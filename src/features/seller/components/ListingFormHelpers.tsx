@@ -296,6 +296,9 @@ const STANDALONE_TYPES: ReadonlySet<ListingData['propertyType']> = new Set(['hou
  * Checks every mandatory field of a listing and returns a message per invalid
  * field. An empty result means the listing can be published.
  */
+/** Shortest description a listing can be published with. */
+export const MIN_DESCRIPTION_LENGTH = 50;
+
 export const validateListing = (
     params: {
         listingData: ListingData;
@@ -327,6 +330,13 @@ export const validateListing = (
 
     if (!listingData.description.trim()) {
         errors.description = t('newListing:validation.descriptionRequired', 'Please add a description of the property');
+    } else if (listingData.description.trim().length < MIN_DESCRIPTION_LENGTH) {
+        // A one-line description leaves the listing page with nothing to read
+        // but a price: ask for a few sentences about the property itself.
+        errors.description = t(
+            'newListing:validation.descriptionTooShort',
+            `Please describe the property in at least ${MIN_DESCRIPTION_LENGTH} characters — the rooms, condition, view and what is nearby.`,
+        );
     }
 
     // At least one photo is mandatory - a listing without images cannot be published
@@ -442,19 +452,9 @@ export const floatingSelectLabelClasses = "absolute text-base text-gray-400 dura
 
 // --- Helper Icons ---
 
-export const UploadIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-    </svg>
-);
 export const CheckCircleIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-export const InfoIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
 );
 

@@ -5,14 +5,9 @@
 
 import React from 'react';
 import type { EconomicIndicators } from '@/src/shared/types/cityInsights.types';
-import {
-  GlobeAltIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  CurrencyEuroIcon,
-  ChartBarIcon,
-} from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
+import { useTranslation } from 'react-i18next';
 export interface EconomicIndicatorsPanelProps {
   data: EconomicIndicators;
 }
@@ -22,19 +17,19 @@ interface IndicatorCardProps {
   value: string;
   trend?: 'up' | 'down' | 'neutral';
   color: string;
-  icon: React.ReactNode;
+  icon: SoftIconName;
   description?: string;
 }
 
 const IndicatorCard: React.FC<IndicatorCardProps> = ({ label, value, trend, color, icon, description }) => (
   <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100">
     <div className="flex items-center gap-1.5 mb-1">
-      {icon}
+      <SoftIcon name={icon} className="w-5 h-5 flex-shrink-0" />
       <span className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">{label}</span>
     </div>
     <div className={`text-lg font-black ${color} flex items-center gap-1`}>
-      {trend === 'up' && <ArrowTrendingUpIcon className="w-4 h-4" />}
-      {trend === 'down' && <ArrowTrendingDownIcon className="w-4 h-4" />}
+      {trend === 'up' && <SoftIcon name="trendUp" className="w-5 h-5" />}
+      {trend === 'down' && <SoftIcon name="trendDown" className="w-5 h-5" />}
       {value}
     </div>
     {description && <p className="text-[10px] text-neutral-400 mt-0.5">{description}</p>}
@@ -53,6 +48,7 @@ function fmtNumber(v: number | null): string {
 }
 
 const EconomicIndicatorsPanel: React.FC<EconomicIndicatorsPanelProps> = ({ data }) => {
+  const { t } = useTranslation();
   const gdpTrend: 'up' | 'down' | 'neutral' = data.gdpGrowthYoY == null
     ? 'neutral'
     : data.gdpGrowthYoY >= 0
@@ -65,8 +61,8 @@ const EconomicIndicatorsPanel: React.FC<EconomicIndicatorsPanelProps> = ({ data 
     <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-          <GlobeAltIcon className="w-5 h-5 text-primary" />
-          Economic Context — {data.country}
+          <SoftIcon name="globe" className="w-6 h-6 flex-shrink-0" />
+          {t('exploreCities:ui.economicIndicatorsPanel.economicContext', 'Economic Context —')} {data.country}
         </h3>
         <a
           href={data.sourceUrl}
@@ -74,53 +70,53 @@ const EconomicIndicatorsPanel: React.FC<EconomicIndicatorsPanelProps> = ({ data 
           rel="noopener noreferrer"
           className="text-[10px] text-blue-500 hover:underline"
         >
-          World Bank Open Data ↗
+          {t('exploreCities:ui.economicIndicatorsPanel.worldBankOpenData', 'World Bank Open Data ↗')}
         </a>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
         <IndicatorCard
-          label="GDP Growth (YoY)"
+          label={t('exploreCities:ui.economicIndicatorsPanel.gdpGrowthYoy', 'GDP Growth (YoY)')}
           value={fmtPercent(data.gdpGrowthYoY)}
           trend={gdpTrend}
           color={gdpTrend === 'up' ? 'text-green-600' : gdpTrend === 'down' ? 'text-red-500' : 'text-neutral-500'}
-          icon={<ChartBarIcon className="w-3.5 h-3.5 text-emerald-500" />}
-          description="Annual real growth"
+          icon="chart"
+          description={t('exploreCities:ui.economicIndicatorsPanel.annualRealGrowth', 'Annual real growth')}
         />
         <IndicatorCard
-          label="Inflation (CPI)"
+          label={t('exploreCities:ui.economicIndicatorsPanel.inflationCpi', 'Inflation (CPI)')}
           value={fmtPercent(data.inflationCPI)}
           color={inflationOk ? 'text-green-600' : 'text-amber-600'}
-          icon={<ArrowTrendingUpIcon className="w-3.5 h-3.5 text-amber-500" />}
-          description="Consumer Price Index"
+          icon="trendUp"
+          description={t('exploreCities:ui.economicIndicatorsPanel.consumerPriceIndex', 'Consumer Price Index')}
         />
         <IndicatorCard
-          label="Mortgage Rate"
+          label={t('exploreCities:ui.economicIndicatorsPanel.mortgageRate', 'Mortgage Rate')}
           value={data.lendingRate == null ? '—' : `${data.lendingRate.toFixed(1)}%`}
           color="text-blue-600"
-          icon={<CurrencyEuroIcon className="w-3.5 h-3.5 text-blue-500" />}
-          description="Avg lending rate"
+          icon="cash"
+          description={t('exploreCities:ui.economicIndicatorsPanel.avgLendingRate', 'Avg lending rate')}
         />
         <IndicatorCard
-          label="GNI per Capita"
+          label={t('exploreCities:ui.economicIndicatorsPanel.gniPerCapita', 'GNI per Capita')}
           value={data.gniPerCapitaUSD == null ? '—' : `$${(data.gniPerCapitaUSD / 1000).toFixed(1)}K`}
           color="text-neutral-900"
-          icon={<CurrencyEuroIcon className="w-3.5 h-3.5 text-green-500" />}
-          description="USD, Atlas method"
+          icon="moneybag"
+          description={t('exploreCities:ui.economicIndicatorsPanel.usdAtlasMethod', 'USD, Atlas method')}
         />
         <IndicatorCard
-          label="Population"
+          label={t('exploreCities:ui.economicIndicatorsPanel.population', 'Population')}
           value={fmtNumber(data.populationTotal)}
           color="text-neutral-900"
-          icon={<GlobeAltIcon className="w-3.5 h-3.5 text-violet-500" />}
-          description="Country total"
+          icon="users"
+          description={t('exploreCities:ui.economicIndicatorsPanel.countryTotal', 'Country total')}
         />
         <IndicatorCard
-          label="Unemployment"
+          label={t('exploreCities:ui.economicIndicatorsPanel.unemployment', 'Unemployment')}
           value={data.unemploymentRate == null ? '—' : `${data.unemploymentRate.toFixed(1)}%`}
           color={data.unemploymentRate != null && data.unemploymentRate > 10 ? 'text-amber-600' : 'text-green-600'}
-          icon={<ChartBarIcon className="w-3.5 h-3.5 text-red-500" />}
-          description="Labor force %"
+          icon="chart"
+          description={t('exploreCities:ui.economicIndicatorsPanel.laborForce', 'Labor force %')}
         />
       </div>
     </div>

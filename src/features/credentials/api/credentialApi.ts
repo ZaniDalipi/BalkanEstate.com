@@ -89,3 +89,28 @@ export const deleteCredential = async (credentialId: string): Promise<void> => {
     requiresAuth: true,
   });
 };
+
+/**
+ * True when a document is stored privately and must be opened through a
+ * short-lived signed link (R2 private bucket: the stored URL points at the
+ * API's /files/open/ route, which needs the auth header a plain link lacks).
+ */
+export const isPrivateDocumentUrl = (url?: string): boolean => !!url && url.includes('/files/open/');
+
+/**
+ * Open a privately stored document in a new tab. The tab is opened first
+ * (synchronously, so popup blockers allow it), then pointed at the signed link.
+ */
+export const openPrivateDocument = async (publicId: string): Promise<void> => {
+  // No 'noopener' here: with it window.open returns null and the tab can't be pointed anywhere.
+  const tab = window.open('', '_blank');
+  if (tab) tab.opener = null;
+  try {
+    const { url } = await apiRequest<{ url: string }>(`/files/signed-url/${publicId}`, { requiresAuth: true });
+    if (tab) tab.location.href = url;
+    else window.open(url, '_blank', 'noopener,noreferrer');
+  } catch (error) {
+    tab?.close();
+    throw error;
+  }
+};

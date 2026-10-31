@@ -14,29 +14,39 @@
  *
  * Adding a host means allowing every visitor's browser to fetch images from
  * it. Uploading through the app is the route that needs no entry at all: those
- * land on Cloudinary, which is already listed.
+ * land on R2 (R2_PUBLIC_URL's host), which is listed automatically.
  */
 
-/** Where our own uploads and transformations live. */
-export const CLOUDINARY_IMAGE_HOST = 'res.cloudinary.com';
+/** Host of the R2 media bucket's public domain (R2_PUBLIC_URL), or null while R2 isn't configured. */
+export const mediaImageHost = (env: NodeJS.ProcessEnv = process.env): string | null => {
+  const raw = env.R2_PUBLIC_URL;
+  if (!raw) return null;
+  try {
+    return new URL(raw).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Hosts that may appear in a photo URL an admin sets by hand.
  *
- * Deliberately short. Wikimedia is here because the city-photo fallback chain
+ * Deliberately short. Cloudinary is here because every image uploaded before
+ * the move to R2 stays there and is shown from there. Wikimedia is here because the city-photo fallback chain
  * already ends at a Wikipedia summary image (`CityMarketCard`,
  * `CityDashboard`), so those URLs reach an `<img src>` whether or not anyone
  * pastes one.
  */
 export const ALLOWED_PHOTO_HOSTS: readonly string[] = [
-  CLOUDINARY_IMAGE_HOST,
+  ...(mediaImageHost() ? [mediaImageHost() as string] : []),
+  'res.cloudinary.com',
   'upload.wikimedia.org',
 ];
 
 /**
  * True when `url` is an `https` URL on an allowed host.
  *
- * Host-exact, never a suffix match: `res.cloudinary.com.attacker.example`
+ * Host-exact, never a suffix match: `media.example.com.attacker.example`
  * ends with an allowed host but is not one.
  */
 export function isAllowedPhotoUrl(url: string): boolean {

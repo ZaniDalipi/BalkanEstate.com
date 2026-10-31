@@ -2,14 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   XMarkIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  HomeIcon,
-  UserIcon,
   CheckIcon,
   ArchiveBoxIcon,
   TrashIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { Inquiry } from './useInquiryManager';
 import UserAvatar from '@/components/shared/UserAvatar';
 
@@ -61,7 +58,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
           {/* Sender Info */}
           <div className="bg-gray-50 rounded-lg p-4">
             <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <UserIcon className="w-5 h-5" />
+              <SoftIcon name="user" className="w-6 h-6 flex-shrink-0" />
               {t('admin:inquiries.senderBuyerInfo')}
             </h4>
             <div className="grid grid-cols-2 gap-4">
@@ -72,7 +69,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
               <div>
                 <label className="text-xs text-gray-500">{t('admin:inquiries.email')}</label>
                 <p className="font-medium flex items-center gap-2">
-                  <EnvelopeIcon className="w-4 h-4 text-gray-400" />
+                  <SoftIcon name="envelope" className="w-5 h-5 flex-shrink-0" />
                   <a href={`mailto:${inquiry.buyerEmail}`} className="text-blue-600 hover:underline">
                     {inquiry.buyerEmail}
                   </a>
@@ -82,7 +79,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
                 <div>
                   <label className="text-xs text-gray-500">{t('admin:inquiries.phone')}</label>
                   <p className="font-medium flex items-center gap-2">
-                    <PhoneIcon className="w-4 h-4 text-gray-400" />
+                    <SoftIcon name="phone" className="w-5 h-5 flex-shrink-0" />
                     <a href={`tel:${inquiry.buyerPhone}`} className="text-blue-600 hover:underline">
                       {inquiry.buyerPhone}
                     </a>
@@ -118,7 +115,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
           {inquiry.propertyId && (
             <div className="bg-purple-50 rounded-lg p-4">
               <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <HomeIcon className="w-5 h-5" />
+                <SoftIcon name="home" className="w-6 h-6 flex-shrink-0" />
                 {t('admin:inquiries.property')}
               </h4>
               <div className="flex items-center gap-4">
@@ -175,8 +172,9 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             if (!adInq.adPage && !adInq.adPlacement && !adInq.attachmentUrl) return null;
             return (
               <div className="bg-indigo-50 rounded-lg p-4">
-                <h4 className="font-semibold text-indigo-900 mb-2">
-                  🔥 {t('admin:inquiries.advertisingRequest', 'Advertising Request')}
+                <h4 className="font-semibold text-indigo-900 mb-2 flex items-center gap-2">
+                  <SoftIcon name="megaphone" className="w-6 h-6 flex-shrink-0" />
+                  {t('admin:inquiries.advertisingRequest', 'Advertising Request')}
                 </h4>
                 <div className="grid grid-cols-2 gap-4 mb-3">
                   <div>
@@ -194,7 +192,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
                     <a href={adInq.attachmentUrl} target="_blank" rel="noopener noreferrer">
                       <img
                         src={adInq.attachmentUrl}
-                        alt="Advertiser creative"
+                        alt={t('admin:ui.inquiryManagerDetail.advertiserCreative', 'Advertiser creative')}
                         className="max-h-64 rounded-lg border border-indigo-200 object-contain bg-white"
                       />
                     </a>
@@ -238,7 +236,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             <textarea
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
-              placeholder="Add internal notes about this inquiry..."
+              placeholder={t('admin:ui.inquiryManagerDetail.addInternalNotesAboutThis', 'Add internal notes about this inquiry...')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"
               rows={3}
             />

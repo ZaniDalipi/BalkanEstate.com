@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { ArticleCategory } from '../types/article.types';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
 const COUNTRY_FLAGS: Record<string, string> = {
-  'All': '🌍',
   'Albania': '🇦🇱',
   'Serbia': '🇷🇸',
   'Croatia': '🇭🇷',
@@ -99,7 +99,7 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
         </h3>
         <div className="flex gap-1.5 sm:gap-2 flex-wrap">
           <FilterPill active={!selectedCountry} onClick={() => onCountryChange(undefined)}>
-            {COUNTRY_FLAGS['All'] && <span className="mr-1">{COUNTRY_FLAGS['All']}</span>}
+            <SoftIcon name="globe" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
             {t('filters.all', 'All')}
           </FilterPill>
           {visibleCountries.map(country => (

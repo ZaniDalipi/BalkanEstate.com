@@ -1,0 +1,90 @@
+{
+  "success": {
+    "title": "Poruka je poslata!",
+    "description": "Hvala što ste nas kontaktirali. Naš tim će vam odgovoriti u roku od 24 sata.",
+    "sendAnother": "Pošalji još jednu poruku"
+  },
+  "advertising": {
+    "prefill": "Zdravo, želio bih da se reklamiram na BalkanEstate. Pošaljite mi reklamna mjesta i cijene.",
+    "heading": "Đe želite svoju reklamu?",
+    "page": "Stranica",
+    "placement": "Pozicija",
+    "creative": "Priložite sliku reklame (opciono)",
+    "removeImage": "Ukloni sliku",
+    "uploading": "Učitava se…",
+    "replaceImage": "Zamijeni sliku",
+    "uploadImage": "Učitaj sliku",
+    "creativeHint": "PNG ili JPG, maks. 5MB. Ovo nam pomaže da reklamu postavimo tačno đe želite."
+  },
+  "info": {
+    "email": "E-mail",
+    "phone": "Telefon",
+    "location": "Lokacija",
+    "locationValue": "Balkanski region",
+    "hours": "Radno vrijeme",
+    "hoursValue": "Pon-Pet, 9:00-18:00 CET",
+    "heading": "Stupite u kontakt"
+  },
+  "title": "Kontaktirajte nas",
+  "subtitle": "Imate pitanje ili vam treba pomoć? Rado ćemo vas čuti. Pošaljite nam poruku i odgovorićemo što prije.",
+  "form": {
+    "heading": "Pošaljite nam poruku",
+    "name": "Ime i prezime",
+    "email": "E-mail adresa",
+    "phone": "Telefon (opciono)",
+    "subject": "Tema",
+    "message": "Vaša poruka",
+    "sending": "Šalje se...",
+    "submit": "Pošalji poruku",
+    "privacyNote": "Slanjem prihvatate našu Politiku privatnosti. Nikada nećemo dijeliti vaše podatke."
+  },
+  "quickHelp": {
+    "heading": "Brza pomoć",
+    "howItWorks": "Saznajte kako funkcioniše BalkanEstate",
+    "pricing": "Pogledajte naše cjenovne planove",
+    "findAgent": "Pronađite agenta za nekretnine",
+    "privacy": "Pročitajte našu politiku privatnosti"
+  },
+  "whatsapp": {
+    "title": "Pišite nam na WhatsApp",
+    "subtitle": "Brz odgovor tokom radnog vremena"
+  },
+  "viber": {
+    "title": "Pišite nam na Viber",
+    "subtitle": "Popularan na Balkanu"
+  },
+  "ui": {
+    "contactForm": {
+      "adCreativePreview": "pregled reklame"
+    }
+  },
+  "subjects": {
+    "general": "Opšte pitanje",
+    "buying": "Kupovina nekretnine",
+    "selling": "Prodaja nekretnine",
+    "agency": "Agencije i agenti",
+    "support": "Tehnička podrška",
+    "partnership": "Partnerstvo",
+    "advertising": "Reklamiranje / reklamni prostor"
+  },
+  "adPages": {
+    "all": "Sve stranice",
+    "home": "Početna",
+    "search": "Rezultati pretrage",
+    "rentals": "Izdavanje",
+    "property-details": "Detalji nekretnine",
+    "agents": "Agenti",
+    "agencies": "Agencije",
+    "business-directory": "Poslovni imenik",
+    "blog": "Blog",
+    "guides": "Vodiči"
+  },
+  "adPlacements": {
+    "in-content": "U sadržaju (leaderboard)",
+    "sidebar": "Bočna traka (skyscraper)",
+    "sticky-bottom": "Fiksna donja traka",
+    "sticky-top": "Fiksna gornja traka",
+    "header": "Zaglavlje",
+    "footer": "Podnožje"
+  }
+}

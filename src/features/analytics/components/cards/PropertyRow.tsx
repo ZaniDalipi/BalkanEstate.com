@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  SparklesIcon,
-  MapPinIcon,
-  BedIcon,
-  UsersIcon,
-  ClockIcon,
-  HeartIcon,
-  ChatBubbleLeftRightIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ChevronRightIcon,
-  PhotoIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { ProgressBar } from '../charts';
 import Sparkline from '../charts/Sparkline';
 import {
@@ -53,13 +46,7 @@ export interface PropertyRowProps {
   onClick?: () => void;
 }
 
-const MEDALS = ['🥇', '🥈', '🥉'];
-
-const RANK_RING = [
-  'ring-yellow-400 bg-yellow-50',
-  'ring-neutral-300 bg-neutral-50',
-  'ring-orange-300 bg-orange-50',
-];
+const MEDALS: SoftIconName[] = ['medal1', 'medal2', 'medal3'];
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-amber-500/90 text-white',
@@ -86,7 +73,7 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
       ? calculateTrend(property.periodViews, property.previousPeriodViews)
       : null;
   const location = [property.city, property.country].filter(Boolean).join(', ');
-  const imageSrc = imageFailed ? '' : optimizeCloudinaryUrl(property.imageUrl, { width: 320, height: 240 });
+  const imageSrc = imageFailed ? '' : optimizeImageUrl(property.imageUrl, { width: 320, height: 240 });
   // Active is the norm; only flag listings that are not live.
   const status =
     property.status && property.status !== 'active' && KNOWN_STATUSES.includes(property.status)
@@ -96,25 +83,25 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
   const engagement: Array<{ icon: React.ReactNode; label: string }> = [];
   if (property.periodUniqueViews !== undefined) {
     engagement.push({
-      icon: <UsersIcon className="h-3.5 w-3.5" />,
+      icon: <SoftIcon name="users" className="h-4 w-4" />,
       label: t('analytics:properties.uniqueViews', { count: property.periodUniqueViews }),
     });
   }
   if (property.avgDuration) {
     engagement.push({
-      icon: <ClockIcon className="h-3.5 w-3.5" />,
+      icon: <SoftIcon name="clock" className="h-4 w-4" />,
       label: t('analytics:properties.avgTime', { time: formatDuration(property.avgDuration) }),
     });
   }
   if (property.saves !== undefined) {
     engagement.push({
-      icon: <HeartIcon className="h-3.5 w-3.5" />,
+      icon: <SoftIcon name="heart" className="h-4 w-4" />,
       label: t('analytics:properties.saves', { count: property.saves }),
     });
   }
   if (property.inquiries !== undefined) {
     engagement.push({
-      icon: <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />,
+      icon: <SoftIcon name="chat" className="h-4 w-4" />,
       label: t('analytics:properties.inquiries', { count: property.inquiries }),
     });
   }
@@ -139,7 +126,7 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
         {imageSrc ? (
           <img
             src={imageSrc}
-            srcSet={cloudinarySrcSet(property.imageUrl, [320, 480]) || undefined}
+            srcSet={imageSrcSet(property.imageUrl, [320, 480]) || undefined}
             sizes="112px"
             alt=""
             loading="lazy"
@@ -149,16 +136,16 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200">
-            <PhotoIcon className="h-6 w-6 text-neutral-300" />
+            <SoftIcon name="photo" className="h-8 w-8 opacity-70" />
           </div>
         )}
-        <span
-          className={`absolute top-1 left-1 min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm ${
-            rank <= 3 ? `ring-2 ${RANK_RING[rank - 1]}` : 'bg-white/90 text-neutral-600'
-          }`}
-        >
-          {rank <= 3 ? MEDALS[rank - 1] : rank}
-        </span>
+        {rank <= 3 ? (
+          <SoftIcon name={MEDALS[rank - 1]} className="absolute top-0.5 left-0.5 w-7 h-7 drop-shadow-sm" />
+        ) : (
+          <span className="absolute top-1 left-1 min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm bg-white/90 text-neutral-600">
+            {rank}
+          </span>
+        )}
         {status && (
           <span
             className={`absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide ${STATUS_STYLES[status]}`}
@@ -176,7 +163,7 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
           </h4>
           {property.isPromoted && (
             <span className="flex-shrink-0 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-700 flex items-center gap-0.5">
-              <SparklesIcon className="h-2.5 w-2.5" />
+              <SoftIcon name="sparkles" className="h-3.5 w-3.5" />
               PRO
             </span>
           )}
@@ -190,13 +177,13 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
           ) : null}
           {location && (
             <span className="flex items-center gap-1 min-w-0">
-              <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0" />
+              <SoftIcon name="pin" className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">{location}</span>
             </span>
           )}
           {property.beds ? (
             <span className="hidden sm:flex items-center gap-1">
-              <BedIcon className="h-3.5 w-3.5" />
+              <SoftIcon name="bed" className="h-4 w-4" />
               {property.beds}
             </span>
           ) : null}

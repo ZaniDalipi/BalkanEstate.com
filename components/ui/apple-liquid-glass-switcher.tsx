@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
+import { useTranslation } from 'react-i18next';
 type Theme = "light" | "dark" | "dim";
 
 interface ThemeSwitcherProps {
@@ -74,6 +75,7 @@ export function ThemeSwitcher({
   value,
   onValueChange,
 }: ThemeSwitcherProps) {
+  const { t } = useTranslation();
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [previousOption, setPreviousOption] = useState<string | null>(
     themeOptions.find((opt) => opt.value === (value ?? internalValue))
@@ -108,7 +110,7 @@ export function ThemeSwitcher({
         themeOptions.find((o) => o.value === activeValue)?.cOption
       }
     >
-      <legend className="switcher__legend">Choose theme</legend>
+      <legend className="switcher__legend">{t('common:ui.apple-liquid-glass-switcher.chooseTheme', 'Choose theme')}</legend>
       {themeOptions.map((option) => (
         <label key={option.value} className="switcher__option">
           <input

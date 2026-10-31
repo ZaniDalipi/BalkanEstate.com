@@ -5,7 +5,7 @@ import {
     type ElasticGalleryAction,
     type ElasticGalleryItem,
 } from '@/src/components/ui/elastic-gallery';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
 import { useShowcaseCities } from '../hooks/useShowcaseCities';
 import { pickShowcaseCities } from '../utils/pickShowcaseCities';
@@ -94,8 +94,8 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 id: city.id,
                 title: city.city,
                 subtitle: city.country,
-                // Through the Cloudinary helpers, never the raw stored URL
-                // (Claude.md). A non-Cloudinary URL falls through them
+                // Through the media helpers, never the raw stored URL
+                // (Claude.md). A URL not on our media CDN falls through them
                 // unchanged, so a manually entered photo still renders.
                 //
                 // `crop: 'limit'` rather than the helper's own `fill` default:
@@ -107,8 +107,8 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 // 960px, a smaller one is delivered at its own size — sharper
                 // either way — and the `object-cover` on the panel still
                 // fills the frame regardless of which it gets.
-                imageUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 960, quality: 'auto', crop: 'limit' }) || city.imageUrl,
-                imageSrcSet: cloudinarySrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto', crop: 'limit' }) || undefined,
+                imageUrl: optimizeImageUrl(city.imageUrl, { width: 960, quality: 'auto', crop: 'limit' }) || city.imageUrl,
+                imageSrcSet: imageSrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto', crop: 'limit' }) || undefined,
                 imageSizes: PANEL_SIZES,
                 imageSizesCollapsed: PANEL_SIZES_COLLAPSED,
                 // Blurred, and smaller than it was. Painted across a whole
@@ -116,7 +116,7 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 // rather than as a photo arriving; blurring it makes the same
                 // ~1KB look like a deliberate colour wash, so the wait — however
                 // short it now is — stops looking like a failure.
-                placeholderUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 24, quality: 'auto:eco', blur: 400 }) || undefined,
+                placeholderUrl: optimizeImageUrl(city.imageUrl, { width: 24, quality: 'auto:eco', blur: 400 }) || undefined,
                 alt: t('home:cityGallery.imageAlt', 'Property in {{city}}, {{country}}', {
                     city: city.city,
                     country: city.country,

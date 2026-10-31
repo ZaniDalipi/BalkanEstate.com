@@ -1,20 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import {
-  TrophyIcon,
-  AcademicCapIcon,
-  StarIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
   XMarkIcon,
-  CheckCircleIcon,
-  CalendarIcon,
-  BuildingOfficeIcon,
-  DocumentTextIcon,
-  PhotoIcon
+  CheckCircleIcon
 } from '@/constants';
 
 // Achievement type matching backend schema
@@ -166,17 +158,17 @@ const validateAchievementForm = (data: AchievementFormData): ValidationErrors =>
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ACHIEVEMENT_TYPES = [
-  { value: 'award', label: 'Award', icon: TrophyIcon },
-  { value: 'certification', label: 'Certification', icon: AcademicCapIcon },
-  { value: 'milestone', label: 'Milestone', icon: StarIcon },
-  { value: 'recognition', label: 'Recognition', icon: ShieldCheckIcon },
-  { value: 'membership', label: 'Membership', icon: UserGroupIcon },
-] as const;
+const ACHIEVEMENT_TYPES: ReadonlyArray<{ value: Achievement['type']; label: string; icon: SoftIconName }> = [
+  { value: 'award', label: 'Award', icon: 'trophy' },
+  { value: 'certification', label: 'Certification', icon: 'gradCap' },
+  { value: 'milestone', label: 'Milestone', icon: 'star' },
+  { value: 'recognition', label: 'Recognition', icon: 'medal1' },
+  { value: 'membership', label: 'Membership', icon: 'users' },
+];
 
-const getTypeIcon = (type: Achievement['type']) => {
+const getTypeIcon = (type: Achievement['type']): SoftIconName => {
   const typeConfig = ACHIEVEMENT_TYPES.find(t => t.value === type);
-  return typeConfig?.icon || TrophyIcon;
+  return typeConfig?.icon || 'trophy';
 };
 
 const getTypeBadgeColors = (type: Achievement['type']) => {
@@ -344,7 +336,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-white/80 to-amber-50/60 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_2px_8px_rgba(217,119,6,0.15)] flex items-center justify-center">
-            <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600/80" />
+            <SoftIcon name="trophy" className="w-7 h-7 sm:w-8 sm:h-8" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-neutral-900">
@@ -371,7 +363,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
       {sortedAchievements.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
           {sortedAchievements.map((achievement) => {
-            const IconComponent = getTypeIcon(achievement.type);
+            const typeIcon = getTypeIcon(achievement.type);
             const colors = getTypeBadgeColors(achievement.type);
             const expired = isExpired(achievement.expiryDate);
             const year = new Date(achievement.dateReceived).getFullYear();
@@ -436,10 +428,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
                     {/* Center: icon + title */}
                     <div className="relative flex flex-col items-center z-10" style={{ marginTop: '-10%' }}>
-                      <IconComponent
-                        className="w-5 h-5 sm:w-6 sm:h-6 mb-1"
-                        style={{ color: colors.accent } as React.CSSProperties}
-                      />
+                      <SoftIcon name={typeIcon} className="w-7 h-7 sm:w-8 sm:h-8 mb-1" />
                       <p
                         className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center leading-tight px-4"
                         style={{ color: colors.text, wordBreak: 'break-word' }}
@@ -466,7 +455,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                         className="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.2em]"
                         style={{ color: colors.accent }}
                       >
-                        {expired ? 'EXPIRED' : `YEAR ${year}`}
+                        {expired ? t('common:ui.achievementsSection.expired', 'EXPIRED') : `YEAR ${year}`}
                       </p>
                     </div>
 
@@ -498,7 +487,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline"
                       >
-                        <DocumentTextIcon className="w-3 h-3" />
+                        <SoftIcon name="docCheck" className="w-4 h-4" />
                         {t('common:achievements.viewDocument')}
                       </a>
                     )}
@@ -547,7 +536,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
           <div className="relative">
             <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-white/80 to-amber-50/50 backdrop-blur-sm border border-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_4px_12px_rgba(217,119,6,0.1)] flex items-center justify-center">
-              <TrophyIcon className="w-7 h-7 sm:w-8 sm:h-8 text-amber-500/60" />
+              <SoftIcon name="trophy" className="w-10 h-10 sm:w-12 sm:h-12" />
             </div>
             <p className="text-sm sm:text-base text-neutral-500 max-w-sm mx-auto">
               {isOwner
@@ -599,7 +588,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                   {t('common:achievements.form.type')} *
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                  {ACHIEVEMENT_TYPES.map(({ value, label, icon: Icon }) => (
+                  {ACHIEVEMENT_TYPES.map(({ value, icon }) => (
                     <button
                       key={value}
                       type="button"
@@ -610,7 +599,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                           : 'border-neutral-200 hover:border-neutral-300'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${formData.type === value ? 'text-amber-600' : 'text-neutral-400'}`} />
+                      <SoftIcon name={icon} className={`w-6 h-6 sm:w-7 sm:h-7 ${formData.type === value ? '' : 'opacity-60'}`} />
                       <span className={`text-[10px] sm:text-xs font-medium ${formData.type === value ? 'text-amber-700' : 'text-neutral-500'}`}>
                         {t(`common:achievements.types.${value}`)}
                       </span>
@@ -693,7 +682,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       if (errors.dateReceived) setErrors(prev => ({ ...prev, dateReceived: undefined }));
                       if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
                     })}
-                    placeholder="DD/MM/YYYY"
+                    placeholder={t('common:ui.achievementsSection.ddMmYyyy', 'DD/MM/YYYY')}
                     maxLength={10}
                     inputMode="numeric"
                     aria-invalid={!!errors.dateReceived}
@@ -715,7 +704,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       setFormData(prev => ({ ...prev, expiryDate: v }));
                       if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
                     })}
-                    placeholder="DD/MM/YYYY"
+                    placeholder={t('common:ui.achievementsSection.ddMmYyyy', 'DD/MM/YYYY')}
                     maxLength={10}
                     inputMode="numeric"
                     aria-invalid={!!errors.expiryDate}

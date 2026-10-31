@@ -104,7 +104,7 @@
     "title": "Trafiku",
     "direct": "Direkt",
     "search": "Kërkim",
-    "social": "Social",
+    "social": "Rrjete sociale",
     "email": "Email",
     "other": "Tjetër"
   },
@@ -119,6 +119,28 @@
     "networkError": "Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj.",
     "serverError": "Gabim në server. Ju lutem provoni përsëri më vonë.",
     "retry": "Riprovo",
-    "retrying": "Duke riprovuar..."
+    "retrying": "Duke riprovuar...",
+    "title": "Gabim gjatë ngarkimit të të dhënave"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Ora kulmore",
+      "peak": "Kulmi:",
+      "total": "Gjithsej:",
+      "less": "Më pak",
+      "noViews": "Asnjë shikim",
+      "more": "Më shumë"
+    },
+    "trafficChart": {
+      "total": "Gjithsej:",
+      "top": "Kryesori:",
+      "directUrlVisits": "Vizita direkte me URL",
+      "googleBingEtc": "Google, Bing, etj.",
+      "facebookInstagramEtc": "Facebook, Instagram, etj.",
+      "newsletterCampaigns": "Buletini, fushata"
+    },
+    "deviceChart": {
+      "ofTotal": "% e totalit"
+    }
   }
 }

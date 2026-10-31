@@ -1,6 +1,6 @@
 /**
  * Videos on the site are always links to a hosting platform — never files we
- * store. Uploading video to Cloudinary is billed per second of processing and
+ * store. Uploading video to R2 is billed per second of processing and
  * per GB delivered, which a free plan can't absorb.
  */
 

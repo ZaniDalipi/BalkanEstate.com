@@ -3,18 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { createAgency } from '@/src/features/agencies/api/agencyApi';
 import Footer from '@/components/shared/Footer';
-import {
-  BuildingOfficeIcon,
-  CheckCircleIcon,
-  ArrowLeftIcon,
-  CreditCardIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-  UsersIcon,
-  HomeIcon,
-  ChartBarIcon,
-  ExclamationTriangleIcon,
-} from '@/constants';
+import { ArrowLeftIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { apiRequest } from '@/src/shared/api';
 import { validatePaymentRedirectUrl } from '@/src/utils/security';
 import { replacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
@@ -86,26 +76,23 @@ const AgencyPaymentPage: React.FC = () => {
     const fetchEnterprisePlan = async () => {
       setLoadingPlan(true);
       try {
-        const response = await fetch(`${API_URL}/products?role=seller`);
-        if (response.ok) {
-          const data = await response.json();
-          const products = data.products || [];
+        const data = await apiRequest<{ products?: any[] }>('/products?role=seller');
+        const products = data.products || [];
 
-          const enterprise = products.find((p: any) =>
-            p.productId?.toLowerCase().includes('enterprise') ||
-            p.name?.toLowerCase().includes('enterprise')
-          );
+        const enterprise = products.find((p: any) =>
+          p.productId?.toLowerCase().includes('enterprise') ||
+          p.name?.toLowerCase().includes('enterprise')
+        );
 
-          if (enterprise) {
-            const rawFeatures: string[] = enterprise.features || DEFAULT_ENTERPRISE_PLAN.features;
-            setEnterprisePlan({
-              name: enterprise.name || 'Enterprise',
-              price: enterprise.price || 999,
-              interval: enterprise.billingPeriod === 'monthly' ? 'month' : 'year',
-              productId: enterprise.productId || 'seller_enterprise_yearly',
-              features: rawFeatures.map((f: string) => replacePlaceholders(f, enterprise)),
-            });
-          }
+        if (enterprise) {
+          const rawFeatures: string[] = enterprise.features || DEFAULT_ENTERPRISE_PLAN.features;
+          setEnterprisePlan({
+            name: enterprise.name || 'Enterprise',
+            price: enterprise.price || 999,
+            interval: enterprise.billingPeriod === 'monthly' ? 'month' : 'year',
+            productId: enterprise.productId || 'seller_enterprise_yearly',
+            features: rawFeatures.map((f: string) => replacePlaceholders(f, enterprise)),
+          });
         }
       } catch (err) {
         // Error removed
@@ -266,7 +253,7 @@ const AgencyPaymentPage: React.FC = () => {
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%)' }}>
         {/* Header */}
         <div
-          className="relative overflow-hidden py-12 sm:py-16"
+          className="relative overflow-hidden py-12 sm:py-16 landscape:py-6"
           style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #312e81 100%)' }}
         >
           <div
@@ -288,11 +275,11 @@ const AgencyPaymentPage: React.FC = () => {
             </button>
             <div
               className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl"
-              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}
+              style={{ background: 'rgba(255,255,255,0.95)' }}
             >
-              <BuildingOfficeIcon className="w-10 h-10 text-white" />
+              <SoftIcon name="building" className="w-16 h-16" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl font-black text-white mb-4 landscape:text-2xl">
               {t('confirm.title', 'Create Your Agency')}
             </h1>
             <p className="text-lg" style={{ color: 'rgba(255,255,255,0.7)' }}>
@@ -305,12 +292,10 @@ const AgencyPaymentPage: React.FC = () => {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {successMessage ? (
             <div className="bg-white rounded-2xl shadow-lg p-8 text-center border border-neutral-100">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircleIcon className="w-8 h-8 text-green-600" />
-              </div>
-              <h2 className="text-xl font-bold text-neutral-800 mb-2">Agency Created!</h2>
+              <SoftIcon name="check" className="w-16 h-16 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-neutral-800 mb-2">{t('agencies:ui.agencyPaymentPage.agencyCreated', 'Agency Created!')}</h2>
               <p className="text-neutral-600 mb-6">{successMessage}</p>
-              <p className="text-sm text-neutral-500">Redirecting to agencies page...</p>
+              <p className="text-sm text-neutral-500">{t('agencies:ui.agencyPaymentPage.redirectingToAgenciesPage', 'Redirecting to agencies page...')}</p>
             </div>
           ) : (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
@@ -321,9 +306,7 @@ const AgencyPaymentPage: React.FC = () => {
               {/* Agency Preview */}
               <div className="rounded-xl p-5 mb-6 border border-amber-200" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%)' }}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}>
-                    <BuildingOfficeIcon className="w-6 h-6 text-white" />
-                  </div>
+                  <SoftIcon name="building" className="w-12 h-12 flex-shrink-0" />
                   <div>
                     <h3 className="font-bold text-neutral-800 text-lg">{pendingAgencyData.name}</h3>
                     <p className="text-sm text-neutral-600">{pendingAgencyData.city}, {pendingAgencyData.country}</p>
@@ -332,7 +315,7 @@ const AgencyPaymentPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   {pendingAgencyData.phone && (
                     <div className="flex flex-col">
-                      <span className="text-neutral-500 text-xs uppercase tracking-wide">Phone</span>
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">{t('agencies:ui.agencyPaymentPage.phone', 'Phone')}</span>
                       <span className="text-neutral-700 font-medium">{pendingAgencyData.phone}</span>
                     </div>
                   )}
@@ -344,7 +327,7 @@ const AgencyPaymentPage: React.FC = () => {
                   )}
                   {pendingAgencyData.licenseNumber && (
                     <div className="flex flex-col">
-                      <span className="text-neutral-500 text-xs uppercase tracking-wide">License</span>
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">{t('agencies:ui.agencyPaymentPage.license', 'License')}</span>
                       <span className="text-neutral-700 font-medium">{pendingAgencyData.licenseNumber}</span>
                     </div>
                   )}
@@ -353,18 +336,18 @@ const AgencyPaymentPage: React.FC = () => {
 
               {/* Enterprise benefits reminder */}
               <div className="rounded-xl p-4 mb-6 border border-slate-700" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
-                <p className="text-amber-400 font-semibold text-sm mb-2">✓ Enterprise Plan Active</p>
+                <p className="text-amber-400 font-semibold text-sm mb-2">{t('agencies:ui.agencyPaymentPage.enterprisePlanActive', '✓ Enterprise Plan Active')}</p>
                 <ul className="text-slate-300 text-sm space-y-1">
-                  <li>• 5 agent registration codes will be emailed to you</li>
-                  <li>• Monthly listing promotion coupons included</li>
-                  <li>• 7-day featured agency trial starts immediately</li>
+                  <li>{t('agencies:ui.agencyPaymentPage.n5AgentRegistrationCodesWill', '• 5 agent registration codes will be emailed to you')}</li>
+                  <li>{t('agencies:ui.agencyPaymentPage.monthlyListingPromotionCouponsIncluded', '• Monthly listing promotion coupons included')}</li>
+                  <li>{t('agencies:ui.agencyPaymentPage.n7DayFeaturedAgencyTrial', '• 7-day featured agency trial starts immediately')}</li>
                 </ul>
               </div>
 
               {/* Error display */}
               {error && (
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                   <p className="text-sm text-red-700">{error}</p>
                 </div>
               )}
@@ -408,7 +391,7 @@ const AgencyPaymentPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 landscape:py-6">
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -432,11 +415,11 @@ const AgencyPaymentPage: React.FC = () => {
             <span>{t('payment.backToDetails', 'Back to Agency Details')}</span>
           </button>
 
-          <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-            <CreditCardIcon className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-white/95 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <SoftIcon name="creditCard" className="w-16 h-16" />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 landscape:text-2xl">
             {t('payment.title', 'Complete Your Purchase')}
           </h1>
           <p className="text-lg text-white/70 max-w-2xl mx-auto">
@@ -450,22 +433,22 @@ const AgencyPaymentPage: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-neutral-100">
           <div className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
-                <CheckCircleIcon className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-full bg-white ring-2 ring-green-500 flex items-center justify-center">
+                <SoftIcon name="check" className="w-7 h-7" />
               </div>
               <span className="text-sm font-medium text-green-600">{t('payment.steps.details', 'Agency Details')}</span>
             </div>
             <div className="w-12 h-1 bg-green-500 rounded-full" />
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center">
-                <CreditCardIcon className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-full bg-white ring-2 ring-amber-500 flex items-center justify-center">
+                <SoftIcon name="creditCard" className="w-7 h-7" />
               </div>
               <span className="text-sm font-medium text-amber-600">{t('payment.steps.payment', 'Payment')}</span>
             </div>
             <div className="w-12 h-1 bg-neutral-200 rounded-full" />
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-neutral-200 text-neutral-400 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                <SoftIcon name="building" className="w-7 h-7 grayscale opacity-50" />
               </div>
               <span className="text-sm font-medium text-neutral-400">{t('payment.steps.confirmation', 'Confirmation')}</span>
             </div>
@@ -485,9 +468,7 @@ const AgencyPaymentPage: React.FC = () => {
             {/* Agency Preview */}
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-6 h-6 text-white" />
-                </div>
+                <SoftIcon name="building" className="w-12 h-12 flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-neutral-800">{pendingAgencyData.name}</h3>
                   <p className="text-sm text-neutral-600">{pendingAgencyData.city}, {pendingAgencyData.country}</p>
@@ -498,15 +479,15 @@ const AgencyPaymentPage: React.FC = () => {
             {/* Plan Details */}
             <div className="border-t border-neutral-100 pt-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-neutral-600">{enterprisePlan.name} Plan</span>
+                <span className="text-neutral-600">{enterprisePlan.name} {t('agencies:ui.agencyPaymentPage.plan', 'Plan')}</span>
                 <span className="font-semibold">€{enterprisePlan.price}/{enterprisePlan.interval}</span>
               </div>
 
               {appliedCoupon && (
                 <div className="flex justify-between items-center mb-2 text-green-600">
                   <span className="flex items-center gap-2">
-                    <SparklesIcon className="w-4 h-4" />
-                    Coupon ({appliedCoupon.code})
+                    <SoftIcon name="tag" className="w-5 h-5 flex-shrink-0" />
+                    {t('agencies:ui.agencyPaymentPage.coupon', 'Coupon (')}{appliedCoupon.code})
                   </span>
                   <span>-{appliedCoupon.discount}%</span>
                 </div>
@@ -526,7 +507,7 @@ const AgencyPaymentPage: React.FC = () => {
               {appliedCoupon ? (
                 <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl p-3">
                   <div className="flex items-center gap-2 text-green-700">
-                    <CheckCircleIcon className="w-5 h-5" />
+                    <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
                     <span className="font-medium">{appliedCoupon.code}</span>
                     <span className="text-sm">(-{appliedCoupon.discount}%)</span>
                   </div>
@@ -568,14 +549,14 @@ const AgencyPaymentPage: React.FC = () => {
           {/* Plan Features */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
             <h2 className="text-xl font-bold text-neutral-800 mb-6 flex items-center gap-2">
-              <SparklesIcon className="w-6 h-6 text-amber-500" />
+              <SoftIcon name="sparkles" className="w-7 h-7 flex-shrink-0" />
               {t('payment.whatsIncluded', "What's Included")}
             </h2>
 
             <div className="space-y-4">
               {enterprisePlan.features.map((feature, idx) => (
                 <div key={idx} className="flex items-start gap-3">
-                  <CheckCircleIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
                   <span className="text-neutral-700">{feature}</span>
                 </div>
               ))}
@@ -585,19 +566,19 @@ const AgencyPaymentPage: React.FC = () => {
             <div className="mt-8 pt-6 border-t border-neutral-100">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <ShieldCheckIcon className="w-5 h-5 text-green-500" />
+                  <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />
                   <span>{t('payment.securePayment', 'Secure Payment')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <UsersIcon className="w-5 h-5 text-blue-500" />
+                  <SoftIcon name="users" className="w-6 h-6 flex-shrink-0" />
                   <span>{t('payment.teamSupport', 'Team Support')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <HomeIcon className="w-5 h-5 text-purple-500" />
+                  <SoftIcon name="home" className="w-6 h-6 flex-shrink-0" />
                   <span>{t('payment.unlimitedProperties', '750 Listings')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <ChartBarIcon className="w-5 h-5 text-amber-500" />
+                  <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
                   <span>{t('payment.fullAnalytics', 'Full Analytics')}</span>
                 </div>
               </div>
@@ -617,7 +598,7 @@ const AgencyPaymentPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <CreditCardIcon className="w-5 h-5" />
+                    <SoftIcon name="creditCard" className="w-6 h-6 flex-shrink-0" />
                     <span>{finalPrice === 0 ? t('payment.activateFree', 'Activate Free') : t('payment.payNow', `Pay €${finalPrice.toFixed(2)}/${enterprisePlan.interval}`)}</span>
                   </>
                 )}

@@ -241,7 +241,7 @@ export const runSource = async (
     });
 
     // Feed images are fetched live from the source site when a visitor views
-    // them — never stored on Cloudinary. Re-hosting a source
+    // them — never stored in storage. Re-hosting a source
     // (adapterConfig.rehostImages = true) is honoured only when the deployment
     // explicitly allows it with ALLOW_EXTERNAL_IMAGE_REHOST=true, so a stray
     // flag on one source can't quietly fill the media account.

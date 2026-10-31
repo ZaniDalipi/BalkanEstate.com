@@ -6,6 +6,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next';
 import { getTimePeriod, TimePeriod } from './Buildings3DLayer';
 import { type Season, calculateSunriseSunset, getSeasonDayOfYear } from './SunArcAnimation';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface SunPositionControlProps {
   onDateTimeChange: (dateTime: Date) => void;
@@ -26,11 +27,11 @@ const formatDecimalHour = (decimalHour: number): string => {
 };
 
 // Season icons and labels
-const SEASONS: { id: Season; icon: string; label: string }[] = [
-  { id: 'spring', icon: '🌸', label: 'Spring' },
-  { id: 'summer', icon: '☀️', label: 'Summer' },
-  { id: 'autumn', icon: '🍂', label: 'Autumn' },
-  { id: 'winter', icon: '❄️', label: 'Winter' },
+const SEASONS: { id: Season; icon: SoftIconName; label: string }[] = [
+  { id: 'spring', icon: 'flower', label: 'Spring' },
+  { id: 'summer', icon: 'sun', label: 'Summer' },
+  { id: 'autumn', icon: 'leafAutumn', label: 'Autumn' },
+  { id: 'winter', icon: 'snowflake', label: 'Winter' },
 ];
 
 // Calculate sun azimuth and altitude based on time, latitude, and day of year
@@ -187,7 +188,7 @@ const SunCompass: React.FC<{
             `}
             style={{ top: '4px' }}
           >
-            {isNight ? '🌙' : '☀️'}
+            <SoftIcon name={isNight ? 'moon' : 'sun'} className="w-4 h-4" />
           </div>
 
           {/* Direction line from center to sun */}
@@ -364,7 +365,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
           `}
         >
           <div className={`p-1.5 rounded-lg bg-gradient-to-br ${getTimeGradient()} flex-shrink-0`}>
-            <span className="text-base">{isCurrentlyDay ? '☀️' : '🌙'}</span>
+            <SoftIcon name={isCurrentlyDay ? 'sun' : 'moon'} className="w-5 h-5" />
           </div>
           <span className="text-sm font-semibold">{formatHour(hour)}</span>
           <svg
@@ -415,19 +416,19 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                 onClick={() => setTime(Math.round(sunriseSunset.sunrise))}
                 className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${timePeriod === 'dawn' ? 'bg-orange-400 text-white shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
-                🌅
+                <SoftIcon name="sunrise" className="w-5 h-5 mx-auto" />
               </button>
               <button
                 onClick={() => setTime(12)}
                 className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${timePeriod === 'noon' ? 'bg-yellow-400 text-slate-800 shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
-                ☀️
+                <SoftIcon name="sun" className="w-5 h-5 mx-auto" />
               </button>
               <button
                 onClick={() => setTime(Math.round(sunriseSunset.sunset))}
                 className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${timePeriod === 'sunset' ? 'bg-orange-500 text-white shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
-                🌇
+                <SoftIcon name="sunset" className="w-5 h-5 mx-auto" />
               </button>
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
@@ -449,7 +450,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                       : isNightMode ? 'bg-slate-800' : 'bg-neutral-100'
                   }`}
                 >
-                  {season.icon}
+                  <SoftIcon name={season.icon} className="w-5 h-5 mx-auto" />
                 </button>
               ))}
             </div>
@@ -487,7 +488,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
             {formatHour(hour)}
           </span>
           <span className={`text-[10px] truncate ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
-            ☀️ {t(`property:map3d.cardinalDirections.${cardinalDirection}`, cardinalDirection)} ({Math.round(sunAzimuth)}°)
+            <SoftIcon name="sun" className="inline-block w-3.5 h-3.5 mr-0.5 align-[-2px]" />{t(`property:map3d.cardinalDirections.${cardinalDirection}`, cardinalDirection)} ({Math.round(sunAzimuth)}°)
           </span>
         </div>
         <svg
@@ -524,7 +525,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
           {/* Property orientation tip - compact */}
           <div className={`text-[10px] p-1.5 rounded-lg ${isNightMode ? 'bg-cyan-900/30 border border-cyan-500/20' : 'bg-blue-50 border border-blue-200'}`}>
             <p className={`font-medium ${isNightMode ? 'text-cyan-300' : 'text-blue-700'}`}>
-              💡 {t('search:map.orientationTip', 'Tip')}:
+              <SoftIcon name="lightbulb" className="inline-block w-3.5 h-3.5 mr-0.5 align-[-2px]" />{t('search:map.orientationTip', 'Tip')}:
             </p>
             <p className={`leading-tight ${isNightMode ? 'text-cyan-200/80' : 'text-blue-600'}`}>
               {hour >= 6 && hour < 12
@@ -562,18 +563,18 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               `}
             />
             <div className={`flex justify-between text-[9px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
-              <span>12AM</span>
-              <span>6AM</span>
-              <span>12PM</span>
-              <span>6PM</span>
-              <span>11PM</span>
+              <span>{t('search:ui.sunPositionControl.n12am', '12AM')}</span>
+              <span>{t('search:ui.sunPositionControl.n6am', '6AM')}</span>
+              <span>{t('search:ui.sunPositionControl.n12pm', '12PM')}</span>
+              <span>{t('search:ui.sunPositionControl.n6pm', '6PM')}</span>
+              <span>{t('search:ui.sunPositionControl.n11pm', '11PM')}</span>
             </div>
           </div>
 
           {/* Sunrise/Sunset times display */}
           <div className={`flex justify-between text-[10px] px-1 ${isNightMode ? 'text-cyan-300' : 'text-primary'}`}>
-            <span>🌅 {formatDecimalHour(sunriseSunset.sunrise)}</span>
-            <span>🌇 {formatDecimalHour(sunriseSunset.sunset)}</span>
+            <span><SoftIcon name="sunrise" className="inline-block w-3.5 h-3.5 mr-0.5 align-[-2px]" />{formatDecimalHour(sunriseSunset.sunrise)}</span>
+            <span><SoftIcon name="sunset" className="inline-block w-3.5 h-3.5 mr-0.5 align-[-2px]" />{formatDecimalHour(sunriseSunset.sunset)}</span>
           </div>
 
           {/* Quick time buttons - use actual sunrise/sunset times */}
@@ -672,7 +673,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                   `}
                   title={t(`search:map.seasons.${season.id}`, season.label)}
                 >
-                  {season.icon}
+                  <SoftIcon name={season.icon} className="w-5 h-5 mx-auto" />
                 </button>
               ))}
             </div>

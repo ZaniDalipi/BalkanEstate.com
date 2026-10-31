@@ -1,6 +1,7 @@
 import React from 'react';
 import { buildAvatarUrl, getDefaultAvatarOptions, parseAvatarOptions, type AvatarOptions } from './AvatarCustomizer';
 
+import { useTranslation } from 'react-i18next';
 interface DefaultAvatarProps {
   gender?: 'male' | 'female' | 'other';
   seed?: string;
@@ -78,6 +79,7 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
   className = 'w-full h-full',
   show3d = false,
 }) => {
+  const { t } = useTranslation();
   // Determine which options to use
   const parsed = parseAvatarOptions(avatarOptions);
   const options: AvatarOptions = parsed
@@ -94,7 +96,7 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
         <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_6px_24px_rgba(0,0,0,0.18),inset_0_-2px_6px_rgba(0,0,0,0.08)] bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100">
           <img
             src={url}
-            alt="Avatar"
+            alt={t('common:ui.defaultAvatar.avatar', 'Avatar')}
             className="w-full h-full"
             loading="lazy"
             decoding="async"
@@ -112,7 +114,7 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
   return (
     <img
       src={url}
-      alt="Avatar"
+      alt={t('common:ui.defaultAvatar.avatar', 'Avatar')}
       className={className}
       loading="lazy"
       decoding="async"

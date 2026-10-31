@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
+import { useTranslation } from 'react-i18next';
 interface HourlyHeatmapProps {
   data: number[];
 }
@@ -9,6 +10,7 @@ interface HourlyHeatmapProps {
  * Shows view distribution across 24 hours with hover effects and animations
  */
 export const HourlyHeatmap: React.FC<HourlyHeatmapProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [animated, setAnimated] = useState(false);
   const [hoveredHour, setHoveredHour] = useState<number | null>(null);
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
@@ -123,7 +125,7 @@ export const HourlyHeatmap: React.FC<HourlyHeatmapProps> = ({ data }) => {
                     <div className="font-medium">{formatHour(hour)}</div>
                     <div className="text-neutral-300">{count} views</div>
                     <div className="text-neutral-400 text-[10px]">{getTimePeriod(hour)}</div>
-                    {isPeak && <div className="text-yellow-400 text-[10px] font-medium">Peak Hour</div>}
+                    {isPeak && <div className="text-yellow-400 text-[10px] font-medium">{t('analytics:ui.hourlyHeatmap.peakHour', 'Peak Hour')}</div>}
                   </div>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
                     <div className="border-4 border-transparent border-t-neutral-800" />
@@ -181,25 +183,25 @@ export const HourlyHeatmap: React.FC<HourlyHeatmapProps> = ({ data }) => {
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
-            Peak: <span className="font-medium text-neutral-700">{formatHour(peakHour)}</span>
+            {t('analytics:ui.hourlyHeatmap.peak', 'Peak:')} <span className="font-medium text-neutral-700">{formatHour(peakHour)}</span>
           </span>
         </div>
         <span>
-          Total: <span className="font-medium text-neutral-700">{totalViews.toLocaleString()} views</span>
+          {t('analytics:ui.hourlyHeatmap.total', 'Total:')} <span className="font-medium text-neutral-700">{totalViews.toLocaleString()} views</span>
         </span>
       </div>
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-1.5 text-[10px] text-neutral-400">
-        <span>Less</span>
+        <span>{t('analytics:ui.hourlyHeatmap.less', 'Less')}</span>
         {[0, 1, 2, 3, 4, 5].map((level) => (
           <div
             key={level}
             className={`w-4 h-4 rounded ${getColorClass(level, false)} transition-transform hover:scale-110 cursor-pointer`}
-            title={level === 0 ? 'No views' : `${level * 20}%+ of peak`}
+            title={level === 0 ? t('analytics:ui.hourlyHeatmap.noViews', 'No views') : `${level * 20}%+ of peak`}
           />
         ))}
-        <span>More</span>
+        <span>{t('analytics:ui.hourlyHeatmap.more', 'More')}</span>
       </div>
     </div>
   );

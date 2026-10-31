@@ -130,6 +130,13 @@ import {
 import multer from 'multer';
 import { isAllowedPhotoUrl, allowedPhotoHostsHint } from '../config/imageHosts';
 import Article from '../models/Article';
+import {
+  addAgencyExtraAdmin,
+  getAgencyAllowanceAdmin,
+  grantResidenceAdmin,
+  listResidencesAdmin,
+  setBuildingLimitAdmin,
+} from '../controllers/adminResidenceController';
 
 const router = express.Router();
 
@@ -157,7 +164,14 @@ router.get('/agencies/:agencyId/subscription', logAdminAction('VIEW_AGENCY_SUBSC
 router.post('/agencies/:agencyId/subscription/activate', logAdminAction('ACTIVATE_AGENCY_SUBSCRIPTION'), activateAgencySubscription);
 router.post('/agencies/:agencyId/subscription/deactivate', logAdminAction('DEACTIVATE_AGENCY_SUBSCRIPTION'), deactivateAgencySubscription);
 router.patch('/agencies/:agencyId/listing-limit', logAdminAction('ADJUST_AGENCY_LISTING_LIMIT'), adjustAgencyListingLimit);
+router.get('/agencies/:agencyId/residence-allowance', logAdminAction('VIEW_AGENCY_RESIDENCES'), getAgencyAllowanceAdmin);
+router.post('/agencies/:agencyId/residence-allowance', logAdminAction('ADD_AGENCY_RESIDENCES'), addAgencyExtraAdmin);
 router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetailAdmin);
+
+// ===== Residences (no payment provider yet: limits and passes are set here) =====
+router.get('/residences', logAdminAction('VIEW_RESIDENCES'), listResidencesAdmin);
+router.patch('/residences/:id/building-limit', logAdminAction('SET_RESIDENCE_BUILDING_LIMIT'), setBuildingLimitAdmin);
+router.post('/residences/:id/grant', logAdminAction('GRANT_RESIDENCE_PASS'), grantResidenceAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);
 router.delete('/agencies/:id', logAdminAction('DELETE_AGENCY'), deleteAgency);
 
@@ -599,12 +613,10 @@ router.delete('/news/:id', logAdminAction('DELETE_NEWS'), async (req: Request, r
       res.status(404).json({ message: 'News article not found' });
       return;
     }
-    // Cleanup Cloudinary cover
+    // Cleanup stored cover
     if (article.coverImagePublicId) {
-      try {
-        const cloudinary = (await import('../config/cloudinary')).default;
-        await cloudinary.uploader.destroy(article.coverImagePublicId);
-      } catch { /* ignore cleanup errors */ }
+      const { deleteImage } = await import('../services/mediaService');
+      await deleteImage(article.coverImagePublicId); // never throws
     }
     await article.deleteOne();
     res.json({ message: 'News article deleted' });
@@ -775,12 +787,10 @@ router.delete('/articles/:id', logAdminAction('DELETE_ARTICLE'), async (req: Req
       return;
     }
 
-    // Cleanup Cloudinary cover image if it exists
+    // Cleanup stored cover image if it exists
     if (article.coverImagePublicId) {
-      try {
-        const cloudinary = (await import('../config/cloudinary')).default;
-        await cloudinary.uploader.destroy(article.coverImagePublicId);
-      } catch { /* ignore cleanup errors */ }
+      const { deleteImage } = await import('../services/mediaService');
+      await deleteImage(article.coverImagePublicId); // never throws
     }
 
     await article.deleteOne();
@@ -827,7 +837,7 @@ router.post('/articles/upload-image', logAdminAction('UPLOAD_ARTICLE_IMAGE'), ar
       return;
     }
 
-    const { uploadImage } = await import('../services/cloudinaryService');
+    const { uploadImage } = await import('../services/mediaService');
     const result = await uploadImage(req.file.buffer, {
       userId: (req as any).user._id.toString(),
       type: 'listing' as any,
@@ -1036,7 +1046,7 @@ router.post(
     try {
       if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
 
-      const { uploadImage } = await import('../services/cloudinaryService');
+      const { uploadImage } = await import('../services/mediaService');
       // Portrait: the corridor card is 18:25 and a card fills a large part of
       // the frame as it exits, so a small upload would visibly soften there.
       //
@@ -1243,7 +1253,7 @@ router.post(
     try {
       if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
 
-      const { uploadImage } = await import('../services/cloudinaryService');
+      const { uploadImage } = await import('../services/mediaService');
       // Portrait master: the gallery panel is a tall column — roughly 4:5 when
       // expanded on a desktop and far narrower when collapsed — and it is
       // always `object-cover`, so a landscape master would lose its sides. The
@@ -1335,7 +1345,7 @@ router.post(
     try {
       if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
 
-      const { uploadImage } = await import('../services/cloudinaryService');
+      const { uploadImage } = await import('../services/mediaService');
       // Landscape master: these appear as a wide hero (1200x500) and as card
       // headers (800x400), always `object-cover`, so a portrait upload would
       // lose its top and bottom.
@@ -1378,7 +1388,7 @@ router.put('/city-photos', logAdminAction('SET_CITY_PHOTO'), async (req: Request
     // Refused here rather than saved and then blocked by the CSP: an image
     // from an unlisted host renders as a blank frame with nothing to explain
     // it, so the curator has to hear about it now. Uploading through the app
-    // always satisfies this — those land on Cloudinary.
+    // always satisfies this — those land in storage.
     if (!isAllowedPhotoUrl(imageUrl)) {
       res.status(400).json({
         message: `Photos can only be linked from: ${allowedPhotoHostsHint()}. Upload the file instead and it will be hosted for you.`,
@@ -1424,7 +1434,7 @@ router.put('/city-photos', logAdminAction('SET_CITY_PHOTO'), async (req: Request
 
 /**
  * Clear a city's override, handing it back to the resolution chain (City
- * Gallery → Villa Destination → the Wikipedia seeder). The Cloudinary asset is
+ * Gallery → Villa Destination → the Wikipedia seeder). The stored photo is
  * left in place: another city or a gallery panel may be using the same upload.
  */
 router.delete('/city-photos', logAdminAction('CLEAR_CITY_PHOTO'), async (req: Request, res: Response): Promise<void> => {

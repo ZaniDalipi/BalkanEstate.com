@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMyBusinessListings, useDeleteBusinessListing } from '@/src/features/business-directory/hooks';
@@ -7,14 +7,11 @@ import { useNotification } from '@/src/shared/hooks/useNotification';
 import { generateBusinessSlug } from '@/utils/slug';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import {
-  BuildingStorefrontIcon,
-  UserIcon,
-  MapPinIcon,
   EyeIcon,
   PencilIcon,
-  CheckBadgeIcon,
   ArrowLeftIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -76,7 +73,7 @@ const MyBusinessListings: React.FC = () => {
   const handleDelete = useCallback(async (listing: BusinessListing) => {
     const confirmed = await confirm(
       t('businessDirectory:delete.confirmTitle', 'Delete Listing'),
-      t('businessDirectory:delete.confirmMessage', { name: listing.name, defaultValue: `Are you sure you want to delete "${listing.name}"? This action cannot be undone.` }),
+      t('businessDirectory:delete.confirmMessage', { name: listing.name, defaultValue: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.' }),
     );
     if (!confirmed) return;
 
@@ -119,9 +116,7 @@ const MyBusinessListings: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-2xl flex items-center justify-center">
-          <BuildingStorefrontIcon className="w-8 h-8 text-red-400" />
-        </div>
+        <SoftIcon name="store" className="block w-16 h-16 mx-auto mb-4" />
         <h3 className="text-lg font-bold text-neutral-700 mb-2">
           {t('businessDirectory:myBusinesses.errorTitle', 'Failed to load businesses')}
         </h3>
@@ -181,9 +176,7 @@ const MyBusinessListings: React.FC = () => {
       {/* Empty state */}
       {listings.length === 0 && (
         <div className="text-center py-16 px-4">
-          <div className="w-20 h-20 mx-auto mb-5 bg-gradient-to-br from-primary/10 to-blue-500/10 rounded-3xl flex items-center justify-center">
-            <BuildingStorefrontIcon className="w-10 h-10 text-primary/60" />
-          </div>
+          <SoftIcon name="store" className="block w-20 h-20 mx-auto mb-5" />
           <h3 className="text-lg font-bold text-neutral-700 mb-2">
             {t('businessDirectory:myBusinesses.emptyTitle', 'No businesses yet')}
           </h3>
@@ -245,7 +238,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
       {/* Banner strip */}
       <div className={`h-20 sm:h-24 bg-gradient-to-r ${gradient} relative overflow-hidden`}>
         {listing.bannerUrl && (
-          <img src={optimizeCloudinaryUrl(listing.bannerUrl, { width: 640 }) || listing.bannerUrl} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+          <img src={optimizeImageUrl(listing.bannerUrl, { width: 640 }) || listing.bannerUrl} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
         )}
         <div className="absolute inset-0 bg-black/10" />
 
@@ -260,7 +253,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
           </span>
           {listing.isVerified && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 text-emerald-600 backdrop-blur-sm border border-white/30 flex items-center gap-0.5">
-              <CheckBadgeIcon className="w-3 h-3" />
+              <SoftIcon name="shield" className="w-4 h-4" />
               {t('verified')}
             </span>
           )}
@@ -269,7 +262,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
         {/* Type badge */}
         <div className="absolute top-2 right-2">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 backdrop-blur-sm border border-white/30 text-neutral-700 flex items-center gap-0.5">
-            {isIndividual ? <UserIcon className="w-3 h-3" /> : <BuildingStorefrontIcon className="w-3 h-3" />}
+            <SoftIcon name={isIndividual ? 'user' : 'store'} className="w-4 h-4" />
             {isIndividual ? t('types.individual') : t('types.business')}
           </span>
         </div>
@@ -277,7 +270,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
         {/* Logo - overlapping banner */}
         <div className={`absolute -bottom-5 left-4 w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-[3px] border-white shadow-lg bg-gradient-to-br ${gradient}`}>
           {listing.logoUrl ? (
-            <img src={optimizeCloudinaryUrl(listing.logoUrl, { width: 240 }) || listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+            <img src={optimizeImageUrl(listing.logoUrl, { width: 240 }) || listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <span className="text-lg sm:text-xl font-bold text-white">{listing.name.charAt(0).toUpperCase()}</span>
@@ -298,18 +291,18 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
 
         {/* Location */}
         <div className="flex items-center gap-1.5 text-xs text-neutral-500 mb-3">
-          <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+          <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{listing.city}, {listing.country}</span>
         </div>
 
         {/* Stats row */}
         <div className="flex items-center gap-3 text-xs text-neutral-400 mb-3">
           <span className="flex items-center gap-1">
-            <EyeIcon className="w-3.5 h-3.5" />
+            <SoftIcon name="eye" className="w-4 h-4" />
             {listing.views} {t('detail.stats.views')}
           </span>
           <span className="flex items-center gap-1">
-            <BuildingStorefrontIcon className="w-3.5 h-3.5" />
+            <SoftIcon name="store" className="w-4 h-4" />
             {listing.services.length} {t('detail.stats.services')}
           </span>
         </div>

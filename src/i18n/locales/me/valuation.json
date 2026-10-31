@@ -158,8 +158,8 @@
     }
   },
   "seo": {
-    "title": "Free AI Property Valuation - Instant Balkan Property Estimate",
-    "description": "Get a free AI-powered property valuation for any Balkan property. Instant price estimates for apartments, houses, and villas in Montenegro, Albania, Serbia, and 8 more countries."
+    "title": "Besplatna AI procjena nekretnine - trenutna procjena na Balkanu",
+    "description": "Dobijte besplatnu AI procjenu za bilo koju nekretninu na Balkanu. Trenutne procjene cijena za stanove, kuće i vile u Crnoj Gori, Albaniji, Srbiji i još 8 zemalja."
   },
   "marketReference": {
     "title": "Referenca tržišne cijene",
@@ -186,5 +186,10 @@
     "count": "{{count}} sačuvano na ovom uređaju",
     "clearAll": "Obriši sve",
     "remove": "Ukloni"
+  },
+  "ui": {
+    "valuationForm": {
+      "multiSelect": "(višestruki izbor)"
+    }
   }
 }

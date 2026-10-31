@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { XMarkIcon } from '../../constants';
 
+import { useTranslation } from 'react-i18next';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +15,7 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth }) => {
+  const { t } = useTranslation();
   // Lock body scroll when modal is open to prevent map jumping
   useEffect(() => {
     if (isOpen) {
@@ -78,7 +80,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <button type="button" onClick={onClose} className="absolute right-3 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }} aria-label="Close modal">
+        <button type="button" onClick={onClose} className="absolute right-3 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }} aria-label={t('common:ui.modal.closeModal', 'Close modal')}>
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         {title && <h2 id={titleId} className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}

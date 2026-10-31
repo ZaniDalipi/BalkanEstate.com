@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import SiteContent from '../models/SiteContent';
-import cloudinary from '../config/cloudinary';
+import { deleteImage } from '../services/mediaService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 import { toYouTubeEmbedUrl, validateYouTubeLink } from '../utils/videoLinks';
 
@@ -70,7 +70,7 @@ export const createContent = async (req: Request, res: Response): Promise<void> 
     let { url } = req.body;
     const userId = (req as any).user._id;
 
-    // Videos are YouTube links only — nothing is uploaded to Cloudinary.
+    // Videos are YouTube links only — nothing is uploaded to storage.
     if (isVideoContent(req.body)) {
       const check = validateYouTubeLink(url);
       if (!check.isValid) {
@@ -153,15 +153,10 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Delete from Cloudinary if publicId exists
-    if (content.publicId) {
-      try {
-        await cloudinary.uploader.destroy(content.publicId, {
-          resource_type: content.type === 'video' ? 'video' : 'image'
-        });
-      } catch (_cloudErr) {
-        // Cloudinary deletion failed silently - content will still be removed from database
-      }
+    // Delete the stored image (videos are YouTube links — nothing stored).
+    // deleteImage never throws: the content is removed from the database either way.
+    if (content.publicId && content.type !== 'video') {
+      await deleteImage(content.publicId);
     }
 
     await SiteContent.findByIdAndDelete(id);

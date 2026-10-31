@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
-import { mergeWithStaticFallback } from '../data/staticCities';
-import { ChartBarIcon, HomeIcon, GlobeAltIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
@@ -21,9 +20,10 @@ import SavedCitiesPanel from './SavedCitiesPanel';
 import DataFreshness from './DataFreshness';
 
 const CityRecommendations: React.FC = () => {
-  const { t } = useTranslation(['exploreCities']);
+  const { t } = useTranslation(['exploreCities', 'common']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [activeTab, setActiveTab] = useState<ExploreCitiesTab>('all');
   // Read ?country= URL param to pre-select a country on mount
   const [selectedCountry, setSelectedCountry] = useState<string>(() => {
@@ -57,13 +57,17 @@ const CityRecommendations: React.FC = () => {
     loadCities();
   }, []);
 
+  // Only what the API returns. This used to pad the list with hard-coded
+  // city statistics stamped "updated just now", which presented placeholder
+  // numbers as current market data.
   const loadCities = async () => {
     try {
       setLoading(true);
+      setLoadFailed(false);
       const data = await getFeaturedCities(100);
-      setCities(mergeWithStaticFallback(data));
-    } catch (error) {
-      // Error removed
+      setCities(data);
+    } catch {
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -168,7 +172,7 @@ const CityRecommendations: React.FC = () => {
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 flex items-center gap-3">
-            <GlobeAltIcon className="w-8 h-8 text-primary" />
+            <SoftIcon name="globe" className="w-9 h-9 flex-shrink-0" />
             <h2 className="text-3xl font-bold text-neutral-900">{t('hero.title')}</h2>
           </div>
           <p className="text-neutral-600 mb-8">{t('hero.discoverSubtitle')}</p>
@@ -191,6 +195,29 @@ const CityRecommendations: React.FC = () => {
     );
   }
 
+  if (loadFailed && cities.length === 0) {
+    return (
+      <div className="p-8" role="alert">
+        <SEO title={t('exploreCities:seo.title')} noindex />
+        <div className="max-w-xl mx-auto text-center bg-white rounded-2xl shadow-md border p-10">
+          <h1 className="text-xl font-semibold text-neutral-800 mb-2">
+            {t('exploreCities:loadError.title', 'City data could not be loaded')}
+          </h1>
+          <p className="text-neutral-500 mb-6">
+            {t('exploreCities:loadError.message', 'Check your connection and try again.')}
+          </p>
+          <button
+            type="button"
+            onClick={loadCities}
+            className="rounded-lg bg-primary px-6 py-2 font-medium text-white hover:bg-primary-dark"
+          >
+            {t('common:loadError.retry', 'Try again')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (cities.length === 0) {
     return (
       <div className="p-8">
@@ -207,9 +234,7 @@ const CityRecommendations: React.FC = () => {
               </div>
             </div>
             <div className="relative z-10">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
-                <HomeIcon className="w-12 h-12 text-cyan-500" />
-              </div>
+              <SoftIcon name="home" className="block w-24 h-24 mx-auto mb-6" />
               <h3 className="text-xl font-semibold text-neutral-700 mb-2">{t('empty.title')}</h3>
               <p className="text-neutral-500">{t('empty.message')}</p>
             </div>
@@ -271,13 +296,11 @@ const CityRecommendations: React.FC = () => {
           {cities.length > 0 && (
             <div className="mb-8 p-5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl border border-violet-200 shadow-sm backdrop-blur-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
-                  <ChartBarIcon className="w-6 h-6 text-white" />
-                </div>
+                <SoftIcon name="chart" className="w-12 h-12 flex-shrink-0" />
                 <div>
                   <h4 className="font-bold text-slate-900 mb-1 text-lg">{t('aiInsights.title')}</h4>
                   <p className="text-sm text-slate-600 mb-2">
-                    {t('aiInsights.description', { count: cities.length })}
+                    {t('aiInsights.estimatesNotice', 'Price per m² comes from official and research sources where available — each city page names its source. Growth, demand, rental-yield and investment figures are AI-generated estimates, not official statistics: use them as a rough guide and check current listings and official data before deciding.')}
                   </p>
                   {/* Freshest row in the set: the age a reader should judge
                       these figures by. Sourced from the data, not from "now". */}

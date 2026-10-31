@@ -2,6 +2,7 @@
 import type { TargetAndTransition } from "motion/react";
 import { motion } from "motion/react";
 import { cn } from "@/src/lib/utils";
+import { useTranslation } from 'react-i18next';
 const initialProps: TargetAndTransition = {
   pathLength: 0,
   opacity: 0,
@@ -20,6 +21,7 @@ function AppleHelloVietnameseEffect({
   onAnimationComplete,
   ...props
 }: Props) {
+  const { t } = useTranslation();
   const calc = (x: number) => x * speed;
   return (
     <motion.svg
@@ -34,7 +36,7 @@ function AppleHelloVietnameseEffect({
       transition={{ duration: 0.5 }}
       {...props}
     >
-      <title>xin chào</title>
+      <title>{t('common:ui.apple-hello-effect.xinChO', 'xin chào')}</title>
       {/* x1 */}
       <motion.path
         d="M102.233 96.2277C75.6823 127.245 45.1612 158.759 11.4143 190.521"

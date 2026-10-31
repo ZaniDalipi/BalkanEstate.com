@@ -10,6 +10,7 @@ import {
   SPEED_LABELS,
   formatTime,
 } from '../hooks/useShadowTimelapse';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface ShadowTimelapseControlProps {
   /** Location latitude for accurate sun calculations */
@@ -40,14 +41,14 @@ const PERIOD_GRADIENTS: Record<TimePeriod, string> = {
 /**
  * Time period icons
  */
-const PERIOD_ICONS: Record<TimePeriod, string> = {
-  night: '🌙',
-  dawn: '🌅',
-  morning: '🌤️',
-  noon: '☀️',
-  afternoon: '🌤️',
-  sunset: '🌇',
-  dusk: '🌆',
+const PERIOD_ICONS: Record<TimePeriod, SoftIconName> = {
+  night: 'moon',
+  dawn: 'sunrise',
+  morning: 'partlySunny',
+  noon: 'sun',
+  afternoon: 'partlySunny',
+  sunset: 'sunset',
+  dusk: 'dusk',
 };
 
 /**
@@ -97,6 +98,7 @@ const TimelineScrubber: React.FC<{
   isNightMode: boolean;
   timePeriod: TimePeriod;
 }> = ({ progress, sunInfo, startHour, endHour, onSeek, isNightMode, timePeriod }) => {
+  const { t } = useTranslation(['property']);
   const range = endHour - startHour;
 
   // Calculate marker positions
@@ -178,9 +180,9 @@ const TimelineScrubber: React.FC<{
       {/* Time labels */}
       <div className={`flex justify-between text-[9px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
         <span>{formatTime(startHour)}</span>
-        <span className="text-orange-400">🌅</span>
-        <span className="text-yellow-400">☀️</span>
-        <span className="text-purple-400">🌇</span>
+        <SoftIcon name="sunrise" className="w-4 h-4" />
+        <SoftIcon name="sun" className="w-4 h-4" />
+        <SoftIcon name="sunset" className="w-4 h-4" />
         <span>{formatTime(endHour)}</span>
       </div>
     </div>
@@ -288,7 +290,7 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
                 {formattedTime}
               </div>
               <div className={`text-xs ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
-                {PERIOD_ICONS[timePeriod]} {t(`shadowTimelapse.periods.${timePeriod}`, timePeriod)}
+                <SoftIcon name={PERIOD_ICONS[timePeriod]} className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`shadowTimelapse.periods.${timePeriod}`, timePeriod)}
               </div>
             </div>
           </div>
@@ -320,9 +322,9 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
         <div className="flex items-center justify-between mt-3">
           <SpeedSelector speed={speed} onSpeedChange={setSpeed} isNightMode={isNightMode} />
           <div className="flex items-center gap-1">
-            <button onClick={goToSunrise} className={`p-1.5 rounded-md text-sm ${isNightMode ? 'hover:bg-slate-700' : 'hover:bg-neutral-100'}`}>🌅</button>
-            <button onClick={goToNoon} className={`p-1.5 rounded-md text-sm ${isNightMode ? 'hover:bg-slate-700' : 'hover:bg-neutral-100'}`}>☀️</button>
-            <button onClick={goToSunset} className={`p-1.5 rounded-md text-sm ${isNightMode ? 'hover:bg-slate-700' : 'hover:bg-neutral-100'}`}>🌇</button>
+            <button onClick={goToSunrise} className={`p-1.5 rounded-md text-sm ${isNightMode ? 'hover:bg-slate-700' : 'hover:bg-neutral-100'}`}><SoftIcon name="sunrise" className="w-5 h-5" /></button>
+            <button onClick={goToNoon} className={`p-1.5 rounded-md text-sm ${isNightMode ? 'hover:bg-slate-700' : 'hover:bg-neutral-100'}`}><SoftIcon name="sun" className="w-5 h-5" /></button>
+            <button onClick={goToSunset} className={`p-1.5 rounded-md text-sm ${isNightMode ? 'hover:bg-slate-700' : 'hover:bg-neutral-100'}`}><SoftIcon name="sunset" className="w-5 h-5" /></button>
           </div>
         </div>
       </div>
@@ -367,7 +369,7 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
           <div className="text-white">
             <div className="text-2xl font-bold">{formattedTime}</div>
             <div className="text-sm opacity-90">
-              {PERIOD_ICONS[timePeriod]} {t(`shadowTimelapse.periods.${timePeriod}`, timePeriod)}
+              <SoftIcon name={PERIOD_ICONS[timePeriod]} className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`shadowTimelapse.periods.${timePeriod}`, timePeriod)}
             </div>
           </div>
           <button
@@ -418,7 +420,7 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
             }
           `}
         >
-          <span className="text-lg">🌅</span>
+          <SoftIcon name="sunrise" className="w-6 h-6" />
           <span className="text-[10px] font-medium">{t('shadowTimelapse.sunrise', 'Sunrise')}</span>
           <span className="text-[9px] opacity-70">{formatTime(sunInfo.sunrise)}</span>
         </button>
@@ -434,9 +436,9 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
             }
           `}
         >
-          <span className="text-lg">☀️</span>
+          <SoftIcon name="sun" className="w-6 h-6" />
           <span className="text-[10px] font-medium">{t('shadowTimelapse.noon', 'Noon')}</span>
-          <span className="text-[9px] opacity-70">12:00 PM</span>
+          <span className="text-[9px] opacity-70">{t('search:ui.shadowTimelapseControl.n1200Pm', '12:00 PM')}</span>
         </button>
         <button
           onClick={goToSunset}
@@ -450,7 +452,7 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
             }
           `}
         >
-          <span className="text-lg">🌇</span>
+          <SoftIcon name="sunset" className="w-6 h-6" />
           <span className="text-[10px] font-medium">{t('shadowTimelapse.sunset', 'Sunset')}</span>
           <span className="text-[9px] opacity-70">{formatTime(sunInfo.sunset)}</span>
         </button>
@@ -469,7 +471,7 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
         mt-3 p-2 rounded-lg text-[10px]
         ${isNightMode ? 'bg-cyan-900/30 border border-cyan-500/20 text-cyan-200' : 'bg-blue-50 border border-blue-200 text-blue-600'}
       `}>
-        💡 {t('shadowTimelapse.tip', 'Watch how shadows move throughout the day to understand sunlight exposure')}
+        <SoftIcon name="lightbulb" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('shadowTimelapse.tip', 'Watch how shadows move throughout the day to understand sunlight exposure')}
       </div>
     </div>
   );

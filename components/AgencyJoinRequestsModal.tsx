@@ -106,7 +106,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            aria-label="Close join requests modal"
+            aria-label={t('agencies:ui.agencyJoinRequestsModal.closeJoinRequestsModal', 'Close join requests modal')}
           >
             <XMarkIcon className="w-6 h-6" />
           </button>

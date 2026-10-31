@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { optimizeImageUrl, imageSrcSet, getPropertyImagePlaceholder } from '@/config/mediaConfig';
 
 interface FeaturedPropertiesSectionProps {
   properties: Property[];
@@ -82,7 +82,7 @@ const PropertyCard: React.FC<{
         <>
           {/* LQIP blur-up placeholder */}
           <img
-            src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
+            src={getPropertyImagePlaceholder(property.imageUrl) || optimizeImageUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
             alt=""
             aria-hidden="true"
             loading="lazy"
@@ -97,8 +97,8 @@ const PropertyCard: React.FC<{
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
             <img
-              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              src={optimizeImageUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={imageSrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
               sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
               alt={property.title || property.address || 'Property image'}
               width={400}
@@ -161,7 +161,7 @@ const PropertyCard: React.FC<{
         </>
         ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300">
-          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+          <SoftIcon name="building" className="w-12 h-12 opacity-70" />
         </div>
         )}
         {/* Badges */}
@@ -204,23 +204,17 @@ const PropertyCard: React.FC<{
           {property.propertyType !== 'land' && (
             <>
               <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
+                <SoftIcon name="bed" className="w-5 h-5" />
                 {property.beds}
               </span>
               <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <SoftIcon name="bath" className="w-5 h-5" />
                 {property.baths}
               </span>
             </>
           )}
           <span className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-            </svg>
+            <SoftIcon name="area" className="w-5 h-5" />
             {property.sqft} m²
           </span>
         </div>

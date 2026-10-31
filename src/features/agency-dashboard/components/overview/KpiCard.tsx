@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface KpiCardProps {
   title: string;
@@ -55,9 +55,9 @@ const KpiCard: React.FC<KpiCardProps> = ({
             }`}
           >
             {isPositive ? (
-              <ArrowTrendingUpIcon className="w-3.5 h-3.5" />
+              <SoftIcon name="trendUp" className="w-4 h-4 flex-shrink-0" />
             ) : (
-              <ArrowTrendingDownIcon className="w-3.5 h-3.5" />
+              <SoftIcon name="trendDown" className="w-4 h-4 flex-shrink-0" />
             )}
             <span>{isPositive ? '+' : ''}{trend?.toFixed(1)}%</span>
           </div>

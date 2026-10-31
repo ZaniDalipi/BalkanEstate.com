@@ -21,10 +21,10 @@
     "browseProperties": "Прелистај имоти",
     "noSessionFound": "Не е пронајдена сесија за плаќање",
     "loginToVerify": "Ве молиме најавете се за да го потврдите вашето плаќање",
-    "plan": "Plan",
-    "validUntil": "Valid Until",
-    "nowActive": "Now active on your account",
-    "continue": "Continue to Dashboard"
+    "plan": "План",
+    "validUntil": "Важи до",
+    "nowActive": "Сега е активно на вашата сметка",
+    "continue": "Продолжи кон таблата"
   },
   "cancel": {
     "title": "Плаќањето е откажано",
@@ -52,10 +52,10 @@
     "redirectBlocked": "Пренасочувањето за плаќање беше блокирано од безбедносни причини. Ве молиме обидете се повторно.",
     "sessionCreationFailed": "Не успеа креирање на сесија за плаќање",
     "invalidDiscountCode": "Невалиден код за попуст",
-    "freeSubscriptionFailed": "Failed to apply free subscription",
-    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
-    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
-    "invalidPlanPrice": "Invalid plan price"
+    "freeSubscriptionFailed": "Примената на бесплатната претплата не успеа",
+    "verificationTimeout": "Проверката на плаќањето истече. Ако сте го завршиле плаќањето, претплатата наскоро ќе се активира. Проверете ја е-поштата за потврда.",
+    "invalidCodeFormat": "Невалиден формат на кодот. Користете само букви, бројки, цртички и долни црти.",
+    "invalidPlanPrice": "Невалидна цена на планот"
   },
   "checkout": {
     "secureCheckout": "Безбедно плаќање",
@@ -84,17 +84,17 @@
     "sslSecured": "SSL осигурано",
     "pciCompliant": "PCI усогласено",
     "securePayment": "Безбедно плаќање",
-    "freeSubscriptionReady": "Free Subscription Ready",
-    "freeSubscriptionReadyDescription": "Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.",
-    "enterCouponCode": "Enter coupon code",
-    "enterDiscountCode": "Please enter a discount code",
-    "discountAppliedSave": "Discount applied: Save €{{amount}}!",
-    "validationFailed": "Failed to validate discount code",
-    "subscribeTo": "Subscribe to {{plan}}",
-    "coupon100Off": "Your coupon provides 100% off!",
-    "priceDescription": "€{{price}}/{{interval}} - Premium features await you",
-    "haveCoupon": "Did we provide a coupon for you?",
-    "enterCodeToActivate": "Enter your code to activate your subscription"
+    "freeSubscriptionReady": "Бесплатната претплата е подготвена",
+    "freeSubscriptionReadyDescription": "Вашиот код за попуст дава 100% попуст! Кликнете подолу за веднаш да ја активирате претплатата - без плаќање.",
+    "enterCouponCode": "Внесете код за купон",
+    "enterDiscountCode": "Внесете код за попуст",
+    "discountAppliedSave": "Попустот е применет: заштедете €{{amount}}!",
+    "validationFailed": "Проверката на кодот за попуст не успеа",
+    "subscribeTo": "Претплати се на {{plan}}",
+    "coupon100Off": "Вашиот купон дава 100% попуст!",
+    "priceDescription": "€{{price}}/{{interval}} - Премиум функциите ве очекуваат",
+    "haveCoupon": "Дали ви дадовме купон?",
+    "enterCodeToActivate": "Внесете го кодот за да ја активирате претплатата"
   },
   "termsAcceptance": {
     "text": "Се согласувам со",
@@ -104,48 +104,90 @@
     "and": "и"
   },
   "subscription": {
-    "alreadySubscribed": "Already Subscribed",
-    "subscriptionActive": "Subscription Active",
-    "alreadyActive": "You already have this subscription active.",
-    "cancelYearlyFirst": "You have a yearly subscription active. Cancel it first before switching to monthly.",
-    "currentPlan": "Current Plan",
-    "active": "✓ Active",
-    "renewsOn": "Renews on",
-    "wantToSwitch": "Want to switch plans?",
-    "manageYourSubscription": "Manage your subscription",
-    "switchToMonthlyInfo": "To switch from yearly to monthly billing, please cancel your current subscription first. After it expires, you can subscribe to the monthly plan.",
-    "manageInfo": "You can manage your subscription from your Account Settings. Cancel anytime before the renewal date.",
-    "manageSubscription": "Manage Subscription"
+    "alreadySubscribed": "Веќе сте претплатени",
+    "subscriptionActive": "Претплатата е активна",
+    "alreadyActive": "Оваа претплата веќе е активна.",
+    "cancelYearlyFirst": "Имате активна годишна претплата. Прво откажете ја пред да преминете на месечна.",
+    "currentPlan": "Тековен план",
+    "active": "✓ Активна",
+    "renewsOn": "Се обновува на",
+    "wantToSwitch": "Сакате да го промените планот?",
+    "manageYourSubscription": "Управувајте со претплатата",
+    "switchToMonthlyInfo": "За да преминете од годишна на месечна наплата, прво откажете ја тековната претплата. Откако ќе истече, можете да се претплатите на месечниот план.",
+    "manageInfo": "Можете да управувате со претплатата од Поставките на сметката. Откажете во секое време пред датумот на обновување.",
+    "manageSubscription": "Управувај со претплатата"
   },
   "polling": {
-    "waitingForPayment": "Waiting for payment confirmation...",
-    "windowClosed": "Payment window closed. Verifying payment...",
-    "processing": "Payment is being processed...",
-    "verifying": "Verifying your payment with our payment provider...",
-    "verifyingAfterClose": "Verifying payment status...",
-    "devMode": "Development mode: Payment window opened. Complete payment manually, then refresh to see subscription status."
+    "waitingForPayment": "Се чека потврда на плаќањето...",
+    "windowClosed": "Прозорецот за плаќање е затворен. Се проверува плаќањето...",
+    "processing": "Плаќањето се обработува...",
+    "verifying": "Се проверува плаќањето кај нашиот давател...",
+    "verifyingAfterClose": "Се проверува статусот на плаќањето...",
+    "devMode": "Развоен режим: прозорецот за плаќање е отворен. Завршете го плаќањето рачно, па освежете за да го видите статусот."
   },
   "inProgress": {
-    "title": "Payment in Progress",
-    "description": "Please complete your payment in the new window",
-    "waitingTitle": "Waiting for Payment",
-    "waitingMessage": "Complete your payment in the popup window. This page will update automatically once your payment is confirmed.",
-    "subscriptionInfo": "Subscription Information",
-    "autoRenewal": "Your subscription will automatically renew at the end of each billing period",
-    "renewalReminder": "You will receive a reminder email 7 days before renewal",
-    "cancelAnytime": "You can cancel anytime from your account settings",
-    "cancel": "Cancel and Close",
-    "helpText": "If the payment window didn't open, please check your popup blocker"
+    "title": "Плаќањето е во тек",
+    "description": "Завршете го плаќањето во новиот прозорец",
+    "waitingTitle": "Се чека плаќање",
+    "waitingMessage": "Завршете го плаќањето во скокачкиот прозорец. Страницата автоматски ќе се ажурира по потврдата.",
+    "subscriptionInfo": "Информации за претплатата",
+    "autoRenewal": "Претплатата автоматски ќе се обновува на крајот на секој период на наплата",
+    "renewalReminder": "Ќе добиете е-пошта за потсетување 7 дена пред обновувањето",
+    "cancelAnytime": "Можете да откажете во секое време од поставките на сметката",
+    "cancel": "Откажи и затвори",
+    "helpText": "Ако прозорецот за плаќање не се отвори, проверете го блокаторот на скокачки прозорци"
   },
   "comingSoon": {
     "selfServicePayment": "Self-service payment",
     "launchingSoon": "Online payment gateway launching soon",
     "integrationInProgress": "Payment integration in progress",
     "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
-    "responseTime": "We typically respond within 24 hours"
+    "responseTime": "Обично одговараме во рок од 24 часа"
   },
   "taxNotice": {
-    "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "title": "Може да се применат даноци",
+    "description": "Конечната цена може да вклучува ДДВ/даноци според вашата локација. Paysera автоматски ги обработува даночните обврски."
+  },
+  "ui": {
+    "paymentSuccess": {
+      "creatingYourAgency": "Се креира вашата агенција...",
+      "settingUpYourAgencyProfile": "Го поставуваме профилот на агенцијата и генерираме кодови за покана за тимот...",
+      "provider": "Давател:",
+      "onlinePayment": "Онлајн плаќање",
+      "paymentProvider": "Давател на плаќања",
+      "orderId": "ID на нарачка",
+      "agencyCreatedSuccessfully": "Агенцијата е успешно креирана!",
+      "yourAgency": "Вашата агенција",
+      "hasBeenSetUp": "е поставена",
+      "isReadyToGo": "е подготвена!",
+      "inviteTeamMembersWithYour": "Поканете членови на тимот со вашите уникатни кодови",
+      "customizeYourAgencyProfilePage": "Прилагодете ја страницата на профилот на агенцијата",
+      "startListingPropertiesUnderYour": "Почнете да објавувате имоти под вашата агенција",
+      "viewYourAgency": "Види ја вашата агенција",
+      "teamInvitationCodes": "Кодови за покана за тимот",
+      "shareTheseCodesWithYour": "Споделете ги овие кодови со членовите на тимот. Секој код дава статус Pro агент при регистрација.",
+      "copied": "Копирано!",
+      "copyCode": "Копирај код",
+      "theseCodesHaveAlsoBeen": "Овие кодови се испратени и на вашата е-пошта",
+      "agencyCreated": "Агенцијата е креирана!",
+      "agencySetupPending": "Поставувањето на агенцијата е на чекање",
+      "paymentSuccessfulPleaseCompleteYour": "Плаќањето е успешно! Завршете го поставувањето на агенцијата од страницата на сметката."
+    },
+    "paymentWindow": {
+      "activationFailed": "Активирањето не успеа",
+      "whatYouCanDo": "Што можете да направите:",
+      "checkYourInternetConnection": "Проверете ја интернет врската",
+      "makeSureTheCouponCode": "Проверете дали кодот за купон е валиден",
+      "tryAgainInAFew": "Обидете се повторно за неколку мига",
+      "contactSupportIfTheIssue": "Контактирајте ја поддршката ако проблемот продолжи",
+      "tryAgain": "Обиди се повторно",
+      "close": "Затвори",
+      "subscriptionActivated": "Претплатата е активирана!",
+      "yourFreeSubscriptionHasBeen": "Вашата бесплатна претплата е успешно активирана.",
+      "nowActiveOnYourAccount": "Сега е активна на вашата сметка",
+      "continueToDashboard": "Продолжи кон таблата",
+      "card": "Картичка",
+      "bank": "Банка"
+    }
   }
 }

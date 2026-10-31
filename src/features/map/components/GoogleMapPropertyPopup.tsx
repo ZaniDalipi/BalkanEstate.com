@@ -3,13 +3,14 @@
  * Extracted from GoogleMapComponent.tsx
  */
 
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { resolveDisplayArea } from '@/shared/property/area';
-import { PROMOTION_TIER_COLORS } from './googleMapConstants';
+import { PROMOTION_TIER_COLORS, PROMOTION_TIER_ICONS } from './googleMapConstants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface GoogleMapPropertyPopupProps {
   property: Property;
@@ -33,7 +34,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
     : property.imageUrl;
   // Popup hero: a 640px preset (strict-transformations safe), not the master.
-  const imageUrl = optimizeCloudinaryUrl(rawImageUrl, { width: 640 }) || rawImageUrl;
+  const imageUrl = optimizeImageUrl(rawImageUrl, { width: 640 }) || rawImageUrl;
 
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -99,7 +100,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
           onClose();
         }}
         className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-all duration-200 hover:rotate-90 hover:scale-110 active:scale-95 z-50"
-        aria-label="Close popup"
+        aria-label={t('search:ui.googleMapPropertyPopup.closePopup', 'Close popup')}
       >
         <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -136,7 +137,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-            <span className="text-2xl opacity-50 animate-float">🏠</span>
+            <SoftIcon name="home" className="w-10 h-10 opacity-60 animate-float" />
           </div>
         )}
         {/* Gradient overlay */}
@@ -148,9 +149,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
             className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold text-white shadow backdrop-blur-sm animate-pulse-glow"
             style={{ backgroundColor: `${PROMOTION_TIER_COLORS[property.promotionTier]}ee` }}
           >
-            {property.promotionTier === 'premium' ? '👑' :
-             property.promotionTier === 'highlight' ? '💎' :
-             property.promotionTier === 'featured' ? '⭐' : '✨'}
+            <SoftIcon name={PROMOTION_TIER_ICONS[property.promotionTier] ?? 'sparkles'} className="w-4 h-4" />
           </div>
         )}
 
@@ -173,7 +172,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
 
         {/* Location */}
         <p className="map-popup-reveal map-popup-reveal-2 text-[11px] text-gray-500 mb-2.5 truncate">
-          📍 {property.city}, {property.country}
+          <SoftIcon name="pin" className="inline-block w-4 h-4 mr-0.5 align-[-4px]" />{property.city}, {property.country}
           {distanceLabel && (
             <span className="text-primary font-semibold"> · {t('map.popup.distanceFromYou', '{{distance}} away', { distance: distanceLabel })}</span>
           )}
@@ -184,14 +183,14 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
           {property.propertyType === 'land' ? (
             area && (
               <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">
-                📐 <b>{area.value.toLocaleString()}</b> m²
+                <SoftIcon name="area" className="w-4 h-4" /> <b>{area.value.toLocaleString()}</b> m²
               </span>
             )
           ) : (
             <>
-              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🛏 {property.beds || 0}</span>
-              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🚿 {property.baths || 0}</span>
-              {area && <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">📐 {area.value.toLocaleString()}</span>}
+              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 inline-flex items-center gap-1"><SoftIcon name="bed" className="w-4 h-4" />{property.beds || 0}</span>
+              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 inline-flex items-center gap-1"><SoftIcon name="bath" className="w-4 h-4" />{property.baths || 0}</span>
+              {area && <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 inline-flex items-center gap-1"><SoftIcon name="area" className="w-4 h-4" />{area.value.toLocaleString()}</span>}
             </>
           )}
         </div>

@@ -96,7 +96,9 @@
       "stripe": "Procesare plăți prin procesatorul nostru de plăți.",
       "analytics": "Analiză web pentru înțelegerea comportamentului utilizatorilor.",
       "cloudflare": "Servicii de securitate și performanță.",
-      "aws": "Găzduire cloud și servicii de stocare."
+      "aws": "Găzduire cloud și servicii de stocare.",
+      "paymentTitle": "Procesator de plăți",
+      "provider": "Procesatorul nostru de plăți gestionează în numele nostru toate tranzacțiile, conformitatea TVA/fiscală, facturarea și rambursările. Informațiile tale de plată sunt procesate în siguranță și nu stocăm datele complete ale cardului tău."
     },
     "transfers": {
       "title": "Transferuri internaționale de date",
@@ -164,6 +166,12 @@
         "title": "Procesarea plăților",
         "text": "Când faceți o achiziție, efectuați o tranzacție cu furnizorul nostru de servicii de plată Paysera, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările.",
         "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii de utilizare Paysera."
+      },
+      "provider": {
+        "title": "Procesarea plăților",
+        "morStatement": "Procesul nostru de comandă este realizat de furnizorul nostru de servicii de plată. Acesta acționează ca Merchant of Record pentru toate comenzile și gestionează solicitările clienților legate de plăți și returnări.",
+        "text": "Când faci o achiziție, tranzacționezi cu furnizorul nostru de servicii de plată, care se ocupă de procesarea plăților, facturare, conformitatea TVA/fiscală și rambursări.",
+        "buyerTerms": "Efectuând o achiziție, ești de acord și cu termenii de utilizare ai furnizorului de plăți."
       }
     },
     "prohibited": {
@@ -347,6 +355,126 @@
     "contact": {
       "title": "Contactați-ne",
       "text": "Dacă aveți întrebări despre utilizarea noastră a cookie-urilor, contactați-ne:"
+    }
+  },
+  "refund": {
+    "title": "Politica de rambursare",
+    "lastUpdated": "Ultima actualizare",
+    "intro": {
+      "title": "Angajamentul nostru",
+      "text": "La BalkanEstate AI dorim să fii pe deplin mulțumit de abonamentul tău. Dacă nu ești mulțumit de serviciile noastre, oferim rambursări în funcție de tipul abonamentului. Această politică descrie termenii și condițiile pentru solicitarea unei rambursări."
+    },
+    "guarantee": {
+      "title": "Perioade de rambursare",
+      "text": "Dacă din orice motiv nu ești mulțumit de abonament, poți solicita o rambursare completă în perioada aplicabilă. Această garanție se aplică pentru:",
+      "newSub": "Achiziții noi de abonament",
+      "upgrade": "Upgrade-uri de plan (rambursarea diferenței plătite)",
+      "firstTime": "Abonați pentru prima dată"
+    },
+    "eligibility": {
+      "title": "Eligibilitate pentru rambursare",
+      "text": "Ești eligibil pentru rambursare dacă:",
+      "withinPeriod": "Cererea este făcută în 7 zile (lunar) sau 30 de zile (anual) de la achiziția inițială",
+      "firstPurchase": "Este primul tău abonament BalkanEstate AI",
+      "notAbused": "Nu ai folosit anterior politica de rambursare",
+      "goodFaith": "Ai folosit serviciul cu bună-credință"
+    },
+    "nonRefundable": {
+      "title": "Situații fără rambursare",
+      "text": "Rambursările nu sunt disponibile în următoarele cazuri:",
+      "afterPeriod": "Cereri făcute după perioada de rambursare (7 zile pentru lunar, 30 de zile pentru anual)",
+      "renewal": "Reînnoiri automate ale abonamentului (anulează înainte de data reînnoirii)",
+      "abuse": "Conturi închise din cauza încălcării Termenilor de utilizare",
+      "repeat": "Cereri repetate de rambursare (o rambursare per utilizator)",
+      "partial": "Utilizare parțială după expirarea perioadei de rambursare"
+    },
+    "howTo": {
+      "title": "Cum soliciți o rambursare",
+      "text": "Pentru a solicita o rambursare, urmează acești pași:",
+      "step1": {
+        "title": "Trimite un email",
+        "text": "Scrie-ne la refunds@balkanestateai.com cu subiectul „Refund Request”"
+      },
+      "step2": {
+        "title": "Include detaliile tale",
+        "text": "Include emailul contului, planul de abonament, data achiziției și motivul rambursării (opțional)"
+      },
+      "step3": {
+        "title": "Așteaptă confirmarea",
+        "text": "Vom analiza cererea și vom răspunde în 2-3 zile lucrătoare"
+      },
+      "step4": {
+        "title": "Primește rambursarea",
+        "text": "După aprobare, rambursările sunt procesate în 5-10 zile lucrătoare pe metoda de plată inițială"
+      }
+    },
+    "contact": {
+      "title": "Solicită o rambursare acum",
+      "text": "Ești gata să soliciți o rambursare? Contactează echipa noastră de asistență:",
+      "response": "De obicei răspundem în 24-48 de ore în zilele lucrătoare."
+    },
+    "processing": {
+      "title": "Procesarea rambursării",
+      "text": "Rambursările sunt procesate de furnizorul nostru de plăți. Iată la ce să te aștepți:",
+      "review": "Timp de analiză",
+      "process": "Timp de procesare",
+      "bank": "Procesare bancară",
+      "note": "Notă: Durata rambursării poate varia în funcție de metoda de plată și instituția financiară."
+    },
+    "provider": {
+      "title": "Procesarea plăților",
+      "text": "Toate plățile și rambursările sunt procesate de furnizorul nostru de plăți, care se ocupă în numele nostru de procesare, conformitate fiscală și plata rambursărilor. Rambursarea va apărea în extrasul tău de la furnizorul nostru de plăți. Pentru întrebări legate de plăți, îți recomandăm să ne contactezi mai întâi pe noi pentru o rezolvare rapidă."
+    },
+    "cancellation": {
+      "title": "Anulare vs. rambursare",
+      "text": "Reține diferența dintre anulare și rambursare:",
+      "cancel": "Anulare",
+      "cancelDesc": "Oprește facturarea viitoare. Păstrezi accesul până la sfârșitul perioadei curente de facturare. Nu se emite rambursare.",
+      "refund": "Rambursare",
+      "refundDesc": "Îți returnează plata. Abonamentul este încheiat imediat și accesul este revocat după procesarea rambursării."
+    },
+    "prorated": {
+      "title": "Rambursări proporționale pentru planurile anuale",
+      "text": "Pentru planurile anuale, dacă soliciți o rambursare după perioada de garanție de 30 de zile, dar în primele 90 de zile, putem oferi la discreția noastră o rambursare proporțională, minus o taxă de procesare. Contactează echipa noastră pentru situația ta specifică."
+    },
+    "disputes": {
+      "title": "Dispute și chargeback-uri",
+      "text": "Te încurajăm să ne contactezi direct înainte de a deschide o dispută la bancă sau la emitentul cardului. Chargeback-urile sunt costisitoare și consumă timp pentru ambele părți. Ne angajăm să rezolvăm orice problemă corect și rapid. Dacă deschizi un chargeback fără să ne contactezi mai întâi, contul tău poate fi suspendat până la finalizarea investigației."
+    },
+    "contactUs": {
+      "title": "Contactează-ne",
+      "text": "Dacă ai întrebări despre politica de rambursare sau ai nevoie de ajutor, contactează-ne:"
+    }
+  },
+  "ui": {
+    "cookiePolicyPage": {
+      "email": "Email:",
+      "phone": "Telefon:"
+    },
+    "refundPolicyPage": {
+      "monthlySubscriptions": "Abonamente lunare",
+      "n7Days": "7 zile",
+      "fullRefundWithin7Days": "Rambursare completă în 7 zile de la achiziție",
+      "yearlySubscriptions": "Abonamente anuale",
+      "n30Days": "30 de zile",
+      "fullRefundWithin30Days": "Rambursare completă în 30 de zile de la achiziție",
+      "email": "Email:",
+      "phone": "Telefon:",
+      "n23BusinessDays": "2-3 zile lucrătoare",
+      "n510BusinessDays": "5-10 zile lucrătoare",
+      "variesByBankUpTo": "Variază în funcție de bancă (până la 10 zile)",
+      "refunds": "Rambursări:",
+      "support": "Asistență:"
+    },
+    "privacyPolicyPage": {
+      "privacyPolicy": "Politica de confidențialitate →",
+      "emailDpoBalkanestateaiCom": "Email: dpo@balkanestateai.com",
+      "email": "Email:",
+      "phone": "Telefon:"
+    },
+    "termsOfServicePage": {
+      "email": "Email:",
+      "phone": "Telefon:"
     }
   }
 }

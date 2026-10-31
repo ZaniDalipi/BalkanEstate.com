@@ -14,6 +14,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
 import { GALLERY_WIDTHS } from '@/config/galleryImages';
+import { snapImageWidth } from '@/config/mediaConfig';
 import type { Property } from '@/types';
 
 // The component calls t() both as t(key, 'fallback') and t(key, { defaultValue }).
@@ -29,7 +30,7 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/src/features/promo/components/Slot', () => ({ default: () => null }));
 
-const photo = (n: number) => `https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/p${n}.jpg`;
+const photo = (n: number) => `https://media.test/listing/p${n}/original.jpg`;
 
 const property = {
   id: 'p1',
@@ -103,7 +104,7 @@ describe('PropertyGallery slide track', () => {
   it('offers the full candidate set and CORS mode the warm-up replays', () => {
     renderGallery(0);
     const active = slideImages().find((img) => img.dataset.galleryUrl === photo(0))!;
-    GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`t_be_w${w}`));
+    GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`/w${snapImageWidth(w)}.webp`));
     // Must match the preloader, or the warmed bytes cannot satisfy this request.
     expect(active.getAttribute('crossorigin')).toBe('anonymous');
   });
@@ -125,7 +126,7 @@ describe('PropertyGallery slide track', () => {
   it('fetches the first screenful of thumbnails up front rather than on scroll', () => {
     renderGallery(0);
     const thumbs = Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-      img.getAttribute('src')?.includes('t_be_w480')
+      img.getAttribute('src')?.includes('/w640.webp')
     );
     expect(thumbs).toHaveLength(11);
     // The strip scrolls horizontally, so a fully lazy strip pops in under the

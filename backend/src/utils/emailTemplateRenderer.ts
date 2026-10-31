@@ -121,13 +121,16 @@ export function replaceVariables(template: string, variables: Record<string, str
   result = result.replace(/&#123;/g, '{').replace(/&#125;/g, '}');
   result = result.replace(/&lbrace;/g, '{').replace(/&rbrace;/g, '}');
 
+  // Strip {{#if ...}}...{{/if}} conditional blocks from the template first, so
+  // the same pattern inside user-supplied values is left untouched.
+  result = result.replace(/\{\{#if\s+\w+\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+
   for (const [key, value] of Object.entries(variables)) {
     // Allow optional whitespace inside braces: {{ key }} or {{key}}
     const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
-    result = result.replace(regex, value ?? '');
+    // A function replacement inserts the value literally ($&, $` etc. are not expanded).
+    result = result.replace(regex, () => value ?? '');
   }
-  // Strip any leftover {{#if ...}}...{{/if}} conditional blocks
-  result = result.replace(/\{\{#if\s+\w+\}\}[\s\S]*?\{\{\/if\}\}/g, '');
   return result;
 }
 

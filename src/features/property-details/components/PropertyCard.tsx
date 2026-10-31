@@ -1,14 +1,14 @@
 import React, { useState, useCallback, memo, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
+import { ScaleIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { preloadRoute } from '@/app/navigation/routePreload';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl, retryWithOriginalImage } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, retryWithOriginalImage } from '@/config/mediaConfig';
 import { getGallerySources, warmImage, warmGallery } from '@/config/galleryImages';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
@@ -19,8 +19,11 @@ import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
+import { SpecIllustration, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { navigate, localizePath } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 /**
  * Column counts as literal classes: Tailwind scans source text, so an
@@ -275,27 +278,27 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const isLand = property.propertyType === 'land';
 
   // Build luxury amenity chips to show on the card
-  const luxuryAmenityChips: { emoji: string; label: string }[] = isLuxuryVilla ? (() => {
-    const chips: { emoji: string; label: string }[] = [];
+  const luxuryAmenityChips: { icon: SoftIconName; label: string }[] = isLuxuryVilla ? (() => {
+    const chips: { icon: SoftIconName; label: string }[] = [];
     const amenities: string[] = (property.amenities as string[]) || [];
-    if (property.hasPool)                             chips.push({ emoji: '🏊', label: 'Pool' });
-    if (property.hasGarden)                           chips.push({ emoji: '🌿', label: 'Garden' });
-    if (amenities.some(a => a.toLowerCase().includes('sauna')))        chips.push({ emoji: '🧖', label: 'Sauna' });
-    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ emoji: '🍷', label: 'Wine Cellar' });
-    if (amenities.some(a => a.toLowerCase().includes('panoramic')))    chips.push({ emoji: '🏔️', label: 'Panoramic' });
-    if (property.breakfastIncluded)           chips.push({ emoji: '🍳', label: 'Breakfast' });
-    if (property.towelsIncluded)              chips.push({ emoji: '🛁', label: 'Towels' });
-    if (property.parkingIncluded)             chips.push({ emoji: '🚗', label: 'Parking' });
+    if (property.hasPool)                             chips.push({ icon: 'pool', label: 'Pool' });
+    if (property.hasGarden)                           chips.push({ icon: 'leaf', label: 'Garden' });
+    if (amenities.some(a => a.toLowerCase().includes('sauna')))        chips.push({ icon: 'spa', label: 'Sauna' });
+    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ icon: 'wine', label: t('property:ui.propertyCard.wineCellar', 'Wine Cellar') });
+    if (amenities.some(a => a.toLowerCase().includes('panoramic')))    chips.push({ icon: 'mountain', label: 'Panoramic' });
+    if (property.breakfastIncluded)           chips.push({ icon: 'kitchen', label: 'Breakfast' });
+    if (property.towelsIncluded)              chips.push({ icon: 'bath', label: 'Towels' });
+    if (property.parkingIncluded)             chips.push({ icon: 'car', label: 'Parking' });
     return chips.slice(0, 5); // max 5 chips on the card
   })() : [];
 
-  const viewTypeDisplay: Record<string, { emoji: string; label: string }> = {
-    sea: { emoji: '🌊', label: 'Sea View' },
-    mountain: { emoji: '⛰️', label: 'Mountain' },
-    park: { emoji: '🌲', label: 'Forest/Lake' },
-    city: { emoji: '🏙️', label: 'City View' },
-    garden: { emoji: '🌷', label: 'Garden View' },
-    street: { emoji: '🏘️', label: 'Street View' },
+  const viewTypeDisplay: Record<string, { icon: SoftIconName; label: string }> = {
+    sea: { icon: 'sea', label: t('property:ui.propertyCard.seaView', 'Sea View') },
+    mountain: { icon: 'mountain', label: 'Mountain' },
+    park: { icon: 'tree', label: 'Forest/Lake' },
+    city: { icon: 'city', label: t('property:ui.propertyCard.cityView', 'City View') },
+    garden: { icon: 'flower', label: t('property:ui.propertyCard.gardenView', 'Garden View') },
+    street: { icon: 'houses', label: t('property:ui.propertyCard.streetView', 'Street View') },
   };
 
   return (
@@ -341,7 +344,20 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             <div className="property-card__photo absolute inset-0">
               <PropertyImage
                 src={currentImageUrl}
-                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+                // Only the facts the listing has: imported listings often lack
+                // rooms or a city, and "undefined bed, 0 bath" helps no one.
+                alt={[
+                  property.title || propertyTypeLabel,
+                  [
+                    property.beds ? `${property.beds} bed` : '',
+                    property.baths ? `${property.baths} bath` : '',
+                  ].filter(Boolean).join(', '),
+                  `${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'}${
+                    property.city || property.country
+                      ? ` in ${[property.city, property.country].filter(Boolean).join(', ')}`
+                      : ''
+                  }`,
+                ].filter(Boolean).join(' - ')}
                 priority={priority}
                 widths={IMAGE_WIDTHS}
                 sizes={IMAGE_SIZES}
@@ -359,7 +375,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 <button
                   className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handlePrevImage}
-                  aria-label="Previous image"
+                  aria-label={t('property:ui.propertyCard.previousImage', 'Previous image')}
                 >
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -368,7 +384,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 <button
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handleNextImage}
-                  aria-label="Next image"
+                  aria-label={t('property:ui.propertyCard.nextImage', 'Next image')}
                 >
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -405,7 +421,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           {isLuxuryVilla && property.viewType && viewTypeDisplay[property.viewType] && (
             <div className="absolute bottom-3 left-3 z-20 pointer-events-none">
               <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-[4px] rounded-full flex items-center gap-1 shadow">
-                <span>{viewTypeDisplay[property.viewType].emoji}</span>
+                <SoftIcon name={viewTypeDisplay[property.viewType].icon} className="w-4 h-4" />
                 {viewTypeDisplay[property.viewType].label}
               </span>
             </div>
@@ -418,14 +434,16 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {isLuxuryVilla ? (
               <div className="bg-gradient-to-r from-[#FFA500] to-[#E8940A] text-white text-[10px] font-bold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-sm">
                 <span className="text-[8px] leading-none">✦</span>
-                LUXURY VILLA
+                {t('property:ui.propertyCard.luxuryVilla', 'LUXURY VILLA')}
               </div>
             ) : isRental ? (
               <div className="bg-blue-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+                <ListingTypePicture type="rent" className="w-3.5 h-3.5" />
                 {t('property:forRent', 'FOR RENT').toUpperCase()}
               </div>
             ) : (
               <div className="bg-emerald-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+                <ListingTypePicture type="sale" className="w-3.5 h-3.5" />
                 {t('property:forSale', 'FOR SALE').toUpperCase()}
               </div>
             )}
@@ -453,9 +471,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* iOS-style Price Drop Badge */}
             {!isSold && !isRented && property.originalPrice && property.originalPrice > property.price && (
               <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
+                <SoftIcon name="trendDown" className="w-4 h-4" />
                 {t('property:priceDrop', 'PRICE DROP').toUpperCase()}
               </div>
             )}
@@ -463,9 +479,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* iOS-style Price Increase Badge */}
             {!isSold && !isRented && property.originalPrice && property.originalPrice < property.price && (
               <div className="bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
+                <SoftIcon name="trendUp" className="w-4 h-4" />
                 {t('property:priceUp', 'PRICE UP').toUpperCase()}
               </div>
             )}
@@ -492,18 +506,18 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                   ? 'bg-gradient-to-r from-violet-500 to-purple-400'
                   : 'bg-neutral-500/85'
               }`}>
-                <StarIconSolid className="w-2.5 h-2.5" />
+                <SoftIcon name={promotionTier === 'premium' ? 'crown' : promotionTier === 'highlight' ? 'diamond' : promotionTier === 'featured' ? 'star' : 'sparkles'} className="w-4 h-4" />
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
-                {promotionTier === 'standard' && 'PROMOTED'}
+                {promotionTier === 'standard' && t('property:ui.propertyCard.promoted', 'PROMOTED')}
               </div>
             )}
 
             {/* iOS-style Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
               <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1">
-                <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+                <SoftIcon name="flame" className="w-4 h-4" /> {t('property:status.urgent').toUpperCase()}
               </div>
             )}
 
@@ -512,7 +526,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 it is — just without a date it can no longer stand behind. */}
             {!isSold && !isRented && construction.status === 'under-construction' && (
               <div className="bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
-                <span aria-hidden="true">🏗</span>
+                <SoftIcon name="crane" className="w-4 h-4" />
                 {construction.expectedYear
                   ? t('property:status.completionYear', { year: construction.expectedYear, defaultValue: 'READY {{year}}' }).toUpperCase()
                   : t('property:status.underConstruction', 'UNDER CONSTRUCTION').toUpperCase()}
@@ -566,9 +580,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               return (
                 <div className="text-right">
                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full border border-amber-200">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                    <SoftIcon name="chat" className="w-4 h-4 sm:w-5 sm:h-5" />
                     {t('property:byNegotiation', 'By Negotiation')}
                   </span>
                 </div>
@@ -613,7 +625,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 ) : (
                   safeProperty.sqft > 0 && property.propertyType !== 'land' && (
                     <p className="text-[10px] text-neutral-400 font-medium">
-                      {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)} per m²
+                      {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)} {t('property:ui.propertyCard.perM', 'per m²')}
                     </p>
                   )
                 )}
@@ -628,7 +640,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
         {/* Location - Clickable for navigation */}
         <div className="property-card__location flex items-center gap-1.5 mb-3">
-          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
           <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
             <button
               onClick={(e) => onLocationClick(e, 'city')}
@@ -668,7 +680,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 aria-label={`${shown} ${label}`}
               >
                 <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-                <span className="text-sm mb-1 relative z-10 leading-none">{display.icon}</span>
+                <SpecIllustration name={display.illustration} className="w-8 h-7 mb-0.5 relative z-10" />
                 <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{shown}</span>
                 <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{label}</span>
               </div>
@@ -686,9 +698,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
             >
               <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-              <svg className="w-4 h-4 text-blue-600 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4M4 16v4h4M16 4h4v4M16 20h4v-4M9 9h6v6H9z" />
-              </svg>
+              <SpecIllustration name="area" className="w-8 h-7 mb-0.5 relative z-10" />
               <span className="font-bold text-sm text-blue-600 leading-none relative z-10 tabular-nums">{safeProperty.sqft}</span>
               <span className="mt-0.5 font-medium text-[9px] leading-tight text-blue-500/80 relative z-10">{t('common:sqm')}</span>
             </div>
@@ -703,7 +713,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 key={chip.label}
                 className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-medium bg-[#FFA500]/10 text-[#0252CD] border border-[#FFA500]/20"
               >
-                <span className="text-[10px]">{chip.emoji}</span>
+                <SoftIcon name={chip.icon} className="w-3.5 h-3.5" />
                 {chip.label}
               </span>
             ))}
@@ -715,9 +725,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           <div className="flex items-center gap-2.5 mt-2.5 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-100">
             {property.checkInTime && (
               <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                <svg className="w-3 h-3 text-[#FFA500] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <SoftIcon name="clock" className="w-4 h-4 flex-shrink-0" />
                 <span>{property.checkInTime}{property.checkOutTime ? `–${property.checkOutTime}` : ''}</span>
               </div>
             )}
@@ -725,9 +733,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <>
                 {property.checkInTime && <span className="text-gray-200">·</span>}
                 <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                  <svg className="w-3 h-3 text-[#FFA500] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
+                  <SoftIcon name="cash" className="w-4 h-4 flex-shrink-0" />
                   <span>+€{property.cleaningFee} {t('rental:details.cleaningFee', 'cleaning')}</span>
                 </div>
               </>
@@ -786,7 +792,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <div className="ml-auto flex items-center gap-1.5 min-w-0 max-w-[9.5rem] bg-neutral-50 pl-1.5 pr-2 py-1 rounded-lg border border-neutral-200" title={safeProperty.seller.agencyName}>
                 {safeProperty.seller.agencyLogo && !agencyLogoFailed ? (
                   <img
-                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
+                    src={optimizeImageUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
                     alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"
@@ -799,7 +805,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                     }}
                   />
                 ) : (
-                  <BuildingOfficeIcon className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+                  <SoftIcon name="building" className="w-5 h-5 flex-shrink-0" />
                 )}
                 <p className="min-w-0 text-[10px] font-medium text-neutral-700 truncate">
                   <span className="sr-only">{t('property:seller.agency')}: </span>
@@ -840,6 +846,7 @@ PropertyCardInner.displayName = 'PropertyCardInner';
  * PropertyCardInner only re-renders if its specific props actually changed.
  */
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton, priority, wide }) => {
+  const { t } = useTranslation();
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
 
   // Defensive check for required fields
@@ -889,6 +896,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
       // The card's copy lets the detail page render at once; it refreshes itself.
+      rememberOpenedProperty(property.id);
       navigate(path, { state: { property } });
     }
   }, [property]);
@@ -901,7 +909,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       try {
         await toggleSavedHomeRef.current(property);
       } catch (error) {
-        showToast?.('Failed to save property. Please try again.', 'error');
+        showToast?.(t('property:ui.propertyCard.failedToSavePropertyPlease', 'Failed to save property. Please try again.'), 'error');
       }
     }
   }, [dispatch, property, showToast]);
@@ -914,7 +922,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       if (stateRef.current.comparisonList.length < 5) {
         dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });
       } else {
-        showToast?.("You can compare a maximum of 5 properties.", 'error');
+        showToast?.(t('property:ui.propertyCard.youCanCompareAMaximum', 'You can compare a maximum of 5 properties.'), 'error');
       }
     }
   }, [dispatch, property.id, showToast]);
@@ -960,7 +968,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     return (
       <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-neutral-200 w-full flex flex-col">
         <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+          <SoftIcon name="building" className="w-12 h-12 opacity-70" />
         </div>
         <div className="p-2.5 sm:p-3.5">
           <div className="h-3.5 bg-neutral-200 rounded w-3/4 mb-1.5 animate-pulse" />

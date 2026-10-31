@@ -5,14 +5,15 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { ChatMessage, AiSearchQuery, Property } from '@/types';
 import { generatePropertySlug } from '@/utils/slug';
 import { getAiChatResponse } from '@/services/geminiService';
-import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPinIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon, EyeIcon } from '@/constants';
+import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useAppContext } from '@/context/AppContext';
 import AiMessageLimitModal from './AiMessageLimitModal';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 // --- Web Speech API types ---
 interface SpeechRecognitionEvent extends Event { results: SpeechRecognitionResultList; resultIndex: number; }
@@ -33,6 +34,8 @@ const BALKAN_SPEECH_LANGS: Record<string, string> = {
 };
 
 function getSpeechLang(): string {
+    // <html lang> is "sr-ME" for Montenegrin (see htmlLang in src/i18n).
+    if (document.documentElement.lang?.toLowerCase() === 'sr-me') return BALKAN_SPEECH_LANGS.me;
     const i18nLang = document.documentElement.lang?.split('-')[0] || 'en';
     return BALKAN_SPEECH_LANGS[i18nLang] || BALKAN_SPEECH_LANGS.en;
 }
@@ -201,7 +204,7 @@ const SwipeCard: React.FC<{
             <AnimatePresence>
                 <motion.img
                     key={currentImgIdx}
-                    src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
+                    src={optimizeImageUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
                     alt={property.title || `${property.propertyType} in ${property.city}`}
                     className="absolute inset-0 w-full h-full object-cover"
                     draggable={false}
@@ -256,7 +259,7 @@ const SwipeCard: React.FC<{
                         </div>
                         {property.title && <p className="text-white/90 font-semibold text-sm line-clamp-1 mb-1.5">{property.title}</p>}
                         <div className="flex items-center gap-1.5 text-white/60 mb-3">
-                            <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                            <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                             <span className="text-xs font-medium">{property.city}, {property.country}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -265,7 +268,7 @@ const SwipeCard: React.FC<{
                                     background: 'rgba(255,255,255,0.08)',
                                     border: '1px solid rgba(255,255,255,0.08)',
                                 }}>
-                                    <span className="text-[11px]">🛏️</span> {property.beds}
+                                    <SoftIcon name="bed" className="w-4 h-4" /> {property.beds}
                                 </span>
                             )}
                             {property.baths > 0 && (
@@ -273,7 +276,7 @@ const SwipeCard: React.FC<{
                                     background: 'rgba(255,255,255,0.08)',
                                     border: '1px solid rgba(255,255,255,0.08)',
                                 }}>
-                                    <span className="text-[11px]">🛁</span> {property.baths}
+                                    <SoftIcon name="bath" className="w-4 h-4" /> {property.baths}
                                 </span>
                             )}
                             {property.sqft > 0 && (
@@ -281,7 +284,7 @@ const SwipeCard: React.FC<{
                                     background: 'rgba(255,255,255,0.08)',
                                     border: '1px solid rgba(255,255,255,0.08)',
                                 }}>
-                                    <span className="text-[11px]">📐</span> {property.sqft}m²
+                                    <SoftIcon name="area" className="w-4 h-4" /> {property.sqft}m²
                                 </span>
                             )}
                         </div>
@@ -414,8 +417,8 @@ const SwipeModal: React.FC<{
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="flex flex-col items-center text-center px-6 py-10"
                             >
-                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-5 shadow-xl shadow-green-500/30">
-                                    <HeartIcon className="w-10 h-10 text-white" />
+                                <div className="w-20 h-20 rounded-full bg-white/95 flex items-center justify-center mb-5 shadow-xl shadow-green-500/30">
+                                    <SoftIcon name="heart" className="w-14 h-14" />
                                 </div>
                                 <h3 className="text-xl font-extrabold text-white mb-2">
                                     {savedProps.length > 0
@@ -533,8 +536,9 @@ const SwipeModal: React.FC<{
 // ============================================================================
 // FILTER PILL
 // ============================================================================
-const FilterPill: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => (
-    <div className="anim-chip-in bg-white/80 backdrop-blur-sm text-neutral-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-neutral-200/60 shadow-sm" style={{ animationDelay: `${delay}ms` }}>
+const FilterPill: React.FC<{ children: React.ReactNode; delay?: number; icon?: SoftIconName }> = ({ children, delay = 0, icon }) => (
+    <div className={`anim-chip-in inline-flex items-center gap-1 bg-white/80 backdrop-blur-sm text-neutral-700 text-xs font-semibold ${icon ? 'pl-2' : 'pl-3'} pr-3 py-1.5 rounded-full border border-neutral-200/60 shadow-sm`} style={{ animationDelay: `${delay}ms` }}>
+        {icon && <SoftIcon name={icon} className="w-4 h-4 flex-shrink-0" />}
         {children}
     </div>
 );
@@ -772,16 +776,16 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     const renderFilters = (query: AiSearchQuery) => {
         const fmt = (v: number) => `€${new Intl.NumberFormat('de-DE').format(v)}`;
         const p: React.ReactNode[] = []; let d = 0;
-        if (query.location) p.push(<FilterPill key="loc" delay={d += 50}>📍 {query.location}</FilterPill>);
-        if (query.country) p.push(<FilterPill key="co" delay={d += 50}>🌍 {query.country}</FilterPill>);
-        if (query.propertyType) { const ic: Record<string, string> = { house: '🏠', apartment: '🏢', villa: '🏛️', land: '🏞️', commercial: '🏪' }; p.push(<FilterPill key="ty" delay={d += 50}>{ic[query.propertyType] || '🏠'} {query.propertyType}</FilterPill>); }
+        if (query.location) p.push(<FilterPill key="loc" delay={d += 50} icon="pin">{query.location}</FilterPill>);
+        if (query.country) p.push(<FilterPill key="co" delay={d += 50} icon="globe">{query.country}</FilterPill>);
+        if (query.propertyType) { const ic: Record<string, SoftIconName> = { house: 'home', apartment: 'building', villa: 'landmark', land: 'tree', commercial: 'store' }; p.push(<FilterPill key="ty" delay={d += 50} icon={ic[query.propertyType] || 'home'}>{query.propertyType}</FilterPill>); }
         if (query.minPrice && query.maxPrice) p.push(<FilterPill key="pr" delay={d += 50}>{fmt(query.minPrice)} - {fmt(query.maxPrice)}</FilterPill>);
         else if (query.minPrice) p.push(<FilterPill key="pr" delay={d += 50}>≥ {fmt(query.minPrice)}</FilterPill>);
         else if (query.maxPrice) p.push(<FilterPill key="pr" delay={d += 50}>≤ {fmt(query.maxPrice)}</FilterPill>);
-        if (query.beds) p.push(<FilterPill key="bd" delay={d += 50}>🛏️ {query.beds}+ {t('ai.beds')}</FilterPill>);
-        if (query.baths) p.push(<FilterPill key="ba" delay={d += 50}>🛁 {query.baths}+ {t('ai.baths')}</FilterPill>);
-        if (query.livingRooms) p.push(<FilterPill key="lr" delay={d += 50}>🛋️ {query.livingRooms}+ {t('ai.living')}</FilterPill>);
-        if (query.sellerType) p.push(<FilterPill key="se" delay={d += 50}>{query.sellerType === 'agent' ? '👔 Agent' : '👤 Private'}</FilterPill>);
+        if (query.beds) p.push(<FilterPill key="bd" delay={d += 50} icon="bed">{query.beds}+ {t('ai.beds')}</FilterPill>);
+        if (query.baths) p.push(<FilterPill key="ba" delay={d += 50} icon="bath">{query.baths}+ {t('ai.baths')}</FilterPill>);
+        if (query.livingRooms) p.push(<FilterPill key="lr" delay={d += 50} icon="sofa">{query.livingRooms}+ {t('ai.living')}</FilterPill>);
+        if (query.sellerType) p.push(<FilterPill key="se" delay={d += 50} icon={query.sellerType === 'agent' ? 'users' : 'user'}>{query.sellerType === 'agent' ? t('search:ui.aiSearch.agent', 'Agent') : t('search:ui.aiSearch.private', 'Private')}</FilterPill>);
         return p;
     };
 
@@ -947,12 +951,12 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                     />
                     {voiceSupported && (
                         isListening ? (
-                            <button type="button" onClick={stopListening} className="relative bg-red-500 text-white rounded-2xl p-3 hover:bg-red-600 transition-all active:scale-90 flex-shrink-0 shadow-md shadow-red-500/25" aria-label="Stop recording">
+                            <button type="button" onClick={stopListening} className="relative bg-red-500 text-white rounded-2xl p-3 hover:bg-red-600 transition-all active:scale-90 flex-shrink-0 shadow-md shadow-red-500/25" aria-label={t('search:ui.aiSearch.stopRecording', 'Stop recording')}>
                                 <span className="absolute inset-0 rounded-2xl bg-red-400 anim-ring-pulse opacity-30" />
                                 <StopCircleIcon className="w-5 h-5 relative z-10" />
                             </button>
                         ) : (
-                            <button type="button" onClick={startListening} disabled={isSearching} className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl p-3 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 disabled:from-neutral-200 disabled:to-neutral-200 disabled:text-neutral-400 disabled:shadow-none transition-all duration-200 active:scale-90 flex-shrink-0 shadow-md shadow-primary/20" aria-label="Start voice assistant">
+                            <button type="button" onClick={startListening} disabled={isSearching} className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl p-3 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 disabled:from-neutral-200 disabled:to-neutral-200 disabled:text-neutral-400 disabled:shadow-none transition-all duration-200 active:scale-90 flex-shrink-0 shadow-md shadow-primary/20" aria-label={t('search:ui.aiSearch.startVoiceAssistant', 'Start voice assistant')}>
                                 <MicrophoneIcon className="w-5 h-5" />
                             </button>
                         )

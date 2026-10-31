@@ -338,6 +338,10 @@ export interface Product {
   aiInsightsLimit: number;
   imageDescriptionLimit: number;
   savedSearchesLimit: number;
+  /** Residence Pass: buildings included per residence. */
+  includedBuildings?: number;
+  /** Agency plan: free residences per subscription year. */
+  residencesPerYear?: number;
   earlyAccessListings?: boolean;
   advancedMarketInsights?: boolean;
   externalProductId?: string;

@@ -8,6 +8,7 @@ import {
   DENY_ALL,
 } from '@/src/shared/utils/cookieConsent';
 import LegalFooter from './LegalFooter';
+import { SEO } from '@/src/components/seo';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import type { AppView } from '@/types';
@@ -38,10 +39,14 @@ const CookiePolicyPage: React.FC = () => {
     openCookieSettings();
   };
 
-  const lastUpdated = 'January 9, 2026';
+  const lastUpdated = 'October 11, 2026';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <SEO
+        title={t('legal:cookies.seoTitle', 'Cookie Policy')}
+        description={t('legal:cookies.seoDescription', 'Which cookies BalkanEstateAI uses — necessary, analytics and advertising — what they are for, and how to change your choice.')}
+      />
       <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}
@@ -53,7 +58,7 @@ const CookiePolicyPage: React.FC = () => {
                 <ArrowLeftIcon className="w-5 h-5" />
                 <span className="font-medium">{t('common:back', 'Back')}</span>
               </button>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 landscape:text-2xl">
                 {t('legal:cookies.title', 'Cookie Policy')}
               </h1>
               <p className="text-gray-600">
@@ -222,6 +227,15 @@ const CookiePolicyPage: React.FC = () => {
               </p>
               <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
                 <div className="flex justify-between items-center">
+                  <span className="font-mono text-gray-600">__gads, __gpi, IDE</span>
+                  <span className="text-gray-500">{t('legal:cookies.types.marketing.adsense', 'Google AdSense — serving and measuring ads')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.upTo13months', 'up to 13 months')}</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {t('legal:cookies.types.marketing.adsenseNote', 'Set by Google and its partners only after you accept marketing cookies. Opt out of personalised ads at')}{' '}
+                  <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">myadcenter.google.com</a>.
+                </p>
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">_fbp</span>
                   <span className="text-gray-500">{t('legal:cookies.types.marketing.fb', 'Facebook Pixel')}</span>
                   <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.3months', '3 months')}</span>
@@ -262,22 +276,22 @@ const CookiePolicyPage: React.FC = () => {
             <ul className="space-y-2 ml-4">
               <li>
                 <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Google Chrome
+                  {t('legal:ui.cookiePolicyPage.googleChrome', 'Google Chrome')}
                 </a>
               </li>
               <li>
                 <a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Mozilla Firefox
+                  {t('legal:ui.cookiePolicyPage.mozillaFirefox', 'Mozilla Firefox')}
                 </a>
               </li>
               <li>
                 <a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Safari
+                  {t('legal:ui.cookiePolicyPage.safari', 'Safari')}
                 </a>
               </li>
               <li>
                 <a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Microsoft Edge
+                  {t('legal:ui.cookiePolicyPage.microsoftEdge', 'Microsoft Edge')}
                 </a>
               </li>
             </ul>
@@ -313,8 +327,8 @@ const CookiePolicyPage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
-              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.privacy}</p>
-              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
+              <p className="text-gray-700">{t('legal:ui.cookiePolicyPage.email', 'Email:')} {CONTACT_CONFIG.email.privacy}</p>
+              <p className="text-gray-700">{t('legal:ui.cookiePolicyPage.phone', 'Phone:')} {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

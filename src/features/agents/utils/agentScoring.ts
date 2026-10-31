@@ -1,4 +1,5 @@
 import type { Agent } from '@/types';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 export const MAX_SCORE = 180;
 
@@ -13,12 +14,13 @@ export interface ScoreBreakdown {
 export interface AchievementBadge {
   key: string;
   label: string;
+  icon: SoftIconName;
   color: string;
 }
 
 export interface ScoringMetricDef {
   key: keyof Omit<ScoreBreakdown, 'total'>;
-  icon: string;
+  icon: SoftIconName;
   labelKey: string;
   formulaKey: string;
   descKey: string;
@@ -32,7 +34,7 @@ export interface ScoringMetricDef {
 export const SCORING_METRIC_DEFS: ScoringMetricDef[] = [
   {
     key: 'rating',
-    icon: '★',
+    icon: 'star',
     labelKey: 'agents:scoring.metrics.rating.label',
     formulaKey: 'agents:scoring.metrics.rating.formula',
     descKey: 'agents:scoring.metrics.rating.desc',
@@ -44,7 +46,7 @@ export const SCORING_METRIC_DEFS: ScoringMetricDef[] = [
   },
   {
     key: 'sales',
-    icon: '🏠',
+    icon: 'home',
     labelKey: 'agents:scoring.metrics.sales.label',
     formulaKey: 'agents:scoring.metrics.sales.formula',
     descKey: 'agents:scoring.metrics.sales.desc',
@@ -56,7 +58,7 @@ export const SCORING_METRIC_DEFS: ScoringMetricDef[] = [
   },
   {
     key: 'active',
-    icon: '📋',
+    icon: 'clipboard',
     labelKey: 'agents:scoring.metrics.active.label',
     formulaKey: 'agents:scoring.metrics.active.formula',
     descKey: 'agents:scoring.metrics.active.desc',
@@ -68,7 +70,7 @@ export const SCORING_METRIC_DEFS: ScoringMetricDef[] = [
   },
   {
     key: 'reviews',
-    icon: '💬',
+    icon: 'chat',
     labelKey: 'agents:scoring.metrics.reviews.label',
     formulaKey: 'agents:scoring.metrics.reviews.formula',
     descKey: 'agents:scoring.metrics.reviews.desc',
@@ -116,10 +118,10 @@ export function getAchievementBadge(agent: Agent): AchievementBadge | null {
   const rating  = clampPositive(agent.rating);
   const reviews = clampPositive(agent.totalReviews);
 
-  if (sold >= 5)                     return { key: 'topSeller',     label: '🔥 Top Seller',    color: '#ef4444' };
-  if (rating >= 4.5 && reviews >= 3) return { key: 'topRated',      label: '⭐ Top Rated',     color: '#f59e0b' };
-  if (active >= 10)                  return { key: 'mostActive',    label: '🚀 Most Active',   color: '#3b82f6' };
-  if (reviews >= 5)                  return { key: 'mostReviewed',  label: '💬 Most Reviewed', color: '#8b5cf6' };
-  if (active >= 3)                   return { key: 'risingStar',    label: '📈 Rising Star',   color: '#10b981' };
+  if (sold >= 5)                     return { key: 'topSeller',     label: 'Top Seller',    icon: 'flame', color: '#ef4444' };
+  if (rating >= 4.5 && reviews >= 3) return { key: 'topRated',      label: 'Top Rated',     icon: 'star', color: '#f59e0b' };
+  if (active >= 10)                  return { key: 'mostActive',    label: 'Most Active',   icon: 'rocket', color: '#3b82f6' };
+  if (reviews >= 5)                  return { key: 'mostReviewed',  label: 'Most Reviewed', icon: 'chat', color: '#8b5cf6' };
+  if (active >= 3)                   return { key: 'risingStar',    label: 'Rising Star',   icon: 'trendUp', color: '#10b981' };
   return null;
 }

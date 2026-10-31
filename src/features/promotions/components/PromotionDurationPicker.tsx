@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClockIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { PromotionDuration, ExtensionTierStyle } from './usePromotionSelector';
 
 // === Types ===
@@ -39,9 +39,7 @@ const PromotionDurationPicker: React.FC<PromotionDurationPickerProps> = ({
   return (
     <div className={`bg-white rounded-xl border ${isExtension ? extStyle.border : 'border-gray-200'} p-5 mb-4 shadow-sm`}>
       <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-        <span className={`w-8 h-8 ${isExtension ? extStyle.iconBg : 'bg-primary/10'} rounded-lg flex items-center justify-center`}>
-          <ClockIcon className={`w-4 h-4 ${isExtension ? 'text-white' : 'text-primary'}`} />
-        </span>
+        <SoftIcon name="clock" className="w-8 h-8 flex-shrink-0" />
         {isExtension
           ? t('common:promotions.chooseExtensionDuration', 'Choose Extension Duration')
           : t('common:promotions.selectDuration', 'Select Duration')}

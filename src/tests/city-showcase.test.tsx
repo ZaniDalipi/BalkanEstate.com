@@ -11,7 +11,7 @@ import { ElasticGallery, type ElasticGalleryItem } from '../components/ui/elasti
 import { validateCityShowcase } from '../shared/utils/validation';
 import { pickShowcaseCities } from '../features/home/utils/pickShowcaseCities';
 import type { ShowcaseCity } from '../features/home/api/cityShowcaseApi';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
 vi.mock('@/src/shared/api', () => ({
     apiRequest: vi.fn(),
@@ -27,7 +27,7 @@ const apiRow = (overrides: Record<string, unknown> = {}) => ({
     city: 'Belgrade',
     country: 'Serbia',
     searchQuery: 'Belgrade',
-    imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/belgrade.jpg',
+    imageUrl: 'https://media.test/belgrade/original.jpg',
     ...overrides,
 });
 
@@ -48,7 +48,7 @@ describe('getShowcaseCities', () => {
                 city: 'Belgrade',
                 country: 'Serbia',
                 searchQuery: 'Belgrade',
-                imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/belgrade.jpg',
+                imageUrl: 'https://media.test/belgrade/original.jpg',
             },
         ]);
     });
@@ -90,7 +90,7 @@ describe('validateCityShowcase', () => {
         city: 'Belgrade',
         country: 'Serbia',
         searchQuery: 'Belgrade',
-        imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/belgrade.jpg',
+        imageUrl: 'https://media.test/belgrade/original.jpg',
         displayOrder: 0,
     };
 
@@ -397,24 +397,23 @@ describe('ElasticGallery', () => {
  * painted across a whole panel is a grid of blocks unless the CDN blurs it, so
  * the blur is the difference between "loading" and "broken".
  */
-describe('optimizeCloudinaryUrl blur', () => {
-    const source = 'https://res.cloudinary.com/demo/image/upload/v1/belgrade.jpg';
+describe('optimizeImageUrl blur', () => {
+    const source = 'https://media.test/belgrade/original.jpg';
 
-    it('serves the placeholder through the blurred 32px preset', () => {
-        // The preset (be_lqip = f_auto,q_auto:eco,w_32,e_blur:400) blurs after
-        // the resize, so a tiny photo reads as a colour wash, not blocks.
-        expect(optimizeCloudinaryUrl(source, { width: 24, quality: 'auto:eco', blur: 400 })).toBe(
-            'https://res.cloudinary.com/demo/image/upload/t_be_lqip/v1/belgrade.jpg',
+    it('serves the stored blurred 32px placeholder', () => {
+        // Blurred at upload, so a tiny photo reads as a colour wash, not blocks.
+        expect(optimizeImageUrl(source, { width: 24, quality: 'auto:eco', blur: 400 })).toBe(
+            'https://media.test/belgrade/lqip.webp',
         );
     });
 
     it('leaves a photo unblurred when no blur is asked for', () => {
-        expect(optimizeCloudinaryUrl(source, { width: 960 })).not.toContain('lqip');
+        expect(optimizeImageUrl(source, { width: 960 })).not.toContain('lqip');
     });
 
     it('treats a blur below 1 or NaN as no blur', () => {
-        expect(optimizeCloudinaryUrl(source, { blur: 0 })).not.toContain('lqip');
-        expect(optimizeCloudinaryUrl(source, { blur: Number.NaN })).not.toContain('lqip');
+        expect(optimizeImageUrl(source, { blur: 0 })).not.toContain('lqip');
+        expect(optimizeImageUrl(source, { blur: Number.NaN })).not.toContain('lqip');
     });
 });
 

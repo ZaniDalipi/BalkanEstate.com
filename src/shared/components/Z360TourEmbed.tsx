@@ -162,7 +162,7 @@ export const Z360TourEmbed: React.FC<Z360TourEmbedProps> = ({
       {showBadge && isZ360 && !isLoading && (
         <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2">
           <img src={Z360_LOGO} alt="Z360" className="h-5 w-auto" />
-          <span className="text-white text-xs font-medium">Z360 Tour</span>
+          <span className="text-white text-xs font-medium">{t('common:ui.z360TourEmbed.z360Tour', 'Z360 Tour')}</span>
         </div>
       )}
 

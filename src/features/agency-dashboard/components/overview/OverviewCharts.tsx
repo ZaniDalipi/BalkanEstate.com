@@ -20,10 +20,11 @@ const BarChartSection: React.FC<BarChartSectionProps> = ({
   barColor,
   barHoverColor,
 }) => {
+  const { t } = useTranslation();
   if (data.length === 0) {
     return (
       <div className="text-center py-8 text-gray-400 text-sm">
-        No data available
+        {t('agencyDashboard:ui.overviewCharts.noDataAvailable', 'No data available')}
       </div>
     );
   }

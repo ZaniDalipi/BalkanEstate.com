@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeftIcon, ChevronRightIcon, EyeIcon, EnvelopeIcon, HomeIcon } from '@/constants';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { DashboardProperty } from '../../types';
 
 interface PropertyTableProps {
@@ -49,9 +50,7 @@ const PropertyTable: React.FC<PropertyTableProps> = ({
   if (!isLoading && properties.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <HomeIcon className="w-8 h-8 text-gray-400" />
-        </div>
+        <SoftIcon name="home" className="w-16 h-16 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-1">
           {t('agencyDashboard:properties.emptyTitle', 'No properties found')}
         </h3>
@@ -108,10 +107,10 @@ const PropertyTable: React.FC<PropertyTableProps> = ({
                   </td>
                   <td className="px-4 py-3 text-gray-600">{prop.assignedAgent}</td>
                   <td className="px-4 py-3 text-gray-600">
-                    <span className="inline-flex items-center gap-1"><EyeIcon className="w-3.5 h-3.5" />{prop.views}</span>
+                    <span className="inline-flex items-center gap-1"><SoftIcon name="eye" className="w-4 h-4 flex-shrink-0" />{prop.views}</span>
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    <span className="inline-flex items-center gap-1"><EnvelopeIcon className="w-3.5 h-3.5" />{prop.inquiries}</span>
+                    <span className="inline-flex items-center gap-1"><SoftIcon name="envelope" className="w-4 h-4 flex-shrink-0" />{prop.inquiries}</span>
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{new Date(prop.listedAt).toLocaleDateString()}</td>
                 </tr>

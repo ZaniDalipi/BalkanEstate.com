@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 
+import { useTranslation } from 'react-i18next';
 interface BeforeAfterSliderProps {
     /** Original image URL (shown on the left / "before") */
     beforeSrc: string;
@@ -22,6 +23,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     afterLabel = 'Restyled',
     className = '',
 }) => {
+  const { t } = useTranslation();
     const [position, setPosition] = useState(50); // percent 0-100
     const containerRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
@@ -102,7 +104,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
                 style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
                 onPointerDown={onPointerDown}
                 role="slider"
-                aria-label="Comparison slider"
+                aria-label={t('common:ui.beforeAfterSlider.comparisonSlider', 'Comparison slider')}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={Math.round(position)}

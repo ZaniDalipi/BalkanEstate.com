@@ -1,9 +1,10 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiRequest } from '@/src/shared/api';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import { BuildingStorefrontIcon, TrashIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { TrashIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 
 interface AdminBusinessListing extends BusinessListing {
@@ -59,7 +60,7 @@ const BusinessListingManager: React.FC = () => {
 
   const handleDelete = useCallback(async (listing: AdminBusinessListing) => {
     const confirmed = await confirm({
-      title: 'Delete Business Listing',
+      title: t('admin:ui.businessListingManager.deleteBusinessListing', 'Delete Business Listing'),
       message: `Are you sure you want to delete "${listing.name}"? This action cannot be undone.`,
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -92,12 +93,10 @@ const BusinessListingManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-            <BuildingStorefrontIcon className="w-5 h-5 text-primary" />
-          </div>
+          <SoftIcon name="store" className="w-10 h-10 flex-shrink-0" />
           <div>
-            <h1 className="text-xl font-bold text-neutral-900">Business Listings</h1>
-            <p className="text-sm text-neutral-500">{total} total listings</p>
+            <h1 className="text-xl font-bold text-neutral-900">{t('admin:ui.businessListingManager.businessListings', 'Business Listings')}</h1>
+            <p className="text-sm text-neutral-500">{total} {t('admin:ui.businessListingManager.totalListings', 'total listings')}</p>
           </div>
         </div>
 
@@ -109,7 +108,7 @@ const BusinessListingManager: React.FC = () => {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, city..."
+              placeholder={t('admin:ui.businessListingManager.searchByNameCity', 'Search by name, city...')}
               className="pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
             />
           </div>
@@ -117,7 +116,7 @@ const BusinessListingManager: React.FC = () => {
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            Search
+            {t('admin:ui.businessListingManager.search', 'Search')}
           </button>
         </form>
       </div>
@@ -140,25 +139,25 @@ const BusinessListingManager: React.FC = () => {
         {isLoading ? (
           <div className="p-12 text-center text-neutral-400">
             <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm">Loading listings...</p>
+            <p className="text-sm">{t('admin:ui.businessListingManager.loadingListings', 'Loading listings...')}</p>
           </div>
         ) : listings.length === 0 ? (
           <div className="p-12 text-center text-neutral-400">
-            <BuildingStorefrontIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">No business listings found</p>
+            <SoftIcon name="store" className="w-10 h-10 mx-auto mb-3" />
+            <p className="text-sm">{t('admin:ui.businessListingManager.noBusinessListingsFound', 'No business listings found')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-neutral-50 border-b border-neutral-200">
                 <tr>
-                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">Business</th>
-                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">Owner</th>
-                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">Category</th>
-                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">Location</th>
-                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">Type</th>
-                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">Views</th>
-                  <th className="text-right px-4 py-3 font-semibold text-neutral-600">Actions</th>
+                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.business', 'Business')}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.owner', 'Owner')}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.category', 'Category')}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.location', 'Location')}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.type', 'Type')}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.views', 'Views')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-neutral-600">{t('admin:ui.businessListingManager.actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
@@ -167,11 +166,9 @@ const BusinessListingManager: React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {listing.logoUrl ? (
-                          <img src={optimizeCloudinaryUrl(listing.logoUrl, { width: 64 }) || listing.logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                          <img src={optimizeImageUrl(listing.logoUrl, { width: 64 }) || listing.logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
                         ) : (
-                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <BuildingStorefrontIcon className="w-4 h-4 text-primary" />
-                          </div>
+                          <SoftIcon name="store" className="w-8 h-8 flex-shrink-0" />
                         )}
                         <div>
                           <p className="font-medium text-neutral-900 truncate max-w-[200px]">{listing.name}</p>
@@ -183,7 +180,7 @@ const BusinessListingManager: React.FC = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-neutral-700">{listing.owner?.name || 'Unknown'}</p>
+                        <p className="text-neutral-700">{listing.owner?.name || t('admin:ui.businessListingManager.unknown', 'Unknown')}</p>
                         <p className="text-xs text-neutral-400">{listing.owner?.email || ''}</p>
                       </div>
                     </td>
@@ -209,7 +206,7 @@ const BusinessListingManager: React.FC = () => {
                       <button
                         onClick={() => handleDelete(listing)}
                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete listing"
+                        title={t('admin:ui.businessListingManager.deleteListing', 'Delete listing')}
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
@@ -226,7 +223,7 @@ const BusinessListingManager: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-neutral-500">
-            Page {page} of {totalPages}
+            {t('admin:ui.businessListingManager.page', 'Page')} {page} of {totalPages}
           </p>
           <div className="flex gap-2">
             <button

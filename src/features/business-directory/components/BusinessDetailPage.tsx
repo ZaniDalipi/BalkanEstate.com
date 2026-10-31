@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,18 +13,13 @@ const MapLocationPicker = lazy(() => import('@/src/features/seller/components/Ma
 const EditBusinessListingForm = lazy(() => import('./EditBusinessListingForm'));
 import {
   PhoneIcon,
-  MapPinIcon,
   EnvelopeIcon,
-  GlobeAltIcon,
-  ClockIcon,
   CheckBadgeIcon,
-  BuildingStorefrontIcon,
-  UserIcon,
   ShareIcon,
-  EyeIcon,
   ArrowLeftIcon,
   PencilIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import Footer from '@/components/shared/Footer';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { navigate } from '@/src/app/router/navigation';
@@ -60,112 +55,32 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   other: 'from-primary to-blue-600',
 };
 
-const CategoryIcon: React.FC<{ category: string; className?: string }> = ({ category, className = 'w-4 h-4' }) => {
-  const icons: Record<string, React.ReactNode> = {
-    construction: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" />
-      </svg>
-    ),
-    renovation: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" />
-      </svg>
-    ),
-    cleaning: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-      </svg>
-    ),
-    moving: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-      </svg>
-    ),
-    interior_design: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z" />
-      </svg>
-    ),
-    architecture: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21" />
-      </svg>
-    ),
-    plumbing: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" />
-      </svg>
-    ),
-    electrical: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
-      </svg>
-    ),
-    landscaping: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-      </svg>
-    ),
-    security: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-      </svg>
-    ),
-    real_estate_law: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z" />
-      </svg>
-    ),
-    insurance: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-      </svg>
-    ),
-    home_inspection: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-      </svg>
-    ),
-    pest_control: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
-      </svg>
-    ),
-    painting: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z" />
-      </svg>
-    ),
-    roofing: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-      </svg>
-    ),
-    hvac: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
-      </svg>
-    ),
-    furniture: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-      </svg>
-    ),
-    appliances: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
-      </svg>
-    ),
-    other: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-      </svg>
-    ),
-  };
-  return <>{icons[category] || icons.other}</>;
+const CATEGORY_ICONS: Record<string, SoftIconName> = {
+  construction: 'crane',
+  renovation: 'wrench',
+  cleaning: 'sparkles',
+  moving: 'car',
+  interior_design: 'sofa',
+  architecture: 'ruler',
+  plumbing: 'bath',
+  electrical: 'bolt',
+  landscaping: 'tree',
+  security: 'lock',
+  real_estate_law: 'scales',
+  insurance: 'shield',
+  home_inspection: 'search',
+  pest_control: 'warning',
+  painting: 'pencil',
+  roofing: 'home',
+  hvac: 'snowflake',
+  furniture: 'bed',
+  appliances: 'kitchen',
+  other: 'clipboard',
 };
+
+const CategoryIcon: React.FC<{ category: string; className?: string }> = ({ category, className = 'w-4 h-4' }) => (
+  <SoftIcon name={CATEGORY_ICONS[category] || CATEGORY_ICONS.other} className={className} />
+);
 
 // Social media brand config
 const SOCIAL_BRANDS: Record<string, { label: string; color: string; hoverColor: string; icon: string }> = {
@@ -250,7 +165,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
         >
           <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
             {currentUser.avatarUrl ? (
-              <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+              <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
             ) : (
               <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
             )}
@@ -479,11 +394,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
         >
-          <div
-            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-3xl flex items-center justify-center"
-          >
-            <BuildingStorefrontIcon className="w-10 h-10 text-neutral-400" />
-          </div>
+          <SoftIcon name="store" className="block w-20 h-20 mx-auto mb-6" />
           <h2 className="text-xl font-bold text-neutral-700 mb-2">{t('detail.notFound')}</h2>
           <p className="text-neutral-500 mb-6">{t('detail.notFoundDesc')}</p>
           <motion.button
@@ -564,7 +475,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               <div className="hidden sm:flex items-center gap-3">
                 <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                   <span className="text-white font-semibold text-sm flex items-center gap-1.5">
-                    {isIndividual ? <UserIcon className="w-3.5 h-3.5" /> : <BuildingStorefrontIcon className="w-3.5 h-3.5" />}
+                    <SoftIcon name={isIndividual ? 'user' : 'store'} className="w-5 h-5" />
                     {isIndividual ? t('types.individual') : t('types.business')}
                   </span>
                 </div>
@@ -630,7 +541,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             <>
               <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
               <img
-                src={optimizeCloudinaryUrl(listing.bannerUrl, { width: 1280 }) || listing.bannerUrl}
+                src={optimizeImageUrl(listing.bannerUrl, { width: 1280 }) || listing.bannerUrl}
                 alt={`${listing.name} banner`}
                 className={`relative w-full h-full object-cover ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
                 style={{ objectPosition: `center ${bannerPosY}%` }}
@@ -805,7 +716,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                 style={{ boxShadow: '0 10px 25px rgba(0,0,0,0.12)' }}
               >
                 {listing.logoUrl ? (
-                  <img src={optimizeCloudinaryUrl(listing.logoUrl, { width: 240 }) || listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" />
+                  <img src={optimizeImageUrl(listing.logoUrl, { width: 240 }) || listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <span className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white drop-shadow-lg">
@@ -818,12 +729,12 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               {/* Verified badge overlay */}
               {listing.isVerified && (
                 <motion.div
-                  className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 bg-emerald-500 text-white p-1.5 sm:p-2 rounded-full shadow-lg border-2 border-white"
+                  className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 bg-white p-0.5 sm:p-1 rounded-full shadow-lg border-2 border-white"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.5 }}
                 >
-                  <CheckBadgeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <SoftIcon name="shield" className="w-7 h-7 sm:w-8 sm:h-8" />
                 </motion.div>
               )}
             </motion.div>
@@ -832,11 +743,11 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             <motion.div className="flex-1 text-center lg:text-left min-w-0 pt-2 sm:pt-6 lg:pt-8" variants={fadeUpVariants}>
               {/* Name + badges row */}
               <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight">{listing.name}</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight landscape:text-2xl">{listing.name}</h1>
                 <div className="flex items-center gap-2 flex-wrap">
                   {listing.isVerified && (
                     <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-100">
-                      <CheckBadgeIcon className="w-3.5 h-3.5" />
+                      <SoftIcon name="shield" className="w-4 h-4" />
                       {t('verified')}
                     </span>
                   )}
@@ -845,7 +756,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                       ? 'bg-violet-50 text-violet-600 border-violet-100'
                       : 'bg-blue-50 text-blue-600 border-blue-100'
                   }`}>
-                    {isIndividual ? <UserIcon className="w-3 h-3" /> : <BuildingStorefrontIcon className="w-3 h-3" />}
+                    <SoftIcon name={isIndividual ? 'user' : 'store'} className="w-4 h-4" />
                     {isIndividual ? t('types.individual') : t('types.business')}
                   </span>
                 </div>
@@ -854,14 +765,14 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               {/* Category tag */}
               <div className="mb-3 sm:mb-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold bg-primary/10 text-primary rounded-full border border-primary/15">
-                  <CategoryIcon category={categoryKey} className="w-4 h-4" />
+                  <CategoryIcon category={categoryKey} className="w-5 h-5" />
                   {listing.category === 'other' && listing.customCategory ? listing.customCategory : t(`categories.${listing.category}`)}
                 </span>
               </div>
 
               {/* Location */}
               <div className="flex items-center justify-center lg:justify-start gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-neutral-600">
-                <MapPinIcon className="w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 flex-shrink-0" />
+                <SoftIcon name="pin" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 <span className="text-xs sm:text-sm md:text-base lg:text-lg">
                   {listing.address && `${listing.address}, `}
                   {listing.city}, {listing.country}
@@ -943,11 +854,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                 <div className={`h-1 bg-gradient-to-r ${gradient}`} />
                 <div className="p-4 sm:p-6 lg:p-8">
                   <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5">
-                    <div className={`w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-sm flex-shrink-0`}>
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                      </svg>
-                    </div>
+                    <SoftIcon name="clipboard" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                     <div>
                       <h2 className="text-base sm:text-lg font-bold text-neutral-900">{t('detail.about', { defaultValue: 'About' })}</h2>
                       <p className="text-[11px] sm:text-xs text-neutral-400">{t('detail.aboutSubtitle', { defaultValue: 'Who we are & what we do' })}</p>
@@ -967,7 +874,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                   {/* Quick info badges */}
                   <div className="flex flex-wrap items-center gap-2 mt-5 pt-5 border-t border-neutral-100">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
-                      <MapPinIcon className="w-3.5 h-3.5" />
+                      <SoftIcon name="pin" className="w-4 h-4" />
                       {listing.city}, {listing.country}
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
@@ -976,18 +883,18 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     </span>
                     {listing.isVerified && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg text-xs font-medium text-emerald-600">
-                        <CheckBadgeIcon className="w-3.5 h-3.5" />
+                        <SoftIcon name="shield" className="w-4 h-4" />
                         {t('verified')}
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-medium text-neutral-500">
-                      <EyeIcon className="w-3.5 h-3.5" />
+                      <SoftIcon name="eye" className="w-4 h-4" />
                       {listing.views} {t('detail.stats.views')}
                     </span>
                     {listing.yearEstablished && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-medium text-blue-600">
-                        <ClockIcon className="w-3.5 h-3.5" />
-                        {t('detail.established', { year: listing.yearEstablished, defaultValue: `Est. ${listing.yearEstablished}` })}
+                        <SoftIcon name="calendar" className="w-4 h-4" />
+                        {t('detail.established', { year: listing.yearEstablished, defaultValue: 'Est. {{year}}' })}
                       </span>
                     )}
                     {listing.priceRange && (
@@ -997,9 +904,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     )}
                     {listing.licenseNumber && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-lg text-xs font-medium text-amber-700 border border-amber-100">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                        </svg>
+                        <SoftIcon name="docCheck" className="w-4 h-4" />
                         {t('detail.licensed', 'Licensed')}
                       </span>
                     )}
@@ -1016,9 +921,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <BuildingStorefrontIcon className="w-4 h-4 text-primary" />
-                    </div>
+                    <SoftIcon name="store" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.services')}</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1047,11 +950,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364V3m0 2.364a48.016 48.016 0 0 1 3.413.235M15 3v2.25m-6 0a48.667 48.667 0 0 0-3.413.235m0 0V3" />
-                      </svg>
-                    </div>
+                    <SoftIcon name="globe" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.languages', 'Languages')}</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1073,9 +972,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                      <MapPinIcon className="w-4 h-4 text-orange-600" />
-                    </div>
+                    <SoftIcon name="pin" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.serviceAreas', 'Service Areas')}</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1097,11 +994,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
-                      </svg>
-                    </div>
+                    <SoftIcon name="creditCard" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.paymentMethods', 'Payment Methods')}</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1123,9 +1016,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                      <ClockIcon className="w-4 h-4 text-amber-600" />
-                    </div>
+                    <SoftIcon name="clock" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.businessHours')}</h2>
                   </div>
                   <div className="space-y-1.5">
@@ -1176,9 +1067,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 text-violet-600" />
-                    </div>
+                    <SoftIcon name="user" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.owner')}</h2>
                   </div>
                   <div className="flex items-center gap-4">
@@ -1229,9 +1118,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                   whileHover={{ scale: 1.01, x: 2 }}
                   whileTap={{ scale: 0.99 }}
                 >
-                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
-                    <PhoneIcon className="w-5 h-5 text-primary" />
-                  </div>
+                  <SoftIcon name="phone" className="w-11 h-11 flex-shrink-0" />
                   <div className="min-w-0">
                     <div className="text-xs text-neutral-500 font-medium">{t('detail.phone')}</div>
                     <div className="font-semibold text-primary truncate">{listing.contactPhone}</div>
@@ -1246,9 +1133,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     whileHover={{ scale: 1.01, x: 2 }}
                     whileTap={{ scale: 0.99 }}
                   >
-                    <div className="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/20 transition-colors">
-                      <EnvelopeIcon className="w-5 h-5 text-blue-600" />
-                    </div>
+                    <SoftIcon name="envelope" className="w-11 h-11 flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="text-xs text-neutral-500 font-medium">{t('detail.email')}</div>
                       <div className="font-medium text-neutral-700 truncate">{listing.contactEmail}</div>
@@ -1266,9 +1151,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     whileHover={{ scale: 1.01, x: 2 }}
                     whileTap={{ scale: 0.99 }}
                   >
-                    <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/20 transition-colors">
-                      <GlobeAltIcon className="w-5 h-5 text-emerald-600" />
-                    </div>
+                    <SoftIcon name="globe" className="w-11 h-11 flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="text-xs text-neutral-500 font-medium">{t('detail.website')}</div>
                       <div className="font-medium text-neutral-700 truncate">{listing.website}</div>
@@ -1321,9 +1204,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                 {/* Location with Directions */}
                 <div className="rounded-xl overflow-hidden">
                   <div className="flex items-center gap-3 p-3 bg-neutral-50/50">
-                    <div className="w-11 h-11 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                      <MapPinIcon className="w-5 h-5 text-orange-600" />
-                    </div>
+                    <SoftIcon name="pin" className="w-11 h-11 flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="text-xs text-neutral-500 font-medium">{t('detail.location')}</div>
                       <div className="font-medium text-neutral-700">
@@ -1372,9 +1253,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
-                      <ShareIcon className="w-4 h-4 text-pink-600" />
-                    </div>
+                    <SoftIcon name="share" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.socialMedia')}</h2>
                   </div>
                   <div className="space-y-2">
@@ -1414,9 +1293,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               >
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <MapPinIcon className="w-4 h-4 text-emerald-600" />
-                    </div>
+                    <SoftIcon name="pin" className="w-8 h-8 flex-shrink-0" />
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.location')}</h2>
                   </div>
                   <div className="rounded-xl overflow-hidden border border-neutral-200 h-[250px]">
@@ -1451,7 +1328,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
               className="text-center py-3 flex items-center justify-center gap-2 text-neutral-400"
               variants={fadeUpVariants}
             >
-              <EyeIcon className="w-4 h-4" />
+              <SoftIcon name="eye" className="w-5 h-5" />
               <span className="text-sm">{t('detail.views', { count: listing.views })}</span>
             </motion.div>
           </motion.div>

@@ -182,5 +182,14 @@
     "count": "{{count}} salvate pe acest dispozitiv",
     "clearAll": "Șterge tot",
     "remove": "Elimină"
+  },
+  "seo": {
+    "title": "Evaluare gratuită AI a proprietății - estimare instantanee în Balcani",
+    "description": "Obține gratuit o evaluare AI pentru orice proprietate din Balcani. Estimări instantanee de preț pentru apartamente, case și vile în Muntenegru, Albania, Serbia și alte 8 țări."
+  },
+  "ui": {
+    "valuationForm": {
+      "multiSelect": "(selecție multiplă)"
+    }
   }
 }

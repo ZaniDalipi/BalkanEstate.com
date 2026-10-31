@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IInquiry extends Document {
   // Inquiry type
-  type: 'property' | 'agent' | 'area_search' | 'contact';
+  type: 'property' | 'agent' | 'area_search' | 'contact' | 'development';
   status: 'new' | 'read' | 'replied' | 'archived';
   // High-priority inquiries (e.g. advertising requests) surface at the top.
   priority: 'normal' | 'high';
@@ -21,6 +21,9 @@ export interface IInquiry extends Document {
   // Related entities
   propertyId?: mongoose.Types.ObjectId;
   propertyTitle?: string;
+  /** Set for 'development' inquiries (a buyer asking about a residence unit). */
+  developmentId?: mongoose.Types.ObjectId;
+  unitId?: mongoose.Types.ObjectId;
 
   // Message content
   message: string;
@@ -48,7 +51,7 @@ const InquirySchema: Schema = new Schema(
   {
     type: {
       type: String,
-      enum: ['property', 'agent', 'area_search', 'contact'],
+      enum: ['property', 'agent', 'area_search', 'contact', 'development'],
       required: true,
     },
     status: {
@@ -104,6 +107,14 @@ const InquirySchema: Schema = new Schema(
     propertyTitle: {
       type: String,
     },
+    developmentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Development',
+    },
+    unitId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentUnit',
+    },
 
     // Message content
     message: {
@@ -150,6 +161,7 @@ const InquirySchema: Schema = new Schema(
 InquirySchema.index({ recipientId: 1, status: 1 });
 InquirySchema.index({ buyerEmail: 1 });
 InquirySchema.index({ propertyId: 1 });
+InquirySchema.index({ developmentId: 1, createdAt: -1 });
 InquirySchema.index({ type: 1, status: 1 });
 InquirySchema.index({ createdAt: -1 });
 

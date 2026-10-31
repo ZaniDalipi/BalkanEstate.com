@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { uploadRequest } from '@/src/shared/api/httpClient';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { villaDestinationKeys } from '@/src/shared/query/queryKeys';
 import { validateVillaDestination } from '@/src/shared/utils/validation';
 import {
@@ -340,7 +340,7 @@ const VillaDestinationsManager: React.FC = () => {
                                     // rows long, so serving the originals here
                                     // would pull tens of megabytes.
                                     <img
-                                        src={optimizeCloudinaryUrl(row.imageUrl, { width: 96, height: 128, crop: 'fill', gravity: 'auto' }) || row.imageUrl}
+                                        src={optimizeImageUrl(row.imageUrl, { width: 96, height: 128, crop: 'fill', gravity: 'auto' }) || row.imageUrl}
                                         alt=""
                                         loading="lazy"
                                         className="h-full w-full object-cover"
@@ -360,7 +360,7 @@ const VillaDestinationsManager: React.FC = () => {
                                     {row.country} · {t('admin:villaDestinations.searches', 'searches')} “{row.query}”
                                 </p>
                                 <p className="truncate text-xs text-gray-400">
-                                    {row.lat.toFixed(4)}, {row.lng.toFixed(4)} · zoom {row.zoom}
+                                    {row.lat.toFixed(4)}, {row.lng.toFixed(4)} {t('admin:ui.villaDestinationsManager.zoom', '· zoom')} {row.zoom}
                                     {!row.imageUrl && row.imageCity ? ` · ${t('admin:villaDestinations.usingCityPhoto', 'using {{city}} photo', { city: row.imageCity })}` : ''}
                                 </p>
                             </div>

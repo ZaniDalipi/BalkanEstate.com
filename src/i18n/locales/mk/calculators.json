@@ -163,5 +163,16 @@
     "perMonth": "/месец",
     "perYear": "/година",
     "invalidValue": "Невалидна вредност"
+  },
+  "ui": {
+    "rentVsBuyCalculator": {
+      "after8YearsItS": "По 8 години, поевтино е да",
+      "buy": "купите",
+      "estimatedSavings0": "Проценети заштеди: $0",
+      "totalCostToRent": "Вкупен трошок за закуп",
+      "netCostToOwn": "Нето трошок за сопственост",
+      "yearlyCostComparison": "Годишна споредба на трошоци",
+      "year1": "Година 1"
+    }
   }
 }

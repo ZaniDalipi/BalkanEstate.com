@@ -121,7 +121,7 @@ const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ e
             {isResending
               ? t('auth:verifyEmail.sending', 'Sending...')
               : cooldown > 0
-              ? t('auth:verifyEmail.resendCooldown', `Resend in ${cooldown}s`)
+              ? t('auth:verifyEmail.resendCooldown', { seconds: cooldown, defaultValue: 'Resend in {{seconds}}s' })
               : t('auth:verifyEmail.resendButton', 'Resend Verification Email')}
           </button>
 

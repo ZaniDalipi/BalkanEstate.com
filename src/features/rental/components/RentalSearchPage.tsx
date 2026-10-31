@@ -1,14 +1,18 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
+import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { interleaveInFeedAds } from '@/features/promo';
 import RentalFilters from './RentalFilters';
+import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
+import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';
 import UniversalSearchBox from '@/src/features/search/universal/UniversalSearchBox';
@@ -22,6 +26,7 @@ import Footer from '@/components/shared/Footer';
 import { Property } from '@/types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -121,6 +126,17 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     } = useRentalSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+    // Desktop filter panel starts folded and folds itself away again once the
+    // visitor scrolls down through the results.
+    const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
+    const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    // Phone held sideways: the header and filters alone fill the ~400px column,
+    // so they fold away while the results scroll down (back on the way up).
+    const isShortLandscape = useShortLandscape();
+    const tuckListChrome = isShortLandscape && isListScrollingDown;
+    useEffect(() => {
+        if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
+    }, [isListScrollingDown]);
 
     // Entrance animation: animate cards when rental data first loads
     const [animateCards, setAnimateCards] = useState(true);
@@ -205,6 +221,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     // it are a screenful of DOM nobody is looking at, built in that same commit.
     const isListOnScreen = showSplitView || mobileView === 'list';
     const mountList = useDeferredMount(!isListOnScreen);
+    // Once the list has slid away behind the map, stop rendering it at all.
+    const listSettledHidden = useSettledHidden(!isListOnScreen);
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists
@@ -238,7 +256,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
             <SEO
                 title={t('rental:seo.title', 'Properties for Rent | BalkanEstate')}
                 description={t('rental:seo.description', 'Browse rental properties across the Balkans. Find apartments, houses, and villas for rent.')}
-                canonical={`${window.location.origin}/rentals${window.location.search}`}
+                canonical={`${window.location.origin}/rentals`}
+                // Filtered views are internal search results: endless
+                // combinations, often empty. Only the unfiltered page is indexed.
+                noindex={window.location.search.length > 1}
                 type="website"
             />
 
@@ -249,22 +270,22 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
-                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
+                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                    data-shown={!showViewToggle || mobileView === 'list'}
+                    data-settled={listSettledHidden} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
                     {/* Spacer for floating mobile header */}
-                    {isMobile && <div className="h-14 flex-shrink-0" />}
+                    {(isMobile || isTablet) && <div className="h-14 flex-shrink-0" />}
 
                     {/* Header with city search — desktop only (mobile uses floating pill bar).
                         Soft liquid-glass bar: frosted white, hairline edge, muted text. */}
                     <div
-                        className="hidden lg:block sticky top-0 z-20 border-b border-black/[0.06]"
+                        className={`hidden ${tuckListChrome || isTablet ? '' : 'lg:block'} sticky top-0 z-20 border-b border-black/[0.06]`}
                         style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
                     >
-                        <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
+                        <div className="px-4 pt-3 pb-2 landscape:pt-2 landscape:pb-1 flex items-center justify-between gap-3">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-primary/80 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
-                                    </svg>
+                                    <SoftIcon name="key" className="w-7 h-7 flex-shrink-0" />
                                     <h1 className="text-lg font-semibold text-neutral-900 tracking-[-0.01em]">{t('rental:title', 'Properties for Rent')}</h1>
                                 </div>
                                 <p className="text-xs mt-0.5 text-neutral-500">
@@ -311,15 +332,15 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         {/* Quick-filter chips (view type + key amenities) */}
                         <div className="px-4 pb-3 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                             {[
-                                { label: '⛰ Mountain', field: 'viewType' as const, value: 'mountain' },
-                                { label: '🌊 Sea View', field: 'viewType' as const, value: 'sea' },
-                                { label: '🌲 Lake / Forest', field: 'viewType' as const, value: 'park' },
-                                { label: '🏙 City View', field: 'viewType' as const, value: 'city' },
-                                { label: '🏊 Pool', field: 'hasPool' as const, value: true },
-                                { label: '🌿 Garden', field: 'hasGarden' as const, value: true },
-                                { label: '🛁 Sauna', field: 'amenities' as const, value: 'sauna' },
-                                { label: '🍷 Wine Cellar', field: 'amenities' as const, value: 'wine cellar' },
-                                { label: '🌅 Panoramic', field: 'amenities' as const, value: 'panoramic view' },
+                                { icon: 'mountain' as SoftIconName, label: 'Mountain', field: 'viewType' as const, value: 'mountain' },
+                                { icon: 'sea' as SoftIconName, label: 'Sea View', field: 'viewType' as const, value: 'sea' },
+                                { icon: 'tree' as SoftIconName, label: 'Lake / Forest', field: 'viewType' as const, value: 'park' },
+                                { icon: 'city' as SoftIconName, label: 'City View', field: 'viewType' as const, value: 'city' },
+                                { icon: 'pool' as SoftIconName, label: 'Pool', field: 'hasPool' as const, value: true },
+                                { icon: 'leaf' as SoftIconName, label: 'Garden', field: 'hasGarden' as const, value: true },
+                                { icon: 'spa' as SoftIconName, label: 'Sauna', field: 'amenities' as const, value: 'sauna' },
+                                { icon: 'wine' as SoftIconName, label: 'Wine Cellar', field: 'amenities' as const, value: 'wine cellar' },
+                                { icon: 'sunrise' as SoftIconName, label: 'Panoramic', field: 'amenities' as const, value: 'panoramic view' },
                             ].map((chip) => {
                                 const isActive = chip.field === 'amenities'
                                     ? (filters.amenities || []).includes(chip.value as string)
@@ -338,13 +359,13 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                                 handleFilterChange(chip.field, isActive ? (chip.field === 'viewType' ? 'any' : null) : chip.value);
                                             }
                                         }}
-                                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
+                                        className={`flex-shrink-0 inline-flex items-center gap-1 pl-1.5 pr-3 py-1 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
                                             isActive
                                                 ? 'bg-primary/10 text-primary border-primary/40'
                                                 : 'bg-black/[0.03] text-neutral-500 border-black/[0.07] hover:border-primary/30 hover:text-primary'
                                         }`}
                                     >
-                                        {chip.label}
+                                        <SoftIcon name={chip.icon} className="w-4 h-4 flex-shrink-0" />{chip.label}
                                     </button>
                                 );
                             })}
@@ -362,7 +383,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                                 : 'bg-black/[0.03] text-neutral-500 border-black/[0.07] hover:border-primary/30 hover:text-primary'
                                         }`}
                                     >
-                                        {label === 'Any' ? label : `🛏 ${label}`}
+                                        {label === 'Any' ? label : <span className="inline-flex items-center gap-1"><SoftIcon name="bed" className="w-4 h-4" />{label}</span>}
                                     </button>
                                 );
                             })}
@@ -370,31 +391,54 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     </div>
 
                     {/* Desktop Filters */}
-                    <div className="hidden lg:block" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                        <RentalFilters
-                            filters={filters}
-                            onFilterChange={handleFilterChange}
-                            onSearch={handleSearch}
-                            onReset={handleResetFilters}
-                            onSaveSearch={handleSaveSearchArea}
-                            isSaving={isSaving}
-                            compact
-                        />
+                    <div className={`hidden ${tuckListChrome || isTablet ? '' : 'lg:block'}`} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                        <CollapsibleFilterPanel
+                            id="rental-desktop-filter-panel"
+                            collapsed={isDesktopFiltersCollapsed}
+                            onToggle={() => setIsDesktopFiltersCollapsed(c => !c)}
+                        >
+                            <RentalFilters
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                onSearch={handleSearch}
+                                onReset={handleResetFilters}
+                                onSaveSearch={handleSaveSearchArea}
+                                isSaving={isSaving}
+                                compact
+                                hideActions
+                            />
+                        </CollapsibleFilterPanel>
+                        {/* Actions stay outside the folding panel so search is always one click away */}
+                        <div className="flex items-center justify-end gap-2 px-4 pb-2">
+                            <button onClick={handleResetFilters} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
+                                {t('rental:filters.reset')}
+                            </button>
+                            <button
+                                onClick={handleSaveSearchArea}
+                                disabled={isSaving}
+                                className="text-[11px] text-primary hover:text-primary-dark py-1.5 px-2 border border-primary/30 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                            >
+                                {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
+                            </button>
+                            <Button variant="cool" size="sm" onClick={() => handleSearch()} className="text-xs font-semibold whitespace-nowrap rounded-xl">
+                                {t('rental:filters.search')}
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Property List */}
-                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
+                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container onScroll={handleListScroll} aria-live="polite">
                         {/* Results count + location + sort bar */}
                         <div className="sticky top-0 bg-white z-[100] border-b border-neutral-200">
-                            <div className="p-4 flex items-center justify-between">
+                            <div className="px-4 py-2.5 flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">{t('search:resultsFound', { count: listProperties.length })}</p>
+                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0 whitespace-nowrap">{t('search:resultsFound', { count: listProperties.length })}</p>
                                     {isSearchingLocation && (
                                         <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary flex-shrink-0" aria-hidden="true" />
                                     )}
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium truncate max-w-[140px]">
-                                            <MapIcon className="w-3 h-3 flex-shrink-0" />
+                                            <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
                                         </span>
                                     )}
@@ -417,7 +461,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
                                             aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
+                                            className="block w-full max-w-[9.5rem] truncate text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>
@@ -437,35 +481,35 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     </div>
                                 </div>
                             </div>
-                            {/* Nothing in the searched area: say so, then
-                                introduce what is listed from elsewhere. */}
-                            {outOfArea ? (
-                                <div className="px-4 pb-2">
-                                    <OutOfAreaBanner
-                                        kind={outOfArea}
-                                        query={filters.query}
-                                        isQueryUnmatched={isQueryUnmatched}
-                                        location={fallbackLocation}
-                                        onResetFilters={handleResetFilters}
-                                    />
-                                </div>
-                            ) : isTextRelaxed && (
-                                /* The typed text matched nothing and the map
-                                   view is answering — say so instead of passing
-                                   the results off as exact matches. */
-                                <div className="px-4 pb-2 -mt-1">
-                                    <p className="text-xs text-neutral-500">
-                                        {t('rental:showingInArea', {
-                                            query: filters.query,
-                                            defaultValue: 'No rental matches “{{query}}” — showing what is available in this area',
-                                        })}
-                                    </p>
-                                </div>
-                            )}
                         </div>
+                            {/* Nothing in the searched area: say so, then
+                            introduce what is listed from elsewhere. */}
+                        {outOfArea ? (
+                            <div className="px-3 pt-2">
+                                <OutOfAreaBanner
+                                    kind={outOfArea}
+                                    query={filters.query}
+                                    isQueryUnmatched={isQueryUnmatched}
+                                    location={fallbackLocation}
+                                    onResetFilters={handleResetFilters}
+                                />
+                            </div>
+                        ) : isTextRelaxed && (
+                            /* The typed text matched nothing and the map
+                               view is answering — say so instead of passing
+                               the results off as exact matches. */
+                            <div className="px-4 pt-2">
+                                <p className="text-xs text-neutral-500">
+                                    {t('rental:showingInArea', {
+                                        query: filters.query,
+                                        defaultValue: 'No rental matches “{{query}}” — showing what is available in this area',
+                                    })}
+                                </p>
+                            </div>
+                        )}
                         <div className="p-3">
                         {!mountList ? null : (isLoading || isSearchFiltering) ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-3">
                                 {[...Array(6)].map((_, i) => (
                                     <PropertyCardSkeleton key={i} index={i} />
                                 ))}
@@ -479,7 +523,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         ) : listProperties.length === 0 ? (
                             <div className="text-center py-12">
-                                <div className="text-4xl mb-3 opacity-60">🏠</div>
+                                <SoftIcon name="home" className="w-12 h-12 mx-auto mb-3" />
                                 <h3 className="text-lg font-semibold text-gray-600 mb-1">{t('rental:noProperties')}</h3>
                                 <p className="text-sm text-gray-400 mb-4">{t('rental:noPropertiesHint')}</p>
                                 <button
@@ -493,7 +537,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <>
                                 <RentalCardAnimationStyles />
                                 <HighlightedPropertiesSection properties={listProperties} />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-3">
                                     {interleaveInFeedAds(
                                         listProperties.slice(0, visibleCount).map((property, index) => (
                                             <AnimatedPropertyCard
@@ -510,7 +554,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 {visibleCount < listProperties.length && (
                                     <div ref={loadMoreRef}>
                                         {isLoadingMore && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-3 mt-3">
                                                 {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                     <PropertyCardSkeleton key={i} index={i} />
                                                 ))}
@@ -529,8 +573,11 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
-                    <div className="absolute inset-0 overflow-hidden">
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
+                    <div
+                        className="search-map-stage absolute inset-0 overflow-hidden"
+                        data-shown={!showViewToggle || mobileView === 'map'}
+                    >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
                 </div>
@@ -538,14 +585,18 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 {/* Mobile/Tablet View Overlays */}
                 {showViewToggle && !isFiltersOpen && (
                     <>
-                        {/* Mobile-only: floating search bar overlay (matches buy page pattern) */}
-                        {isMobile && (
+                        {/* Mobile and tablet (incl. a phone held sideways): floating search
+                            bar overlay (matches buy page pattern). Tablets had no search or
+                            filters in list view: this bar was phone-only and the desktop
+                            header only shows in split view. */}
+                        {(isMobile || isTablet) && (
                             <div
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
-                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                    // Stop short of the floating header (Subscribe / New / account) on md+.
+                                    paddingRight: 'max(calc(env(safe-area-inset-right, 0px) + 8px), var(--floating-header-w, 0px))',
                                 }}
                             >
                                 <div className="pointer-events-auto w-full space-y-2">
@@ -557,7 +608,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     >
                                         <button
                                             onClick={onToggleSidebar}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                            className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                                             aria-label={t('common:aria.openMenu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800"/>
@@ -590,7 +641,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {state.currentUser.avatarUrl ? (
-                                                        <img src={optimizeCloudinaryUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                        <img src={optimizeImageUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                                     ) : (
                                                         <DefaultAvatar gender={state.currentUser.gender} seed={state.currentUser.id || state.currentUser.name} avatarOptions={state.currentUser.avatarOptions} />
                                                     )}
@@ -622,7 +673,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
                         <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>

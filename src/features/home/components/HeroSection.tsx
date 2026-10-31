@@ -225,8 +225,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 60%)',
         pointerEvents: 'none',
       }} />
+      {/* Anchored to the top, not the bottom: the hero grows when its photo
+          gallery loads, and a bottom-anchored blob moving with it was the
+          largest layout shift on the home page (CLS ≈ 0.27 in Lighthouse). */}
       <div style={{
-        position: 'absolute', bottom: '-40px', left: '-80px',
+        position: 'absolute', top: '320px', left: '-80px',
         width: '350px', height: '350px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 60%)',
         pointerEvents: 'none',
@@ -235,10 +238,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       {/* hero-top-pad rather than a plain pt-*: installed as a PWA there is no
           browser chrome above this, so the heading started directly under the
           status bar and behind the floating menu button. */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 hero-top-pad pb-16 sm:pb-28 hero-stagger">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 hero-top-pad pb-16 sm:pb-28 landscape:pb-10 hero-stagger">
         {/* Title */}
         <h1
-          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
+          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl landscape:text-3xl font-bold text-slate-900 tracking-tight leading-tight max-w-5xl mx-auto hero-fade-up"
           style={{ minHeight: '2.6em' }}
         >
           <span className="block">
@@ -249,10 +252,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 have nothing to clip to and the word would disappear.
                 No min-width guess here any more either — the Typewriter
                 reserves the width of its longest word, measured in the real
-                font, so the line cannot reflow as it types. */}
-            <span className="inline-block align-bottom">
+                font, so the line cannot reflow as it types.
+                The word always gets its own line, centred in that reserved
+                width. Whether the longest word fits beside the title depends
+                on the language and the screen ("Вашиот Дом од Соништата" fit
+                at almost no width), and when it didn't the word dropped to a
+                line of its own anyway, left-aligned, so the heading looked
+                lopsided. One layout for every size keeps it centred. */}
+            <span className="block">
               <Typewriter
                 className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600"
+                alignClassName="text-center"
                 words={typewriterWords}
                 speed={80}
                 delayBetweenWords={2000}
@@ -261,21 +271,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               />
             </span>
           </span>
-          <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
+          <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl landscape:text-2xl font-semibold">
             {t('home:hero.titleEnd')}
           </span>
         </h1>
 
         {/* Subtitle */}
         <p
-          className="mt-4 sm:mt-5 text-center text-sm sm:text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed px-2 hero-fade-up"
+          className="mt-4 sm:mt-5 landscape:mt-2 text-center text-sm sm:text-base md:text-lg landscape:text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed px-2 hero-fade-up"
           style={{ animationDelay: '0.08s' }}
         >
           {t('home:hero.subtitle')}
         </p>
 
         {/* Search Bar — liquid glass */}
-        <div className="mt-6 sm:mt-8 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
+        <div className="mt-6 sm:mt-8 landscape:mt-4 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
           <div style={{
             position: 'relative',
             zIndex: 10,
@@ -325,7 +335,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 placeholder={t('home:hero.searchPlaceholder')}
-                className="flex-1 py-3.5 sm:py-5 px-3 text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
+                className="flex-1 py-3.5 sm:py-5 landscape:py-3 px-3 text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
                 style={{ boxShadow: 'none' }}
                 aria-label={t('home:hero.searchPlaceholder')}
               />
@@ -334,7 +344,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 <button
                   onClick={() => { onSearchChange(''); setIsDismissed(false); }}
                   className="mr-1 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors"
-                  aria-label="Clear"
+                  aria-label={t('home:ui.heroSection.clear', 'Clear')}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -448,7 +458,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* CTA Buttons — liquid glass */}
-        <div className="mt-5 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
+        <div className="mt-5 sm:mt-6 landscape:mt-4 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
           <button
             onClick={() => onNavigate('/search')}
             style={{
@@ -495,7 +505,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         {belowActions}
 
         {/* Stats Strip — liquid glass card */}
-        <div className="mt-10 sm:mt-12 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
+        <div className="mt-10 sm:mt-12 landscape:mt-6 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
           <div style={{
             borderRadius: '20px',
             padding: '1rem 1.5rem',

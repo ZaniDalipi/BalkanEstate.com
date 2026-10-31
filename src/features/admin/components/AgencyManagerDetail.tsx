@@ -1,11 +1,13 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import { AgencyAllowanceCard } from './residences/AgencyAllowanceCard';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -69,16 +71,14 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               <div className="flex items-start gap-4">
                 {viewingAgency.logo ? (
                   <img
-                    src={optimizeCloudinaryUrl(viewingAgency.logo, { width: 240 }) || viewingAgency.logo}
+                    src={optimizeImageUrl(viewingAgency.logo, { width: 240 }) || viewingAgency.logo}
                     alt={viewingAgency.name}
                     loading="lazy"
                     decoding="async"
                     className="w-24 h-24 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <BuildingOfficeIcon className="w-12 h-12 text-blue-600" />
-                  </div>
+                  <SoftIcon name="building" className="w-24 h-24 flex-shrink-0" />
                 )}
                 <div className="flex-1">
                   <h4 className="text-2xl font-bold text-gray-900">{viewingAgency.name}</h4>
@@ -208,6 +208,10 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                   {/* Listing Limit Override */}
                   <AgencyListingLimitOverride agency={viewingAgency} />
+                  {/* Residences: free residences this subscription year */}
+                  <div className="mt-4">
+                    <AgencyAllowanceCard agencyId={viewingAgency._id} />
+                  </div>
                 </div>
               </div>
 
@@ -552,7 +556,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     specialties: e.target.value.split(',').map(s => s.trim())
                   })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Residential, Commercial, Luxury Properties"
+                  placeholder={t('admin:ui.agencyManagerDetail.residentialCommercialLuxuryProperties', 'Residential, Commercial, Luxury Properties')}
                 />
               </div>
 
@@ -569,7 +573,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     certifications: e.target.value.split(',').map(s => s.trim())
                   })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Licensed Real Estate Agency, ISO Certified"
+                  placeholder={t('admin:ui.agencyManagerDetail.licensedRealEstateAgencyIso', 'Licensed Real Estate Agency, ISO Certified')}
                 />
               </div>
 
@@ -590,7 +594,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                           businessHours: { ...editForm.businessHours, [day]: e.target.value }
                         })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        placeholder="9:00 AM - 6:00 PM"
+                        placeholder={t('admin:ui.agencyManagerDetail.n900Am600', '9:00 AM - 6:00 PM')}
                       />
                     </div>
                   ))}

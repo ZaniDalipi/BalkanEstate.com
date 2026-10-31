@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { getCurrencySymbol } from '@/utils/currency';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface RentalDashboardStatsProps {
     properties: Property[];
@@ -61,9 +62,7 @@ const RentalDashboardStats: React.FC<RentalDashboardStatsProps> = ({ properties 
     return (
         <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-xl p-4 sm:p-5 shadow-lg mb-4">
             <div className="flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                </svg>
+                <span className="w-7 h-7 rounded-lg bg-white/95 flex items-center justify-center flex-shrink-0"><SoftIcon name="chart" className="w-5 h-5" /></span>
                 <h3 className="text-sm font-bold text-white">{t('rental:dashboard.title', 'Rental Portfolio')}</h3>
             </div>
 

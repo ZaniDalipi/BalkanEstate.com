@@ -21,7 +21,12 @@
     "messages": "Mesazhet",
     "myAccount": "Llogaria Ime",
     "howItWorks": "Si Funksionon",
-    "blog": "Blog"
+    "blog": "Blog",
+    "about": "Rreth nesh",
+    "contactUs": "Na kontaktoni",
+    "advertise": "Reklamoni me ne",
+    "buyingGuides": "Udhëzues blerjeje",
+    "mortgageCalculator": "Kalkulator kredie"
   },
   "countries": {
     "AL": "Shqipëri",
@@ -87,5 +92,13 @@
     "becomePartner": "Bëhu Partner",
     "affiliates": "Bashkëpunëtorë",
     "developers": "Për Zhvilluesit"
-  }
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Na gjeni në Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Ture profesionale 360° të pronave",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - Ture 360° të pronave"
+    }
+  },
+  "exploreCitiesIn": "Eksploro qytetet në {{country}}"
 }

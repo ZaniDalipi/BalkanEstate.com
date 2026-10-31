@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { escapeRegex } from '../utils/escapeRegex';
 import BusinessListing, { BUSINESS_CATEGORIES, LISTING_TYPES } from '../models/BusinessListing';
 import { IUser } from '../models/User';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/mediaService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 import { encodeId, resolveId } from '../utils/idObfuscation';
 
@@ -330,7 +330,7 @@ export const deleteBusinessListing = async (
       return;
     }
 
-    // Clean up images from Cloudinary
+    // Clean up images from storage
     if (listing.logoPublicId) {
       await deleteImage(listing.logoPublicId).catch(() => {});
     }
@@ -562,7 +562,7 @@ export const adminDeleteBusinessListing = async (
       return;
     }
 
-    // Clean up images from Cloudinary
+    // Clean up images from storage
     if (listing.logoPublicId) {
       await deleteImage(listing.logoPublicId).catch(() => {});
     }

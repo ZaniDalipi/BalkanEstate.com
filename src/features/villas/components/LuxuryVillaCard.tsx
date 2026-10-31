@@ -8,17 +8,19 @@ import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import VillaBookingModal from './VillaBookingModal';
 import { navigate, localizePath } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 /** View types and cancellation policies keyed to the same strings VillaFilters
  *  uses, so the card and the filter chips always read identically. */
-const VIEW_TYPE: Record<string, { emoji: string; key: string; fallback: string }> = {
-    sea:      { emoji: '🌊', key: 'villas:filters.sea',        fallback: 'Sea View'      },
-    mountain: { emoji: '⛰️',  key: 'villas:filters.mountain',  fallback: 'Mountain'      },
-    park:     { emoji: '🌲', key: 'villas:filters.lakeForest', fallback: 'Lake / Forest' },
-    city:     { emoji: '🏙️', key: 'villas:filters.cityView',  fallback: 'City View'     },
-    garden:   { emoji: '🌷', key: 'villas:filters.gardenView', fallback: 'Garden View'   },
-    street:   { emoji: '🏘️', key: 'villas:filters.streetView', fallback: 'Street View'  },
+const VIEW_TYPE: Record<string, { icon: SoftIconName; key: string; fallback: string }> = {
+    sea:      { icon: 'sea',      key: 'villas:filters.sea',        fallback: 'Sea View'      },
+    mountain: { icon: 'mountain', key: 'villas:filters.mountain',   fallback: 'Mountain'      },
+    park:     { icon: 'tree',     key: 'villas:filters.lakeForest', fallback: 'Lake / Forest' },
+    city:     { icon: 'city',     key: 'villas:filters.cityView',   fallback: 'City View'     },
+    garden:   { icon: 'flower',   key: 'villas:filters.gardenView', fallback: 'Garden View'   },
+    street:   { icon: 'houses',   key: 'villas:filters.streetView', fallback: 'Street View'   },
 };
 
 const CANCEL_LABEL: Record<string, { key: string; fallback: string }> = {
@@ -100,6 +102,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
         if (shouldOpenInNewTab()) {
             window.open(localizePath(path), '_blank', 'noopener,noreferrer');
         } else {
+            rememberOpenedProperty(property.id);
             navigate(path, { state: { property: property } });
         }
     }, [dispatch, property]);
@@ -188,15 +191,15 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     const hasAmenity = (needle: string) =>
         amenities.some(a => typeof a === 'string' && a.toLowerCase().includes(needle));
     const chips = [
-        property.hasPool           && { emoji: '🏊', label: t('villas:filters.pool', 'Pool') },
-        property.hasGarden         && { emoji: '🌿', label: t('villas:filters.garden', 'Garden') },
-        hasAmenity('sauna')        && { emoji: '🧖', label: t('villas:filters.sauna', 'Sauna') },
-        hasAmenity('wine')         && { emoji: '🍷', label: t('villas:filters.wineCellar', 'Wine Cellar') },
-        hasAmenity('panoramic')    && { emoji: '🏔️', label: t('villas:filters.panoramic', 'Panoramic') },
-        property.breakfastIncluded && { emoji: '🍳', label: t('villas:amenities.breakfast', 'Breakfast') },
-        property.towelsIncluded    && { emoji: '🛁', label: t('villas:amenities.towels', 'Towels') },
-        property.parkingIncluded   && { emoji: '🚗', label: t('villas:amenities.parking', 'Parking') },
-    ].filter(Boolean).slice(0, 5) as { emoji: string; label: string }[];
+        property.hasPool           && { icon: 'pool',     label: t('villas:filters.pool', 'Pool') },
+        property.hasGarden         && { icon: 'leaf',     label: t('villas:filters.garden', 'Garden') },
+        hasAmenity('sauna')        && { icon: 'spa',      label: t('villas:filters.sauna', 'Sauna') },
+        hasAmenity('wine')         && { icon: 'wine',     label: t('villas:filters.wineCellar', 'Wine Cellar') },
+        hasAmenity('panoramic')    && { icon: 'mountain', label: t('villas:filters.panoramic', 'Panoramic') },
+        property.breakfastIncluded && { icon: 'kitchen',  label: t('villas:amenities.breakfast', 'Breakfast') },
+        property.towelsIncluded    && { icon: 'bath',     label: t('villas:amenities.towels', 'Towels') },
+        property.parkingIncluded   && { icon: 'car',      label: t('villas:amenities.parking', 'Parking') },
+    ].filter(Boolean).slice(0, 5) as { icon: SoftIconName; label: string }[];
 
     const viewType  = property.viewType ? VIEW_TYPE[property.viewType] : null;
     const isSold    = property.status === 'sold';
@@ -373,8 +376,8 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                 {t('villas:badges.beachfront', 'Beachfront')}
                             </span>
                         ) : viewType && (
-                            <span className="px-2 py-[5px] rounded-full text-[10px] font-semibold text-white/90 bg-black/35 backdrop-blur-sm border border-white/10">
-                                <span aria-hidden="true">{viewType.emoji}</span> {t(viewType.key, viewType.fallback)}
+                            <span className="inline-flex items-center gap-1 pl-1 pr-2 py-[3px] rounded-full text-[10px] font-semibold text-white/90 bg-black/35 backdrop-blur-sm border border-white/10">
+                                <SoftIcon name={viewType.icon} className="w-4 h-4 flex-shrink-0" />{t(viewType.key, viewType.fallback)}
                             </span>
                         )}
                         <button
@@ -460,10 +463,10 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     <div className="absolute z-20 flex flex-wrap gap-1 px-3.5" style={{ bottom: '78px' }}>
                         {chips.map((chip, ci) => (
                             <span key={chip.label}
-                                className="luxury-chip bg-black/55 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[4px] rounded-full border border-white/12"
+                                className="luxury-chip inline-flex items-center gap-1 bg-black/55 backdrop-blur-sm text-white text-[10px] font-semibold pl-1 pr-2 py-[3px] rounded-full border border-white/12"
                                 style={{ transitionDelay: `${ci * 35}ms` }}
                             >
-                                <span aria-hidden="true">{chip.emoji}</span> {chip.label}
+                                <SoftIcon name={chip.icon} className="w-4 h-4 flex-shrink-0" />{chip.label}
                             </span>
                         ))}
                     </div>
@@ -480,29 +483,26 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                     : t('villas:card.defaultTitle', 'Luxury Villa'))}
                             </h3>
                             <p className="flex items-center gap-1 text-white/60 text-[11px] mb-2">
-                                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                 {property.city}{property.country ? `, ${property.country}` : ''}
                             </p>
                             {/* Stat dots */}
                             <div className="flex items-center gap-3 text-white/50 text-[11px]">
                                 {property.beds  > 0 && (
                                     <span className="flex items-center gap-1">
-                                        <span className="text-[13px]">🛏</span>
+                                        <SoftIcon name="bed" className="w-4 h-4" />
                                         <span>{property.beds}</span>
                                     </span>
                                 )}
                                 {property.baths > 0 && (
                                     <span className="flex items-center gap-1">
-                                        <span className="text-[13px]">🛁</span>
+                                        <SoftIcon name="bath" className="w-4 h-4" />
                                         <span>{property.baths}</span>
                                     </span>
                                 )}
                                 {property.sqft  > 0 && (
                                     <span className="flex items-center gap-1">
-                                        <span className="text-[11px]">📐</span>
+                                        <SoftIcon name="area" className="w-4 h-4" />
                                         <span>{property.sqft} m²</span>
                                     </span>
                                 )}
@@ -537,7 +537,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     {(property.checkInTime || (property.cleaningFee ?? 0) > 0 || property.cancellationPolicy) && (
                         <div className="mt-1.5 flex items-center flex-wrap gap-x-2 text-white/35 text-[10px]">
                             {property.checkInTime && (
-                                <span>⏰ {property.checkInTime}{property.checkOutTime ? `–${property.checkOutTime}` : ''}</span>
+                                <span><SoftIcon name="clock" className="inline-block w-3.5 h-3.5 mr-0.5 align-[-3px]" />{property.checkInTime}{property.checkOutTime ? `–${property.checkOutTime}` : ''}</span>
                             )}
                             {(property.cleaningFee ?? 0) > 0 && (
                                 <span>· {t('villas:card.cleaningFee', '+{{price}} cleaning', {

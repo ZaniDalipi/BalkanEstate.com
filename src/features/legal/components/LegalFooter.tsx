@@ -4,19 +4,24 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
+import { AppLink } from '@/src/app/router/AppLink';
+import { paths } from '@/src/app/router/paths';
 
 interface LegalFooterProps {
-  onNavigate: (view: string) => void;
+  /** Kept for existing callers; links are real hrefs and navigate themselves. */
+  onNavigate?: (view: string) => void;
 }
 
-const LegalFooter: React.FC<LegalFooterProps> = ({ onNavigate }) => {
+const LegalFooter: React.FC<LegalFooterProps> = () => {
   const { t } = useTranslation(['footer']);
 
   const legalLinks = [
-    { label: t('footer:legal.privacyPolicy'), path: 'privacy-policy' },
-    { label: t('footer:legal.termsOfService'), path: 'terms-of-service' },
-    { label: t('footer:legal.cookiePolicy'), path: 'cookie-policy' },
-    { label: t('footer:legal.refundPolicy'), path: 'refund-policy' },
+    { label: t('footer:links.about', 'About Us'), path: paths.about() },
+    { label: t('footer:legal.privacyPolicy'), path: paths.privacy() },
+    { label: t('footer:legal.termsOfService'), path: paths.terms() },
+    { label: t('footer:legal.cookiePolicy'), path: paths.cookies() },
+    { label: t('footer:legal.refundPolicy'), path: paths.refund() },
+    { label: t('footer:links.contactUs', 'Contact Us'), path: paths.contact() },
   ];
 
   return (
@@ -37,13 +42,13 @@ const LegalFooter: React.FC<LegalFooterProps> = ({ onNavigate }) => {
           {/* Legal Links */}
           <nav className="flex flex-wrap gap-4 text-sm text-gray-400">
             {legalLinks.map((link) => (
-              <button
+              <AppLink
                 key={link.path}
-                onClick={() => onNavigate(link.path)}
+                to={link.path}
                 className="hover:text-white transition-colors"
               >
                 {link.label}
-              </button>
+              </AppLink>
             ))}
           </nav>
 

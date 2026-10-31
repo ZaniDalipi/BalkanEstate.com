@@ -32,7 +32,9 @@
     "enabledMessage": "Do të merrni njoftime me email për të gjitha kërkimet e ruajtura",
     "disabledTitle": "Njoftimet të çaktivizuara",
     "disabledMessage": "Njoftimet me email janë çaktivizuar",
-    "toggleFailed": "Përditësimi i cilësimeve të njoftimeve dështoi"
+    "toggleFailed": "Përditësimi i cilësimeve të njoftimeve dështoi",
+    "noSearchesTitle": "Nuk ka kërkime të ruajtura",
+    "noSearchesMessage": "Ruani fillimisht një kërkim pronash, pastaj aktivizoni njoftimet me email për t'u njoftuar për përputhje të reja"
   },
   "clearAll": {
     "button": "Pastro të gjitha",
@@ -74,7 +76,21 @@
     "confirmDelete": "Jeni të sigurt që dëshironi të fshini \"{{name}}\"?",
     "deleteFailed": "Fshirja e kërkimit dështoi. Ju lutemi provoni përsëri.",
     "enterName": "Ju lutemi shkruani një emër",
-    "renameFailed": "Riemërimi i kërkimit dështoi. Ju lutemi provoni përsëri."
+    "renameFailed": "Riemërimi i kërkimit dështoi. Ju lutemi provoni përsëri.",
+    "alertsEnabled": "Njoftimet u aktivizuan",
+    "alertsEnabledDesc": "Do të merrni njoftime {{frequency}}",
+    "errorTitle": "Gabim",
+    "alertUpdateFailed": "Përditësimi i cilësimeve të njoftimeve dështoi",
+    "deleteTitle": "Fshi kërkimin e ruajtur",
+    "deleteButton": "Fshi",
+    "cancelButton": "Anulo",
+    "warningTitle": "Paralajmërim",
+    "rent": "QIRA",
+    "buy": "BLERJE",
+    "alertSettings": "Cilësimet e njoftimeve",
+    "upgradeForAlerts": "Kaloni në plan më të lartë për njoftime",
+    "emailAlerts": "Njoftime me email",
+    "frequency": "Frekuenca"
   },
   "favorites": {
     "badge": "Koleksioni juaj i të preferuarave",
@@ -84,16 +100,26 @@
     "stats": {
       "properties": "Prona",
       "agents": "Agjentë",
-      "countries": "Shtete"
+      "countries": "Shtete",
+      "agencies": "Agjenci"
     },
     "tabs": {
       "properties": "Prona",
-      "agents": "Agjentë"
+      "agents": "Agjentë",
+      "agencies": "Agjenci"
     },
     "badges": {
       "quickAccess": "Qasje e shpejtë",
       "organized": "Të organizuara sipas vendndodhjes",
       "compare": "Krahasim i lehtë"
+    }
+  },
+  "searches": {
+    "clearFailed": "Pastrimi i kërkimeve të ruajtura dështoi"
+  },
+  "ui": {
+    "savedHomesPage": {
+      "featured": "E veçuar"
     }
   }
 }

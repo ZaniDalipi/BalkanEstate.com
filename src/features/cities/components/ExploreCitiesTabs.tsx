@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Globe2, Bookmark } from 'lucide-react';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 export type ExploreCitiesTab = 'all' | 'saved';
 
@@ -22,9 +22,9 @@ const TAB_ORDER: readonly ExploreCitiesTab[] = ['all', 'saved'];
 const ExploreCitiesTabs: React.FC<ExploreCitiesTabsProps> = ({ active, savedCount, onChange }) => {
   const { t } = useTranslation(['exploreCities']);
 
-  const labels: Record<ExploreCitiesTab, { text: string; icon: React.ReactNode }> = {
-    all: { text: t('tabs.allCities', 'All cities'), icon: <Globe2 className="w-4 h-4" /> },
-    saved: { text: t('tabs.savedPlaces', 'Saved places'), icon: <Bookmark className="w-4 h-4" /> },
+  const labels: Record<ExploreCitiesTab, { text: string; icon: SoftIconName }> = {
+    all: { text: t('tabs.allCities', 'All cities'), icon: 'globe' },
+    saved: { text: t('tabs.savedPlaces', 'Saved places'), icon: 'save' },
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -59,7 +59,7 @@ const ExploreCitiesTabs: React.FC<ExploreCitiesTabsProps> = ({ active, savedCoun
                 : 'text-neutral-600 hover:bg-neutral-100'
             }`}
           >
-            {labels[tab].icon}
+            <SoftIcon name={labels[tab].icon} className="w-5 h-5" />
             {labels[tab].text}
             {tab === 'saved' && savedCount > 0 && (
               <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${

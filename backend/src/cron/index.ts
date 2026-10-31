@@ -14,14 +14,14 @@ import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propert
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
-import { cleanupOrphanedTempImages } from '../services/cloudinaryService';
-import { syncCloudinaryPresetsOnStartup } from '../services/media/cloudinaryPresetSync';
+import { cleanupOrphanedTempImages } from '../services/mediaService';
 import { runMediaRetention } from '../services/media/mediaRetentionService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
 import { runScoreFullRefresh } from '../jobs/scoreBackfillJob';
 import { runMonthlyCityMarketDigest } from '../jobs/cityMarketDigestJob';
+import { runResidenceBillingJob } from '../services/developments/billing/residenceBillingJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -58,10 +58,22 @@ let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
 let cityMarketDigestTask: cron.ScheduledTask | null = null;
 let tempImageCleanupTask: cron.ScheduledTask | null = null;
-let presetSyncTask: cron.ScheduledTask | null = null;
 let mediaRetentionTask: cron.ScheduledTask | null = null;
+let residenceBillingTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
+  // Residence Pass upkeep (trial reminders, offline notices, plan coverage) - daily at 08:07
+  residenceBillingTask = cron.schedule('7 8 * * *', async () => {
+    await withDbConnection('residence billing', async () => {
+      try {
+        const r = await runResidenceBillingJob();
+        cronLogger.info(`🏢 Residence billing: ${r.reminders} reminder(s), ${r.owners} owner(s) recomputed, ${r.backfilled} backfilled`);
+      } catch (error) {
+        cronLogger.error('Residence billing cron error:', error);
+      }
+    });
+  });
+
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
   checkExpiringTask = cron.schedule('0 10 * * *', async () => {
     await withDbConnection('expiring subscriptions check', async () => {
@@ -425,16 +437,8 @@ export const startCronJobs = () => {
     });
   });
 
-  // Orphaned listing uploads - daily at 3:30 AM. Photos uploaded to the temp
-  // folder by abandoned listing forms are otherwise billed as storage forever.
-  // Re-check the Cloudinary delivery presets daily at 3:10 AM. Startup already
-  // registers them; this heals one that failed or was deleted in the dashboard
-  // (with strict transformations on, a missing preset is a broken image).
-  // One list call when everything is in place.
-  presetSyncTask = cron.schedule('10 3 * * *', async () => {
-    await syncCloudinaryPresetsOnStartup();
-  });
-
+  // Orphaned listing uploads - daily at 3:30 AM. Photos uploaded as drafts
+  // by abandoned listing forms are otherwise stored forever.
   tempImageCleanupTask = cron.schedule('30 3 * * *', async () => {
     await withDbConnection('temp image cleanup', async () => {
       try {
@@ -446,7 +450,7 @@ export const startCronJobs = () => {
     });
   });
 
-  // Media retention - daily at 4:15 AM. Clears Cloudinary media of listings
+  // Media retention - daily at 4:15 AM. Clears stored media of listings
   // deleted/sold longer ago than MEDIA_RETENTION_*_YEARS (defaults 1 / 2).
   // Runs in small batches, so a backlog drains over several nights.
   mediaRetentionTask = cron.schedule('15 4 * * *', async () => {
@@ -551,6 +555,7 @@ export const startCronJobs = () => {
 };
 
 export const stopCronJobs = () => {
+  if (residenceBillingTask) residenceBillingTask.stop();
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
   if (userSubscriptionTask) userSubscriptionTask.stop();
@@ -572,7 +577,6 @@ export const stopCronJobs = () => {
   if (scoreRefreshTask) scoreRefreshTask.stop();
   if (cityMarketDigestTask) cityMarketDigestTask.stop();
   if (tempImageCleanupTask) tempImageCleanupTask.stop();
-  if (presetSyncTask) presetSyncTask.stop();
   if (mediaRetentionTask) mediaRetentionTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');

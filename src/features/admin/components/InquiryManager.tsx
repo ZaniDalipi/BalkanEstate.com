@@ -4,8 +4,8 @@ import {
   MagnifyingGlassIcon,
   EyeIcon,
   TrashIcon,
-  EnvelopeIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useInquiryManager } from './useInquiryManager';
 import InquiryManagerDetail from './InquiryManagerDetail';
 import UserAvatar from '@/components/shared/UserAvatar';
@@ -66,7 +66,7 @@ const InquiryManager: React.FC = () => {
                 <p className="text-sm text-gray-500">{t('admin:inquiries.totalInquiries')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.overview.totalInquiries}</p>
               </div>
-              <EnvelopeIcon className="w-10 h-10 text-blue-500 opacity-20" />
+              <SoftIcon name="envelope" className="w-10 h-10 flex-shrink-0" />
             </div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
@@ -252,8 +252,9 @@ const InquiryManager: React.FC = () => {
                   <td className="px-4 py-4">
                     <div className="flex flex-col items-start gap-1">
                       {(inquiry as { priority?: string }).priority === 'high' && (
-                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-indigo-600 text-white whitespace-nowrap">
-                          🔥 {t('admin:inquiries.advertising', 'Advertising')}
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold rounded-full bg-indigo-600 text-white whitespace-nowrap">
+                          <SoftIcon name="megaphone" className="w-4 h-4 flex-shrink-0" />
+                          {t('admin:inquiries.advertising', 'Advertising')}
                         </span>
                       )}
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(inquiry.type)}`}>
@@ -285,14 +286,14 @@ const InquiryManager: React.FC = () => {
                       <button
                         onClick={() => handleViewInquiry(inquiry)}
                         className="text-blue-600 hover:text-blue-900"
-                        title="View details"
+                        title={t('admin:ui.inquiryManager.viewDetails', 'View details')}
                       >
                         <EyeIcon className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDeleteInquiry(inquiry._id)}
                         className="text-red-600 hover:text-red-900"
-                        title="Delete"
+                        title={t('admin:ui.inquiryManager.delete', 'Delete')}
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>

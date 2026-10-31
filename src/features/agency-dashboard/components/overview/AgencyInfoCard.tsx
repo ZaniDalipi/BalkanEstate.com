@@ -1,17 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  BuildingOfficeIcon,
-  MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  GlobeAltIcon,
-  ClockIcon,
-  UsersIcon,
-  HomeIcon,
-  ShieldCheckIcon,
-} from '@/constants';
 import { useAgency } from '@/src/features/agencies/hooks/useAgency';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyInfoCardProps {
   agencyId: string;
@@ -59,22 +49,22 @@ const AgencyInfoCard: React.FC<AgencyInfoCardProps> = ({ agencyId }) => {
 
   const infoItems = [
     {
-      icon: <MapPinIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="pin" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.location', 'Location'),
       value: [agencyData.city, agencyData.country].filter(Boolean).join(', ') || '-',
     },
     {
-      icon: <EnvelopeIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="envelope" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.email', 'Email'),
       value: (agencyData.email as string) || '-',
     },
     {
-      icon: <PhoneIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="phone" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.phone', 'Phone'),
       value: (agencyData.phone as string) || '-',
     },
     {
-      icon: <GlobeAltIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="globe" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.website', 'Website'),
       value: (agencyData.website as string) || '-',
       isLink: !!(agencyData.website),
@@ -83,17 +73,17 @@ const AgencyInfoCard: React.FC<AgencyInfoCardProps> = ({ agencyId }) => {
 
   const statsItems = [
     {
-      icon: <HomeIcon className="w-4 h-4 text-green-600" />,
+      icon: <SoftIcon name="home" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.totalProperties', 'Properties'),
       value: (agencyData.totalProperties as number) ?? 0,
     },
     {
-      icon: <UsersIcon className="w-4 h-4 text-blue-600" />,
+      icon: <SoftIcon name="users" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.totalAgentsCount', 'Agents'),
       value: (agencyData.totalAgents as number) ?? 0,
     },
     {
-      icon: <ClockIcon className="w-4 h-4 text-amber-600" />,
+      icon: <SoftIcon name="clock" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.yearsInBusiness', 'Years'),
       value: (agencyData.yearsInBusiness as number) ?? '-',
     },
@@ -106,20 +96,20 @@ const AgencyInfoCard: React.FC<AgencyInfoCardProps> = ({ agencyId }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-start gap-4 mb-5">
-        <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
-          {agencyData.logo ? (
+        {agencyData.logo ? (
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0">
             <img src={agencyData.logo as string} alt={agencyData.name as string} className="w-14 h-14 rounded-xl object-cover" />
-          ) : (
-            <BuildingOfficeIcon className="w-7 h-7 text-white" />
-          )}
-        </div>
+          </div>
+        ) : (
+          <SoftIcon name="building" className="w-14 h-14 flex-shrink-0" />
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold text-gray-900 truncate">
             {agencyData.name as string}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium capitalize">
-              <ShieldCheckIcon className="w-3 h-3" />
+              <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
               {agencyType}
             </span>
             {agencyData.isFeatured && (

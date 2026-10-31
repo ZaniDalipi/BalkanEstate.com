@@ -270,7 +270,10 @@ export const PRODUCTS = [
       'Unlimited generate insights for all agents',
       'Dedicated account manager',
       'Team dashboard & analytics',
+      '{residencesPerYear} free residence per year',
     ],
+    // Residences: free residences per subscription year (edit here or in the admin pricing screen)
+    residencesPerYear: 1,
     targetRole: 'seller' as const, // Show in "For Sellers" tab
     displayOrder: 4,
     badge: 'BEST FOR TEAMS',
@@ -398,6 +401,71 @@ export const PRODUCTS = [
     imageDescriptionLimit: -1, // unlimited
   },
 
+  // ============================================================================
+  // RESIDENCE PASS (per residence; see config/residenceBilling.ts)
+  // ============================================================================
+  {
+    productId: 'residence_pass_yearly',
+    name: 'Residence Pass',
+    description: 'Keeps one residence public for 12 months, with 5 buildings included.',
+    type: 'non_consumable' as const,
+    tier: 'residence' as const,
+    price: 149,
+    currency: 'EUR',
+    billingPeriod: 'yearly' as const,
+    durationDays: 365,
+    features: ['{durationMonths} months public', '{includedBuildings} buildings included', 'Interactive explorer', 'Unit inquiries'],
+    // Buildings included per residence (edit here or in the admin pricing screen)
+    includedBuildings: 5,
+    targetRole: 'all' as const,
+    displayOrder: 50,
+    highlighted: false,
+    isActive: true,
+    // Bought from a residence's dashboard, not from the plan cards on /subscribe.
+    isVisible: false,
+    hasFreeTrial: false,
+    gracePeriodDays: 0,
+    listingsLimit: 0,
+    promotionCoupons: 0,
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
+    agentCoupons: 0,
+    savedSearchesLimit: 0,
+    aiMessagesLimit: 0,
+    aiInsightsLimit: 0,
+    imageDescriptionLimit: 0,
+  },
+  {
+    productId: 'residence_extra_building_yearly',
+    name: 'Extra Building',
+    description: 'One more building in a residence, for the rest of its pass period.',
+    type: 'non_consumable' as const,
+    tier: 'residence' as const,
+    price: 29,
+    currency: 'EUR',
+    billingPeriod: 'yearly' as const,
+    durationDays: 365,
+    features: ['One more building', 'Renews with the Residence Pass'],
+    targetRole: 'all' as const,
+    displayOrder: 51,
+    highlighted: false,
+    isActive: true,
+    // Bought from a residence's dashboard, not from the plan cards on /subscribe.
+    isVisible: false,
+    hasFreeTrial: false,
+    gracePeriodDays: 0,
+    listingsLimit: 0,
+    promotionCoupons: 0,
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
+    agentCoupons: 0,
+    savedSearchesLimit: 0,
+    aiMessagesLimit: 0,
+    aiInsightsLimit: 0,
+    imageDescriptionLimit: 0,
+  },
   // ============================================================================
   // FEATURED AGENCY - Visibility boosts for agencies (duration-based)
   // ============================================================================

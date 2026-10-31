@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@/constants';
+import { optimizeImageUrl, isMediaCdnUrl } from '@/config/mediaConfig';
+import { isCloudinaryPhotoUrl } from '@/config/legacyCloudinary';
 import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
 import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const RoomStylerModal = lazy(() => import('../../room-styler/components/RoomStylerModal'));
 
@@ -37,9 +39,10 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const [isSendingToChat, setIsSendingToChat] = useState(false);
     const [showStyler, setShowStyler] = useState(false);
 
-    // The AI Room Styler only works on Cloudinary-hosted listing photos.
+    // The AI Room Styler only works on our own stored listing photos (R2, or
+    // ones still kept on Cloudinary).
     const currentUrl = images[currentIndex]?.url;
-    const canRestyle = !!currentUrl && currentUrl.includes('res.cloudinary.com');
+    const canRestyle = !!currentUrl && (isMediaCdnUrl(currentUrl) || isCloudinaryPhotoUrl(currentUrl));
 
     const openStyler = useCallback(() => {
         if (!state.isAuthenticated) {
@@ -398,7 +401,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         type="button"
                         onClick={zoomOut}
                         className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                        aria-label="Zoom out"
+                        aria-label={t('property:ui.imageViewerModal.zoomOut', 'Zoom out')}
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                             <circle cx="11" cy="11" r="8"/><path strokeLinecap="round" d="M21 21l-4.35-4.35M8 11h6"/>
@@ -408,7 +411,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         type="button"
                         onClick={resetZoom}
                         className="px-2 text-white text-xs font-semibold min-w-[46px] min-h-[44px] flex items-center justify-center hover:bg-white/10 transition-colors tabular-nums"
-                        aria-label="Reset zoom"
+                        aria-label={t('property:ui.imageViewerModal.resetZoom', 'Reset zoom')}
                     >
                         {Math.round(zoom * 100)}%
                     </button>
@@ -416,7 +419,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         type="button"
                         onClick={zoomIn}
                         className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                        aria-label="Zoom in"
+                        aria-label={t('property:ui.imageViewerModal.zoomIn', 'Zoom in')}
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                             <circle cx="11" cy="11" r="8"/><path strokeLinecap="round" d="M21 21l-4.35-4.35M11 8v6M8 11h6"/>
@@ -432,9 +435,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-sm font-medium bg-white/10 text-white/80 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-colors"
                         aria-label={t('property:roomStyler.reimagine', 'Reimagine this room')}
                     >
-                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                        </svg>
+                        <SoftIcon name="sparkles" className="w-5 h-5 flex-shrink-0" />
                         <span className="hidden sm:inline">{t('property:roomStyler.reimagine', 'Reimagine')}</span>
                     </button>
                 )}
@@ -447,11 +448,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         annotateMode ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20'
                     }`}
                     aria-pressed={annotateMode}
-                    aria-label="Toggle annotation mode"
+                    aria-label={t('property:ui.imageViewerModal.toggleAnnotationMode', 'Toggle annotation mode')}
                 >
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
-                    </svg>
+                    <SoftIcon name="pencil" className="w-5 h-5 flex-shrink-0" />
                     <span className="hidden sm:inline">{annotateMode ? t('property:imageViewer.annotate.done', 'Done') : t('property:imageViewer.annotate.label', 'Annotate')}</span>
                 </button>
 
@@ -516,7 +515,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         onClick={undo}
                         disabled={strokes.length === 0}
                         className="w-9 h-9 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        aria-label="Undo last stroke"
+                        aria-label={t('property:ui.imageViewerModal.undoLastStroke', 'Undo last stroke')}
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
@@ -529,7 +528,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         onClick={clearAnnotations}
                         disabled={strokes.length === 0}
                         className="w-9 h-9 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        aria-label="Clear all annotations"
+                        aria-label={t('property:ui.imageViewerModal.clearAllAnnotations', 'Clear all annotations')}
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -543,7 +542,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             onClick={downloadAnnotated}
                             disabled={strokes.length === 0}
                             className="flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-white bg-white/20 hover:bg-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            aria-label="Download annotated image"
+                            aria-label={t('property:ui.imageViewerModal.downloadAnnotatedImage', 'Download annotated image')}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -556,7 +555,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                                 onClick={sendAnnotatedToChat}
                                 disabled={strokes.length === 0 || isSendingToChat}
                                 className="flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-white bg-primary hover:bg-primary/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                aria-label="Send annotated image to chat"
+                                aria-label={t('property:ui.imageViewerModal.sendAnnotatedImageToChat', 'Send annotated image to chat')}
                             >
                                 {isSendingToChat ? (
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
@@ -591,7 +590,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     <img
                         // Same placeholder URL the inline gallery uses, so opening
                         // fullscreen paints the blur from cache instead of fetching.
-                        src={currentSources.placeholder || optimizeCloudinaryUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
+                        src={currentSources.placeholder || optimizeImageUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-60 pointer-events-none select-none"
@@ -612,7 +611,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 >
                     {imageError ? (
                         <div className="flex flex-col items-center justify-center text-white p-8">
-                            <BuildingOfficeIcon className="w-20 h-20 text-neutral-500"/>
+                            <SoftIcon name="photo" className="w-20 h-20 opacity-70" />
                             <p className="mt-4 text-sm font-medium text-white/70">{t('property:imageViewer.loadError', 'Image could not be loaded')}</p>
                         </div>
                     ) : (

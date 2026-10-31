@@ -39,6 +39,7 @@ export type AppView =
   | 'createAgencyPayment'
   | 'createAgencyConfirm'
   | 'guides'
+  | 'about'
   | 'blog'
   | 'not-found';
 

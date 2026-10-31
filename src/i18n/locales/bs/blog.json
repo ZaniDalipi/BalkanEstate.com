@@ -29,5 +29,26 @@
     "prev": "Prethodna",
     "next": "Sljedeća",
     "page": "Stranica {{page}} od {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "Kopirano!",
+      "more": "Više",
+      "copyLink": "Kopiraj link",
+      "articleContent": "Sadržaj članka",
+      "featured": "Istaknuto",
+      "minRead": "min čitanja",
+      "shareThisArticle": "Podijelite ovaj članak",
+      "views": "pregleda"
+    },
+    "blogPage": {
+      "activeFilters": "Aktivni filteri:",
+      "clearAll": "Obriši sve",
+      "tryAdjustingYourFilters": "Pokušajte promijeniti filtere"
+    },
+    "articleCard": {
+      "featured": "Istaknuto",
+      "readArticle": "Pročitaj članak"
+    }
   }
 }

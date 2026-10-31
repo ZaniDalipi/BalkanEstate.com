@@ -21,14 +21,14 @@ export function NotFound() {
 							className="bg-[url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif)] h-[250px] sm:h-[350px] md:h-[400px] bg-center bg-no-repeat bg-contain"
 							aria-hidden="true"
 						>
-							<h1 className="text-center text-black text-6xl sm:text-7xl md:text-8xl pt-6 sm:pt-8">
+							<h1 className="text-center text-black text-6xl sm:text-7xl md:text-8xl pt-6 sm:pt-8 landscape:text-3xl">
 								404
 							</h1>
 						</div>
 						<div className="relative z-10 mt-[-50px]">
-							<h3 className="text-2xl text-black sm:text-3xl font-bold mb-4">
+							<h2 className="text-2xl text-black sm:text-3xl font-bold mb-4">
 								{t('common:notFound.title')}
-							</h3>
+							</h2>
 							<p className="mb-6 text-black sm:mb-5">
 								{t('common:notFound.message')}
 							</p>

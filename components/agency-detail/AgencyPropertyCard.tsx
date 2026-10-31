@@ -6,14 +6,9 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  BuildingOfficeIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  ShieldCheckIcon,
-  ChevronRightIcon,
-} from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { ChevronRightIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -76,15 +71,13 @@ const AgencyPropertyCard: React.FC<AgencyPropertyCardProps> = ({
           {/* Logo */}
           {agencyLogo ? (
             <img
-              src={optimizeCloudinaryUrl(agencyLogo, { width: 56, quality: 'auto', crop: 'fill' })}
+              src={optimizeImageUrl(agencyLogo, { width: 56, quality: 'auto', crop: 'fill' })}
               alt={agencyName}
               className="w-14 h-14 rounded-xl object-cover border border-gray-100 shadow-sm flex-shrink-0"
               loading="lazy"
             />
           ) : (
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center flex-shrink-0">
-              <BuildingOfficeIcon className="w-7 h-7 text-amber-600" />
-            </div>
+            <SoftIcon name="building" className="w-14 h-14 flex-shrink-0" />
           )}
 
           <div className="min-w-0 flex-1">
@@ -94,7 +87,7 @@ const AgencyPropertyCard: React.FC<AgencyPropertyCardProps> = ({
             )}
             {registrationNumber && (
               <div className="flex items-center gap-1 mt-0.5">
-                <ShieldCheckIcon className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
                 <span className="text-xs text-green-700 font-medium">
                   {t('agencyDetails:propertyCard.registrationNumber', 'Reg. No.')} {registrationNumber}
                 </span>
@@ -132,7 +125,7 @@ const AgencyPropertyCard: React.FC<AgencyPropertyCardProps> = ({
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-50 text-green-700 rounded-xl text-sm font-semibold hover:bg-green-100 transition-colors"
               aria-label={t('agencyDetails:propertyCard.contactAgency', 'Contact Agency')}
             >
-              <PhoneIcon className="w-4 h-4" />
+              <SoftIcon name="phone" className="w-5 h-5" />
               {t('agencyDetails:labels.call', 'Call')}
             </a>
           )}
@@ -142,7 +135,7 @@ const AgencyPropertyCard: React.FC<AgencyPropertyCardProps> = ({
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-sm font-semibold hover:bg-blue-100 transition-colors"
               aria-label={`${t('agencyDetails:labels.email', 'Email')} ${agencyName}`}
             >
-              <EnvelopeIcon className="w-4 h-4" />
+              <SoftIcon name="envelope" className="w-5 h-5" />
               {t('agencyDetails:labels.email', 'Email')}
             </a>
           )}

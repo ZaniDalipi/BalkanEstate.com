@@ -40,7 +40,7 @@ const zIndexNear = (marker: string): number => {
 
 describe('the villas search dropdown is not cut through by the results bar', () => {
     it('puts the header holding the search box above the results bar', () => {
-        const header = zIndexNear('hidden lg:block sticky top-0');
+        const header = zIndexNear("'lg:block'} sticky top-0");
         const resultsBar = zIndexNear('sticky top-0 bg-white border-b border-gray-100');
 
         expect(header).toBeGreaterThan(resultsBar);

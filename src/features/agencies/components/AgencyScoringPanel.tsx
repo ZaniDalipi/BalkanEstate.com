@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AGENCY_SCORING_METRIC_DEFS, AGENCY_MAX_SCORE } from '../utils/agencyScoring';
 import { ChevronDownIcon } from '@/constants';
 import { cn } from '@/lib/utils';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface AgencyScoringPanelProps {
   defaultCollapsed?: boolean;
@@ -10,7 +11,7 @@ interface AgencyScoringPanelProps {
 }
 
 interface MetricCardProps {
-  icon: string;
+  icon: SoftIconName;
   label: string;
   formula: string;
   desc: string;
@@ -23,13 +24,15 @@ interface MetricCardProps {
 
 const MetricCard: React.FC<MetricCardProps> = ({
   icon, label, formula, desc, cap, maxPts, color, bg, border,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <div
     role="listitem"
     style={{ background: bg, border: `1px solid ${border}` }}
     className="rounded-2xl p-4 flex flex-col items-center text-center gap-2"
   >
-    <span className="text-2xl leading-none" role="img" aria-hidden="true">{icon}</span>
+    <SoftIcon name={icon} className="w-10 h-10" />
 
     <span className="text-xs font-bold text-gray-900 leading-tight">{label}</span>
 
@@ -44,7 +47,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
     <div className="w-full">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-gray-400 font-medium">0 pts</span>
+        <span className="text-[10px] text-gray-400 font-medium">{t('agencies:ui.agencyScoringPanel.n0Pts', '0 pts')}</span>
         <span className="text-[10px] font-bold" style={{ color }}>{maxPts} pts</span>
       </div>
       <div className="h-1 rounded-full bg-gray-100 overflow-hidden">
@@ -66,6 +69,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     </span>
   </div>
 );
+};
 
 const AgencyScoringPanel: React.FC<AgencyScoringPanelProps> = ({
   defaultCollapsed = false,
@@ -116,7 +120,7 @@ const AgencyScoringPanel: React.FC<AgencyScoringPanelProps> = ({
         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5 sm:py-4 hover:bg-gray-50 transition-colors duration-150 text-left"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-base" aria-hidden="true">🏢</span>
+          <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
           <span className="text-sm font-bold text-gray-900 truncate">
             {t('agencies:scoring.panelTitle', 'How the agency score works')}
           </span>

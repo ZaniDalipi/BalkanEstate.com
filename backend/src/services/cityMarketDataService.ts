@@ -365,22 +365,21 @@ function generateFallbackCityData(cityInfo: { city: string; country: string; cou
   if (metadata.type === 'coastal' || metadata.type === 'tourist') growth = 10;
   else if (metadata.type === 'capital' && metadata.tier === 1) growth = 12;
   else if (metadata.type === 'industrial') growth = 3;
-  const priceGrowthYoY = growth + Math.round((Math.random() - 0.5) * 4);
+  // No random jitter: these fallback figures are rough type-based estimates,
+  // and randomising them made every reseed publish different "statistics".
+  const priceGrowthYoY = growth;
 
   // Days on market (lower for better markets)
   const averageDaysOnMarket = metadata.tier === 1 ? 35 : metadata.tier === 2 ? 45 : 55;
 
   // Demand score
-  const demandScore = Math.min(100, Math.max(60,
-    (metadata.tier === 1 ? 85 : metadata.tier === 2 ? 75 : 65) + Math.round((Math.random() - 0.5) * 10)
-  ));
+  const demandScore = metadata.tier === 1 ? 85 : metadata.tier === 2 ? 75 : 65;
 
   // Rental yield (higher for tourist/coastal)
   let rentalYield = 5.0;
   if (metadata.type === 'coastal' || metadata.type === 'tourist') rentalYield = 6.5;
   else if (metadata.type === 'capital') rentalYield = 4.5;
-  rentalYield += (Math.random() - 0.5) * 1;
-  rentalYield = Math.round(rentalYield * 10) / 10;
+
 
   // Investment score
   const investmentScore = Math.min(100, Math.max(55,

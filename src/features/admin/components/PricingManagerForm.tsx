@@ -1,7 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/constants';
+import { ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { Product } from '../api/adminApi';
+import { ResidenceLimitsFields } from './ResidenceLimitsFields';
 import { availablePlaceholders, replacePlaceholders, hasPlaceholders } from '@/src/shared/utils/featurePlaceholders';
 
 interface PricingManagerFormProps {
@@ -52,7 +54,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
           <h3 className="text-xl font-bold flex items-center gap-2">
-            <PencilIcon className="w-5 h-5" />
+            <SoftIcon name="pencil" className="w-6 h-6 flex-shrink-0" />
             {t('admin:pricing.editProduct', 'Edit Product')}
           </h3>
           <button
@@ -184,10 +186,12 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <h4 className="font-semibold text-green-900 mb-3">{t('admin:pricing.form.limitsSection', 'Limits & Quotas')}</h4>
 
+            <ResidenceLimitsFields product={editingProduct} onNumber={handleNumberChange} />
+
             {/* Listings Limit - Most important for sellers/agents */}
             <div className="bg-white border-2 border-green-300 rounded-lg p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🏠</span>
+                <SoftIcon name="home" className="w-6 h-6 flex-shrink-0" />
                 <h5 className="font-semibold text-green-800">{t('admin:pricing.form.listingsLimit', 'Listings Limit')}</h5>
               </div>
               <p className="text-xs text-gray-600 mb-2">{t('admin:pricing.form.listingsLimitDesc', 'Maximum number of active property listings allowed for this plan')}</p>
@@ -214,7 +218,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                   value={editingProduct.savedSearchesLimit}
                   onChange={(e) => handleNumberChange('savedSearchesLimit', e.target.value, -1)}
                   min="-1"
-                  placeholder="-1 for unlimited"
+                  placeholder={t('admin:ui.pricingManagerForm.n1ForUnlimited', '-1 for unlimited')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 mt-1">{t('admin:pricing.form.unlimitedHelp', '-1 = unlimited')}</p>
@@ -397,7 +401,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                           ? 'text-gray-300 cursor-not-allowed'
                           : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
                       }`}
-                      title="Move up"
+                      title={t('admin:ui.pricingManagerForm.moveUp', 'Move up')}
                     >
                       <ChevronUpIcon className="w-3 h-3" />
                     </button>
@@ -410,7 +414,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                           ? 'text-gray-300 cursor-not-allowed'
                           : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
                       }`}
-                      title="Move down"
+                      title={t('admin:ui.pricingManagerForm.moveDown', 'Move down')}
                     >
                       <ChevronDownIcon className="w-3 h-3" />
                     </button>

@@ -1,15 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  PlayCircleIcon,
   PlusIcon,
   TrashIcon,
-  BookOpenIcon,
-  QuestionMarkCircleIcon,
-  SparklesIcon,
   ChevronUpIcon,
   ChevronDownIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import {
   type SiteContent,
   type Step,
@@ -25,14 +22,14 @@ import {
 interface ContentTypeOption {
   id: string;
   label: string;
-  icon: React.FC<{ className?: string }>;
+  icon: SoftIconName;
 }
 
 const CONTENT_TYPES: ContentTypeOption[] = [
-  { id: 'video', label: 'Video Tutorial', icon: PlayCircleIcon },
-  { id: 'guide', label: 'Step-by-Step Guide', icon: BookOpenIcon },
-  { id: 'faq', label: 'FAQ Section', icon: QuestionMarkCircleIcon },
-  { id: 'feature', label: 'Feature Highlight', icon: SparklesIcon },
+  { id: 'video', label: 'Video Tutorial', icon: 'video' },
+  { id: 'guide', label: 'Step-by-Step Guide', icon: 'clipboard' },
+  { id: 'faq', label: 'FAQ Section', icon: 'chat' },
+  { id: 'feature', label: 'Feature Highlight', icon: 'sparkles' },
 ];
 
 interface HowItWorksManagerFormProps {
@@ -91,7 +88,6 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CONTENT_TYPES.map((type) => {
-                const Icon = type.icon;
                 return (
                   <button
                     key={type.id}
@@ -103,8 +99,8 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <Icon className="w-6 h-6" />
-                    <span className="text-sm font-medium">{type.label}</span>
+                    <SoftIcon name={type.icon} className="w-8 h-8" />
+                    <span className="text-sm font-medium">{t(`admin:lists.howItWorksContentTypes.${type.id}`, type.label)}</span>
                   </button>
                 );
               })}
@@ -123,7 +119,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                 setFormData((prev) => ({ ...prev, key: e.target.value }))
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., getting-started-create-account"
+              placeholder={t('admin:ui.howItWorksManagerForm.eGGettingStartedCreate', 'e.g., getting-started-create-account')}
               required
             />
           </div>
@@ -140,7 +136,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                 setFormData((prev) => ({ ...prev, title: e.target.value }))
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., How to Create an Account"
+              placeholder={t('admin:ui.howItWorksManagerForm.eGHowToCreate', 'e.g., How to Create an Account')}
               required
             />
           </div>
@@ -157,7 +153,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={2}
-              placeholder="Brief description of the content"
+              placeholder={t('admin:ui.howItWorksManagerForm.briefDescriptionOfTheContent', 'Brief description of the content')}
             />
           </div>
 
@@ -176,7 +172,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               >
                 {SUBSECTIONS.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.label}
+                    {t(`admin:lists.howItWorksSubsections.${s.id}`, s.label)}
                   </option>
                 ))}
               </select>
@@ -194,7 +190,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.label}
+                    {t(`admin:lists.howItWorksCategories.${c.id}`, c.label)}
                   </option>
                 ))}
               </select>
@@ -214,7 +210,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   setFormData((prev) => ({ ...prev, estimatedTime: e.target.value }))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., 5 mins"
+                placeholder={t('admin:ui.howItWorksManagerForm.eG5Mins', 'e.g., 5 mins')}
               />
             </div>
             <div>
@@ -228,9 +224,9 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="advanced">Advanced</option>
+                <option value="easy">{t('admin:ui.howItWorksManagerForm.easy', 'Easy')}</option>
+                <option value="medium">{t('admin:ui.howItWorksManagerForm.medium', 'Medium')}</option>
+                <option value="advanced">{t('admin:ui.howItWorksManagerForm.advanced', 'Advanced')}</option>
               </select>
             </div>
           </div>
@@ -257,7 +253,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               {/* Video URL / Embed URL input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  YouTube URL or Video URL
+                  {t('admin:ui.howItWorksManagerForm.youtubeUrlOrVideoUrl', 'YouTube URL or Video URL')}
                 </label>
                 <input
                   type="url"
@@ -282,12 +278,12 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                   placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Paste a YouTube link — it will be auto-converted to embed format. Video files are not uploaded.
+                  {t('admin:ui.howItWorksManagerForm.pasteAYoutubeLinkIt', 'Paste a YouTube link — it will be auto-converted to embed format. Video files are not uploaded.')}
                 </p>
 
                 {formData.url && formData.url.includes('youtube.com/embed') && (
                   <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                    YouTube video detected — embed URL ready
+                    {t('admin:ui.howItWorksManagerForm.youtubeVideoDetectedEmbedUrl', 'YouTube video detected — embed URL ready')}
                   </p>
                 )}
               </div>
@@ -300,7 +296,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                       <iframe
                         className="absolute top-0 left-0 w-full h-full"
                         src={convertToYouTubeEmbedUrl(formData.url)}
-                        title="Video preview"
+                        title={t('admin:ui.howItWorksManagerForm.videoPreview', 'Video preview')}
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -318,7 +314,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700">
-                  Steps ({formData.steps.length})
+                  {t('admin:ui.howItWorksManagerForm.steps', 'Steps (')}{formData.steps.length})
                 </label>
                 <button
                   type="button"
@@ -341,7 +337,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
                           {step.stepNumber}
                         </span>
-                        <span className="font-medium text-gray-700">Step {step.stepNumber}</span>
+                        <span className="font-medium text-gray-700">{t('admin:ui.howItWorksManagerForm.step', 'Step')} {step.stepNumber}</span>
                       </span>
                       <div className="flex items-center gap-1">
                         <button
@@ -376,14 +372,14 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         value={step.title}
                         onChange={(e) => updateStep(index, 'title', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        placeholder="Step title"
+                        placeholder={t('admin:ui.howItWorksManagerForm.stepTitle', 'Step title')}
                       />
                       <textarea
                         value={step.description}
                         onChange={(e) => updateStep(index, 'description', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                         rows={2}
-                        placeholder="Step description"
+                        placeholder={t('admin:ui.howItWorksManagerForm.stepDescription', 'Step description')}
                       />
                       <div className="grid grid-cols-2 gap-3">
                         <select
@@ -393,7 +389,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         >
                           {ICON_OPTIONS.map((icon) => (
                             <option key={icon.id} value={icon.id}>
-                              {icon.label}
+                              {t(`admin:lists.howItWorksIcons.${icon.id}`, icon.label)}
                             </option>
                           ))}
                         </select>
@@ -402,7 +398,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                           value={step.duration || ''}
                           onChange={(e) => updateStep(index, 'duration', e.target.value)}
                           className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                          placeholder="Duration (e.g., 2 mins)"
+                          placeholder={t('admin:ui.howItWorksManagerForm.durationEG2Mins', 'Duration (e.g., 2 mins)')}
                         />
                       </div>
                     </div>
@@ -411,7 +407,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
                 {formData.steps.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <BookOpenIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <SoftIcon name="clipboard" className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">{t('admin:howItWorks.noStepsAdded')}</p>
                   </div>
                 )}
@@ -424,7 +420,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700">
-                  FAQs ({formData.faqs.length})
+                  {t('admin:ui.howItWorksManagerForm.faqs', 'FAQs (')}{formData.faqs.length})
                 </label>
                 <button
                   type="button"
@@ -443,7 +439,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                     className="p-4 bg-gray-50 rounded-xl border border-gray-200"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-gray-700">Question {index + 1}</span>
+                      <span className="font-medium text-gray-700">{t('admin:ui.howItWorksManagerForm.question', 'Question')} {index + 1}</span>
                       <button
                         type="button"
                         onClick={() => removeFAQ(index)}
@@ -459,14 +455,14 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         value={faq.question}
                         onChange={(e) => updateFAQ(index, 'question', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        placeholder="Question"
+                        placeholder={t('admin:ui.howItWorksManagerForm.question', 'Question')}
                       />
                       <textarea
                         value={faq.answer}
                         onChange={(e) => updateFAQ(index, 'answer', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                         rows={3}
-                        placeholder="Answer"
+                        placeholder={t('admin:ui.howItWorksManagerForm.answer', 'Answer')}
                       />
                     </div>
                   </div>
@@ -474,7 +470,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
                 {formData.faqs.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <QuestionMarkCircleIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <SoftIcon name="chat" className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">{t('admin:howItWorks.noFaqsAdded')}</p>
                   </div>
                 )}
@@ -487,7 +483,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700">
-                  Features ({formData.features.length})
+                  {t('admin:ui.howItWorksManagerForm.features', 'Features (')}{formData.features.length})
                 </label>
                 <button
                   type="button"
@@ -507,7 +503,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                       value={feature}
                       onChange={(e) => updateFeature(index, e.target.value)}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                      placeholder="Feature description"
+                      placeholder={t('admin:ui.howItWorksManagerForm.featureDescription', 'Feature description')}
                     />
                     <button
                       type="button"
@@ -521,7 +517,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
                 {formData.features.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <SparklesIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <SoftIcon name="sparkles" className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">{t('admin:howItWorks.noFeaturesAdded')}</p>
                   </div>
                 )}

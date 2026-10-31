@@ -87,7 +87,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                 <div className="relative inline-block">
                     <img
                         src={imagePreview}
-                        alt="Preview"
+                        alt={t('messages:ui.messageInput.preview', 'Preview')}
                         className="max-w-[120px] sm:max-w-xs max-h-24 sm:max-h-32 rounded-lg border border-neutral-300"
                     />
                     <button

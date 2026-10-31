@@ -67,20 +67,20 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
 
     if (type === 'invitation') {
       if (upperCode.length > 0 && upperCode.length < INVITATION_CODE_MIN_LENGTH) {
-        return { valid: false, message: 'Keep typing... (AGY-XXXXXX-XXXXXX)', status: 'typing' };
+        return { valid: false, message: t('agencies:ui.invitationCodeModal.keepTypingAgyXxxxxxXxxxxx', 'Keep typing... (AGY-XXXXXX-XXXXXX)'), status: 'typing' };
       }
       if (upperCode.length >= INVITATION_CODE_MIN_LENGTH && !INVITATION_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: AGY-XXXXXX-XXXXXX', status: 'invalid' };
+        return { valid: false, message: t('agencies:ui.invitationCodeModal.invalidFormatExpectedAgyXxxxxx', 'Invalid format. Expected: AGY-XXXXXX-XXXXXX'), status: 'invalid' };
       }
       if (INVITATION_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: t('invitationCode.validInvitationFormat'), status: 'valid' };
       }
     } else {
       if (upperCode.length > 0 && upperCode.length < 12) {
-        return { valid: false, message: 'Keep typing... (XXX-XXXXXXXX)', status: 'typing' };
+        return { valid: false, message: t('agencies:ui.invitationCodeModal.keepTypingXxxXxxxxxxx', 'Keep typing... (XXX-XXXXXXXX)'), status: 'typing' };
       }
       if (upperCode.length >= COUPON_CODE_MIN_LENGTH && !COUPON_CODE_PATTERN.test(upperCode)) {
-        return { valid: false, message: 'Invalid format. Expected: XXX-XXXXXXXX', status: 'invalid' };
+        return { valid: false, message: t('agencies:ui.invitationCodeModal.invalidFormatExpectedXxxXxxxxxxx', 'Invalid format. Expected: XXX-XXXXXXXX'), status: 'invalid' };
       }
       if (COUPON_CODE_PATTERN.test(upperCode)) {
         return { valid: true, message: t('invitationCode.validCouponFormat'), status: 'valid' };
@@ -198,7 +198,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
                   : 'text-gray-600 hover:text-gray-900'
             }`}
             disabled={isSubmitting || !hasProSubscription}
-            title={!hasProSubscription ? 'Pro subscription required to use invitation codes' : undefined}
+            title={!hasProSubscription ? t('agencies:ui.invitationCodeModal.proSubscriptionRequiredToUse', 'Pro subscription required to use invitation codes') : undefined}
           >
             <span className="hidden sm:inline">{t('invitationCode.invitationCode')}</span>
             <span className="sm:hidden">{t('invitationCode.inviteShort')}</span>
@@ -241,7 +241,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               id="codeInput"
               value={code}
               onChange={handleCodeChange}
-              placeholder={codeType === 'invitation' ? 'AGY-XXXXXX-XXXXXX' : 'XXX-XXXXXXXX'}
+              placeholder={codeType === 'invitation' ? t('agencies:ui.invitationCodeModal.agyXxxxxxXxxxxx', 'AGY-XXXXXX-XXXXXX') : t('agencies:ui.invitationCodeModal.xxxXxxxxxxx', 'XXX-XXXXXXXX')}
               className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-base sm:text-lg tracking-wider uppercase transition-colors ${
                 error ? 'border-red-300 bg-red-50' :
                 validationStatus === 'valid' ? 'border-green-300 bg-green-50' :
@@ -267,8 +267,8 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
               ) : (
                 <p className="text-xs text-gray-500">
                   {codeType === 'invitation'
-                    ? 'Format: AGY-XXXXXX-XXXXXX'
-                    : 'Format: ABC-XXXXXXXX'}
+                    ? t('agencies:ui.invitationCodeModal.formatAgyXxxxxxXxxxxx', 'Format: AGY-XXXXXX-XXXXXX')
+                    : t('agencies:ui.invitationCodeModal.formatAbcXxxxxxxx', 'Format: ABC-XXXXXXXX')}
                 </p>
               )}
             </div>

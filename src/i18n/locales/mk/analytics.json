@@ -119,6 +119,28 @@
     "networkError": "Грешка на мрежата. Ве молиме проверете ја вашата врска.",
     "serverError": "Грешка на серверот. Ве молиме обидете се подоцна.",
     "retry": "Обиди се повторно",
-    "retrying": "Обидување повторно..."
+    "retrying": "Обидување повторно...",
+    "title": "Грешка при вчитување податоци"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Највисок час",
+      "peak": "Врв:",
+      "total": "Вкупно:",
+      "less": "Помалку",
+      "noViews": "Нема прегледи",
+      "more": "Повеќе"
+    },
+    "trafficChart": {
+      "total": "Вкупно:",
+      "top": "Најмногу:",
+      "directUrlVisits": "Директни посети преку URL",
+      "googleBingEtc": "Google, Bing, итн.",
+      "facebookInstagramEtc": "Facebook, Instagram, итн.",
+      "newsletterCampaigns": "Билтен, кампањи"
+    },
+    "deviceChart": {
+      "ofTotal": "% од вкупно"
+    }
   }
 }

@@ -24,14 +24,12 @@ vi.mock('browser-image-compression', () => ({ default: vi.fn() }));
 const { buildPreviewProperty } = await import('@/src/features/seller/components/useListingForm');
 const { initialListingData } = await import('@/src/features/seller/components/ListingFormHelpers');
 
-const blankImage = { file: null, previewUrl: '' } as never;
-
 /** Run form state through the real preview builder and read the area off it. */
 const submittedArea = (overrides: Partial<ListingData>): number =>
     buildPreviewProperty(
         { ...initialListingData, ...overrides } as ListingData,
         [],
-        blankImage,
+        [], // no floor plans
         'Albania',
         'Tirana',
         'private_seller' as never,

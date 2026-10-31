@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import {
     XMarkIcon,
     PlusIcon,
-    TrophyIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import AchievementsSection from '@/components/shared/AchievementsSection';
 import { Achievement } from '@/components/shared/AchievementsSection';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
@@ -178,7 +178,7 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-gray-100 rounded-xl transition-colors ml-3 flex-shrink-0"
-                        aria-label="Close"
+                        aria-label={t('agents:ui.agentEditModal.close', 'Close')}
                     >
                         <XMarkIcon className="w-5 h-5 text-gray-500" />
                     </button>
@@ -346,7 +346,7 @@ const AgentEditModal: React.FC<AgentEditModalProps> = ({
                     {/* Awards & Achievements */}
                     <section className="border-t border-gray-200 pt-6">
                         <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <TrophyIcon className="w-5 h-5 text-amber-500" />
+                            <SoftIcon name="trophy" className="w-6 h-6 flex-shrink-0" />
                             {t('profilePage.editModal.achievements', 'Awards & Achievements')}
                         </h3>
                         <AchievementsSection

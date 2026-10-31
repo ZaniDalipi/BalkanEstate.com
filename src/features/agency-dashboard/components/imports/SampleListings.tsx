@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import type { FeedSampleListing } from '../../types/propertyImports';
 import { formatPrice } from './formatters';
 
@@ -13,7 +13,7 @@ const SampleListings: React.FC<{ samples: FeedSampleListing[] }> = ({ samples })
       {samples.map((s) => (
         <li key={s.externalId} className="flex gap-3 rounded-lg border border-gray-200 p-3">
           {s.imageUrls[0] && (
-            <img src={optimizeCloudinaryUrl(s.imageUrls[0], { width: 160 })} alt="" loading="lazy" className="w-20 h-20 rounded-md object-cover bg-gray-100 shrink-0" />
+            <img src={optimizeImageUrl(s.imageUrls[0], { width: 160 })} alt="" loading="lazy" className="w-20 h-20 rounded-md object-cover bg-gray-100 shrink-0" />
           )}
           <div className="min-w-0 text-sm">
             <p className="font-semibold text-gray-900 truncate">{s.title}</p>

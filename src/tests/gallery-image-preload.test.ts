@@ -11,6 +11,7 @@
  */
 
 import { API_URL } from '../shared/api/config';
+import { snapImageWidth } from '../../config/mediaConfig';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getGallerySources,
@@ -21,7 +22,7 @@ import {
   VIEWER_SIZES,
 } from '@/config/galleryImages';
 
-const CLOUDINARY = 'https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/photo.jpg';
+const CLOUDINARY = 'https://media.test/listing/photo/original.jpg';
 
 /** Captures what each `new Image()` preloader was actually asked to fetch. */
 interface Requested {
@@ -110,7 +111,7 @@ const uniqueUrls = (count: number): string[] => {
 describe('getGallerySources', () => {
   it('offers every candidate width so the browser can match the device DPR', () => {
     const { srcSet } = getGallerySources(CLOUDINARY);
-    GALLERY_WIDTHS.forEach((w) => expect(srcSet).toContain(`t_be_w${w}`));
+    GALLERY_WIDTHS.forEach((w) => expect(srcSet).toContain(`/w${snapImageWidth(w)}.webp`));
   });
 
   it('requests CORS for Cloudinary, matching the rendered <img>', () => {
@@ -122,12 +123,12 @@ describe('getGallerySources', () => {
     const encoded = encodeURIComponent('https://example.com/house.jpg');
     expect(sources.src).toBe(`${API_URL}/image-proxy?url=${encoded}&w=1920`);
     // One candidate per width, so phones don't download the desktop size.
-    expect(sources.srcSet).toContain(`${API_URL}/image-proxy?url=${encoded}&w=480 480w`);
+    expect(sources.srcSet).toContain(`${API_URL}/image-proxy?url=${encoded}&w=640 640w`);
     expect(sources.crossOrigin).toBeUndefined();
   });
 
   it('produces a blurred placeholder for the first paint', () => {
-    expect(getGallerySources(CLOUDINARY).placeholder).toContain('t_be_lqip');
+    expect(getGallerySources(CLOUDINARY).placeholder).toContain('lqip.webp');
   });
 
   it('tolerates a missing URL', () => {
@@ -136,7 +137,7 @@ describe('getGallerySources', () => {
 });
 
 /** Recovers the photo's index from the URL its request was built from. */
-const indexOf = (req: Requested): number => Number(/-(\d+)\./.exec(req.srcset)?.[1]);
+const indexOf = (req: Requested): number => Number(/-(\d+)\//.exec(req.srcset)?.[1]);
 
 describe('warmImage', () => {
   it('replays every attribute the browser uses to pick a candidate', async () => {

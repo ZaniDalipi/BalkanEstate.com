@@ -186,5 +186,10 @@
     "count": "{{count}} saved on this device",
     "clearAll": "Clear all",
     "remove": "Remove"
+  },
+  "ui": {
+    "valuationForm": {
+      "multiSelect": "(multi-select)"
+    }
   }
 }

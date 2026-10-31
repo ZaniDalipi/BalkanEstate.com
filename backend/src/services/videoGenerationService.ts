@@ -38,8 +38,7 @@ export interface VideoGenerationOptions {
 
 /**
  * A rendered video on local disk. It is streamed to the seller as a download
- * and then removed — generated videos are never stored (Cloudinary bills video
- * by the second and by the GB). Always call `cleanup()` when done with it.
+ * and then removed — generated videos are never stored. Always call `cleanup()` when done with it.
  */
 export interface VideoGenerationResult {
   filePath: string;

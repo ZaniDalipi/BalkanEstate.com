@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useBanners';
 import { useAdPreview } from '../hooks/usePreview';
 import { trackClick, trackImpression } from '../api/bannerApi';
@@ -39,9 +39,22 @@ interface AdSlotProps {
   /** Extra wrapper style. */
   style?: React.CSSProperties;
   /** When there's no booked banner, render nothing instead of the
-   *  "Your Ad Here" placeholder (network fill still applies). Use for overlays
-   *  where an empty placeholder would be intrusive (e.g. over photos). */
+   *  "Your Ad Here" placeholder, even in admin preview (network fill still
+   *  applies). */
   hidePlaceholder?: boolean;
+  /** Show the "Your Ad Here" placeholder to visitors when nothing is booked.
+   *  Off by default: give it to ONE slot per page (the main in-content
+   *  banner), so advertisers can find and contact us without the page
+   *  turning into a row of empty ad boxes — which is what reviewers read
+   *  as "low value content". Other slots show it only in admin preview. */
+  showPlaceholder?: boolean;
+  /** Allow AdSense to fill the slot when nothing is booked (default: true).
+   *  Turn off for slots that sit over content — AdSense units must not
+   *  overlay or obscure the publisher's content, e.g. listing photos. */
+  allowNetworkFill?: boolean;
+  /** Show a close button on a booked banner (used for the overlay in the
+   *  photo gallery). Nothing is rendered — button included — when unbooked. */
+  dismiss?: { label: string; onDismiss: () => void };
 }
 
 /**
@@ -60,6 +73,9 @@ const AdSlot: React.FC<AdSlotProps> = ({
   className,
   style,
   hidePlaceholder = false,
+  showPlaceholder = false,
+  allowNetworkFill = true,
+  dismiss,
 }) => {
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
@@ -157,7 +173,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   // No direct booking — fill with a network ad (AdSense) to earn revenue on
   // unsold inventory, when consented to and not in preview mode. Once AdSense
   // reports it has nothing either, fall through to the placeholder below.
-  if (!banner && !preview.active && canNetworkFill && !networkUnfilled) {
+  if (!banner && !preview.active && allowNetworkFill && canNetworkFill && !networkUnfilled) {
     return (
       <div ref={wrapperRef} className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
         <div style={{ ...baseBoxStyle, background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -167,12 +183,12 @@ const AdSlot: React.FC<AdSlotProps> = ({
     );
   }
 
-  // Overlay slots opt out of the placeholder entirely (network fill above
-  // still applies when configured).
-  if (!banner && hidePlaceholder) return null;
+  // Nothing booked and nothing from the network: collapse, unless this is the
+  // page's one public placeholder slot (or admin preview is showing where the
+  // unbooked slots sit).
+  if (!banner && (hidePlaceholder || (!preview.active && !showPlaceholder))) return null;
 
-  // No banner configured — show a "Your Ad Here" placeholder so the ad space
-  // is always visible and sellable, sized to the real ad slot.
+  // "Your Ad Here" — links to the contact form as an advertising lead.
   if (!banner) {
     return (
       <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
@@ -244,7 +260,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   }
 
   // Request ~2× the slot's CSS width so the creative stays sharp on hi-DPI screens.
-  const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, {
+  const imageSrc = optimizeImageUrl(banner.imageUrl, {
     width: isTall ? 700 : 1600,
     quality: 'auto',
   });
@@ -319,6 +335,18 @@ const AdSlot: React.FC<AdSlotProps> = ({
           />
         </a>
       </div>
+      {dismiss && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); dismiss.onDismiss(); }}
+          aria-label={dismiss.label}
+          className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };

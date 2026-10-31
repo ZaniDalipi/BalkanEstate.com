@@ -13,13 +13,17 @@
  */
 
 import { PARKING_TYPES, type ParkingType, type TypeAttribute } from './typeAttributes';
+import type { SoftIconName, SpecIllustrationName } from '../illustrations';
 
 export interface AttributeDisplay {
   /** Translation key, resolved against the `property` namespace. */
   key: string;
   /** Shown when the active locale has no translation yet. */
   fallback: string;
-  icon: string;
+  /** Small inline icon for compact lists (the detail page draws `illustration`). */
+  icon: SoftIconName;
+  /** The branded scene drawn for it on the detail page. */
+  illustration: SpecIllustrationName;
   /** Printed after the value — areas are in m², counts have no unit. */
   unit?: string;
   /**
@@ -30,28 +34,29 @@ export interface AttributeDisplay {
 }
 
 export const ATTRIBUTE_DISPLAY: Record<TypeAttribute, AttributeDisplay> = {
-  beds: { key: 'features.bedrooms', fallback: 'Bedrooms', icon: '🛏️' },
-  baths: { key: 'features.bathrooms', fallback: 'Bathrooms', icon: '🚿' },
-  livingRooms: { key: 'details.livingRoomPlural', fallback: 'Living rooms', icon: '🛋️' },
-  kitchens: { key: 'details.kitchens', fallback: 'Kitchens', icon: '🍳' },
-  diningRooms: { key: 'details.diningRooms', fallback: 'Dining rooms', icon: '🍽️' },
-  toilets: { key: 'details.toilets', fallback: 'Toilets (WC)', icon: '🚻' },
-  storageRooms: { key: 'details.storageRooms', fallback: 'Storage rooms', icon: '📦' },
-  offices: { key: 'details.offices', fallback: 'Offices', icon: '💼' },
-  openPlanArea: { key: 'details.openPlanArea', fallback: 'Open-plan area', icon: '🪟', unit: 'm²' },
-  landArea: { key: 'details.landArea', fallback: 'Land area', icon: '🌳', unit: 'm²' },
-  buildingArea: { key: 'details.buildingArea', fallback: 'Building area', icon: '🏗️', unit: 'm²' },
-  grossArea: { key: 'details.grossArea', fallback: 'Gross area', icon: '📐', unit: 'm²' },
-  netArea: { key: 'details.netArea', fallback: 'Net area', icon: '📏', unit: 'm²' },
-  parking: { key: 'features.parking', fallback: 'Parking', icon: '🅿️' },
+  beds: { key: 'features.bedrooms', fallback: 'Bedrooms', icon: 'bed', illustration: 'beds' },
+  baths: { key: 'features.bathrooms', fallback: 'Bathrooms', icon: 'bath', illustration: 'baths' },
+  livingRooms: { key: 'details.livingRoomPlural', fallback: 'Living rooms', icon: 'sofa', illustration: 'livingRooms' },
+  kitchens: { key: 'details.kitchens', fallback: 'Kitchens', icon: 'kitchen', illustration: 'kitchen' },
+  diningRooms: { key: 'details.diningRooms', fallback: 'Dining rooms', icon: 'kitchen', illustration: 'dining' },
+  toilets: { key: 'details.toilets', fallback: 'Toilets (WC)', icon: 'bath', illustration: 'toilet' },
+  storageRooms: { key: 'details.storageRooms', fallback: 'Storage rooms', icon: 'cube', illustration: 'storage' },
+  offices: { key: 'details.offices', fallback: 'Offices', icon: 'desktop', illustration: 'office' },
+  openPlanArea: { key: 'details.openPlanArea', fallback: 'Open-plan area', icon: 'area', illustration: 'openPlan', unit: 'm²' },
+  landArea: { key: 'details.landArea', fallback: 'Land area', icon: 'tree', illustration: 'plot', unit: 'm²' },
+  buildingArea: { key: 'details.buildingArea', fallback: 'Building area', icon: 'building', illustration: 'house', unit: 'm²' },
+  grossArea: { key: 'details.grossArea', fallback: 'Gross area', icon: 'area', illustration: 'area', unit: 'm²' },
+  netArea: { key: 'details.netArea', fallback: 'Net area', icon: 'ruler', illustration: 'area', unit: 'm²' },
+  parking: { key: 'features.parking', fallback: 'Parking', icon: 'car', illustration: 'garage' },
   parkingType: {
     key: 'details.parkingType',
     fallback: 'Parking type',
-    icon: '🚗',
+    icon: 'car',
+    illustration: 'garage',
     valueKey: 'details.parkingTypes',
   },
-  floorNumber: { key: 'features.floor', fallback: 'Floor', icon: '🏢' },
-  totalFloors: { key: 'features.floors', fallback: 'Floors', icon: '🏬' },
+  floorNumber: { key: 'features.floor', fallback: 'Floor', icon: 'building', illustration: 'floors' },
+  totalFloors: { key: 'features.floors', fallback: 'Floors', icon: 'elevator', illustration: 'floors' },
 };
 
 /** English names for the parking arrangements, used as translation fallbacks. */

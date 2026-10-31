@@ -7,7 +7,7 @@ import type { Types } from 'mongoose';
 import AgencyFeedAsset, { type IAgencyFeedAsset } from '../../models/AgencyFeedAsset';
 import Property from '../../models/Property';
 import { resolvePublicUrl, SsrfError } from '../../utils/ssrfGuard';
-import { deleteImage, uploadImage } from '../cloudinaryService';
+import { deleteImage, uploadImage } from '../mediaService';
 import { feedLogger } from './feedAudit';
 
 /**
@@ -23,8 +23,8 @@ import { feedLogger } from './feedAudit';
  *   existing photos, and it is retried after a cool-down rather than every run.
  *
  * Storage modes (AGENCY_FEED_IMAGE_MODE):
- *   rehost    (default) — upload through `uploadImage`, the same sharp-compressed,
- *                         tagged, per-listing Cloudinary pipeline manual uploads use,
+ *   rehost    (default) — upload through `uploadImage`, the same per-listing media
+ *                         pipeline (R2, every size) that manual uploads use,
  *                         so delivery and transformations are unchanged.
  *   reference           — validate only and keep the agency's URL; the frontend
  *                         already serves external photos via /api/image-proxy.
@@ -65,7 +65,7 @@ export interface ImageStore {
   remove(publicId: string): Promise<void>;
 }
 
-export const cloudinaryImageStore: ImageStore = {
+export const mediaImageStore: ImageStore = {
   mode: 'rehost',
   async save(buffer, _sourceUrl, kind, ctx) {
     const result = await uploadImage(buffer, {
@@ -73,6 +73,7 @@ export const cloudinaryImageStore: ImageStore = {
       userName: ctx.sellerName,
       propertyId: String(ctx.propertyId),
       propertyTitle: ctx.propertyTitle,
+      agencyId: String(ctx.agencyId),
       type: kind === 'floorplan' ? 'floorplan' : 'property',
       maxWidth: kind === 'floorplan' ? 2400 : 1920,
       maxHeight: kind === 'floorplan' ? 2400 : 1080,
@@ -96,7 +97,7 @@ export const referenceImageStore: ImageStore = {
 };
 
 export const defaultImageStore = (): ImageStore =>
-  process.env.AGENCY_FEED_IMAGE_MODE === 'reference' ? referenceImageStore : cloudinaryImageStore;
+  process.env.AGENCY_FEED_IMAGE_MODE === 'reference' ? referenceImageStore : mediaImageStore;
 
 export type ImageDownloader = (url: string) => Promise<Buffer>;
 

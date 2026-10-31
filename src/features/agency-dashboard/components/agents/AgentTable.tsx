@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { UsersIcon, TicketIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { DashboardAgent } from '../../types';
 import UserAvatar from '@/components/shared/UserAvatar';
 
@@ -50,9 +50,7 @@ const AgentTable: React.FC<AgentTableProps> = ({
   if (!isLoading && agents.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <UsersIcon className="w-8 h-8 text-gray-400" />
-        </div>
+        <SoftIcon name="users" className="w-16 h-16 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
           {t('agencyDashboard:agents.emptyTitle', 'No agents yet')}
         </h3>
@@ -119,7 +117,7 @@ const AgentTable: React.FC<AgentTableProps> = ({
                   <td className="px-4 py-3 text-center hidden md:table-cell">
                     {agent.couponCode ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded-md font-mono text-[11px]">
-                        <TicketIcon className="w-3 h-3" />
+                        <SoftIcon name="ticket" className="w-4 h-4 flex-shrink-0" />
                         {agent.couponCode}
                       </span>
                     ) : (

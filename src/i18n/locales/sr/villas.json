@@ -204,7 +204,7 @@
   "amenities": {
     "breakfast": "Doručak",
     "towels": "Peškiri",
-    "parking": "Parking"
+    "parking": "Паркинг"
   },
   "card": {
     "defaultTitle": "Luksuzna vila",
@@ -222,5 +222,6 @@
     "cardLabel": "Луксузне виле у {{place}}, {{country}}",
     "seeAll": "Види све",
     "photoWikimedia": "© Wikimedia Commons"
-  }
+  },
+  "showingInArea": "Ниједна вила не одговара упиту „{{query}}“ — приказујемо шта је доступно у овој области"
 }

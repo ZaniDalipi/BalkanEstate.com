@@ -114,7 +114,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       aria-describedby="confirmation-message"
     >
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative overflow-hidden animate-fade-in"
+        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative dialog-fit animate-fade-in"
         onClick={handleContentClick}
       >
         {/* Close button */}
@@ -122,7 +122,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           onClick={onClose}
           disabled={isLoading}
           className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 transition-colors z-10 disabled:opacity-50"
-          aria-label="Close"
+          aria-label={t('common:ui.confirmationModal.close', 'Close')}
         >
           <XMarkIcon className="w-5 h-5" />
         </button>

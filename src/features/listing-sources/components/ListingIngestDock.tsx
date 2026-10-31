@@ -9,6 +9,7 @@ import {
 import ListingIngestProgressModal from './ListingIngestProgressModal';
 import ListingPreviewModal from './ListingPreviewModal';
 import type { ListingSource } from '../api/listingSourceApi';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 /**
  * Build the minimal `ListingSource`-shaped object the modal needs from a session.
@@ -312,7 +313,7 @@ const DockCard: React.FC<DockCardProps> = ({ session, onExpand, onDismiss, t }) 
               <div className="flex items-center gap-2 mt-1 text-[10px] font-semibold tabular-nums">
                 {imported > 0 && <span className="text-emerald-600">+{imported}</span>}
                 {updated > 0 && <span className="text-blue-600">↻{updated}</span>}
-                {deferred > 0 && <span className="text-amber-600">⏱{deferred}</span>}
+                {deferred > 0 && <span className="text-amber-600 inline-flex items-center gap-0.5"><SoftIcon name="clock" className="w-3.5 h-3.5" />{deferred}</span>}
                 {failed > 0 && <span className="text-red-600">✕{failed}</span>}
               </div>
             )}

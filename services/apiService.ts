@@ -653,11 +653,15 @@ export const sendContactInquiry = async (params: ContactInquiryParams): Promise<
 export const uploadAdvertisingImage = async (file: File): Promise<{ url: string }> => {
   const form = new FormData();
   form.append('image', file);
-  const { API_URL } = await import('@/src/shared/api/config');
+  // Public visitors may not have the __csrf cookie yet; bootstrap it, then send
+  // it back in the header (double-submit) or the backend rejects with 403.
+  await ensureCsrfToken();
+  const csrfToken = getCsrfToken();
   const res = await fetch(`${API_URL}/inquiries/advertising-image`, {
     method: 'POST',
     body: form,
     credentials: 'include',
+    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -860,7 +864,7 @@ export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<
 };
 
 /**
- * Upload property images to Cloudinary
+ * Upload property images to R2
  * @param images - Array of image files to upload
  * @param propertyId - Optional property ID for organized folder structure
  * @returns Array of uploaded images with URLs and public IDs
@@ -2398,7 +2402,7 @@ export interface CityMarketData {
    * Curated photo, resolved server-side across the three collections that can
    * hold one for the same place (see `backend/src/services/cityPhotoService.ts`).
    * Absent when no photo has been curated anywhere — the UI then falls back to
-   * the convention Cloudinary id. Read through `cityImageSources`.
+   * the convention city photo. Read through `cityImageSources`.
    */
   imageUrl?: string;
   /** Where `imageUrl` came from, for the admin screen and for debugging. */

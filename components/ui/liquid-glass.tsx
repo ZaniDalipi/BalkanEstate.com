@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslation } from 'react-i18next';
 // Types
 interface GlassEffectProps {
   children: React.ReactNode;
@@ -163,6 +164,7 @@ const GlassFilter: React.FC = () => (
 );
 // Main Component
 export const Component = () => {
+  const { t } = useTranslation();
   const dockIcons: DockIcon[] = [
     {
       src: "https://parsefiles.back4app.com/JPaQcFfEEQ1ePBxbf6wvzkPMEqKYHhPYv8boI1Rc/a13d1acfd046f503f987c1c95af582c8_low_res_Claude.png",
@@ -202,7 +204,7 @@ export const Component = () => {
         <GlassDock icons={dockIcons} href="https://x.com/notsurajgaud" />
         <GlassButton href="https://x.com/notsurajgaud">
           <div className="text-xl text-white">
-            <p>How can i help you today?</p>
+            <p>{t('common:ui.liquid-glass.howCanIHelpYou', 'How can i help you today?')}</p>
           </div>
         </GlassButton>
       </div>

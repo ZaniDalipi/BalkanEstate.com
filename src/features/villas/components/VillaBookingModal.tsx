@@ -6,7 +6,8 @@ import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { validateName, validateEmail, validatePhone, sanitizeText } from '@/shared/utils/validation';
 
 interface VillaBookingModalProps {
@@ -246,12 +247,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
           <div className="px-6 py-5">
             {success ? (
               <div className="text-center py-6">
-                <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4"
-                     style={{ background: 'rgba(201,162,39,0.12)' }}>
-                  <svg className="h-7 w-7" style={{ color: 'var(--color-villa-gold-calm)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                  </svg>
-                </div>
+                <SoftIcon name="phone" className="mx-auto h-14 w-14 mb-4" />
                 <h3 className="text-[20px] font-semibold text-neutral-900 tracking-[-0.02em] mb-1.5">
                   {isForRent ? t('villas:booking.successTitle', 'Booking request sent') : t('villas:booking.enquirySuccessTitle', 'Enquiry sent')}
                 </h3>
@@ -275,7 +271,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                 <div className="flex gap-3.5 mb-5 items-center">
                   {property.imageUrl && (
                     <img
-                      src={optimizeCloudinaryUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
+                      src={optimizeImageUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
                       alt={property.title}
                       loading="lazy"
                       decoding="async"
@@ -299,9 +295,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
 
                 {/* "How it works" — call-you note, quiet frosted row */}
                 <div className="flex items-start gap-2.5 mb-5 rounded-2xl p-3.5" style={{ background: 'rgba(120,120,128,0.06)' }}>
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                  </svg>
+                  <SoftIcon name="phone" className="w-5 h-5 flex-shrink-0" />
                   <p className="text-[12.5px] leading-relaxed text-neutral-500">
                     {isForRent
                       ? t('villas:booking.callYouNote', 'No online payment. Send your request and the villa host calls you directly to confirm dates, price and arrange your stay.')

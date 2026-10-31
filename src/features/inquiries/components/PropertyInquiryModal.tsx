@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
 import { Property } from '@/types';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
-import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
 interface PropertyInquiryModalProps {
   property: Property;
@@ -143,7 +144,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
           <button
             onClick={onClose}
             className="text-white/80 hover:text-white p-1 flex-shrink-0"
-            aria-label="Close"
+            aria-label={t('common:ui.propertyInquiryModal.close', 'Close')}
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -152,11 +153,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
         <div className="p-4 sm:p-6">
           {success ? (
             <div className="text-center py-8">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+              <SoftIcon name="check" className="mx-auto h-16 w-16 mb-4" />
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {t('property:inquiry.successTitle', 'Inquiry Sent!')}
               </h3>
@@ -176,7 +173,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
               <div className="flex gap-3 mb-6 p-3 bg-neutral-50 rounded-lg">
                 {property.imageUrl ? (
                 <img
-                  src={optimizeCloudinaryUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
+                  src={optimizeImageUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
                   alt={property.title}
                   loading="lazy"
                   decoding="async"
@@ -184,7 +181,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                 />
                 ) : (
                 <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center flex-shrink-0">
-                  <BuildingOfficeIcon className="w-8 h-8 text-neutral-400" />
+                  <SoftIcon name="building" className="w-12 h-12" />
                 </div>
                 )}
                 <div className="flex-1 min-w-0">

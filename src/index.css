@@ -519,6 +519,42 @@ html[data-zoom] {
   font-size: calc(100% * var(--zoom-scale, 1));
 }
 
+/* Fluid root size: text follows the screen, not a fixed number.
+   Every Tailwind size and space is in rem, so scaling the root scales the
+   whole interface together (the same lever the zoom compensation above uses;
+   viewport units are untouched). Sizes are CSS pixels, which the browser
+   already maps to the screen's density, so this only has to follow the
+   screen's size.
+
+   - Phones held sideways get the desktop layout (they are ≥768px wide) with
+     only ~360–460px of height, which is what limits them: the root follows
+     the height, 3.1% of it, from 12px (a 390px-tall iPhone) to 14px (460px+).
+     The bounds are percentages of the browser's own default, so someone who
+     raised their default text size keeps it, scaled.
+     At a fixed phone size the page looked zoomed in, one card at a time.
+   - Narrow phones in portrait ease from 16px down to 15px below ~390px wide.
+
+   Form fields follow it too; maximum-scale=1 in the viewport meta keeps iOS
+   from zooming in when a small field is focused. */
+@media (orientation: landscape) and (max-height: 500px) {
+  html {
+    --fluid-root: clamp(75%, 3.1dvh, 87.5%);
+    font-size: var(--fluid-root);
+  }
+  html[data-zoom] {
+    font-size: calc(var(--fluid-root) * var(--zoom-scale, 1));
+  }
+}
+@media (orientation: portrait) and (max-width: 400px) {
+  html {
+    --fluid-root: clamp(93.75%, 4.1vw, 100%);
+    font-size: var(--fluid-root);
+  }
+  html[data-zoom] {
+    font-size: calc(var(--fluid-root) * var(--zoom-scale, 1));
+  }
+}
+
 /* The app shell is sized in dvh; make sure its wrapper can never be the thing
    that stops short of the viewport. */
 #root {
@@ -1113,6 +1149,8 @@ html[data-zoom] {
 }
 
 /* Custom Media Query Variants for landscape modes */
+/* `landscape:` = a phone turned sideways (wide but ~400px tall). The JS twin is
+   SHORT_LANDSCAPE_QUERY in src/hooks/useMediaQuery.ts — keep them in step. */
 @custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant tablet-landscape (@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px));
 
@@ -1363,6 +1401,18 @@ html[data-zoom] {
   }
 }
 
+/* A centred dialog that never outgrows the screen. A phone held sideways is
+   ~360px tall, so a fixed-height card ran off the top and bottom with no way
+   to reach its buttons; this caps it at the visible height (less the notch
+   and the backdrop's padding) and lets it scroll inside instead. */
+.dialog-fit {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* Prevent iOS overscroll rubber-band on modal/drawer backgrounds */
 .overscroll-none {
   overscroll-behavior: none;
@@ -1404,6 +1454,11 @@ html[data-zoom] {
      plus a small gap, with a 44px floor for Android devices that report 0. */
 :root {
   --floating-search-top-pad: calc(env(safe-area-inset-top, 0px) + 8px);
+  /* Width of the desktop sidebar rail (md+). The rail pads itself by the left
+     safe-area inset, so on a notched phone held sideways a flat 5rem left only
+     ~2rem for the icons; the inset is added on top instead. Anything that has
+     to sit beside the rail (the page column, fixed bars) uses this. */
+  --sidebar-rail-w: calc(5rem + env(safe-area-inset-left, 0px));
 }
 
 /* Top of the home hero.
@@ -1419,6 +1474,14 @@ html[data-zoom] {
 @media (min-width: 640px) {
   .hero-top-pad {
     padding-top: max(6rem, calc(env(safe-area-inset-top, 0px) + 4rem));
+  }
+}
+
+/* Phone held sideways: ~400px tall, so the 6rem drop would push the search
+   box below the fold. Just enough to clear the floating header (~3.25rem). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero-top-pad {
+    padding-top: max(3.75rem, calc(env(safe-area-inset-top, 0px) + 3.25rem));
   }
 }
 
@@ -2248,4 +2311,131 @@ html.reduce-motion .celebration-bar {
   opacity: 1 !important;
   transform: none !important;
   stroke-dashoffset: 0 !important;
+}
+
+/* Sidebar dock magnification.
+   Like the macOS Dock: the icon under the pointer pops up to twice its
+   size with a slight spring, and its label slides right so the bigger
+   icon never covers it. Only the hovered row moves. Transforms only, so
+   nothing reflows. Pointer devices only — a tap has no hover — and off
+   for reduced motion. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .sidebar-dock .nav-dock-icon,
+  .sidebar-dock .dock-label {
+    transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .sidebar-dock .nav-dock-icon {
+    position: relative;
+    transform-origin: left center;
+  }
+  .sidebar-dock button:hover .nav-dock-icon {
+    z-index: 2;
+    transform: scale(2);
+    filter: drop-shadow(0 6px 10px rgba(2, 82, 205, 0.25));
+  }
+  .sidebar-dock button:hover .dock-label {
+    transform: translateX(28px);
+  }
+}
+
+/* Home page category row: pictures that step out of their cards.
+   At rest each picture sits half above its card's top edge. Hovering a
+   card pops only that picture up, Dock-style: it springs to 1.5x and
+   rises, over its neighbours. Without hover (touch) or with reduced
+   motion the pictures simply stay put. Also used by Quick Access. */
+.category-dock__picture {
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+  filter: drop-shadow(0 10px 12px rgba(15, 23, 42, 0.22));
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .category-dock__picture {
+    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), filter 260ms ease-out;
+  }
+  .category-dock:hover .category-dock__picture {
+    transform: translateX(-50%) translateY(-10px) scale(1.5);
+    filter: drop-shadow(0 18px 22px rgba(15, 23, 42, 0.3));
+  }
+}
+
+/* ============================================================================
+   Search pages — List / Map switch on phones and tablets
+   The list slides off to the left while the map behind it eases in from the
+   right and fades up; switching back reverses it. Only transform and opacity
+   animate, so it runs on the compositor and a tap mid-slide just turns it
+   around. The map stage is never scaled: it holds the WebGL map canvas, and
+   resampling that every frame is what costs memory on iPhones.
+   Once a panel has slid away it turns `visibility: hidden` (after the slide,
+   via the delayed visibility transition) and its animations pause, so the
+   phone stops painting and ticking a full-screen layer nobody can see.
+   Split view (lg+) is untouched.
+   ============================================================================ */
+/* Below 1024px, and on any phone held sideways (getSearchLayout() in
+   src/shared/utils/searchLayout.ts treats those as tablets too). */
+@media (max-width: 1023.98px), (orientation: landscape) and (max-height: 500px) {
+  .search-list-panel,
+  .search-map-stage {
+    --view-switch-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    transition:
+      transform 420ms var(--view-switch-ease),
+      opacity 420ms var(--view-switch-ease),
+      visibility 0s linear 0s;
+  }
+
+  .search-list-panel[data-shown='true'],
+  .search-map-stage[data-shown='true'] {
+    transform: none;
+    opacity: 1;
+  }
+
+  .search-list-panel[data-shown='false'] {
+    transform: translate3d(-100%, 0, 0);
+    visibility: hidden;
+    pointer-events: none;
+    transition-delay: 0s, 0s, 420ms;
+  }
+
+  .search-map-stage[data-shown='false'] {
+    transform: translate3d(10%, 0, 0);
+    opacity: 0.4;
+    visibility: hidden;
+    pointer-events: none;
+    transition-delay: 0s, 0s, 420ms;
+  }
+
+  /* Once the list has finished sliding away (data-settled, set from JS after
+     the slide) the browser skips rendering it entirely and may drop its
+     photos and layers; it stays mounted and keeps its scroll position. */
+  .search-list-panel[data-settled='true'] {
+    content-visibility: hidden;
+  }
+
+  /* Pulsing pins, cluster halos, badge pings: nothing to see while hidden. */
+  .search-list-panel[data-shown='false'] *,
+  .search-map-stage[data-shown='false'] * {
+    animation-play-state: paused !important;
+  }
+
+  /* Every card badge, arrow and heart is a backdrop-blur: each one is a GPU
+     buffer, and a long list holds hundreds of them — enough on its own to get
+     the page killed on an iPhone. On a phone the badges keep their tinted
+     background and lose only the blur. */
+  .search-list-panel [class*='backdrop-blur'] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+@media (max-width: 1023.98px) and (prefers-reduced-motion: reduce),
+       (orientation: landscape) and (max-height: 500px) and (prefers-reduced-motion: reduce) {
+  .search-list-panel,
+  .search-map-stage {
+    transition: opacity 150ms linear, visibility 0s linear 0s;
+  }
+  .search-list-panel[data-shown='false'],
+  .search-map-stage[data-shown='false'] {
+    transform: none;
+    opacity: 0;
+    transition-delay: 0s, 150ms;
+  }
 }

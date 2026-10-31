@@ -97,7 +97,8 @@
     "noLocations": "No locations to display",
     "noLocationsHint": "Businesses with addresses will appear here on the map",
     "viewDetails": "View Details",
-    "directions": "Directions"
+    "directions": "Directions",
+    "listingCount": "{{count}} on map"
   },
   "verified": "Verified",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Get in touch today to discuss your project and receive a free consultation.",
       "callNow": "Call {{phone}}",
       "sendEmail": "Send Email"
-    }
+    },
+    "established": "Est. {{year}}"
   },
   "days": {
     "monday": "Monday",
@@ -278,6 +280,33 @@
     "delete": "Delete",
     "emptyTitle": "No businesses yet",
     "emptyMessage": "Create your first business listing to showcase your services in the directory.",
-    "createFirst": "Create Business Listing"
+    "createFirst": "Create Business Listing",
+    "editSuccessTitle": "Updated",
+    "editSuccessMessage": "Business listing has been updated.",
+    "errorTitle": "Failed to load businesses",
+    "errorMessage": "Something went wrong. Please try again later.",
+    "backToList": "Back to My Businesses"
+  },
+  "delete": {
+    "confirmTitle": "Delete Listing",
+    "successTitle": "Deleted",
+    "successMessage": "Business listing has been deleted.",
+    "errorTitle": "Error",
+    "errorMessage": "Failed to delete listing. Please try again.",
+    "confirmMessage": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Preview",
+      "bannerPreview": "Banner preview"
+    },
+    "createBusinessListingForm": {
+      "preview": "Preview",
+      "bannerPreview": "Banner preview"
+    }
   }
 }

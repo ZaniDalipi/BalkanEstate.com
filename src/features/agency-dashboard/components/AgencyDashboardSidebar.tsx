@@ -1,24 +1,18 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ChartBarIcon,
-  UsersIcon,
-  HomeIcon,
-  EnvelopeIcon,
-  ArrowTrendingUpIcon,
-  CurrencyEuroIcon,
-  BuildingOfficeIcon,
-  ChatBubbleLeftRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
   XMarkIcon,
-  MagnifyingGlassIcon,
   ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
 } from '@/constants';
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AgencyDashboardSidebarProps {
   activeSection: AgencyDashboardSection;
@@ -78,19 +72,19 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'overview',
           label: t('agencyDashboard:sidebar.overview', 'Overview'),
-          icon: <ChartBarIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="chart" className="w-6 h-6" />,
         },
         {
           id: 'agents',
           label: t('agencyDashboard:sidebar.agents', 'Agents'),
-          icon: <UsersIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="users" className="w-6 h-6" />,
           badge: pendingJoinRequests > 0 ? pendingJoinRequests : overview?.totalAgents,
           badgeColor: pendingJoinRequests > 0 ? 'bg-red-500 animate-pulse' : undefined,
         },
         {
           id: 'leads',
           label: t('agencyDashboard:sidebar.leads', 'Leads & Inquiries'),
-          icon: <EnvelopeIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="envelope" className="w-6 h-6" />,
           badge: overview?.inquiriesThisMonth,
           badgeColor: overview?.inquiriesThisMonth ? 'bg-red-500' : undefined,
         },
@@ -103,7 +97,7 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'properties',
           label: t('agencyDashboard:sidebar.properties', 'Properties'),
-          icon: <HomeIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="home" className="w-6 h-6" />,
           badge: overview?.activeListings,
         },
         {
@@ -114,12 +108,12 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'analytics',
           label: t('agencyDashboard:sidebar.analytics', 'Analytics'),
-          icon: <ArrowTrendingUpIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="trendUp" className="w-6 h-6" />,
         },
         {
           id: 'financial',
           label: t('agencyDashboard:sidebar.financial', 'Financial'),
-          icon: <CurrencyEuroIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="cash" className="w-6 h-6" />,
         },
       ],
     },
@@ -130,12 +124,12 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'profile',
           label: t('agencyDashboard:sidebar.profile', 'Agency Profile'),
-          icon: <BuildingOfficeIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="building" className="w-6 h-6" />,
         },
         {
           id: 'team',
           label: t('agencyDashboard:sidebar.team', 'Team'),
-          icon: <ChatBubbleLeftRightIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="chat" className="w-6 h-6" />,
         },
       ],
     },
@@ -146,8 +140,8 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center">
-              <BuildingOfficeIcon className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-white/95 rounded-lg flex items-center justify-center">
+              <SoftIcon name="building" className="w-6 h-6" />
             </div>
             <span className="font-bold text-white text-sm">
               {t('agencyDashboard:sidebar.title', 'Agency Dashboard')}
@@ -155,8 +149,8 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 mx-auto bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center">
-            <BuildingOfficeIcon className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 mx-auto bg-white/95 rounded-lg flex items-center justify-center">
+            <SoftIcon name="building" className="w-6 h-6" />
           </div>
         )}
         <button
@@ -225,6 +219,20 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
       </nav>
 
       <div className="border-t border-gray-800 p-3 space-y-1">
+        <button
+          onClick={() => navigate(paths.developmentsDashboard())}
+          title={collapsed ? t('agencyDashboard:sidebar.residences', 'Residences') : undefined}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-indigo-300 hover:bg-indigo-900/30 hover:text-indigo-200 transition-colors ${
+            collapsed ? 'justify-center' : ''
+          }`}
+        >
+          <SoftIcon name="building" className="w-6 h-6" />
+          {!collapsed && (
+            <span className="text-sm font-medium">
+              {t('agencyDashboard:sidebar.residences', 'Residences')}
+            </span>
+          )}
+        </button>
         {onBrowseProperties && (
           <button
             onClick={onBrowseProperties}
@@ -233,7 +241,7 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
               collapsed ? 'justify-center' : ''
             }`}
           >
-            <MagnifyingGlassIcon className="w-5 h-5" />
+            <SoftIcon name="search" className="w-6 h-6" />
             {!collapsed && (
               <span className="text-sm font-medium">
                 {t('agencyDashboard:sidebar.browseProperties', 'Browse Properties')}

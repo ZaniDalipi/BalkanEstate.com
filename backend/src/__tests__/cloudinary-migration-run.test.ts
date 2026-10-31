@@ -1,0 +1,245 @@
+/**
+ * The Cloudinary → R2 migration end to end, against MongoDB and an in-memory
+ * bucket: photos land in their user/listing folders, every reference (URL,
+ * publicId, FileRecord, URLs inside text) is rewritten, and a re-run is a no-op.
+ */
+const bucket = new Map<string, string>();
+const downloads: string[] = [];
+/** Runs during a download — lets a test edit a document mid-migration, as a live user would. */
+let duringDownload: ((url: string) => Promise<void>) | null = null;
+
+jest.mock('@aws-sdk/client-s3', () => {
+  class Command {
+    constructor(public input: any) {}
+  }
+  class PutObjectCommand extends Command {}
+  class DeleteObjectsCommand extends Command {}
+  class CopyObjectCommand extends Command {}
+  class GetObjectCommand extends Command {}
+  class S3Client {
+    async send(cmd: Command) {
+      const { input } = cmd as any;
+      if (cmd instanceof PutObjectCommand) bucket.set(`${input.Bucket}/${input.Key}`, input.ContentType);
+      if (cmd instanceof DeleteObjectsCommand) for (const o of input.Delete.Objects) bucket.delete(`${input.Bucket}/${o.Key}`);
+      return {};
+    }
+  }
+  return { S3Client, PutObjectCommand, DeleteObjectsCommand, CopyObjectCommand, GetObjectCommand };
+});
+
+jest.mock('../services/mediaService', () => {
+  const actual = jest.requireActual('../services/mediaService');
+  const sharpLib = jest.requireActual('sharp');
+  return {
+    ...actual,
+    downloadImage: jest.fn(async (url: string) => {
+      downloads.push(url);
+      if (duringDownload) await duringDownload(url);
+      if (url.includes('gone')) throw new Error('Image download failed: HTTP 404');
+      return sharpLib({ create: { width: 800, height: 600, channels: 3, background: '#88a' } }).jpeg().toBuffer();
+    }),
+  };
+});
+
+process.env.R2_ACCOUNT_ID = 'acct';
+process.env.R2_ACCESS_KEY_ID = 'key';
+process.env.R2_SECRET_ACCESS_KEY = 'secret';
+process.env.R2_BUCKET = 'media';
+process.env.R2_PRIVATE_BUCKET = 'media-private';
+process.env.R2_PUBLIC_URL = 'https://media.example.com';
+process.env.BACKEND_URL = 'https://api.example.com';
+process.env.CLOUDINARY_CLOUD_NAME = 'demo';
+process.env.CLOUDINARY_API_KEY = 'k';
+process.env.CLOUDINARY_API_SECRET = 's';
+
+import mongoose from 'mongoose';
+import MediaAsset from '../models/MediaAsset';
+import { runMigration, cloudinaryApiDownloadUrl } from '../scripts/migrateCloudinaryToR2';
+import { migratedPhotoId } from '../services/media/cloudinaryMigration';
+
+const CLD = 'https://res.cloudinary.com/demo/image/upload';
+const USER = new mongoose.Types.ObjectId();
+const LISTING = new mongoose.Types.ObjectId();
+const PHOTO_ID = 'balkan-estate/users/j/jane_x/listings/flat_y/photos/p1';
+const PLAN_ID = 'balkan-estate/users/j/jane_x/listings/flat_y/floorplans/f1';
+const AVATAR_ID = 'balkan-estate/users/j/jane_x/avatar/a1';
+const LICENSE_ID = 'balkan-estate/users/j/jane_x/documents/license/l1';
+const BLOG_ID = 'balkan-estate/blog/inline';
+
+const db = () => mongoose.connection.db!;
+const quiet = { log: () => undefined };
+
+beforeEach(async () => {
+  duringDownload = null;
+  bucket.clear();
+  downloads.length = 0;
+  await db().collection('properties').insertOne({
+    _id: LISTING,
+    sellerId: USER,
+    imageUrl: `${CLD}/v1/${PHOTO_ID}.jpg`,
+    imagePublicId: PHOTO_ID,
+    images: [{ url: `${CLD}/t_be_w480/v1/${PHOTO_ID}.jpg`, publicId: PHOTO_ID, tag: 'main' }],
+    floorplans: [{ url: `${CLD}/v1/${PLAN_ID}.png`, publicId: PLAN_ID }],
+  });
+  await db().collection('users').insertOne({
+    _id: USER,
+    avatarUrl: `${CLD}/v2/${AVATAR_ID}.jpg`,
+    avatarPublicId: AVATAR_ID,
+    agentLicense: {
+      documentUrl: `https://res.cloudinary.com/demo/image/authenticated/s--sig--/v3/${LICENSE_ID}.jpg`,
+      documentPublicId: LICENSE_ID,
+    },
+  });
+  await db().collection('filerecords').insertOne({ publicId: AVATAR_ID, url: `${CLD}/v2/${AVATAR_ID}.jpg`, userId: USER, fileType: 'avatar' });
+  await db().collection('blogposts').insertOne({ body: `<p>Look <img src="${CLD}/v9/${BLOG_ID}.png"> and <img src="${CLD}/v9/gone.png"></p>` });
+});
+
+describe('cloudinaryApiDownloadUrl', () => {
+  it("signs the API download link the way Cloudinary's private_download_url does", () => {
+    const url = new URL(
+      cloudinaryApiDownloadUrl({ cloud: 'demo', publicId: 'balkan-estate/x/p1', format: 'jpg', deliveryType: 'upload' }, 'KEY', 'SECRET', 1700000000)
+    );
+    expect(url.origin + url.pathname).toBe('https://api.cloudinary.com/v1_1/demo/image/download');
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      public_id: 'balkan-estate/x/p1',
+      format: 'jpg',
+      type: 'upload',
+      timestamp: '1700000000',
+      api_key: 'KEY',
+      // sha1("format=jpg&public_id=balkan-estate/x/p1&timestamp=1700000000&type=upload" + "SECRET")
+      signature: '241ded23b291df56b2f57659a65b9e80fb413f0c',
+    });
+  });
+});
+
+describe('runMigration', () => {
+  it('dry run changes nothing', async () => {
+    const stats = await runMigration({ apply: false, skipConventionCities: true, ...quiet });
+    // photo (shared by 2 fields), floor plan, avatar, licence, 2 inline blog images
+    expect(stats.migrated).toBe(6);
+    expect(bucket.size).toBe(0);
+    expect(downloads).toHaveLength(0);
+    expect(await MediaAsset.countDocuments()).toBe(0);
+    expect((await db().collection('users').findOne({ _id: USER }))!.avatarPublicId).toBe(AVATAR_ID);
+  });
+
+  it('moves photos into user/listing folders and rewrites every reference', async () => {
+    const stats = await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+
+    expect(stats.migrated).toBe(5);
+    expect(stats.failed.map((f) => f.publicId)).toEqual(['gone']);
+    // shared photo downloaded once, transformations stripped
+    expect(downloads.filter((u) => u.includes('/p1'))).toEqual([`${CLD}/${PHOTO_ID}.jpg`]);
+
+    // 800px masters store w160–w1280, so the folder records that cap.
+    const photoKey = `users/${USER}/listings/${LISTING}/photos/${migratedPhotoId(PHOTO_ID)}_w1280`;
+    const planKey = `users/${USER}/listings/${LISTING}/floorplans/${migratedPhotoId(PLAN_ID)}_w1280`;
+    const avatarKey = `users/${USER}/avatar/${migratedPhotoId(AVATAR_ID)}_w1280`;
+    const licenseKey = `users/${USER}/documents/license/${migratedPhotoId(LICENSE_ID)}`;
+
+    const property = await db().collection('properties').findOne({ _id: LISTING });
+    expect(property!.imageUrl).toBe(`https://media.example.com/${photoKey}/original.jpg`);
+    expect(property!.imagePublicId).toBe(photoKey);
+    expect(property!.images[0]).toMatchObject({ url: `https://media.example.com/${photoKey}/original.jpg`, publicId: photoKey, tag: 'main' });
+    expect(property!.floorplans[0].publicId).toBe(planKey);
+
+    const user = await db().collection('users').findOne({ _id: USER });
+    expect(user!.avatarPublicId).toBe(avatarKey);
+    // the licence stays private: private bucket, opened through the API
+    expect(user!.agentLicense.documentUrl).toBe(`https://api.example.com/api/files/open/${licenseKey}`);
+    expect(bucket.has(`media-private/${licenseKey}/original.jpg`)).toBe(true);
+    expect([...bucket.keys()].some((k) => k.startsWith(`media/${licenseKey}`))).toBe(false);
+    // …and its owner can still open it: a licence from before FileRecord existed gets one
+    expect(stats.accessRecordsCreated).toBe(1);
+    expect(await db().collection('filerecords').findOne({ publicId: licenseKey })).toMatchObject({ userId: USER, fileType: 'license' });
+
+    // access-control record follows
+    const record = await db().collection('filerecords').findOne({ userId: USER });
+    expect(record).toMatchObject({ publicId: avatarKey, url: `https://media.example.com/${avatarKey}/original.jpg` });
+
+    // URLs inside text: the owner can't be told → legacy/; the missing one is left alone
+    const post = await db().collection('blogposts').findOne({});
+    expect(post!.body).toContain(`https://media.example.com/legacy/${BLOG_ID}_w1280/original.jpg`);
+    expect(post!.body).toContain(`${CLD}/v9/gone.png`);
+
+    const assets = await MediaAsset.find().lean();
+    expect(assets.map((a) => a.kind).sort()).toEqual(['avatar', 'floorplan', 'legacy', 'license', 'property']);
+    const photo = assets.find((a) => a.key === photoKey)!;
+    expect(String(photo.propertyId)).toBe(String(LISTING));
+    expect(String(photo.ownerId)).toBe(String(USER));
+    expect(photo.source?.cloudinaryPublicId).toBe(PHOTO_ID);
+  });
+
+  it('--skip-external leaves imported external-listing images on Cloudinary', async () => {
+    const EXT_ID = 'balkan-estate/external-listings/crozilla/123/e1';
+    const extUrl = `${CLD}/v1/${EXT_ID}.jpg`;
+    const ext = await db().collection('properties').insertOne({ images: [{ url: extUrl, publicId: EXT_ID }] });
+
+    const stats = await runMigration({ apply: true, skipConventionCities: true, skipExternal: true, ...quiet });
+
+    expect(stats.migrated).toBe(5);
+    expect(stats.leftOnCloudinary).toBe(1);
+    expect(downloads.some((u) => u.includes('external-listings'))).toBe(false);
+    const doc = await db().collection('properties').findOne({ _id: ext.insertedId });
+    expect(doc!.images[0]).toMatchObject({ url: extUrl, publicId: EXT_ID });
+  });
+
+  it('--skip-listings moves everything except listing photos and floor plans', async () => {
+    const stats = await runMigration({ apply: true, skipConventionCities: true, skipListings: true, ...quiet });
+
+    // photo + floor plan stay; avatar, licence and the blog image move ("gone" fails)
+    expect(stats.leftOnCloudinary).toBe(2);
+    expect(stats.byKind).toEqual({ avatar: 1, license: 1, legacy: 1 });
+    expect(downloads.some((u) => u.includes('/listings/'))).toBe(false);
+    const property = await db().collection('properties').findOne({ _id: LISTING });
+    expect(property!.imageUrl).toBe(`${CLD}/v1/${PHOTO_ID}.jpg`);
+    expect(property!.images[0].publicId).toBe(PHOTO_ID);
+    expect(property!.floorplans[0].publicId).toBe(PLAN_ID);
+    expect((await db().collection('users').findOne({ _id: USER }))!.avatarUrl).toMatch(/^https:\/\/media\.example\.com\//);
+  });
+
+  it("never overwrites an edit a user makes while the migration runs", async () => {
+    // The seller reorders photos (a new one first) while ours is being copied.
+    duringDownload = async (url) => {
+      if (!url.includes('/p1')) return;
+      duringDownload = null;
+      await db().collection('properties').updateOne(
+        { _id: LISTING },
+        { $set: { images: [{ url: 'https://media.example.com/new/original.jpg', publicId: 'new', tag: 'living' }, { url: `${CLD}/t_be_w480/v1/${PHOTO_ID}.jpg`, publicId: PHOTO_ID, tag: 'main' }] } }
+      );
+    };
+    await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+
+    const property = await db().collection('properties').findOne({ _id: LISTING });
+    // The user's new first photo is intact, and the moved photo is rewritten where it now is.
+    expect(property!.images[0]).toMatchObject({ publicId: 'new', tag: 'living' });
+    expect(property!.images[1].url).toMatch(/^https:\/\/media\.example\.com\/users\//);
+    expect(property!.images[1].publicId).toMatch(/^users\//);
+  });
+
+  it('falls back to the Cloudinary API download when public delivery is refused', async () => {
+    process.env.CLOUDINARY_API_KEY = 'k';
+    duringDownload = async (url) => {
+      if (url.startsWith('https://res.cloudinary.com/')) throw new Error('Image download failed: HTTP 401');
+    };
+    try {
+      const stats = await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+      expect(stats.migrated).toBe(5);
+      expect(downloads.some((u) => u.startsWith('https://api.cloudinary.com/v1_1/demo/image/download?'))).toBe(true);
+    } finally {
+      delete process.env.CLOUDINARY_API_KEY;
+    }
+  });
+
+  it('is a no-op the second time', async () => {
+    await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+    downloads.length = 0;
+    const again = await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+    expect(again.alreadyMigrated).toBe(5);
+    expect(again.migrated).toBe(0);
+    // only the one that failed is retried (its plain original URL, then the URL as stored)
+    expect(downloads).toEqual([`${CLD}/gone.png`, `${CLD}/v9/gone.png`]);
+    expect(again.docsUpdated).toBe(0);
+    expect(again.accessRecordsCreated).toBe(0);
+  });
+});

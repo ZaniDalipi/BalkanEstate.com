@@ -35,20 +35,7 @@ import {
 } from '../services/storageAccessPolicy';
 
 // Mock Cloudinary to avoid real API calls
-jest.mock('../config/cloudinary', () => ({
-  __esModule: true,
-  default: {
-    url: jest.fn(
-      (publicId: string, options: any) => {
-        const deliveryType = options?.type === 'authenticated' ? 'authenticated' : 'upload';
-        return `https://res.cloudinary.com/test/${options?.resource_type || 'image'}/${deliveryType}/s--fakesig--/${publicId}`;
-      }
-    ),
-    uploader: {
-      destroy: jest.fn().mockResolvedValue({ result: 'ok' }),
-    },
-  },
-}));
+
 
 describe('Storage Access Policy', () => {
   let app: Express;

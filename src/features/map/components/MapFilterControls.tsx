@@ -5,7 +5,6 @@ import {
   PencilIcon,
   XCircleIcon,
   SearchPlusIcon,
-  MapLegendIcon,
   CrosshairsIcon,
 } from '@/constants';
 import SunPositionControl from './SunPositionControl';
@@ -14,6 +13,7 @@ import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPan
 import { ClimateRiskLegend } from './ClimateRiskLayer';
 import { Legend } from '@/src/components/map/MapPropertyMarker';
 import { TILE_LAYERS, type TileLayerType } from './useMapComponent';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface MapFilterControlsProps {
   isMobile: boolean;
@@ -129,7 +129,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
 
       {/* Debug Info Display - shows zoom level and coordinates */}
       <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
-        <span>🔍{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} 📍{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
+        <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
       </div>
 
       {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}
@@ -152,7 +152,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
               >
                 <CrosshairsIcon className="w-4 h-4 xl:w-5 xl:h-5 text-neutral-700" />
               </button>
-              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
+              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label={t('search:ui.mapFilterControls.mapStyle', 'Map style')}>
                 <button
                   onClick={() => { setMapType('positron'); if (drawnBounds) onDrawComplete(null); }}
                   className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
@@ -160,7 +160,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Clean map style - minimal, properties stand out"
+                  aria-label={t('search:ui.mapFilterControls.cleanMapStyleMinimalProperties', 'Clean map style - minimal, properties stand out')}
                   aria-pressed={mapType === 'positron'}
                 >
                   {t('search:map.clean', 'Clean')}
@@ -172,7 +172,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Color map style - shows neighborhoods, parks, amenities"
+                  aria-label={t('search:ui.mapFilterControls.colorMapStyleShowsNeighborhoods', 'Color map style - shows neighborhoods, parks, amenities')}
                   aria-pressed={mapType === 'voyager'}
                 >
                   {t('search:map.color', 'Color')}
@@ -184,7 +184,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Street map style"
+                  aria-label={t('search:ui.mapFilterControls.streetMapStyle', 'Street map style')}
                   aria-pressed={mapType === 'street'}
                 >
                   {t('search:map.street')}
@@ -196,7 +196,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Satellite aerial imagery"
+                  aria-label={t('search:ui.mapFilterControls.satelliteAerialImagery', 'Satellite aerial imagery')}
                   aria-pressed={mapType === 'satellite'}
                 >
                   {t('search:map.satellite')}
@@ -248,7 +248,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                   aria-haspopup="menu"
                   aria-expanded={isMapOptionsOpen}
                 >
-                  <span className="text-xs xl:text-sm">🌡️</span>
+                  <SoftIcon name="thermometer" className="w-4 h-4 xl:w-5 xl:h-5" />
                   <span className="hidden xl:inline">{t('search:map.climateRisks.title', 'Climate Risks')}</span>
                   <svg
                     className={`w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
@@ -275,7 +275,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.buildings3D', '3D Buildings')}
                 aria-pressed={show3DBuildings}
               >
-                <span className="text-xs xl:text-sm">🏢</span>
+                <SoftIcon name="cube" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.buildings3D', '3D')}</span>
               </button>
 
@@ -290,7 +290,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.landmarks', 'Landmarks')}
                 aria-pressed={showLandmarks}
               >
-                <span className="text-xs xl:text-sm">🏛️</span>
+                <SoftIcon name="landmark" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.poi', 'POI')}</span>
               </button>
 
@@ -305,7 +305,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.cadastralParcels')}
                 aria-pressed={showCadastre}
               >
-                <span className="text-xs xl:text-sm">📐</span>
+                <SoftIcon name="mapGrid" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.parcels', 'Parcels')}</span>
               </button>
 
@@ -320,7 +320,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.measure', 'Measure land')}
                 aria-pressed={showMeasurement}
               >
-                <span className="text-xs xl:text-sm">📏</span>
+                <SoftIcon name="ruler" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.measure', 'Measure')}</span>
               </button>
 
@@ -335,7 +335,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.legend', 'Legend')}
                 aria-pressed={isLegendOpen}
               >
-                <MapLegendIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+                <SoftIcon name="legend" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.legend', 'Legend')}</span>
               </button>
               </div>
@@ -359,7 +359,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                   >
                     <SearchPlusIcon className="w-4 h-4" />
                     <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
-                    <span className="sm:hidden">Save</span>
+                    <span className="sm:hidden">{t('search:ui.mapFilterControls.save', 'Save')}</span>
                   </button>
                 )}
                 <button
@@ -368,7 +368,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 >
                   <XCircleIcon className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
-                  <span className="sm:hidden">Clear</span>
+                  <span className="sm:hidden">{t('search:ui.mapFilterControls.clear', 'Clear')}</span>
                 </button>
               </div>
             )}
@@ -423,7 +423,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                         : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <MapLegendIcon className="w-5 h-5 flex-shrink-0" />
+                    <SoftIcon name="legend" className="w-6 h-6 flex-shrink-0" />
                     <span className="text-[15px] font-semibold">{t('search:map.legend', 'Legend')}</span>
                   </button>
 
@@ -436,7 +436,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                         : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-xl flex-shrink-0">🏛️</span>
+                    <SoftIcon name="landmark" className="w-6 h-6 flex-shrink-0" />
                     <span className="text-[15px] font-semibold">{t('search:map.pointsOfInterest', 'Points of Interest')}</span>
                   </button>
 
@@ -452,7 +452,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                         : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-xl flex-shrink-0">📏</span>
+                    <SoftIcon name="ruler" className="w-6 h-6 flex-shrink-0" />
                     <span className="text-[15px] font-semibold">{t('search:map.measureDistance', 'Measure Distance')}</span>
                   </button>
 
@@ -465,7 +465,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                         : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-xl flex-shrink-0">🏢</span>
+                    <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
                     <span className="text-[15px] font-semibold">{t('search:map.buildings3D', '3D Buildings')}</span>
                   </button>
 
@@ -478,7 +478,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                         : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-xl flex-shrink-0">📐</span>
+                    <SoftIcon name="area" className="w-6 h-6 flex-shrink-0" />
                     <span className="text-[15px] font-semibold">{t('search:map.landParcels', 'Land Parcels')}</span>
                   </button>
                 </div>

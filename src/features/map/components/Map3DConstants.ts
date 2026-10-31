@@ -3,6 +3,7 @@
 
 import type { TimePeriod } from '../hooks/useShadowTimelapse';
 import type { MapDestination } from '@/shared/map/mapDestination';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 /**
  * Props for Map3DBuildings component
@@ -127,12 +128,12 @@ export const TIME_LIGHTING: Record<TimePeriod, TimeLighting> = {
   },
 };
 
-export const PERIOD_ICONS: Record<TimePeriod, string> = {
-  night: '\u{1F319}',
-  dawn: '\u{1F305}',
-  morning: '\u{1F324}\uFE0F',
-  noon: '\u2600\uFE0F',
-  afternoon: '\u{1F324}\uFE0F',
-  sunset: '\u{1F307}',
-  dusk: '\u{1F306}',
+export const PERIOD_ICONS: Record<TimePeriod, SoftIconName> = {
+  night: 'moon',
+  dawn: 'sunrise',
+  morning: 'partlySunny',
+  noon: 'sun',
+  afternoon: 'partlySunny',
+  sunset: 'sunset',
+  dusk: 'dusk',
 };

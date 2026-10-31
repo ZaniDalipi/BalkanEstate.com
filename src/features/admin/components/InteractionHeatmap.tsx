@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ExclamationTriangleIcon,
-  ClockIcon,
-} from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { API_URL } from '@/src/shared/api/config';
 import { tokenService } from '@/src/shared/api/tokenService';
 
@@ -46,7 +43,7 @@ const InteractionHeatmap: React.FC = () => {
         }
       );
 
-      if (!response.ok) throw new Error('Failed to fetch heatmap data');
+      if (!response.ok) throw new Error(t('admin:ui.interactionHeatmap.failedToFetchHeatmapData', 'Failed to fetch heatmap data'));
 
       const heatmapData = await response.json();
       setData(heatmapData);
@@ -71,7 +68,7 @@ const InteractionHeatmap: React.FC = () => {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8">
         <div className="text-center text-red-600">
-          <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-4" />
+          <SoftIcon name="warning" className="w-12 h-12 mx-auto mb-4" />
           <p className="font-semibold">{error}</p>
           <button
             onClick={fetchHeatmapData}
@@ -184,7 +181,7 @@ const InteractionHeatmap: React.FC = () => {
             <div className="text-sm text-gray-600 mt-2">
               {t('admin:analytics.conversionRate', 'Conversion Rate')}
             </div>
-            <div className="text-xs text-gray-500 mt-1">Clicks to Completion</div>
+            <div className="text-xs text-gray-500 mt-1">{t('admin:ui.interactionHeatmap.clicksToCompletion', 'Clicks to Completion')}</div>
           </div>
         </div>
       </div>
@@ -205,19 +202,19 @@ const InteractionHeatmap: React.FC = () => {
                       {page.path}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {page.uniqueVisitors} unique visitors
+                      {page.uniqueVisitors} {t('admin:ui.interactionHeatmap.uniqueVisitors', 'unique visitors')}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-blue-600">{page.views}</div>
-                    <div className="text-xs text-gray-500">views</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.interactionHeatmap.views', 'views')}</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <SoftIcon name="clock" className="w-8 h-8 mx-auto mb-2" />
               <p className="text-sm">{t('admin:analytics.noPageData', 'No page view data available')}</p>
             </div>
           )}
@@ -237,19 +234,19 @@ const InteractionHeatmap: React.FC = () => {
                       {btn.button}
                     </div>
                     <div className="text-xs text-gray-500 truncate">
-                      on {btn.page}
+                      {t('admin:ui.interactionHeatmap.on', 'on')} {btn.page}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-green-600">{btn.clicks}</div>
-                    <div className="text-xs text-gray-500">clicks</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.interactionHeatmap.clicks', 'clicks')}</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <SoftIcon name="clock" className="w-8 h-8 mx-auto mb-2" />
               <p className="text-sm">{t('admin:analytics.noButtonData', 'No button click data available')}</p>
             </div>
           )}
@@ -293,7 +290,7 @@ const InteractionHeatmap: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <SoftIcon name="clock" className="w-8 h-8 mx-auto mb-2" />
               <p className="text-sm">{t('admin:analytics.noDeviceData', 'No device data available')}</p>
             </div>
           )}
@@ -315,14 +312,14 @@ const InteractionHeatmap: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-purple-600">{flow.count}</div>
-                    <div className="text-xs text-gray-500">sessions</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.interactionHeatmap.sessions', 'sessions')}</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <SoftIcon name="clock" className="w-8 h-8 mx-auto mb-2" />
               <p className="text-sm">{t('admin:analytics.noFlowData', 'No user flow data available')}</p>
             </div>
           )}

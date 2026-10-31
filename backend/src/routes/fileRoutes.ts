@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getSignedUrl,
+  openFile,
   getBatchSignedUrls,
   getMyFiles,
   deleteFile,
@@ -93,7 +94,7 @@ router.post('/signed-urls', generalRateLimiter, getBatchSignedUrls);
  *         required: true
  *         schema:
  *           type: string
- *         description: Cloudinary public ID (URL-encoded)
+ *         description: storage key (URL-encoded)
  *       - in: query
  *         name: resourceType
  *         schema:
@@ -110,6 +111,10 @@ router.post('/signed-urls', generalRateLimiter, getBatchSignedUrls);
  */
 router.get('/signed-url/{*publicId}', generalRateLimiter, getSignedUrl);
 
+// Redirects to a short-lived link after the same ownership check. Stored as
+// the URL of R2 private documents, so a plain link opens them.
+router.get('/open/{*publicId}', generalRateLimiter, openFile);
+
 /**
  * @swagger
  * /api/files/{publicId}:
@@ -124,7 +129,7 @@ router.get('/signed-url/{*publicId}', generalRateLimiter, getSignedUrl);
  *         required: true
  *         schema:
  *           type: string
- *         description: Cloudinary public ID (URL-encoded)
+ *         description: storage key (URL-encoded)
  *     responses:
  *       200:
  *         description: File deleted

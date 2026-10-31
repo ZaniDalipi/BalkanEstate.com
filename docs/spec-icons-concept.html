@@ -1,0 +1,310 @@
+<title>BalkanEstate Spec Icons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* Layout: a quiet header, then a grid of listing-style spec cards — the illustrations are the hero. */
+  :root {
+    --bg: #F3F5F9;
+    --card: #FFFFFF;
+    --fg: #0E1726;
+    --muted: #5A6578;
+    --line: #E1E6EF;
+    --brand: #0252CD;
+    --brand-soft: #E6F0FF;
+    --font-display: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0B1120; --card: #131B2E; --fg: #EEF2F8; --muted: #9AA6BA;
+      --line: #24304A; --brand: #5B9BFF; --brand-soft: #16264A; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B1120; --card: #131B2E; --fg: #EEF2F8; --muted: #9AA6BA;
+    --line: #24304A; --brand: #5B9BFF; --brand-soft: #16264A; color-scheme: dark;
+  }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: var(--font-display);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 40px 56px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 32px; }
+  header { display: grid; gap: 10px; max-width: 64ch; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--brand); }
+  h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0; font-weight: 800; text-wrap: balance; }
+  header p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+    padding: 22px 24px 20px; display: grid; gap: 6px; min-width: 0;
+  }
+  .card h2 { margin: 0; font-size: 15px; font-weight: 700; color: var(--muted); }
+  .art { display: grid; place-items: center; padding-block: 6px; }
+  .art svg { width: 100%; max-width: 280px; height: auto; }
+  .value { display: flex; align-items: baseline; gap: 8px; }
+  .value b { font-size: 40px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .value span { font-size: 15px; font-weight: 700; }
+  .hide {
+    margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--muted);
+  }
+  .hide svg { width: 22px; height: 22px; flex: none; }
+  .hide strong { color: var(--fg); font-weight: 700; }
+  .note { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 72ch; }
+</style>
+
+<!-- Shared logo marks (three isometric towers). Blue for light surfaces, white for blue fabric. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo" viewBox="5.2 3.4 12.2 13.8">
+      <g stroke-linejoin="round" stroke-width=".7">
+        <path d="M9.2 5.9 12.9 4 16.75 5.8 13 7.6Z" fill="#B9DEFB" stroke="#B9DEFB"/>
+        <path d="M9.2 5.9 13 7.6V16.6L9.2 14.9Z" fill="#6FA6DA" stroke="#6FA6DA"/>
+        <path d="M13 7.6 16.75 5.8V15.9L13 16.6Z" fill="#93C6F2" stroke="#93C6F2"/>
+        <path d="M5.9 9 8.5 8 11.3 9.3 8.7 10.3Z" fill="#B9DEFB" stroke="#B9DEFB"/>
+        <path d="M5.9 9 8.7 10.3V15.3L5.9 13.9Z" fill="#6FA6DA" stroke="#6FA6DA"/>
+        <path d="M8.7 10.3 11.3 9.3V14.75L8.7 15.3Z" fill="#93C6F2" stroke="#93C6F2"/>
+      </g>
+    </symbol>
+    <symbol id="logo-white" viewBox="5.2 3.4 12.2 13.8">
+      <g stroke-linejoin="round" stroke-width=".7">
+        <path d="M9.2 5.9 12.9 4 16.75 5.8 13 7.6Z" fill="#FFFFFF" stroke="#FFFFFF"/>
+        <path d="M9.2 5.9 13 7.6V16.6L9.2 14.9Z" fill="#D6E7FB" stroke="#D6E7FB"/>
+        <path d="M13 7.6 16.75 5.8V15.9L13 16.6Z" fill="#F2F8FF" stroke="#F2F8FF"/>
+        <path d="M5.9 9 8.5 8 11.3 9.3 8.7 10.3Z" fill="#FFFFFF" stroke="#FFFFFF"/>
+        <path d="M5.9 9 8.7 10.3V15.3L5.9 13.9Z" fill="#D6E7FB" stroke="#D6E7FB"/>
+        <path d="M8.7 10.3 11.3 9.3V14.75L8.7 15.3Z" fill="#F2F8FF" stroke="#F2F8FF"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Concept sheet · spec illustrations</div>
+    <h1>Every spec gets a scene, with our towers hidden inside it</h1>
+    <p>Six sample icons for the property details page, drawn in one isometric style with brand-blue accents. Each one hides the BalkanEstate two-tower mark somewhere small. Look for it, then tell us which placements you like.</p>
+  </header>
+
+  <section class="grid" id="grid"></section>
+
+  <p class="note">These are hand-built vector drafts that show composition and logo placement. The final set can be rendered as soft 3D images in the same layouts once image-generation credits are available, or kept as vectors (sharp at any size and only a few KB each).</p>
+</main>
+
+<script>
+(function () {
+  var C = 0.866, Sn = 0.5;
+  function mk(S, ox, oy) {
+    var out = [];
+    function P(x, y, z) { return [ox + (x - y) * C * S, oy + (x + y) * Sn * S - z * S]; }
+    function pts(a) { return a.map(function (p) { var q = P(p[0], p[1], p[2]); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' '); }
+    function poly(a, fill, extra) { out.push('<polygon points="' + pts(a) + '" fill="' + fill + '"' + (extra || '') + '/>'); }
+    var api = {
+      P: P,
+      poly: poly,
+      raw: function (s) { out.push(s); },
+      box: function (x, y, z, w, d, h, c) {
+        poly([[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], c.r);
+        poly([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], c.l);
+        poly([[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], c.t);
+      },
+      // rectangle on a y = const face (lower-left facing)
+      lrect: function (yc, x1, x2, z1, z2, fill) { poly([[x1, yc, z1], [x2, yc, z1], [x2, yc, z2], [x1, yc, z2]], fill); },
+      // rectangle on an x = const face (lower-right facing)
+      rrect: function (xc, y1, y2, z1, z2, fill) { poly([[xc, y1, z1], [xc, y2, z1], [xc, y2, z2], [xc, y1, z2]], fill); },
+      // rectangle on a z = const face (top)
+      trect: function (zc, x1, x2, y1, y2, fill) { poly([[x1, y1, zc], [x2, y1, zc], [x2, y2, zc], [x1, y2, zc]], fill); },
+      // logo painted onto a face. size in world units.
+      logoL: function (yc, x, ztop, size, id) {
+        var o = P(x, yc, ztop), k = S * size / 24;
+        out.push('<use href="#' + (id || 'logo') + '" width="24" height="24" transform="matrix(' + [C * k, Sn * k, 0, k, o[0], o[1]].map(function (n) { return n.toFixed(3); }).join(' ') + ')"/>');
+      },
+      logoR: function (xc, y, ztop, size, id) {
+        var o = P(xc, y, ztop), k = S * size / 24;
+        out.push('<use href="#' + (id || 'logo') + '" width="24" height="24" transform="matrix(' + [C * k, -Sn * k, 0, k, o[0], o[1]].map(function (n) { return n.toFixed(3); }).join(' ') + ')"/>');
+      },
+      logoT: function (zc, x, y, size, id) {
+        var o = P(x, y, zc), k = S * size / 24;
+        out.push('<use href="#' + (id || 'logo') + '" width="24" height="24" transform="matrix(' + [C * k, Sn * k, -C * k, Sn * k, o[0], o[1]].map(function (n) { return n.toFixed(3); }).join(' ') + ')"/>');
+      },
+      tree: function (x, y, z, r) {
+        var p = P(x, y, z);
+        out.push('<rect x="' + (p[0] - 1.5) + '" y="' + (p[1] - r * 1.2) + '" width="3" height="' + r * 1.2 + '" fill="#8A6A4A"/>');
+        out.push('<circle cx="' + p[0] + '" cy="' + (p[1] - r * 1.6) + '" r="' + r + '" fill="#4E9A4A"/>');
+        out.push('<circle cx="' + (p[0] - r * .35) + '" cy="' + (p[1] - r * 1.85) + '" r="' + r * .55 + '" fill="#6DB863"/>');
+      },
+      shadow: function (x, y, rx, ry) { out.push('<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="#0E1726" opacity=".08"/>'); },
+      svg: function (label) { return '<svg viewBox="0 0 280 210" role="img" aria-label="' + label + '">' + out.join('') + '</svg>'; }
+    };
+    return api;
+  }
+
+  var WALL = { t: '#FFFFFF', l: '#F4F6FA', r: '#DCE2EC' };
+  var ROOF_F = '#3A4253', ROOF_B = '#2A303D', GLASS = '#BFD6F2', GLASS_D = '#9DBBE0';
+  var BLUE = { t: '#3B82F6', l: '#0252CD', r: '#0141A6' };
+
+  function house() {
+    var g = mk(8, 150, 92);
+    g.shadow(140, 186, 100, 14);
+    g.box(-3, -3, -0.7, 19, 15, 0.7, { t: '#8CC66B', l: '#EEF1F5', r: '#D6DCE6' });
+    g.tree(-1.5, 9.5, 0, 9);
+    var w = 12, d = 8, h = 7, rh = 4, o = 0.7;
+    g.box(0, 0, 0, w, d, h, WALL);
+    // windows, left face
+    g.lrect(d, 1.5, 4.5, 1, 3.6, GLASS); g.lrect(d, 1.5, 4.5, 4.2, 6.2, GLASS);
+    g.lrect(d, 6.6, 9.4, 0, h, '#0252CD');
+    g.lrect(d, 7.3, 8.7, 0, 3.6, '#1C2433');
+    g.lrect(d, 10.2, 11.4, 4.2, 6.2, GLASS);
+    // windows, right face
+    g.rrect(w, 2, 4, 1.2, 3.4, GLASS_D); g.rrect(w, 2, 4, 4.2, 6.2, GLASS_D); g.rrect(w, 5.2, 6.6, 4.2, 6.2, GLASS_D);
+    // roof back slope, chimney with logo flag, front slope, gable
+    g.poly([[-o, -o, h], [w + o, -o, h], [w + o, d / 2, h + rh], [-o, d / 2, h + rh]], ROOF_B);
+    g.box(8.4, 1.4, 8, 1.4, 1.4, 4.4, { t: '#C9D1DD', l: '#EEF1F5', r: '#D3DAE4' });
+    var top = g.P(9.1, 2.1, 12.4);
+    g.raw('<line x1="' + top[0] + '" y1="' + top[1] + '" x2="' + top[0] + '" y2="' + (top[1] - 42) + '" stroke="#5A6578" stroke-width="1.6"/>');
+    g.raw('<path d="M' + top[0] + ' ' + (top[1] - 42) + ' h30 l-5 9 5 9 h-30z" fill="#FFFFFF" stroke="#0252CD" stroke-width="1.4"/>');
+    g.raw('<use href="#logo" x="' + (top[0] + 3) + '" y="' + (top[1] - 41) + '" width="16" height="16"/>');
+    g.poly([[-o, d + o, h], [w + o, d + o, h], [w + o, d / 2, h + rh], [-o, d / 2, h + rh]], ROOF_F);
+    g.poly([[w, 0, h], [w, d, h], [w, d / 2, h + rh]], WALL.r);
+    g.tree(14, 1, 0, 8);
+    return g.svg('House with a BalkanEstate flag on the chimney');
+  }
+
+  function bed() {
+    var g = mk(9, 140, 50);
+    g.shadow(140, 176, 96, 12);
+    g.box(-4.2, 0.3, 0, 2.8, 2.8, 3.4, { t: '#E9E3DA', l: '#D9D0C3', r: '#C6BBAC' });
+    var lp = g.P(-2.8, 1.7, 3.4);
+    g.raw('<rect x="' + (lp[0] - 1) + '" y="' + (lp[1] - 18) + '" width="2" height="18" fill="#A99B89"/><path d="M' + (lp[0] - 9) + ' ' + (lp[1] - 18) + ' h18 l-4 -12 h-10z" fill="#F5EFE6"/>');
+    g.box(0, -0.9, 0, 11, 0.9, 6.2, { t: '#EDE6DC', l: '#E2D9CC', r: '#CFC4B5' });
+    g.box(0, 0, 0, 11, 13, 1.6, { t: '#D9CFC2', l: '#BFB2A2', r: '#AA9C8B' });
+    g.box(0.3, 0.3, 1.6, 10.4, 12.4, 1.7, { t: '#FFFFFF', l: '#F1F3F7', r: '#DDE3EC' });
+    g.box(1, 1, 3.3, 4, 2.8, 1.1, { t: '#FFFFFF', l: '#F3F5F9', r: '#E0E5EE' });
+    g.box(6, 1, 3.3, 4, 2.8, 1.1, { t: '#FFFFFF', l: '#F3F5F9', r: '#E0E5EE' });
+    g.logoT(4.4, 8.1, 1.4, 1.7);
+    g.box(0.1, 6, 3.3, 10.8, 6.9, 0.35, BLUE);
+    g.trect(3.66, 0.1, 10.9, 7.4, 8.2, '#FFFFFF');
+    g.lrect(12.9, 0.1, 10.9, 1.4, 3.65, '#0252CD');
+    g.rrect(10.9, 6, 12.9, 1.2, 3.65, '#0141A6');
+    return g.svg('Bed with a logo tag stitched on the pillow');
+  }
+
+  function bath() {
+    var g = mk(9.5, 120, 70);
+    g.shadow(150, 166, 92, 12);
+    // faucet behind
+    var f = g.P(6, 0.4, 5);
+    g.raw('<path d="M' + f[0] + ' ' + (f[1] + 2) + ' v-26 q0 -8 9 -8 q9 0 9 8 v6" fill="none" stroke="#5A6578" stroke-width="3" stroke-linecap="round"/>');
+    g.box(0.6, 0.6, 0, 0.8, 0.8, 0.9, { t: '#C3CAD6', l: '#AEB7C5', r: '#98A2B2' });
+    g.box(11, 0.6, 0, 0.8, 0.8, 0.9, { t: '#C3CAD6', l: '#AEB7C5', r: '#98A2B2' });
+    g.box(0.6, 5.2, 0, 0.8, 0.8, 0.9, { t: '#C3CAD6', l: '#AEB7C5', r: '#98A2B2' });
+    g.box(11, 5.2, 0, 0.8, 0.8, 0.9, { t: '#C3CAD6', l: '#AEB7C5', r: '#98A2B2' });
+    g.box(0, 0, 0.9, 12.4, 6.6, 3.8, WALL);
+    g.trect(4.7, 0.8, 11.6, 0.8, 5.8, '#E3EBF6');
+    g.trect(4.3, 1.1, 11.3, 1.1, 5.5, '#BFD9F5');
+    // towel over the rim
+    g.trect(4.72, 7.2, 10, 4.6, 6.6, '#3B82F6');
+    g.lrect(6.6, 7.2, 10, 1.6, 4.72, '#0252CD');
+    g.logoL(6.6, 7.8, 4.2, 1.9, 'logo-white');
+    g.lrect(6.6, 7.2, 10, 1.6, 1.95, '#FFFFFF');
+    // plant
+    g.box(13.5, 0.4, 0, 2.6, 2.6, 2.4, { t: '#E8ECF2', l: '#FFFFFF', r: '#D5DBE5' });
+    var pl = g.P(14.8, 1.7, 2.4);
+    g.raw('<path d="M' + pl[0] + ' ' + pl[1] + ' q-14 -10 -10 -26 q8 8 10 24 q2 -20 12 -28 q4 16 -10 30z" fill="#4E9A4A"/>');
+    return g.svg('Bathtub with the logo woven into the towel');
+  }
+
+  function plot() {
+    var g = mk(7.4, 150, 48);
+    g.shadow(140, 186, 110, 12);
+    var W = 20, D = 15;
+    g.box(0, 0, -0.9, W, D, 0.9, { t: '#8CC66B', l: '#EEF1F5', r: '#D6DCE6' });
+    // path
+    g.trect(0.02, 9.5, 11, 7, D, '#E6E1D6');
+    // little house
+    g.box(7, 2.5, 0, 6.5, 4.5, 3.6, WALL);
+    g.lrect(7, 8, 9.2, 0, 2, '#0252CD');
+    g.poly([[6.6, 2.1, 3.6], [13.9, 2.1, 3.6], [13.9, 4.75, 5.6], [6.6, 4.75, 5.6]], ROOF_B);
+    g.poly([[6.6, 7.4, 3.6], [13.9, 7.4, 3.6], [13.9, 4.75, 5.6], [6.6, 4.75, 5.6]], ROOF_F);
+    g.poly([[13.5, 2.5, 3.6], [13.5, 7, 3.6], [13.5, 4.75, 5.6]], WALL.r);
+    g.tree(3.5, 3.5, 0, 7); g.tree(16, 10, 0, 6);
+    // boundary
+    var a = g.P(0.4, 0.4, 0.02), b = g.P(W - 0.4, 0.4, 0.02), c = g.P(W - 0.4, D - 0.4, 0.02), d = g.P(0.4, D - 0.4, 0.02);
+    g.raw('<polygon points="' + [a, b, c, d].map(function (p) { return p.join(','); }).join(' ') + '" fill="none" stroke="#0252CD" stroke-width="2.6" stroke-linejoin="round"/>');
+    [[0.4, 0.4], [W - 0.4, 0.4], [W - 0.4, D - 0.4], [0.4, D - 0.4]].forEach(function (q) { g.box(q[0] - 0.3, q[1] - 0.3, 0, 0.6, 0.6, 1.4, BLUE); });
+    // dimension lines
+    var p1 = g.P(0, D + 1.6, -0.9), p2 = g.P(W, D + 1.6, -0.9), p3 = g.P(W + 1.6, 0, -0.9), p4 = g.P(W + 1.6, D, -0.9);
+    g.raw('<line x1="' + p3[0] + '" y1="' + p3[1] + '" x2="' + p4[0] + '" y2="' + p4[1] + '" stroke="#8A94A6" stroke-width="1"/>');
+    // sign stake with logo at the front corner
+    var s = g.P(2.6, D - 1.2, 0);
+    g.raw('<rect x="' + (s[0] - 1.2) + '" y="' + (s[1] - 40) + '" width="2.4" height="40" fill="#8A6A4A"/>');
+    g.lrect(D - 1.2, 0.6, 5.6, 3.4, 7.8, '#FFFFFF');
+    g.rrect(5.6, D - 1.5, D - 1.2, 3.4, 7.8, '#C9D1DD');
+    g.logoL(D - 1.2, 1.5, 7.5, 3.6);
+    return g.svg('Plot of land with a BalkanEstate boundary sign');
+  }
+
+  function garage() {
+    var g = mk(7.6, 150, 74);
+    g.shadow(140, 192, 104, 12);
+    g.box(-1, -1, -0.6, 18, 17, 0.6, { t: '#D7DCE3', l: '#EEF1F5', r: '#C9D0DA' });
+    g.box(0, 0, 0, 10, 7, 6, WALL);
+    g.box(-0.3, -0.3, 6, 10.6, 7.6, 0.6, { t: '#3A4253', l: '#2A303D', r: '#232834' });
+    g.lrect(7, 1.4, 8.6, 0, 4.4, '#E3E8F0');
+    for (var z = 0.55; z < 4.4; z += 0.55) g.lrect(7, 1.4, 8.6, z, z + 0.08, '#C7CFDB');
+    g.logoL(7, 4.2, 5.75, 1.4);
+    g.rrect(10, 2, 5, 2.4, 4.6, GLASS_D);
+    // car leaving the garage
+    g.box(2.2, 8.4, 0.6, 5.6, 7.2, 1.7, BLUE);
+    g.box(2.7, 9.8, 2.3, 4.6, 3.8, 1.5, { t: '#2A303D', l: '#9DBBE0', r: '#7FA2CC' });
+    g.lrect(15.6, 3.4, 6.6, 1.0, 1.6, '#FFFFFF');
+    var wl = g.P(2.2, 14, 0.6), wr = g.P(7.8, 14, 0.6);
+    g.raw('<ellipse cx="' + (wl[0] + 2) + '" cy="' + (wl[1] - 3) + '" rx="5" ry="6" fill="#1C2433"/><ellipse cx="' + (wr[0] - 1) + '" cy="' + (wr[1] - 6) + '" rx="5" ry="6" fill="#1C2433"/>');
+    var h1 = g.P(2.6, 15.6, 1.6), h2 = g.P(7.4, 15.6, 1.6);
+    g.raw('<circle cx="' + h1[0] + '" cy="' + h1[1] + '" r="2.4" fill="#FFF6D6"/><circle cx="' + h2[0] + '" cy="' + h2[1] + '" r="2.4" fill="#FFF6D6"/>');
+    g.tree(14, 1.5, 0, 7);
+    return g.svg('Garage with the BalkanEstate mark above the door');
+  }
+
+  function sofa() {
+    var g = mk(9.4, 128, 62);
+    g.shadow(140, 172, 100, 12);
+    var S = { t: '#EEF1F5', l: '#E1E6EE', r: '#C9D0DB' };
+    g.box(0, 0, 0, 13, 1.6, 5.4, S);
+    g.box(0, 0, 0, 1.6, 5.6, 3.4, S);
+    g.box(1.6, 1.6, 0, 9.8, 4, 2, S);
+    g.box(1.7, 1.7, 2, 4.8, 3.9, 0.8, { t: '#FFFFFF', l: '#F1F4F8', r: '#DCE2EB' });
+    g.box(6.5, 1.7, 2, 4.8, 3.9, 0.8, { t: '#FFFFFF', l: '#F1F4F8', r: '#DCE2EB' });
+    // brand cushion
+    g.box(7.6, 1.7, 2.8, 3, 0.9, 2.9, BLUE);
+    g.logoL(2.6, 8.15, 5.2, 1.9, 'logo-white');
+    g.box(11.4, 0, 0, 1.6, 5.6, 3.4, S);
+    // coffee table
+    g.box(2.5, 8, 0, 7, 3.6, 1.8, { t: '#C9A27A', l: '#B48C63', r: '#9C7752' });
+    var cup = g.P(5, 9.5, 1.8);
+    g.raw('<rect x="' + (cup[0] - 4) + '" y="' + (cup[1] - 7) + '" width="8" height="7" rx="1.5" fill="#FFFFFF"/>');
+    // floor lamp
+    var l = g.P(14.6, 0.6, 0);
+    g.raw('<rect x="' + (l[0] - 1) + '" y="' + (l[1] - 74) + '" width="2" height="74" fill="#5A6578"/><path d="M' + (l[0] - 12) + ' ' + (l[1] - 74) + ' h24 l-5 -16 h-14z" fill="#F7F1E4"/>');
+    return g.svg('Sofa with a blue BalkanEstate cushion');
+  }
+
+  var cards = [
+    { title: 'Ndërtimi · Building', v: '2', u: 'kate', art: house, where: 'A flag with the towers flies from the <strong>chimney</strong>.' },
+    { title: 'Dhomat e gjumit · Bedrooms', v: '4', u: 'dhoma', art: bed, where: 'Embroidered on the <strong>right pillow</strong>, like a hotel tag.' },
+    { title: 'Banjo · Bathrooms', v: '2', u: 'banjo', art: bath, where: 'Woven into the <strong>blue towel</strong> on the rim.' },
+    { title: 'Sipërfaqja e parcelës · Plot', v: '2', u: 'ari', art: plot, where: 'On the <strong>boundary sign</strong> at the front corner.' },
+    { title: 'Parking dhe garazhi · Parking', v: '1', u: 'garazh', art: garage, where: 'A <strong>brand plate</strong> above the garage door.' },
+    { title: 'Dhoma ndenjeje · Living rooms', v: '1', u: 'sallon', art: sofa, where: 'Printed on the <strong>blue throw cushion</strong>.' }
+  ];
+  var grid = document.getElementById('grid');
+  grid.innerHTML = cards.map(function (c) {
+    return '<article class="card"><h2>' + c.title + '</h2><div class="art">' + c.art() + '</div>' +
+      '<div class="value"><b>' + c.v + '</b><span>' + c.u + '</span></div>' +
+      '<div class="hide"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#logo"/></svg><span>' + c.where + '</span></div></article>';
+  }).join('');
+})();
+</script>

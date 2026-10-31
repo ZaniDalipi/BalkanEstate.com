@@ -11,8 +11,8 @@ const countryCurrencyMap: { [key: string]: string } = {
   'Romania': 'EUR',
 };
 
-export const formatPrice = (price: number, country: string): string => {
-  const currency = countryCurrencyMap[country] || 'EUR'; // Default to EUR
+export const formatPrice = (price: number, country?: string): string => {
+  const currency = (country && countryCurrencyMap[country]) || 'EUR'; // Default to EUR
 
   // Use a locale that fits the general Balkan number format (e.g., de-DE uses dots for thousands)
   return new Intl.NumberFormat('de-DE', { 

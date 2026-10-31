@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { type PromotionCoupon } from '../hooks/usePromotionCouponData';
 import { usePromotionCouponManager } from './usePromotionCouponManager';
 import { CreateCouponModal } from './PromotionCouponManagerForm';
@@ -67,9 +68,9 @@ const PromotionCouponManager: React.FC = () => {
             {/* Real-time indicator */}
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Auto-refresh 10s</span>
+              <span>{t('admin:ui.promotionCouponManager.autoRefresh10s', 'Auto-refresh 10s')}</span>
               <span className="text-gray-400">|</span>
-              <span>Updated: {formatLastUpdated(dataUpdatedAt)}</span>
+              <span>{t('admin:ui.promotionCouponManager.updated', 'Updated:')} {formatLastUpdated(dataUpdatedAt)}</span>
             </div>
             <button
               onClick={refreshCoupons}
@@ -154,7 +155,7 @@ const PromotionCouponManager: React.FC = () => {
                   )}
                   {coupon.isPublic && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded">
-                      Public
+                      {t('admin:ui.promotionCouponManager.public', 'Public')}
                     </span>
                   )}
                 </td>
@@ -165,7 +166,7 @@ const PromotionCouponManager: React.FC = () => {
                       : `\u20AC${coupon.discountValue}`}
                   </span>
                   {coupon.minimumPurchaseAmount && coupon.minimumPurchaseAmount > 0 && (
-                    <div className="text-xs text-gray-500">Min: &euro;{coupon.minimumPurchaseAmount}</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.promotionCouponManager.min', 'Min: €')}{coupon.minimumPurchaseAmount}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -181,7 +182,7 @@ const PromotionCouponManager: React.FC = () => {
                     </span>
                     <span className="text-gray-500"> / {coupon.maxTotalUses || '\u221E'}</span>
                   </div>
-                  <div className="text-xs text-gray-500">{coupon.maxUsesPerUser} per user</div>
+                  <div className="text-xs text-gray-500">{coupon.maxUsesPerUser} {t('admin:ui.promotionCouponManager.perUser', 'per user')}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div>{formatDate(coupon.validFrom)}</div>
@@ -228,7 +229,7 @@ const PromotionCouponManager: React.FC = () => {
 
         {filteredCoupons.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            <div className="text-4xl mb-4">🎟️</div>
+            <SoftIcon name="ticket" className="w-12 h-12 mx-auto mb-4" />
             <p>{t('admin:promotionCoupons.noCouponsFound')}</p>
             <p className="text-sm mt-1">{t('admin:promotionCoupons.createFirstCoupon')}</p>
           </div>

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImage } from '@/types';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { ArrowTopRightOnSquareIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon } from '@/constants';
 import { PhotoSpotSquare } from '@/src/components/property/PhotoSpotMarker';
 import { spotFloor } from '@/shared/utils/floorplans';
@@ -270,7 +270,7 @@ const FloorPlanMiniMap: React.FC<FloorPlanMiniMapProps> = ({ planUrl, label, flo
                     {/* transform is written directly by write() */}
                     <div ref={contentRef} className="absolute inset-0" style={{ transformOrigin: '0 0', willChange: 'transform' }}>
                         <img
-                            src={optimizeCloudinaryUrl(planUrl, { width: 1200, quality: 'auto' }) || planUrl}
+                            src={optimizeImageUrl(planUrl, { width: 1200, quality: 'auto' }) || planUrl}
                             alt=""
                             className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                             draggable={false}

@@ -1,0 +1,90 @@
+{
+  "success": {
+    "title": "Message Sent!",
+    "description": "Thank you for reaching out. Our team will get back to you within 24 hours.",
+    "sendAnother": "Send Another Message"
+  },
+  "advertising": {
+    "prefill": "Hi, I'd like to advertise on BalkanEstate. Please send me your ad placements and pricing.",
+    "heading": "Where would you like your ad?",
+    "page": "Page",
+    "placement": "Placement",
+    "creative": "Attach your ad image (optional)",
+    "removeImage": "Remove image",
+    "uploading": "Uploading…",
+    "replaceImage": "Replace image",
+    "uploadImage": "Upload image",
+    "creativeHint": "PNG or JPG, max 5MB. This helps us place your ad exactly where you want it."
+  },
+  "info": {
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "locationValue": "Balkans Region",
+    "hours": "Business Hours",
+    "hoursValue": "Mon-Fri, 9:00-18:00 CET",
+    "heading": "Get in Touch"
+  },
+  "title": "Contact Us",
+  "subtitle": "Have a question or need help? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+  "form": {
+    "heading": "Send us a Message",
+    "name": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone (optional)",
+    "subject": "Subject",
+    "message": "Your Message",
+    "sending": "Sending...",
+    "submit": "Send Message",
+    "privacyNote": "By submitting, you agree to our Privacy Policy. We will never share your information."
+  },
+  "quickHelp": {
+    "heading": "Quick Help",
+    "howItWorks": "Learn how BalkanEstate works",
+    "pricing": "View our pricing plans",
+    "findAgent": "Find a real estate agent",
+    "privacy": "Read our privacy policy"
+  },
+  "whatsapp": {
+    "title": "Chat on WhatsApp",
+    "subtitle": "Quick response during business hours"
+  },
+  "viber": {
+    "title": "Chat on Viber",
+    "subtitle": "Popular in the Balkans region"
+  },
+  "ui": {
+    "contactForm": {
+      "adCreativePreview": "ad creative preview"
+    }
+  },
+  "subjects": {
+    "general": "General inquiry",
+    "buying": "Buying a property",
+    "selling": "Selling a property",
+    "agency": "Agency & agents",
+    "support": "Technical support",
+    "partnership": "Partnership",
+    "advertising": "Advertising / Ad placement"
+  },
+  "adPages": {
+    "all": "All pages",
+    "home": "Home",
+    "search": "Search results",
+    "rentals": "Rentals",
+    "property-details": "Property details",
+    "agents": "Agents",
+    "agencies": "Agencies",
+    "business-directory": "Business directory",
+    "blog": "Blog",
+    "guides": "Guides"
+  },
+  "adPlacements": {
+    "in-content": "In content (leaderboard)",
+    "sidebar": "Sidebar (skyscraper)",
+    "sticky-bottom": "Sticky bottom bar",
+    "sticky-top": "Sticky top bar",
+    "header": "Header",
+    "footer": "Footer"
+  }
+}

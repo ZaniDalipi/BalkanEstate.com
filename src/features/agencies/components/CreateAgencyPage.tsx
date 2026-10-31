@@ -6,33 +6,22 @@ import { canCreateAgency } from '@/src/shared/utils/subscriptionHelpers';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { UserRole } from '@/types';
 import Footer from '@/components/shared/Footer';
-import {
-  BuildingOfficeIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  MapPinIcon,
-  PhoneIcon,
-  GlobeAltIcon,
-  ClockIcon,
-  UsersIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon,
-  ShieldCheckIcon,
-} from '@/constants';
+import { ArrowRightIcon, ArrowLeftIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { API_URL } from '@/src/shared/api/config';
-import { Upload, ImageIcon, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
-const AGENCY_TYPES = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'luxury', label: 'Luxury' },
-  { value: 'commercial', label: 'Commercial' },
-  { value: 'boutique', label: 'Boutique' },
-  { value: 'team', label: 'Team' },
-] as const;
+const AGENCY_TYPES: ReadonlyArray<{ value: 'standard' | 'luxury' | 'commercial' | 'boutique' | 'team'; label: string; icon: SoftIconName }> = [
+  { value: 'standard', label: 'Standard', icon: 'home' },
+  { value: 'luxury', label: 'Luxury', icon: 'crown' },
+  { value: 'commercial', label: 'Commercial', icon: 'building' },
+  { value: 'boutique', label: 'Boutique', icon: 'key' },
+  { value: 'team', label: 'Team', icon: 'users' },
+];
 
 const SPECIALIZATION_OPTIONS = [
   'Residential Sales', 'Residential Rentals', 'Commercial Sales', 'Commercial Leasing',
@@ -381,10 +370,10 @@ const CreateAgencyPage: React.FC = () => {
   const selectClasses = "w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all duration-200 hover:border-neutral-400 cursor-pointer bg-white";
 
   const stepInfo = [
-    { number: 1, title: t('create.steps.basic', 'Basic Info'), icon: BuildingOfficeIcon },
-    { number: 2, title: t('create.steps.location', 'Location'), icon: MapPinIcon },
-    { number: 3, title: t('create.steps.contact', 'Contact'), icon: PhoneIcon },
-    { number: 4, title: t('create.steps.details', 'Details'), icon: ClockIcon },
+    { number: 1, title: t('create.steps.basic', 'Basic Info'), icon: 'building' as SoftIconName },
+    { number: 2, title: t('create.steps.location', 'Location'), icon: 'pin' as SoftIconName },
+    { number: 3, title: t('create.steps.contact', 'Contact'), icon: 'phone' as SoftIconName },
+    { number: 4, title: t('create.steps.details', 'Details'), icon: 'clock' as SoftIconName },
   ];
 
   return (
@@ -401,7 +390,7 @@ const CreateAgencyPage: React.FC = () => {
         type="warning"
       />
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 landscape:py-6">
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -425,11 +414,11 @@ const CreateAgencyPage: React.FC = () => {
             <span>{t('create.backToAccount', 'Back to Account')}</span>
           </button>
 
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-            <BuildingOfficeIcon className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-white/95 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <SoftIcon name="building" className="w-16 h-16" />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 landscape:text-2xl">
             {t('create.title', 'Create Your Agency')}
           </h1>
           <p className="text-lg text-white/70 max-w-2xl mx-auto">
@@ -438,7 +427,7 @@ const CreateAgencyPage: React.FC = () => {
 
           {canSkipPayment && (
             <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-full text-green-300 border border-green-500/30">
-              <CheckCircleIcon className="w-5 h-5" />
+              <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
               <span className="font-medium">{t('create.enterpriseActive', 'Enterprise Subscription Active')}</span>
             </div>
           )}
@@ -455,11 +444,11 @@ const CreateAgencyPage: React.FC = () => {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                       currentStep >= step.number
-                        ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg'
-                        : 'bg-neutral-100 text-neutral-400'
+                        ? 'bg-white ring-2 ring-amber-500 shadow-lg'
+                        : 'bg-neutral-100'
                     }`}
                   >
-                    <step.icon className="w-6 h-6" />
+                    <SoftIcon name={step.icon} className={`w-9 h-9 ${currentStep >= step.number ? '' : 'grayscale opacity-50'}`} />
                   </div>
                   <span className={`mt-2 text-xs sm:text-sm font-medium ${
                     currentStep >= step.number ? 'text-amber-600' : 'text-neutral-400'
@@ -483,7 +472,7 @@ const CreateAgencyPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
           <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-xl">
             <div className="flex items-start gap-3">
-              <ExclamationTriangleIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <SoftIcon name="warning" className="w-7 h-7 flex-shrink-0" />
               <div>
                 <h4 className="font-bold text-amber-800 mb-1">
                   {agencyEligibility.reason?.includes('agent')
@@ -531,9 +520,7 @@ const CreateAgencyPage: React.FC = () => {
           {currentStep === 1 && (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
               <h2 className="text-xl font-bold text-neutral-800 mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-5 h-5 text-amber-600" />
-                </div>
+                <SoftIcon name="building" className="w-10 h-10 flex-shrink-0" />
                 {t('create.sections.basicInfo', 'Basic Information')}
               </h2>
 
@@ -599,7 +586,7 @@ const CreateAgencyPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="w-20 h-20 rounded-xl border-2 border-dashed border-neutral-300 flex items-center justify-center bg-neutral-50">
-                        <ImageIcon className="w-8 h-8 text-neutral-400" />
+                        <SoftIcon name="photo" className="w-12 h-12" />
                       </div>
                     )}
                     <div className="flex-1">
@@ -655,7 +642,7 @@ const CreateAgencyPage: React.FC = () => {
                             : 'border-neutral-200 bg-white text-neutral-600 hover:border-amber-300'
                         }`}
                       >
-                        <ShieldCheckIcon className="w-4 h-4" />
+                        <SoftIcon name={agencyType.icon} className="w-5 h-5 flex-shrink-0" />
                         {t(`create.agencyTypes.${agencyType.value}`, agencyType.label)}
                       </button>
                     ))}
@@ -672,9 +659,7 @@ const CreateAgencyPage: React.FC = () => {
           {currentStep === 2 && (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
               <h2 className="text-xl font-bold text-neutral-800 mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <MapPinIcon className="w-5 h-5 text-blue-600" />
-                </div>
+                <SoftIcon name="pin" className="w-10 h-10 flex-shrink-0" />
                 {t('create.sections.location', 'Location')}
               </h2>
 
@@ -764,9 +749,7 @@ const CreateAgencyPage: React.FC = () => {
           {currentStep === 3 && (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
               <h2 className="text-xl font-bold text-neutral-800 mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <PhoneIcon className="w-5 h-5 text-green-600" />
-                </div>
+                <SoftIcon name="phone" className="w-10 h-10 flex-shrink-0" />
                 {t('create.sections.contact', 'Contact Information')}
               </h2>
 
@@ -823,7 +806,7 @@ const CreateAgencyPage: React.FC = () => {
                       name="facebookUrl"
                       value={formData.facebookUrl}
                       onChange={handleInputChange}
-                      placeholder="facebook.com/yourpage"
+                      placeholder={t('agencies:ui.createAgencyPage.facebookComYourpage', 'facebook.com/yourpage')}
                       className={inputClasses}
                     />
                   </div>
@@ -835,7 +818,7 @@ const CreateAgencyPage: React.FC = () => {
                       name="instagramUrl"
                       value={formData.instagramUrl}
                       onChange={handleInputChange}
-                      placeholder="instagram.com/yourpage"
+                      placeholder={t('agencies:ui.createAgencyPage.instagramComYourpage', 'instagram.com/yourpage')}
                       className={inputClasses}
                     />
                   </div>
@@ -847,7 +830,7 @@ const CreateAgencyPage: React.FC = () => {
                       name="linkedinUrl"
                       value={formData.linkedinUrl}
                       onChange={handleInputChange}
-                      placeholder="linkedin.com/company/..."
+                      placeholder={t('agencies:ui.createAgencyPage.linkedinComCompany', 'linkedin.com/company/...')}
                       className={inputClasses}
                     />
                   </div>
@@ -861,9 +844,7 @@ const CreateAgencyPage: React.FC = () => {
             <div className="space-y-6">
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
                 <h2 className="text-xl font-bold text-neutral-800 mb-6 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                    <UsersIcon className="w-5 h-5 text-purple-600" />
-                  </div>
+                  <SoftIcon name="users" className="w-10 h-10 flex-shrink-0" />
                   {t('create.sections.professional', 'Professional Details')}
                 </h2>
 
@@ -972,9 +953,7 @@ const CreateAgencyPage: React.FC = () => {
               {/* Business Hours */}
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
                 <h2 className="text-xl font-bold text-neutral-800 mb-6 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                    <ClockIcon className="w-5 h-5 text-indigo-600" />
-                  </div>
+                  <SoftIcon name="clock" className="w-10 h-10 flex-shrink-0" />
                   {t('create.sections.businessHours', 'Business Hours')}
                 </h2>
 
@@ -989,7 +968,7 @@ const CreateAgencyPage: React.FC = () => {
                         id={day}
                         value={hours}
                         onChange={(e) => handleBusinessHoursChange(day, e.target.value)}
-                        placeholder="9:00 AM - 5:00 PM"
+                        placeholder={t('agencies:ui.createAgencyPage.n900Am500', '9:00 AM - 5:00 PM')}
                         className={inputClasses}
                       />
                     </div>
@@ -1000,7 +979,7 @@ const CreateAgencyPage: React.FC = () => {
               {/* What You'll Get */}
               <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 border-2 border-amber-200 rounded-2xl p-6 sm:p-8">
                 <h3 className="text-lg font-bold text-amber-900 mb-4 flex items-center gap-2">
-                  <CheckCircleIcon className="w-6 h-6 text-amber-600" />
+                  <SoftIcon name="check" className="w-7 h-7 flex-shrink-0" />
                   {t('create.benefits.title', "What You'll Get")}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1013,7 +992,7 @@ const CreateAgencyPage: React.FC = () => {
                     t('create.benefits.support', 'Priority customer support'),
                   ].map((benefit, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <CheckCircleIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                      <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
                       <span className="text-sm text-amber-800">{benefit}</span>
                     </div>
                   ))}
@@ -1053,7 +1032,7 @@ const CreateAgencyPage: React.FC = () => {
               >
                 {canSkipPayment ? (
                   <>
-                    <BuildingOfficeIcon className="w-5 h-5" />
+                    <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
                     {t('create.createAgency', 'Create Agency')}
                   </>
                 ) : (

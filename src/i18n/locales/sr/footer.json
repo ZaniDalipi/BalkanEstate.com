@@ -21,7 +21,12 @@
     "messages": "Поруке",
     "myAccount": "Мој налог",
     "howItWorks": "Како функционише",
-    "blog": "Блог"
+    "blog": "Блог",
+    "about": "О нама",
+    "contactUs": "Контакт",
+    "advertise": "Оглашавајте се код нас",
+    "buyingGuides": "Водичи за куповину",
+    "mortgageCalculator": "Калкулатор кредита"
   },
   "countries": {
     "AL": "Албанија",
@@ -87,5 +92,13 @@
     "becomePartner": "Постаните партнер",
     "affiliates": "Сарадници",
     "developers": "За програмере"
-  }
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Пронађите нас на Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Професионалне 360° туре некретнина",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - 360° туре некретнина"
+    }
+  },
+  "exploreCitiesIn": "Истражите градове у {{country}}"
 }

@@ -136,7 +136,7 @@ const ConsentBanner: React.FC = () => {
       <div
         className="cookie-banner fixed z-[99998] left-3 right-3 sm:left-auto sm:right-6 sm:w-[22rem] bg-white border border-gray-200 rounded-xl shadow-xl"
         role="dialog"
-        aria-label="Cookie consent"
+        aria-label={t('common:ui.consentBanner.cookieConsent', 'Cookie consent')}
       >
         <div className="p-3.5">
           {!showSettings ? (

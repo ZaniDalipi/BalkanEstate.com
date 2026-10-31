@@ -366,9 +366,9 @@ attempts for syncs); a run that still fails is recorded as failed and the feed s
 
 ## Setup and deployment
 
-No new paid service is required. The worker uses the existing MongoDB, and photos go through the existing Cloudinary
+No new paid service is required. The worker uses the existing MongoDB, and photos go through the existing media storage (R2)
 pipeline (`uploadImage`: sharp compression, per-listing folders, tags, registered delivery presets). Set
-`AGENCY_FEED_IMAGE_MODE=reference` to avoid Cloudinary storage entirely; photos are then validated but served from
+`AGENCY_FEED_IMAGE_MODE=reference` to avoid storing copies entirely; photos are then validated but served from
 the agency's URLs through the existing `/api/image-proxy`.
 
 ### Environment variables (backend and worker)
@@ -378,7 +378,7 @@ the agency's URLs through the existing `/api/image-proxy`.
 | `MONGODB_URI` | — | Required by the worker (same database as the API). |
 | `FIELD_ENCRYPTION_KEY` (or `ENCRYPTION_KEY`) | — | Encrypts feed credentials. **Must be identical for API and worker.** ≥ 32 characters. |
 | `AGENCY_FEED_WORKER_MODE` | `external` in production, `embedded` elsewhere | `embedded` runs the worker inside the API process; `external` expects the separate worker. |
-| `AGENCY_FEED_IMAGE_MODE` | `rehost` | `rehost` (Cloudinary) or `reference` (agency URLs via image proxy). |
+| `AGENCY_FEED_IMAGE_MODE` | `rehost` | `rehost` (media storage, R2) or `reference` (agency URLs via image proxy). |
 | `AGENCY_FEED_SYNC_INTERVAL_HOURS` | `24` | Time between scheduled syncs. |
 | `AGENCY_FEED_MAX_MB` | `50` | Maximum feed download size. |
 | `AGENCY_FEED_MAX_LISTINGS` | `10000` | Maximum listings per feed. |
@@ -388,7 +388,7 @@ the agency's URLs through the existing `/api/image-proxy`.
 | `AGENCY_FEED_WORKER_CONCURRENCY` | `2` | Jobs processed in parallel per worker process (1–8). |
 | `AGENCY_FEED_POLL_INTERVAL_MS` | `2000` | How often an idle worker checks the queue. |
 | `AGENCY_FEED_APPLY_CONCURRENCY` | `4` | Listings written in parallel within one import (max 16). |
-| `CLOUDINARY_*`, `SENTRY_DSN` | existing | Reused as is. |
+| `R2_*`, `SENTRY_DSN` | existing | Reused as is. |
 
 ### Deploying
 

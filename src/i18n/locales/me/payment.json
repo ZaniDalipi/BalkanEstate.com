@@ -22,9 +22,9 @@
     "noSessionFound": "Nije pronađena sesija plaćanja",
     "loginToVerify": "Molimo prijavite se da verifikujete plaćanje",
     "plan": "Plan",
-    "validUntil": "Valid Until",
-    "nowActive": "Now active on your account",
-    "continue": "Continue to Dashboard"
+    "validUntil": "Važi do",
+    "nowActive": "Sada aktivno na vašem nalogu",
+    "continue": "Nastavi na kontrolnu tablu"
   },
   "cancel": {
     "title": "Plaćanje otkazano",
@@ -52,10 +52,10 @@
     "redirectBlocked": "Preusmjeravanje plaćanja je blokirano iz bezbjednosnih razloga. Molimo pokušajte ponovo.",
     "sessionCreationFailed": "Neuspješno kreiranje sesije plaćanja",
     "invalidDiscountCode": "Nevažeći kod za popust",
-    "freeSubscriptionFailed": "Failed to apply free subscription",
-    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
-    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
-    "invalidPlanPrice": "Invalid plan price"
+    "freeSubscriptionFailed": "Primjena besplatne pretplate nije uspjela",
+    "verificationTimeout": "Provjera plaćanja je istekla. Ako ste završili plaćanje, pretplata će uskoro biti aktivirana. Provjerite e-mail za potvrdu.",
+    "invalidCodeFormat": "Neispravan format koda. Koristite samo slova, brojeve, crtice i donje crte.",
+    "invalidPlanPrice": "Neispravna cijena plana"
   },
   "checkout": {
     "secureCheckout": "Sigurno plaćanje",
@@ -84,17 +84,17 @@
     "sslSecured": "SSL osigurano",
     "pciCompliant": "PCI usklađeno",
     "securePayment": "Sigurno plaćanje",
-    "freeSubscriptionReady": "Free Subscription Ready",
-    "freeSubscriptionReadyDescription": "Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.",
-    "enterCouponCode": "Enter coupon code",
-    "enterDiscountCode": "Please enter a discount code",
-    "discountAppliedSave": "Discount applied: Save €{{amount}}!",
-    "validationFailed": "Failed to validate discount code",
-    "subscribeTo": "Subscribe to {{plan}}",
-    "coupon100Off": "Your coupon provides 100% off!",
-    "priceDescription": "€{{price}}/{{interval}} - Premium features await you",
-    "haveCoupon": "Did we provide a coupon for you?",
-    "enterCodeToActivate": "Enter your code to activate your subscription"
+    "freeSubscriptionReady": "Besplatna pretplata je spremna",
+    "freeSubscriptionReadyDescription": "Vaš kod za popust daje 100% popusta! Kliknite ispod da odmah aktivirate pretplatu - bez plaćanja.",
+    "enterCouponCode": "Unesite kod kupona",
+    "enterDiscountCode": "Unesite kod za popust",
+    "discountAppliedSave": "Popust je primijenjen: uštedite €{{amount}}!",
+    "validationFailed": "Provjera koda za popust nije uspjela",
+    "subscribeTo": "Pretplati se na {{plan}}",
+    "coupon100Off": "Vaš kupon daje 100% popusta!",
+    "priceDescription": "€{{price}}/{{interval}} - Premium funkcije vas čekaju",
+    "haveCoupon": "Da li smo vam dali kupon?",
+    "enterCodeToActivate": "Unesite kod da aktivirate pretplatu"
   },
   "termsAcceptance": {
     "text": "Prihvatam",
@@ -104,48 +104,90 @@
     "and": "i"
   },
   "subscription": {
-    "alreadySubscribed": "Already Subscribed",
-    "subscriptionActive": "Subscription Active",
-    "alreadyActive": "You already have this subscription active.",
-    "cancelYearlyFirst": "You have a yearly subscription active. Cancel it first before switching to monthly.",
-    "currentPlan": "Current Plan",
-    "active": "✓ Active",
-    "renewsOn": "Renews on",
-    "wantToSwitch": "Want to switch plans?",
-    "manageYourSubscription": "Manage your subscription",
-    "switchToMonthlyInfo": "To switch from yearly to monthly billing, please cancel your current subscription first. After it expires, you can subscribe to the monthly plan.",
-    "manageInfo": "You can manage your subscription from your Account Settings. Cancel anytime before the renewal date.",
-    "manageSubscription": "Manage Subscription"
+    "alreadySubscribed": "Već ste pretplaćeni",
+    "subscriptionActive": "Pretplata je aktivna",
+    "alreadyActive": "Ova pretplata je već aktivna.",
+    "cancelYearlyFirst": "Imate aktivnu godišnju pretplatu. Prvo je otkažite prije prelaska na mjesečnu.",
+    "currentPlan": "Trenutni plan",
+    "active": "✓ Aktivna",
+    "renewsOn": "Obnavlja se",
+    "wantToSwitch": "Želite da promijenite plan?",
+    "manageYourSubscription": "Upravljajte pretplatom",
+    "switchToMonthlyInfo": "Da biste prešli sa godišnjeg na mjesečni obračun, prvo otkažite trenutnu pretplatu. Kada istekne, možete se pretplatiti na mjesečni plan.",
+    "manageInfo": "Pretplatom možete upravljati u Podešavanjima naloga. Otkažite u bilo kom trenutku prije datuma obnove.",
+    "manageSubscription": "Upravljaj pretplatom"
   },
   "polling": {
-    "waitingForPayment": "Waiting for payment confirmation...",
-    "windowClosed": "Payment window closed. Verifying payment...",
-    "processing": "Payment is being processed...",
-    "verifying": "Verifying your payment with our payment provider...",
-    "verifyingAfterClose": "Verifying payment status...",
-    "devMode": "Development mode: Payment window opened. Complete payment manually, then refresh to see subscription status."
+    "waitingForPayment": "Čeka se potvrda plaćanja...",
+    "windowClosed": "Prozor za plaćanje je zatvoren. Provjerava se plaćanje...",
+    "processing": "Plaćanje se obrađuje...",
+    "verifying": "Provjerava se plaćanje kod našeg pružaoca...",
+    "verifyingAfterClose": "Provjerava se status plaćanja...",
+    "devMode": "Razvojni režim: prozor za plaćanje je otvoren. Završite plaćanje ručno, pa osvježite da vidite status pretplate."
   },
   "inProgress": {
-    "title": "Payment in Progress",
-    "description": "Please complete your payment in the new window",
-    "waitingTitle": "Waiting for Payment",
-    "waitingMessage": "Complete your payment in the popup window. This page will update automatically once your payment is confirmed.",
-    "subscriptionInfo": "Subscription Information",
-    "autoRenewal": "Your subscription will automatically renew at the end of each billing period",
-    "renewalReminder": "You will receive a reminder email 7 days before renewal",
-    "cancelAnytime": "You can cancel anytime from your account settings",
-    "cancel": "Cancel and Close",
-    "helpText": "If the payment window didn't open, please check your popup blocker"
+    "title": "Plaćanje u toku",
+    "description": "Završite plaćanje u novom prozoru",
+    "waitingTitle": "Čeka se plaćanje",
+    "waitingMessage": "Završite plaćanje u iskačućem prozoru. Stranica će se automatski ažurirati nakon potvrde.",
+    "subscriptionInfo": "Informacije o pretplati",
+    "autoRenewal": "Pretplata će se automatski obnavljati na kraju svakog obračunskog perioda",
+    "renewalReminder": "Dobićete podsjetnik e-mailom 7 dana prije obnove",
+    "cancelAnytime": "Možete otkazati u bilo kom trenutku u podešavanjima naloga",
+    "cancel": "Otkaži i zatvori",
+    "helpText": "Ako se prozor za plaćanje nije otvorio, provjerite blokator iskačućih prozora"
   },
   "comingSoon": {
     "selfServicePayment": "Self-service payment",
     "launchingSoon": "Online payment gateway launching soon",
     "integrationInProgress": "Payment integration in progress",
     "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
-    "responseTime": "We typically respond within 24 hours"
+    "responseTime": "Obično odgovaramo u roku od 24 sata"
   },
   "taxNotice": {
-    "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "title": "Mogu se primijeniti porezi",
+    "description": "Konačna cijena može uključivati PDV/poreze prema vašoj lokaciji. Paysera automatski obrađuje poreske obaveze."
+  },
+  "ui": {
+    "paymentSuccess": {
+      "creatingYourAgency": "Pravi se vaša agencija...",
+      "settingUpYourAgencyProfile": "Podešavamo profil agencije i generišemo kodove pozivnice za tim...",
+      "provider": "Pružalac:",
+      "onlinePayment": "Onlajn plaćanje",
+      "paymentProvider": "Pružalac platnih usluga",
+      "orderId": "ID porudžbine",
+      "agencyCreatedSuccessfully": "Agencija je uspješno napravljena!",
+      "yourAgency": "Vaša agencija",
+      "hasBeenSetUp": "je podešena",
+      "isReadyToGo": "je spremna!",
+      "inviteTeamMembersWithYour": "Pozovite članove tima svojim jedinstvenim kodovima",
+      "customizeYourAgencyProfilePage": "Prilagodite stranicu profila agencije",
+      "startListingPropertiesUnderYour": "Počnite da objavljujete nekretnine u okviru agencije",
+      "viewYourAgency": "Pogledaj svoju agenciju",
+      "teamInvitationCodes": "Kodovi pozivnice za tim",
+      "shareTheseCodesWithYour": "Podijelite ove kodove sa članovima tima. Svaki kod daje status Pro agenta pri registraciji.",
+      "copied": "Kopirano!",
+      "copyCode": "Kopiraj kod",
+      "theseCodesHaveAlsoBeen": "Ovi kodovi su poslati i na vaš e-mail",
+      "agencyCreated": "Agencija je napravljena!",
+      "agencySetupPending": "Podešavanje agencije na čekanju",
+      "paymentSuccessfulPleaseCompleteYour": "Plaćanje je uspješno! Završite podešavanje agencije sa stranice naloga."
+    },
+    "paymentWindow": {
+      "activationFailed": "Aktivacija nije uspjela",
+      "whatYouCanDo": "Šta možete da uradite:",
+      "checkYourInternetConnection": "Provjerite internet vezu",
+      "makeSureTheCouponCode": "Provjerite da li je kod kupona ispravan",
+      "tryAgainInAFew": "Pokušajte ponovo za nekoliko trenutaka",
+      "contactSupportIfTheIssue": "Kontaktirajte podršku ako se problem nastavi",
+      "tryAgain": "Pokušaj ponovo",
+      "close": "Zatvori",
+      "subscriptionActivated": "Pretplata je aktivirana!",
+      "yourFreeSubscriptionHasBeen": "Vaša besplatna pretplata je uspješno aktivirana.",
+      "nowActiveOnYourAccount": "Sada aktivna na vašem nalogu",
+      "continueToDashboard": "Nastavi na kontrolnu tablu",
+      "card": "Kartica",
+      "bank": "Banka"
+    }
   }
 }

@@ -41,7 +41,15 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
     } else if (store === 'apple' && transactionId) {
       const appStoreService = getAppStoreService();
       await appStoreService.validateTransaction(transactionId);
-    } else if (store !== 'web') {
+    } else if (store === 'web') {
+      // Web purchases are activated by the payment provider's confirmation
+      // (or a 100% coupon), never by the client asking for it.
+      res.status(400).json({
+        message: 'Web subscriptions are activated after payment confirmation',
+        code: 'WEB_PURCHASE_NOT_ALLOWED',
+      });
+      return;
+    } else {
       res.status(400).json({ message: 'Invalid store or missing purchase information' });
       return;
     }

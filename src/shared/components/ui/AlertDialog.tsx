@@ -118,7 +118,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex justify-center items-center p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative overflow-hidden"
+        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative dialog-fit"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -126,7 +126,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 transition-colors z-10"
-            aria-label="Close"
+            aria-label={t('common:ui.alertDialog.close', 'Close')}
           >
             <XMarkIcon className="w-5 h-5" />
           </button>

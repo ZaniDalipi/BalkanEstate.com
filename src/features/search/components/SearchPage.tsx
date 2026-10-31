@@ -1,10 +1,10 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyList from './PropertyList';
 import { Property, ChatMessage, AiSearchQuery } from '@/types';
-import { Bars3Icon, UserCircleIcon, AdjustmentsHorizontalIcon, Squares2x2Icon, PencilIcon, XMarkIcon, MapIcon } from '@/constants';
+import { Bars3Icon, UserCircleIcon, AdjustmentsHorizontalIcon, Squares2x2Icon, XMarkIcon, MapIcon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import AiSearch from './AiSearch';
@@ -18,8 +18,10 @@ import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
 import SearchMobileFilters from './SearchMobileFilters';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
+import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -139,6 +141,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const mountMap = useDeferredMount(!isMapOnScreen);
     const isListOnScreen = showSplitView || mobileView === 'list';
     const mountList = useDeferredMount(!isListOnScreen);
+    // Once the list has slid away behind the map, stop rendering it at all.
+    const listSettledHidden = useSettledHidden(!isListOnScreen);
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists
@@ -203,7 +207,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 <div
                     className="fixed top-0 left-0 right-0 z-[9999] h-0.5 overflow-hidden"
                     role="progressbar"
-                    aria-label="Loading properties"
+                    aria-label={t('search:ui.searchPage.loadingProperties', 'Loading properties')}
                 >
                     <div
                         className="h-full bg-blue-600"
@@ -224,9 +228,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <SEO
                 title={seoTitle}
                 description={seoDescription}
-                canonical={`${window.location.origin}/search${window.location.search}`}
+                canonical={`${window.location.origin}/search`}
+                // Filtered views are internal search results: endless
+                // combinations, often empty. Only the unfiltered page is indexed.
+                noindex={window.location.search.length > 1}
                 type="website"
             />
+            {/* The map and results have no visible page title, so the page's
+                heading is given to assistive tech and crawlers here. */}
+            <h1 className="sr-only">{seoTitle}</h1>
 
             {/* ItemList JSON-LD schema for search results - enables rich carousel in Google */}
             {listProperties.length > 0 && (
@@ -295,7 +305,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${(isMobile || isTablet) && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
-                 <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 ${ showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : '' } lg:translate-x-0 transition-transform duration-300`}>
+                 <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                    data-shown={!showViewToggle || mobileView === 'list'}
+                    data-settled={listSettledHidden}>
                     {mountList && searchMode !== 'ai' && (
                         <SearchHeader
                             t={t as any}
@@ -313,8 +325,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
                 {/* --- Right Panel: Map --- */}
                 {/* On mobile/tablet: full-width behind list panel. On lg: 50% map, on xl+: 40% map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
-                    <div className="absolute inset-0 overflow-hidden">
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
+                    <div
+                        className="search-map-stage absolute inset-0 overflow-hidden"
+                        data-shown={!showViewToggle || mobileView === 'map'}
+                    >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
 
@@ -327,8 +342,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     boxShadow: '0 8px 32px rgba(2, 82, 205, 0.35)',
                                 }}
                             >
-                                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                                    <PencilIcon className="w-5 h-5 text-white" />
+                                <div className="flex-shrink-0 w-10 h-10 bg-white/95 rounded-lg flex items-center justify-center">
+                                    <SoftIcon name="pencil" className="w-7 h-7" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     {/* Second argument is the English fallback: without it a
@@ -363,7 +378,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 style={{
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
-                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                    // Stop short of the floating header (Subscribe / New / account) on md+.
+                                    paddingRight: 'max(calc(env(safe-area-inset-right, 0px) + 8px), var(--floating-header-w, 0px))',
                                 }}
                             >
                                 <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
@@ -376,7 +392,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         <button
                                             onClick={onToggleSidebar}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                            aria-label="Open menu"
+                                            aria-label={t('search:ui.searchPage.openMenu', 'Open menu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800"/>
                                         </button>
@@ -392,7 +408,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         <button
                                             onClick={() => updateSearchPageState({ isFiltersOpen: true })}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                            aria-label="Open filters"
+                                            aria-label={t('search:ui.searchPage.openFilters', 'Open filters')}
                                         >
                                             <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
                                         </button>
@@ -400,11 +416,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                             <button
                                                 onClick={() => navigate(paths.account())}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
-                                                aria-label="My account"
+                                                aria-label={t('search:ui.searchPage.myAccount', 'My account')}
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {currentUser.avatarUrl ? (
-                                                        <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                        <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                                     ) : (
                                                         <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                                                     )}
@@ -422,12 +438,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
                                     <div className="relative bg-primary text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-medium whitespace-nowrap">
-                                        <span>Tap "Map"</span>
+                                        <span>{t('search:ui.searchPage.tapMap', 'Tap "Map"')}</span>
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-6 border-transparent border-t-primary"></div>
                                     </div>
                                 </div>
                             )}
-                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
+                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label={t('search:ui.searchPage.viewToggle', 'View toggle')}>
                                 <LiquidGlassSwitch
                                     options={[
                                         { value: 'list', label: 'List', icon: <Squares2x2Icon className="w-full h-full" /> },
@@ -447,7 +463,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             </div>
 
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/50" onClick={() => updateSearchPageState({ isFiltersOpen: false })}></div>
                     <div className="relative w-full h-full" onClick={(e) => { e.stopPropagation(); updateSearchPageState({ isFiltersOpen: false }); }}>
                         <div className="absolute inset-0 bg-white" onClick={e => e.stopPropagation()}>

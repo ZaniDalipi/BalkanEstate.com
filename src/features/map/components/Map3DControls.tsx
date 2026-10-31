@@ -10,6 +10,7 @@ import { TIME_LIGHTING, PERIOD_ICONS } from './Map3DConstants';
 import { MAP_DESTINATIONS, type MapDestination } from '@/shared/map/mapDestination';
 import { SunTimeScrubber, SunDateStepper } from './SunTimeScrubber';
 import type { ShadowLayerStatus } from './BuildingShadowLayer';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 export interface Map3DControlsProps {
   // State
@@ -132,7 +133,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   // Say so when shadows can't be shown, instead of silently showing none
   const statusNotice = showShadows && shadowStatus?.state === 'failed' ? (
     <p className="text-[10px] sm:text-xs text-amber-300 leading-snug" title={shadowStatus.reason}>
-      {'\u26A0\uFE0F'} {t('property:shadowTimelapse.unavailable', 'Shadows are not supported in this browser')}
+      <SoftIcon name="warning" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('property:shadowTimelapse.unavailable', 'Shadows are not supported in this browser')}
     </p>
   ) : showShadows && shadowStatus?.state === 'ready' && shadowStatus.buildings === 0 ? (
     <p className="text-[10px] sm:text-xs text-slate-400 leading-snug">
@@ -145,12 +146,13 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   const sunReadout = sunPosition ? (
     <div className="flex items-center justify-between gap-2 text-[10px] sm:text-xs text-slate-300 whitespace-nowrap">
       <span title={t('property:shadowTimelapse.sunDirection', 'Sun direction')}>
-        {'\u{1F9ED}'} {t(`property:map3d.cardinalDirections.${cardinal}`, cardinal)} {Math.round(sunPosition.azimuth)}°
+        <SoftIcon name="target" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`property:map3d.cardinalDirections.${cardinal}`, cardinal)} {Math.round(sunPosition.azimuth)}°
       </span>
       <span title={t('property:shadowTimelapse.sunElevation', 'Sun elevation')}>
+        <SoftIcon name={sunPosition.altitude > 0 ? 'sun' : 'moon'} className="inline-block w-4 h-4 mr-1 align-[-3px]" />
         {sunPosition.altitude > 0
-          ? `\u2600\uFE0F ${Math.round(sunPosition.altitude)}°`
-          : `\u{1F319} ${t('property:shadowTimelapse.belowHorizon', 'Below horizon')}`}
+          ? `${Math.round(sunPosition.altitude)}°`
+          : t('property:shadowTimelapse.belowHorizon', 'Below horizon')}
       </span>
     </div>
   ) : null;
@@ -298,10 +300,8 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               </>
             ) : (
               <>
-                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-gradient-to-br from-green-500 to-emerald-600 rounded-full border-2 border-white shadow-lg group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-white/95 rounded-full border-2 border-emerald-400 shadow-lg group-hover:scale-110 transition-transform">
+                  <SoftIcon name="tour360" className="w-9 h-9 sm:w-10 sm:h-10" />
                 </div>
                 <span className="text-[10px] sm:text-xs text-white font-bold">{t('property:virtualTour.tourButton', '360° Tour')}</span>
               </>
@@ -335,9 +335,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               }`}
               title={t('property:floorIndicator.title', 'Floors')}
             >
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+              <SoftIcon name="building" className="w-5 h-5" />
               <span className="hidden sm:inline text-xs">
                 {t('property:floorIndicator.title', 'Floors')}
               </span>
@@ -353,7 +351,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
             }`}
             title={t('property:map3d.shadows', 'Show Building Shadows')}
           >
-            <span className="text-xs sm:text-sm">{'\u2600\uFE0F'}</span>
+            <SoftIcon name="sun" className="w-5 h-5" />
             <span className="hidden sm:inline text-xs">
               {showShadows ? t('property:map3d.shadowsOn', 'Shadows') : t('property:map3d.shadowsOff', 'Shadows')}
             </span>
@@ -367,7 +365,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
             }`}
             title={t('property:map3d.floorLabels', 'Show Floor Levels')}
           >
-            <span className="text-xs sm:text-sm">{'\u{1F3E2}'}</span>
+            <SoftIcon name="building" className="w-5 h-5" />
             <span className="hidden sm:inline text-xs">
               {showFloorLabels ? t('property:map3d.hideFloors', 'Hide') : t('property:map3d.showFloors', 'Labels')}
             </span>
@@ -382,7 +380,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               }`}
               title={t('property:map3d.nearbyPlaces', 'Nearby Places')}
             >
-              <span className="text-xs sm:text-sm">{'\u{1F4CD}'}</span>
+              <SoftIcon name="pin" className="w-5 h-5" />
               <span className="hidden sm:inline text-xs">
                 {t('property:map3d.nearbyPOI', 'Nearby')}
               </span>
@@ -401,7 +399,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                   showTimelapse ? 'lg:hidden bg-blue-600 text-white border-blue-500' : 'bg-slate-900/90 text-white hover:bg-slate-800 border-slate-700/50'
                 }`}
               >
-                <span className="text-xs sm:text-base">{'\u2600\uFE0F'}</span>
+                <SoftIcon name="sun" className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="hidden sm:inline text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
               </button>
               {showTimelapse && (
@@ -417,7 +415,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                       <div>
                         <div className="text-lg sm:text-2xl font-bold">{timelapse.formattedTime}</div>
                         <div className="text-[10px] sm:text-sm opacity-90">
-                          {PERIOD_ICONS[timelapse.timePeriod]} {t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
+                          <SoftIcon name={PERIOD_ICONS[timelapse.timePeriod]} className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
                         </div>
                       </div>
                       <button
@@ -439,8 +437,9 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                         onClick={timelapse.goToSunrise}
                         className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm sm:text-lg transition-all"
                         title={t('property:map3d.sunrise', 'Sunrise')}
+                        aria-label={t('property:map3d.sunrise', 'Sunrise')}
                       >
-                        {'\u{1F305}'}
+                        <SoftIcon name="sunrise" className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                       <button
                         onClick={timelapse.toggle}
@@ -460,8 +459,9 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                         onClick={timelapse.goToSunset}
                         className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm sm:text-lg transition-all"
                         title={t('property:map3d.sunset', 'Sunset')}
+                        aria-label={t('property:map3d.sunset', 'Sunset')}
                       >
-                        {'\u{1F307}'}
+                        <SoftIcon name="sunset" className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                     </div>
 
@@ -504,10 +504,10 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
             >
               <div className="text-sm sm:text-lg font-bold leading-tight whitespace-nowrap">{timelapse.formattedTime}</div>
               <div className="text-[10px] sm:text-xs opacity-90 leading-tight truncate">
-                {PERIOD_ICONS[timelapse.timePeriod]} {t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
+                <SoftIcon name={PERIOD_ICONS[timelapse.timePeriod]} className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
               </div>
             </div>
-            <button onClick={timelapse.goToSunrise} className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm" title={t('property:map3d.sunrise', 'Sunrise')}>{'\u{1F305}'}</button>
+            <button onClick={timelapse.goToSunrise} className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm" title={t('property:map3d.sunrise', 'Sunrise')} aria-label={t('property:map3d.sunrise', 'Sunrise')}><SoftIcon name="sunrise" className="w-5 h-5" /></button>
             <button
               onClick={timelapse.toggle}
               aria-label={timelapse.isPlaying ? t('search:map.pauseAnimation', 'Pause') : t('search:map.playAnimation', 'Play')}
@@ -515,7 +515,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
             >
               {playIcon('w-4 h-4')}
             </button>
-            <button onClick={timelapse.goToSunset} className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm" title={t('property:map3d.sunset', 'Sunset')}>{'\u{1F307}'}</button>
+            <button onClick={timelapse.goToSunset} className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm" title={t('property:map3d.sunset', 'Sunset')} aria-label={t('property:map3d.sunset', 'Sunset')}><SoftIcon name="sunset" className="w-5 h-5" /></button>
             <button
               onClick={cycleSpeed}
               title={t('property:shadowTimelapse.speed', 'Speed')}

@@ -4,7 +4,8 @@ import { formatPrice } from '@/utils/currency';
 import { NominatimResult } from '@/types';
 import { formatGeocodedPlace } from '@/shared/geo';
 import { searchLocation } from '@/services/osmService';
-import { MapPinIcon, SpinnerIcon } from '@/constants';
+import { SpinnerIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { getCityMarketData } from '@/src/features/cities/api/cityApi';
 import { API_URL } from '@/src/shared/api/config';
@@ -177,7 +178,7 @@ const PropertyCalculator: React.FC = () => {
                      <ul className="absolute z-20 w-full mt-1 glass-panel-light max-h-60 overflow-y-auto glass-scrollbar">
                         {suggestions.map((suggestion) => (
                             <li key={suggestion.place_id} onMouseDown={() => handleSuggestionClick(suggestion)} className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center gap-2 transition-colors">
-                                <MapPinIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                                <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                                 <span className="min-w-0">
                                     <span className="block truncate">{formatGeocodedPlace(suggestion).primary}</span>
                                     <span className="block truncate text-xs text-gray-400">{formatGeocodedPlace(suggestion).secondary}</span>

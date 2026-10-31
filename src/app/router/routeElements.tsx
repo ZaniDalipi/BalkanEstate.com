@@ -11,6 +11,8 @@
 import React, { lazy, useEffect, useLayoutEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/context/AppContext';
 import { UserRole, type Agency, type Property } from '@/types';
 import { isLanguageSupported, type LanguageCode } from '@/src/i18n';
@@ -86,16 +88,24 @@ export const PropertyRoute: React.FC = () => {
   const passed = useRouteState().property;
   // A card's copy is shown at once; the detail page refreshes it itself.
   const usePassed = !!passed && passed.id === propertyId;
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: propertyKeys.detail(propertyId),
     queryFn: () => getProperty(propertyId),
     enabled: !usePassed && !!propertyId,
     placeholderData: undefined,
-    retry: (count, error: any) => error?.response?.status !== 404 && count < 2,
+    // httpClient puts the HTTP status on `statusCode`. A missing listing is
+    // final; anything else (network, 5xx) is worth two more tries.
+    retry: (count, err) => !isMissing(err) && count < 2,
   });
 
   const property = usePassed ? passed : data;
   if (!property) {
+    // Only a listing the API says does not exist is a 404. A network or
+    // server error is not: show it with a retry instead of telling the
+    // visitor the listing is gone.
+    if (isError && !isMissing(error)) {
+      return <RouteLoadError onRetry={() => refetch()} retrying={isFetching} />;
+    }
     if (isError || (!isLoading && !usePassed)) return <NotFoundPage />;
     return <PageLoader />;
   }
@@ -103,6 +113,41 @@ export const PropertyRoute: React.FC = () => {
     <QueryErrorBoundary>
       <PropertyDetailsPage property={property} />
     </QueryErrorBoundary>
+  );
+};
+
+/** The API answered that the record does not exist (or the id is malformed). */
+function isMissing(error: unknown): boolean {
+  const status = (error as { statusCode?: number } | null)?.statusCode;
+  return status === 404 || status === 400 || status === 410;
+}
+
+/** A detail page that could not be loaded for a reason other than "not found". */
+const RouteLoadError: React.FC<{ onRetry: () => void; retrying?: boolean }> = ({ onRetry, retrying }) => {
+  const { t } = useTranslation('common');
+  return (
+    <div role="alert" className="flex min-h-[60vh] items-center justify-center px-4">
+      {/* A transient failure must never be indexed as the page's content. */}
+      <Helmet>
+        <meta name="robots" content="noindex" />
+      </Helmet>
+      <div className="max-w-md text-center">
+        <h1 className="text-xl font-semibold text-neutral-900">
+          {t('loadError.title', 'This page could not be loaded')}
+        </h1>
+        <p className="mt-2 text-neutral-600">
+          {t('loadError.description', 'Check your connection and try again. If it keeps happening, our servers may be busy.')}
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={retrying}
+          className="mt-5 rounded-lg bg-primary px-6 py-2 font-medium text-white hover:bg-primary-dark disabled:opacity-60"
+        >
+          {retrying ? t('loadError.retrying', 'Retrying…') : t('loadError.retry', 'Try again')}
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -143,6 +188,7 @@ function normalizeAgencySlug(slug: string): string {
   return slug.replace(',', '/').replace(/\/+$/, '');
 }
 
+/** null: the API says there is no such agency. Throws on network/server errors. */
 async function fetchAgency(slug: string): Promise<Agency | null> {
   // The token lets the backend recognise the owner (and add them as a member).
   const token = tokenService.getAccessToken();
@@ -150,8 +196,11 @@ async function fetchAgency(slug: string): Promise<Agency | null> {
   if (token) headers.Authorization = `Bearer ${token}`;
   const path = slug.split('/').map(encodeURIComponent).join('/');
   const response = await fetch(`${API_CONFIG.BASE_URL}/agencies/${path}`, { headers });
+  if (response.status === 404 || response.status === 400) return null;
   const contentType = response.headers.get('content-type');
-  if (!response.ok || !contentType?.includes('application/json')) return null;
+  if (!response.ok || !contentType?.includes('application/json')) {
+    throw new Error(`Agency request failed (${response.status})`);
+  }
   const data = await response.json();
   return (data.agency as Agency) ?? null;
 }
@@ -160,7 +209,8 @@ async function fetchAgency(slug: string): Promise<Agency | null> {
 export const AgencyRoute: React.FC = () => {
   const slug = normalizeAgencySlug(useParams()['*'] ?? '');
   const passed = useRouteState().agency;
-  const [agency, setAgency] = useState<Agency | null | undefined>(passed ?? undefined);
+  const [agency, setAgency] = useState<Agency | null | undefined | 'error'>(passed ?? undefined);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (passed) {
@@ -170,16 +220,17 @@ export const AgencyRoute: React.FC = () => {
     let cancelled = false;
     setAgency(undefined);
     fetchAgency(slug)
-      .catch(() => null)
-      .then((result) => {
-        if (!cancelled) setAgency(result);
-      });
+      .then(
+        (result) => { if (!cancelled) setAgency(result); },
+        () => { if (!cancelled) setAgency('error'); },
+      );
     return () => {
       cancelled = true;
     };
-  }, [slug, passed]);
+  }, [slug, passed, attempt]);
 
   if (agency === undefined) return <PageLoader />;
+  if (agency === 'error') return <RouteLoadError onRetry={() => setAttempt((n) => n + 1)} />;
   if (agency === null) return <NotFoundPage />;
   return (
     <QueryErrorBoundary>

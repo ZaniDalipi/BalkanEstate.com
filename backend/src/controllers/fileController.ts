@@ -6,10 +6,10 @@ import {
   batchGetSignedUrls,
   isFileOwner,
 } from '../services/storageAccessPolicy';
-import { deleteImage } from '../services/cloudinaryService';
+import { deleteImage } from '../services/mediaService';
 import { mediaLogger } from '../utils/logger';
 
-// Matches valid Cloudinary public IDs: alphanumeric, hyphens, underscores, slashes, dots
+// Matches valid storage key: alphanumeric, hyphens, underscores, slashes, dots
 const PUBLIC_ID_PATTERN = /^[a-zA-Z0-9_\-/.]+$/;
 const MAX_PUBLIC_ID_LENGTH = 512;
 
@@ -95,6 +95,39 @@ export const getSignedUrl = async (
   } catch (error: any) {
     mediaLogger.error('Error getting signed URL:', error);
     res.status(500).json({ message: 'Error generating file access URL' });
+  }
+};
+
+/**
+ * @desc    Open a private file: check access, then redirect to a short-lived link.
+ *          This is the URL stored for R2 private documents (licences,
+ *          credentials), so a plain "View document" link works for the owner
+ *          and admins and for nobody else.
+ * @route   GET /api/files/open/*
+ * @access  Private
+ */
+export const openFile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+    const publicId = sanitizePublicId(extractPublicId(req.params));
+    if (!publicId) {
+      res.status(400).json({ message: 'Invalid or missing publicId' });
+      return;
+    }
+    const user = req.user as IUser;
+    const result = await getSignedUrlIfAuthorized(String(user._id), publicId, user.role, 'image');
+    if (!result) {
+      res.status(403).json({ message: 'You do not have permission to access this file' });
+      return;
+    }
+    res.set('Cache-Control', 'private, no-store');
+    res.redirect(302, result.url);
+  } catch (error: any) {
+    mediaLogger.error('Error opening file:', error);
+    res.status(500).json({ message: 'Error opening file' });
   }
 };
 

@@ -4,14 +4,14 @@
     "overview": "Prezentare",
     "listings": "Anunțuri",
     "reviews": "Recenzii",
-    "back": "Back to Agents"
+    "back": "Înapoi la agenți"
   },
   "tabs": {
     "about": "Despre Mine",
     "listings": "Anunțuri",
     "reviews": "Recenzii",
     "contact": "Contact",
-    "overview": "Overview"
+    "overview": "Prezentare generală"
   },
   "badges": {
     "verified": "Agent Verificat",
@@ -19,7 +19,7 @@
     "topRated": "Top Rating",
     "superAgent": "Super Agent",
     "newAgent": "Agent Nou",
-    "premierAgent": "Premier Agent",
+    "premierAgent": "Agent premier",
     "superhost": "Superhost"
   },
   "contact": {
@@ -34,10 +34,10 @@
     "schedule": "Programează un Apel",
     "message": "Trimite Mesaj",
     "responseTime": "Răspunde de obicei în",
-    "callNow": "Call Now",
-    "sendEmail": "Send Email",
-    "sendMessage": "Send Message",
-    "scheduleCall": "Schedule a Call"
+    "callNow": "Sună acum",
+    "sendEmail": "Trimite email",
+    "sendMessage": "Trimite mesaj",
+    "scheduleCall": "Programează un apel"
   },
   "stats": {
     "propertiesSold": "Proprietăți Vândute",
@@ -46,10 +46,10 @@
     "avgRating": "Rating Mediu",
     "responseRate": "Rata de Răspuns",
     "yearsExperience": "Ani de Experiență",
-    "totalSales": "Total Sales",
-    "avgResponseTime": "Avg. Response Time",
-    "satisfactionRate": "Satisfaction Rate",
-    "languages": "Languages Spoken"
+    "totalSales": "Vânzări totale",
+    "avgResponseTime": "Timp mediu de răspuns",
+    "satisfactionRate": "Rata de satisfacție",
+    "languages": "Limbi vorbite"
   },
   "overview": {
     "about": "Despre Mine",
@@ -58,8 +58,8 @@
     "languages": "Limbi Vorbite",
     "certifications": "Certificări",
     "education": "Educație",
-    "aboutMe": "About Me",
-    "serviceAreas": "Service Areas"
+    "aboutMe": "Despre mine",
+    "serviceAreas": "Zone deservite"
   },
   "listings": {
     "title": "Anunțurile Mele",
@@ -68,8 +68,8 @@
     "pending": "În Așteptare",
     "viewAll": "Vezi Toate",
     "noListings": "Încă nu există anunțuri",
-    "activeListings": "Active Listings",
-    "soldListings": "Sold Listings"
+    "activeListings": "Anunțuri active",
+    "soldListings": "Anunțuri vândute"
   },
   "reviews": {
     "title": "Recenzii Clienți",
@@ -78,10 +78,10 @@
     "verifiedPurchase": "Client Verificat",
     "helpful": "Util",
     "report": "Raportează",
-    "averageRating": "Average Rating",
-    "totalReviews": "Total Reviews",
-    "beFirst": "Be the first to leave a review for this agent",
-    "reportReview": "Report Review"
+    "averageRating": "Evaluare medie",
+    "totalReviews": "Total recenzii",
+    "beFirst": "Fii primul care lasă o recenzie acestui agent",
+    "reportReview": "Raportează recenzia"
   },
   "consultation": {
     "title": "Programați o Consultație Gratuită",
@@ -89,54 +89,54 @@
     "button": "Programează Acum",
     "duration": "30 minute",
     "free": "Gratuit",
-    "selectDate": "Select Date",
-    "selectTime": "Select Time",
-    "yourName": "Your Name",
-    "yourEmail": "Your Email",
-    "yourPhone": "Your Phone",
-    "message": "Message (optional)",
-    "messagePlaceholder": "Tell us about your property requirements...",
-    "bookNow": "Book Consultation",
-    "confirmBooking": "Confirm Booking"
+    "selectDate": "Selectează data",
+    "selectTime": "Selectează ora",
+    "yourName": "Numele tău",
+    "yourEmail": "Emailul tău",
+    "yourPhone": "Telefonul tău",
+    "message": "Mesaj (opțional)",
+    "messagePlaceholder": "Spune-ne despre cerințele tale privind proprietatea...",
+    "bookNow": "Rezervă o consultație",
+    "confirmBooking": "Confirmă rezervarea"
   },
   "appraisal": {
     "title": "Evaluare Proprietate",
     "description": "Aflați valoarea proprietății dumneavoastră astăzi",
     "button": "Solicită Evaluare",
-    "propertyAddress": "Property Address",
-    "propertyType": "Property Type",
-    "requestAppraisal": "Request Appraisal"
+    "propertyAddress": "Adresa proprietății",
+    "propertyType": "Tipul proprietății",
+    "requestAppraisal": "Solicită o evaluare"
   },
   "agency": {
     "title": "Agenție",
     "worksWith": "Lucrează cu",
     "viewAgency": "Vezi Agenția",
     "independent": "Agent Independent",
-    "partOf": "Part of",
-    "independentAgent": "Independent Agent"
+    "partOf": "Face parte din",
+    "independentAgent": "Agent independent"
   },
   "similarAgents": {
     "title": "Agenți Similari",
     "viewAll": "Vezi Toți",
-    "inArea": "in {{area}}"
+    "inArea": "în {{area}}"
   },
   "actions": {
     "share": "Distribuie Profilul",
     "save": "Salvează Agentul",
     "report": "Raportează Agentul",
-    "shareProfile": "Share Profile",
-    "saveAgent": "Save Agent",
-    "reportAgent": "Report Agent"
+    "shareProfile": "Distribuie profilul",
+    "saveAgent": "Salvează agentul",
+    "reportAgent": "Raportează agentul"
   },
   "messages": {
     "saved": "Agent salvat în favorite",
     "removed": "Agent eliminat din favorite",
     "messageSent": "Mesaj trimis cu succes",
     "error": "A apărut o eroare. Vă rugăm încercați din nou.",
-    "consultationBooked": "Consultation booked successfully!",
-    "appraisalRequested": "Appraisal request sent successfully!",
-    "profileShared": "Profile link copied to clipboard!",
-    "agentSaved": "Agent saved to your favorites!",
-    "reviewSubmitted": "Review submitted successfully!"
+    "consultationBooked": "Consultația a fost rezervată cu succes!",
+    "appraisalRequested": "Solicitarea de evaluare a fost trimisă cu succes!",
+    "profileShared": "Linkul profilului a fost copiat în clipboard!",
+    "agentSaved": "Agentul a fost salvat la favorite!",
+    "reviewSubmitted": "Recenzia a fost trimisă cu succes!"
   }
 }

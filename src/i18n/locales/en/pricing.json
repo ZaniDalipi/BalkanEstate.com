@@ -21,7 +21,9 @@
     "agencyFeature": "Agency"
   },
   "error": {
-    "loadFailed": "Failed to load pricing plans"
+    "loadFailed": "Failed to load pricing plans",
+    "paymentFailed": "Payment Failed",
+    "paymentFailedMessage": "Something went wrong with your payment. Please try again or contact support."
   },
   "limitedOffer": "Limited Time Offer Ends In:",
   "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
@@ -145,7 +147,8 @@
     "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
     "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
     "subscriptionActivated": "Subscription activated successfully!",
-    "startListing": "Start Listing Properties"
+    "startListing": "Start Listing Properties",
+    "subscriptionActivatedWithReceipt": "Your subscription has been activated. A receipt has been sent to your email."
   },
   "listing": {
     "title": "Listing Promotion Plans",
@@ -215,7 +218,8 @@
     "enterpriseSubtitle": "Everything your agency needs — team members, branding page and more.",
     "comingSoon": "Coming Soon",
     "featureComingSoon": "Agency featuring will be available soon!",
-    "selectDuration": "Select duration:"
+    "selectDuration": "Select duration:",
+    "noPlans": "No agency feature plans available at this time."
   },
   "coupon": {
     "title": "Do you have a coupon from the seller?",
@@ -287,11 +291,40 @@
     "title": "Special Offers",
     "subtitle": "Limited-time deals on listing promotions",
     "selectOffer": "Select Offer",
-    "daysLeft": "{{days}} days left"
+    "daysLeft": "{{days}} days left",
+    "limitedTime": "Limited Time",
+    "homeSubtitle": "Boost your property listings with exclusive deals",
+    "lastDay": "Last day!",
+    "getThisDeal": "Get This Deal",
+    "viewAllDeals": "View All Promotion Plans",
+    "selectListing": "Select a listing to promote with {{name}}",
+    "selected": "Selected — Choose Listing"
   },
   "gameDiscount": {
     "title": "You won {{percent}}% off!",
     "description": "Your code {{code}} is applied automatically at checkout on Pro and Enterprise plans.",
     "validUntil": "Valid until {{date}}."
+  },
+  "role": {
+    "buyerPlanOnly": "Buyer Plan",
+    "buyerPlanOnlyMessage": "This plan is for buyers. Please switch to a Buyer account in your profile settings to subscribe.",
+    "sellerPlanOnly": "Seller Plan",
+    "sellerPlanOnlyMessage": "This plan is for sellers and agents. Please switch to a Private Seller or Agent account in your profile settings to subscribe."
+  },
+  "upgrade": {
+    "alreadyEnterprise": "You Have the Top Plan",
+    "alreadyEnterpriseMessage": "You already have the Enterprise plan — the highest tier available. Manage your subscription from your account settings.",
+    "yearlyActive": "Yearly Plan Active",
+    "yearlyActiveMessage": "You already have a Yearly plan. You can only upgrade to the Enterprise plan.",
+    "monthlyActive": "Monthly Plan Active",
+    "monthlyActiveMessage": "You already have a Monthly plan. You can upgrade to the Yearly or Enterprise plan."
+  },
+  "ui": {
+    "buyerPlansSection": {
+      "noBuyerPlansAvailableAt": "No buyer plans available at the moment."
+    },
+    "enterprisePlanCard": {
+      "completeSolutionForRealEstate": "Complete solution for real estate agencies"
+    }
   }
 }

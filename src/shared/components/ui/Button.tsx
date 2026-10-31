@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'glass';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -40,6 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   'aria-label': ariaLabel,
   ...props
 }) => {
+  const { t } = useTranslation();
   return (
     <button
       className={`
@@ -63,7 +65,7 @@ export const Button: React.FC<ButtonProps> = ({
         <span
           className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"
           role="status"
-          aria-label="Loading"
+          aria-label={t('common:ui.button.loading', 'Loading')}
         />
       ) : (
         <>

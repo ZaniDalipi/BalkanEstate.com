@@ -21,7 +21,9 @@
     "agencyFeature": "Agencija"
   },
   "error": {
-    "loadFailed": "Učitavanje cenovnika nije uspelo"
+    "loadFailed": "Učitavanje cenovnika nije uspelo",
+    "paymentFailed": "Плаћање није успело",
+    "paymentFailedMessage": "Нешто није у реду са плаћањем. Покушајте поново или контактирајте подршку."
   },
   "limitedOffer": "Ograničena ponuda ističe za:",
   "offerTitle": "Čestitamo! Otključali ste ekskluzivne popuste!",
@@ -145,7 +147,8 @@
     "message": "Vaša {{plan}} pretplata je aktivirana. Sada imate pristup svim premium funkcijama.",
     "agencyMessage": "Vaša Enterprise pretplata je aktivirana i vaša agencija je uspešno kreirana! Sada ste administrator svoje agencije.",
     "subscriptionActivated": "Pretplata uspešno aktivirana!",
-    "startListing": "Počnite da objavljujete nekretnine"
+    "startListing": "Počnite da objavljujete nekretnine",
+    "subscriptionActivatedWithReceipt": "Ваша претплата је активирана. Рачун је послат на ваш имејл."
   },
   "listing": {
     "title": "Planovi za promociju oglasa",
@@ -244,7 +247,7 @@
       "homepageCarousel": "Karusel agencija na početnoj stranici",
       "featuredBadge": "Značka istaknuto na profilu",
       "boostedVisibility": "Pojačana vidljivost svuda (3x)",
-      "mapMarker": "Agency marker on property map"
+      "mapMarker": "Ознака агенције на мапи некретнина"
     },
     "mapMarker": {
       "title": "Oznaka na mapi",
@@ -268,10 +271,11 @@
     "enterpriseSubtitle": "Sve što vaša agencija treba — članovi tima, stranica brenda i još mnogo toga.",
     "comingSoon": "Uskoro",
     "featureComingSoon": "Isticanje agencije biće uskoro dostupno!",
-    "oneWeek": "1 WEEK",
-    "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!",
-    "selectDuration": "Izaberite trajanje:"
+    "oneWeek": "1 НЕДЕЉА",
+    "perWeek": "недељно",
+    "showsEverywhere": "Приказује се свуда!",
+    "selectDuration": "Izaberite trajanje:",
+    "noPlans": "Тренутно нема доступних планова за агенције."
   },
   "contact": {
     "haveQuestions": "Imate pitanja?",
@@ -288,20 +292,54 @@
     "providerNote": "Plaćanja obrađuje Paysera. PDV/porezi uključeni gde je primenljivo."
   },
   "duration": {
-    "7days": "7 days",
-    "30days": "30 days",
-    "90days": "90 days"
+    "7days": "7 дана",
+    "30days": "30 дана",
+    "90days": "90 дана"
   },
   "coupon": {
     "title": "Имате ли купон од продавца?",
     "description": "Изаберите било који план изнад и користите вашу шифру купона да активирате вашу претплату одмах.",
     "selectPlan": "Изаберите план да користите ваш купон",
-    "haveDiscountCode": "Have a discount code?"
+    "haveDiscountCode": "Имате код за попуст?"
   },
   "specialOffers": {
     "title": "Посебне Понуде",
     "subtitle": "Ограничене понуде за промоцију огласа",
     "selectOffer": "Изабери Понуду",
-    "daysLeft": "{{days}} дана преостаје"
+    "daysLeft": "{{days}} дана преостаје",
+    "limitedTime": "Ограничено време",
+    "homeSubtitle": "Истакните своје огласе уз ексклузивне понуде",
+    "lastDay": "Последњи дан!",
+    "getThisDeal": "Узми понуду",
+    "viewAllDeals": "Погледај све планове промоције",
+    "selectListing": "Изаберите оглас за промоцију уз {{name}}",
+    "selected": "Изабрано — изаберите оглас"
+  },
+  "gameDiscount": {
+    "title": "Освојили сте {{percent}}% попуста!",
+    "description": "Ваш код {{code}} се аутоматски примењује при плаћању Pro и Enterprise планова.",
+    "validUntil": "Важи до {{date}}."
+  },
+  "role": {
+    "buyerPlanOnly": "План за купце",
+    "buyerPlanOnlyMessage": "Овај план је за купце. Пребаците се на налог купца у подешавањима профила да бисте се претплатили.",
+    "sellerPlanOnly": "План за продавце",
+    "sellerPlanOnlyMessage": "Овај план је за продавце и агенте. Пребаците се на налог приватног продавца или агента у подешавањима профила да бисте се претплатили."
+  },
+  "upgrade": {
+    "alreadyEnterprise": "Имате највиши план",
+    "alreadyEnterpriseMessage": "Већ имате Enterprise план — највиши ниво. Претплатом управљајте у подешавањима налога.",
+    "yearlyActive": "Активан годишњи план",
+    "yearlyActiveMessage": "Већ имате годишњи план. Можете прећи само на Enterprise план.",
+    "monthlyActive": "Активан месечни план",
+    "monthlyActiveMessage": "Већ имате месечни план. Можете прећи на годишњи или Enterprise план."
+  },
+  "ui": {
+    "buyerPlansSection": {
+      "noBuyerPlansAvailableAt": "Тренутно нема планова за купце."
+    },
+    "enterprisePlanCard": {
+      "completeSolutionForRealEstate": "Комплетно решење за агенције за некретнине"
+    }
   }
 }

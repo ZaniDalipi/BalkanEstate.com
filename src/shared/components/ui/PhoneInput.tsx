@@ -8,6 +8,7 @@ import {
   getCachedDefaultPhoneCode,
 } from '@/constants/phoneCountryCodes';
 
+import { useTranslation } from 'react-i18next';
 interface PhoneInputProps {
   value: string; // E.164 full phone, e.g. "+38971234567" or ""
   onChange: (fullPhone: string) => void;
@@ -133,6 +134,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   defaultCountryCode,
   id,
 }) => {
+  const { t } = useTranslation();
   // Parse the incoming value to extract any country code already embedded in it
   const parsed = parsePhoneValue(value);
 
@@ -235,7 +237,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         onChange={handleCountryChange}
         disabled={disabled}
         className={selectCls}
-        aria-label="Country code"
+        aria-label={t('common:ui.phoneInput.countryCode', 'Country code')}
       >
         {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
           <React.Fragment key={`${cc.country}-${cc.code}`}>
@@ -259,7 +261,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         placeholder={getPhonePlaceholder(selectedCode)}
         className={inputCls}
         autoComplete="tel-national"
-        aria-label={id ? undefined : 'Phone number'}
+        aria-label={id ? undefined : t('common:ui.phoneInput.phoneNumber', 'Phone number')}
         aria-invalid={!!error}
       />
     </div>

@@ -16,9 +16,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
-  Rectangle,
-  Polyline,
-  Polygon,
+  RectangleF,
+  PolylineF,
+  PolygonF,
+  OverlayView,
+  OverlayViewF,
 } from '@react-google-maps/api';
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 
@@ -28,6 +30,7 @@ import MapPopupOverlay from './MapPopupOverlay';
 import GoogleMapControls from './GoogleMapControls';
 import GoogleMapMeasurement from './GoogleMapMeasurement';
 import { mapContainerStyle } from './googleMapConstants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 /**
  * Main GoogleMapComponent - composes hook + sub-components
@@ -101,7 +104,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
           {/* Drawn bounds rectangle (saved area) */}
           {hook.googleDrawnBounds && !isDrawing && (
-            <Rectangle
+            <RectangleF
               bounds={hook.googleDrawnBounds}
               options={{
                 strokeColor: '#0252CD',
@@ -116,7 +119,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
           {/* Temporary drawing rectangle (while user is drawing) */}
           {hook.drawingRect && isDrawing && (
-            <Rectangle
+            <RectangleF
               bounds={hook.drawingRect}
               options={{
                 strokeColor: '#0252CD',
@@ -135,7 +138,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           {hook.showMeasurement && hook.measurementPoints.length >= 2 && (
             <>
               {hook.measurementMode === 'area' && hook.measurementPoints.length >= 3 ? (
-                <Polygon
+                <PolygonF
                   paths={hook.measurementPoints}
                   options={{
                     strokeColor: '#10b981',
@@ -147,7 +150,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
                   }}
                 />
               ) : (
-                <Polyline
+                <PolylineF
                   path={hook.measurementPoints}
                   options={{
                     strokeColor: '#10b981',
@@ -159,11 +162,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
               )}
             </>
           )}
+
+          {/* Measurement vertices — a dot per placed point, so the very first
+              click is visible before any line or polygon can be drawn. Point
+              objects keep their identity across renders, so the overlays aren't
+              rebuilt on every render. */}
+          {hook.showMeasurement && hook.measurementPoints.map((point, index) => (
+            <OverlayViewF
+              key={index}
+              position={point}
+              mapPaneName={OverlayView.OVERLAY_LAYER}
+            >
+              <div
+                className="pointer-events-none w-3.5 h-3.5 rounded-full bg-white border-[3px] border-emerald-500 shadow"
+                style={{ transform: 'translate(-50%, -50%)' }}
+              />
+            </OverlayViewF>
+          ))}
         </GoogleMap>
 
         {/* Debug info overlay — desktop only */}
         <div className="hidden sm:block absolute top-4 left-4 z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
-          <span>🔍{hook.zoom.toFixed(1)}/21 📍{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} 📌{hook.validProperties.length}</span>
+          <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{hook.zoom.toFixed(1)}/21 <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} <SoftIcon name="home" className="w-3.5 h-3.5 ml-1" />{hook.validProperties.length}</span>
         </div>
 
         {/* Measurement Tool Panel + Save Modal */}

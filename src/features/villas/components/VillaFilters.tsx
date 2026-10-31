@@ -4,6 +4,7 @@ import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface VillaFiltersProps {
     filters: Filters;
@@ -13,19 +14,21 @@ interface VillaFiltersProps {
     onSaveSearch?: () => void;
     isSaving?: boolean;
     compact?: boolean;
+    /** Leave out Reset / Save — the page renders them outside a folding panel. */
+    hideActions?: boolean;
 }
 
 const VIEW_TYPE_CHIPS = [
-    { value: 'mountain', labelKey: 'filters.mountain',  defaultLabel: 'Mountain',      emoji: '⛰️' },
-    { value: 'sea',      labelKey: 'filters.sea',       defaultLabel: 'Sea View',      emoji: '🌊' },
-    { value: 'park',     labelKey: 'filters.lakeForest',defaultLabel: 'Lake / Forest', emoji: '🌲' },
-    { value: 'city',     labelKey: 'filters.cityView',  defaultLabel: 'City View',     emoji: '🏙️' },
+    { value: 'mountain', labelKey: 'filters.mountain',  defaultLabel: 'Mountain',      icon: 'mountain' },
+    { value: 'sea',      labelKey: 'filters.sea',       defaultLabel: 'Sea View',      icon: 'sea' },
+    { value: 'park',     labelKey: 'filters.lakeForest',defaultLabel: 'Lake / Forest', icon: 'tree' },
+    { value: 'city',     labelKey: 'filters.cityView',  defaultLabel: 'City View',     icon: 'city' },
 ] as const;
 
 const AMENITY_CHIPS = [
-    { tag: 'sauna',       labelKey: 'filters.sauna',      defaultLabel: 'Sauna',       emoji: '🧖' },
-    { tag: 'wine cellar', labelKey: 'filters.wineCellar', defaultLabel: 'Wine Cellar', emoji: '🍷' },
-    { tag: 'panoramic',   labelKey: 'filters.panoramic',  defaultLabel: 'Panoramic',   emoji: '🏔️' },
+    { tag: 'sauna',       labelKey: 'filters.sauna',      defaultLabel: 'Sauna',       icon: 'spa' },
+    { tag: 'wine cellar', labelKey: 'filters.wineCellar', defaultLabel: 'Wine Cellar', icon: 'wine' },
+    { tag: 'panoramic',   labelKey: 'filters.panoramic',  defaultLabel: 'Panoramic',   icon: 'mountain' },
 ] as const;
 
 const VillaFilters: React.FC<VillaFiltersProps> = ({
@@ -36,6 +39,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
     onSaveSearch,
     isSaving,
     compact,
+    hideActions,
 }) => {
     const { t } = useTranslation(['villas', 'common', 'search', 'rental']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
@@ -98,7 +102,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                             onClick={() => onFilterChange('viewType', activeViewType === chip.value ? 'any' : chip.value)}
                             className={`${chipBase} ${activeViewType === chip.value ? chipActive : chipInactive}`}
                         >
-                            <span>{chip.emoji}</span>
+                            <SoftIcon name={chip.icon} className="w-4 h-4" />
                             <span>{t(`villas:${chip.labelKey}`, chip.defaultLabel)}</span>
                         </button>
                     ))}
@@ -110,9 +114,9 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 {/* Amenity chips: Pool + Garden + string amenities */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                     {([
-                        { key: 'hasPool'   as keyof Filters, label: t('villas:filters.pool',   'Pool'),   emoji: '🏊' },
-                        { key: 'hasGarden' as keyof Filters, label: t('villas:filters.garden', 'Garden'), emoji: '🌿' },
-                    ] as const).map(({ key, label, emoji }) => {
+                        { key: 'hasPool'   as keyof Filters, label: t('villas:filters.pool',   'Pool'),   icon: 'pool' },
+                        { key: 'hasGarden' as keyof Filters, label: t('villas:filters.garden', 'Garden'), icon: 'leaf' },
+                    ] as const).map(({ key, label, icon }) => {
                         const isActive = (filters as any)[key] === true;
                         return (
                             <button
@@ -121,12 +125,12 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                 onClick={() => onFilterChange(key, isActive ? null : true)}
                                 className={`${chipBase} ${isActive ? chipActive : chipInactive}`}
                             >
-                                <span>{emoji}</span>
+                                <SoftIcon name={icon} className="w-4 h-4" />
                                 <span>{label}</span>
                             </button>
                         );
                     })}
-                    {AMENITY_CHIPS.map(({ tag, labelKey, defaultLabel, emoji }) => {
+                    {AMENITY_CHIPS.map(({ tag, labelKey, defaultLabel, icon }) => {
                         const isActive = activeAmenities.includes(tag);
                         return (
                             <button
@@ -135,7 +139,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                 onClick={() => toggleAmenity(tag)}
                                 className={`${chipBase} ${isActive ? chipActive : chipInactive}`}
                             >
-                                <span>{emoji}</span>
+                                <SoftIcon name={icon} className="w-4 h-4" />
                                 <span>{t(`villas:${labelKey}`, defaultLabel)}</span>
                             </button>
                         );
@@ -160,7 +164,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                         : 'bg-white text-gray-500 border-gray-200 hover:border-[var(--color-villa-gold-bright)]/60 hover:text-[var(--color-primary)]'
                                 }`}
                             >
-                                {n === null ? t('common:any', 'Any') : `${n}+`} 🛏️
+                                {n === null ? t('common:any', 'Any') : `${n}+`}<SoftIcon name="bed" className="inline-block w-4 h-4 ml-1 align-[-3px]" />
                             </button>
                         );
                     })}
@@ -184,7 +188,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                         : 'bg-white text-gray-500 border-gray-200 hover:border-[var(--color-villa-gold-bright)]/60 hover:text-[var(--color-primary)]'
                                 }`}
                             >
-                                {n === null ? t('common:any', 'Any') : `${n}+`} 🛁
+                                {n === null ? t('common:any', 'Any') : `${n}+`}<SoftIcon name="bath" className="inline-block w-4 h-4 ml-1 align-[-3px]" />
                             </button>
                         );
                     })}
@@ -233,10 +237,10 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 />
 
                 {/* Thin divider */}
-                <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />
+                {!hideActions && <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />}
 
                 {/* Reset — only if active filters */}
-                {hasActiveFilters && (
+                {!hideActions && hasActiveFilters && (
                     <button
                         onClick={onReset}
                         className="flex-shrink-0 text-[11px] text-red-400 hover:text-red-600 whitespace-nowrap transition-colors px-1.5 py-1 rounded-lg hover:bg-red-50 mr-1.5 border border-red-200 font-medium"
@@ -246,7 +250,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 )}
 
                 {/* Save search */}
-                {onSaveSearch && (
+                {!hideActions && onSaveSearch && (
                     <button
                         onClick={onSaveSearch}
                         disabled={isSaving}
@@ -278,7 +282,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                             onClick={() => onFilterChange('viewType', activeViewType === chip.value ? 'any' : chip.value)}
                             className={`${chipBase} text-xs px-3 py-1.5 ${activeViewType === chip.value ? chipActive : chipInactive}`}
                         >
-                            <span>{chip.emoji}</span>
+                            <SoftIcon name={chip.icon} className="w-4 h-4" />
                             <span>{t(`villas:${chip.labelKey}`, chip.defaultLabel)}</span>
                         </button>
                     ))}
@@ -316,7 +320,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                             : 'bg-white text-gray-500 border-gray-200 hover:border-[var(--color-villa-gold-bright)]/60 hover:text-[var(--color-primary)]'
                                     }`}
                                 >
-                                    {n === null ? t('common:any', 'Any') : `${n}+ 🛏️`}
+                                    {n === null ? t('common:any', 'Any') : <>{n}+<SoftIcon name="bed" className="inline-block w-4 h-4 ml-1 align-[-3px]" /></>}
                                 </button>
                             );
                         })}
@@ -341,7 +345,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                         : 'bg-white text-gray-500 border-gray-200 hover:border-[var(--color-villa-gold-bright)]/60 hover:text-[var(--color-primary)]'
                                 }`}
                             >
-                                {n === null ? t('common:any', 'Any') : `${n}+ 🛁`}
+                                {n === null ? t('common:any', 'Any') : <>{n}+<SoftIcon name="bath" className="inline-block w-4 h-4 ml-1 align-[-3px]" /></>}
                             </button>
                         );
                     })}
@@ -393,9 +397,9 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 <label className={fullLabelClasses}>{t('villas:filters.amenities', 'Premium Amenities')}</label>
                 <div className="flex flex-wrap gap-2">
                     {([
-                        { key: 'hasPool'   as keyof Filters, label: t('villas:filters.pool',   'Pool'),   emoji: '🏊' },
-                        { key: 'hasGarden' as keyof Filters, label: t('villas:filters.garden', 'Garden'), emoji: '🌿' },
-                    ] as const).map(({ key, label, emoji }) => {
+                        { key: 'hasPool'   as keyof Filters, label: t('villas:filters.pool',   'Pool'),   icon: 'pool' },
+                        { key: 'hasGarden' as keyof Filters, label: t('villas:filters.garden', 'Garden'), icon: 'leaf' },
+                    ] as const).map(({ key, label, icon }) => {
                         const isActive = (filters as any)[key] === true;
                         return (
                             <button
@@ -404,12 +408,12 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                 onClick={() => onFilterChange(key, isActive ? null : true)}
                                 className={`${chipBase} text-xs px-3 py-1.5 ${isActive ? chipActive : chipInactive}`}
                             >
-                                <span>{emoji}</span>
+                                <SoftIcon name={icon} className="w-4 h-4" />
                                 <span>{label}</span>
                             </button>
                         );
                     })}
-                    {AMENITY_CHIPS.map(({ tag, labelKey, defaultLabel, emoji }) => {
+                    {AMENITY_CHIPS.map(({ tag, labelKey, defaultLabel, icon }) => {
                         const isActive = activeAmenities.includes(tag);
                         return (
                             <button
@@ -418,7 +422,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                                 onClick={() => toggleAmenity(tag)}
                                 className={`${chipBase} text-xs px-3 py-1.5 ${isActive ? chipActive : chipInactive}`}
                             >
-                                <span>{emoji}</span>
+                                <SoftIcon name={icon} className="w-4 h-4" />
                                 <span>{t(`villas:${labelKey}`, defaultLabel)}</span>
                             </button>
                         );

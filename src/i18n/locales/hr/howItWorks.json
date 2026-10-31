@@ -158,7 +158,7 @@
         "desc": "Kliknite za poziv na mobilnim uređajima"
       },
       "email": {
-        "title": "Email",
+        "title": "E-pošta",
         "desc": "Izravni email prodavaču ili agentu"
       },
       "whatsapp": {
@@ -535,7 +535,7 @@
     "title": "Izgradite Svoje Carstvo Nekretnina",
     "subtitle": "Kreirajte svoju agenciju, pozovite agente i upravljajte cijelim timom s jedne moćne platforme",
     "pricing": {
-      "planName": "Enterprise Plan",
+      "planName": "Enterprise plan",
       "price": "€1.000",
       "period": "/godišnje",
       "tagline": "Sve što vam treba za vođenje uspješne agencije",
@@ -749,7 +749,7 @@
       }
     },
     "proPlan": {
-      "title": "Pro Plan",
+      "title": "Pro plan",
       "popular": "NAJPOPULARNIJI",
       "price": "€25",
       "period": "/mjesec",
@@ -861,6 +861,27 @@
     "q5": {
       "question": "Kako funkcioniraju promotivni krediti?",
       "answer": "Promotivni krediti vam omogućuju da promovirate svoje oglase kako bi se pojavljivali više u rezultatima pretraživanja. Pro korisnici dobivaju 3 kredita/mjesec, agencije dobivaju 15 za dijeljenje među svojim timom."
+    }
+  },
+  "guide": {
+    "stepByStep": "Vodič korak po korak",
+    "progress": "Napredak",
+    "tips": "Savjeti",
+    "completed": "Vodič je završen!",
+    "completedMessage": "Odlično! Završili ste sve korake."
+  },
+  "video": {
+    "tutorial": "Video upute"
+  },
+  "feature": {
+    "highlight": "Istaknuta značajka"
+  },
+  "ui": {
+    "howItWorksPage": {
+      "aiSearch": "AI pretraživanje",
+      "findMeA": "Pronađi mi...",
+      "features": "Značajke",
+      "forever": "zauvijek"
     }
   }
 }

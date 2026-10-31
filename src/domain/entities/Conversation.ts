@@ -51,8 +51,8 @@ export class Conversation {
   get lastMessageText(): string {
     const last = this.lastMessage;
     if (!last) return 'No messages yet';
-    if (last.imageUrl) return '📷 Image';
-    if (last.encryptedMessage) return '🔒 Encrypted message';
+    if (last.imageUrl) return 'Image';
+    if (last.encryptedMessage) return 'Encrypted message';
     return last.text || '';
   }
 

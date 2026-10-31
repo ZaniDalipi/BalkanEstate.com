@@ -96,7 +96,9 @@
       "stripe": "Payment processing. Our payment processor processes your payment information securely. We do not store your full credit card details.",
       "analytics": "Website analytics to understand user behavior and improve our services. We use IP anonymization.",
       "cloudflare": "Security and performance services including DDoS protection and content delivery.",
-      "aws": "Cloud hosting and storage services. Data is stored in EU data centers."
+      "aws": "Cloud hosting and storage services. Data is stored in EU data centers.",
+      "paymentTitle": "Payment Processor",
+      "provider": "Our payment processor handles all payment transactions, VAT/tax compliance, invoicing, and refunds on our behalf. Your payment information is processed securely and we do not store your full credit card details."
     },
     "transfers": {
       "title": "International Data Transfers",
@@ -164,6 +166,12 @@
         "title": "Payment Processing",
         "text": "When you make a purchase, you are transacting with our payment service provider Paysera, who handles payment processing, invoicing, VAT/tax compliance, and refunds.",
         "buyerTerms": "By making a purchase, you also agree to Paysera's Terms of Service."
+      },
+      "provider": {
+        "title": "Payment Processing",
+        "morStatement": "Our order process is conducted by our payment service provider. They serve as the Merchant of Record for all our orders and handle customer service inquiries related to payments and returns.",
+        "text": "When you make a purchase, you are transacting with our payment service provider, who handles payment processing, invoicing, VAT/tax compliance, and refunds.",
+        "buyerTerms": "By making a purchase, you also agree to the payment provider's terms of service."
       }
     },
     "prohibited": {
@@ -347,6 +355,133 @@
     "contact": {
       "title": "Contact Us",
       "text": "If you have questions about our use of cookies, please contact us:"
+    }
+  },
+  "refund": {
+    "title": "Refund Policy",
+    "lastUpdated": "Last updated",
+    "intro": {
+      "title": "Our Commitment",
+      "text": "At BalkanEstate AI, we want you to be completely satisfied with your subscription. If you are not satisfied with our services, we offer refunds based on your subscription type. This policy outlines the terms and conditions for requesting a refund."
+    },
+    "guarantee": {
+      "title": "Refund Periods",
+      "text": "If you are not satisfied with your subscription for any reason, you can request a full refund within the applicable refund period. This guarantee applies to:",
+      "newSub": "New subscription purchases",
+      "upgrade": "Plan upgrades (refund for the difference paid)",
+      "firstTime": "First-time subscribers"
+    },
+    "eligibility": {
+      "title": "Refund Eligibility",
+      "text": "You are eligible for a refund if:",
+      "withinPeriod": "Your request is made within 7 days (monthly) or 30 days (yearly) of the original purchase",
+      "firstPurchase": "It is your first subscription with BalkanEstate AI",
+      "notAbused": "The refund policy has not been previously used by you",
+      "goodFaith": "You have used the service in good faith"
+    },
+    "nonRefundable": {
+      "title": "Non-Refundable Situations",
+      "text": "Refunds are not available in the following cases:",
+      "afterPeriod": "Requests made after the refund period (7 days for monthly, 30 days for yearly)",
+      "renewal": "Automatic subscription renewals (you should cancel before renewal date)",
+      "abuse": "Accounts terminated due to Terms of Service violations",
+      "repeat": "Repeat refund requests (one refund per user)",
+      "partial": "Partial usage after the refund window has expired"
+    },
+    "howTo": {
+      "title": "How to Request a Refund",
+      "text": "To request a refund, please follow these steps:",
+      "step1": {
+        "title": "Send an Email",
+        "text": "Email us at refunds@balkanestateai.com with the subject line \"Refund Request\""
+      },
+      "step2": {
+        "title": "Include Your Details",
+        "text": "Include your account email address, subscription plan, purchase date, and reason for the refund (optional)"
+      },
+      "step3": {
+        "title": "Wait for Confirmation",
+        "text": "We will review your request and respond within 2-3 business days"
+      },
+      "step4": {
+        "title": "Receive Your Refund",
+        "text": "Once approved, refunds are processed within 5-10 business days to your original payment method"
+      }
+    },
+    "contact": {
+      "title": "Request a Refund Now",
+      "text": "Ready to request a refund? Contact our support team:",
+      "response": "We typically respond within 24-48 hours during business days."
+    },
+    "processing": {
+      "title": "Refund Processing",
+      "text": "Refunds are processed by our payment provider. Here is what to expect:",
+      "review": "Review time",
+      "process": "Processing time",
+      "bank": "Bank processing",
+      "note": "Note: Refund timing may vary depending on your payment method and financial institution."
+    },
+    "provider": {
+      "title": "Payment Processing",
+      "text": "All payments and refunds are processed by our payment provider. Our payment provider handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from our payment provider. For any payment-related inquiries, we recommend contacting us first for the fastest resolution."
+    },
+    "cancellation": {
+      "title": "Cancellation vs. Refund",
+      "text": "Please note the difference between cancellation and refund:",
+      "cancel": "Cancellation",
+      "cancelDesc": "Stops future billing. You retain access until the end of your current billing period. No refund is issued.",
+      "refund": "Refund",
+      "refundDesc": "Returns your payment. Subscription is immediately terminated and access is revoked upon refund processing."
+    },
+    "prorated": {
+      "title": "Prorated Refunds for Annual Plans",
+      "text": "For annual subscription plans, if you request a refund after the 30-day guarantee period but within the first 90 days, we may offer a prorated refund at our discretion, minus a processing fee. Please contact our support team to discuss your specific situation."
+    },
+    "disputes": {
+      "title": "Disputes and Chargebacks",
+      "text": "We encourage you to contact us directly before filing a dispute with your bank or credit card company. Chargebacks are costly and time-consuming for both parties. We are committed to resolving any issues fairly and quickly. If you file a chargeback without first contacting us, your account may be suspended pending investigation."
+    },
+    "contactUs": {
+      "title": "Contact Us",
+      "text": "If you have any questions about our refund policy or need assistance, please contact us:"
+    }
+  },
+  "ui": {
+    "cookiePolicyPage": {
+      "googleChrome": "Google Chrome",
+      "mozillaFirefox": "Mozilla Firefox",
+      "safari": "Safari",
+      "microsoftEdge": "Microsoft Edge",
+      "email": "Email:",
+      "phone": "Phone:"
+    },
+    "refundPolicyPage": {
+      "monthlySubscriptions": "Monthly Subscriptions",
+      "n7Days": "7 Days",
+      "fullRefundWithin7Days": "Full refund within 7 days of purchase",
+      "yearlySubscriptions": "Yearly Subscriptions",
+      "n30Days": "30 Days",
+      "fullRefundWithin30Days": "Full refund within 30 days of purchase",
+      "email": "Email:",
+      "phone": "Phone:",
+      "n23BusinessDays": "2-3 business days",
+      "n510BusinessDays": "5-10 business days",
+      "variesByBankUpTo": "Varies by bank (up to 10 days)",
+      "refunds": "Refunds:",
+      "support": "Support:"
+    },
+    "privacyPolicyPage": {
+      "googleAnalytics": "Google Analytics",
+      "privacyPolicy": "Privacy Policy →",
+      "cloudflare": "Cloudflare",
+      "awsAmazonWebServices": "AWS (Amazon Web Services)",
+      "emailDpoBalkanestateaiCom": "Email: dpo@balkanestateai.com",
+      "email": "Email:",
+      "phone": "Phone:"
+    },
+    "termsOfServicePage": {
+      "email": "Email:",
+      "phone": "Phone:"
     }
   }
 }

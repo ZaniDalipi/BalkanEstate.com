@@ -59,7 +59,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Variables: {selectedEmail.variables.map((v) => `{{${v.name}}}`).join(', ')}
+              {t('admin:ui.emailManagerForm.variables', 'Variables:')} {selectedEmail.variables.map((v) => `{{${v.name}}}`).join(', ')}
             </p>
           </div>
 
@@ -73,7 +73,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
               value={editForm.preheaderText || ''}
               onChange={(e) => setEditForm({ ...editForm, preheaderText: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Preview text shown in email clients"
+              placeholder={t('admin:ui.emailManagerForm.previewTextShownInEmail', 'Preview text shown in email clients')}
             />
           </div>
 
@@ -117,7 +117,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
           {/* Header Image URL */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Header Image URL (optional, replaces emoji)
+              {t('admin:ui.emailManagerForm.headerImageUrlOptionalReplaces', 'Header Image URL (optional, replaces emoji)')}
             </label>
             <input
               type="text"
@@ -128,7 +128,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
             />
             {editForm.headerImageUrl && (
               <div className="mt-2 bg-gray-100 rounded-lg p-3 inline-block">
-                <img src={editForm.headerImageUrl} alt="Header" className="max-h-12 max-w-40" />
+                <img src={editForm.headerImageUrl} alt={t('admin:ui.emailManagerForm.header', 'Header')} className="max-h-12 max-w-40" />
               </div>
             )}
           </div>
@@ -213,7 +213,7 @@ export const EditEmailModal: React.FC<EditEmailModalProps> = ({
                 value={editForm.footerReason || ''}
                 onChange={(e) => setEditForm({ ...editForm, footerReason: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g., You received this because..."
+                placeholder={t('admin:ui.emailManagerForm.eGYouReceivedThis', 'e.g., You received this because...')}
               />
             </div>
           </div>
@@ -288,7 +288,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{t('admin:emailManager.emailPreview')}</h2>
-            <p className="text-sm text-gray-500">Subject: {previewSubject}</p>
+            <p className="text-sm text-gray-500">{t('admin:ui.emailManagerForm.subject', 'Subject:')} {previewSubject}</p>
           </div>
           <div className="flex items-center gap-3">
             {/* Device toggle */}
@@ -305,7 +305,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                Desktop
+                {t('admin:ui.emailManagerForm.desktop', 'Desktop')}
               </button>
               <button
                 type="button"
@@ -319,7 +319,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
-                Mobile
+                {t('admin:ui.emailManagerForm.mobile', 'Mobile')}
               </button>
             </div>
 
@@ -337,7 +337,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                Light
+                {t('admin:ui.emailManagerForm.light', 'Light')}
               </button>
               <button
                 type="button"
@@ -351,7 +351,7 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
-                Dark
+                {t('admin:ui.emailManagerForm.dark', 'Dark')}
               </button>
             </div>
 
@@ -378,8 +378,8 @@ export const PreviewEmailModal: React.FC<PreviewEmailModalProps> = ({
             previewMode === 'dark' ? 'text-gray-500' : 'text-gray-400'
           }`}>
             {previewMode === 'dark'
-              ? 'Dark mode preview simulates how the email appears in dark email clients'
-              : 'Light mode shows the standard email appearance'}
+              ? t('admin:ui.emailManagerForm.darkModePreviewSimulatesHow', 'Dark mode preview simulates how the email appears in dark email clients')
+              : t('admin:ui.emailManagerForm.lightModeShowsTheStandard', 'Light mode shows the standard email appearance')}
           </p>
         </div>
       </div>
@@ -435,7 +435,7 @@ export const TestEmailModal: React.FC<TestEmailModalProps> = ({
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="Enter email address"
+              placeholder={t('admin:ui.emailManagerForm.enterEmailAddress', 'Enter email address')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

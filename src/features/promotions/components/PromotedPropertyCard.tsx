@@ -7,15 +7,16 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
-import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { ClockIcon, ChartBarIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
 // Tier configuration
-export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string; icon: string }> = {
-  premium: { color: 'text-amber-700', bg: 'bg-amber-100', label: 'Premium Premiere', icon: '👑' },
-  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', label: 'Highlight', icon: '✨' },
-  featured: { color: 'text-violet-600', bg: 'bg-violet-50', label: 'Featured', icon: '⭐' },
-  standard: { color: 'text-gray-700', bg: 'bg-gray-100', label: 'Standard', icon: '📋' },
+export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string; icon: SoftIconName }> = {
+  premium: { color: 'text-amber-700', bg: 'bg-amber-100', label: 'Premium Premiere', icon: 'crown' },
+  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', label: 'Highlight', icon: 'sparkles' },
+  featured: { color: 'text-violet-600', bg: 'bg-violet-50', label: 'Featured', icon: 'star' },
+  standard: { color: 'text-gray-700', bg: 'bg-gray-100', label: 'Standard', icon: 'clipboard' },
 };
 
 interface TimeRemaining {
@@ -142,7 +143,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
       {promotion?.autoExtendStatus === 'pending' && promotion?.autoExtendCheckoutUrl && (
         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🔄</span>
+            <SoftIcon name="refresh" className="w-6 h-6 flex-shrink-0" />
             <span className="text-sm font-semibold">{t('promotionCard.autoExtendReady', 'Auto-extend ready! Complete payment to extend.')}</span>
           </div>
           <button
@@ -158,7 +159,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
       {isExpiringSoon && !isExpired && promotion?.autoExtendStatus !== 'pending' && (
         <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">⚠️</span>
+            <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
             <span className="text-sm font-semibold">
               {daysRemaining === 1
                 ? t('promotionCard.expiringIn_one', 'Expiring in {{count}} day!', { count: daysRemaining })
@@ -178,13 +179,13 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${tierConfig.bg} ${tierConfig.color} text-sm font-semibold`}>
-            <StarIconSolid className="w-3.5 h-3.5" />
-            <span>{tierConfig.label}</span>
+            <SoftIcon name={tierConfig.icon} className="w-5 h-5" />
+            <span>{t(`seller:promotionCard.tiers.${TIER_CONFIG[tier] ? tier : 'standard'}`, tierConfig.label)}</span>
           </div>
           <div className="flex items-center gap-2">
             {property.hasUrgentBadge ? (
               <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-                <FireIcon className="w-3 h-3" /> {t('promotionCard.urgentBadge', 'Urgent')}
+                <SoftIcon name="flame" className="w-4 h-4" /> {t('promotionCard.urgentBadge', 'Urgent')}
               </span>
             ) : !isExpired && promotion?._id && (
               <button
@@ -197,7 +198,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
                     <span className="animate-spin w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full inline-block" /> {t('promotionCard.processing', 'Processing...')}
                   </>
                 ) : (
-                  <><FireIcon className="w-3 h-3" /> {t('promotionCard.addUrgent', '+Urgent €0.99')}</>
+                  <><SoftIcon name="flame" className="w-4 h-4" /> {t('promotionCard.addUrgent', '+Urgent €0.99')}</>
                 )}
               </button>
             )}
@@ -208,25 +209,23 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
             {property.imageUrl ? (
-              <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
+              <img src={optimizeImageUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || t('common:ui.promotedPropertyCard.property', 'Property')} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <BuildingOfficeIcon className="w-10 h-10 text-neutral-300" />
+                <SoftIcon name="building" className="w-10 h-10" />
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-neutral-800 truncate mb-1">{property.title || 'Untitled Property'}</h4>
+            <h4 className="font-semibold text-neutral-800 truncate mb-1">{property.title || t('common:ui.promotedPropertyCard.untitledProperty', 'Untitled Property')}</h4>
             <div className="flex items-center gap-1 text-sm text-neutral-500 mb-2">
-              <MapPinIcon className="w-3.5 h-3.5" />
+              <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{property.city}, {property.country}</span>
             </div>
             <div className="text-lg font-bold text-primary">
               {property.isNegotiable ? (
                 <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-sm font-semibold px-2 py-1 rounded-full border border-amber-200">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+                  <SoftIcon name="chat" className="w-4 h-4" />
                   {t('property:byNegotiation', 'By Negotiation')}
                 </span>
               ) : formatPrice(property.price, property.country)}
@@ -238,7 +237,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="mt-4 pt-4 border-t border-neutral-100">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-sm text-neutral-600">
-              <ClockIcon className="w-4 h-4" />
+              <SoftIcon name="clock" className="w-5 h-5" />
               <span>{t('promotionCard.timeRemaining', 'Time Remaining')}</span>
             </div>
             <CountdownTimer endDate={endDate} />
@@ -291,7 +290,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <button
             onClick={() => onViewHistory(property)}
             className="px-3 py-2 bg-neutral-100 text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors text-sm font-medium flex items-center gap-1.5"
-            title="View Promotion History"
+            title={t('common:ui.promotedPropertyCard.viewPromotionHistory', 'View Promotion History')}
           >
             <ChartBarIcon className="w-4 h-4" />
           </button>

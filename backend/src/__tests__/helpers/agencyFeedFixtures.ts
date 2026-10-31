@@ -74,7 +74,8 @@ const png = async (): Promise<Buffer> => {
 export const createWorld = (): FakeWorld => {
   let xml = feedXml([]);
   let failure: number | null = null;
-  let clock = Date.UTC(2026, 9, 1, 3, 0, 0);
+  // Starts at the real current time: activation compares the preview time with the real clock.
+  let clock = Date.now();
   const downloads: string[] = [];
   const stored: string[] = [];
   const removed: string[] = [];

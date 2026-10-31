@@ -1,31 +1,13 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
-    UserIcon,
-    HomeIcon,
-    StarIcon,
-    TrendingUpIcon,
-    ShieldCheckIcon,
-    CheckBadgeIcon,
-    AcademicCapIcon,
-    TrophyIcon,
-    ChartBarIcon,
     DocumentTextIcon,
     ArrowRightIcon,
-    MapIcon,
-    MapPinIcon,
-    HomeModernIcon,
-    BuildingLibraryIcon,
-    BanknotesIcon,
-    CheckCircleIcon,
-    UserCircleIcon,
-    ChatBubbleBottomCenterTextIcon,
     MagnifyingGlassIcon,
     PhoneIcon,
-    EnvelopeIcon,
-    GlobeAltIcon,
+    EnvelopeIcon
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -43,6 +25,7 @@ import { filterPropertiesByQuery, parseSearchTerms } from '../utils/propertySear
 import { pageSlice, pageWindow } from '../utils/listingPagination';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
+import { ListingTypePicture, SoftIcon } from '@/src/shared/illustrations';
 
 // Component to fix map rendering issues in dynamic containers
 const MapInvalidator: React.FC = () => {
@@ -241,6 +224,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     onViewProperty,
 }) => {
     const { t } = useTranslation(['agents']);
+    // The agent's pin on the map: only when the parent says the coordinates are valid.
+    const agentPosition: [number, number] | null =
+        hasValidCoordinates && agent.lat != null && agent.lng != null ? [agent.lat, agent.lng] : null;
     const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
     const [listingSearch, setListingSearch] = useState('');
 
@@ -277,7 +263,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                     className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                 >
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
-                        <UserIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        <SoftIcon name="user" className="w-5 h-5 md:w-6 md:h-6" />
                         <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.overview')}</span>
                     </div>
                 </button>
@@ -286,7 +272,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                     className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'listings' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                 >
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
-                        <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        <SoftIcon name="home" className="w-5 h-5 md:w-6 md:h-6" />
                         <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.listings')} ({activeListings.length})</span>
                     </div>
                 </button>
@@ -295,7 +281,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                     className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'reviews' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                 >
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
-                        <StarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        <SoftIcon name="star" className="w-5 h-5 md:w-6 md:h-6" />
                         <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.reviews')} ({stats.reviews})</span>
                     </div>
                 </button>
@@ -313,10 +299,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             <div className="prose prose-sm sm:prose-base lg:prose-lg text-gray-700 leading-relaxed">
                                 {agent.bio || (
                                     <p className="text-sm sm:text-base lg:text-lg">
-                                        {firstName} is a dedicated real estate professional with {stats.yearsExperience} years of experience
-                                        in the industry{isAgencyAgent && ` as part of the ${agent.agencyName} team`}.
-                                        {firstName} specializes in helping clients achieve their real estate goals through
-                                        expert market knowledge and personalized service.
+                                        {firstName} {t('agents:ui.agentProfileTabs.isADedicatedRealEstate', 'is a dedicated real estate professional with')} {stats.yearsExperience} {t('agents:ui.agentProfileTabs.yearsOfExperienceInThe', 'years of experience in the industry')}{isAgencyAgent && ` as part of the ${agent.agencyName} team`}.
+                                        {firstName} {t('agents:ui.agentProfileTabs.specializesInHelpingClientsAchieve', 'specializes in helping clients achieve their real estate goals through expert market knowledge and personalized service.')}
                                     </p>
                                 )}
                             </div>
@@ -326,14 +310,14 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(agent.officePhone || agent.phone || agent.officeAddress || agent.websiteUrl || agent.email) && (
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <PhoneIcon className="w-6 h-6 text-blue-600" />
+                                    <SoftIcon name="phone" className="w-8 h-8" />
                                     {t('profilePage.contactInfo', 'Contact Information')}
                                 </h3>
                                 <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
                                     {(agent.officePhone || agent.phone) && (
                                         <a href={`tel:${agent.officePhone || agent.phone}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                                             <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                                                <PhoneIcon className="w-5 h-5 text-green-600" />
+                                                <SoftIcon name="phone" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.officePhone || agent.phone}</div>
@@ -344,7 +328,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {agent.email && (
                                         <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                                             <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                                                <SoftIcon name="envelope" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.email}</div>
@@ -355,7 +339,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {agent.officeAddress && (
                                         <div className="flex items-center gap-3 text-gray-700">
                                             <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-                                                <MapPinIcon className="w-5 h-5 text-purple-600" />
+                                                <SoftIcon name="pin" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.officeAddress}</div>
@@ -366,7 +350,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {agent.websiteUrl && (
                                         <a href={agent.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                                             <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                                                <GlobeAltIcon className="w-5 h-5 text-indigo-600" />
+                                                <SoftIcon name="globe" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.websiteUrl.replace(/^https?:\/\//, '')}</div>
@@ -392,7 +376,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {/* Performance Stats */}
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <TrendingUpIcon className="w-6 h-6 text-blue-600" />
+                                <SoftIcon name="trendUp" className="w-8 h-8" />
                                 {t('profilePage.performance.title')}
                             </h3>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -426,7 +410,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {/* Credentials & Certifications */}
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
+                                <SoftIcon name="shield" className="w-8 h-8" />
                                 {t('profilePage.credentials.title')}
                             </h3>
 
@@ -435,9 +419,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 {agent.licenseVerified && agent.licenseNumber && (
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
                                     <div className="flex items-start gap-4">
-                                        <div className="bg-blue-600 text-white p-3 rounded-lg flex-shrink-0">
-                                            <CheckBadgeIcon className="w-6 h-6" />
-                                        </div>
+                                        <SoftIcon name="shield" className="w-12 h-12 flex-shrink-0" />
                                         <div className="flex-1">
                                             <h4 className="font-bold text-gray-900 text-lg mb-1">{t('profilePage.credentials.licensedAgent')}</h4>
                                             <p className="text-blue-700 font-mono text-sm font-semibold">
@@ -469,7 +451,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(marketInsights.totalSold > 0 || marketInsights.totalActive > 0 || marketInsights.avgPrice > 0) && (
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <ChartBarIcon className="w-6 h-6 text-blue-600" />
+                                <SoftIcon name="chart" className="w-8 h-8" />
                                 {t('profilePage.marketInsights.title', 'Property Overview')}
                                 {agent.city && <span className="text-sm font-normal text-gray-500 ml-1">- {agent.city}</span>}
                             </h3>
@@ -506,7 +488,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 {/* Price Range */}
                                 {marketInsights.priceRange && marketInsights.priceRange.min !== marketInsights.priceRange.max && (
                                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 mb-5">
-                                        <BanknotesIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                                        <SoftIcon name="cash" className="w-6 h-6 flex-shrink-0" />
                                         <div className="text-sm text-gray-700">
                                             <span className="font-medium">{t('profilePage.marketInsights.priceRange', 'Price Range')}:</span>{' '}
                                             <span className="font-semibold text-gray-900">{formatPrice(marketInsights.priceRange.min, agent.country)}</span>
@@ -533,7 +515,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {allAgentProperties.length > 0 && allAgentProperties.some(p => p.lat && p.lng) && (
                             <div>
                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                                    <SoftIcon name="mapGrid" className="w-7 h-7 sm:w-8 sm:h-8" />
                                     {t('profilePage.propertiesMap.title')}
                                     <span className="text-sm font-normal text-gray-600 ml-2">
                                         ({activeListings.length} {t('profilePage.propertiesMap.active')}, {soldProperties.length} {t('profilePage.propertiesMap.sold')}{rentedProperties.length > 0 ? `, ${rentedProperties.length} ${t('profilePage.propertiesMap.rented', 'Rented')}` : ''})
@@ -582,7 +564,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                     >
                                                         {property.imageUrl && (
                                                             <div className="w-full h-28 overflow-hidden">
-                                                                <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                                                <img src={optimizeImageUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                                             </div>
                                                         )}
                                                         <div className="p-2.5">
@@ -641,7 +623,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(hasValidCoordinates || (agent.serviceAreas && agent.serviceAreas.length > 0)) && (
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <MapPinIcon className="w-6 h-6 text-blue-600" />
+                                    <SoftIcon name="pin" className="w-8 h-8" />
                                     {t('profilePage.serviceArea.title')}
                                 </h3>
 
@@ -653,15 +635,15 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 key={area}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm font-medium"
                                             >
-                                                <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                                 {area}
                                             </span>
                                         ))}
                                     </div>
                                 )}
-                                {hasValidCoordinates && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
+                                {agentPosition && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
                                     <MapContainer
-                                        center={[agent.lat, agent.lng]}
+                                        center={agentPosition}
                                         zoom={13}
                                         scrollWheelZoom={true}
                                         className="w-full h-80"
@@ -674,7 +656,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                             maxZoom={22}
                                         />
                                         <MapInvalidator />
-                                        <Marker position={[agent.lat, agent.lng]} icon={L.icon({
+                                        <Marker position={agentPosition} icon={L.icon({
                                             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
                                             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                                             iconSize: [25, 41],
@@ -686,7 +668,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 <div className="text-center min-w-[200px]">
                                                     <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
                                                         {agent.avatarUrl ? (
-                                                            <img src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
+                                                            <img src={optimizeImageUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                         ) : (
                                                             <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                                         )}
@@ -699,7 +681,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                             className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold mb-2 transition-colors text-sm"
                                                         >
                                                             <PhoneIcon className="w-4 h-4" />
-                                                            Call
+                                                            {t('agents:ui.agentProfileTabs.call', 'Call')}
                                                         </a>
                                                     )}
                                                     {agent.email && (
@@ -721,7 +703,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                             <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
                                                 {agent.avatarUrl ? (
-                                                    <img src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
+                                                    <img src={optimizeImageUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                 ) : (
                                                     <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                                 )}
@@ -737,7 +719,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                         href={`tel:${agent.phone}`}
                                                         className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-semibold transition-colors text-sm pointer-events-auto"
                                                     >
-                                                        Call
+                                                        {t('agents:ui.agentProfileTabs.call', 'Call')}
                                                     </a>
                                                 )}
                                                 <a
@@ -762,10 +744,10 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div key={spec} className="bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-colors group hover:shadow-md">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                                    {spec.includes('Luxury') ? <TrophyIcon className="w-5 h-5 text-blue-600" /> :
-                                                     spec.includes('Commercial') ? <BuildingLibraryIcon className="w-5 h-5 text-blue-600" /> :
-                                                     spec.includes('Investment') ? <BanknotesIcon className="w-5 h-5 text-blue-600" /> :
-                                                     <HomeModernIcon className="w-5 h-5 text-blue-600" />}
+                                                    {spec.includes('Luxury') ? <SoftIcon name="crown" className="w-7 h-7" /> :
+                                                     spec.includes('Commercial') ? <SoftIcon name="store" className="w-7 h-7" /> :
+                                                     spec.includes('Investment') ? <SoftIcon name="moneybag" className="w-7 h-7" /> :
+                                                     <SoftIcon name="home" className="w-7 h-7" />}
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{spec}</span>
                                             </div>
@@ -776,7 +758,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-blue-100 rounded-lg">
-                                                    <HomeModernIcon className="w-5 h-5 text-blue-600" />
+                                                    <SoftIcon name="home" className="w-7 h-7" />
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{t('profilePage.expertise.residential')}</span>
                                             </div>
@@ -784,7 +766,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-green-100 rounded-lg">
-                                                    <UserIcon className="w-5 h-5 text-green-600" />
+                                                    <SoftIcon name="user" className="w-7 h-7" />
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{t('profilePage.expertise.firstTimeBuyers')}</span>
                                             </div>
@@ -792,7 +774,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-purple-100 rounded-lg">
-                                                    <BuildingLibraryIcon className="w-5 h-5 text-purple-600" />
+                                                    <SoftIcon name="landmark" className="w-7 h-7" />
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{t('profilePage.expertise.propertyManagement')}</span>
                                             </div>
@@ -900,7 +882,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                             }`}
                                         >
-                                            {t('profilePage.listingsTab.forSale', 'For Sale')} ({saleCount})
+                                            <ListingTypePicture type="sale" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('profilePage.listingsTab.forSale', 'For Sale')} ({saleCount})
                                         </button>
                                         <button
                                             onClick={() => setListingTypeFilter('rent')}
@@ -908,7 +890,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 listingTypeFilter === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                                             }`}
                                         >
-                                            {t('profilePage.listingsTab.forRent', 'For Rent')} ({rentCount})
+                                            <ListingTypePicture type="rent" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('profilePage.listingsTab.forRent', 'For Rent')} ({rentCount})
                                         </button>
                                     </div>
                                 );
@@ -1039,46 +1021,46 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {/* Reviews List */}
                         {agent.testimonials && agent.testimonials.length > 0 ? (
                             <div className="space-y-6">
-                                {agent.testimonials.slice(0, 5).map((t, index) => (
+                                {agent.testimonials.slice(0, 5).map((testimonial, index) => (
                                     <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-300 transition-colors">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                                                    {t.userId?.avatarUrl ? (
+                                                    {testimonial.userId?.avatarUrl ? (
                                                         <img
-                                                            src={optimizeCloudinaryUrl(t.userId.avatarUrl, { width: 128 }) || t.userId.avatarUrl}
-                                                            alt={t.userId.name || t.clientName}
+                                                            src={optimizeImageUrl(testimonial.userId.avatarUrl, { width: 128 }) || testimonial.userId.avatarUrl}
+                                                            alt={testimonial.userId.name || testimonial.clientName}
                                                             loading="lazy"
                                                             decoding="async"
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <DefaultAvatar gender={t.userId?.gender} seed={t.userId?.id || t.userId?.name || t.clientName || 'user'} avatarOptions={t.userId?.avatarOptions} show3d />
+                                                        <DefaultAvatar gender={testimonial.userId?.gender} seed={testimonial.userId?.id || testimonial.userId?.name || testimonial.clientName || 'user'} avatarOptions={testimonial.userId?.avatarOptions} show3d />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-gray-900">{t.userId?.name || t.clientName || 'Anonymous'}</p>
-                                                    <p className="text-sm text-gray-600">Verified Buyer • {t.rating}.0</p>
+                                                    <p className="font-bold text-gray-900">{testimonial.userId?.name || testimonial.clientName || t('agents:ui.agentProfileTabs.anonymous', 'Anonymous')}</p>
+                                                    <p className="text-sm text-gray-600">{t('agents:ui.agentProfileTabs.verifiedBuyer', 'Verified Buyer •')} {testimonial.rating}.0</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-gray-500 text-sm">
-                                                    {t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-US', {
+                                                    {testimonial.createdAt ? new Date(testimonial.createdAt).toLocaleDateString('en-US', {
                                                         year: 'numeric',
                                                         month: 'short',
                                                         day: 'numeric',
-                                                    }) : 'Recently'}
+                                                    }) : t('agents:ui.agentProfileTabs.recently', 'Recently')}
                                                 </div>
-                                                <StarRating rating={t.rating || 0} />
+                                                <StarRating rating={testimonial.rating || 0} />
                                             </div>
                                         </div>
-                                        <p className="text-gray-700 text-lg italic mb-4">"{t.quote}"</p>
+                                        <p className="text-gray-700 text-lg italic mb-4">"{testimonial.quote}"</p>
                                         {(t as any).response && (
                                             <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
                                                 <div className="flex items-start gap-3">
-                                                    <ChatBubbleBottomCenterTextIcon className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                    <SoftIcon name="chat" className="w-6 h-6 flex-shrink-0" />
                                                     <div>
-                                                        <p className="font-semibold text-gray-900 mb-1">Response from {firstName}</p>
+                                                        <p className="font-semibold text-gray-900 mb-1">{t('agents:ui.agentProfileTabs.responseFrom', 'Response from')} {firstName}</p>
                                                         <p className="text-gray-700">{(t as any).response}</p>
                                                     </div>
                                                 </div>
@@ -1089,7 +1071,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </div>
                         ) : (
                             <div className="text-center py-12">
-                                <StarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <SoftIcon name="star" className="block w-16 h-16 mx-auto mb-4" />
                                 <p className="text-gray-600 text-lg mb-2">{t('profilePage.reviewsTab.noReviews')}</p>
                                 <p className="text-gray-500">{t('profilePage.reviewsTab.beFirstToReview', { name: firstName })}</p>
                             </div>
