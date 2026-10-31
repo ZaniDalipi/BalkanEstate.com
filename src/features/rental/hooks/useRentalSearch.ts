@@ -9,6 +9,7 @@ import { generateSearchName, generateSearchNameFromCoords } from '@/services/gem
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { useFeatureMatches } from '@/src/features/search/hooks/useFeatureMatches';
 import { narrowToMapView } from '@/src/features/search/mapList';
 import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
@@ -248,9 +249,11 @@ export function useRentalSearch() {
     // Client-side filtering + sorting (same pattern as buy page — instant, no API call).
     // Bounds are deliberately NOT applied here: the map draws every rental that
     // matches the filters, and only the list follows the viewport (below).
+    // Listings the server found to have every amenity, read from the whole listing.
+    const featureMatches = useFeatureMatches(activeFilters);
     const baseFilteredProperties = useMemo(
-        () => filterAndSortProperties(rentalProperties, activeFilters),
-        [rentalProperties, activeFilters]
+        () => filterAndSortProperties(rentalProperties, activeFilters, { featureMatches }),
+        [rentalProperties, activeFilters, featureMatches]
     );
 
     /**
@@ -266,9 +269,9 @@ export function useRentalSearch() {
     const needsRelaxedText = baseFilteredProperties.length === 0 && activeFilters.query.trim() !== '';
     const relaxedProperties = useMemo(() => {
         if (!needsRelaxedText) return null;
-        const relaxed = filterAndSortProperties(rentalProperties, { ...activeFilters, query: '' });
+        const relaxed = filterAndSortProperties(rentalProperties, { ...activeFilters, query: '' }, { featureMatches });
         return relaxed.length > 0 ? relaxed : null;
-    }, [needsRelaxedText, rentalProperties, activeFilters]);
+    }, [needsRelaxedText, rentalProperties, activeFilters, featureMatches]);
 
     /**
      * What the map draws — and the set the list is drawn from, so the two

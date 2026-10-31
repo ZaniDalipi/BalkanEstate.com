@@ -586,6 +586,8 @@ export interface Filters {
     minKitchens?: number | null;
     /** Leave out listings whose distance is unknown when a distance filter is set. Set by AI search. */
     requireKnownDistances?: boolean;
+    /** Direction the property faces. Unset in filters saved before it existed; read as 'any'. */
+    orientation?: Orientation;
 }
 
 export const initialFilters: Filters = {
@@ -687,6 +689,7 @@ export interface AiSearchQuery {
     condition?: Exclude<PropertyCondition, 'any'>;
     viewType?: Exclude<ViewType, 'any'>;
     energyRating?: Exclude<EnergyRating, 'any'>;
+    orientation?: Exclude<Orientation, 'any'>;
     hasBalcony?: boolean;
     hasGarden?: boolean;
     hasElevator?: boolean;
@@ -701,7 +704,10 @@ export interface AiSearchQuery {
     maxDistanceToSea?: number;
     maxDistanceToSchool?: number;
     maxDistanceToHospital?: number;
-    /** Anything else the listing must have ("floor heating", "panoramic view"). */
+    /**
+     * Anything else the listing must have, each as "english|translations…"
+     * ("floor heating|ngrohje në dysheme|podno grejanje").
+     */
     amenities?: string[];
     /** Older name for `amenities`; still read so a cached reply keeps working. */
     features?: string[];

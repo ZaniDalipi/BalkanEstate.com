@@ -3,6 +3,7 @@ import type { AiSearchQuery, Filters } from '@/types';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { CONSTRUCTION_STATUSES } from '@/shared/property/construction';
 import { PROPERTY_TYPES } from '@/shared/types/property.types';
+import { amenityAlternatives } from '@/utils/amenityMatch';
 
 /**
  * Turns what the AI assistant understood into the search filters, so every
@@ -41,6 +42,7 @@ const HEATING = ['central', 'electric', 'gas', 'oil', 'heat-pump', 'solar', 'woo
 const CONDITION = ['new', 'excellent', 'good', 'fair', 'needs-renovation'] as const;
 const VIEW = ['sea', 'mountain', 'city', 'park', 'garden', 'street'] as const;
 const ENERGY = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'] as const;
+const ORIENTATION = ['north', 'south', 'east', 'west', 'northEast', 'northWest', 'southEast', 'southWest'] as const;
 
 const oneOf = <T extends string>(allowed: readonly T[], value: unknown): T | undefined =>
     typeof value === 'string' && (allowed as readonly string[]).includes(value) ? (value as T) : undefined;
@@ -66,18 +68,23 @@ export const countryKeyFromAi = (country?: string): string | null => {
     return BALKAN_COUNTRIES[key] ? key : null;
 };
 
+/**
+ * Amenities as the filter keeps them: "english|translation|…", cleaned. One
+ * whose wording is a yes/no field ("lift", "swimming pool") sets that field
+ * instead, which the search checks against the box, the tags and the text.
+ */
 const splitAmenities = (query: AiSearchQuery) => {
     const booleans: Partial<Record<BooleanFilterKey, boolean>> = {};
     const tags: string[] = [];
     const seen = new Set<string>();
     for (const raw of [...(query.amenities ?? []), ...(query.features ?? [])]) {
         if (typeof raw !== 'string') continue;
-        const tag = raw.trim().toLowerCase();
-        if (!tag || seen.has(tag)) continue;
-        seen.add(tag);
-        const field = AMENITY_TO_BOOLEAN[tag];
+        const alternatives = [...new Set(amenityAlternatives(raw.toLowerCase()))];
+        if (alternatives.length === 0 || seen.has(alternatives[0])) continue;
+        seen.add(alternatives[0]);
+        const field = alternatives.map(a => AMENITY_TO_BOOLEAN[a]).find(Boolean);
         if (field) booleans[field] = true;
-        else tags.push(tag);
+        else tags.push(alternatives.join('|'));
     }
     return { booleans, tags };
 };
@@ -118,6 +125,7 @@ export const aiQueryToFilters = (query: AiSearchQuery): Filters => {
         condition: oneOf(CONDITION, query.condition) ?? 'any',
         viewType: oneOf(VIEW, query.viewType) ?? 'any',
         energyRating: oneOf(ENERGY, query.energyRating) ?? 'any',
+        orientation: oneOf(ORIENTATION, query.orientation) ?? 'any',
         amenities: tags,
         // Everything the user asked for must be shown to hold, distances too.
         requireKnownDistances: true,

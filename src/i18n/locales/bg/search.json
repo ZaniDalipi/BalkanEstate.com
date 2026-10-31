@@ -79,7 +79,8 @@
     "priceReduced": "Намалена цена",
     "priceIncreased": "Повишена цена",
     "constructionStatus": "Строителство",
-    "kitchens": "Кухни"
+    "kitchens": "Кухни",
+    "orientation": "Ориентация"
   },
   "options": {
     "any": "Всички",
@@ -654,5 +655,15 @@
   "constructionOptions": {
     "ready": "Готово за нанасяне",
     "underConstruction": "В строеж"
+  },
+  "orientationOptions": {
+    "north": "Север",
+    "south": "Юг",
+    "east": "Изток",
+    "west": "Запад",
+    "northEast": "Североизток",
+    "northWest": "Северозапад",
+    "southEast": "Югоизток",
+    "southWest": "Югозапад"
   }
 }

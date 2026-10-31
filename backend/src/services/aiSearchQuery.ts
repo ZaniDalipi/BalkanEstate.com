@@ -20,6 +20,7 @@ const ENUMS = {
   condition: ['new', 'excellent', 'good', 'fair', 'needs-renovation'],
   viewType: ['sea', 'mountain', 'city', 'park', 'garden', 'street'],
   energyRating: ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'],
+  orientation: ['north', 'south', 'east', 'west', 'northEast', 'northWest', 'southEast', 'southWest'],
 } as const;
 
 type EnumKey = keyof typeof ENUMS;
@@ -49,6 +50,7 @@ const RANGE_PAIRS = [
 
 const MAX_AMENITIES = 20;
 const MAX_TEXT = 100;
+const MAX_ALTERNATIVES = 10;
 
 export type AiSearchQuery = Record<string, string | number | boolean | string[]>;
 
@@ -89,6 +91,7 @@ export const AI_SEARCH_QUERY_SCHEMA = {
     heatingType: choice('heatingType', 'Heating source.'),
     condition: choice('condition', 'Condition of the property.'),
     viewType: choice('viewType', 'View, when it is one of these.'),
+    orientation: choice('orientation', 'Direction the property faces.'),
     energyRating: choice('energyRating', 'Energy rating.'),
     hasBalcony: bool('Balcony or terrace.'),
     hasGarden: bool('Garden or yard.'),
@@ -107,7 +110,7 @@ export const AI_SEARCH_QUERY_SCHEMA = {
     amenities: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: 'Other things the listing must have that no field above covers, short English words (e.g. "floor heating", "panoramic view", "fireplace", "sauna").',
+      description: 'Other things the listing must have that no field above covers. One entry per thing: the English term first, then the same thing in Albanian, Serbian/Croatian/Bosnian, Macedonian, Bulgarian, Greek and Romanian, all separated by "|" (e.g. "floor heating|underfloor heating|ngrohje në dysheme|podno grejanje|podno grijanje|подно греење|подово отопление|ενδοδαπέδια θέρμανση|încălzire în pardoseală").',
     },
   },
 };
@@ -128,7 +131,10 @@ export const AI_SEARCH_RULES = `
         - Energy rating "A+" → energyRating "A+".
         - Distances: "less than 500 m from a school" → maxDistanceToSchool 0.5 (always km). "near the sea / walking distance to the beach" → maxDistanceToSea 1. "close to the centre" → maxDistanceToCenter 2.
         - Yes/no features use their field (hasBalcony, hasGarden, hasElevator, hasSecurity, hasAirConditioning, hasPool, petsAllowed, has360Tour). "no pets" → petsAllowed false.
-        - Anything else the listing must have (fireplace, sauna, jacuzzi, gym, storage, wine cellar, panoramic view, floor heating, smart home, ...) → amenities, short lowercase English words.
+        - Anything else the listing must have (fireplace, sauna, jacuzzi, gym, storage, wine cellar, panoramic view, floor heating, smart home, duplex, penthouse, sea view from the terrace, ...) → amenities. Each entry is ONE requirement written as "english term|translations" in Albanian, Serbian/Croatian/Bosnian, Macedonian, Bulgarian, Greek and Romanian, separated by "|", so listings written in any of those languages are found. Use short stems that appear in listing text ("ngrohje në dysheme", not a whole sentence).
+        - Read the WHOLE message, including every comma-separated item, and map each one. Before answering, check each requirement the user wrote has a home in searchQuery.
+        - Orientation ("south facing", "faces east") → orientation: north, south, east, west, northEast, northWest, southEast, southWest.
+        - "not on the ground floor" → minFloorNumber 1. "top floor" / "last floor" / "penthouse" → amenities ("top floor|kati i fundit|poslednji sprat|zadnji kat|последен кат|последен етаж|τελευταίος όροφος|ultimul etaj").
         - "to rent", "for rent", "me qira", "za izdavanje" → listingType "rent". Otherwise leave listingType unset.
         - Refinements keep everything from earlier turns unless the user changes or removes it.
         - Your responseMessage may ONLY mention criteria you actually put in searchQuery, and must mention all of them. Say "between X and Y" for ranges and "exactly X" when min equals max.
@@ -138,6 +144,18 @@ const sanitizeText = (value: unknown): string | null => {
   if (typeof value !== 'string') return null;
   const text = value.trim().slice(0, MAX_TEXT);
   return text || null;
+};
+
+/**
+ * One amenity: "english|translation|..." with each alternative trimmed,
+ * lower-cased, de-duplicated and capped, or null when nothing usable is left.
+ */
+const sanitizeAmenity = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  const alternatives = [...new Set(
+    value.split('|').map((a) => a.trim().toLowerCase().slice(0, MAX_TEXT)).filter(Boolean),
+  )].slice(0, MAX_ALTERNATIVES);
+  return alternatives.length > 0 ? alternatives.join('|') : null;
 };
 
 const sanitizeNumber = (value: unknown, allowZero: boolean): number | null => {
@@ -175,11 +193,10 @@ export const sanitizeAiSearchQuery = (raw: unknown): AiSearchQuery | null => {
     if (typeof value === 'string' && (ENUMS[key] as readonly string[]).includes(value)) out[key] = value;
   }
 
-  const amenitySource = Array.isArray(input.amenities) ? input.amenities
+  const amenitySource: unknown[] = Array.isArray(input.amenities) ? input.amenities
     : Array.isArray(input.features) ? input.features : [];
-  const amenities = [...new Set(
-    amenitySource.map((a) => sanitizeText(a)?.toLowerCase()).filter((a): a is string => !!a),
-  )].slice(0, MAX_AMENITIES);
+  const amenities = [...new Set(amenitySource.map(sanitizeAmenity).filter((a): a is string => !!a))]
+    .slice(0, MAX_AMENITIES);
   if (amenities.length > 0) out.amenities = amenities;
 
   for (const [minKey, maxKey] of RANGE_PAIRS) {

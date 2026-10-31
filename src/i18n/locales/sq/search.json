@@ -79,7 +79,8 @@
     "priceReduced": "Çmim i ulur",
     "priceIncreased": "Çmim i rritur",
     "constructionStatus": "Ndërtimi",
-    "kitchens": "Kuzhina"
+    "kitchens": "Kuzhina",
+    "orientation": "Orientimi"
   },
   "options": {
     "any": "Çdo",
@@ -654,5 +655,15 @@
   "constructionOptions": {
     "ready": "Gati për banim",
     "underConstruction": "Në ndërtim"
+  },
+  "orientationOptions": {
+    "north": "Veri",
+    "south": "Jug",
+    "east": "Lindje",
+    "west": "Perëndim",
+    "northEast": "Verilindje",
+    "northWest": "Veriperëndim",
+    "southEast": "Juglindje",
+    "southWest": "Jugperëndim"
   }
 }

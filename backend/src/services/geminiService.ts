@@ -887,7 +887,7 @@ export const getAiChatResponse = async (
         User: "Apartment in Tirana, exactly 76 m2, 1 bedroom, under 200k, under construction, one kitchen, electric floor heating, floor 15, A+ energy, panoramic view, less than 0.5 km from a school"
         {
           "responseMessage": "Here are apartments in Tirana of exactly 76 m² with 1+ bedroom and 1+ kitchen, under €200,000, under construction, on floor 15, with electric floor heating, A+ energy rating, a panoramic view and a school within 0.5 km. Want me to adjust anything?",
-          "searchQuery": { "location": "Tirana", "country": "Albania", "propertyType": "apartment", "minSqft": 76, "maxSqft": 76, "beds": 1, "kitchens": 1, "maxPrice": 200000, "constructionStatus": "under-construction", "heatingType": "electric", "minFloorNumber": 15, "maxFloorNumber": 15, "energyRating": "A+", "maxDistanceToSchool": 0.5, "amenities": ["floor heating", "panoramic view"] },
+          "searchQuery": { "location": "Tirana", "country": "Albania", "propertyType": "apartment", "minSqft": 76, "maxSqft": 76, "beds": 1, "kitchens": 1, "maxPrice": 200000, "constructionStatus": "under-construction", "heatingType": "electric", "minFloorNumber": 15, "maxFloorNumber": 15, "energyRating": "A+", "maxDistanceToSchool": 0.5, "amenities": ["floor heating|underfloor heating|ngrohje në dysheme|podno grejanje|podno grijanje|подно греење|подово отопление|ενδοδαπέδια θέρμανση|încălzire în pardoseală", "panoramic view|pamje panoramike|panoramski pogled|панорамски поглед|панорамна гледка|πανοραμική θέα|vedere panoramică"] },
           "isFinalQuery": true
         }
 

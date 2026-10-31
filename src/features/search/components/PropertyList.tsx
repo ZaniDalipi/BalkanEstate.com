@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
+import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation } from '@/types';
+import { amenityAlternatives, amenityLabel } from '@/utils/amenityMatch';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { SearchIcon, XMarkIcon, BellIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
@@ -101,6 +102,13 @@ const FilterButton: React.FC<{
  * Rent / Buy pictures as the sidebar.
  */
 type FilterIcon = SoftIconName | 'listingType';
+
+const ORIENTATION_OPTIONS: { value: Exclude<Orientation, 'any'>; fallback: string }[] = [
+  { value: 'north', fallback: 'North' }, { value: 'northEast', fallback: 'North-east' },
+  { value: 'east', fallback: 'East' }, { value: 'southEast', fallback: 'South-east' },
+  { value: 'south', fallback: 'South' }, { value: 'southWest', fallback: 'South-west' },
+  { value: 'west', fallback: 'West' }, { value: 'northWest', fallback: 'North-west' },
+];
 const FilterLabel: React.FC<{ icon?: FilterIcon; className?: string; children: React.ReactNode }> = ({ icon, className, children }) => (
   <label className={`flex items-center gap-1.5 text-xs font-medium text-neutral-700 ${className ?? 'mb-1'}`}>
     {icon === 'listingType' ? (
@@ -568,6 +576,21 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             </select>
                         </div>
 
+                        {/* Orientation */}
+                        <div>
+                            <FilterLabel icon="sun">{t('search:filters.orientation', 'Orientation')}</FilterLabel>
+                            <select
+                                value={filters.orientation ?? 'any'}
+                                onChange={(e) => onFilterChange('orientation', e.target.value as Orientation)}
+                                className={inputBaseClasses}
+                            >
+                                <option value="any">{t('search:options.any')}</option>
+                                {ORIENTATION_OPTIONS.map(o => (
+                                    <option key={o.value} value={o.value}>{t(`search:orientationOptions.${o.value}`, o.fallback)}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         {/* Floor Number Range (for apartments) */}
                         <div>
                             <FilterLabel icon="building">{t('search:filters.floorNumber')}</FilterLabel>
@@ -729,7 +752,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                                 key={amenity}
                                                 className="flex items-center gap-1 bg-primary-light text-primary-dark text-xs font-semibold px-2 py-1 rounded-full"
                                             >
-                                                <span>#{amenity}</span>
+                                                <span title={amenityAlternatives(amenity).join(' · ')}>#{amenityLabel(amenity)}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => {

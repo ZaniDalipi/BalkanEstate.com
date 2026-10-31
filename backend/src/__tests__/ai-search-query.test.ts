@@ -47,6 +47,16 @@ describe('sanitizeAiSearchQuery', () => {
     expect(sanitizeAiSearchQuery({ features: ['Sauna', 'sauna ', ''] })).toEqual({ amenities: ['sauna'] });
   });
 
+  it('keeps each amenity with its translations, cleaned', () => {
+    expect(sanitizeAiSearchQuery({ amenities: ['Floor heating | Ngrohje në dysheme|floor heating', ' | '] }))
+      .toEqual({ amenities: ['floor heating|ngrohje në dysheme'] });
+  });
+
+  it('keeps a known orientation and drops an unknown one', () => {
+    expect(sanitizeAiSearchQuery({ orientation: 'southEast' })).toEqual({ orientation: 'southEast' });
+    expect(sanitizeAiSearchQuery({ orientation: 'up' })).toEqual({});
+  });
+
   it('returns null for anything that is not an object', () => {
     expect(sanitizeAiSearchQuery(null)).toBeNull();
     expect(sanitizeAiSearchQuery('Tirana')).toBeNull();

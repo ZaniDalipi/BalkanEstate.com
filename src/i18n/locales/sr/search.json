@@ -78,8 +78,9 @@
     "last30Days": "Последњих 30 дана",
     "priceReduced": "Снижена цена",
     "priceIncreased": "Повећана цена",
-    "constructionStatus": "Izgradnja",
-    "kitchens": "Kuhinje"
+    "constructionStatus": "Изградња",
+    "kitchens": "Кухиње",
+    "orientation": "Оријентација"
   },
   "options": {
     "any": "Било који",
@@ -652,7 +653,17 @@
     }
   },
   "constructionOptions": {
-    "ready": "Useljivo odmah",
-    "underConstruction": "U izgradnji"
+    "ready": "Усељиво одмах",
+    "underConstruction": "У изградњи"
+  },
+  "orientationOptions": {
+    "north": "Север",
+    "south": "Југ",
+    "east": "Исток",
+    "west": "Запад",
+    "northEast": "Североисток",
+    "northWest": "Северозапад",
+    "southEast": "Југоисток",
+    "southWest": "Југозапад"
   }
 }

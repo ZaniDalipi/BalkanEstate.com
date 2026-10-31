@@ -361,6 +361,8 @@ export interface Filters {
   minKitchens?: number | null;
   /** Leave out listings whose distance is unknown when a distance filter is set. Set by AI search. */
   requireKnownDistances?: boolean;
+  /** Direction the property faces. Unset in filters saved before it existed; read as 'any'. */
+  orientation?: Orientation;
 }
 
 export const initialFilters: Filters = {

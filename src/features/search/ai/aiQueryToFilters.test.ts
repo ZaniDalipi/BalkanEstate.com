@@ -26,7 +26,7 @@ describe('aiQueryToFilters', () => {
 
     it('starts from the defaults, so nothing from an earlier search lingers', () => {
         expect(aiQueryToFilters({})).toEqual({
-            ...initialFilters, constructionStatus: 'any', minKitchens: null, requireKnownDistances: true,
+            ...initialFilters, constructionStatus: 'any', minKitchens: null, requireKnownDistances: true, orientation: 'any',
         });
     });
 
@@ -45,6 +45,17 @@ describe('aiQueryToFilters', () => {
         expect(f.hasPool).toBe(true);
         expect(f.hasElevator).toBe(true);
         expect(f.amenities).toEqual(['sauna']);
+    });
+
+    it('keeps each amenity with its translations, and maps a translated yes/no feature', () => {
+        const f = aiQueryToFilters({ amenities: ['Floor heating|Ngrohje në dysheme', 'elevator|ashensor', 'floor heating|other'] });
+        expect(f.amenities).toEqual(['floor heating|ngrohje në dysheme']);
+        expect(f.hasElevator).toBe(true);
+    });
+
+    it('applies orientation', () => {
+        expect(aiQueryToFilters({ orientation: 'southEast' }).orientation).toBe('southEast');
+        expect(aiQueryToFilters({ orientation: 'up' as never }).orientation).toBe('any');
     });
 
     it('keeps an explicit "no" and the ground floor', () => {
@@ -118,5 +129,32 @@ describe('unknown distances', () => {
 
     it('do not matter to an AI search without a distance filter', () => {
         expect(filterProperties([unknown], aiQueryToFilters({}))).toHaveLength(1);
+    });
+});
+
+describe('the server\'s reading of the whole listing', () => {
+    const base = { ...({} as Property), id: 'x', lat: 41.33, lng: 19.82, price: 1, sqft: 1, amenities: [],
+        propertyType: 'apartment', listingType: 'sale', status: 'active', seller: { type: 'agent' } } as Property;
+    const filters = aiQueryToFilters({ amenities: ['floor heating|ngrohje në dysheme'], hasElevator: true });
+
+    it('keeps a listing it found, though the list does not show the feature', () => {
+        expect(filterProperties([base], filters, { featureMatches: new Set(['x']) })).toHaveLength(1);
+    });
+
+    it('drops a listing it did not find, though a tag looks right', () => {
+        const tagged = { ...base, amenities: ['floor heating'], hasElevator: true } as Property;
+        expect(filterProperties([tagged], filters, { featureMatches: new Set() })).toEqual([]);
+    });
+
+    it('falls back to the fields the list carries until it answers', () => {
+        const tagged = { ...base, amenities: ['Floor heating'], hasElevator: true } as Property;
+        expect(filterProperties([tagged], filters)).toHaveLength(1);
+        expect(filterProperties([base], filters)).toEqual([]);
+    });
+
+    it('still checks a "no" against the listing itself', () => {
+        const noPets = aiQueryToFilters({ amenities: ['sauna'], petsAllowed: false });
+        const allowsPets = { ...base, petsAllowed: true } as Property;
+        expect(filterProperties([allowsPets], noPets, { featureMatches: new Set(['x']) })).toEqual([]);
     });
 });

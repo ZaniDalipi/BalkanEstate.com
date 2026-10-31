@@ -2,6 +2,8 @@ import { Property, Filters } from '../types';
 import { BALKAN_COUNTRIES } from '../constants/countries';
 import { createPropertyMatcher, rankProperties } from '../src/shared/search';
 import { normalizeConstructionStatus } from '../src/shared/property/construction';
+import { listingHasAmenity } from './amenityMatch';
+import { hasFeatureRequest } from './featureMatchRequest';
 
 /**
  * `base` plus every listing of `extra` it does not already hold. Used to fold
@@ -13,7 +15,16 @@ export const mergeById = (base: Property[], extra: Property[]): Property[] => {
     return [...base, ...extra.filter((p) => !seen.has(p.id))];
 };
 
-export const filterProperties = (properties: Property[], filters: Filters): Property[] => {
+export interface FilterOptions {
+    /**
+     * Ids of listings the server found to have every requested amenity and
+     * text-backed "yes" feature (see `featureMatchRequest`). Must be the answer
+     * for these same filters; leave unset until it arrives.
+     */
+    featureMatches?: ReadonlySet<string>;
+}
+
+export const filterProperties = (properties: Property[], filters: Filters, options: FilterOptions = {}): Property[] => {
     // Text matching runs through the search engine: the query is parsed once,
     // its words are all required (typing more narrows), spellings are folded
     // so "Becici" and "Bečići" are one word, and a typo is forgiven.
@@ -85,15 +96,25 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const conditionMatch = filters.condition !== 'any' ? p.condition === filters.condition : true;
         const viewTypeMatch = filters.viewType !== 'any' ? p.viewType === filters.viewType : true;
         const energyRatingMatch = filters.energyRating !== 'any' ? p.energyRating === filters.energyRating : true;
+        const orientationMatch = filters.orientation && filters.orientation !== 'any'
+            ? p.orientation === filters.orientation
+            : true;
 
         // Boolean filters (null means no filter applied)
-        const hasBalconyMatch = filters.hasBalcony !== null ? p.hasBalcony === filters.hasBalcony : true;
-        const hasGardenMatch = filters.hasGarden !== null ? p.hasGarden === filters.hasGarden : true;
-        const hasElevatorMatch = filters.hasElevator !== null ? p.hasElevator === filters.hasElevator : true;
-        const hasSecurityMatch = filters.hasSecurity !== null ? p.hasSecurity === filters.hasSecurity : true;
-        const hasAirConditioningMatch = filters.hasAirConditioning !== null ? p.hasAirConditioning === filters.hasAirConditioning : true;
-        const hasPoolMatch = filters.hasPool !== null ? p.hasPool === filters.hasPool : true;
-        const petsAllowedMatch = filters.petsAllowed !== null ? p.petsAllowed === filters.petsAllowed : true;
+        // A "yes" the server already checked against the whole listing (see
+        // amenitiesMatch) is not checked again here against the box alone.
+        const flagMatch = (wanted: boolean | null, has: boolean | undefined): boolean => {
+            if (wanted === null) return true;
+            if (wanted === true && options.featureMatches) return true;
+            return has === wanted;
+        };
+        const hasBalconyMatch = flagMatch(filters.hasBalcony, p.hasBalcony);
+        const hasGardenMatch = flagMatch(filters.hasGarden, p.hasGarden);
+        const hasElevatorMatch = flagMatch(filters.hasElevator, p.hasElevator);
+        const hasSecurityMatch = flagMatch(filters.hasSecurity, p.hasSecurity);
+        const hasAirConditioningMatch = flagMatch(filters.hasAirConditioning, p.hasAirConditioning);
+        const hasPoolMatch = flagMatch(filters.hasPool, p.hasPool);
+        const petsAllowedMatch = flagMatch(filters.petsAllowed, p.petsAllowed);
         const has360TourMatch = filters.has360Tour !== null ? p.hasVirtualTour360 === filters.has360Tour : true;
 
         // Discount filter - property has discount if originalPrice exists and is higher than current price
@@ -138,21 +159,13 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const maxDistanceToSchoolMatch = withinDistance(p.distanceToSchool, filters.maxDistanceToSchool);
         const maxDistanceToHospitalMatch = withinDistance(p.distanceToHospital, filters.maxDistanceToHospital);
 
-        // Amenities filter - check if property has all required amenities (bidirectional substring matching)
-        const amenitiesMatch = filters.amenities && filters.amenities.length > 0 ?
-            filters.amenities.every(amenity => {
-                // A listing may state it under amenities or special features.
-                const propertyAmenities = [...(p.amenities || []), ...(p.specialFeatures || [])];
-                const searchTerm = (amenity || '').toLowerCase().trim();
-                if (!searchTerm) return true;
-                return propertyAmenities.some(pAmenity => {
-                    const propAmenity = (pAmenity || '').toLowerCase().trim();
-                    if (!propAmenity) return false;
-                    // Bidirectional matching: either the property amenity contains the search term,
-                    // or the search term contains the property amenity
-                    return propAmenity.includes(searchTerm) || searchTerm.includes(propAmenity);
-                });
-            }) : true;
+        // Amenities and text-backed yes/no features. With the server's answer
+        // (which read each whole listing, description included) a listing is in
+        // or out by id; until then the fields the list carries are checked.
+        const featureMatches = options.featureMatches;
+        const amenitiesMatch = featureMatches && hasFeatureRequest(filters)
+            ? featureMatches.has(p.id)
+            : (filters.amenities ?? []).every(amenity => listingHasAmenity(p, amenity));
 
         return queryMatch &&
                saleStatusMatch &&
@@ -177,6 +190,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                conditionMatch &&
                viewTypeMatch &&
                energyRatingMatch &&
+               orientationMatch &&
                hasBalconyMatch &&
                hasGardenMatch &&
                hasElevatorMatch &&
@@ -209,8 +223,8 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
  * orderings can be tested directly — a `switch` this size is exactly where a
  * branch quietly stops returning anything.
  */
-export const filterAndSortProperties = (properties: Property[], activeFilters: Filters): Property[] => {
-    const filtered = filterProperties(properties, activeFilters);
+export const filterAndSortProperties = (properties: Property[], activeFilters: Filters, options: FilterOptions = {}): Property[] => {
+    const filtered = filterProperties(properties, activeFilters, options);
     const now = Date.now();
 
     // Pre-compute promotion scores once (O(N)) — avoids O(N log N) calls inside comparators

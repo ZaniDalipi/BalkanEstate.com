@@ -12,6 +12,8 @@ import { useAppContext } from '@/context/AppContext';
 import AiMessageLimitModal from './AiMessageLimitModal';
 import { filterProperties } from '@/utils/propertyUtils';
 import { aiQueryToFilters } from '../ai/aiQueryToFilters';
+import { useFeatureMatches } from '../hooks/useFeatureMatches';
+import { initialFilters } from '@/types';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -624,12 +626,15 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         }
     }, [finalQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const finalFilters = useMemo(() => (finalQuery ? aiQueryToFilters(finalQuery) : null), [finalQuery]);
+    // Read from each whole listing on the server; see useFeatureMatches.
+    const featureMatches = useFeatureMatches(finalFilters ?? initialFilters);
     const matchedProperties = useMemo(() => {
-        if (!finalQuery) return [];
+        if (!finalFilters) return [];
         // Only listings that meet every criterion — never a near miss. The
         // auto-apply above reloads the area, so matches arrive as it does.
-        return filterProperties(properties, aiQueryToFilters(finalQuery)).slice(0, 15);
-    }, [finalQuery, properties]);
+        return filterProperties(properties, finalFilters, { featureMatches }).slice(0, 15);
+    }, [finalFilters, properties, featureMatches]);
 
     // Auto-show swipe cards when properties are found
     useEffect(() => {

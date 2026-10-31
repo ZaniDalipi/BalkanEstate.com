@@ -79,7 +79,8 @@
     "priceReduced": "Μειωμένη τιμή",
     "priceIncreased": "Αυξημένη τιμή",
     "constructionStatus": "Κατασκευή",
-    "kitchens": "Κουζίνες"
+    "kitchens": "Κουζίνες",
+    "orientation": "Προσανατολισμός"
   },
   "options": {
     "any": "Οποιοδήποτε",
@@ -654,5 +655,15 @@
   "constructionOptions": {
     "ready": "Έτοιμο προς κατοίκηση",
     "underConstruction": "Υπό κατασκευή"
+  },
+  "orientationOptions": {
+    "north": "Βόρειος",
+    "south": "Νότιος",
+    "east": "Ανατολικός",
+    "west": "Δυτικός",
+    "northEast": "Βορειοανατολικός",
+    "northWest": "Βορειοδυτικός",
+    "southEast": "Νοτιοανατολικός",
+    "southWest": "Νοτιοδυτικός"
   }
 }

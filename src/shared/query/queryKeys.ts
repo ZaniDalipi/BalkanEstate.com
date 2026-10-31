@@ -122,6 +122,10 @@ export const propertyKeys = {
 
   // What the homes around a property ask and sold for
   areaPrices: (propertyId: string) => [...propertyKeys.all, propertyId, 'area-prices'] as const,
+
+  // Ids of listings whose full text has every requested feature (AI search, amenity filters)
+  featureMatches: (request: { features: string[]; flags: string[]; listingType?: string }) =>
+    [...propertyKeys.public(), 'feature-matches', request] as const,
 };
 
 // ============================================================================

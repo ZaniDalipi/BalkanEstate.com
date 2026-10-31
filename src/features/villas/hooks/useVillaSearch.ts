@@ -7,6 +7,7 @@ import type { Suggestion } from '@/src/features/search/universal/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
 import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
+import { useFeatureMatches } from '@/src/features/search/hooks/useFeatureMatches';
 import { narrowToMapView } from '@/src/features/search/mapList';
 import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { applyQueryToFilters } from '@/src/features/search/universal/queryToFilters';
@@ -315,9 +316,11 @@ export function useVillaSearch() {
         listingType: listingMode === 'any' ? 'any' : listingMode,
     }), [activeFilters, listingMode]);
 
+    // Listings the server found to have every amenity, read from the whole listing.
+    const featureMatches = useFeatureMatches(collectionFilters);
     const baseFilteredProperties = useMemo(
-        () => filterAndSortProperties(villaProperties, collectionFilters),
-        [villaProperties, collectionFilters]
+        () => filterAndSortProperties(villaProperties, collectionFilters, { featureMatches }),
+        [villaProperties, collectionFilters, featureMatches]
     );
 
     /**
@@ -333,9 +336,9 @@ export function useVillaSearch() {
     const needsRelaxedText = baseFilteredProperties.length === 0 && collectionFilters.query.trim() !== '';
     const relaxedProperties = useMemo(() => {
         if (!needsRelaxedText) return null;
-        const relaxed = filterAndSortProperties(villaProperties, { ...collectionFilters, query: '' });
+        const relaxed = filterAndSortProperties(villaProperties, { ...collectionFilters, query: '' }, { featureMatches });
         return relaxed.length > 0 ? relaxed : null;
-    }, [needsRelaxedText, villaProperties, collectionFilters]);
+    }, [needsRelaxedText, villaProperties, collectionFilters, featureMatches]);
 
     /**
      * What the map draws — and the set the list is drawn from, so the two

@@ -79,7 +79,8 @@
     "priceReduced": "Preț redus",
     "priceIncreased": "Preț crescut",
     "constructionStatus": "Construcție",
-    "kitchens": "Bucătării"
+    "kitchens": "Bucătării",
+    "orientation": "Orientare"
   },
   "options": {
     "any": "Oricare",
@@ -654,5 +655,15 @@
   "constructionOptions": {
     "ready": "Gata de mutare",
     "underConstruction": "În construcție"
+  },
+  "orientationOptions": {
+    "north": "Nord",
+    "south": "Sud",
+    "east": "Est",
+    "west": "Vest",
+    "northEast": "Nord-est",
+    "northWest": "Nord-vest",
+    "southEast": "Sud-est",
+    "southWest": "Sud-vest"
   }
 }

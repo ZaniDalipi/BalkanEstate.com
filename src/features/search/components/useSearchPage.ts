@@ -8,6 +8,7 @@ import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { outOfAreaFallback, type OutOfAreaKind } from '../outOfArea';
 import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
+import { useFeatureMatches } from '@/src/features/search/hooks/useFeatureMatches';
 import { aiQueryToFilters, countryKeyFromAi } from '../ai/aiQueryToFilters';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
@@ -463,9 +464,11 @@ export function useSearchPage() {
         setToast({ show: true, message, type });
     }, []);
 
+    // Listings the server found to have every amenity, read from the whole listing.
+    const featureMatches = useFeatureMatches(activeFilters);
     const baseFilteredProperties = useMemo(
-        () => filterAndSortProperties(properties, activeFilters),
-        [properties, activeFilters]
+        () => filterAndSortProperties(properties, activeFilters, { featureMatches }),
+        [properties, activeFilters, featureMatches]
     );
 
     /**
@@ -482,9 +485,9 @@ export function useSearchPage() {
     const needsRelaxedText = baseFilteredProperties.length === 0 && activeFilters.query.trim() !== '';
     const relaxedProperties = useMemo(() => {
         if (!needsRelaxedText) return null;
-        const relaxed = filterAndSortProperties(properties, { ...activeFilters, query: '' });
+        const relaxed = filterAndSortProperties(properties, { ...activeFilters, query: '' }, { featureMatches });
         return relaxed.length > 0 ? relaxed : null;
-    }, [needsRelaxedText, properties, activeFilters]);
+    }, [needsRelaxedText, properties, activeFilters, featureMatches]);
 
     /**
      * What the map draws — and the set the list is drawn from, so the two

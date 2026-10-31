@@ -18,6 +18,7 @@ import {
   getAreaPrices,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
+import { getFeatureMatches } from '../controllers/featureMatchController';
 import { upload } from '../utils/upload';
 import { mutationRateLimiter } from '../middleware/security';
 import { validatePropertyId } from '../middleware/propertyValidation';
@@ -98,6 +99,10 @@ const router = express.Router();
  *                   $ref: '#/components/schemas/Pagination'
  */
 router.get('/', getProperties);
+
+// Which listings have every requested feature, read from the full listing text.
+// Registered before '/:id' so the path is not taken for a property id.
+router.get('/feature-matches', getFeatureMatches);
 
 /**
  * @swagger

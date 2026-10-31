@@ -79,7 +79,8 @@
     "priceReduced": "Намалена цена",
     "priceIncreased": "Зголемена цена",
     "constructionStatus": "Градба",
-    "kitchens": "Кујни"
+    "kitchens": "Кујни",
+    "orientation": "Ориентација"
   },
   "options": {
     "any": "Било кој",
@@ -654,5 +655,15 @@
   "constructionOptions": {
     "ready": "Подготвено за вселување",
     "underConstruction": "Во изградба"
+  },
+  "orientationOptions": {
+    "north": "Север",
+    "south": "Југ",
+    "east": "Исток",
+    "west": "Запад",
+    "northEast": "Североисток",
+    "northWest": "Северозапад",
+    "southEast": "Југоисток",
+    "southWest": "Југозапад"
   }
 }

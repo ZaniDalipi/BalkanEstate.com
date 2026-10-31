@@ -79,7 +79,8 @@
     "priceReduced": "Snižena cijena",
     "priceIncreased": "Povećana cijena",
     "constructionStatus": "Izgradnja",
-    "kitchens": "Kuhinje"
+    "kitchens": "Kuhinje",
+    "orientation": "Orijentacija"
   },
   "options": {
     "any": "Bilo koji",
@@ -654,5 +655,15 @@
   "constructionOptions": {
     "ready": "Useljivo odmah",
     "underConstruction": "U izgradnji"
+  },
+  "orientationOptions": {
+    "north": "Sjever",
+    "south": "Jug",
+    "east": "Istok",
+    "west": "Zapad",
+    "northEast": "Sjeveroistok",
+    "northWest": "Sjeverozapad",
+    "southEast": "Jugoistok",
+    "southWest": "Jugozapad"
   }
 }

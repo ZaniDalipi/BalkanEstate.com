@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { createTestQueryClient } from '@/src/tests/test-utils';
 
 /**
  * Searching the rent page.
@@ -90,7 +93,11 @@ afterEach(() => {
 
 /** Mount the hook and let the initial rentals fetch settle. */
 const mountHook = async () => {
-  const view = renderHook(() => useRentalSearch());
+  // The hook asks the server which listings have the requested features.
+  const client = createTestQueryClient();
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client }, children);
+  const view = renderHook(() => useRentalSearch(), { wrapper });
   await waitFor(() => expect(view.result.current.isLoading).toBe(false));
   return view;
 };

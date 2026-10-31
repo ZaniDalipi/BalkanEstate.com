@@ -95,7 +95,8 @@
     "priceReduced": "Price Reduced",
     "priceIncreased": "Price Increased",
     "constructionStatus": "Construction",
-    "kitchens": "Kitchens"
+    "kitchens": "Kitchens",
+    "orientation": "Orientation"
   },
   "options": {
     "any": "Any",
@@ -664,5 +665,15 @@
   "constructionOptions": {
     "ready": "Ready to move in",
     "underConstruction": "Under construction"
+  },
+  "orientationOptions": {
+    "north": "North",
+    "south": "South",
+    "east": "East",
+    "west": "West",
+    "northEast": "North-east",
+    "northWest": "North-west",
+    "southEast": "South-east",
+    "southWest": "South-west"
   }
 }
