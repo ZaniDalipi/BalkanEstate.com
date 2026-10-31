@@ -5,6 +5,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as maplibregl from 'maplibre-gl';
+import '../utils/maplibreWorker';
 import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
 import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';

@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 import { Resend } from 'resend';
 import User, { DEFAULT_EMAIL_PREFERENCES, IEmailPreferences } from '../models/User';
 import { CITY_MARKET_DIGEST_EMAIL_TYPE } from '../config/cityMarketDigest';
@@ -258,7 +258,7 @@ const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
 const EMAIL_SEND_INTERVAL_MS = parseInt(process.env.EMAIL_SEND_INTERVAL_MS ?? '300000', 10);
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: Transporter | null = null;
   private resend: Resend | null = null;
   private provider: EmailProvider = 'none';
   private fromEmails: Record<EmailCategory, string>;
