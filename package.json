@@ -107,6 +107,8 @@
   "overrides": {
     "serialize-javascript": ">=7.0.3",
     "ws": ">=8.21.0",
-    "esbuild": ">=0.28.1"
+    "esbuild": ">=0.28.1",
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.3"
   }
 }
