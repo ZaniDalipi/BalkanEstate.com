@@ -2,6 +2,7 @@ import User from '../models/User';
 import Agency from '../models/Agency';
 import Product, { IProduct } from '../models/Product';
 import Subscription from '../models/Subscription';
+import MonthlyCouponDelivery, { MonthlyCouponDeliveryKind } from '../models/MonthlyCouponDelivery';
 import { sendMonthlyCouponEmail } from './emailService';
 import { generateProSubscriptionCoupons } from './subscriptionPaymentService';
 import { promotionLogger } from '../utils/logger';
@@ -26,6 +27,35 @@ interface CouponRefreshResult {
 function endOfCurrentMonth(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+}
+
+/** Calendar month in UTC as `YYYY-MM` — the period a monthly delivery belongs to. */
+export function couponPeriod(date: Date = new Date()): string {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+function isDuplicateKeyError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: number }).code === 11000;
+}
+
+/**
+ * Atomically claim this month's delivery for one recipient. Returns false when
+ * it was already claimed (by an earlier run, another scheduler or another
+ * server instance) so the caller skips it and nobody gets the email twice.
+ */
+export async function claimMonthlyDelivery(kind: MonthlyCouponDeliveryKind, key: string, period: string): Promise<boolean> {
+  try {
+    await MonthlyCouponDelivery.create({ period, kind, key });
+    return true;
+  } catch (err) {
+    if (isDuplicateKeyError(err)) return false;
+    throw err;
+  }
+}
+
+/** Give a claim back when the refresh failed before anything was sent, so a re-run can retry it. */
+async function releaseMonthlyDelivery(kind: MonthlyCouponDeliveryKind, key: string, period: string): Promise<void> {
+  await MonthlyCouponDelivery.deleteOne({ period, kind, key }).catch(() => undefined);
 }
 
 /**
@@ -59,13 +89,21 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
   }
 
   const monthEnd = endOfCurrentMonth();
+  const period = couponPeriod();
 
   for (const sub of activeProSubscriptions) {
     const userId = sub.userId;
+    let claimed = false;
     try {
+      // One delivery per user per month, even with several Pro subscription docs or overlapping runs
+      claimed = await claimMonthlyDelivery('pro', String(userId), period);
+      if (!claimed) continue;
+
       const user = await User.findById(userId);
       if (!user) {
         errors.push(`Pro refresh: user ${userId} not found, skipping`);
+        claimed = false;
+        await releaseMonthlyDelivery('pro', String(userId), period);
         continue;
       }
 
@@ -73,6 +111,8 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
       const product = productCache.get(sub.productId) ?? productCache.get('pro_monthly');
       if (!product) {
         errors.push(`Pro refresh: product not found for ${sub.productId}, skipping user ${user.email}`);
+        claimed = false;
+        await releaseMonthlyDelivery('pro', String(userId), period);
         continue;
       }
 
@@ -98,6 +138,7 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
         },
       });
       refreshed++;
+      claimed = false; // refreshed — keep the claim even if the email fails below
 
       // Generate actual coupon codes (only for the new monthly allocation)
       let couponCodes: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
@@ -135,6 +176,7 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
       }
     } catch (userError) {
       errors.push(`Failed to refresh coupons for user ${userId}: ${userError}`);
+      if (claimed) await releaseMonthlyDelivery('pro', String(userId), period);
     }
   }
 
@@ -182,9 +224,11 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
   }
 
   const monthEnd = endOfCurrentMonth();
+  const period = couponPeriod();
 
   for (const sub of activeAgencySubscriptions) {
     const ownerId = sub.userId;
+    let claimedAgencyId: string | null = null;
     try {
       const owner = await User.findById(ownerId);
       if (!owner) { errors.push(`Agency refresh: owner ${ownerId} not found`); continue; }
@@ -192,6 +236,10 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
 
       const agency = await Agency.findById(owner.agencyId);
       if (!agency) { errors.push(`Agency refresh: agency ${owner.agencyId} not found for ${owner.email}`); continue; }
+
+      // One delivery per agency per month, even with several subscription docs or overlapping runs
+      if (!(await claimMonthlyDelivery('agency', String(agency._id), period))) continue;
+      claimedAgencyId = String(agency._id);
 
       // Reset agency coupons — no rollover
       agency.promotionCoupons = {
@@ -202,6 +250,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
       };
       await agency.save();
       refreshed++;
+      claimedAgencyId = null; // refreshed — keep the claim even if an email fails below
 
       // Generate codes for the owner (shared with the whole agency) — 2-week validity
       let couponCodes: Array<{ tier: 'highlight' | 'premium' | 'featured'; code: string }> = [];
@@ -261,6 +310,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
       }
     } catch (agencyError) {
       errors.push(`Failed to refresh coupons for agency owner ${ownerId}: ${agencyError}`);
+      if (claimedAgencyId) await releaseMonthlyDelivery('agency', claimedAgencyId, period);
     }
   }
 

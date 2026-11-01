@@ -148,7 +148,6 @@ import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 import { ensureAllFeaturedCitiesExist } from './services/cityMarketDataService';
-import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 import { runScoreBackfill } from './jobs/scoreBackfillJob';
 import { initializePushService } from './services/pushNotificationService';
 
@@ -260,9 +259,7 @@ serverLogger.info('✅ Trial management job started');
 startCityMarketDataUpdateJob();
 serverLogger.info('✅ City market data update job started (biweekly)');
 
-// Start monthly coupon refresh job (1st of each month)
-startMonthlyCouponJob();
-serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
+// Monthly coupon refresh (1st of each month) is scheduled once, in startCronJobs() (src/cron/index.ts)
 
 // Start monthly listing counter reset worker (1st of each month at 00:00 UTC)
 startMonthlyResetWorker();
