@@ -1505,5 +1505,8 @@
     "inBuilding": "Intrare a clădirii",
     "newHere": "Intrare nouă",
     "homesAvailable_few": "{{count}} locuințe disponibile"
+  },
+  "sheet": {
+    "save": "Salvează"
   }
 }

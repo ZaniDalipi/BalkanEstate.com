@@ -1,10 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Modal from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
 import { FormSelect } from '../../shared/FormSelect';
 import { ToggleSwitch } from '../../shared/ToggleSwitch';
+import { FormSheet, FormSheetGroup } from '../../shared/FormSheet';
 import { useEntranceKindLabel } from '../../shared/entranceKind';
 import { ENTRANCE_KINDS, type DevelopmentEntrance, type EntranceKind } from '../../../types';
 import { ENTRANCE_LIMITS } from '../../../validation/entranceValidation';
@@ -36,13 +35,23 @@ export const EntranceDialog: React.FC<EntranceDialogProps> = ({ developmentId, b
   });
   const noteId = React.useId();
   const switchId = React.useId();
+  const formId = React.useId();
   const title = entrance
     ? t('entrance.editTitle', { name: entrance.name, defaultValue: 'Edit {{name}}' })
     : t('entrance.addTitle', { building: buildingName, defaultValue: 'Add an entrance to {{building}}' });
 
   return (
-    <Modal isOpen onClose={onClose} title={title} size="lg">
+    <FormSheet
+      title={title}
+      barTitle={entrance ? entrance.name : t('entrance.newHere', 'New entrance')}
+      formId={formId}
+      submitLabel={t('entrance.save', 'Save entrance')}
+      submitting={isSaving}
+      submittingLabel={t('entrance.saving', 'Saving…')}
+      onClose={onClose}
+    >
       <form
+        id={formId}
         noValidate
         className="space-y-5"
         onSubmit={(e) => {
@@ -50,47 +59,48 @@ export const EntranceDialog: React.FC<EntranceDialogProps> = ({ developmentId, b
           void submit();
         }}
       >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="sm:col-span-2">
-            <Input label={t('entrance.name', 'Name')} placeholder={t('entrance.namePlaceholder', 'e.g. Entrance A')} value={form.name} maxLength={ENTRANCE_LIMITS.name} onChange={(e) => set('name', e.target.value)} error={errors.name} required autoFocus />
+        <FormSheetGroup>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="sm:col-span-2">
+              <Input label={t('entrance.name', 'Name')} placeholder={t('entrance.namePlaceholder', 'e.g. Entrance A')} value={form.name} maxLength={ENTRANCE_LIMITS.name} onChange={(e) => set('name', e.target.value)} error={errors.name} required autoFocus autoCapitalize="words" enterKeyHint="next" autoComplete="off" />
+            </div>
+            <Input label={t('entrance.code', 'Short code')} placeholder="A" value={form.code} maxLength={ENTRANCE_LIMITS.code} onChange={(e) => set('code', e.target.value)} error={errors.code} autoCapitalize="characters" autoCorrect="off" spellCheck={false} enterKeyHint="next" autoComplete="off" />
           </div>
-          <Input label={t('entrance.code', 'Short code')} placeholder="A" value={form.code} maxLength={ENTRANCE_LIMITS.code} onChange={(e) => set('code', e.target.value)} error={errors.code} />
-        </div>
-        <FormSelect
-          label={t('entrance.kindLabel', 'Kind')}
-          value={form.kind}
-          onChange={(e) => set('kind', e.target.value as EntranceKind)}
-          options={ENTRANCE_KINDS.map((k) => ({ value: k, label: kindLabel(k) }))}
-          error={errors.kind}
-        />
+          <FormSelect
+            label={t('entrance.kindLabel', 'Kind')}
+            value={form.kind}
+            onChange={(e) => set('kind', e.target.value as EntranceKind)}
+            options={ENTRANCE_KINDS.map((k) => ({ value: k, label: kindLabel(k) }))}
+            error={errors.kind}
+          />
+        </FormSheetGroup>
         {/* A grouped settings row, iOS style: the label on the left, the switch on the right. */}
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 py-1.5 pl-4 pr-2">
-          <label htmlFor={switchId} className="cursor-pointer py-2 text-sm font-medium text-gray-800">
+        <div className="flex min-h-[52px] items-center justify-between gap-4 rounded-xl bg-white py-1 pl-4 pr-2 md:border md:border-gray-200 md:bg-gray-50">
+          <label htmlFor={switchId} className="cursor-pointer py-2 text-base text-gray-900 md:text-sm md:font-medium md:text-gray-800">
             {t('entrance.accessible', 'Step-free access (wheelchair, pram)')}
           </label>
           <ToggleSwitch id={switchId} checked={form.accessible} onChange={(v) => set('accessible', v)} />
         </div>
-        <div>
-          <label htmlFor={noteId} className="mb-1.5 block text-sm font-medium text-gray-700">{t('entrance.note', 'Note for buyers')}</label>
-          <textarea
-            id={noteId}
-            rows={2}
-            value={form.note}
-            maxLength={ENTRANCE_LIMITS.note}
-            placeholder={t('entrance.notePlaceholder', 'e.g. From the main street · concierge 8:00–20:00')}
-            onChange={(e) => set('note', e.target.value)}
-            aria-invalid={errors.note ? 'true' : undefined}
-            aria-describedby={errors.note ? `${noteId}-error` : undefined}
-            className={`block w-full resize-y rounded-lg border bg-transparent px-3 py-2.5 text-base transition-colors duration-200 placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 sm:px-4 sm:py-2 sm:text-sm ${errors.note ? 'border-red-300 focus:border-red-500 focus-visible:ring-red-500/20' : 'border-gray-300 focus:border-primary focus-visible:ring-primary/20'}`}
-          />
-          {errors.note && <p id={`${noteId}-error`} role="alert" className="mt-1.5 text-sm text-red-600">{errors.note}</p>}
-        </div>
+        <FormSheetGroup>
+          <div>
+            <label htmlFor={noteId} className="mb-1.5 block text-sm font-medium text-gray-700">{t('entrance.note', 'Note for buyers')}</label>
+            <textarea
+              id={noteId}
+              rows={2}
+              value={form.note}
+              maxLength={ENTRANCE_LIMITS.note}
+              placeholder={t('entrance.notePlaceholder', 'e.g. From the main street · concierge 8:00–20:00')}
+              onChange={(e) => set('note', e.target.value)}
+              enterKeyHint="done"
+              aria-invalid={errors.note ? 'true' : undefined}
+              aria-describedby={errors.note ? `${noteId}-error` : undefined}
+              className={`block w-full resize-y rounded-lg border bg-transparent px-3 py-2.5 text-base transition-colors duration-200 placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 sm:px-4 sm:py-2 sm:text-sm ${errors.note ? 'border-red-300 focus:border-red-500 focus-visible:ring-red-500/20' : 'border-gray-300 focus:border-primary focus-visible:ring-primary/20'}`}
+            />
+            {errors.note && <p id={`${noteId}-error`} role="alert" className="mt-1.5 text-sm text-red-600">{errors.note}</p>}
+          </div>
+        </FormSheetGroup>
         {formError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
-        <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
-          <Button type="button" variant="ghost" className="min-h-[44px]" onClick={onClose}>{t('wizard.cancel', 'Cancel')}</Button>
-          <Button type="submit" className="min-h-[44px] px-5" disabled={isSaving}>{isSaving ? t('entrance.saving', 'Saving…') : t('entrance.save', 'Save entrance')}</Button>
-        </div>
       </form>
-    </Modal>
+    </FormSheet>
   );
 };

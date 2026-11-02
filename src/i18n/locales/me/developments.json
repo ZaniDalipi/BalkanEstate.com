@@ -1505,5 +1505,8 @@
     "inBuilding": "Ulaz zgrade",
     "newHere": "Novi ulaz",
     "homesAvailable_few": "{{count}} slobodna stana"
+  },
+  "sheet": {
+    "save": "Sačuvaj"
   }
 }

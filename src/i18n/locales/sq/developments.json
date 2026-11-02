@@ -1494,5 +1494,8 @@
     "needBuilding": "Shtoni më parë një ndërtesë; hyrjet i përkasin një ndërtese.",
     "inBuilding": "Hyrje e ndërtesës",
     "newHere": "Hyrje e re"
+  },
+  "sheet": {
+    "save": "Ruaj"
   }
 }

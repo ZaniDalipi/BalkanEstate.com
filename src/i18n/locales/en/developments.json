@@ -1494,5 +1494,8 @@
     "needBuilding": "Add a building first; entrances belong to a building.",
     "inBuilding": "Entrance of building",
     "newHere": "New entrance"
+  },
+  "sheet": {
+    "save": "Save"
   }
 }

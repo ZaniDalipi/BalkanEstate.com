@@ -1505,5 +1505,8 @@
     "inBuilding": "Улаз зграде",
     "newHere": "Нови улаз",
     "homesAvailable_few": "{{count}} слободна стана"
+  },
+  "sheet": {
+    "save": "Сачувај"
   }
 }
