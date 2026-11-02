@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, fireEvent } from '@testing-library/react';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
 import { GALLERY_WIDTHS } from '@/config/galleryImages';
 import { snapImageWidth } from '@/config/mediaConfig';
@@ -107,6 +107,25 @@ describe('PropertyGallery slide track', () => {
     GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`/w${snapImageWidth(w)}.webp`));
     // Must match the preloader, or the warmed bytes cannot satisfy this request.
     expect(active.getAttribute('crossorigin')).toBe('anonymous');
+  });
+
+  it('retries a photo without crossorigin when the CORS-mode load fails, keeping it on screen', () => {
+    // The media bucket answering without CORS headers blocks every CORS-mode
+    // request; the photo itself is fine as a plain image.
+    renderGallery(0);
+    const before = slideImages().find((img) => img.dataset.galleryUrl === photo(0))!;
+    expect(before.getAttribute('crossorigin')).toBe('anonymous');
+
+    fireEvent.error(before);
+
+    const after = slideImages().find((img) => img.dataset.galleryUrl === photo(0))!;
+    expect(after.hasAttribute('crossorigin')).toBe(false);
+    // Still a photo, not the grey placeholder.
+    expect(after).toBeTruthy();
+
+    // A second failure is a real failure: the placeholder takes over.
+    fireEvent.error(after);
+    expect(slideImages().find((img) => img.dataset.galleryUrl === photo(0))).toBeUndefined();
   });
 
   it('starts each photo hidden behind its blur and reveals it on load', () => {

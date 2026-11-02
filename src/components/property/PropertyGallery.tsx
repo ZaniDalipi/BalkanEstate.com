@@ -225,6 +225,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // photo rather than as one flag for "the current image".
   const [loadedUrls, setLoadedUrls] = useState<Record<string, true>>({});
   const [failedUrls, setFailedUrls] = useState<Record<string, true>>({});
+  // Photos retried without `crossOrigin` after a CORS-mode load failed (e.g. the
+  // media bucket lacks a CORS policy). They display fine; only canvas export is lost.
+  const [noCorsUrls, setNoCorsUrls] = useState<Record<string, true>>({});
   const [aspects, setAspects] = useState<Record<string, number>>({});
 
   const markLoaded = useCallback((url: string, img: HTMLImageElement) => {
@@ -716,7 +719,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
                         width={1200}
                         height={800}
-                        crossOrigin={sources.crossOrigin}
+                        crossOrigin={noCorsUrls[item.url] ? undefined : sources.crossOrigin}
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
                         fetchpriority={isActive ? 'high' : 'low'}
@@ -735,7 +738,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         }}
                         draggable={false}
                         onLoad={(e) => markLoaded(item.url, e.currentTarget)}
-                        onError={() => setFailedUrls((prev) => ({ ...prev, [item.url]: true }))}
+                        onError={() => {
+                          // First failure in CORS mode: retry once as a plain image.
+                          if (sources.crossOrigin && !noCorsUrls[item.url]) {
+                            setNoCorsUrls((prev) => ({ ...prev, [item.url]: true }));
+                          } else {
+                            setFailedUrls((prev) => ({ ...prev, [item.url]: true }));
+                          }
+                        }}
                       />
                     </motion.div>
                   </motion.div>

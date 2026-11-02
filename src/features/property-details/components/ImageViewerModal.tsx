@@ -35,6 +35,8 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const { state, dispatch } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(startIndex);
     const [imageError, setImageError] = useState(false);
+    // Photos retried without `crossOrigin` after a CORS-mode load failed.
+    const [noCorsUrls, setNoCorsUrls] = useState<Record<string, true>>({});
     const [imageLoaded, setImageLoaded] = useState(false);
     const [isSendingToChat, setIsSendingToChat] = useState(false);
     const [showStyler, setShowStyler] = useState(false);
@@ -627,7 +629,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                             src={currentSources.src}
                             srcSet={currentSources.srcSet || undefined}
                             sizes={currentSources.srcSet ? currentSources.sizes : undefined}
-                            crossOrigin={currentSources.crossOrigin}
+                            crossOrigin={noCorsUrls[images[currentIndex].url] ? undefined : currentSources.crossOrigin}
                             alt={t('property:imageViewer.imageAlt', 'Property image {{current}} of {{total}}', { current: currentIndex + 1, total: images.length })}
                             width={1920}
                             height={1280}
@@ -646,7 +648,14 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                                 transition: 'opacity 320ms ease-out, transform 320ms ease-out',
                             }}
                             onLoad={() => setImageLoaded(true)}
-                            onError={() => setImageError(true)}
+                            onError={() => {
+                                const url = images[currentIndex].url;
+                                if (currentSources.crossOrigin && !noCorsUrls[url]) {
+                                    setNoCorsUrls((prev) => ({ ...prev, [url]: true }));
+                                } else {
+                                    setImageError(true);
+                                }
+                            }}
                         />
                     )}
                 </div>
