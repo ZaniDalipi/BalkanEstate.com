@@ -9,6 +9,11 @@ import {
   ENTERPRISE_TIER_LIMITS,
   PRO_BUYER_LIMITS,
 } from '../config/subscriptionConstants';
+import {
+  findSavedInsight,
+  parseListingId,
+  saveInsight,
+} from '../services/savedNeighborhoodInsightService';
 
 /**
  * Check if the GOOGLE_AI_API_KEY is configured
@@ -27,6 +32,23 @@ const FREE_USER_MONTHLY_LIMIT = FREE_TIER_LIMITS.AI_INSIGHTS; // Free users get 
 export const getNeighborhoodInsights = async (req: Request, res: Response) => {
   try {
     const { lat, lng, address, city, country, language } = req.body;
+
+    // Optional: the listing this insight is for. When given, the insight is
+    // kept for the requesting user only and served again without using quota.
+    const rawListingId = req.body.listingId;
+    const listingId = rawListingId === undefined ? null : parseListingId(rawListingId);
+    if (rawListingId !== undefined && !listingId) {
+      return res.status(400).json({ message: 'Invalid listingId' });
+    }
+
+    // A saved insight is served before any AI-availability, validation or quota checks.
+    const requesterId = (req.user as any)?._id;
+    if (requesterId && listingId) {
+      const saved = await findSavedInsight(requesterId, listingId);
+      if (saved) {
+        return res.status(200).json({ insights: saved, saved: true });
+      }
+    }
 
     // Check if AI service is available
     if (!isApiKeyConfigured()) {
@@ -136,6 +158,15 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
         responseLanguage
       );
 
+      // Keep it forever for this user + listing (best effort: never fail the request over it).
+      if (listingId) {
+        try {
+          await saveInsight(currentUserId, listingId, insights, responseLanguage);
+        } catch (saveError) {
+          apiLogger.error('Failed to save neighborhood insight:', saveError);
+        }
+      }
+
       // Increment usage counter
       user.neighborhoodInsights.monthlyCount += 1;
       user.neighborhoodInsights.lastUsed = now;
@@ -161,6 +192,28 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
     return res.status(500).json({
       message: 'An error occurred while processing your request',
     });
+  }
+};
+
+/**
+ * Get the insight the current user already generated for a listing.
+ * Scoped to the caller: other users' insights are never returned.
+ */
+export const getSavedInsight = async (req: Request, res: Response) => {
+  try {
+    const currentUserId = (req.user as any)?._id;
+    if (!currentUserId) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    const listingId = parseListingId(req.params.listingId);
+    if (!listingId) {
+      return res.status(400).json({ message: 'Invalid listingId' });
+    }
+    const insights = await findSavedInsight(currentUserId, listingId);
+    return res.status(200).json({ insights });
+  } catch (error) {
+    apiLogger.error('Error in getSavedInsight controller:', error);
+    return res.status(500).json({ message: 'An error occurred while fetching the saved insight' });
   }
 };
 

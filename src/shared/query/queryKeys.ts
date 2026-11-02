@@ -41,6 +41,18 @@ export const roomStylerKeys = {
 };
 
 // ============================================================================
+// Neighborhood Insights Query Keys
+// Used by: NeighborhoodInsights (a user's own saved AI insight per listing)
+// The user id is part of the key so accounts never share a cached insight.
+// ============================================================================
+
+export const neighborhoodInsightKeys = {
+  all: ['neighborhoodInsight'] as const,
+  saved: (userId: string, listingId: string) =>
+    [...neighborhoodInsightKeys.all, 'saved', userId, listingId] as const,
+};
+
+// ============================================================================
 // Discount Codes Query Keys
 // Used by: Admin DiscountCodeManager, Payment validation
 // ============================================================================

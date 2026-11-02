@@ -1092,6 +1092,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Mobile Only: Neighborhood Insights — directly under the description */}
             <div data-section="neighborhood" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '62ms' }}>
               <NeighborhoodInsights
+                listingId={property.id}
                 lat={property.lat}
                 lng={property.lng}
                 address={property.address}
@@ -1167,6 +1168,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Neighborhood Insights (Desktop only — mobile version shown above) */}
             <div data-section="neighborhood" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '130ms' }}>
               <NeighborhoodInsights
+                listingId={property.id}
                 lat={property.lat}
                 lng={property.lng}
                 address={property.address}

@@ -11,6 +11,9 @@ import { createSanitizedMarkup } from '../../shared/utils/sanitize';
 import { validateCoordinates } from '../../shared/utils/validation';
 import { apiRequest } from '../../shared/api';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { useQueryClient } from '@tanstack/react-query';
+import { neighborhoodInsightKeys } from '@/src/shared/query/queryKeys';
+import { useSavedNeighborhoodInsight } from './useSavedNeighborhoodInsight';
 
 // Map language codes to full language names for AI prompt
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -32,6 +35,8 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 interface NeighborhoodInsightsProps {
+  /** Listing id; lets the user's generated insight be kept for this listing. */
+  listingId?: string;
   lat: number;
   lng: number;
   address: string;
@@ -54,6 +59,7 @@ interface NeighborhoodInsightsProps {
  * - Powered by AI
  */
 export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
+  listingId,
   lat,
   lng,
   address,
@@ -62,7 +68,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
 }) => {
   const { t } = useTranslation(['property']);
   const { state, dispatch } = useAppContext();
-  const [insights, setInsights] = useState<string | null>(null);
+  const [generatedInsights, setGeneratedInsights] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRequested, setIsRequested] = useState(false);
@@ -71,6 +77,15 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
     limit: number;
     remaining: number;
   } | null>(null);
+
+  const queryClient = useQueryClient();
+  const userId = state.currentUser?.id ?? state.currentUser?._id;
+  const { data: savedInsights } = useSavedNeighborhoodInsight(
+    listingId,
+    state.isAuthenticated ? userId : undefined
+  );
+  // The user's own saved insight is shown straight away, without spending quota.
+  const insights = generatedInsights ?? savedInsights ?? null;
 
   const fetchInsights = async () => {
     // Check authentication
@@ -105,12 +120,15 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
 
       const data = await apiRequest<any>('/neighborhood-insights', {
         method: 'POST',
-        body: { lat, lng, address, city, country, language: languageName },
+        body: { lat, lng, address, city, country, language: languageName, listingId },
         requiresAuth: true,
       });
 
-      setInsights(data.insights);
-      setUsage(data.usage);
+      setGeneratedInsights(data.insights);
+      setUsage(data.usage ?? null);
+      if (listingId && userId) {
+        queryClient.setQueryData(neighborhoodInsightKeys.saved(userId, listingId), data.insights);
+      }
     } catch (err: any) {
       if (err.statusCode === 429) {
         setError(err.message || 'Rate limit exceeded');
@@ -128,7 +146,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
   };
 
   const renderContent = () => {
-    if (!isRequested) {
+    if (!isRequested && !insights) {
       const isAuthenticated = state.isAuthenticated && state.currentUser;
       return (
         <div className="text-center py-1 sm:py-2">
