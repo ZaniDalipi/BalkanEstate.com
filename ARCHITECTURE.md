@@ -41,7 +41,7 @@ src/components/property/  # Shared property UI (used by multiple features)
 ├── PropertyPhotos.tsx    # Thumbnail strip
 ├── PhotoSpotMarker.tsx   # Camera + view cone drawn on a floor plan
 ├── PropertyMapLink.tsx
-└── NeighborhoodInsights.tsx
+└── insights/             # NeighborhoodInsights: component, Insight* parts, flow hook, API
 ```
 
 ### Code Organisation: Small Files, One Job Each
@@ -1442,6 +1442,30 @@ resized once by sharp on our server into the sizes it needs (`w160…w1920.webp`
 in MongoDB (`MediaAsset`). Nothing is resized on request. Full description —
 layout, every upload case, setup, migration from Cloudinary and the
 `media:check` script — in [docs/MEDIA_STORAGE.md](docs/MEDIA_STORAGE.md).
+
+## Neighbourhood Insights — kept per user
+
+```
+NeighborhoodInsights ─ useNeighborhoodInsight ─ useSavedNeighborhoodInsight (React Query)
+                              │                        └── GET  /api/neighborhood-insights/saved/:listingId
+                              └── POST /api/neighborhood-insights
+                                    ├── parseInsightRequest        (validation, pure)
+                                    ├── findSavedInsight           → saved copy: no AI call, no quota
+                                    ├── neighborhoodInsightQuotaService (limit + monthly window)
+                                    └── saveInsight → SavedNeighborhoodInsight { userId, listingId }
+```
+
+- **An insight belongs to the user who generated it.** One row per
+  (`userId`, `listingId`), unique-indexed; every read and write is keyed on the
+  authenticated user, and the client cache key includes the user id.
+- **Reopening is free.** A saved insight is returned before the AI-availability
+  and quota checks. The first saved report wins (`$setOnInsert`).
+- **Validated on both sides.** The client checks the location before spending a
+  request (`validateNeighborhoodInsightPlace`); the server re-validates and
+  allow-lists the language because the text is interpolated into an AI prompt.
+- **Failures are values.** The API module returns `{ ok, error }` with a typed
+  `InsightFailure`; the UI shows the reason (`role="alert"`) and the next step
+  (retry, or an upgrade hint when the monthly limit is reached).
 
 ## Security Notes
 - All API mutations use CSRF cookie (`credentials: 'include'`)

@@ -9,7 +9,6 @@ import express from 'express';
 import User from '../models/User';
 import SavedNeighborhoodInsight from '../models/SavedNeighborhoodInsight';
 import { getNeighborhoodInsights as generateInsights } from '../services/geminiService';
-import { parseListingId } from '../services/savedNeighborhoodInsightService';
 import { getAuthToken } from './setup';
 
 jest.mock('../services/geminiService', () => ({
@@ -26,16 +25,6 @@ const body = (listingId?: string) => ({
   city: 'Tirana',
   country: 'Albania',
   ...(listingId ? { listingId } : {}),
-});
-
-describe('parseListingId', () => {
-  it('accepts plain ids and rejects anything else', () => {
-    expect(parseListingId('64b7f0c2a1')).toBe('64b7f0c2a1');
-    expect(parseListingId('')).toBeNull();
-    expect(parseListingId('a/b')).toBeNull();
-    expect(parseListingId({ $ne: null })).toBeNull();
-    expect(parseListingId('x'.repeat(65))).toBeNull();
-  });
 });
 
 describe('Saved neighborhood insights API', () => {

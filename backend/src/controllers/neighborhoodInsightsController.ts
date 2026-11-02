@@ -1,306 +1,129 @@
 import { Request, Response } from 'express';
-import { getNeighborhoodInsights as getNeighborhoodInsightsFromGemini } from '../services/geminiService';
+import { getNeighborhoodInsights as generateWithGemini } from '../services/geminiService';
 import User from '../models/User';
-import Product from '../models/Product';
 import { apiLogger } from '../utils/logger';
+import { parseInsightRequest, parseListingId } from '../utils/neighborhoodInsightValidation';
+import { findSavedInsight, saveInsight } from '../services/savedNeighborhoodInsightService';
 import {
-  FREE_TIER_LIMITS,
-  PRO_TIER_LIMITS,
-  ENTERPRISE_TIER_LIMITS,
-  PRO_BUYER_LIMITS,
-} from '../config/subscriptionConstants';
-import {
-  findSavedInsight,
-  parseListingId,
-  saveInsight,
-} from '../services/savedNeighborhoodInsightService';
+  ensureCurrentWindow,
+  hasReachedLimit,
+  isSubscribedUser,
+  resolveMonthlyLimit,
+  toUsage,
+} from '../services/neighborhoodInsightQuotaService';
+
+const requesterId = (req: Request) => (req.user as { _id?: string } | undefined)?._id;
 
 /**
- * Check if the GOOGLE_AI_API_KEY is configured
- */
-const isApiKeyConfigured = (): boolean => {
-  return !!process.env.GOOGLE_AI_API_KEY;
-};
-
-// Usage limits
-const FREE_USER_MONTHLY_LIMIT = FREE_TIER_LIMITS.AI_INSIGHTS; // Free users get 3 insights per month
-
-/**
- * Get neighborhood insights for a property location
- * Requires authentication and enforces usage limits
+ * POST /api/neighborhood-insights
+ *
+ * Returns the caller's saved insight for the listing when there is one (no AI
+ * call, no quota); otherwise validates, checks the monthly limit, generates,
+ * saves it for that user and counts it.
  */
 export const getNeighborhoodInsights = async (req: Request, res: Response) => {
   try {
-    const { lat, lng, address, city, country, language } = req.body;
-
-    // Optional: the listing this insight is for. When given, the insight is
-    // kept for the requesting user only and served again without using quota.
-    const rawListingId = req.body.listingId;
-    const listingId = rawListingId === undefined ? null : parseListingId(rawListingId);
-    if (rawListingId !== undefined && !listingId) {
-      return res.status(400).json({ message: 'Invalid listingId' });
+    const userId = requesterId(req);
+    if (!userId) {
+      return res.status(401).json({ message: 'Authentication required to access neighborhood insights' });
     }
 
-    // A saved insight is served before any AI-availability, validation or quota checks.
-    const requesterId = (req.user as any)?._id;
-    if (requesterId && listingId) {
-      const saved = await findSavedInsight(requesterId, listingId);
-      if (saved) {
-        return res.status(200).json({ insights: saved, saved: true });
-      }
+    const parsed = parseInsightRequest(req.body);
+    if (parsed.ok === false) {
+      return res.status(400).json({ message: parsed.message, field: parsed.field });
+    }
+    const { lat, lng, address, city, country, language, listingId } = parsed.value;
+
+    // A saved insight is served before the AI-availability and quota checks.
+    if (listingId) {
+      const saved = await findSavedInsight(userId, listingId);
+      if (saved) return res.status(200).json({ insights: saved, saved: true });
     }
 
-    // Check if AI service is available
-    if (!isApiKeyConfigured()) {
-      return res.status(503).json({
-        message: 'AI service is temporarily unavailable. Please try again later.',
-      });
+    if (!process.env.GOOGLE_AI_API_KEY) {
+      return res.status(503).json({ message: 'AI service is temporarily unavailable. Please try again later.' });
     }
 
-    // Validate required fields
-    if (!lat || !lng || !address || !city || !country) {
-      return res.status(400).json({
-        message: 'Missing required fields: lat, lng, address, city, country',
-      });
-    }
+    const user = await User.findById(userId);
+    if (!user) return res.status(401).json({ message: 'User not found' });
 
-    // Default to English if no language specified
-    const responseLanguage = language || 'English';
-
-    // Validate coordinates
-    if (typeof lat !== 'number' || typeof lng !== 'number') {
-      return res.status(400).json({
-        message: 'Latitude and longitude must be numbers',
-      });
-    }
-
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      return res.status(400).json({
-        message: 'Invalid coordinates',
-      });
-    }
-
-    // Get current user ID from JWT
-    const currentUserId = (req.user as any)?._id;
-    if (!currentUserId) {
-      return res.status(401).json({
-        message: 'Authentication required to access neighborhood insights',
-      });
-    }
-
-    // Fetch full user document from database
-    const user = await User.findById(currentUserId);
-    if (!user) {
-      return res.status(401).json({
-        message: 'User not found',
-      });
-    }
-
-    // Initialize neighborhoodInsights if it doesn't exist
-    if (!user.neighborhoodInsights) {
-      user.neighborhoodInsights = {
-        monthlyCount: 0,
-        monthResetDate: getNextMonthStart(),
-      };
-    }
-
-    // Check if we need to reset the monthly counter
     const now = new Date();
-    if (now >= user.neighborhoodInsights.monthResetDate) {
-      user.neighborhoodInsights.monthlyCount = 0;
-      user.neighborhoodInsights.monthResetDate = getNextMonthStart();
-    }
+    ensureCurrentWindow(user, now);
+    const limit = await resolveMonthlyLimit(user);
+    const usage = toUsage(user, limit);
 
-    // Determine usage limit based on subscription plan from DB
-    const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-    let monthlyLimit = FREE_USER_MONTHLY_LIMIT;
-    if (isSubscribed && user.subscriptionPlan) {
-      const product = await Product.findOne({ productId: user.subscriptionPlan });
-      const limit = product?.aiInsightsLimit ?? undefined;
-      if (limit === -1) {
-        monthlyLimit = -1; // unlimited
-      } else if (typeof limit === 'number' && limit > 0) {
-        monthlyLimit = limit;
-      } else {
-        // Product doesn't have aiInsightsLimit set - use plan-based defaults
-        const plan = user.subscriptionPlan.toLowerCase();
-        if (plan.includes('enterprise') || plan.includes('agency')) {
-          monthlyLimit = ENTERPRISE_TIER_LIMITS.AI_INSIGHTS;
-        } else if (plan.includes('buyer')) {
-          monthlyLimit = PRO_BUYER_LIMITS.AI_INSIGHTS;
-        } else if (plan.includes('yearly')) {
-          monthlyLimit = PRO_TIER_LIMITS.YEARLY.AI_INSIGHTS;
-        } else if (plan.includes('monthly')) {
-          monthlyLimit = PRO_TIER_LIMITS.MONTHLY.AI_INSIGHTS;
-        }
-      }
-    }
-
-    // Check if user has exceeded their monthly limit (-1 = unlimited, skip check)
-    if (monthlyLimit !== -1 && user.neighborhoodInsights.monthlyCount >= monthlyLimit) {
+    if (hasReachedLimit(usage.used, limit)) {
+      const subscribed = isSubscribedUser(user);
       return res.status(429).json({
-        message: `You have reached your monthly limit of ${monthlyLimit} neighborhood insights. ${isSubscribed ? 'Your limit will reset next month.' : 'Upgrade to a premium plan for more insights.'}`,
-        limit: monthlyLimit,
-        used: user.neighborhoodInsights.monthlyCount,
-        resetDate: user.neighborhoodInsights.monthResetDate,
-        isSubscribed,
+        message: `You have reached your monthly limit of ${limit} neighborhood insights. ${
+          subscribed ? 'Your limit will reset next month.' : 'Upgrade to a premium plan for more insights.'
+        }`,
+        limit,
+        used: usage.used,
+        resetDate: usage.resetDate,
+        isSubscribed: subscribed,
       });
     }
 
-    // Get insights from Gemini
+    let insights: string;
     try {
-      const insights = await getNeighborhoodInsightsFromGemini(
-        Number(lat),
-        Number(lng),
-        String(address),
-        String(city),
-        String(country),
-        responseLanguage
-      );
-
-      // Keep it forever for this user + listing (best effort: never fail the request over it).
-      if (listingId) {
-        try {
-          await saveInsight(currentUserId, listingId, insights, responseLanguage);
-        } catch (saveError) {
-          apiLogger.error('Failed to save neighborhood insight:', saveError);
-        }
-      }
-
-      // Increment usage counter
-      user.neighborhoodInsights.monthlyCount += 1;
-      user.neighborhoodInsights.lastUsed = now;
-      await user.save();
-
-      return res.status(200).json({
-        insights,
-        usage: {
-          used: user.neighborhoodInsights.monthlyCount,
-          limit: monthlyLimit,
-          resetDate: user.neighborhoodInsights.monthResetDate,
-          remaining: monthlyLimit === -1 ? -1 : monthlyLimit - user.neighborhoodInsights.monthlyCount,
-        },
-      });
+      insights = await generateWithGemini(lat, lng, address, city, country, language);
     } catch (error) {
       apiLogger.error('Error getting neighborhood insights:', error);
-      return res.status(500).json({
-        message: 'Failed to generate neighborhood insights. Please try again later.',
-      });
+      return res.status(500).json({ message: 'Failed to generate neighborhood insights. Please try again later.' });
     }
+
+    // Keeping it is best effort: a failed save must not lose the report the user just waited for.
+    if (listingId) {
+      try {
+        await saveInsight(userId, listingId, insights, language);
+      } catch (error) {
+        apiLogger.error('Failed to save neighborhood insight:', error);
+      }
+    }
+
+    user.neighborhoodInsights!.monthlyCount += 1;
+    user.neighborhoodInsights!.lastUsed = now;
+    await user.save();
+
+    return res.status(200).json({ insights, usage: toUsage(user, limit) });
   } catch (error) {
     apiLogger.error('Error in getNeighborhoodInsights controller:', error);
-    return res.status(500).json({
-      message: 'An error occurred while processing your request',
-    });
+    return res.status(500).json({ message: 'An error occurred while processing your request' });
   }
 };
 
-/**
- * Get the insight the current user already generated for a listing.
- * Scoped to the caller: other users' insights are never returned.
- */
+/** GET /api/neighborhood-insights/saved/:listingId — only the caller's own insight. */
 export const getSavedInsight = async (req: Request, res: Response) => {
   try {
-    const currentUserId = (req.user as any)?._id;
-    if (!currentUserId) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
+    const userId = requesterId(req);
+    if (!userId) return res.status(401).json({ message: 'Authentication required' });
+
     const listingId = parseListingId(req.params.listingId);
-    if (!listingId) {
-      return res.status(400).json({ message: 'Invalid listingId' });
-    }
-    const insights = await findSavedInsight(currentUserId, listingId);
-    return res.status(200).json({ insights });
+    if (!listingId) return res.status(400).json({ message: 'Invalid listingId' });
+
+    return res.status(200).json({ insights: await findSavedInsight(userId, listingId) });
   } catch (error) {
     apiLogger.error('Error in getSavedInsight controller:', error);
     return res.status(500).json({ message: 'An error occurred while fetching the saved insight' });
   }
 };
 
-/**
- * Get current usage statistics for the user
- */
+/** GET /api/neighborhood-insights/usage — the caller's monthly usage. */
 export const getUsageStats = async (req: Request, res: Response) => {
   try {
-    // Get current user ID from JWT
-    const currentUserId = (req.user as any)?._id;
-    if (!currentUserId) {
-      return res.status(401).json({
-        message: 'Authentication required',
-      });
-    }
+    const userId = requesterId(req);
+    if (!userId) return res.status(401).json({ message: 'Authentication required' });
 
-    // Fetch full user document from database
-    const user = await User.findById(currentUserId);
-    if (!user) {
-      return res.status(401).json({
-        message: 'User not found',
-      });
-    }
+    const user = await User.findById(userId);
+    if (!user) return res.status(401).json({ message: 'User not found' });
 
-    // Initialize if doesn't exist
-    if (!user.neighborhoodInsights) {
-      user.neighborhoodInsights = {
-        monthlyCount: 0,
-        monthResetDate: getNextMonthStart(),
-      };
-      await user.save();
-    }
+    if (ensureCurrentWindow(user)) await user.save();
 
-    // Check if we need to reset
-    const now = new Date();
-    if (now >= user.neighborhoodInsights.monthResetDate) {
-      user.neighborhoodInsights.monthlyCount = 0;
-      user.neighborhoodInsights.monthResetDate = getNextMonthStart();
-      await user.save();
-    }
-
-    const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-    let monthlyLimit = FREE_USER_MONTHLY_LIMIT;
-    if (isSubscribed && user.subscriptionPlan) {
-      const product = await Product.findOne({ productId: user.subscriptionPlan });
-      const limit = product?.aiInsightsLimit ?? undefined;
-      if (limit === -1) {
-        monthlyLimit = -1; // unlimited
-      } else if (typeof limit === 'number' && limit > 0) {
-        monthlyLimit = limit;
-      } else {
-        // Product doesn't have aiInsightsLimit set - use plan-based defaults
-        const plan = user.subscriptionPlan.toLowerCase();
-        if (plan.includes('enterprise') || plan.includes('agency')) {
-          monthlyLimit = ENTERPRISE_TIER_LIMITS.AI_INSIGHTS;
-        } else if (plan.includes('buyer')) {
-          monthlyLimit = PRO_BUYER_LIMITS.AI_INSIGHTS;
-        } else if (plan.includes('yearly')) {
-          monthlyLimit = PRO_TIER_LIMITS.YEARLY.AI_INSIGHTS;
-        } else if (plan.includes('monthly')) {
-          monthlyLimit = PRO_TIER_LIMITS.MONTHLY.AI_INSIGHTS;
-        }
-      }
-    }
-
-    return res.status(200).json({
-      used: user.neighborhoodInsights.monthlyCount,
-      limit: monthlyLimit,
-      resetDate: user.neighborhoodInsights.monthResetDate,
-      remaining: monthlyLimit === -1 ? -1 : monthlyLimit - user.neighborhoodInsights.monthlyCount,
-      isSubscribed,
-    });
+    const limit = await resolveMonthlyLimit(user);
+    return res.status(200).json({ ...toUsage(user, limit), isSubscribed: isSubscribedUser(user) });
   } catch (error) {
     apiLogger.error('Error in getUsageStats controller:', error);
-    return res.status(500).json({
-      message: 'An error occurred while fetching usage statistics',
-    });
+    return res.status(500).json({ message: 'An error occurred while fetching usage statistics' });
   }
 };
-
-/**
- * Helper function to get the start of next month
- */
-function getNextMonthStart(): Date {
-  const nextMonth = new Date();
-  nextMonth.setMonth(nextMonth.getMonth() + 1);
-  nextMonth.setDate(1);
-  nextMonth.setHours(0, 0, 0, 0);
-  return nextMonth;
-}

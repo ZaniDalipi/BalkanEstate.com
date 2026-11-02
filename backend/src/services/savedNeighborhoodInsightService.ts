@@ -1,12 +1,6 @@
 import mongoose from 'mongoose';
 import SavedNeighborhoodInsight from '../models/SavedNeighborhoodInsight';
 
-const LISTING_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
-
-/** Returns the listing id when it is a safe, plausible id, otherwise null. */
-export const parseListingId = (value: unknown): string | null =>
-  typeof value === 'string' && LISTING_ID_PATTERN.test(value) ? value : null;
-
 /** The insight THIS user saved for this listing, or null. Never reads other users' rows. */
 export const findSavedInsight = async (
   userId: mongoose.Types.ObjectId | string,

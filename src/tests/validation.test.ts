@@ -10,6 +10,7 @@ import {
   validatePassword,
   validateUrl,
   validateCoordinates,
+  validateNeighborhoodInsightPlace,
   validatePrice,
   validateTextLength,
   validatePropertyTitle,
@@ -379,5 +380,23 @@ describe('validateCityShowcase', () => {
 
   it('skips the uniqueness rule when the caller has no list to check against', () => {
     expect(validateCityShowcase({ ...panel, existingPanels: [] })).toEqual({ isValid: true });
+  });
+});
+
+describe('validateNeighborhoodInsightPlace', () => {
+  const place = { lat: 41.33, lng: 19.82, address: 'Rruga 1', city: 'Tirana', country: 'Albania' };
+
+  it('accepts a complete place', () => {
+    expect(validateNeighborhoodInsightPlace(place)).toEqual({ isValid: true });
+  });
+
+  it('rejects bad coordinates, including a missing (NaN) location', () => {
+    expect(validateNeighborhoodInsightPlace({ ...place, lat: 95 }).isValid).toBe(false);
+    expect(validateNeighborhoodInsightPlace({ ...place, lat: NaN, lng: NaN }).isValid).toBe(false);
+  });
+
+  it.each(['address', 'city', 'country'] as const)('rejects a blank %s', (field) => {
+    const result = validateNeighborhoodInsightPlace({ ...place, [field]: '  ' });
+    expect(result).toEqual({ isValid: false, error: `Property ${field} is required` });
   });
 });

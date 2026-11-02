@@ -2,7 +2,7 @@
 // All property-related UI components
 
 export { ImageEditorModal } from './ImageEditorModal';
-export { NeighborhoodInsights } from './NeighborhoodInsights';
+export { NeighborhoodInsights } from './insights';
 export { PropertyGallery } from './PropertyGallery';
 export { PropertyInfo } from './PropertyInfo';
 export { PropertyContact } from './PropertyContact';

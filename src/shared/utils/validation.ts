@@ -246,6 +246,33 @@ export function validateCoordinates(lat: number, lng: number): ValidationResult 
 }
 
 /**
+ * Validate the location a neighborhood-insight request is built from.
+ * An AI report needs a real place: valid coordinates plus a readable
+ * address, city and country. The server re-validates all of it.
+ */
+export function validateNeighborhoodInsightPlace(place: {
+  lat: number;
+  lng: number;
+  address: string;
+  city: string;
+  country: string;
+}): ValidationResult {
+  const coords = validateCoordinates(place.lat, place.lng);
+  if (!coords.isValid) return coords;
+
+  for (const [field, value] of [
+    ['address', place.address],
+    ['city', place.city],
+    ['country', place.country],
+  ] as const) {
+    if (typeof value !== 'string' || !value.trim()) {
+      return { isValid: false, error: `Property ${field} is required` };
+    }
+  }
+  return { isValid: true };
+}
+
+/**
  * Validate one city panel of the home-page gallery as entered in the admin.
  *
  * The photo is the part worth being strict about. This collection is the only
