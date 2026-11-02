@@ -1,0 +1,93 @@
+name: Dependency Gate
+
+# Every change to dependencies has to pass this before it can be merged:
+#   1. GitHub's dependency review: no newly added package with a known
+#      vulnerability or a malware advisory (GitHub Advisory Database).
+#   2. Every package downloads from the npm registry over https with an
+#      integrity hash (no tarballs from other servers slipped into a lockfile).
+#   3. Every package carries a valid npm registry signature.
+#   4. No dependency install script runs unless it was reviewed and approved
+#      in "allowScripts" in package.json.
+#   5. npm audit finds nothing high or critical.
+# It also runs weekly, since new advisories appear for packages already in use.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1' # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '20'
+  NPM_VERSION: '11.21.1'
+
+jobs:
+  review:
+    name: Review new dependencies
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: on-failure
+
+  verify:
+    name: Verify ${{ matrix.project.name }} packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - { name: frontend, dir: . }
+          - { name: backend, dir: backend }
+    defaults:
+      run:
+        working-directory: ${{ matrix.project.dir }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # npm 11 enforces allowScripts in package.json: dependency install
+      # scripts run only when approved there. npm 10 ignores it and runs all.
+      - name: Use npm 11
+        run: npm install -g npm@${{ env.NPM_VERSION }}
+
+      - name: Lockfile sources
+        working-directory: .
+        run: node scripts/check-lockfiles.mjs ${{ matrix.project.dir }}/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Registry signatures
+        run: npm audit signatures
+
+      - name: Install scripts reviewed
+        run: |
+          out="$(npm install-scripts ls 2>&1)"
+          echo "$out"
+          if ! grep -q "No packages with unreviewed install scripts" <<< "$out"; then
+            echo "::error::A dependency wants to run an install script that nobody approved. Read what it does, then run 'npm install-scripts approve <pkg>' or 'npm install-scripts deny <pkg>' in ${{ matrix.project.dir }} and commit package.json."
+            exit 1
+          fi
+
+      - name: Known vulnerabilities
+        run: npm audit --audit-level=high

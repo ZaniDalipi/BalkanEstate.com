@@ -26,6 +26,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      # npm 11 enforces allowScripts in package.json: dependency install
+      # scripts run only when approved there. npm 10 ignores it and runs all.
+      - name: Use npm 11
+        run: npm install -g npm@11.21.1
+
       - name: Install frontend dependencies
         run: npm ci
 
@@ -56,6 +61,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+
+      # npm 11 enforces allowScripts in package.json: dependency install
+      # scripts run only when approved there. npm 10 ignores it and runs all.
+      - name: Use npm 11
+        run: npm install -g npm@11.21.1
 
       - name: Install dependencies
         run: npm ci
@@ -90,6 +100,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
+
+      # npm 11 enforces allowScripts in package.json: dependency install
+      # scripts run only when approved there. npm 10 ignores it and runs all.
+      - name: Use npm 11
+        run: npm install -g npm@11.21.1
 
       - name: Install dependencies
         working-directory: ./backend
@@ -141,28 +156,8 @@ jobs:
   #         JWT_SECRET: test-secret
   #         JWT_REFRESH_SECRET: test-refresh-secret
 
-  # =============================================================================
-  # Security Audit
-  # =============================================================================
-  security:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Audit frontend dependencies
-        run: npm audit --audit-level=high || true
-
-      - name: Audit backend dependencies
-        working-directory: ./backend
-        run: npm audit --audit-level=high || true
+  # Dependency security (signatures, install scripts, audit) runs in
+  # dependency-gate.yml.
 
   # =============================================================================
   # Bundle Size Check

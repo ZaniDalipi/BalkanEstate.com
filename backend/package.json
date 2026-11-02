@@ -166,5 +166,15 @@
   "overrides": {
     "glob": "^14.0.3",
     "minimatch": "^11.0.3"
+  },
+  "allowScripts": {
+    "@ffmpeg-installer/linux-x64@4.1.0": true,
+    "mongodb-memory-server@10.4.3": true,
+    "protobufjs": false,
+    "@scarf/scarf": false,
+    "@parcel/watcher": false,
+    "@ffmpeg-installer/darwin-arm64@4.1.5": true,
+    "@ffmpeg-installer/darwin-x64@4.1.0": true,
+    "fsevents": false
   }
 }

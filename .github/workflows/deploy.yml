@@ -40,6 +40,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      # npm 11 enforces allowScripts in package.json: dependency install
+      # scripts run only when approved there. npm 10 ignores it and runs all.
+      - name: Use npm 11
+        run: npm install -g npm@11.21.1
+
       - name: Install frontend dependencies
         run: npm ci
 

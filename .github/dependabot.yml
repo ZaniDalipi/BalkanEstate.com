@@ -1,0 +1,36 @@
+# Dependabot opens pull requests to update dependencies; each one goes
+# through the Dependency Gate workflow before it can be merged.
+# Security fixes are opened as soon as an advisory is published. Ordinary
+# version updates wait 7 days after a release (cooldown), matching
+# min-release-age in .npmrc, so a hijacked release is usually pulled before
+# it ever reaches a pull request.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      frontend-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      backend-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
