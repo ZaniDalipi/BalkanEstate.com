@@ -209,7 +209,6 @@ const cacheConfig: Record<string, number> = {
   '/api/promotions/tiers': 30 * 1000,
   '/api/promotion-plans': 30 * 1000,
   '/api/coupons/public': 5 * 60 * 1000,
-  '/api/neighborhood-insights': 20 * 60 * 1000,
   '/api/geocoding': 20 * 60 * 1000,
   '/api/city-market-data': 60 * 60 * 1000,
   // Admin-curated and rarely changed; every admin write invalidates this
@@ -264,6 +263,9 @@ const cacheBlacklist = [
   '/api/payments',
   '/api/auth/me',
   '/api/analytics',
+  // Per-user: saved insights and monthly usage. The cache key has no user id,
+  // so caching these would show one user's data (or a stale "nothing saved") to another.
+  '/api/neighborhood-insights',
 ];
 
 const isBlacklisted = (path: string): boolean => {

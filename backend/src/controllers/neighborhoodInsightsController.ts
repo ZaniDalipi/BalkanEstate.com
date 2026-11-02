@@ -12,6 +12,9 @@ import {
   toUsage,
 } from '../services/neighborhoodInsightQuotaService';
 
+/** Per-user responses must never be stored by a browser or proxy. */
+const noStore = (res: Response) => res.setHeader('Cache-Control', 'no-store');
+
 const requesterId = (req: Request) => (req.user as { _id?: string } | undefined)?._id;
 
 /**
@@ -22,6 +25,7 @@ const requesterId = (req: Request) => (req.user as { _id?: string } | undefined)
  * saves it for that user and counts it.
  */
 export const getNeighborhoodInsights = async (req: Request, res: Response) => {
+  noStore(res);
   try {
     const userId = requesterId(req);
     if (!userId) {
@@ -95,6 +99,7 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
 
 /** GET /api/neighborhood-insights/saved/:listingId — only the caller's own insight. */
 export const getSavedInsight = async (req: Request, res: Response) => {
+  noStore(res);
   try {
     const userId = requesterId(req);
     if (!userId) return res.status(401).json({ message: 'Authentication required' });
@@ -111,6 +116,7 @@ export const getSavedInsight = async (req: Request, res: Response) => {
 
 /** GET /api/neighborhood-insights/usage — the caller's monthly usage. */
 export const getUsageStats = async (req: Request, res: Response) => {
+  noStore(res);
   try {
     const userId = requesterId(req);
     if (!userId) return res.status(401).json({ message: 'Authentication required' });
