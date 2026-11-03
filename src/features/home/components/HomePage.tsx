@@ -249,15 +249,6 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           rather than sitting across either. */}
       <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" showPlaceholder />
 
-      {/* Right after the hero: new residences (a scroll stack) and the business
-          directory, so both are among the first things people see. */}
-      <Suspense fallback={<SectionFallback />}>
-        <HomeResidencesSection />
-      </Suspense>
-      <Suspense fallback={<SectionFallback />}>
-        <HomeBusinessesSection />
-      </Suspense>
-
       <AppShowcaseSection onNavigate={handleNavigate} />
 
       {isAuthenticated && currentUser && (
@@ -284,6 +275,19 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
             onPropertyClick={handlePropertyClick}
             onViewAll={() => handleNavigate('/search')}
           />
+        </Suspense>
+      </div>
+
+      {/* Just below the featured listings: new residences (a scroll stack)
+          and the business directory. */}
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HomeResidencesSection />
+        </Suspense>
+      </div>
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HomeBusinessesSection />
         </Suspense>
       </div>
 
