@@ -30,7 +30,10 @@ export const BusinessMobileActionBar: React.FC<BusinessMobileActionBarProps> = (
       {visible && (
         <motion.div
           className={`fixed inset-x-0 bottom-0 z-30 border-t border-black/[0.06] px-3 pt-2.5 shadow-[0_-8px_30px_-12px_rgba(15,23,42,0.25)] md:left-(--sidebar-rail-w) lg:hidden ${GLASS_BAR}`}
-          style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
+          style={{
+            paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))',
+            paddingRight: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
+          }}
           initial={reduce ? { opacity: 0 } : { y: '100%' }}
           animate={reduce ? { opacity: 1 } : { y: 0 }}
           exit={reduce ? { opacity: 0 } : { y: '100%' }}

@@ -24,8 +24,19 @@ export const BusinessTopBar: React.FC<BusinessTopBarProps> = ({ name, showTitle,
   return (
     <header
       className={`sticky top-0 z-40 border-b transition-colors ${GLASS_BAR} ${showTitle ? 'border-black/[0.08]' : 'border-transparent'}`}
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+      }}
     >
+      {/* Installed app: iOS draws the clock and battery in white over the page,
+          so give them a dark strip to sit on; in a browser tab the strip has no height. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 hidden bg-gradient-to-b from-slate-900/85 to-slate-900/70 pwa:block"
+        style={{ height: 'env(safe-area-inset-top, 0px)' }}
+      />
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-2 sm:px-4">
         <button
           type="button"

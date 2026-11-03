@@ -52,7 +52,9 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const tint = optimizeImageUrl(listing.bannerUrl, { width: 160 });
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#f5f5f7] pb-28 lg:pb-0">
+    // Room for the bottom contact bar. Below md the app's scroll container
+    // already reserves 3.5rem + the home-indicator inset, so only top that up.
+    <div className="relative min-h-screen overflow-x-clip bg-[#f5f5f7] pb-4 md:pb-24 lg:pb-0">
       <SEO
         title={`${listing.name} – ${category}, ${listing.city}`}
         description={listing.description?.slice(0, 160) || `${listing.name}: ${category} in ${listing.city}, ${listing.country}.`}
@@ -69,7 +71,7 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
 
       <BusinessTopBar name={listing.name} showTitle={titlePast} isOwner={isOwner} onBack={onBack} onEdit={onEdit} onShare={share} />
 
-      <main className="relative mx-auto max-w-6xl sm:px-6 sm:pt-4">
+      <main className="relative mx-auto max-w-6xl sm:px-6 sm:pt-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))]">
         <BusinessBanner listing={listing} isOwner={isOwner} />
         <BusinessIdentityCard listing={listing} status={status} now={now} titleRef={titleRef}>
           <BusinessQuickActions ref={actionsRef} actions={quickActions(channels)} onShare={share} />

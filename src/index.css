@@ -1165,6 +1165,9 @@ html[data-zoom] {
    SHORT_LANDSCAPE_QUERY in src/hooks/useMediaQuery.ts — keep them in step. */
 @custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant tablet-landscape (@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px));
+/* `pwa:` = running as the installed app (home-screen icon), not in a browser tab.
+   iOS draws the status bar *over* the page there (black-translucent), in white. */
+@custom-variant pwa (@media (display-mode: standalone));
 
 /* Leaflet Map Popup Styling */
 .leaflet-popup-content-wrapper {

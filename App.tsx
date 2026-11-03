@@ -441,8 +441,9 @@ const MainLayout: React.FC = () => {
             details page which has its own in-content + sidebar ad slots (so the
             sticky bar doesn't overlap them), and on the full-height map/search
             pages, where a bar pinned over the map gets in the way of panning,
-            the results sheet and the map controls. */}
-        {adPage && !isFullHeightView && (
+            the results sheet and the map controls. Also hidden on a business
+            profile, whose own Call / WhatsApp bar sits in that same spot. */}
+        {adPage && !isFullHeightView && !isBusinessDetail && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>
