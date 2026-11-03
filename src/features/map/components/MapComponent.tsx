@@ -238,9 +238,17 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
     searchMode,
     hoveredPropertyId,
     hideControls = false,
+    onReady,
   } = props;
 
   const hook = useMapComponent(props);
+
+  // Google reports ready itself (tiles + first pins). Leaflet fades its own
+  // tiles in, and the timeout notice must be seen, so those are ready at once.
+  const usesGoogle = USE_GOOGLE_MAPS && !hook.forceLeaflet && !hook.loadingTimedOut;
+  useEffect(() => {
+    if (!usesGoogle) onReady?.();
+  }, [usesGoogle, onReady]);
 
   // Use Google Maps if API key is available and not forced to Leaflet
   if (USE_GOOGLE_MAPS && !hook.forceLeaflet) {
@@ -287,6 +295,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           searchMode={searchMode}
           hoveredPropertyId={hoveredPropertyId}
           hideControls={hideControls}
+          onReady={onReady}
         />
       </MapErrorBoundary>
     );

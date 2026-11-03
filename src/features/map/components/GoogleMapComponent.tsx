@@ -13,7 +13,6 @@
  */
 
 import React from 'react';
-import MapBusyOverlay from './MapBusyOverlay';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
@@ -82,8 +81,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
     <HighlightedPropertiesProvider properties={hook.validProperties}>
       {/* data-no-swipe-back: dragging the map pans it. */}
       <div className="w-full h-full relative overflow-hidden" data-no-swipe-back>
-        {/* Pins are built a slice at a time; say so rather than look frozen. */}
-        <MapBusyOverlay busy={hook.isBuildingMarkers} />
         {/* Core Google Map */}
         <GoogleMap
           mapContainerStyle={mapContainerStyle}

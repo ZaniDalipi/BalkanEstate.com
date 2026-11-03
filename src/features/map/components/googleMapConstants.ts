@@ -111,3 +111,10 @@ export const formatMarkerPrice = (
   }
   return `€${price}`;
 };
+
+/**
+ * The colour behind the map before its tiles arrive. The loading veil
+ * (`MapLoadingVeil`) is painted the same colour, so when it fades out there is
+ * no flash of a different grey between the veil and the first tiles.
+ */
+export const MAP_BACKDROP = '#eef1f5';

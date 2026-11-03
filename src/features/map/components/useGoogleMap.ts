@@ -66,6 +66,7 @@ import {
   colorMapStyles,
   latLngToWebMercator,
   formatMarkerPrice,
+  MAP_BACKDROP,
 } from './googleMapConstants';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -124,6 +125,8 @@ export interface GoogleMapComponentProps {
   hoveredPropertyId?: string | null;
   /** Hide all map controls (for saved searches view) */
   hideControls?: boolean;
+  /** Called once, when the map is ready to be seen: tiles painted and first pins built. */
+  onReady?: () => void;
 }
 
 /** Pins built per animation frame on the first load of the map. */
@@ -198,6 +201,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // Pins are built only around what is on screen (see markerArea.ts); null
   // until the map has reported its first view.
   const [markerArea, setMarkerArea] = useState<Area | null>(null);
+  // Ready to be seen (see `onReady`): the first tiles are painted and the first
+  // pins are built, so the loading veil can fade to a whole map, not a half one.
+  const [tilesPainted, setTilesPainted] = useState(false);
+  const [pinsSettled, setPinsSettled] = useState(false);
+  const readyReportedRef = useRef(false);
+  const onReadyRef = useRef(props.onReady);
+  onReadyRef.current = props.onReady;
 
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
@@ -628,6 +638,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Set ref synchronously first (avoids race condition with marker creation effect)
     mapInstanceRef.current = mapInstance;
     setMap(mapInstance);
+    google.maps.event.addListenerOnce(mapInstance, 'tilesloaded', () => setTilesPainted(true));
 
     // Deliver initial bounds immediately so properties load on first render.
     // onIdle may fire before React processes setMap(), causing it to exit early.
@@ -1179,7 +1190,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       promotedMarkersRef.current.forEach(m => { m.map = null; });
       promotedMarkersRef.current = [];
 
-      if (props.length === 0) return;
+      if (props.length === 0) {
+        setPinsSettled(true);
+        return;
+      }
       hasAnimatedEntranceRef.current = true;
 
       const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
@@ -1194,6 +1208,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       const finish = () => {
         cancelMarkerBuildRef.current = null;
         setIsBuildingMarkers(false);
+        setPinsSettled(true);
         // Whatever was built is shown, even when the build stopped on an error.
         clusterer.render();
       };
@@ -1297,6 +1312,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   useEffect(() => {
     const mapToUse = map || mapInstanceRef.current;
     if (!mapToUse || !clustererRef.current || !isLoaded || !markersReady) return;
+    // Until the map has reported its view there is no area to build pins for;
+    // building for "nothing" first would reveal the map before its pins.
+    if (!markerArea) return;
 
     // Debounce: wait 150ms for properties to settle before creating markers
     // This prevents the scenario where rapid property updates cause markers
@@ -1314,7 +1332,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         clearTimeout(markerCreationTimerRef.current);
       }
     };
-  }, [markerProperties, map, isLoaded, markersReady, createAllMarkers]);
+  }, [markerProperties, markerArea, map, isLoaded, markersReady, createAllMarkers]);
+
+  useEffect(() => {
+    if (readyReportedRef.current || !tilesPainted || !pinsSettled) return;
+    readyReportedRef.current = true;
+    onReadyRef.current?.();
+  }, [tilesPainted, pinsSettled]);
 
   // Animated "you are here" marker — created once permission is granted and a
   // valid fix is available, removed the moment location becomes unavailable
@@ -2099,6 +2123,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (!isLoaded || typeof google === 'undefined') return undefined;
 
     const opts: google.maps.MapOptions = {
+      // Same colour as the loading veil, so its fade shows no seam.
+      backgroundColor: MAP_BACKDROP,
       restriction: {
         latLngBounds: BALKAN_BOUNDS,
         strictBounds: false,

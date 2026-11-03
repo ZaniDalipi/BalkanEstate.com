@@ -1341,7 +1341,7 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   (`PANEL_SLIDE_MS`, 450ms) the leaving panel is torn down; `PANEL_GAP_MS`
   (120ms) later, once that commit has painted, the arriving panel is built.
   Meanwhile the arriving panel shows a cheap placeholder: `ListPendingSkeleton`
-  (card-shaped, no photos) or `MapBusyOverlay`. The timers are
+  (card-shaped, no photos) or `MapLoadingVeil`. The timers are
   `useSettledHidden` with two delays per panel. `useListMemory` restores the
   list's scroll offset and paged-in depth (`initialVisibleCount` /
   `onVisibleCountChange` on `PropertyList`); the map restores its own view from
@@ -1349,7 +1349,9 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
 - **Crash-loop guard.** Safari kills the page without running our code, so a
   crash can only be noticed on the next load. `useViewSwitchGuard` writes a
   `sessionStorage` marker when the switch is tapped and clears it after
-  `SWITCH_SURVIVE_MS` (or on leaving the page); a marker found on load
+  `SWITCH_SURVIVE_MS`, on leaving the page, or on `pagehide` (a refresh, a
+  closed tab — never fired for a page the system kills, so a refresh never
+  shows the notice); a marker found on load
   (`consumeSwitchCrash`, pure, in `features/search/utils/viewSwitchGuard.ts`)
   means the last page died mid-switch. That load opens on the list (not the
   map the app state defaults to), builds the map only when asked
@@ -1357,11 +1359,20 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   (`search:ui.searchPage.recoveredFromCrash`). Storage that is missing or throws
   just turns the guard off. Rentals and Villas still use the older
   hide-only behaviour.
-- **Lazy map code.** `LazyMap` (`features/map/components/LazyMap.tsx`) is what
-  Search, Rentals and Villas render: `MapComponent` is its own chunk, loaded via
-  `lazyWithRetry` with `MapBusyOverlay` as the Suspense fallback, inside a
-  feature `ErrorBoundary` so a failed download stays in the map area.
-  `useWarmMap()` fetches it at idle so the first tap on Map is still instant.
+- **Lazy map code, revealed in one piece.** `LazyMap`
+  (`features/map/components/LazyMap.tsx`) is what Search, Rentals and Villas
+  render: `MapComponent` is its own chunk (`lazyWithRetry`, warmed at idle by
+  `useWarmMap()`), inside a feature `ErrorBoundary`. `MapLoadingVeil` covers the
+  map in `MAP_BACKDROP` (also the Google map's `backgroundColor`, so there is no
+  seam) until the map calls `onReady` — Google: first `tilesloaded` and the first
+  pins built; Leaflet and the timeout notice: at once — or `MAP_REVEAL_TIMEOUT_MS`
+  passes, then fades it out (framer-motion, instant under reduced motion). The
+  "Loading properties" pill is debounced by `useSmoothFlag` (shown after 150ms,
+  kept at least 500ms) so short loads never flash it. Veil and pill are
+  `pointer-events-none`: the switch, search bar and menu stay usable. During the
+  list → map hand-over `SearchPage` keeps its own veil mounted (`covered=
+  {mapPending}`), so it fades out over the map's veil instead of cutting.
+  The list fades in over its skeleton (`PanelFadeIn`, opacity only).
 - **Pins only around the view.** `/search` loads up to 3000 listings, and a
   pin is a DOM node plus a Google marker. `useGoogleMap` builds pins only for
   listings inside `markerArea` (`features/map/utils/markerArea.ts`, pure): the
@@ -1377,9 +1388,7 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   (`features/map/utils/chunkedWork.ts`, injectable scheduler, cancellable) 60 per
   frame, adds each slice to the clusterer without drawing, and draws once at the
   end. A build that throws stops there and shows the pins already made; a newer
-  call cancels it. `MapBusyOverlay` shows "Loading properties" while the
-  listings are still arriving (`SearchPage`) or the pins are being built
-  (`GoogleMapComponent`); it never blocks the map. Rentals and Villas share
+  call cancels it. The first build happens under `MapLoadingVeil` (below). Rentals and Villas share
   `useGoogleMap`, so they get the chunked build too.
 - **Map pins are built for the screen only.** The Google map clusters with
   `SuperClusterViewportAlgorithm` (`useGoogleMap.ts`): bubbles and pins exist

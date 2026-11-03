@@ -40,10 +40,22 @@ export function useViewSwitchGuard(): { recovered: boolean; switched: boolean; b
     }, SWITCH_SURVIVE_MS);
   }, []);
 
-  // Leaving the page is not a crash: it must not leave a marker behind.
-  useEffect(() => () => {
-    stopTimer();
-    clearSwitchMarker(getMarkerStorage());
+  // Leaving the page is not a crash: it must not leave a marker behind. That
+  // covers unmounting (another page in the app) and the document going away —
+  // a refresh, closing the tab, following a link. `pagehide` fires for all of
+  // those but never for a page the system kills, which is exactly the
+  // difference the marker is there to tell, so a refresh never shows the
+  // "restarted to free memory" notice.
+  useEffect(() => {
+    const onPageHide = () => {
+      stopTimer();
+      clearSwitchMarker(getMarkerStorage());
+    };
+    window.addEventListener('pagehide', onPageHide);
+    return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      onPageHide();
+    };
   }, []);
 
   return { recovered, switched, beginSwitch };

@@ -17,6 +17,7 @@ import { useViewSwitchGuard } from '../hooks/useViewSwitchGuard';
 import { useListMemory } from '../hooks/useListMemory';
 import { planPanels } from '../utils/panelHandoff';
 import ListPendingSkeleton from './ListPendingSkeleton';
+import PanelFadeIn from './PanelFadeIn';
 import { generatePropertySlug } from '@/utils/slug';
 import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
@@ -26,7 +27,7 @@ import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
-import MapBusyOverlay from '@/src/features/map/components/MapBusyOverlay';
+import MapLoadingVeil from '@/src/features/map/components/MapLoadingVeil';
 
 /** The panels' slide (420ms in src/index.css) plus a frame: nothing heavy happens before it ends. */
 const PANEL_SLIDE_MS = 450;
@@ -352,18 +353,22 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                  <div ref={listMemory.panelRef} className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || shownView === 'list'}
                     data-settled={listReleased}>
-                    {mountList && searchMode !== 'ai' && (
-                        <SearchHeader
-                            t={t as any}
-                            filters={filters}
-                            properties={properties}
-                            near={mapCentre}
-                            onFilterChange={handleFilterChange}
-                            onSearch={handleSearch}
-                            onSelectSuggestion={handleSelectSuggestion}
-                        />
+                    {mountList && (
+                        <PanelFadeIn>
+                            {searchMode !== 'ai' && (
+                                <SearchHeader
+                                    t={t as any}
+                                    filters={filters}
+                                    properties={properties}
+                                    near={mapCentre}
+                                    onFilterChange={handleFilterChange}
+                                    onSearch={handleSearch}
+                                    onSelectSuggestion={handleSelectSuggestion}
+                                />
+                            )}
+                            <PropertyList {...propertyListProps} />
+                        </PanelFadeIn>
                     )}
-                    {mountList && <PropertyList {...propertyListProps} />}
                     {/* The map is being let go before the list is built: the cards' shape, not a blank panel. */}
                     {listPending && <ListPendingSkeleton />}
                 </div>
@@ -376,9 +381,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || shownView === 'map'}
                     >
-                        {mountMap && <MapComponent {...mapProps} />}
-                        {/* Listings still arriving: the map is there, its pins are not yet. */}
-                        <MapBusyOverlay busy={mapPending || (mountMap && isLoadingProperties)} />
+                        {/* The map veils itself until tiles and pins are drawn; while
+                            it waits for the list to be let go, the same veil stands in,
+                            so the hand-over shows one continuous loading state. */}
+                        {mountMap && <MapComponent {...mapProps} busy={isLoadingProperties} />}
+                        <MapLoadingVeil covered={mapPending} busy={mapPending} />
                     </div>
 
                     {/* Draw hint banner - shown when navigating from explore cities */}

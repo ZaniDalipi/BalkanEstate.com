@@ -56,4 +56,13 @@ describe('useViewSwitchGuard', () => {
     unmount();
     expect(window.sessionStorage.getItem(SWITCH_MARKER_KEY)).toBeNull();
   });
+
+  it('a refresh right after a switch is not a crash: no recovery notice on the next load', () => {
+    const { result } = renderHook(() => useViewSwitchGuard());
+    act(() => result.current.beginSwitch());
+    // The browser unloads the page for the refresh.
+    window.dispatchEvent(new Event('pagehide'));
+    expect(window.sessionStorage.getItem(SWITCH_MARKER_KEY)).toBeNull();
+    expect(renderHook(() => useViewSwitchGuard()).result.current.recovered).toBe(false);
+  });
 });
