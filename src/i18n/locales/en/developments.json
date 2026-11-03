@@ -1188,8 +1188,8 @@
       "trialInProgress": "Another of your residences is on its free trial. Buy a pass to publish this one now.",
       "trialLimit": "You have used all your free trials. Buy a pass to publish.",
       "buildingLimit": "This residence can have {{limit}} buildings. Unlock more to add another.",
-      "paymentSoonAmount": "Online payment is coming soon. {{amount}} is still due, so enter a code that covers it.",
-      "paymentSoon": "Online payment is coming soon. Enter a code to unlock it now.",
+      "paymentSoonAmount": "{{amount}} is still due. Payment is agreed with us directly; enter a code that covers it.",
+      "paymentSoon": "Payment is agreed with us directly. Enter the unlock code we sent you.",
       "couponInvalid": "This code is not valid for residences.",
       "coupon": {
         "unknown": "There is no such code. Check the spelling.",
@@ -1205,7 +1205,7 @@
     },
     "code": {
       "label": "Unlock code",
-      "required": "Enter your code. Online payment is coming soon.",
+      "required": "Enter the unlock code we sent you after agreeing the payment.",
       "format": "Codes use letters, numbers, - and _ (3–64 characters)."
     },
     "quantity": {
@@ -1221,7 +1221,8 @@
     "summary": {
       "each": "{{n}} × price",
       "discount": "Premium discount ({{pct}}%)",
-      "total": "Total"
+      "total": "Total",
+      "validity": "One payment, valid for {{months}} months — not a lifetime pass. It doesn’t renew by itself."
     },
     "done": {
       "pass": "Residence Pass active",
@@ -1255,7 +1256,18 @@
     "publishWithPass": "Buy pass and publish",
     "publishTrial": "Publish · free for {{days}} days",
     "createNote": "Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online.",
-    "publishAgency": "Publish · free with your agency plan"
+    "publishAgency": "Publish · free with your agency plan",
+    "arrange": {
+      "title": "How to pay",
+      "body": "We don’t take payments online. We agree the payment with you directly: write to us, we confirm the details together and send you an unlock code to enter below.",
+      "emailAria": "Write to {{email}} about this purchase",
+      "mailBody": "Hello,\n\nI would like to buy: {{item}} ({{price}}).\nResidence: {{link}}\n\nThank you.",
+      "extraItem": "Extra buildings: {{n}}",
+      "copy": "Copy address",
+      "copied": "Copied",
+      "copyFailed": "Couldn’t copy. Select {{email}} above, or write to it from your email app.",
+      "passItem": "Residence Pass"
+    }
   },
   "pricingSection": {
     "title": "Residences",
@@ -1394,7 +1406,9 @@
     "PHONE_INVALID": "Enter a valid phone number, like +389 2 123 4567.",
     "SOCIAL_HOST": "This must be a link to {{network}}.",
     "ENTRANCE_NAME_TAKEN": "This building already has an entrance called “{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first."
+    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first.",
+    "RESIDENCE_GALLERY_FULL": "A residence can have at most {{max}} photos. {{remaining}} more can be added.",
+    "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1494,5 +1508,21 @@
     "needBuilding": "Add a building first; entrances belong to a building.",
     "inBuilding": "Entrance of building",
     "newHere": "New entrance"
+  },
+  "sheet": {
+    "save": "Save"
+  },
+  "gallery": {
+    "heading": "Photos",
+    "hint": "Shown on the residence page after the cover. Up to {{max}} photos — JPG, PNG, WebP or AVIF, 10 MB each.",
+    "count": "{{n}} of {{max}}",
+    "add": "Add photos",
+    "uploading": "Uploading…",
+    "photoAlt": "Photo {{n}}",
+    "moveEarlier": "Move photo {{n}} earlier",
+    "moveLater": "Move photo {{n}} later",
+    "remove": "Remove photo {{n}}",
+    "removeMessage": "The photo is removed from the residence page.",
+    "showAll": "Photos ({{n}})"
   }
 }

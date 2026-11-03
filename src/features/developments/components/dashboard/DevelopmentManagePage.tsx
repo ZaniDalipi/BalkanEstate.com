@@ -119,7 +119,7 @@ const DevelopmentManagePage: React.FC = () => {
 
       <ManageTabs tabs={tabs} active={tab} onSelect={selectTab} label={t('manage.tabs.label', 'Manage development')} idPrefix={PREFIX} />
 
-      {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} canBuy={canBuy} />)}
+      {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} canBuy={canBuy} canEditPhotos={roleCan(role, 'media.upload')} />)}
       {panel('inventory', <InventoryPanel developmentId={development.id} role={role} slug={development.slug} />)}
       {panel(
         'explorer',

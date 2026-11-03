@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import Development, { IDevelopment } from '../../models/Development';
 import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import DevelopmentFloor from '../../models/DevelopmentFloor';
+import DevelopmentScene from '../../models/DevelopmentScene';
 import DevelopmentEntrance, { IDevelopmentEntrance } from '../../models/DevelopmentEntrance';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import Property from '../../models/Property';
@@ -61,7 +62,31 @@ export const toPublicDevelopment = (development: IDevelopment): Record<string, u
   json.allowUnitInquiries = development.allowUnitInquiries !== false;
   json.builder = publicBuilder(development.builder);
   if (!json.builder) delete json.builder;
+  // Gallery photos without their storage keys.
+  json.gallery = (development.gallery ?? []).map(({ url, width, height }) => ({ url, ...(width ? { width } : {}), ...(height ? { height } : {}) }));
   return json;
+};
+
+/**
+ * A photo for each residence in a list: its cover, else its first gallery
+ * photo, else the first published picture of the whole residence (the
+ * explorer view), so cards never stay blank when the owner skipped the cover.
+ */
+export const listPreviewImages = async (developments: IDevelopment[]): Promise<Map<string, string>> => {
+  const out = new Map<string, string>();
+  const missing: mongoose.Types.ObjectId[] = [];
+  for (const d of developments) {
+    const photo = d.coverImage || d.gallery?.[0]?.url;
+    if (photo) out.set(String(d._id), photo);
+    else missing.push(d._id as mongoose.Types.ObjectId);
+  }
+  if (missing.length === 0) return out;
+  const scenes = await DevelopmentScene.find({ developmentId: { $in: missing }, targetType: 'development', deletedAt: null, published: { $exists: true } })
+    .sort({ sortOrder: 1, createdAt: 1 })
+    .select('developmentId imageUrl')
+    .lean();
+  for (const s of scenes) if (s.imageUrl && !out.has(String(s.developmentId))) out.set(String(s.developmentId), s.imageUrl);
+  return out;
 };
 
 /** The builder as buyers see it: only once it has a name, and without storage keys. */

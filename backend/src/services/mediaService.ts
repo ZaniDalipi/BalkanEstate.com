@@ -50,6 +50,7 @@ export type UploadType = Extract<
   | 'development-scene'
   | 'development-builder-logo'
   | 'development-builder-banner'
+  | 'development-gallery'
   | 'business-logo'
   | 'business-banner'
   | 'site-logo'

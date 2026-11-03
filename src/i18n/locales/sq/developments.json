@@ -1188,8 +1188,8 @@
       "trialInProgress": "Një tjetër rezidencë e juaja është në provë falas. Blini paketën për ta publikuar këtë tani.",
       "trialLimit": "Keni përdorur të gjitha provat falas. Blini paketën për ta publikuar.",
       "buildingLimit": "Kjo rezidencë mund të ketë {{limit}} ndërtesa. Zhbllokoni më shumë për të shtuar një tjetër.",
-      "paymentSoonAmount": "Pagesa online vjen së shpejti. Mbeten {{amount}} për t’u paguar, ndaj shkruani një kod që i mbulon.",
-      "paymentSoon": "Pagesa online vjen së shpejti. Shkruani një kod për ta zhbllokuar tani.",
+      "paymentSoonAmount": "{{amount}} ende për t’u paguar. Pagesa merret vesh drejtpërdrejt me ne; futni një kod që e mbulon.",
+      "paymentSoon": "Pagesa merret vesh drejtpërdrejt me ne. Futni kodin e zhbllokimit që ju dërguam.",
       "couponInvalid": "Ky kod nuk vlen për rezidenca.",
       "coupon": {
         "unknown": "Nuk ka kod të tillë. Kontrolloni shkrimin.",
@@ -1205,7 +1205,7 @@
     },
     "code": {
       "label": "Kodi i zhbllokimit",
-      "required": "Shkruani kodin tuaj. Pagesa online vjen së shpejti.",
+      "required": "Futni kodin e zhbllokimit që ju dërguam pasi ramë dakord për pagesën.",
       "format": "Kodet kanë shkronja, numra, - dhe _ (3–64 karaktere)."
     },
     "quantity": {
@@ -1221,7 +1221,8 @@
     "summary": {
       "each": "{{n}} × çmimi",
       "discount": "Zbritje Premium ({{pct}}%)",
-      "total": "Gjithsej"
+      "total": "Gjithsej",
+      "validity": "Një pagesë, e vlefshme për {{months}} muaj — jo pa afat. Nuk rinovohet vetë."
     },
     "done": {
       "pass": "Paketa e Rezidencës është aktive",
@@ -1255,7 +1256,18 @@
     "publishWithPass": "Bli paketën dhe publiko",
     "publishTrial": "Publiko · falas për {{days}} ditë",
     "createNote": "Krijimi është falas. Publikimi nis një provë falas 15-ditore; pas saj, Paketa e Rezidencës e mban online.",
-    "publishAgency": "Publiko · falas me planin e agjencisë"
+    "publishAgency": "Publiko · falas me planin e agjencisë",
+    "arrange": {
+      "title": "Si të paguani",
+      "body": "Nuk pranojmë pagesa online. Pagesën e marrim vesh drejtpërdrejt me ju: na shkruani, i konfirmojmë detajet së bashku dhe ju dërgojmë një kod zhbllokimi për ta futur më poshtë.",
+      "emailAria": "Shkruani te {{email}} për këtë blerje",
+      "mailBody": "Përshëndetje,\n\nDëshiroj të blej: {{item}} ({{price}}).\nRezidenca: {{link}}\n\nFaleminderit.",
+      "extraItem": "Ndërtesa shtesë: {{n}}",
+      "copy": "Kopjo adresën",
+      "copied": "U kopjua",
+      "copyFailed": "Nuk u kopjua. Zgjidhni {{email}} më lart, ose shkruajini nga aplikacioni juaj i postës.",
+      "passItem": "Paketa e Rezidencës"
+    }
   },
   "pricingSection": {
     "title": "Rezidenca",
@@ -1394,7 +1406,9 @@
     "PHONE_INVALID": "Shkruani një numër telefoni të vlefshëm, si +389 2 123 4567.",
     "SOCIAL_HOST": "Kjo duhet të jetë një lidhje në {{network}}.",
     "ENTRANCE_NAME_TAKEN": "Kjo ndërtesë ka tashmë një hyrje me emrin “{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër."
+    "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër.",
+    "RESIDENCE_GALLERY_FULL": "Një rezidencë mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
+    "GALLERY_ORDER_INVALID": "Fotot ndryshuan ndërkohë. Ringarkoni faqen dhe provoni përsëri."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1494,5 +1508,21 @@
     "needBuilding": "Shtoni më parë një ndërtesë; hyrjet i përkasin një ndërtese.",
     "inBuilding": "Hyrje e ndërtesës",
     "newHere": "Hyrje e re"
+  },
+  "sheet": {
+    "save": "Ruaj"
+  },
+  "gallery": {
+    "heading": "Fotot",
+    "hint": "Shfaqen në faqen e rezidencës pas kopertinës. Deri në {{max}} foto — JPG, PNG, WebP ose AVIF, 10 MB secila.",
+    "count": "{{n}} nga {{max}}",
+    "add": "Shto foto",
+    "uploading": "Po ngarkohet…",
+    "photoAlt": "Foto {{n}}",
+    "moveEarlier": "Zhvendos foton {{n}} më përpara",
+    "moveLater": "Zhvendos foton {{n}} më pas",
+    "remove": "Hiq foton {{n}}",
+    "removeMessage": "Fotoja hiqet nga faqja e rezidencës.",
+    "showAll": "Fotot ({{n}})"
   }
 }

@@ -56,6 +56,8 @@ export const API_ERROR_TEXT: Record<string, string> = {
   LIMIT_FILE_COUNT: 'Too many pictures: {{maxFiles}} at a time at most.',
   LIMIT_UNEXPECTED_FILE: 'Too many pictures: {{maxFiles}} at a time at most.',
   GALLERY_FULL: 'A unit can have at most {{max}} pictures. Remove some first.',
+  RESIDENCE_GALLERY_FULL: 'A residence can have at most {{max}} photos. {{remaining}} more can be added.',
+  GALLERY_ORDER_INVALID: 'The photos changed meanwhile. Reload the page and try again.',
   STORAGE_NOT_CONFIGURED: 'Picture uploads are not available right now. Try again later.',
   LISTING_NOT_YOURS: 'You can only use your own listings.',
   LISTING_CLOSED: 'This listing is closed (sold or rented), so it can’t be linked.',

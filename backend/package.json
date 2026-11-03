@@ -149,7 +149,6 @@
     "@types/nodemailer": "^7.0.3",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
-    "@types/sharp": "^0.31.1",
     "@types/socket.io": "^3.0.1",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",

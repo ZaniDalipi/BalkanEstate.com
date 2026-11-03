@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Keyboard focus outline for everything that has no focus style of its own.
+   In the base layer, so a component's utilities (e.g. a field's soft
+   `focus:outline-none focus-visible:ring-2` halo) replace it instead of
+   stacking a second, hard outline on top: unlayered CSS would beat every
+   Tailwind utility. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #0252CD;
+    outline-offset: 2px;
+  }
+}
+
 /* Custom Theme Configuration for BalkanEstate */
 @theme {
   /* Font Family */
@@ -1489,11 +1501,6 @@ html[data-zoom] {
 @media (display-mode: standalone) {
   :root {
     --floating-search-top-pad: max(calc(env(safe-area-inset-top, 0px) + 8px), 44px);
-  }
-
-  :focus-visible {
-    outline: 2px solid #0252CD;
-    outline-offset: 2px;
   }
 
   /* In standalone PWA, links should show pointer cursor */

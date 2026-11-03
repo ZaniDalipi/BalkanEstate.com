@@ -23,7 +23,7 @@ export function useCheckout(developmentId: string, kind: ResidencePurchaseKind, 
 
   const codeMessage = (raw: string) => {
     const p = codeProblem(raw);
-    if (p === 'empty') return t('billing.code.required', 'Enter your code. Online payment is coming soon.');
+    if (p === 'empty') return t('billing.code.required', 'Enter the unlock code we sent you after agreeing the payment.');
     if (p === 'format') return t('billing.code.format', 'Codes use letters, numbers, - and _ (3–64 characters).');
     return null;
   };

@@ -84,8 +84,8 @@ export function useBillingText() {
           return t('billing.refusal.buildingLimit', { limit: r.limit ?? 5, defaultValue: 'This residence can have {{limit}} buildings. Unlock more to add another.' });
         case 'PAYMENT_NOT_CONFIGURED':
           return r.amount
-            ? t('billing.refusal.paymentSoonAmount', { amount: formatCharge(r.amount), defaultValue: 'Online payment is coming soon. {{amount}} is still due, so enter a code that covers it.' })
-            : t('billing.refusal.paymentSoon', 'Online payment is coming soon. Enter a code to unlock it now.');
+            ? t('billing.refusal.paymentSoonAmount', { amount: formatCharge(r.amount), defaultValue: '{{amount}} is still due. Payment is agreed with us directly; enter a code that covers it.' })
+            : t('billing.refusal.paymentSoon', 'Payment is agreed with us directly. Enter the unlock code we sent you.');
         case 'COUPON_INVALID':
           return r.reason && COUPON_REASON_TEXT[r.reason]
             ? t(`billing.refusal.coupon.${r.reason}`, { min: r.min !== undefined ? formatCharge(r.min) : '', defaultValue: COUPON_REASON_TEXT[r.reason] })

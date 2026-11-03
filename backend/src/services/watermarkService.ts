@@ -119,7 +119,8 @@ export const applyWatermark = async (
     const padding = Math.round(logoSize * 0.25); // Padding from edges
     const opacity = 0.5;
 
-    const compositeInputs: sharp.OverlayOptions[] = [];
+    // Typed from sharp's own composite() signature, so it compiles whichever sharp typings are installed.
+    const compositeInputs: NonNullable<Parameters<ReturnType<typeof sharp>['composite']>[0]> = [];
 
     // 1. BalkanEstate logo - bottom-right
     try {

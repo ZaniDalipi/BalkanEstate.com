@@ -37,6 +37,7 @@ import {
   listPublicUnits as listPublicUnitsService,
   getPublicUnitDetail,
   toPublicDevelopment,
+  listPreviewImages,
 } from '../services/developments/developmentPublicService';
 import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
 import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
@@ -235,8 +236,9 @@ export const uploadCover = async (req: Request, res: Response): Promise<void> =>
       developmentId: String(development._id),
       developmentName: development.name,
       type: 'development-cover',
-      maxWidth: 1920,
-      maxHeight: 720,
+      // The whole photo, sharp at any hero size; the page crops it with CSS.
+      maxWidth: 2400,
+      maxHeight: 2400,
     });
 
     development.coverImage = result.url;
@@ -382,7 +384,11 @@ export const listPublic = async (req: Request, res: Response): Promise<void> => 
       Development.find(query).sort({ publishedAt: -1 }).skip(skip).limit(limit),
       Development.countDocuments(query),
     ]);
-    res.json({ developments: items.map(toPublicDevelopment), total });
+    const previews = await listPreviewImages(items);
+    res.json({
+      developments: items.map((d) => ({ ...toPublicDevelopment(d), ...(previews.get(String(d._id)) ? { previewImage: previews.get(String(d._id)) } : {}) })),
+      total,
+    });
   } catch (error) {
     sendServiceError(res, error, 'list public developments');
   }

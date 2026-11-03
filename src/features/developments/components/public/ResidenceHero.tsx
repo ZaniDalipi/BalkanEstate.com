@@ -5,6 +5,8 @@ import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
 import { residenceTimeline } from '../../utils/timeline';
 import type { Development } from '../../types';
+import { residencePhotos } from '../../utils/residencePhotos';
+import { ResidencePhotosButton } from './gallery/ResidencePhotosButton';
 
 interface ResidenceHeroProps {
   development: Development;
@@ -13,7 +15,8 @@ interface ResidenceHeroProps {
 }
 
 /**
- * Full-bleed residence hero — a cinematic cover with layered gradients, glass
+ * Full-bleed residence hero — the cover photo shown whole and bright (a
+ * gradient only behind the text), a Photos button for the gallery, glass
  * chips for category / construction status / completion, the project name and
  * location, and primary actions. Designed as the attention-grabbing top of a
  * premium development page; falls back to a branded gradient with no cover.
@@ -45,14 +48,14 @@ export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onVie
           srcSet={imageSrcSet(coverImage)}
           sizes="(max-width: 1200px) 100vw, 1200px"
           alt={name}
-          className="absolute inset-0 h-full w-full scale-105 object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-center"
         />
       )}
-      {/* Layered scrims: a top vignette for the chips, a deep bottom for the title. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
-      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/40 to-transparent" />
+      {/* Darkened only behind the text at the bottom, so the building itself stays bright. */}
+      <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+      <ResidencePhotosButton photos={residencePhotos(development)} variant="glass" className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6" />
 
-      <div className="relative flex min-h-[400px] flex-col justify-end gap-4 px-6 pb-20 pt-6 sm:min-h-[500px] sm:px-10 sm:pb-24 sm:pt-10">
+      <div className="relative flex min-h-[460px] flex-col justify-end gap-4 px-6 pb-20 pt-16 sm:aspect-[16/10] sm:max-h-[80vh] sm:px-10 sm:pb-24 lg:aspect-[2/1]">
         <div className="flex flex-wrap gap-2">
           <Chip>{t(`category.${category}`)}</Chip>
           <Chip>

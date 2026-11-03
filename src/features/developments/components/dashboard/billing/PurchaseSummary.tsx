@@ -53,6 +53,11 @@ export const PurchaseSummary: React.FC<PurchaseSummaryProps> = ({ kind, quantity
           <dt>{t('billing.summary.total', 'Total')}</dt>
           <dd>{formatCharge(total)}</dd>
         </div>
+        {kind === 'pass' && (
+          <p className="pt-1 text-xs leading-relaxed text-slate-600">
+            {t('billing.summary.validity', { months: billing.terms.passMonths, defaultValue: 'One payment, valid for {{months}} months — not a lifetime pass. It doesn’t renew by itself.' })}
+          </p>
+        )}
       </dl>
     </div>
   );

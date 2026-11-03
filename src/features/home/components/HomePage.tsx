@@ -33,6 +33,8 @@ const HowItWorksSection = lazy(() => import('./HowItWorksSection'));
 const CTASection = lazy(() => import('./CTASection'));
 const NewsSection = lazy(() => import('./NewsSection'));
 const TestimonialsSection = lazy(() => import('./TestimonialsSection'));
+const HomeResidencesSection = lazy(() => import('./residences/HomeResidencesSection'));
+const HomeBusinessesSection = lazy(() => import('./businesses/HomeBusinessesSection'));
 
 const SectionFallback = () => (
   <div className="py-16 flex justify-center">
@@ -273,6 +275,19 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
             onPropertyClick={handlePropertyClick}
             onViewAll={() => handleNavigate('/search')}
           />
+        </Suspense>
+      </div>
+
+      {/* Just below the featured listings: new residences (a scroll stack)
+          and the business directory. */}
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HomeResidencesSection />
+        </Suspense>
+      </div>
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HomeBusinessesSection />
         </Suspense>
       </div>
 

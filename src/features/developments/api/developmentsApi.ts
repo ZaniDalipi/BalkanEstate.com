@@ -178,6 +178,18 @@ export const deleteEntrance = (id: string, entranceId: string): Promise<{ succes
 export const getDevelopmentStructure = (id: string): Promise<DevelopmentStructure> =>
   apiRequest<DevelopmentStructure>(`${DASH}/${id}/structure`, { requiresAuth: true });
 
+export const uploadResidencePhotos = (id: string, files: File[]): Promise<{ development: Development }> => {
+  const formData = new FormData();
+  files.forEach((f) => formData.append('images', f));
+  return uploadRequest<{ development: Development }>(`${DASH}/${id}/gallery`, formData);
+};
+
+export const deleteResidencePhoto = (id: string, index: number): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/gallery/${index}`, { method: 'DELETE', requiresAuth: true });
+
+export const reorderResidencePhotos = (id: string, urls: string[]): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/gallery/order`, { method: 'PATCH', body: { urls }, requiresAuth: true });
+
 export const uploadDevelopmentCover = (
   id: string,
   file: File

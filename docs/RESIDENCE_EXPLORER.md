@@ -837,6 +837,43 @@ unique per entrance, so "A1" can exist behind both Entrance 1 and Entrance 2.
   - components: `EntranceMarkers.test.tsx`, `BuildingEntrancesCard.test.tsx`,
     `CreateImportPicker.test.tsx`.
 
+## 7b-10. Cover and photo gallery
+
+- **Cover:**
+  - Stored whole in R2 (up to 2400px on each side; it used to be shrunk to fit
+    1920×720, which made ordinary photos soft).
+  - The hero shows it without zoom, darkened only behind the text, in a taller
+    frame (16:10 on tablets, 2:1 on desktop, at most 80% of the screen height).
+- **Gallery** (`Development.gallery`, at most `DEVELOPMENT_GALLERY_MAX` = 15
+  besides the cover):
+  - stored in R2 (`developments/<name>/gallery`, kind `development-gallery`);
+  - managed on the Overview tab → *Photos*: add several at once, move earlier or
+    later, remove (needs `media.upload`).
+
+  | Endpoint | What it does | Refusals |
+  |---|---|---|
+  | `POST /api/dashboard/developments/:id/gallery` (`images`, ≤10 per request) | Adds photos | `NO_IMAGES`, `IMAGE_TYPE`, `LIMIT_FILE_SIZE`, `LIMIT_FILE_COUNT`, `RESIDENCE_GALLERY_FULL {max, remaining}`, `STORAGE_NOT_CONFIGURED` (503) |
+  | `PATCH …/gallery/order { urls }` | The same photos in a new order | `GALLERY_ORDER_INVALID` |
+  | `DELETE …/gallery/:index` | Removes one photo and its stored file | `IMAGE_NOT_FOUND` |
+
+  - The limit is checked before uploading and again in the write, so two uploads
+    at once can't pass 15. Files uploaded for a request that then fails are
+    deleted again.
+  - The dashboard checks type, size, batch and the limit first, with the same
+    texts, and shows every refusal above the photos (`role="alert"`).
+- **Buyers see:**
+  - a *Photos (N)* button (on the hero, with small previews, or in the title
+    bar when the explorer is shown);
+  - it opens the full-screen viewer with the cover first, then the gallery in
+    the owner's order (`residencePhotos`).
+
+  The public development carries `gallery: [{ url, width, height }]`, without
+  storage keys.
+- **Tests:**
+  - backend: `__tests__/developments/residence-gallery.test.ts`;
+  - frontend: `residencePhotos.test.ts`, `ResidenceGallerySection.test.tsx`,
+    `ResidencePhotosButton.test.tsx`.
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.

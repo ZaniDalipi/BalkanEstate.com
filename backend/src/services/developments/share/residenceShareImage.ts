@@ -90,7 +90,8 @@ async function loadPhoto(url: string): Promise<Buffer | null> {
 
 async function render(facts: ResidenceShareFacts, lang: SupportedLangCode): Promise<Buffer> {
   const photo = facts.photoUrl ? await loadPhoto(facts.photoUrl) : null;
-  let base: sharp.Sharp;
+  // Typed from the sharp function, so it compiles whichever sharp typings are installed.
+  let base: ReturnType<typeof sharp>;
   let size: { width: number; height: number } | undefined;
   if (photo) {
     const { data, info } = await sharp(photo, { limitInputPixels: 40_000_000 }).rotate().toBuffer({ resolveWithObject: true });

@@ -259,5 +259,24 @@
     "categoriesSection": {
       "exclusive": "✦ Exclusive"
     }
+  },
+  "residences": {
+    "title": "New residences",
+    "subtitle": "Explore new buildings floor by floor and pick your apartment.",
+    "viewAll": "All residences",
+    "viewAllCount": "All {{n}} residences",
+    "explore": "Explore residence",
+    "available": "{{available}} of {{total}} homes available",
+    "builtBy": "Built by {{name}}",
+    "loadFailed": "New residences couldn’t be loaded right now."
+  },
+  "businesses": {
+    "title": "Business directory",
+    "subtitle": "Builders, lawyers, notaries, movers and more — trusted local services for your home.",
+    "viewAll": "Open the directory",
+    "viewAllCount": "All {{n}} businesses",
+    "loadFailed": "Businesses couldn’t be loaded right now.",
+    "prev": "Show earlier businesses",
+    "next": "Show more businesses"
   }
 }
