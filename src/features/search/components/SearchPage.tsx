@@ -24,6 +24,7 @@ import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
+import MapBusyOverlay from '@/src/features/map/components/MapBusyOverlay';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -353,6 +354,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         data-shown={!showViewToggle || shownView === 'map'}
                     >
                         {mountMap && <MapComponent {...mapProps} />}
+                        {/* Listings still arriving: the map is there, its pins are not yet. */}
+                        <MapBusyOverlay busy={mountMap && isLoadingProperties} />
                     </div>
 
                     {/* Draw hint banner - shown when navigating from explore cities */}

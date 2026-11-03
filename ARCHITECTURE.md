@@ -1352,6 +1352,17 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   (`search:ui.searchPage.recoveredFromCrash`). Storage that is missing or throws
   just turns the guard off. Rentals and Villas still use the older
   hide-only behaviour.
+- **Pins are built a slice at a time, with a loading state.** The first draw
+  of the Google map used to build a DOM node and a marker for every listing in
+  one loop, a long task and memory spike at the instant of the switch.
+  `createAllMarkers` (`useGoogleMap.ts`) now hands them to `runInChunks`
+  (`features/map/utils/chunkedWork.ts`, injectable scheduler, cancellable) 60 per
+  frame, adds each slice to the clusterer without drawing, and draws once at the
+  end. A build that throws stops there and shows the pins already made; a newer
+  call cancels it. `MapBusyOverlay` shows "Loading properties" while the
+  listings are still arriving (`SearchPage`) or the pins are being built
+  (`GoogleMapComponent`); it never blocks the map. Rentals and Villas share
+  `useGoogleMap`, so they get the chunked build too.
 - **Map pins are built for the screen only.** The Google map clusters with
   `SuperClusterViewportAlgorithm` (`useGoogleMap.ts`): bubbles and pins exist
   only inside the visible area plus a margin. The whole-region algorithm put

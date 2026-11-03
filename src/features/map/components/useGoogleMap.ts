@@ -19,6 +19,7 @@ import { Property } from '@/types';
 import L from 'leaflet';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { SmoothMarkerClusterer, ViewportClusterAlgorithm } from '../utils/smoothClusterer';
+import { runInChunks } from '../utils/chunkedWork';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
@@ -124,6 +125,9 @@ export interface GoogleMapComponentProps {
   hideControls?: boolean;
 }
 
+/** Pins built per animation frame on the first load of the map. */
+const MARKER_BUILD_CHUNK = 60;
+
 export function useGoogleMap(props: GoogleMapComponentProps) {
   const {
     properties,
@@ -186,6 +190,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Tracks when the marker library + clusterer are ready (avoids race condition)
   const [markersReady, setMarkersReady] = useState(false);
+  // True while the pins are being built a slice at a time (see createAllMarkers),
+  // so the map can say it is busy instead of looking frozen or half empty.
+  const [isBuildingMarkers, setIsBuildingMarkers] = useState(false);
+  const cancelMarkerBuildRef = useRef<(() => void) | null>(null);
 
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
@@ -672,6 +680,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Handle map unmount
   const onUnmount = useCallback(() => {
+    cancelMarkerBuildRef.current?.();
+    cancelMarkerBuildRef.current = null;
     clusterActivationRef.current?.reset();
     clusterActivationRef.current = null;
     if (clustererRef.current) {
@@ -994,6 +1004,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const createAllMarkers = useCallback((props: Property[], mapToUse: google.maps.Map) => {
     if (!clustererRef.current) return;
 
+    // A first-load build still in flight is replaced by this call. What it had
+    // already added was added without drawing, so draw it before moving on.
+    if (cancelMarkerBuildRef.current) {
+      cancelMarkerBuildRef.current();
+      cancelMarkerBuildRef.current = null;
+      setIsBuildingMarkers(false);
+      clustererRef.current.render();
+    }
+
     // A spiderfied cluster holds its pins at temporary positions with their
     // `map` forced on. Fold it back before diffing, or the clusterer would
     // re-render around coordinates that aren't where those listings are.
@@ -1158,21 +1177,45 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
       const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
       const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+      const clusterer = clustererRef.current;
 
-      for (let i = 0; i < props.length; i++) {
-        const { marker, markerDiv, isActivelyPromoted } = makeMarker(props[i], true, i, props.length);
-        markersRef.current.set(props[i].id, marker);
-        markerDivsRef.current.set(props[i].id, markerDiv);
-        if (isActivelyPromoted) {
-          marker.map = mapToUse;
-          promotedMarkers.push(marker);
-        } else {
-          regularMarkers.push(marker);
-        }
-      }
-
-      clustererRef.current.addMarkers(regularMarkers);
-      promotedMarkersRef.current = promotedMarkers;
+      // One pin is a DOM node plus a Google marker. Building one for every
+      // listing in a single loop is a long task and a memory spike right as a
+      // phone switches to the map, so the pins are built a slice per frame,
+      // added to the clusterer without drawing, and drawn once at the end.
+      setIsBuildingMarkers(true);
+      const finish = () => {
+        cancelMarkerBuildRef.current = null;
+        setIsBuildingMarkers(false);
+        // Whatever was built is shown, even when the build stopped on an error.
+        clusterer.render();
+      };
+      cancelMarkerBuildRef.current = runInChunks({
+        items: props,
+        chunkSize: MARKER_BUILD_CHUNK,
+        processChunk: (chunk, start) => {
+          const slice: google.maps.marker.AdvancedMarkerElement[] = [];
+          chunk.forEach((property, offset) => {
+            const { marker, markerDiv, isActivelyPromoted } = makeMarker(property, true, start + offset, props.length);
+            markersRef.current.set(property.id, marker);
+            markerDivsRef.current.set(property.id, markerDiv);
+            if (isActivelyPromoted) {
+              marker.map = mapToUse;
+              promotedMarkers.push(marker);
+            } else {
+              regularMarkers.push(marker);
+              slice.push(marker);
+            }
+          });
+          if (slice.length > 0) clusterer.addMarkers(slice, true);
+          promotedMarkersRef.current = promotedMarkers;
+        },
+        onDone: finish,
+        onError: (error) => {
+          console.error('Map pins stopped building; showing the ones that were ready.', error);
+          finish();
+        },
+      });
 
       if ((window as any).__balkanestateSplashDone) {
         setTimeout(() => { delete (window as any).__balkanestateSplashDone; }, 3500);
@@ -2095,6 +2138,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Loading
     isLoaded,
     loadError,
+    isBuildingMarkers,
 
     // Map
     map,
