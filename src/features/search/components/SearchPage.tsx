@@ -15,6 +15,8 @@ import { SEO } from '@/src/components/seo';
 import { useSearchPage } from './useSearchPage';
 import { useViewSwitchGuard } from '../hooks/useViewSwitchGuard';
 import { useListMemory } from '../hooks/useListMemory';
+import { planPanels } from '../utils/panelHandoff';
+import ListPendingSkeleton from './ListPendingSkeleton';
 import { generatePropertySlug } from '@/utils/slug';
 import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
@@ -25,6 +27,11 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
 import MapBusyOverlay from '@/src/features/map/components/MapBusyOverlay';
+
+/** The panels' slide (420ms in src/index.css) plus a frame: nothing heavy happens before it ends. */
+const PANEL_SLIDE_MS = 450;
+/** After the leaving panel is torn down, before the arriving one is built: lets that commit paint. */
+const PANEL_GAP_MS = 120;
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -134,28 +141,40 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
 
-    // The two panels are the expensive halves of this page, and on a phone only
-    // one of them is ever on screen: the list slides over the map, so whichever
-    // is behind is being built for nobody — in the very commit a navigation
-    // lands in. Each waits for idle while it is off screen, and mounts straight
-    // away the moment it is on it (split view, or the visitor switching tabs).
-    // Once mounted they stay mounted, so switching between them is instant.
+    // The two panels are the expensive halves of this page. In split view both
+    // are on screen and each mounts at idle (`useDeferredMount`). On a phone or
+    // tablet only one is, and they hand over to each other (`planPanels` below).
     // If the last page in this tab was killed during a List/Map switch, open
     // lighter: on the list, with the map built only when the visitor asks.
     const { recovered, switched, beginSwitch } = useViewSwitchGuard();
     const shownView = recovered && !switched ? 'list' : mobileView;
     const isMapOnScreen = showSplitView || shownView === 'map';
-    const mountMap = useDeferredMount(!isMapOnScreen, { idle: !recovered });
+    const deferredMap = useDeferredMount(!isMapOnScreen, { idle: !recovered });
     const isListOnScreen = showSplitView || shownView === 'list';
-    const mountList = useDeferredMount(!isListOnScreen);
-    // Once the list has slid away behind the map, stop rendering it at all.
-    const listSettledHidden = useSettledHidden(!isListOnScreen);
-    // On a phone or tablet only one panel is on screen, and keeping the hidden
-    // list alive beside a WebGL map is what gets Safari to kill the tab. So once
-    // it has slid away it is released outright, and `useListMemory` brings the
-    // visitor back to the same card.
-    const releaseList = showViewToggle && listSettledHidden;
-    const listMemory = useListMemory(releaseList, filters);
+    const deferredList = useDeferredMount(!isListOnScreen);
+    // Released once its slide away is over; gone a moment after that, when
+    // the teardown has been committed and the other panel may be built.
+    const listReleased = useSettledHidden(!isListOnScreen, PANEL_SLIDE_MS);
+    const listGone = useSettledHidden(!isListOnScreen, PANEL_SLIDE_MS + PANEL_GAP_MS);
+    const mapReleased = useSettledHidden(!isMapOnScreen, PANEL_SLIDE_MS);
+    const mapGone = useSettledHidden(!isMapOnScreen, PANEL_SLIDE_MS + PANEL_GAP_MS);
+    // On a phone or tablet only one panel is on screen, and the list's photos
+    // beside a WebGL map with its pins are what get Safari to kill the tab. So
+    // the panels hand over: the one leaving is torn down before the one arriving
+    // is built (see `planPanels`), and `useListMemory` brings the visitor back to
+    // the same card. The map's own view is restored from `mapViewMemory`.
+    const { renderList: mountList, renderMap: mountMap, listPending, mapPending } = planPanels({
+        oneAtATime: showViewToggle,
+        listWanted: isListOnScreen,
+        mapWanted: isMapOnScreen,
+        listReleased,
+        listGone,
+        mapReleased,
+        mapGone,
+        deferredList,
+        deferredMap,
+    });
+    const listMemory = useListMemory(showViewToggle && !mountList, filters);
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists
@@ -330,8 +349,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
                  <div ref={listMemory.panelRef} className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || shownView === 'list'}
-                    data-settled={listSettledHidden}>
-                    {mountList && !releaseList && searchMode !== 'ai' && (
+                    data-settled={listReleased}>
+                    {mountList && searchMode !== 'ai' && (
                         <SearchHeader
                             t={t as any}
                             filters={filters}
@@ -342,7 +361,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             onSelectSuggestion={handleSelectSuggestion}
                         />
                     )}
-                    {mountList && !releaseList && <PropertyList {...propertyListProps} />}
+                    {mountList && <PropertyList {...propertyListProps} />}
+                    {/* The map is being let go before the list is built: the cards' shape, not a blank panel. */}
+                    {listPending && <ListPendingSkeleton />}
                 </div>
 
 
@@ -355,7 +376,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     >
                         {mountMap && <MapComponent {...mapProps} />}
                         {/* Listings still arriving: the map is there, its pins are not yet. */}
-                        <MapBusyOverlay busy={mountMap && isLoadingProperties} />
+                        <MapBusyOverlay busy={mapPending || (mountMap && isLoadingProperties)} />
                     </div>
 
                     {/* Draw hint banner - shown when navigating from explore cities */}

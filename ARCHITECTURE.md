@@ -1332,15 +1332,20 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   only the current, previous and next slide and pauses autoplay off screen.
   Once the list has finished sliding away (`useSettledHidden`), it gets
   `content-visibility: hidden`: still mounted, scroll kept, but not rendered.
-- **The hidden list is released, not just hidden (Search).** On a phone or
-  tablet, once the list has settled behind the map (`useSettledHidden`),
-  `SearchPage` unmounts `PropertyList` and its header outright
-  (`releaseList`); `content-visibility` alone still left every card and photo
-  alive beside the WebGL map. `useListMemory` (`features/search/hooks`) keeps the
-  scroll offset (captured from `[data-scroll-container]`) and the number of
-  cards paged in (`initialVisibleCount` / `onVisibleCountChange` on
-  `PropertyList`), and puts the visitor back on the same card when the list
-  returns; a change of filters starts the results over.
+- **One panel alive at a time (Search, phone and tablet).** The list's photos
+  and the WebGL map with its pins cannot both live on an iPhone; keeping the map
+  mounted behind the list is what crashed Map → List. `planPanels`
+  (`features/search/utils/panelHandoff.ts`, pure) hands over in three steps:
+  on the tap the slide starts and the leaving panel stays as it is (the slide
+  shows real content and nothing heavy runs during it); once the slide is over
+  (`PANEL_SLIDE_MS`, 450ms) the leaving panel is torn down; `PANEL_GAP_MS`
+  (120ms) later, once that commit has painted, the arriving panel is built.
+  Meanwhile the arriving panel shows a cheap placeholder: `ListPendingSkeleton`
+  (card-shaped, no photos) or `MapBusyOverlay`. The timers are
+  `useSettledHidden` with two delays per panel. `useListMemory` restores the
+  list's scroll offset and paged-in depth (`initialVisibleCount` /
+  `onVisibleCountChange` on `PropertyList`); the map restores its own view from
+  `mapViewMemory`. Split view keeps the idle-deferred mounts unchanged.
 - **Crash-loop guard.** Safari kills the page without running our code, so a
   crash can only be noticed on the next load. `useViewSwitchGuard` writes a
   `sessionStorage` marker when the switch is tapped and clears it after
