@@ -20,6 +20,7 @@ import L from 'leaflet';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { SmoothMarkerClusterer, ViewportClusterAlgorithm } from '../utils/smoothClusterer';
 import { runInChunks } from '../utils/chunkedWork';
+import { nextMarkerArea, isInArea, type Area } from '../utils/markerArea';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
@@ -194,6 +195,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   // so the map can say it is busy instead of looking frozen or half empty.
   const [isBuildingMarkers, setIsBuildingMarkers] = useState(false);
   const cancelMarkerBuildRef = useRef<(() => void) | null>(null);
+  // Pins are built only around what is on screen (see markerArea.ts); null
+  // until the map has reported its first view.
+  const [markerArea, setMarkerArea] = useState<Area | null>(null);
 
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
@@ -720,6 +724,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         [ne.lat(), ne.lng()]
       );
       const leafletCenter = L.latLng(mapCenter.lat(), mapCenter.lng());
+
+      const view = { south: sw.lat(), west: sw.lng(), north: ne.lat(), east: ne.lng() };
+      setMarkerArea((current) => nextMarkerArea(current, view));
 
       onMapMove(leafletBounds, leafletCenter);
     }
@@ -1278,6 +1285,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [colocatedOffsets]);
 
+  // Only the listings around the view get a pin; the rest are still listed,
+  // searched and focusable, they just have no DOM node until the map nears them.
+  const markerProperties = useMemo(
+    () => (markerArea ? validProperties.filter((p) => isInArea(markerArea, p.lat, p.lng)) : []),
+    [validProperties, markerArea],
+  );
+
   // Update markers when properties change — debounced to avoid rapid clear/recreate
   // cycles during initial load (API fetch + WebSocket updates can fire in quick succession)
   useEffect(() => {
@@ -1292,7 +1306,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
 
     markerCreationTimerRef.current = setTimeout(() => {
-      createAllMarkers(validProperties, mapToUse);
+      createAllMarkers(markerProperties, mapToUse);
     }, 150);
 
     return () => {
@@ -1300,7 +1314,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         clearTimeout(markerCreationTimerRef.current);
       }
     };
-  }, [validProperties, map, isLoaded, markersReady, createAllMarkers]);
+  }, [markerProperties, map, isLoaded, markersReady, createAllMarkers]);
 
   // Animated "you are here" marker — created once permission is granted and a
   // valid fix is available, removed the moment location becomes unavailable

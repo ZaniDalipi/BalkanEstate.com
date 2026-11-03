@@ -1357,6 +1357,14 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   (`search:ui.searchPage.recoveredFromCrash`). Storage that is missing or throws
   just turns the guard off. Rentals and Villas still use the older
   hide-only behaviour.
+- **Pins only around the view.** `/search` loads up to 3000 listings, and a
+  pin is a DOM node plus a Google marker. `useGoogleMap` builds pins only for
+  listings inside `markerArea` (`features/map/utils/markerArea.ts`, pure): the
+  viewport padded by one viewport on each side, updated on idle. The area is
+  sticky (a pan inside it changes nothing) and shrinks back after a zoom in, so
+  the pins are let go. Listings outside it are still listed, searched and
+  focusable; only their pin waits until the map comes near. This is why a page
+  with a handful of listings (Rentals) never crashed while Search did.
 - **Pins are built a slice at a time, with a loading state.** The first draw
   of the Google map used to build a DOM node and a marker for every listing in
   one loop, a long task and memory spike at the instant of the switch.
