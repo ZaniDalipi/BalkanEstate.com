@@ -1196,8 +1196,8 @@
       "trialInProgress": "Druga vaša rezidencija je na besplatnoj probi. Kupite paket da odmah objavite ovu.",
       "trialLimit": "Iskoristili ste sve besplatne probe. Kupite paket da biste objavili.",
       "buildingLimit": "Ova rezidencija može imati {{limit}} zgrada. Otključajte još da dodate novu.",
-      "paymentSoonAmount": "Online plaćanje stiže uskoro. Preostalo je {{amount}}, pa unesite kod koji to pokriva.",
-      "paymentSoon": "Online plaćanje stiže uskoro. Unesite kod da odmah otključate.",
+      "paymentSoonAmount": "Još je za plaćanje {{amount}}. Plaćanje se dogovara direktno sa nama; unesite kod koji to pokriva.",
+      "paymentSoon": "Plaćanje se dogovara direktno sa nama. Unesite kod za otključavanje koji smo vam poslali.",
       "couponInvalid": "Ovaj kod ne važi za rezidencije.",
       "coupon": {
         "unknown": "Takav kod ne postoji. Provjerite kako ste ga napisali.",
@@ -1213,7 +1213,7 @@
     },
     "code": {
       "label": "Kod za otključavanje",
-      "required": "Unesite svoj kod. Online plaćanje stiže uskoro.",
+      "required": "Unesite kod za otključavanje koji smo vam poslali nakon dogovora o plaćanju.",
       "format": "Kodovi imaju slova, brojeve, - i _ (3–64 znaka)."
     },
     "quantity": {
@@ -1229,7 +1229,8 @@
     "summary": {
       "each": "{{n}} × cijena",
       "discount": "Premium popust ({{pct}}%)",
-      "total": "Ukupno"
+      "total": "Ukupno",
+      "validity": "Jedna uplata, važi {{months}} mjeseci — nije doživotno. Ne obnavlja se sama."
     },
     "done": {
       "pass": "Paket rezidencije je aktivan",
@@ -1265,7 +1266,18 @@
     "publishWithPass": "Kupi paket i objavi",
     "publishTrial": "Objavi · besplatno {{days}} dana",
     "createNote": "Postavljanje je besplatno. Objavljivanje pokreće besplatnu probu od 15 dana; nakon nje paket rezidencije je drži online.",
-    "publishAgency": "Objavi · besplatno uz plan agencije"
+    "publishAgency": "Objavi · besplatno uz plan agencije",
+    "arrange": {
+      "title": "Kako platiti",
+      "body": "Ne primamo online plaćanja. Plaćanje dogovaramo direktno sa vama: pišite nam, zajedno potvrdimo detalje i pošaljemo vam kod za otključavanje koji unosite ispod.",
+      "emailAria": "Pišite na {{email}} u vezi sa ovom kupovinom",
+      "mailBody": "Zdravo,\n\nŽelim da kupim: {{item}} ({{price}}).\nRezidencija: {{link}}\n\nHvala.",
+      "extraItem": "Dodatne zgrade: {{n}}",
+      "copy": "Kopiraj adresu",
+      "copied": "Kopirano",
+      "copyFailed": "Kopiranje nije uspjelo. Označite {{email}} iznad ili pišite na nju iz svoje aplikacije za e-poštu.",
+      "passItem": "Paket rezidencije"
+    }
   },
   "pricingSection": {
     "title": "Rezidencije",

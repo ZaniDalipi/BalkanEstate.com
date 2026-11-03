@@ -1196,8 +1196,8 @@
       "trialInProgress": "Alt ansamblu al tău este în proba gratuită. Cumpără un abonament ca să-l publici acum pe acesta.",
       "trialLimit": "Ai folosit toate probele gratuite. Cumpără un abonament ca să publici.",
       "buildingLimit": "Acest ansamblu poate avea {{limit}} clădiri. Deblochează mai multe ca să adaugi una nouă.",
-      "paymentSoonAmount": "Plata online vine în curând. Mai sunt de plată {{amount}}, așa că introdu un cod care le acoperă.",
-      "paymentSoon": "Plata online vine în curând. Introdu un cod ca să deblochezi acum.",
+      "paymentSoonAmount": "Mai sunt de plătit {{amount}}. Plata se stabilește direct cu noi; introduceți un cod care o acoperă.",
+      "paymentSoon": "Plata se stabilește direct cu noi. Introduceți codul de deblocare pe care vi l-am trimis.",
       "couponInvalid": "Acest cod nu este valabil pentru ansambluri.",
       "coupon": {
         "unknown": "Nu există un astfel de cod. Verificați ortografia.",
@@ -1213,7 +1213,7 @@
     },
     "code": {
       "label": "Cod de deblocare",
-      "required": "Introdu codul. Plata online vine în curând.",
+      "required": "Introduceți codul de deblocare pe care vi l-am trimis după ce am stabilit plata.",
       "format": "Codurile au litere, cifre, - și _ (3–64 caractere)."
     },
     "quantity": {
@@ -1229,7 +1229,8 @@
     "summary": {
       "each": "{{n}} × preț",
       "discount": "Reducere Premium ({{pct}}%)",
-      "total": "Total"
+      "total": "Total",
+      "validity": "O singură plată, valabilă {{months}} luni — nu pe viață. Nu se reînnoiește singură."
     },
     "done": {
       "pass": "Abonamentul de ansamblu este activ",
@@ -1265,7 +1266,18 @@
     "publishWithPass": "Cumpără abonament și publică",
     "publishTrial": "Publică · gratuit {{days}} zile",
     "createNote": "Crearea este gratuită. Publicarea pornește o probă gratuită de 15 zile; după ea, abonamentul de ansamblu îl ține online.",
-    "publishAgency": "Publică · gratuit cu planul agenției"
+    "publishAgency": "Publică · gratuit cu planul agenției",
+    "arrange": {
+      "title": "Cum plătiți",
+      "body": "Nu primim plăți online. Stabilim plata direct cu dvs.: ne scrieți, confirmăm împreună detaliile și vă trimitem un cod de deblocare pe care îl introduceți mai jos.",
+      "emailAria": "Scrieți la {{email}} despre această achiziție",
+      "mailBody": "Bună ziua,\n\nAș dori să cumpăr: {{item}} ({{price}}).\nAnsamblul: {{link}}\n\nMulțumesc.",
+      "extraItem": "Clădiri suplimentare: {{n}}",
+      "copy": "Copiază adresa",
+      "copied": "Copiat",
+      "copyFailed": "Copierea nu a reușit. Selectați {{email}} mai sus sau scrieți din aplicația dvs. de e-mail.",
+      "passItem": "Abonament ansamblu"
+    }
   },
   "pricingSection": {
     "title": "Ansambluri",
