@@ -13,6 +13,7 @@ import { propertyKeys } from '@/src/features/properties/api';
 import { tokenService } from '@/src/shared/api/tokenService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { clearAgencyDraft } from '@/src/features/agencies/utils/agencyDraft';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -237,6 +238,7 @@ const PaymentSuccess: React.FC = () => {
 
         // Clear pending agency data from context
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
+        clearAgencyDraft(state.currentUser?.id);
 
         // Immediately refresh user data so the creator has dashboard access right away
         try {

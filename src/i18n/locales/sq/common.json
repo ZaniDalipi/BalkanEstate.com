@@ -879,5 +879,10 @@
     "title": "Kjo faqe nuk mund të ngarkohej",
     "retry": "Provo përsëri"
   }
-}
+},
+  "formDraft": {
+    "restoredTitle": "Rikthyem atë që kishit plotësuar herën e fundit.",
+    "restoredMessage": "Ruajtur në këtë pajisje më {{date}}.",
+    "startOver": "Hidhe dhe fillo nga e para"
+  }
 }

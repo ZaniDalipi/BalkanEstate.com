@@ -1146,8 +1146,21 @@ export const useListingForm = (
         scrollPageToTop();
     }, []);
 
+    // One send at a time: the lock is a ref so a double click lands on it
+    // before React has re-rendered the button as disabled.
+    const submitLockRef = useRef(false);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (submitLockRef.current) return;
+        submitLockRef.current = true;
+        try {
+            await submitListing();
+        } finally {
+            submitLockRef.current = false;
+        }
+    };
+
+    const submitListing = async () => {
         if (!currentUser) {
             showError(t('common:errors.authRequired'), t('newListing:errors.mustBeLoggedIn'));
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });

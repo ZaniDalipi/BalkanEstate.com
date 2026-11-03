@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useId } from 'react';
+import { useAppContext } from '@/context/AppContext';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
+import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
@@ -50,7 +54,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
   // enquiry (no dates). The host still calls the enquirer back either way.
   const isForRent = property.listingType !== 'sale';
   const [mounted, setMounted] = useState(false);
-  const [form, setForm] = useState({
+  const userId = useAppContext().state.currentUser?.id;
+  const [blank] = useState(() => ({
     checkIn: '',
     checkOut: '',
     guests: 2,
@@ -58,7 +63,17 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
     email: defaultEmail,
     phone: defaultPhone,
     notes: '',
-  });
+  }));
+  // An unsent request is kept on this device until it is sent
+  const draft = useFormDraft<typeof blank>(formDraftKey(`villa-booking-${property.id}`, userId));
+  const [form, setForm] = useState(() => draft.restored ?? blank);
+  useDraftAutosave(draft, form, blank);
+  const sendingRef = useRef(false);
+
+  const discardDraft = () => {
+    draft.discard();
+    setForm(blank);
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -147,6 +162,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
       return;
     }
 
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     setIsSubmitting(true);
     try {
       // Compose a request the host/seller receives as an inquiry
@@ -174,10 +191,12 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
         buyerPhone: form.phone.trim() || undefined,
         message: lines.join('\n'),
       });
+      draft.finish();
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('villas:booking.sendError', 'Could not send your request. Please try again.'));
     } finally {
+      sendingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -308,6 +327,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                     <p className="text-[13px] text-[#d70015]">{error}</p>
                   </div>
                 )}
+
+                <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {isForRent && (<>

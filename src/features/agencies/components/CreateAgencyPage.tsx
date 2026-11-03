@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
@@ -14,6 +14,9 @@ import PhoneInput, { validateFullPhone } from '@/src/shared/components/ui/PhoneI
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import { agencyDraftKey } from '../utils/agencyDraft';
 
 const AGENCY_TYPES: ReadonlyArray<{ value: 'standard' | 'luxury' | 'commercial' | 'boutique' | 'team'; label: string; icon: SoftIconName }> = [
   { value: 'standard', label: 'Standard', icon: 'home' },
@@ -77,6 +80,35 @@ const defaultBusinessHours = {
   sunday: 'Closed',
 };
 
+const EMPTY_AGENCY_FORM: AgencyFormData = {
+  name: '',
+  description: '',
+  type: 'standard',
+  address: '',
+  zipCode: '',
+  city: '',
+  country: '',
+  phone: '',
+  email: '',
+  website: '',
+  licenseNumber: '',
+  registrationNumber: '',
+  yearsInBusiness: '',
+  languages: [],
+  specializations: [],
+  serviceAreas: '',
+  facebookUrl: '',
+  instagramUrl: '',
+  linkedinUrl: '',
+  businessHours: defaultBusinessHours,
+};
+
+/** What the form keeps on this device until the agency is created (not the logo file) */
+interface AgencyDraft {
+  formData: AgencyFormData;
+  currentStep: number;
+}
+
 const CreateAgencyPage: React.FC = () => {
   const { t } = useTranslation(['agencies', 'common', 'modals']);
   const { state, dispatch } = useAppContext();
@@ -84,33 +116,16 @@ const CreateAgencyPage: React.FC = () => {
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
+  const userId = state.currentUser?.id;
+  const draft = useFormDraft<AgencyDraft>(userId ? agencyDraftKey(userId) : null);
+  // The user's own details prefill the form, unless a draft brought back what they typed
+  const prefillUserRef = useRef(draft.restored === null);
+  const [currentStep, setCurrentStep] = useState(draft.restored?.currentStep ?? 1);
   const totalSteps = 4;
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const [formData, setFormData] = useState<AgencyFormData>({
-    name: '',
-    description: '',
-    type: 'standard',
-    address: '',
-    zipCode: '',
-    city: '',
-    country: '',
-    phone: '',
-    email: '',
-    website: '',
-    licenseNumber: '',
-    registrationNumber: '',
-    yearsInBusiness: '',
-    languages: [],
-    specializations: [],
-    serviceAreas: '',
-    facebookUrl: '',
-    instagramUrl: '',
-    linkedinUrl: '',
-    businessHours: defaultBusinessHours,
-  });
+  const [formData, setFormData] = useState<AgencyFormData>(draft.restored?.formData ?? EMPTY_AGENCY_FORM);
 
   // Check agency creation eligibility
   const agencyEligibility = canCreateAgency(
@@ -175,7 +190,8 @@ const CreateAgencyPage: React.FC = () => {
           setAvailableCities(countryData.cities.map(city => city.name));
         }
       }
-    } else if (state.currentUser) {
+    } else if (state.currentUser && prefillUserRef.current) {
+      prefillUserRef.current = false;
       const user = state.currentUser;
       setFormData(prev => ({
         ...prev,
@@ -195,6 +211,24 @@ const CreateAgencyPage: React.FC = () => {
       }
     }
   }, [state.pendingAgencyData, state.currentUser]);
+
+  // Keep what was typed on this device; nothing meaningful typed means no draft
+  useDraftAutosave<AgencyDraft | null>(draft, hasUnsavedChanges ? { formData, currentStep } : null, null);
+
+  const discardDraft = () => {
+    draft.discard();
+    setCurrentStep(1);
+    const user = state.currentUser;
+    setFormData(user ? {
+      ...EMPTY_AGENCY_FORM,
+      email: user.email || '',
+      phone: user.phone || '',
+      city: user.city || '',
+      country: user.country || '',
+      name: user.agencyName || '',
+      licenseNumber: user.licenseNumber || '',
+    } : EMPTY_AGENCY_FORM);
+  };
 
   // Track unsaved changes
   useEffect(() => {
@@ -514,6 +548,8 @@ const CreateAgencyPage: React.FC = () => {
             {error}
           </div>
         )}
+
+        <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-6" />
 
         <form onSubmit={handleSubmit}>
           {/* Step 1: Basic Information */}

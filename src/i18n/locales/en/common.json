@@ -899,5 +899,10 @@
     "retry": "Try again",
     "description": "Check your connection and try again. If it keeps happening, our servers may be busy.",
     "retrying": "Retrying…"
+  },
+  "formDraft": {
+    "restoredTitle": "We restored what you entered last time.",
+    "restoredMessage": "Saved on this device on {{date}}.",
+    "startOver": "Discard and start over"
   }
 }

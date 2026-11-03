@@ -14,6 +14,7 @@ import {
 } from '../../types';
 import { CreateImportPicker } from './CreateImportPicker';
 import { useCreateDevelopmentForm } from './useCreateDevelopmentForm';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 
 /**
  * Step 1 of the development wizard: basic information.
@@ -27,7 +28,7 @@ import { useCreateDevelopmentForm } from './useCreateDevelopmentForm';
  */
 const CreateDevelopmentForm: React.FC = () => {
   const { t } = useTranslation('developments');
-  const { form, set, location, setLocation, fieldError, submitError, sheet, setSheet, onSubmit, isLoading } = useCreateDevelopmentForm();
+  const { form, set, location, setLocation, fieldError, submitError, sheet, setSheet, onSubmit, isLoading, draftSavedAt, discardDraft } = useCreateDevelopmentForm();
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8">
@@ -38,6 +39,8 @@ const CreateDevelopmentForm: React.FC = () => {
           {t('billing.createNote', 'Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online.')}
         </p>
       </header>
+
+      <DraftRestoredNotice savedAt={draftSavedAt} onDiscard={discardDraft} className="mb-4" />
 
       <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-white p-5 space-y-5" noValidate>
         <Input

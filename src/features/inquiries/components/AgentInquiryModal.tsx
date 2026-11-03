@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAppContext } from '@/context/AppContext';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
+import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import { useTranslation } from 'react-i18next';
 import { sendAgentInquiry } from '@/services/apiService';
 import { XMarkIcon } from '@/constants';
@@ -43,12 +47,23 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
 }) => {
   const { t } = useTranslation(['agents', 'common']);
   const [inquiryType, setInquiryType] = useState<InquiryType>('');
-  const [formData, setFormData] = useState({
+  const userId = useAppContext().state.currentUser?.id;
+  const [blank] = useState(() => ({
     buyerName: defaultName,
     buyerEmail: defaultEmail,
     buyerPhone: defaultPhone,
     message: '',
-  });
+  }));
+  // An unsent message is kept on this device until it is sent
+  const draft = useFormDraft<typeof blank>(formDraftKey(`agent-inquiry-${agent.userId || agent.agentId || agent.id}`, userId));
+  const [formData, setFormData] = useState(() => draft.restored ?? blank);
+  useDraftAutosave(draft, formData, blank);
+  const sendingRef = useRef(false);
+
+  const discardDraft = () => {
+    draft.discard();
+    setFormData(blank);
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +139,8 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
       return;
     }
 
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     setIsSubmitting(true);
     try {
       const agentId = String(agent.userId || agent.agentId || agent.id || '');
@@ -137,10 +154,12 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
         buyerPhone: formData.buyerPhone.trim() || undefined,
         message: formData.message.trim(),
       });
+      draft.finish();
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('agents:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
     } finally {
+      sendingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -295,6 +314,8 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                   <p className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
+
+              <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
 

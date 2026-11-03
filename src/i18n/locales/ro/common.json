@@ -879,5 +879,10 @@
     "title": "Pagina nu a putut fi încărcată",
     "retry": "Încercați din nou"
   }
-}
+},
+  "formDraft": {
+    "restoredTitle": "Am restabilit ce ați completat data trecută.",
+    "restoredMessage": "Salvat pe acest dispozitiv la {{date}}.",
+    "startOver": "Renunță și începe de la capăt"
+  }
 }
