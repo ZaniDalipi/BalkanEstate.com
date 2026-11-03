@@ -9,7 +9,7 @@ import { AppleHelloEnglishEffect } from '@/src/components/ui/apple-hello-effect'
 /* ------------------------------------------------------------------ */
 const SplashLogo: React.FC<{ className?: string }> = ({ className }) => (
   <img
-    src="/icons/logo-3d.svg"
+    src="/icons/logo-3d-256.webp"
     alt="BalkanEstate"
     className={className}
     draggable={false}

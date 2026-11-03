@@ -1,7 +1,7 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import MapComponent from '@/src/features/map/components/MapComponent';
+import MapComponent, { useWarmMap } from '@/src/features/map/components/LazyMap';
 import PropertyList from './PropertyList';
 import { Property, ChatMessage, AiSearchQuery } from '@/types';
 import { Bars3Icon, UserCircleIcon, AdjustmentsHorizontalIcon, Squares2x2Icon, XMarkIcon, MapIcon } from '@/constants';
@@ -175,6 +175,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         deferredMap,
     });
     const listMemory = useListMemory(showViewToggle && !mountList, filters);
+    // The map's code is its own chunk: fetch it at idle so the first tap on Map finds it ready.
+    useWarmMap();
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists

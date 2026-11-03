@@ -2,7 +2,7 @@ import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
-import MapComponent from '@/src/features/map/components/MapComponent';
+import MapComponent, { useWarmMap } from '@/src/features/map/components/LazyMap';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
@@ -632,6 +632,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     // On screen, it mounts immediately as before.
     const isMapOnScreen = !showViewToggle || mobileView === 'map';
     const mountMap = useDeferredMount(!isMapOnScreen);
+    // The map's code is its own chunk: fetch it at idle so the first tap on Map finds it ready.
+    useWarmMap();
     // And the same the other way round: with the map showing, the cards behind
     // it are a screenful of DOM nobody is looking at, built in that same commit.
     const isListOnScreen = !showViewToggle || mobileView === 'list';

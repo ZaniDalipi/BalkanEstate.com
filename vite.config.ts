@@ -76,7 +76,9 @@ export default defineConfig(({ mode }) => {
           // We register the SW manually after page load in index.tsx
           // to keep it out of the critical rendering path.
           injectRegister: null,
-          includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.jpg', 'robots.txt'],
+          // Small icons only. The logo SVGs in public/icons embed ~1-2MB of bitmaps
+          // each; precaching them made every first visit download ~6MB of logos.
+          includeAssets: ['icons/*.png', 'icons/logo-3d-256.webp', 'robots.txt'],
           manifest: {
             name: 'BalkanEstateAI',
             short_name: 'BalkanEstate',
@@ -183,8 +185,23 @@ export default defineConfig(({ mode }) => {
             ]
           },
           workbox: {
-            globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}'],
-            maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+            // Precache the app shell, not the whole site. This used to precache
+            // every file (~33MB: all 10 language packs, the admin dashboard,
+            // the HEIC converter, MapLibre, full-size partner images), which a
+            // phone downloaded in the background on its first visit, competing
+            // with the page itself. What is left out is cached on first use by
+            // the `/assets/` runtime rule below, so a visitor still gets their
+            // own language and the pages they open offline.
+            globPatterns: ['**/*.{js,css,html,ico,woff,woff2}'],
+            globIgnores: [
+              '**/i18n-*.js',            // one language per visitor, fetched on demand
+              '**/heic-converter*.js',   // only when an iPhone photo is uploaded
+              '**/maplibre*.js',         // only the 3D building view
+              '**/AdminDashboard*.js',
+              '**/*Dashboard*.js',
+              '**/node_modules/**',
+            ],
+            maximumFileSizeToCacheInBytes: 1024 * 1024, // nothing over 1MB belongs in the shell
             // Safari Mobile fix: import a script that strips response.redirected
             // from navigation responses before Safari can reject them with
             // "Response served by service worker has redirections"
@@ -199,6 +216,17 @@ export default defineConfig(({ mode }) => {
             // directly so React picks up the ?token= query params normally.
             navigateFallbackDenylist: [/^\/api\//, /^\/auth\/callback/],
             runtimeCaching: [
+              // Build output is content-hashed, so a cached file never goes
+              // stale: whatever the shell did not precache is kept on first use.
+              {
+                urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/assets/'),
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'app-assets',
+                  expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 60 },
+                  cacheableResponse: { statuses: [200] },
+                },
+              },
               {
                 urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
                 handler: 'CacheFirst',
@@ -415,6 +443,24 @@ export default defineConfig(({ mode }) => {
                 // Date handling
                 if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
                   return 'date-utils';
+                }
+                // Libraries only some screens use. Left to the catch-all below
+                // they sat in `vendor`, which every page loads before it can
+                // render: ~900KB of spreadsheet parsing, Google Maps bindings,
+                // GSAP and avatar art on pages that use none of them (even the
+                // spreadsheet reader, which the code already imports lazily).
+                // A chunk of their own is fetched only by the screens that use it.
+                if (id.includes('read-excel-file') || id.includes('fflate')) {
+                  return 'spreadsheet';
+                }
+                if (id.includes('@react-google-maps') || id.includes('@googlemaps/')) {
+                  return 'google-maps';
+                }
+                if (id.includes('node_modules/gsap')) {
+                  return 'gsap';
+                }
+                if (id.includes('@dicebear')) {
+                  return 'avatars';
                 }
                 // All other node_modules
                 return 'vendor';

@@ -136,7 +136,7 @@ export const ArrowTopRightOnSquareIcon: React.FC<{ className?: string }> = ({ cl
 export const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement('img', {
         className: className,
-        src: '/icons/logo-3d.svg',
+        src: '/icons/logo-3d-256.webp',
         alt: 'BalkanEstate',
     })
 );

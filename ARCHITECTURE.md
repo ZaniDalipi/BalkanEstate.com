@@ -1357,6 +1357,11 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   (`search:ui.searchPage.recoveredFromCrash`). Storage that is missing or throws
   just turns the guard off. Rentals and Villas still use the older
   hide-only behaviour.
+- **Lazy map code.** `LazyMap` (`features/map/components/LazyMap.tsx`) is what
+  Search, Rentals and Villas render: `MapComponent` is its own chunk, loaded via
+  `lazyWithRetry` with `MapBusyOverlay` as the Suspense fallback, inside a
+  feature `ErrorBoundary` so a failed download stays in the map area.
+  `useWarmMap()` fetches it at idle so the first tap on Map is still instant.
 - **Pins only around the view.** `/search` loads up to 3000 listings, and a
   pin is a DOM node plus a Google marker. `useGoogleMap` builds pins only for
   listings inside `markerArea` (`features/map/utils/markerArea.ts`, pure): the
@@ -1492,3 +1497,23 @@ layout, every upload case, setup, migration from Cloudinary and the
 - JWT stored in httpOnly cookies (not localStorage)
 - Input sanitisation on the Express layer
 - Image uploads validated by Cloudinary (type + size limits on the backend)
+
+---
+
+## Loading budget (build and service worker)
+
+- **`vendor` holds only what every page needs.** Libraries a few screens use
+  get their own chunk in `vite.config.ts → manualChunks` (`spreadsheet`,
+  `google-maps`, `gsap`, `avatars`); left to the catch-all they were in
+  `vendor`, loaded before any page renders (835KB → 384KB). Add a rule for any
+  new heavy library that is not used app-wide.
+- **The service worker precaches the shell, not the site.** `workbox.globPatterns`
+  covers js/css/html/fonts only, `globIgnores` leaves out language packs,
+  dashboards, the HEIC converter and MapLibre, and files over 1MB are never
+  precached. Everything else under `/assets/` is cached on first use
+  (`app-assets`, CacheFirst — the names are content-hashed). First-visit
+  precache went from ~33MB to ~6.6MB.
+- **No multi-megabyte images in the shell.** The logo SVGs in `public/icons`
+  embed ~1–2MB of bitmaps; pages use `logo-3d-256.webp` (10KB) and the favicon is
+  `logo-3d-64.png`. `logo-3d.svg` stays only for the backend watermark.
+
