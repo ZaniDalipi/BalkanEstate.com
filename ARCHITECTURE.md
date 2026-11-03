@@ -1332,6 +1332,26 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   only the current, previous and next slide and pauses autoplay off screen.
   Once the list has finished sliding away (`useSettledHidden`), it gets
   `content-visibility: hidden`: still mounted, scroll kept, but not rendered.
+- **The hidden list is released, not just hidden (Search).** On a phone or
+  tablet, once the list has settled behind the map (`useSettledHidden`),
+  `SearchPage` unmounts `PropertyList` and its header outright
+  (`releaseList`); `content-visibility` alone still left every card and photo
+  alive beside the WebGL map. `useListMemory` (`features/search/hooks`) keeps the
+  scroll offset (captured from `[data-scroll-container]`) and the number of
+  cards paged in (`initialVisibleCount` / `onVisibleCountChange` on
+  `PropertyList`), and puts the visitor back on the same card when the list
+  returns; a change of filters starts the results over.
+- **Crash-loop guard.** Safari kills the page without running our code, so a
+  crash can only be noticed on the next load. `useViewSwitchGuard` writes a
+  `sessionStorage` marker when the switch is tapped and clears it after
+  `SWITCH_SURVIVE_MS` (or on leaving the page); a marker found on load
+  (`consumeSwitchCrash`, pure, in `features/search/utils/viewSwitchGuard.ts`)
+  means the last page died mid-switch. That load opens on the list (not the
+  map the app state defaults to), builds the map only when asked
+  (`useDeferredMount(…, { idle: false })`) and says why in a toast
+  (`search:ui.searchPage.recoveredFromCrash`). Storage that is missing or throws
+  just turns the guard off. Rentals and Villas still use the older
+  hide-only behaviour.
 - **Map pins are built for the screen only.** The Google map clusters with
   `SuperClusterViewportAlgorithm` (`useGoogleMap.ts`): bubbles and pins exist
   only inside the visible area plus a margin. The whole-region algorithm put

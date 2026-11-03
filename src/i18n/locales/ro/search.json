@@ -606,7 +606,8 @@
       "openFilters": "Deschide filtrele",
       "myAccount": "Contul meu",
       "tapMap": "Atinge „Hartă”",
-      "viewToggle": "Comută vizualizarea"
+      "viewToggle": "Comută vizualizarea",
+      "recoveredFromCrash": "Pagina a repornit pentru a elibera memorie. Harta se încarcă când atingi Hartă."
     },
     "aiSearch": {
       "agent": "Agent",

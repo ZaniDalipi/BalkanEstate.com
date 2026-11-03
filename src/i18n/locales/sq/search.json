@@ -606,7 +606,8 @@
       "openFilters": "Hap filtrat",
       "myAccount": "Llogaria ime",
       "tapMap": "Prek \"Harta\"",
-      "viewToggle": "Ndrysho pamjen"
+      "viewToggle": "Ndrysho pamjen",
+      "recoveredFromCrash": "Faqja u rindez për të liruar memorie. Harta ngarkohet kur prek Harta."
     },
     "aiSearch": {
       "agent": "Agjent",

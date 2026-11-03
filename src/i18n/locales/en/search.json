@@ -606,7 +606,8 @@
       "openFilters": "Open filters",
       "myAccount": "My account",
       "tapMap": "Tap \"Map\"",
-      "viewToggle": "View toggle"
+      "viewToggle": "View toggle",
+      "recoveredFromCrash": "The page restarted to free memory. The map loads when you tap Map."
     },
     "sunPositionControl": {
       "n12am": "12AM",

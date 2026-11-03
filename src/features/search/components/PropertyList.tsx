@@ -56,6 +56,10 @@ interface PropertyListProps {
   isLoadingProperties?: boolean;
   isAuthenticated?: boolean;
   onOpenAuthModal?: () => void;
+  /** Cards to page in at first: a list brought back after being released keeps its depth. */
+  initialVisibleCount?: number;
+  /** Told how many cards are paged in, so a released list can come back as deep. */
+  onVisibleCountChange?: (count: number) => void;
 }
 
 /**
@@ -852,9 +856,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Use props instead of useAppContext() to avoid re-rendering the
     // entire property list when unrelated context state changes (e.g. savedHomes).
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, outOfArea = null, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, outOfArea = null, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal, initialVisibleCount, onVisibleCountChange } = props;
 
-    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const [visibleCount, setVisibleCount] = useState(initialVisibleCount ?? ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
@@ -912,9 +916,19 @@ const PropertyList = memo<PropertyListProps>((props) => {
     // Memoized so JSON.stringify only runs when filters reference changes, not on every
     // internal state change (visibleCount, isLoadingMore, etc.).
     const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    // The first run is the mount itself: a list returning from the map keeps
+    // the depth it was given, and only a real change of filters starts over.
+    const isFirstFiltersKey = useRef(true);
     useEffect(() => {
+      if (isFirstFiltersKey.current) {
+        isFirstFiltersKey.current = false;
+        return;
+      }
       setVisibleCount(ITEMS_PER_PAGE);
     }, [filtersKey]);
+    useEffect(() => {
+      onVisibleCountChange?.(visibleCount);
+    }, [visibleCount, onVisibleCountChange]);
 
     // Show skeleton placeholders briefly when search filters change,
     // so users see a clear "refreshing" signal instead of an instant jump.

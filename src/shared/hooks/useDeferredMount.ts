@@ -19,8 +19,12 @@ import { useEffect, useState } from 'react';
  * because a flag went back to false, so `defer` turning true again after the
  * mount is ignored; and `defer` turning *false* (the user opened the map)
  * mounts immediately rather than waiting for idle.
+ *
+ * `idle: false` turns the idle mount off: the subtree then mounts only when
+ * `defer` goes false. The search page uses it after a crash, so the map is
+ * not built until the visitor asks for it.
  */
-export function useDeferredMount(defer: boolean): boolean {
+export function useDeferredMount(defer: boolean, { idle: mountAtIdle = true }: { idle?: boolean } = {}): boolean {
   const [mounted, setMounted] = useState(!defer);
 
   useEffect(() => {
@@ -31,6 +35,7 @@ export function useDeferredMount(defer: boolean): boolean {
       setMounted(true);
       return;
     }
+    if (!mountAtIdle) return;
 
     let cancelled = false;
     const mount = () => {
@@ -64,7 +69,7 @@ export function useDeferredMount(defer: boolean): boolean {
         (window as Window & { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback?.(idleHandle);
       }
     };
-  }, [defer, mounted]);
+  }, [defer, mounted, mountAtIdle]);
 
   return mounted;
 }

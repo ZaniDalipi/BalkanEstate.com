@@ -606,7 +606,8 @@
       "openFilters": "Otvori filtere",
       "myAccount": "Moj račun",
       "tapMap": "Dodirnite „Mapa“",
-      "viewToggle": "Promijeni prikaz"
+      "viewToggle": "Promijeni prikaz",
+      "recoveredFromCrash": "Stranica se ponovo pokrenula radi oslobađanja memorije. Mapa se učitava kad dodirnete Mapa."
     },
     "aiSearch": {
       "agent": "Agent",
