@@ -33,6 +33,8 @@ const HowItWorksSection = lazy(() => import('./HowItWorksSection'));
 const CTASection = lazy(() => import('./CTASection'));
 const NewsSection = lazy(() => import('./NewsSection'));
 const TestimonialsSection = lazy(() => import('./TestimonialsSection'));
+const HomeResidencesSection = lazy(() => import('./residences/HomeResidencesSection'));
+const HomeBusinessesSection = lazy(() => import('./businesses/HomeBusinessesSection'));
 
 const SectionFallback = () => (
   <div className="py-16 flex justify-center">
@@ -246,6 +248,15 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           showcase, on a row of its own so it separates the two sections
           rather than sitting across either. */}
       <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" showPlaceholder />
+
+      {/* Right after the hero: new residences (a scroll stack) and the business
+          directory, so both are among the first things people see. */}
+      <Suspense fallback={<SectionFallback />}>
+        <HomeResidencesSection />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <HomeBusinessesSection />
+      </Suspense>
 
       <AppShowcaseSection onNavigate={handleNavigate} />
 

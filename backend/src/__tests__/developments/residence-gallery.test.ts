@@ -104,3 +104,24 @@ describe('residence gallery', () => {
     expect((await request(app).patch(`${url}/order`).set(auth(viewer.token)).send({ urls: [] })).status).toBe(403);
   });
 });
+
+describe('preview photo in the residence list', () => {
+  it('uses the cover, else the first gallery photo, else the first published picture of the residence', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const DevelopmentScene = require('../../models/DevelopmentScene').default;
+    const a = await setupDevelopment({ published: true, name: 'Preview A' });
+    const b = await setupDevelopment({ published: true, name: 'Preview B' });
+    const c = await setupDevelopment({ published: true, name: 'Preview C' });
+    await Development.updateOne({ _id: a.devId }, { $set: { gallery: [{ url: 'https://cdn.example.com/g1.webp' }] } });
+    await DevelopmentScene.create({
+      developmentId: b.devId, targetType: 'development', targetId: b.devId, imageUrl: 'https://cdn.example.com/view.webp', imageWidth: 100, imageHeight: 100,
+      draft: { hotspots: [], version: 1 }, published: { hotspots: [], version: 1, publishedAt: new Date() },
+    });
+    const res = await request(app).get(`${PUB}?limit=50`);
+    expect(res.status).toBe(200);
+    const by = (slug: string) => res.body.developments.find((d: { slug: string }) => d.slug === slug);
+    expect(by(a.dev.slug).previewImage).toBe('https://cdn.example.com/g1.webp');
+    expect(by(b.dev.slug).previewImage).toBe('https://cdn.example.com/view.webp');
+    expect(by(c.dev.slug)).not.toHaveProperty('previewImage');
+  });
+});

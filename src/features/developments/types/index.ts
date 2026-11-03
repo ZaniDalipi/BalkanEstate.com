@@ -82,6 +82,8 @@ export interface Development {
   /** Present once the owner has named the builder. */
   builder?: DevelopmentBuilder;
   coverImage?: string;
+  /** Lists only: the cover, else the first gallery photo, else the first published explorer picture. */
+  previewImage?: string;
   /** More photos of the residence, in the owner's order (at most 15). */
   gallery?: DevelopmentPhoto[];
   /** Whether buyers may send an inquiry about a unit that has no linked listing. */
