@@ -174,6 +174,9 @@ export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
 export const SCENE_TARGET_TYPES = ['development', 'building', 'floor'] as const;
 export type SceneTargetType = (typeof SCENE_TARGET_TYPES)[number];
 
+/** Photos a residence gallery can hold (besides its cover). */
+export const DEVELOPMENT_GALLERY_MAX = 15;
+
 /** What kind of door an entrance is: the main one, a side door, the car park, or a service door. */
 export const ENTRANCE_KINDS = ['main', 'side', 'garage', 'service'] as const;
 export type EntranceKind = (typeof ENTRANCE_KINDS)[number];

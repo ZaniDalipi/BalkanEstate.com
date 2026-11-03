@@ -87,6 +87,8 @@ export const mediaFolder = (kind: MediaAssetKind, ctx: MediaKeyContext): string 
       return `developments/${namedSegment(ctx.developmentName, ctx.developmentId || ctx.userId)}/builder/logo`;
     case 'development-builder-banner':
       return `developments/${namedSegment(ctx.developmentName, ctx.developmentId || ctx.userId)}/builder/banner`;
+    case 'development-gallery':
+      return `developments/${namedSegment(ctx.developmentName, ctx.developmentId || ctx.userId)}/gallery`;
     case 'business-logo':
       return `businesses/${namedSegment(ctx.businessName, ctx.businessListingId || ctx.userId)}/logo`;
     case 'business-banner':

@@ -82,6 +82,8 @@ export interface Development {
   /** Present once the owner has named the builder. */
   builder?: DevelopmentBuilder;
   coverImage?: string;
+  /** More photos of the residence, in the owner's order (at most 15). */
+  gallery?: DevelopmentPhoto[];
   /** Whether buyers may send an inquiry about a unit that has no linked listing. */
   allowUnitInquiries?: boolean;
   status: DevelopmentStatus;
@@ -89,6 +91,13 @@ export interface Development {
   stats: DevelopmentStats;
   createdAt: string;
   updatedAt: string;
+}
+
+/** A residence gallery photo (public: no storage key). */
+export interface DevelopmentPhoto {
+  url: string;
+  width?: number;
+  height?: number;
 }
 
 export interface DevelopmentBuilding {

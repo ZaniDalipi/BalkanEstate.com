@@ -1406,7 +1406,9 @@
     "PHONE_INVALID": "Shkruani një numër telefoni të vlefshëm, si +389 2 123 4567.",
     "SOCIAL_HOST": "Kjo duhet të jetë një lidhje në {{network}}.",
     "ENTRANCE_NAME_TAKEN": "Kjo ndërtesë ka tashmë një hyrje me emrin “{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër."
+    "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër.",
+    "RESIDENCE_GALLERY_FULL": "Një rezidencë mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
+    "GALLERY_ORDER_INVALID": "Fotot ndryshuan ndërkohë. Ringarkoni faqen dhe provoni përsëri."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1509,5 +1511,18 @@
   },
   "sheet": {
     "save": "Ruaj"
+  },
+  "gallery": {
+    "heading": "Fotot",
+    "hint": "Shfaqen në faqen e rezidencës pas kopertinës. Deri në {{max}} foto — JPG, PNG, WebP ose AVIF, 10 MB secila.",
+    "count": "{{n}} nga {{max}}",
+    "add": "Shto foto",
+    "uploading": "Po ngarkohet…",
+    "photoAlt": "Foto {{n}}",
+    "moveEarlier": "Zhvendos foton {{n}} më përpara",
+    "moveLater": "Zhvendos foton {{n}} më pas",
+    "remove": "Hiq foton {{n}}",
+    "removeMessage": "Fotoja hiqet nga faqja e rezidencës.",
+    "showAll": "Fotot ({{n}})"
   }
 }

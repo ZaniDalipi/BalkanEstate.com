@@ -235,8 +235,9 @@ export const uploadCover = async (req: Request, res: Response): Promise<void> =>
       developmentId: String(development._id),
       developmentName: development.name,
       type: 'development-cover',
-      maxWidth: 1920,
-      maxHeight: 720,
+      // The whole photo, sharp at any hero size; the page crops it with CSS.
+      maxWidth: 2400,
+      maxHeight: 2400,
     });
 
     development.coverImage = result.url;

@@ -1416,7 +1416,9 @@
     "PHONE_INVALID": "Unesite ispravan broj telefona, npr. +389 2 123 4567.",
     "SOCIAL_HOST": "Ovo mora biti link na {{network}}.",
     "ENTRANCE_NAME_TAKEN": "Ova zgrada već ima ulaz pod nazivom „{{name}}”.",
-    "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz."
+    "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz.",
+    "RESIDENCE_GALLERY_FULL": "Rezidencija može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
+    "GALLERY_ORDER_INVALID": "Fotografije su se u međuvremenu promijenile. Osvježite stranicu i pokušajte ponovo."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1520,5 +1522,18 @@
   },
   "sheet": {
     "save": "Spremi"
+  },
+  "gallery": {
+    "heading": "Fotografije",
+    "hint": "Prikazuju se na stranici rezidencije nakon naslovne. Do {{max}} fotografija — JPG, PNG, WebP ili AVIF, do 10 MB svaka.",
+    "count": "{{n}} od {{max}}",
+    "add": "Dodaj fotografije",
+    "uploading": "Otpremanje…",
+    "photoAlt": "Fotografija {{n}}",
+    "moveEarlier": "Pomjeri fotografiju {{n}} naprijed",
+    "moveLater": "Pomjeri fotografiju {{n}} nazad",
+    "remove": "Ukloni fotografiju {{n}}",
+    "removeMessage": "Fotografija se uklanja sa stranice rezidencije.",
+    "showAll": "Fotografije ({{n}})"
   }
 }

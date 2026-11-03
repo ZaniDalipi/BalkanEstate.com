@@ -61,6 +61,8 @@ export const toPublicDevelopment = (development: IDevelopment): Record<string, u
   json.allowUnitInquiries = development.allowUnitInquiries !== false;
   json.builder = publicBuilder(development.builder);
   if (!json.builder) delete json.builder;
+  // Gallery photos without their storage keys.
+  json.gallery = (development.gallery ?? []).map(({ url, width, height }) => ({ url, ...(width ? { width } : {}), ...(height ? { height } : {}) }));
   return json;
 };
 

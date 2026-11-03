@@ -46,6 +46,7 @@ export const MEDIA_ASSET_KINDS = [
   'development-scene',
   'development-builder-logo',
   'development-builder-banner',
+  'development-gallery',
   'business-logo',
   'business-banner',
   'site-logo',

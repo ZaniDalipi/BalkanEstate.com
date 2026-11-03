@@ -1416,7 +1416,9 @@
     "PHONE_INVALID": "Introduceți un număr de telefon valid, de ex. +389 2 123 4567.",
     "SOCIAL_HOST": "Acesta trebuie să fie un link către {{network}}.",
     "ENTRANCE_NAME_TAKEN": "Această clădire are deja o intrare numită „{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} unități folosesc încă această intrare. Mutați-le mai întâi la altă intrare."
+    "ENTRANCE_IN_USE": "{{count}} unități folosesc încă această intrare. Mutați-le mai întâi la altă intrare.",
+    "RESIDENCE_GALLERY_FULL": "Un ansamblu poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
+    "GALLERY_ORDER_INVALID": "Fotografiile s-au schimbat între timp. Reîncărcați pagina și încercați din nou."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1520,5 +1522,18 @@
   },
   "sheet": {
     "save": "Salvează"
+  },
+  "gallery": {
+    "heading": "Fotografii",
+    "hint": "Apar pe pagina ansamblului după copertă. Până la {{max}} fotografii — JPG, PNG, WebP sau AVIF, câte 10 MB.",
+    "count": "{{n}} din {{max}}",
+    "add": "Adaugă fotografii",
+    "uploading": "Se încarcă…",
+    "photoAlt": "Fotografia {{n}}",
+    "moveEarlier": "Mută fotografia {{n}} mai devreme",
+    "moveLater": "Mută fotografia {{n}} mai târziu",
+    "remove": "Elimină fotografia {{n}}",
+    "removeMessage": "Fotografia este eliminată de pe pagina ansamblului.",
+    "showAll": "Fotografii ({{n}})"
   }
 }

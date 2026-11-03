@@ -1406,7 +1406,9 @@
     "PHONE_INVALID": "Enter a valid phone number, like +389 2 123 4567.",
     "SOCIAL_HOST": "This must be a link to {{network}}.",
     "ENTRANCE_NAME_TAKEN": "This building already has an entrance called “{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first."
+    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first.",
+    "RESIDENCE_GALLERY_FULL": "A residence can have at most {{max}} photos. {{remaining}} more can be added.",
+    "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1509,5 +1511,18 @@
   },
   "sheet": {
     "save": "Save"
+  },
+  "gallery": {
+    "heading": "Photos",
+    "hint": "Shown on the residence page after the cover. Up to {{max}} photos — JPG, PNG, WebP or AVIF, 10 MB each.",
+    "count": "{{n}} of {{max}}",
+    "add": "Add photos",
+    "uploading": "Uploading…",
+    "photoAlt": "Photo {{n}}",
+    "moveEarlier": "Move photo {{n}} earlier",
+    "moveLater": "Move photo {{n}} later",
+    "remove": "Remove photo {{n}}",
+    "removeMessage": "The photo is removed from the residence page.",
+    "showAll": "Photos ({{n}})"
   }
 }

@@ -3,6 +3,7 @@ import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import {
   DEVELOPMENT_CATEGORIES,
   DEVELOPMENT_CONSTRUCTION_STATUSES,
+  DEVELOPMENT_GALLERY_MAX,
   DEVELOPMENT_STATUSES,
   type DevelopmentCategory,
   type DevelopmentConstructionStatus,
@@ -25,6 +26,14 @@ export interface IDevelopmentContact {
 }
 
 /** A stored image: public URL plus the storage key (never sent to the public). */
+/** A residence gallery photo stored in R2. */
+export interface IDevelopmentPhoto {
+  url: string;
+  publicId?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface IDevelopmentImage {
   url: string;
   publicId?: string;
@@ -112,6 +121,8 @@ export interface IDevelopment extends Document {
   /** Cover image URL + storage key (mirrors the Agency cover pattern). */
   coverImage?: string;
   coverImagePublicId?: string;
+  /** More photos of the residence, in the owner's order (at most DEVELOPMENT_GALLERY_MAX). */
+  gallery: IDevelopmentPhoto[];
   status: DevelopmentStatus;
   billing: IDevelopmentBilling;
   /**
@@ -232,6 +243,19 @@ const DevelopmentSchema: Schema = new Schema(
     },
     coverImage: { type: String },
     coverImagePublicId: { type: String },
+    gallery: {
+      type: [
+        new Schema(
+          { url: { type: String, required: true }, publicId: { type: String }, width: { type: Number }, height: { type: Number } },
+          { _id: false }
+        ),
+      ],
+      default: [],
+      validate: {
+        validator: (v: unknown[]) => v.length <= DEVELOPMENT_GALLERY_MAX,
+        message: `A residence gallery holds at most ${DEVELOPMENT_GALLERY_MAX} photos`,
+      },
+    },
     status: {
       type: String,
       enum: DEVELOPMENT_STATUSES,
