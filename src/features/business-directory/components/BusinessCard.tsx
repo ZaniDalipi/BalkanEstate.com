@@ -5,6 +5,7 @@ import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import MagneticTiltCard from './MagneticTiltCard';
+import { categoryGradient } from '../utils/categoryStyle';
 
 interface BusinessCardProps {
   listing: BusinessListing;
@@ -12,33 +13,9 @@ interface BusinessCardProps {
   onQuoteRequest?: (listing: BusinessListing) => void;
 }
 
-// Category gradient banners
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  construction: 'from-amber-500 to-orange-600',
-  renovation: 'from-blue-500 to-cyan-600',
-  cleaning: 'from-emerald-400 to-teal-600',
-  moving: 'from-purple-500 to-indigo-600',
-  interior_design: 'from-pink-500 to-rose-600',
-  architecture: 'from-slate-500 to-zinc-700',
-  plumbing: 'from-sky-500 to-blue-600',
-  electrical: 'from-yellow-500 to-amber-600',
-  landscaping: 'from-green-500 to-emerald-700',
-  security: 'from-red-500 to-rose-700',
-  real_estate_law: 'from-indigo-500 to-violet-700',
-  insurance: 'from-cyan-500 to-blue-700',
-  home_inspection: 'from-orange-400 to-red-600',
-  pest_control: 'from-lime-500 to-green-700',
-  painting: 'from-fuchsia-500 to-purple-700',
-  roofing: 'from-stone-500 to-neutral-700',
-  hvac: 'from-blue-400 to-indigo-600',
-  furniture: 'from-amber-400 to-yellow-600',
-  appliances: 'from-gray-500 to-slate-700',
-  other: 'from-primary to-blue-600',
-};
-
 const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRequest }) => {
   const { t } = useTranslation('businessDirectory');
-  const gradient = CATEGORY_GRADIENTS[listing.category] || CATEGORY_GRADIENTS.other;
+  const gradient = categoryGradient(listing.category);
   const isIndividual = listing.listingType === 'individual';
 
   // Quick action handlers (stop propagation to prevent card click)

@@ -143,7 +143,53 @@
       "callNow": "Јави се на {{phone}}",
       "sendEmail": "Испрати е-пошта"
     },
-    "established": "Основано {{year}}"
+    "established": "Основано {{year}}",
+    "directory": "Именик",
+    "actions": {
+      "label": "Опции за контакт",
+      "call": "Јави се",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "Е-пошта",
+      "website": "Веб-страница",
+      "directions": "Насоки"
+    },
+    "atAGlance": "Накратко",
+    "copied": "Копирано",
+    "copy": "Копирај",
+    "copyAddress": "Копирај адреса",
+    "copyFailed": "Копирањето не успеа — означете го текстот",
+    "copyValue": "Копирај: {{label}}",
+    "founded": "Основано",
+    "highlights": "Истакнато",
+    "licenseNumber": "Број на лиценца",
+    "listedBy": "Објавено од",
+    "loading": "Се вчитува бизнисот…",
+    "logoAlt": "Лого: {{name}}",
+    "openSocial": "{{network}} (се отвора во ново јазиче)",
+    "priceRange": "Ценовен опсег",
+    "profileViews": "Прегледи на профилот",
+    "readLess": "Прикажи помалку",
+    "readMore": "Прочитај повеќе",
+    "seeAll": "Види ги сите",
+    "similar": "Повеќе во {{category}}",
+    "price": {
+      "budget": "Поволно",
+      "mid": "Средно",
+      "premium": "Премиум"
+    },
+    "status": {
+      "open": "Отворено",
+      "closes": "Затвора во {{time}}",
+      "allDay": "24 часа",
+      "closed": "Затворено",
+      "closedToday": "Денес затворено",
+      "opensAt": "Отвора во {{time}}",
+      "opensTomorrow": "Отвора утре во {{time}}",
+      "opensOn": "Отвора: {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} година работење",
+    "yearsInBusiness_other": "{{count}} години работење"
   },
   "days": {
     "monday": "Понеделник",
@@ -268,7 +314,8 @@
     "status": "Статус на огласот",
     "statusActiveDesc": "Вашиот оглас е видлив за сите",
     "statusInactiveDesc": "Вашиот оглас е скриен од именикот",
-    "success": "Вашиот оглас беше успешно ажуриран"
+    "success": "Вашиот оглас беше успешно ажуриран",
+    "short": "Уреди"
   },
   "myBusinesses": {
     "title": "Мои бизниси",
@@ -308,5 +355,14 @@
       "preview": "Преглед",
       "bannerPreview": "Преглед на банер"
     }
+  },
+  "paymentMethods": {
+    "cash": "Готовина",
+    "credit_card": "Кредитна картичка",
+    "debit_card": "Дебитна картичка",
+    "bank_transfer": "Банкарски трансфер",
+    "paypal": "PayPal",
+    "crypto": "Крипто",
+    "invoice": "Фактура"
   }
 }

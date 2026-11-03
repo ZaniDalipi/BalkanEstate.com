@@ -143,7 +143,53 @@
       "callNow": "Thirr {{phone}}",
       "sendEmail": "Dërgo Email"
     },
-    "established": "Themeluar më {{year}}"
+    "established": "Themeluar më {{year}}",
+    "directory": "Drejtoria",
+    "actions": {
+      "label": "Mundësitë e kontaktit",
+      "call": "Telefono",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "Email",
+      "website": "Faqja",
+      "directions": "Udhëzime"
+    },
+    "atAGlance": "Me një shikim",
+    "copied": "U kopjua",
+    "copy": "Kopjo",
+    "copyAddress": "Kopjo adresën",
+    "copyFailed": "Nuk u kopjua — përzgjidhni tekstin",
+    "copyValue": "Kopjo: {{label}}",
+    "founded": "Themeluar",
+    "highlights": "Pikat kryesore",
+    "licenseNumber": "Numri i licencës",
+    "listedBy": "Publikuar nga",
+    "loading": "Po ngarkohet biznesi…",
+    "logoAlt": "Logoja e {{name}}",
+    "openSocial": "{{network}} (hapet në skedë të re)",
+    "priceRange": "Niveli i çmimeve",
+    "profileViews": "Shikime të profilit",
+    "readLess": "Më pak",
+    "readMore": "Lexo më shumë",
+    "seeAll": "Shiko të gjitha",
+    "similar": "Më shumë në {{category}}",
+    "price": {
+      "budget": "Ekonomik",
+      "mid": "Mesatar",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Hapur",
+      "closes": "Mbyllet në {{time}}",
+      "allDay": "24 orë",
+      "closed": "Mbyllur",
+      "closedToday": "Mbyllur sot",
+      "opensAt": "Hapet në {{time}}",
+      "opensTomorrow": "Hapet nesër në {{time}}",
+      "opensOn": "Hapet {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} vit në biznes",
+    "yearsInBusiness_other": "{{count}} vjet në biznes"
   },
   "days": {
     "monday": "E hënë",
@@ -268,7 +314,8 @@
     "status": "Statusi i Listimit",
     "statusActiveDesc": "Listimi juaj është i dukshëm për të gjithë",
     "statusInactiveDesc": "Listimi juaj është i fshehur nga drejtoria",
-    "success": "Listimi juaj u përditësua me sukses"
+    "success": "Listimi juaj u përditësua me sukses",
+    "short": "Ndrysho"
   },
   "myBusinesses": {
     "title": "Bizneset e mia",
@@ -308,5 +355,14 @@
       "preview": "Pamje paraprake",
       "bannerPreview": "Pamje paraprake e banerit"
     }
+  },
+  "paymentMethods": {
+    "cash": "Para në dorë",
+    "credit_card": "Kartë krediti",
+    "debit_card": "Kartë debiti",
+    "bank_transfer": "Transfertë bankare",
+    "paypal": "PayPal",
+    "crypto": "Kriptomonedha",
+    "invoice": "Faturë"
   }
 }

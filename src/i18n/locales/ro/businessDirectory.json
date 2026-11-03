@@ -143,7 +143,54 @@
       "callNow": "Sună la {{phone}}",
       "sendEmail": "Trimite email"
     },
-    "established": "Înființat în {{year}}"
+    "established": "Înființat în {{year}}",
+    "directory": "Director",
+    "actions": {
+      "label": "Opțiuni de contact",
+      "call": "Sună",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "E-mail",
+      "website": "Site",
+      "directions": "Indicații"
+    },
+    "atAGlance": "Pe scurt",
+    "copied": "Copiat",
+    "copy": "Copiază",
+    "copyAddress": "Copiază adresa",
+    "copyFailed": "Nu s-a putut copia — selectați textul",
+    "copyValue": "Copiază: {{label}}",
+    "founded": "Înființată",
+    "highlights": "Repere",
+    "licenseNumber": "Număr licență",
+    "listedBy": "Publicat de",
+    "loading": "Se încarcă afacerea…",
+    "logoAlt": "Sigla {{name}}",
+    "openSocial": "{{network}} (se deschide într-o filă nouă)",
+    "priceRange": "Nivel de preț",
+    "profileViews": "Vizualizări profil",
+    "readLess": "Mai puțin",
+    "readMore": "Citește mai mult",
+    "seeAll": "Vezi tot",
+    "similar": "Mai multe în {{category}}",
+    "price": {
+      "budget": "Accesibil",
+      "mid": "Mediu",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Deschis",
+      "closes": "Se închide la {{time}}",
+      "allDay": "Non-stop",
+      "closed": "Închis",
+      "closedToday": "Închis azi",
+      "opensAt": "Se deschide la {{time}}",
+      "opensTomorrow": "Se deschide mâine la {{time}}",
+      "opensOn": "Se deschide: {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} an de activitate",
+    "yearsInBusiness_few": "{{count}} ani de activitate",
+    "yearsInBusiness_other": "{{count}} de ani de activitate"
   },
   "days": {
     "monday": "Luni",
@@ -268,7 +315,8 @@
     "status": "Starea anunțului",
     "statusActiveDesc": "Anunțul tău este vizibil pentru toți",
     "statusInactiveDesc": "Anunțul tău este ascuns din director",
-    "success": "Anunțul tău a fost actualizat cu succes"
+    "success": "Anunțul tău a fost actualizat cu succes",
+    "short": "Editează"
   },
   "myBusinesses": {
     "title": "Afacerile mele",
@@ -309,5 +357,14 @@
       "preview": "Previzualizare",
       "bannerPreview": "Previzualizare banner"
     }
+  },
+  "paymentMethods": {
+    "cash": "Numerar",
+    "credit_card": "Card de credit",
+    "debit_card": "Card de debit",
+    "bank_transfer": "Transfer bancar",
+    "paypal": "PayPal",
+    "crypto": "Cripto",
+    "invoice": "Factură"
   }
 }

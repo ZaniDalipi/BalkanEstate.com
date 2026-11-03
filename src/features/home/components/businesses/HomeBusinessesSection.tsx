@@ -5,7 +5,7 @@ import { AppLink } from '@/src/app/router/AppLink';
 import { paths } from '@/src/app/router/paths';
 import { useBusinessListings } from '@/src/features/business-directory/hooks/useBusinessListings';
 import { HomeSectionHeader } from '../HomeSectionHeader';
-import { BusinessRailCard } from './BusinessRailCard';
+import { BusinessRailCard } from '@/src/features/business-directory/components/BusinessRailCard';
 
 const SHOWN = 12;
 const arrow = 'hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:inline-flex';

@@ -143,7 +143,53 @@
       "callNow": "Call {{phone}}",
       "sendEmail": "Send Email"
     },
-    "established": "Est. {{year}}"
+    "established": "Est. {{year}}",
+    "directory": "Directory",
+    "actions": {
+      "label": "Contact options",
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "Email",
+      "website": "Website",
+      "directions": "Directions"
+    },
+    "atAGlance": "At a glance",
+    "copied": "Copied",
+    "copy": "Copy",
+    "copyAddress": "Copy address",
+    "copyFailed": "Couldn’t copy — select the text instead",
+    "copyValue": "Copy {{label}}",
+    "founded": "Founded",
+    "highlights": "Highlights",
+    "licenseNumber": "License number",
+    "listedBy": "Listed by",
+    "loading": "Loading business…",
+    "logoAlt": "{{name}} logo",
+    "openSocial": "{{network}} (opens in a new tab)",
+    "priceRange": "Price range",
+    "profileViews": "Profile views",
+    "readLess": "Show less",
+    "readMore": "Read more",
+    "seeAll": "See all",
+    "similar": "More in {{category}}",
+    "price": {
+      "budget": "Budget",
+      "mid": "Mid-range",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Open",
+      "closes": "Closes {{time}}",
+      "allDay": "24 hours",
+      "closed": "Closed",
+      "closedToday": "Closed today",
+      "opensAt": "Opens {{time}}",
+      "opensTomorrow": "Opens tomorrow {{time}}",
+      "opensOn": "Opens {{day}} {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} year in business",
+    "yearsInBusiness_other": "{{count}} years in business"
   },
   "days": {
     "monday": "Monday",
@@ -268,7 +314,8 @@
     "status": "Listing Status",
     "statusActiveDesc": "Your listing is visible to everyone",
     "statusInactiveDesc": "Your listing is hidden from the directory",
-    "success": "Your listing has been updated successfully"
+    "success": "Your listing has been updated successfully",
+    "short": "Edit"
   },
   "myBusinesses": {
     "title": "My Businesses",
@@ -308,5 +355,14 @@
       "preview": "Preview",
       "bannerPreview": "Banner preview"
     }
+  },
+  "paymentMethods": {
+    "cash": "Cash",
+    "credit_card": "Credit card",
+    "debit_card": "Debit card",
+    "bank_transfer": "Bank transfer",
+    "paypal": "PayPal",
+    "crypto": "Crypto",
+    "invoice": "Invoice"
   }
 }
