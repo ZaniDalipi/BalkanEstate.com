@@ -224,33 +224,6 @@
       "gestureDesktop": "Folosește Ctrl + derulare pentru zoom",
       "gestureMac": "Folosește ⌘ + derulare pentru zoom",
       "gestureMobile": "Folosește două degete pentru a muta harta"
-    },
-    "ask": {
-      "title": "Întreabă despre {{name}}",
-      "badge": "AI",
-      "suggestions": "Întrebări sugerate",
-      "limited": "Prea multe întrebări deocamdată — afacerea îți poate răspunde direct.",
-      "unavailable": "Nu pot răspunde acum — afacerea îți poate spune direct.",
-      "thinking": "Mă gândesc…",
-      "inputLabel": "Întrebarea ta pentru {{name}}",
-      "placeholder": "Întreabă orice despre ei…",
-      "send": "Trimite",
-      "disclaimer": "Răspunsurile vin doar din acest profil și pot fi incomplete — confirmă detaliile importante cu afacerea.",
-      "entry": "Întreabă orice despre {{name}}",
-      "suggest": {
-        "weekend": "Sunt deschiși sâmbăta?",
-        "areas": "Ce zone acoperă?",
-        "languages": "Vorbesc engleză?",
-        "payment": "Cum pot plăti?",
-        "services": "Ce servicii oferă?",
-        "quote": "Cum primesc o ofertă de preț?"
-      },
-      "remaining_one": "Mai ai {{count}} întrebare pentru această vizită",
-      "remaining_few": "Mai ai {{count}} întrebări pentru această vizită",
-      "remaining_other": "Mai ai {{count}} de întrebări pentru această vizită",
-      "cooldown": "Poți întreba din nou în câteva clipe.",
-      "visitLimit": "Aceasta este limita de întrebări pentru această vizită — afacerea îți poate răspunde direct la restul.",
-      "wait": "O clipă — poți întreba din nou în {{seconds}} s."
     }
   },
   "days": {

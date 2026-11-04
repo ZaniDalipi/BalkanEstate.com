@@ -224,33 +224,6 @@
       "gestureDesktop": "Koristite Ctrl + skrolovanje za zumiranje",
       "gestureMac": "Koristite ⌘ + skrolovanje za zumiranje",
       "gestureMobile": "Koristite dva prsta za pomjeranje mape"
-    },
-    "ask": {
-      "title": "Pitajte o: {{name}}",
-      "badge": "AI",
-      "suggestions": "Predložena pitanja",
-      "limited": "Previše pitanja za sada — firma vam može odgovoriti direktno.",
-      "unavailable": "Trenutno ne mogu da odgovorim — firma vam može reći direktno.",
-      "thinking": "Razmišljam…",
-      "inputLabel": "Vaše pitanje za {{name}}",
-      "placeholder": "Pitajte bilo šta o njima…",
-      "send": "Pošalji",
-      "disclaimer": "Odgovori dolaze samo iz ovog profila i mogu biti nepotpuni — važne detalje potvrdite sa firmom.",
-      "entry": "Pitajte bilo šta o: {{name}}",
-      "suggest": {
-        "weekend": "Da li rade subotom?",
-        "areas": "Koja područja pokrivaju?",
-        "languages": "Da li govore engleski?",
-        "payment": "Kako mogu da platim?",
-        "services": "Koje usluge nude?",
-        "quote": "Kako da dobijem ponudu?"
-      },
-      "remaining_one": "Preostalo je još {{count}} pitanje za ovu posjetu",
-      "remaining_few": "Preostala su još {{count}} pitanja za ovu posjetu",
-      "remaining_other": "Preostalo je još {{count}} pitanja za ovu posjetu",
-      "cooldown": "Uskoro možete ponovo da pitate.",
-      "visitLimit": "To je ograničenje pitanja za ovu posjetu — ostalo vam firma može odgovoriti direktno.",
-      "wait": "Trenutak — ponovo možete pitati za {{seconds}} s."
     }
   },
   "days": {

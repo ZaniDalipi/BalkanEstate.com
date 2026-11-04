@@ -11,7 +11,6 @@ import {
   getMyBusinessListings,
 } from '../controllers/businessListingController';
 import { protect } from '../middleware/auth';
-import { askBusinessListing } from '../controllers/businessAssistantController';
 
 const router = express.Router();
 
@@ -44,8 +43,6 @@ router.post('/', protect, createBusinessListing);
 
 // Parameterized routes
 router.get('/:id', getBusinessListing);
-// Public; spam and cost limits live in askGuard (per IP, per business, site-wide, plus an answer cache).
-router.post('/:id/ask', askBusinessListing);
 router.put('/:id', protect, updateBusinessListing);
 router.delete('/:id', protect, deleteBusinessListing);
 router.post('/:id/upload-logo', protect, upload.single('logo'), uploadBusinessLogo);

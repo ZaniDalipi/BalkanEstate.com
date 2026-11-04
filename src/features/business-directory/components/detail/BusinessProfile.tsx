@@ -15,9 +15,7 @@ import { getOpenStatus } from '../../utils/businessHours';
 import { categoryLabel } from '../../utils/categoryStyle';
 import { contactChannels, quickActions } from '../../utils/contactChannels';
 import { businessJsonLd } from '../../utils/businessJsonLd';
-import { AskEntryButton } from './AskEntryButton';
 import { BusinessAboutSection } from './BusinessAboutSection';
-import { BusinessAskSection } from './BusinessAskSection';
 import { BusinessBanner } from './BusinessBanner';
 import { BusinessContactSection } from './BusinessContactSection';
 import { BusinessFactsSection } from './BusinessFactsSection';
@@ -50,14 +48,10 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const actionsRef = useRef<HTMLDivElement>(null);
   const titlePast = useScrolledPast(titleRef);
   const actionsPast = useScrolledPast(actionsRef);
-  const askInputRef = useRef<HTMLInputElement>(null);
   const { toast, share, copy } = useShareAndCopy(listing.name);
   const { location, locate } = useVisitorLocation();
   const reduceMotion = useReducedMotion();
-  const jumpTo = (id: string, then?: () => void) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
-    then?.();
-  };
+  const jumpTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
 
   const status = getOpenStatus(listing.businessHours, now);
   const channels = useMemo(() => contactChannels(listing), [listing]);
@@ -99,13 +93,11 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
           onDistanceClick={() => jumpTo('business-location')}
         >
           <BusinessQuickActions ref={actionsRef} actions={quickActions(channels)} onShare={share} />
-          <AskEntryButton name={listing.name} onClick={() => jumpTo('business-ask', () => askInputRef.current?.focus({ preventScroll: true }))} />
         </BusinessIdentityCard>
 
         <div className="mt-5 grid gap-5 px-3 sm:mt-6 sm:px-0 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
           <div className="min-w-0 space-y-5">
             <BusinessAboutSection listing={listing} />
-            <BusinessAskSection listing={listing} channels={channels} inputRef={askInputRef} />
             <BusinessFactsSection listing={listing} now={now} />
             <BusinessHoursSection hours={listing.businessHours} status={status} now={now} />
             <BusinessOwnerSection listing={listing} />

@@ -222,32 +222,6 @@
       "gestureDesktop": "Përdorni Ctrl + rrotullim për zmadhim",
       "gestureMac": "Përdorni ⌘ + rrotullim për zmadhim",
       "gestureMobile": "Përdorni dy gishta për të lëvizur hartën"
-    },
-    "ask": {
-      "title": "Pyet për {{name}}",
-      "badge": "AI",
-      "suggestions": "Pyetje të sugjeruara",
-      "limited": "Shumë pyetje për momentin — biznesi mund t’ju përgjigjet drejtpërdrejt.",
-      "unavailable": "Nuk mund të përgjigjem tani — biznesi mund t’jua thotë drejtpërdrejt.",
-      "thinking": "Duke menduar…",
-      "inputLabel": "Pyetja juaj për {{name}}",
-      "placeholder": "Pyetni çfarëdo për ta…",
-      "send": "Dërgo",
-      "disclaimer": "Përgjigjet vijnë vetëm nga ky profil dhe mund të jenë të paplota — konfirmoni detajet e rëndësishme me biznesin.",
-      "entry": "Pyet çfarëdo për {{name}}",
-      "suggest": {
-        "weekend": "A janë hapur të shtunën?",
-        "areas": "Në cilat zona punojnë?",
-        "languages": "A flasin anglisht?",
-        "payment": "Si mund të paguaj?",
-        "services": "Çfarë shërbimesh ofrojnë?",
-        "quote": "Si të marr një ofertë çmimi?"
-      },
-      "remaining_one": "Ju ka mbetur {{count}} pyetje për këtë vizitë",
-      "remaining_other": "Ju kanë mbetur {{count}} pyetje për këtë vizitë",
-      "cooldown": "Mund të pyesni sërish pas pak.",
-      "visitLimit": "Ky është kufiri i pyetjeve për këtë vizitë — biznesi mund t’ju përgjigjet drejtpërdrejt për të tjerat.",
-      "wait": "Një moment — mund të pyesni sërish pas {{seconds}} s."
     }
   },
   "days": {

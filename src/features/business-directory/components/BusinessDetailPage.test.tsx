@@ -9,14 +9,12 @@ const h = vi.hoisted(() => ({
   detail: { listing: null as unknown, isLoading: false, error: null as unknown },
   list: { listings: [] as unknown[], total: 0, isLoading: false, error: null },
   user: null as null | { id: string },
-  askBusiness: vi.fn(),
   getTravelRoute: vi.fn(),
   geocodePlace: vi.fn(),
   map: vi.fn(),
 }));
 
 vi.mock('@/src/features/business-directory/api/businessExtrasApi', () => ({
-  askBusiness: (...args: unknown[]) => h.askBusiness(...args),
   getTravelRoute: (...args: unknown[]) => h.getTravelRoute(...args),
   geocodePlace: (...args: unknown[]) => h.geocodePlace(...args),
 }));
@@ -78,7 +76,6 @@ const mockGeolocation = (result: 'ok' | 'denied') => {
 };
 
 beforeEach(() => {
-  h.askBusiness.mockReset();
   h.getTravelRoute.mockReset();
   h.geocodePlace.mockReset();
   h.map.mockReset();
@@ -151,26 +148,6 @@ describe('BusinessDetailPage', () => {
     expect(onBack).toHaveBeenCalled();
   });
 
-  it('answers a suggested question from the profile, with the next step under it', async () => {
-    h.askBusiness.mockResolvedValue({ answer: 'Yes — they speak English and Italian.', action: 'whatsapp' });
-    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
-    const chat = within(screen.getByRole('region', { name: 'detail.ask.title' }));
-    fireEvent.click(chat.getByRole('button', { name: 'detail.ask.suggest.languages' }));
-    await waitFor(() => expect(h.askBusiness).toHaveBeenCalledWith('regina', 'detail.ask.suggest.languages', []));
-    expect(await chat.findByText('Yes — they speak English and Italian.')).toBeInTheDocument();
-    expect(chat.getByRole('link', { name: /detail.actions.whatsapp/ })).toHaveAttribute('href', 'https://wa.me/355686060190');
-  });
-
-  it('when the assistant is down, says so and offers the business directly', async () => {
-    h.askBusiness.mockRejectedValue(Object.assign(new Error('down'), { statusCode: 503 }));
-    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
-    const chat = within(screen.getByRole('region', { name: 'detail.ask.title' }));
-    fireEvent.change(chat.getByLabelText('detail.ask.inputLabel'), { target: { value: 'Do you build pools?' } });
-    fireEvent.click(chat.getByRole('button', { name: 'detail.ask.send' }));
-    expect(await chat.findByText('detail.ask.unavailable')).toBeInTheDocument();
-    expect(chat.getByRole('link', { name: /detail.actions.whatsapp/ })).toBeInTheDocument();
-  });
-
   it('shows time and distance from the visitor, and a distance chip up top', async () => {
     mockGeolocation('ok');
     h.getTravelRoute.mockResolvedValue({ distanceMeters: 112_400, durationSeconds: 5_100, path: [[41.3, 19.8], [40.45, 19.48]] });
@@ -222,15 +199,5 @@ describe('BusinessDetailPage', () => {
     expect(screen.getAllByText(/^Rruga Pavllo Flloko, Vlorë, Albania$/).length).toBeGreaterThan(0);
     const owner = within(screen.getByRole('region', { name: 'detail.owner' }));
     expect(owner.getByText('sales')).toBeInTheDocument();
-  });
-
-  it('when the server says slow down, asks the visitor to wait (no contact hand-off needed)', async () => {
-    h.askBusiness.mockRejectedValue(Object.assign(new Error('slow'), { statusCode: 429, details: { reason: 'burst', retryAfterSeconds: 40 } }));
-    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
-    const chat = within(screen.getByRole('region', { name: 'detail.ask.title' }));
-    fireEvent.click(chat.getByRole('button', { name: 'detail.ask.suggest.quote' }));
-    expect(await chat.findByText('detail.ask.wait')).toBeInTheDocument();
-    expect(chat.queryByRole('link', { name: /detail.actions.whatsapp/ })).not.toBeInTheDocument();
-    expect(chat.getByRole('button', { name: 'detail.ask.send' })).toBeDisabled();
   });
 });

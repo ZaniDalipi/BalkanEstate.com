@@ -1072,6 +1072,3 @@ export const generateSearchNameFromCoords = async (
 
   return result.text.trim();
 };
-
-/** Shared client and retry policy, for feature services that call Gemini themselves. */
-export { getAI as getGeminiClient, retryWithBackoff };

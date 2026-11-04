@@ -8,26 +8,6 @@ export const getTravelRoute = async (from: LatLng, to: LatLng, mode: TravelMode)
   return route;
 };
 
-export const ASK_ACTIONS = ['call', 'whatsapp', 'viber', 'email', 'website', 'directions', 'none'] as const;
-export type AskAction = (typeof ASK_ACTIONS)[number];
-
-export interface AskTurn {
-  role: 'user' | 'assistant';
-  text: string;
-}
-
-export interface AskReply {
-  answer: string;
-  action: AskAction;
-}
-
-/** Ask the business's profile a question; answered by the assistant from the profile only. */
-export const askBusiness = (listingId: string, question: string, history: AskTurn[]): Promise<AskReply> =>
-  apiRequest<AskReply>(`/business-listings/${encodeURIComponent(listingId)}/ask`, {
-    method: 'POST',
-    body: { question, history },
-  });
-
 interface GeocodeRow {
   lat: string;
   lon: string;

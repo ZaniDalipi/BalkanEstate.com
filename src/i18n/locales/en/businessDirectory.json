@@ -222,32 +222,6 @@
       "gestureDesktop": "Use Ctrl + scroll to zoom the map",
       "gestureMac": "Use ⌘ + scroll to zoom the map",
       "gestureMobile": "Use two fingers to move the map"
-    },
-    "ask": {
-      "title": "Ask about {{name}}",
-      "badge": "AI",
-      "suggestions": "Suggested questions",
-      "limited": "That’s a lot of questions for now — the business can answer the rest directly.",
-      "unavailable": "I can’t answer right now — the business can tell you directly.",
-      "thinking": "Thinking…",
-      "inputLabel": "Your question for {{name}}",
-      "placeholder": "Ask anything about them…",
-      "send": "Send",
-      "disclaimer": "Answers come only from this profile and may be incomplete — confirm important details with the business.",
-      "entry": "Ask anything about {{name}}",
-      "suggest": {
-        "weekend": "Are they open on Saturday?",
-        "areas": "Which areas do they cover?",
-        "languages": "Do they speak English?",
-        "payment": "How can I pay?",
-        "services": "What services do they offer?",
-        "quote": "How do I get a quote?"
-      },
-      "remaining_one": "{{count}} question left for this visit",
-      "remaining_other": "{{count}} questions left for this visit",
-      "cooldown": "You can ask again in a moment.",
-      "visitLimit": "That’s the question limit for this visit — the business can answer the rest directly.",
-      "wait": "One moment — you can ask again in {{seconds}} s."
     }
   },
   "days": {

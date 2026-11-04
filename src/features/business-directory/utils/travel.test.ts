@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { appleMapsDirections, formatDistance, formatDuration, googleMapsDirections, haversineKm, prefersAppleMaps, roundPoint } from './travel';
-import { askSuggestions } from './askSuggestions';
-import { toHistory, type AskMessage } from '../hooks/useAskBusiness';
 
 const tirana = { lat: 41.3275, lng: 19.8187 };
 const vlora = { lat: 40.4517, lng: 19.4805 };
@@ -37,29 +34,5 @@ describe('travel', () => {
     expect(roundPoint({ lat: 41.327512, lng: 19.818749 })).toEqual({ lat: 41.3275, lng: 19.8187 });
     expect(prefersAppleMaps('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)')).toBe(true);
     expect(prefersAppleMaps('Mozilla/5.0 (Linux; Android 14)')).toBe(false);
-  });
-});
-
-describe('ask helpers', () => {
-  it('suggests questions the profile can answer, plus the quote hand-off', () => {
-    const l = { services: ['Renovation'], businessHours: { monday: '9-17' }, serviceAreas: ['Vlore'], languages: ['English'], paymentMethods: ['cash'] } as unknown as BusinessListing;
-    expect(askSuggestions(l).map((s) => s.key)).toEqual([
-      'detail.ask.suggest.weekend', 'detail.ask.suggest.areas', 'detail.ask.suggest.languages', 'detail.ask.suggest.quote',
-    ]);
-    expect(askSuggestions({ services: [] } as unknown as BusinessListing).map((s) => s.key)).toEqual(['detail.ask.suggest.quote']);
-  });
-
-  it('sends the chat so far as history, without error notes', () => {
-    const messages: AskMessage[] = [
-      { id: 1, role: 'user', text: 'Open Saturday?' },
-      { id: 2, role: 'error', reason: 'unavailable' },
-      { id: 3, role: 'user', text: 'Open Saturday?' },
-      { id: 4, role: 'assistant', text: 'Yes, 9–13.', action: 'none' },
-    ];
-    expect(toHistory(messages)).toEqual([
-      { role: 'user', text: 'Open Saturday?' },
-      { role: 'user', text: 'Open Saturday?' },
-      { role: 'assistant', text: 'Yes, 9–13.' },
-    ]);
   });
 });

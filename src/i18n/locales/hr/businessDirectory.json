@@ -224,33 +224,6 @@
       "gestureDesktop": "Koristite Ctrl + pomicanje za zumiranje",
       "gestureMac": "Koristite ⌘ + pomicanje za zumiranje",
       "gestureMobile": "Koristite dva prsta za pomicanje karte"
-    },
-    "ask": {
-      "title": "Pitajte o: {{name}}",
-      "badge": "AI",
-      "suggestions": "Predložena pitanja",
-      "limited": "Previše pitanja za sada — tvrtka vam može odgovoriti izravno.",
-      "unavailable": "Trenutno ne mogu odgovoriti — tvrtka vam može reći izravno.",
-      "thinking": "Razmišljam…",
-      "inputLabel": "Vaše pitanje za {{name}}",
-      "placeholder": "Pitajte bilo što o njima…",
-      "send": "Pošalji",
-      "disclaimer": "Odgovori dolaze samo iz ovog profila i mogu biti nepotpuni — važne pojedinosti potvrdite s tvrtkom.",
-      "entry": "Pitajte bilo što o: {{name}}",
-      "suggest": {
-        "weekend": "Rade li subotom?",
-        "areas": "Koja područja pokrivaju?",
-        "languages": "Govore li engleski?",
-        "payment": "Kako mogu platiti?",
-        "services": "Koje usluge nude?",
-        "quote": "Kako dobiti ponudu?"
-      },
-      "remaining_one": "Preostalo je još {{count}} pitanje za ovaj posjet",
-      "remaining_few": "Preostala su još {{count}} pitanja za ovaj posjet",
-      "remaining_other": "Preostalo je još {{count}} pitanja za ovaj posjet",
-      "cooldown": "Uskoro možete ponovno pitati.",
-      "visitLimit": "To je ograničenje pitanja za ovaj posjet — ostalo vam tvrtka može odgovoriti izravno.",
-      "wait": "Trenutak — ponovno možete pitati za {{seconds}} s."
     }
   },
   "days": {
