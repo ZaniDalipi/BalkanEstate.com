@@ -81,7 +81,13 @@ export const resolveId = (param: string): string | null => {
   const decoded = decodeId(param);
   if (decoded) return decoded;
 
-  // 3. Slug with encoded ID suffix after underscore: "slug-text_EncodedId1234"
+  // 3. Slug with encoded ID suffix after underscore: "slug-text_EncodedId1234".
+  //    The encoded ID is always the last 16 characters, and base64url can
+  //    itself contain "_" — so read it by length before splitting on the last "_".
+  if (param.length > 17 && param[param.length - 17] === '_') {
+    const fromTail = decodeId(param.slice(-16));
+    if (fromTail) return fromTail;
+  }
   const underscoreIdx = param.lastIndexOf('_');
   if (underscoreIdx > 0) {
     const suffix = param.slice(underscoreIdx + 1);
