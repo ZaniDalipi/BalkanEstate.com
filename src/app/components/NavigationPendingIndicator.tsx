@@ -1,18 +1,23 @@
 import React from 'react';
 import { CircleSpinner } from '@/src/shared/components/ui/CircleSpinner';
-import { useNavigationPending } from '@/src/app/navigation/useNavigationPending';
+import { useNavigationActivity } from '@/src/app/navigation/useNavigationActivity';
+import { usePageSpinnerVisible } from '@/src/shared/components/ui/pageSpinnerStore';
 
 /**
- * A small spinning circle at the top of the screen while the next page loads.
+ * A small spinning circle near the top of the screen whenever a page change
+ * is loading: opening a listing, going back, switching section — from the tap
+ * until the new page is showing and has fetched its data.
  *
- * The current page stays visible and usable underneath; this only says the
- * tap was heard. It sits just below the mobile top bar (~4rem, plus the notch
- * via `--floating-search-top-pad`) so it never covers the title, and ignores
- * touches so it never blocks the page.
+ * The page underneath stays visible and usable; this only says work is going
+ * on. It steps aside while the page shows its own big loader, sits just below
+ * the mobile top bar (~4rem, plus the notch via `--floating-search-top-pad`)
+ * so it never covers the title, and ignores touches so it never blocks the
+ * page.
  */
 export const NavigationPendingIndicator: React.FC = () => {
-  const pending = useNavigationPending();
-  if (!pending) return null;
+  const loading = useNavigationActivity();
+  const pageSpinnerShown = usePageSpinnerVisible();
+  if (!loading || pageSpinnerShown) return null;
 
   return (
     <div

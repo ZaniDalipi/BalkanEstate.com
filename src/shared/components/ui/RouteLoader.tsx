@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CircleSpinner } from './CircleSpinner';
+import { usePageSpinner } from './pageSpinnerStore';
 
 interface RouteLoaderProps {
   /** Fill the viewport rather than the content area. */
@@ -26,6 +27,8 @@ export const RouteLoader: React.FC<RouteLoaderProps> = ({ fullScreen = false, de
     const timer = window.setTimeout(() => setVisible(true), delayMs);
     return () => window.clearTimeout(timer);
   }, [delayMs]);
+  // While this big circle shows, the small navigation one stays out of the way.
+  usePageSpinner(visible);
 
   return (
     <div
