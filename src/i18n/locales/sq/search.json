@@ -666,5 +666,75 @@
     "northWest": "Veriperëndim",
     "southEast": "Juglindje",
     "southWest": "Jugperëndim"
+  },
+  "spotlight": {
+    "explore": "Eksploro",
+    "close": "Mbyll",
+    "tabs": {
+      "details": "Detajet",
+      "route": "Rruga",
+      "ask": "Pyet AI"
+    },
+    "details": {
+      "beds": "Dhoma gjumi",
+      "baths": "Banjo",
+      "area": "Sipërfaqja",
+      "floor": "Kati",
+      "yearBuilt": "Viti i ndërtimit",
+      "noPhoto": "Ende pa foto",
+      "perSqm": "{{price}} për m²",
+      "fromYourPlace": "nga vendi juaj",
+      "howFar": "Sa larg është nga vendi juaj?",
+      "viewFull": "Shiko njoftimin e plotë"
+    },
+    "route": {
+      "hoursMinutes": "{{h}} orë {{m}} min",
+      "minutes": "{{m}} min",
+      "myLocation": "Vendndodhja aktuale",
+      "locationDenied": "Qasja në vendndodhje është e fikur. Shkruani adresën tuaj.",
+      "locationUnavailable": "Nuk e gjetëm pozicionin tuaj. Shkruani adresën tuaj.",
+      "noResults": "Nuk u gjet asnjë vend. Provoni rrugën dhe qytetin.",
+      "locating": "Duke ju gjetur…",
+      "useMyLocation": "Përdor vendndodhjen time",
+      "typeAddress": "Ose shkruani adresën tuaj",
+      "find": "Gjej",
+      "modes": {
+        "driving": "Makinë",
+        "walking": "Në këmbë",
+        "transit": "Transport publik"
+      },
+      "pickStart": "Zgjidhni nga nisni për të parë rrugën dhe kohën e udhëtimit.",
+      "from": "Nga",
+      "change": "Ndrysho",
+      "modeLabel": "Si udhëtoni",
+      "calculating": "Duke gjetur rrugën më të mirë…",
+      "noRoute": "Nuk ka rrugë për këtë mënyrë udhëtimi. Provoni një tjetër.",
+      "unavailable": "Udhëzimet e drejtpërdrejta nuk janë të disponueshme këtu. Hapeni rrugën në Google Maps.",
+      "straightLine": "{{distance}} në vijë ajrore",
+      "openInGoogle": "Hap në Google Maps"
+    },
+    "ask": {
+      "suggest": {
+        "parking": "A ka parkim?",
+        "family": "A është e mirë për familje?",
+        "area": "Si është lagjja?",
+        "seller": "Çfarë duhet t'i kërkoj shitësit?"
+      },
+      "errors": {
+        "login": "Hyni për t'i bërë pyetje AI-së për këtë shtëpi.",
+        "limit": "I keni përdorur pyetjet AI të këtij muaji.",
+        "unavailable": "Asistenti AI nuk është i disponueshëm tani. Provoni më vonë.",
+        "invalid": "Për këtë njoftim nuk mund të bëhen pyetje tani.",
+        "generic": "Nuk morëm përgjigje. Provoni përsëri."
+      },
+      "intro": "Pyetni çdo gjë për këtë shtëpi. Përgjigjet vijnë nga njoftimi.",
+      "thinking": "Duke menduar…",
+      "signIn": "Hyni",
+      "seePlans": "Shiko planet",
+      "placeholder": "Pyetni për këtë shtëpi…",
+      "send": "Dërgo",
+      "tooLong": "Mbajeni nën {{max}} karaktere.",
+      "disclaimer": "Përgjigjet e AI mund të jenë të gabuara. Kontrolloni detajet e rëndësishme me shitësin."
+    }
   }
 }

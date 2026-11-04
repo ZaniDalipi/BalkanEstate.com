@@ -1,4 +1,11 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import type { PropertyFacts } from './propertyAssistant/propertyFacts';
+import {
+  buildPropertyQuestionPrompt,
+  parsePropertyAnswer,
+  type AssistantTurn,
+  type PropertyAnswer,
+} from './propertyAssistant/questionPrompt';
 import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
@@ -1072,3 +1079,26 @@ export const generateSearchNameFromCoords = async (
 
   return result.text.trim();
 };
+
+/**
+ * Answer one question about one listing (see services/propertyAssistant).
+ * `facts` must already be the public whitelist from buildPropertyFacts.
+ */
+export const answerPropertyQuestion = async (
+  facts: PropertyFacts,
+  history: AssistantTurn[],
+  question: string,
+): Promise<PropertyAnswer> => {
+  const prompt = buildPropertyQuestionPrompt(facts, history, question);
+  const result = await retryWithBackoff(() =>
+    getAI().models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: { responseMimeType: 'application/json' },
+    })
+  );
+  const parsed = parsePropertyAnswer(result.text ?? '');
+  if (!parsed) throw new Error('No answer returned from Gemini API');
+  return parsed;
+};
+

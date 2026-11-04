@@ -8,6 +8,7 @@ import {
   generateDescription,
   calculateDistances,
   aiChat,
+  askAboutProperty,
   generateSearchName,
   restyleRoom,
   getRoomStyleUsage,
@@ -40,6 +41,9 @@ router.post('/calculate-distances', calculateDistances);
 
 // POST /api/ai/chat - AI real estate assistant chat
 router.post('/chat', aiChat);
+
+// POST /api/ai/ask-property - Answer a question about one listing (map spotlight)
+router.post('/ask-property', askAboutProperty);
 
 // POST /api/ai/generate-search-name - Generate human-readable search name
 router.post('/generate-search-name', generateSearchName);

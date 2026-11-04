@@ -22,6 +22,7 @@ interface MapPopupOverlayProps {
   map: google.maps.Map | null;
   onClose: () => void;
   onViewDetails: () => void;
+  onExplore?: () => void;
   distanceLabel?: string | null;
 }
 
@@ -52,6 +53,7 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
   map,
   onClose,
   onViewDetails,
+  onExplore,
   distanceLabel,
 }) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -222,6 +224,7 @@ const MapPopupOverlay: React.FC<MapPopupOverlayProps> = ({
             property={property}
             onClose={onClose}
             onViewDetails={onViewDetails}
+            onExplore={onExplore}
             distanceLabel={distanceLabel}
             placement={layout.placement}
             tailOffsetX={layout.tailOffsetX}

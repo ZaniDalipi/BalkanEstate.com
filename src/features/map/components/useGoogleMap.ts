@@ -2175,6 +2175,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [drawnBounds]);
 
   return {
+    validUserLocation,
     // Loading
     isLoaded,
     loadError,

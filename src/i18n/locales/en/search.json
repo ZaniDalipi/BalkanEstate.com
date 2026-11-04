@@ -676,5 +676,75 @@
     "northWest": "North-west",
     "southEast": "South-east",
     "southWest": "South-west"
+  },
+  "spotlight": {
+    "explore": "Explore",
+    "close": "Close",
+    "tabs": {
+      "details": "Details",
+      "route": "Route",
+      "ask": "Ask AI"
+    },
+    "details": {
+      "beds": "Bedrooms",
+      "baths": "Bathrooms",
+      "area": "Area",
+      "floor": "Floor",
+      "yearBuilt": "Year built",
+      "noPhoto": "No photos yet",
+      "perSqm": "{{price}} per m²",
+      "fromYourPlace": "from your place",
+      "howFar": "How far is it from your place?",
+      "viewFull": "View full listing"
+    },
+    "route": {
+      "hoursMinutes": "{{h}} h {{m}} min",
+      "minutes": "{{m}} min",
+      "myLocation": "Current location",
+      "locationDenied": "Location access is off. Type your address instead.",
+      "locationUnavailable": "Couldn't find your position. Type your address instead.",
+      "noResults": "No place found. Try a street and city.",
+      "locating": "Finding you…",
+      "useMyLocation": "Use my location",
+      "typeAddress": "Or type your address",
+      "find": "Find",
+      "modes": {
+        "driving": "Car",
+        "walking": "Walk",
+        "transit": "Transit"
+      },
+      "pickStart": "Choose where you start to see the route and travel time.",
+      "from": "From",
+      "change": "Change",
+      "modeLabel": "How you travel",
+      "calculating": "Finding the best route…",
+      "noRoute": "No route for this way of travel. Try another.",
+      "unavailable": "Live directions aren't available here. Open the route in Google Maps instead.",
+      "straightLine": "{{distance}} as the crow flies",
+      "openInGoogle": "Open in Google Maps"
+    },
+    "ask": {
+      "suggest": {
+        "parking": "Is there parking?",
+        "family": "Is it good for a family?",
+        "area": "What's the neighbourhood like?",
+        "seller": "What should I ask the seller?"
+      },
+      "errors": {
+        "login": "Sign in to ask the AI about this home.",
+        "limit": "You've used this month's AI questions.",
+        "unavailable": "The AI assistant is unavailable right now. Try again later.",
+        "invalid": "This listing can't be asked about right now.",
+        "generic": "Couldn't get an answer. Try again."
+      },
+      "intro": "Ask anything about this home. Answers come from the listing.",
+      "thinking": "Thinking…",
+      "signIn": "Sign in",
+      "seePlans": "See plans",
+      "placeholder": "Ask about this home…",
+      "send": "Send",
+      "tooLong": "Keep it under {{max}} characters.",
+      "disclaimer": "AI answers can be wrong. Check important details with the seller."
+    }
   }
 }

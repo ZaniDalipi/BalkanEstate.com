@@ -666,5 +666,75 @@
     "northWest": "Nord-vest",
     "southEast": "Sud-est",
     "southWest": "Sud-vest"
+  },
+  "spotlight": {
+    "explore": "Explorează",
+    "close": "Închide",
+    "tabs": {
+      "details": "Detalii",
+      "route": "Traseu",
+      "ask": "Întreabă AI"
+    },
+    "details": {
+      "beds": "Dormitoare",
+      "baths": "Băi",
+      "area": "Suprafață",
+      "floor": "Etaj",
+      "yearBuilt": "Anul construcției",
+      "noPhoto": "Încă nu sunt fotografii",
+      "perSqm": "{{price}} pe m²",
+      "fromYourPlace": "de la locul tău",
+      "howFar": "Cât de departe este de locul tău?",
+      "viewFull": "Vezi anunțul complet"
+    },
+    "route": {
+      "hoursMinutes": "{{h}} h {{m}} min",
+      "minutes": "{{m}} min",
+      "myLocation": "Locația curentă",
+      "locationDenied": "Accesul la locație este oprit. Scrie adresa ta.",
+      "locationUnavailable": "Nu ți-am găsit poziția. Scrie adresa ta.",
+      "noResults": "Nu am găsit niciun loc. Încearcă strada și orașul.",
+      "locating": "Te căutăm…",
+      "useMyLocation": "Folosește locația mea",
+      "typeAddress": "Sau scrie adresa ta",
+      "find": "Caută",
+      "modes": {
+        "driving": "Mașină",
+        "walking": "Pe jos",
+        "transit": "Transport public"
+      },
+      "pickStart": "Alege de unde pleci ca să vezi traseul și durata.",
+      "from": "De la",
+      "change": "Schimbă",
+      "modeLabel": "Cum călătorești",
+      "calculating": "Căutăm cel mai bun traseu…",
+      "noRoute": "Nu există traseu pentru acest mod. Încearcă altul.",
+      "unavailable": "Indicațiile live nu sunt disponibile aici. Deschide traseul în Google Maps.",
+      "straightLine": "{{distance}} în linie dreaptă",
+      "openInGoogle": "Deschide în Google Maps"
+    },
+    "ask": {
+      "suggest": {
+        "parking": "Există parcare?",
+        "family": "Este bun pentru o familie?",
+        "area": "Cum este cartierul?",
+        "seller": "Ce ar trebui să întreb vânzătorul?"
+      },
+      "errors": {
+        "login": "Autentifică-te ca să întrebi AI despre această locuință.",
+        "limit": "Ai folosit întrebările AI din această lună.",
+        "unavailable": "Asistentul AI nu este disponibil acum. Încearcă mai târziu.",
+        "invalid": "Nu se pot pune întrebări despre acest anunț acum.",
+        "generic": "Nu am primit un răspuns. Încearcă din nou."
+      },
+      "intro": "Întreabă orice despre această locuință. Răspunsurile vin din anunț.",
+      "thinking": "Mă gândesc…",
+      "signIn": "Autentificare",
+      "seePlans": "Vezi planurile",
+      "placeholder": "Întreabă despre această locuință…",
+      "send": "Trimite",
+      "tooLong": "Maximum {{max}} caractere.",
+      "disclaimer": "Răspunsurile AI pot fi greșite. Verifică detaliile importante cu vânzătorul."
+    }
   }
 }

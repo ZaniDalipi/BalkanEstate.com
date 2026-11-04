@@ -12,7 +12,10 @@
  * drawing rectangles, measurement shapes) lives here as it ties everything together.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import type { Property } from '@/types';
+import { useAppContext } from '@/context/AppContext';
+import PropertySpotlight from '../spotlight/PropertySpotlight';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
@@ -53,6 +56,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
   // All state, refs, effects, and handlers from the custom hook
   const hook = useGoogleMap(props);
+  // The listing being explored in the spotlight (details, route, ask the AI).
+  const [spotlight, setSpotlight] = useState<Property | null>(null);
+  const { dispatch } = useAppContext();
 
   // Loading states - early returns MUST come after all hooks
   if (hook.loadError) {
@@ -98,6 +104,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
               map={hook.map}
               onClose={() => hook.setSelectedProperty(null)}
               onViewDetails={() => hook.handleViewDetails(hook.selectedProperty!)}
+              onExplore={() => { setSpotlight(hook.selectedProperty); hook.setSelectedProperty(null); }}
               distanceLabel={hook.selectedPropertyDistanceLabel}
             />
           )}
@@ -255,6 +262,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           isLayerMenuOpen={hook.isLayerMenuOpen}
           setIsLayerMenuOpen={hook.setIsLayerMenuOpen}
         />
+        {spotlight && (
+          <PropertySpotlight
+            key={spotlight.id}
+            property={spotlight}
+            map={hook.map}
+            userLocation={hook.validUserLocation}
+            isAuthenticated={isAuthenticated}
+            onClose={() => setSpotlight(null)}
+            onViewDetails={() => hook.handleViewDetails(spotlight)}
+            onSignIn={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } })}
+          />
+        )}
       </div>
     </HighlightedPropertiesProvider>
   );

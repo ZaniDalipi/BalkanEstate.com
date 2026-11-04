@@ -1526,3 +1526,44 @@ layout, every upload case, setup, migration from Cloudinary and the
   embed ~1–2MB of bitmaps; pages use `logo-3d-256.webp` (10KB) and the favicon is
   `logo-3d-64.png`. `logo-3d.svg` stays only for the backend watermark.
 
+
+---
+
+## Map Spotlight — explore a listing without leaving the map
+
+Tapping a pin opens the usual popup; its **Explore ✦** button opens
+`PropertySpotlight` (`src/features/map/spotlight/`): a bottom sheet on phones
+(portal, above the List/Map switch; drag the handle down or press Esc to close),
+a card on the right from `md`. The map stays usable behind it. Google map only
+(the Leaflet fallback keeps the plain popup).
+
+```
+PropertySpotlight            tabs: Details · Route · Ask AI (SpotlightTabs)
+  ├── useSpotlightRoute      origin = "My place" (useHomePlace, localStorage) or live GPS
+  │     ├── useRoute         TanStack query → fetchRoute (google DirectionsService), spotlightKeys.route
+  │     └── useRouteLine     draws casing + line, animated in, fits bounds above the sheet
+  ├── useAskProperty         mutation → POST /api/ai/ask-property; kept here so the chat survives tab switches
+  ├── SpotlightDetails       photos, price, price/m², facts, travel summary, "View full listing"
+  ├── SpotlightRoute         from / mode (car, walk, transit) / time + distance / Open in Google Maps
+  │     └── HomePlacePicker  "Use my location" or a typed address (searchLocation)
+  └── SpotlightAsk           suggestions → follow-ups from the answer, AskMessages
+```
+
+- **Never a dead end.** `fetchRoute` never throws: no route for a mode says so;
+  a refused service (key without the Directions API, quota, network) shows the
+  straight-line distance and the "Open in Google Maps" link, which always works.
+- **The assistant answers from the database, not the client.**
+  `askAboutProperty` (`backend/src/controllers/aiController.ts`) validates the
+  body (`parseAskPropertyBody`: 24-hex id, question ≤ 500 chars, ≤ 10 history
+  turns), loads the listing, and reduces it to `buildPropertyFacts`
+  (`services/propertyAssistant/propertyFacts.ts`) — a whitelist, so seller
+  email, tenant names, notes and rental history never reach the model. The
+  prompt (`questionPrompt.ts`) passes visitor text as quoted data, forbids
+  invented numbers, and answers in the visitor's language with up to three
+  follow-ups. 400 / 404 never spend a message.
+- **One AI allowance.** `consumeAiMessage` (`backend/src/utils/aiMessageLimits.ts`)
+  is shared by the search assistant and the property assistant. The UI maps 401
+  → sign in, 429 → "See plans", 503 → try later (`askErrorKind`).
+- Popup buttons use `useOverlayTap` (`features/map/hooks`): a click inside a
+  Google Maps overlay is unreliable on touch, so a tap on pointerup also counts.
+- Texts: `search:spotlight.*` in all 10 locales.

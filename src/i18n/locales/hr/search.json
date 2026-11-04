@@ -666,5 +666,75 @@
     "northWest": "Sjeverozapad",
     "southEast": "Jugoistok",
     "southWest": "Jugozapad"
+  },
+  "spotlight": {
+    "explore": "Istraži",
+    "close": "Zatvori",
+    "tabs": {
+      "details": "Detalji",
+      "route": "Ruta",
+      "ask": "Pitaj AI"
+    },
+    "details": {
+      "beds": "Spavaće sobe",
+      "baths": "Kupaonice",
+      "area": "Površina",
+      "floor": "Kat",
+      "yearBuilt": "Godina izgradnje",
+      "noPhoto": "Još nema fotografija",
+      "perSqm": "{{price}} po m²",
+      "fromYourPlace": "od vašeg mjesta",
+      "howFar": "Koliko je udaljeno od vašeg mjesta?",
+      "viewFull": "Pogledaj cijeli oglas"
+    },
+    "route": {
+      "hoursMinutes": "{{h}} h {{m}} min",
+      "minutes": "{{m}} min",
+      "myLocation": "Trenutna lokacija",
+      "locationDenied": "Pristup lokaciji je isključen. Upišite svoju adresu.",
+      "locationUnavailable": "Nismo pronašli vaš položaj. Upišite svoju adresu.",
+      "noResults": "Mjesto nije pronađeno. Pokušajte ulicu i grad.",
+      "locating": "Tražimo vas…",
+      "useMyLocation": "Koristi moju lokaciju",
+      "typeAddress": "Ili upišite svoju adresu",
+      "find": "Pronađi",
+      "modes": {
+        "driving": "Auto",
+        "walking": "Pješice",
+        "transit": "Javni prijevoz"
+      },
+      "pickStart": "Odaberite odakle krećete da vidite rutu i vrijeme putovanja.",
+      "from": "Od",
+      "change": "Promijeni",
+      "modeLabel": "Kako putujete",
+      "calculating": "Tražimo najbolju rutu…",
+      "noRoute": "Nema rute za ovaj način putovanja. Pokušajte drugi.",
+      "unavailable": "Upute uživo ovdje nisu dostupne. Otvorite rutu u Google Maps.",
+      "straightLine": "{{distance}} zračnom linijom",
+      "openInGoogle": "Otvori u Google Maps"
+    },
+    "ask": {
+      "suggest": {
+        "parking": "Ima li parkinga?",
+        "family": "Je li dobro za obitelj?",
+        "area": "Kakvo je susjedstvo?",
+        "seller": "Što da pitam prodavatelja?"
+      },
+      "errors": {
+        "login": "Prijavite se da pitate AI o ovoj nekretnini.",
+        "limit": "Iskoristili ste AI pitanja za ovaj mjesec.",
+        "unavailable": "AI asistent trenutno nije dostupan. Pokušajte kasnije.",
+        "invalid": "O ovom oglasu trenutno se ne može pitati.",
+        "generic": "Nismo dobili odgovor. Pokušajte ponovno."
+      },
+      "intro": "Pitajte bilo što o ovoj nekretnini. Odgovori dolaze iz oglasa.",
+      "thinking": "Razmišljam…",
+      "signIn": "Prijavi se",
+      "seePlans": "Pogledaj planove",
+      "placeholder": "Pitajte o ovoj nekretnini…",
+      "send": "Pošalji",
+      "tooLong": "Najviše {{max}} znakova.",
+      "disclaimer": "AI odgovori mogu biti netočni. Važne pojedinosti provjerite s prodavateljem."
+    }
   }
 }

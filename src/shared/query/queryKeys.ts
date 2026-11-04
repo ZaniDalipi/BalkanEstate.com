@@ -383,3 +383,14 @@ export const gameRewardKeys = {
   all: ['gameRewards'] as const,
   status: () => [...gameRewardKeys.all, 'status'] as const,
 };
+
+// ============================================================================
+// Map Spotlight Query Keys
+// Used by: map spotlight route tab (useRoute)
+// ============================================================================
+
+export const spotlightKeys = {
+  all: ['spotlight'] as const,
+  route: (origin: { lat: number; lng: number }, destination: { lat: number; lng: number }, mode: string) =>
+    [...spotlightKeys.all, 'route', origin.lat, origin.lng, destination.lat, destination.lng, mode] as const,
+};

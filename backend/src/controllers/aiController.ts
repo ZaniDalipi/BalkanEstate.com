@@ -6,15 +6,19 @@ import { cloudinaryOriginalUrl } from '../services/media/cloudinaryMigration';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
-import {
-  FREE_TIER_LIMITS,
-  PRO_TIER_LIMITS,
-  ENTERPRISE_TIER_LIMITS,
-  PRO_BUYER_LIMITS,
-} from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { isPropertyType, PROPERTY_TYPES_LABEL } from '../config/propertyTypes';
 import { getRoomStyle } from '../data/roomStyles';
 import { getRoomStyleUsageStats } from '../utils/roomStyleLimits';
+import { consumeAiMessage } from '../utils/aiMessageLimits';
+import Property from '../models/Property';
+import { buildPropertyFacts } from '../services/propertyAssistant/propertyFacts';
+import {
+  MAX_HISTORY_TURNS,
+  MAX_QUESTION_CHARS,
+  MAX_TURN_CHARS,
+  type AssistantTurn,
+} from '../services/propertyAssistant/questionPrompt';
 
 function getNextMonthStart(): Date {
   const d = new Date();
@@ -206,61 +210,17 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Enforce aiMessagesLimit per plan
-    const userId = (req.user as any)?._id;
-    if (userId) {
-      const user = await User.findById(userId);
-      if (user) {
-        const now = new Date();
-        if (!user.aiMessagesUsage) {
-          user.aiMessagesUsage = { monthlyCount: 0, monthResetDate: getNextMonthStart() };
-        }
-        if (now >= user.aiMessagesUsage.monthResetDate) {
-          user.aiMessagesUsage.monthlyCount = 0;
-          user.aiMessagesUsage.monthResetDate = getNextMonthStart();
-        }
-
-        const isSubscribed = user.isSubscribed && user.hasActiveSubscription();
-        let messageLimit: number = FREE_TIER_LIMITS.AI_MESSAGES; // Default for free users
-
-        if (isSubscribed && user.subscriptionPlan) {
-          const product = await Product.findOne({ productId: user.subscriptionPlan });
-          const rawLimit = product?.aiMessagesLimit;
-          const limit = typeof rawLimit === 'number' ? rawLimit : undefined;
-
-          if (typeof limit === 'number') {
-            messageLimit = limit;
-          } else {
-            // Product doesn't have aiMessagesLimit set - use plan-based defaults
-            const plan = user.subscriptionPlan.toLowerCase();
-            if (plan.includes('enterprise') || plan.includes('agency')) {
-              messageLimit = ENTERPRISE_TIER_LIMITS.AI_MESSAGES;
-            } else if (plan.includes('buyer')) {
-              messageLimit = PRO_BUYER_LIMITS.AI_MESSAGES;
-            } else if (plan.includes('yearly')) {
-              messageLimit = PRO_TIER_LIMITS.YEARLY.AI_MESSAGES;
-            } else if (plan.includes('monthly')) {
-              messageLimit = PRO_TIER_LIMITS.MONTHLY.AI_MESSAGES;
-            }
-          }
-        }
-
-        // Enforce limit (-1 = unlimited, skip check)
-        if (messageLimit !== -1) {
-          if (user.aiMessagesUsage.monthlyCount >= messageLimit) {
-            res.status(429).json({
-              message: `AI message limit reached. You have used all ${messageLimit} messages for this month.`,
-              limit: messageLimit,
-              used: user.aiMessagesUsage.monthlyCount,
-              remaining: 0,
-              resetDate: user.aiMessagesUsage.monthResetDate,
-            });
-            return;
-          }
-          user.aiMessagesUsage.monthlyCount += 1;
-          await user.save();
-        }
-      }
+    // Enforce aiMessagesLimit per plan (shared with the property assistant).
+    const quota = await consumeAiMessage((req.user as any)?._id);
+    if (quota.ok === false) {
+      res.status(429).json({
+        message: `AI message limit reached. You have used all ${quota.limit} messages for this month.`,
+        limit: quota.limit,
+        used: quota.used,
+        remaining: 0,
+        resetDate: quota.resetDate,
+      });
+      return;
     }
 
     apiLogger.info(`Processing AI chat with ${history.length} messages and ${properties.length} properties`);
@@ -490,3 +450,74 @@ export const generateSearchName = async (req: Request, res: Response): Promise<v
     res.status(500).json({ message: 'Failed to generate search name. Please try again later.' });
   }
 };
+
+/** Validate the body of POST /api/ai/ask-property; a reason for the first problem, or the clean input. */
+export function parseAskPropertyBody(body: unknown):
+  | { ok: true; propertyId: string; question: string; history: AssistantTurn[] }
+  | { ok: false; error: string } {
+  const b = (body ?? {}) as Record<string, unknown>;
+  const propertyId = typeof b.propertyId === 'string' ? b.propertyId.trim() : '';
+  if (!/^[a-fA-F0-9]{24}$/.test(propertyId)) return { ok: false, error: 'propertyId must be a valid listing id.' };
+
+  const question = typeof b.question === 'string' ? b.question.trim() : '';
+  if (!question) return { ok: false, error: 'question is required.' };
+  if (question.length > MAX_QUESTION_CHARS) return { ok: false, error: `question must be at most ${MAX_QUESTION_CHARS} characters.` };
+
+  const rawHistory = b.history === undefined ? [] : b.history;
+  if (!Array.isArray(rawHistory)) return { ok: false, error: 'history must be an array.' };
+  const history: AssistantTurn[] = [];
+  for (const turn of rawHistory.slice(-MAX_HISTORY_TURNS)) {
+    const t = (turn ?? {}) as Record<string, unknown>;
+    if ((t.sender !== 'user' && t.sender !== 'ai') || typeof t.text !== 'string' || !t.text.trim()) {
+      return { ok: false, error: 'Each history entry needs sender ("user" or "ai") and text.' };
+    }
+    history.push({ sender: t.sender, text: t.text.slice(0, MAX_TURN_CHARS) });
+  }
+  return { ok: true, propertyId, question, history };
+}
+
+/**
+ * POST /api/ai/ask-property
+ * Answer a visitor's question about one listing. The listing is read from the
+ * database (never taken from the client), reduced to its public facts, and the
+ * question counts against the user's monthly AI messages.
+ */
+export const askAboutProperty = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!isApiKeyConfigured()) {
+      res.status(503).json({ message: 'AI service is not available right now.' });
+      return;
+    }
+    const input = parseAskPropertyBody(req.body);
+    if (input.ok === false) {
+      res.status(400).json({ message: input.error });
+      return;
+    }
+
+    const listing = await Property.findById(input.propertyId).lean();
+    if (!listing) {
+      res.status(404).json({ message: 'Listing not found.' });
+      return;
+    }
+
+    const quota = await consumeAiMessage((req.user as any)?._id);
+    if (quota.ok === false) {
+      res.status(429).json({
+        message: `AI message limit reached. You have used all ${quota.limit} messages for this month.`,
+        limit: quota.limit,
+        used: quota.used,
+        remaining: 0,
+        resetDate: quota.resetDate,
+      });
+      return;
+    }
+
+    const facts = buildPropertyFacts(listing as unknown as Record<string, unknown>);
+    const result = await geminiService.answerPropertyQuestion(facts, input.history, input.question);
+    res.json(result);
+  } catch (error) {
+    apiLogger.error('Error in askAboutProperty:', error instanceof Error ? error.message : String(error));
+    res.status(500).json({ message: 'Could not answer right now. Please try again.' });
+  }
+};
+

@@ -4,7 +4,8 @@
  */
 
 import { optimizeImageUrl } from '@/config/mediaConfig';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useState } from 'react';
+import { useOverlayTap } from '../hooks/useOverlayTap';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
@@ -16,6 +17,8 @@ interface GoogleMapPropertyPopupProps {
   property: Property;
   onClose: () => void;
   onViewDetails: () => void;
+  /** Open the spotlight (details, route, ask the AI) over the map. */
+  onExplore?: () => void;
   /** Distance from the user's current location, pre-formatted (e.g. "3.2 km"). */
   distanceLabel?: string | null;
   /** Whether the card opens above ('top') or below ('bottom') the marker. */
@@ -24,12 +27,12 @@ interface GoogleMapPropertyPopupProps {
   tailOffsetX?: number;
 }
 
-const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails, distanceLabel, placement = 'top', tailOffsetX = 0 }) => {
+const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails, onExplore, distanceLabel, placement = 'top', tailOffsetX = 0 }) => {
   // Resolved here rather than read off `property.sqft`: a popup is often
   // handed a raw API row that never passed through a transform, and a flat
   // quoted only in gross and net would show the "0 m²" the field holds.
   const area = resolveDisplayArea(property);
-  const { t } = useTranslation(['property']);
+  const { t } = useTranslation(['property', 'search']);
   const rawImageUrl = property.images?.[0]
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
     : property.imageUrl;
@@ -38,35 +41,10 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
 
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // The CTA lives inside a Google Maps overlay pane, where a plain `click` is
-  // the least reliable event on touch: Maps' own gesture handling and any
-  // re-layout of the overlay between touchstart and touchend can swallow it,
-  // and the tap then does nothing at all. So the button also acts on pointerup
-  // for touch/pen, treating it as a tap only when the finger stayed put (a
-  // drag that starts on the card is the user panning the map, and pointer
-  // capture would otherwise deliver that pointerup here as a "tap").
-  const pressRef = useRef<{ x: number; y: number } | null>(null);
-  const firedRef = useRef(false);
-
-  const activate = useCallback(() => {
-    if (firedRef.current) return;
-    firedRef.current = true;
-    onViewDetails();
-  }, [onViewDetails]);
-
-  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
-    pressRef.current = { x: e.clientX, y: e.clientY };
-  }, []);
-
-  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
-    // Mouse taps are left to the native click so focus/keyboard behave normally.
-    if (e.pointerType === 'mouse') return;
-    const start = pressRef.current;
-    pressRef.current = null;
-    if (!start) return;
-    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return;
-    activate();
-  }, [activate]);
+  // Both buttons sit inside a Google Maps overlay pane, where a plain click is
+  // unreliable on touch — see useOverlayTap.
+  const viewTap = useOverlayTap(onViewDetails);
+  const exploreTap = useOverlayTap(onExplore ?? (() => {}));
 
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
@@ -195,17 +173,25 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
           )}
         </div>
 
-        {/* View details button */}
-        <button
-          type="button"
-          onClick={activate}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={() => { pressRef.current = null; }}
-          className="map-popup-cta map-popup-reveal map-popup-reveal-4 w-full py-2.5 min-h-[44px] touch-manipulation bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 text-white text-[13px] font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
-        >
-          {t('map.popup.viewDetails', 'View')} <span className="map-popup-cta-arrow">→</span>
-        </button>
+        {/* Explore (spotlight) and View details */}
+        <div className="flex gap-2">
+          {onExplore && (
+            <button
+              type="button"
+              {...exploreTap}
+              className="map-popup-reveal map-popup-reveal-4 flex-1 py-2.5 min-h-[44px] touch-manipulation rounded-lg bg-primary/10 text-primary text-[13px] font-semibold transition-all duration-200 hover:bg-primary/15 active:scale-[0.98]"
+            >
+              {t('search:spotlight.explore', 'Explore')} ✦
+            </button>
+          )}
+          <button
+            type="button"
+            {...viewTap}
+            className="map-popup-cta map-popup-reveal map-popup-reveal-4 flex-1 py-2.5 min-h-[44px] touch-manipulation bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 text-white text-[13px] font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+          >
+            {t('map.popup.viewDetails', 'View')} <span className="map-popup-cta-arrow">→</span>
+          </button>
+        </div>
       </div>
     </div>
   );
