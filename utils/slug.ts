@@ -74,3 +74,20 @@ export function generateBusinessSlug(listing: {
   // The backend extracts the ID by splitting on the last underscore
   return `${slug}_${listing.id}`;
 }
+
+/** Encoded ids are always 16 base64url characters — and base64url includes "_" and "-". */
+const ENCODED_ID = /^[A-Za-z0-9_-]{16}$/;
+
+/**
+ * The listing id inside a business URL segment — the inverse of
+ * generateBusinessSlug. The id is the LAST 16 characters after the separating
+ * "_": splitting on the last underscore instead would cut an id that itself
+ * contains one ("…_Ab_qkgXEcz8pju5t" → "qkgXEcz8pju5t", a 404). A segment that
+ * is not a slug (a bare id, or the listing's own slug field) is returned as
+ * it is, for the API to resolve.
+ */
+export function businessIdFromSlug(segment: string): string {
+  const id = segment.slice(-16);
+  if (segment.length > 17 && segment[segment.length - 17] === '_' && ENCODED_ID.test(id)) return id;
+  return segment;
+}

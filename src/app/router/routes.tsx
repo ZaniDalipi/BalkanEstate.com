@@ -21,6 +21,7 @@ import { useOpenSidebar } from './layoutContext';
 import { lazyWithRetry } from './lazyWithRetry';
 import { paths, type BusinessDirectoryTab } from './paths';
 import { registerRouter } from './navigation';
+import { businessIdFromSlug } from '@/utils/slug';
 import {
   AdminRoute,
   AgencyRoute,
@@ -90,10 +91,9 @@ const WithSidebar: React.FC<{ page: SidebarPage }> = ({ page: Page }) => {
  */
 const BusinessDirectoryRoute: React.FC<{ tab?: BusinessDirectoryTab; creating?: boolean }> = ({ tab, creating }) => {
   const { listingSlug } = useParams();
-  // SEO slugs end in `_EncodedId` ("acme-law-in-skopje_Ab12"); plain ids have none.
-  const underscore = listingSlug?.lastIndexOf('_') ?? -1;
-  const listingId = listingSlug && underscore > 0 ? listingSlug.slice(underscore + 1) : listingSlug ?? null;
-  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} creating={creating} />);
+  // SEO slugs end in `_` + a 16-character encoded id, which may itself contain "_".
+  const listingId = listingSlug ? businessIdFromSlug(listingSlug) : null;
+  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} />);
 };
 
 type AppRoute = RouteObject & { handle?: RouteHandle };

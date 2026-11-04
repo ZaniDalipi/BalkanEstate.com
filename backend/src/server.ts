@@ -125,6 +125,7 @@ import aiRoutes from './routes/aiRoutes';
 import cadastreRoutes from './routes/cadastreRoutes';
 import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
 import fileRoutes from './routes/fileRoutes';
+import routingRoutes from './routes/routingRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
 import articleRoutes from './routes/articleRoutes';
@@ -396,6 +397,7 @@ app.use('/api/achievements', achievementRoutes); // User and agency achievements
 app.use('/api/promotion-plans', promotionPlanRoutes); // Listing promotion and agency feature plans
 app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
 app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
+app.use('/api/routing', routingRoutes); // Travel routes visitor → business (OSRM proxy, IP rate limited)
 app.use('/api/map', mapProxyRoutes); // Weather tile & FIRMS WMS proxy (API keys server-side)
 app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
 app.use('/api/news', newsRoutes); // Public real estate news

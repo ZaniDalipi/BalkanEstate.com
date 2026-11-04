@@ -249,13 +249,13 @@ const MainLayout: React.FC = () => {
   // Back to Site / account), so the global floating header is suppressed there to avoid
   // it overlapping and covering those controls.
   const hasOwnHeader = view === 'agency-dashboard';
-  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !isBusinessDetail && !hasOwnHeader;
+  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !hasOwnHeader;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
   const isHomeView = view === 'home';
   const isHomePage = isSearchPage || isRentalPage || isVillaPage || isHomeView;
-  const showPWATopBar = isMobile && !isPropertyDetail && !isBusinessDetail && !isHomePage;
+  const showPWATopBar = isMobile && !isPropertyDetail && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
   const isMainTabView = !isAgentDetail && !isAgencyDetail && !isBusinessDetail && [
@@ -314,6 +314,7 @@ const MainLayout: React.FC = () => {
   const pageTitle = useMemo(() => {
     if (isAgencyDetail) return t('nav:pageTitles.agency');
     if (isAgentDetail) return t('nav:pageTitles.agent');
+    if (isBusinessDetail) return t('nav:pageTitles.businessDirectory');
     const titleKeys: Record<string, string> = {
       home: 'nav:pageTitles.home',
       search: 'nav:pageTitles.search',
@@ -342,7 +343,7 @@ const MainLayout: React.FC = () => {
     };
     const key = titleKeys[view];
     return key ? t(key) : t('nav:pageTitles.default');
-  }, [view, isAgencyDetail, isAgentDetail, t]);
+  }, [view, isAgencyDetail, isAgentDetail, isBusinessDetail, t]);
 
   const handlePWABack = useCallback(() => {
     // Step back through history whenever there is an in-app entry to step back
@@ -441,8 +442,9 @@ const MainLayout: React.FC = () => {
             details page which has its own in-content + sidebar ad slots (so the
             sticky bar doesn't overlap them), and on the full-height map/search
             pages, where a bar pinned over the map gets in the way of panning,
-            the results sheet and the map controls. */}
-        {adPage && !isFullHeightView && (
+            the results sheet and the map controls. Also hidden on a business
+            profile, whose own Call / WhatsApp bar sits in that same spot. */}
+        {adPage && !isFullHeightView && !isBusinessDetail && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>
