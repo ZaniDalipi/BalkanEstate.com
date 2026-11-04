@@ -87,8 +87,8 @@
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animate-aurora: aurora 60s linear infinite;
 
-  /* No page transition animations: a navigation swaps the view on the spot.
-     See src/components/ui/ViewTransition.tsx. */
+  /* Pages fade in once ready (`.be-page-fade`); nothing is played in front of a
+     tap. See the "Page changes and loading" section at the end of this file. */
 }
 
 /* Aurora background color variables */
@@ -2444,5 +2444,65 @@ html.reduce-motion .celebration-bar {
     transform: none;
     opacity: 0;
     transition-delay: 0s, 150ms;
+  }
+}
+
+/* ============================================================================
+   Page changes and loading
+   Everything here animates only `transform` and `opacity`, which run on the
+   compositor in Safari, Chrome and installed PWAs — no repaints while the next
+   page is being mounted, which is when a phone's main thread is busiest.
+   ============================================================================ */
+
+/* The app's one spinner (CircleSpinner.tsx): a blue arc going round a grey
+   ring, the same circle as the boot screen in index.html. One turn = 0.8s
+   (SPINNER_TURN_S in spinnerPhase.ts). */
+@keyframes be-spin {
+  to { transform: rotate(360deg); }
+}
+.be-circle-spinner {
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: #e5e7eb;
+  border-top-color: #0252CD;
+  border-radius: 9999px;
+  animation: be-spin 0.8s linear infinite;
+}
+/* A spinner says "still working", so it keeps turning under reduced motion,
+   just slower. */
+@media (prefers-reduced-motion: reduce) {
+  .be-circle-spinner { animation-duration: 1.6s !important; }
+}
+
+/* The arriving page fades in. Opacity only: a transform here would make this
+   wrapper the containing block of every `position: fixed` bar on the page and
+   shift them while it plays. `backwards` (not `both`) so nothing stays applied
+   once it ends. Short and ease-out, so the page is mostly there within ~80ms
+   and a tap never feels held up. */
+@keyframes be-page-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.be-page-fade {
+  animation: be-page-enter 180ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .be-page-fade { animation: none; }
+}
+html.reduce-motion .be-page-fade { animation: none; }
+
+/* No grey flash on tap in mobile Safari/Chrome; pressed states come from the
+   app's own press feedback instead. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Installed app: a pull past the top must not reload the whole app (Chrome on
+   Android does pull-to-refresh in standalone too) or rubber-band the shell
+   like a web page. Inner scroll areas keep their own momentum scrolling. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
   }
 }
