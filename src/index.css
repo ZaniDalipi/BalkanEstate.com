@@ -2544,6 +2544,15 @@ html.reduce-motion .celebration-bar {
     filter: brightness(1.06);
   }
 
+  /* Amber tinted glass (the directory's "Surprise me"). */
+  .liquid-tint.liquid-tint--amber {
+    background: linear-gradient(180deg, rgba(255, 179, 64, 0.96), rgba(245, 115, 22, 0.96));
+    box-shadow:
+      inset 0 -1px 0 rgba(120, 50, 0, 0.25),
+      0 1px 2px rgba(245, 115, 22, 0.3),
+      0 12px 28px -12px rgba(245, 115, 22, 0.6);
+  }
+
   /* Smoky glass over photos (the banner's Back / Customize). */
   .liquid-dark {
     color: #fff;

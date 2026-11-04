@@ -36,7 +36,7 @@ afterEach(() => vi.unstubAllGlobals());
 describe('business link preview', () => {
   it('uses the business’s own share card, sized for the feeds', () => {
     const html = buildBusinessOgHtml(listing, SEGMENT, 'en');
-    expect(meta(html, 'og:image')).toBe(`https://api.balkanestateai.com/api/og/business/KN2IJzIvwAD6-RhL/image.jpg?v=${Date.parse(listing.updatedAt!).toString(36)}`);
+    expect(meta(html, 'og:image')).toBe(`https://api.balkanestateai.com/api/og/business/KN2IJzIvwAD6-RhL/image.jpg?v=${Date.parse(listing.updatedAt!).toString(36)}.g2`);
     expect(meta(html, 'og:image:width')).toBe('1200');
     expect(meta(html, 'og:image:height')).toBe('630');
     expect(meta(html, 'og:title')).toBe('Regina &lt;Group&gt; Construction – Construction in Vlore, Albania | BalkanEstateAI');

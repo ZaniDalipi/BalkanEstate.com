@@ -46,6 +46,9 @@ export interface BusinessData {
   updatedAt?: string;
 }
 
+/** Bump when the card's look changes, so feeds that cache by URL fetch the new one. */
+export const CARD_DESIGN = 'g2';
+
 /** The directory's own tabs share the URL shape; they are not businesses. */
 const DIRECTORY_TABS = new Set(['businesses', 'individuals', 'mine']);
 
@@ -57,12 +60,12 @@ export const businessCategory = (b: BusinessData): string =>
 
 /**
  * The share card's URL. `v` changes when the listing is edited (a new logo or
- * cover), so feeds that cache by URL pick up the new card.
+ * cover) or the card's design does, so feeds that cache by URL pick up the new card.
  */
 export function businessCardUrl(b: BusinessData, segment: string): string {
   const key = b.id || businessIdFromSlug(segment);
   const version = b.updatedAt ? Date.parse(b.updatedAt).toString(36) : '0';
-  return `${API_BASE}/og/business/${encodeURIComponent(key)}/image.jpg?v=${version}`;
+  return `${API_BASE}/og/business/${encodeURIComponent(key)}/image.jpg?v=${version}.${CARD_DESIGN}`;
 }
 
 export function buildBusinessPage(b: BusinessData, segment: string, lang = 'en'): RenderedPage {
