@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'framer-motion';
 import { optimizeImageUrl } from '@/config/mediaConfig';
+import { API_URL } from '@/src/shared/api/config';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
@@ -53,7 +54,9 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const status = getOpenStatus(listing.businessHours, now);
   const channels = useMemo(() => contactChannels(listing), [listing]);
   const category = categoryLabel(listing, t);
-  const image = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
+  // The same 1200×630 share card the link-preview crawlers get (cover + logo + name).
+  const shareCard = `${API_URL}/og/business/${encodeURIComponent(listing.id)}/image.jpg?v=${Date.parse(listing.updatedAt).toString(36)}`;
+  const photo = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
   const tint = optimizeImageUrl(listing.bannerUrl, { width: 160 });
   const { place, isLocating: isLocatingPlace } = useBusinessPlace(listing);
   // Only a real pin or address is close enough to quote a distance from.
@@ -66,8 +69,8 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
       <SEO
         title={`${listing.name} – ${category}, ${listing.city}`}
         description={listing.description?.slice(0, 160) || `${listing.name}: ${category} in ${listing.city}, ${listing.country}.`}
-        image={image}
-        jsonLd={businessJsonLd(listing, typeof window !== 'undefined' ? window.location.href : '', image)}
+        image={shareCard}
+        jsonLd={businessJsonLd(listing, typeof window !== 'undefined' ? window.location.href : '', photo)}
       />
       {/* Ambient tint: the cover photo, blurred, behind the glass. */}
       {tint && (

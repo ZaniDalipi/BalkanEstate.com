@@ -74,8 +74,9 @@ const isLocalUrl = (url: string) => {
 /**
  * The photo's bytes through the image proxy (SSRF-guarded, cached). Outside
  * production, demo pictures served by the local dev server are read directly.
+ * Shared with the business share card.
  */
-async function loadPhoto(url: string): Promise<Buffer | null> {
+export async function loadPhoto(url: string): Promise<Buffer | null> {
   try {
     if (process.env.NODE_ENV !== 'production' && isLocalUrl(url)) {
       const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
