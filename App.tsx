@@ -8,6 +8,7 @@ import { MotionConfig } from 'framer-motion';
 import { MobileHomeBell } from './src/app/components/MobileHomeBell';
 import { residenceUpPath } from './src/features/developments/utils/residenceUpPath';
 import { MobileTopBarActions } from './src/app/components/MobileTopBarActions';
+import { PageStage } from './src/app/components/PageStage';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
@@ -152,9 +153,11 @@ const PageOutlet: React.FC = () => {
     );
   }
 
+  // PageStage keeps the current page up until the next one is ready (no blank
+  // flash between screens) and fades the new one in — see its doc comment.
   return (
     <ViewTransition>
-      <ErrorBoundary level="route" key={pageKey}>
+      <PageStage pageKey={pageKey}>
         <RouteNoindexContext.Provider value={!!noindex}>
           {/* Defaults for this URL (canonical, robots). Mounted before the
               page, so the page's own <SEO> takes precedence; pages without
@@ -162,11 +165,9 @@ const PageOutlet: React.FC = () => {
               merges alternate links from every instance, so defaults would
               leak onto pages that are deliberately single-language. */}
           <SEO alternates={false} />
-          <Suspense fallback={<PageLoader />}>
-            <Outlet />
-          </Suspense>
+          <Outlet />
         </RouteNoindexContext.Provider>
-      </ErrorBoundary>
+      </PageStage>
     </ViewTransition>
   );
 };
@@ -620,8 +621,10 @@ const MainLayout: React.FC = () => {
 
 const FullScreenLoader: React.FC = () => {
     return (
-        <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
-            <LogoLoader size="lg" showText={true} />
+        // White and the same 40px circle as the boot screen in index.html, so
+        // the hand-off from HTML to React is invisible.
+        <div className="w-screen h-screen flex flex-col items-center justify-center bg-white">
+            <LogoLoader size="md" showText={false} />
         </div>
     );
 };

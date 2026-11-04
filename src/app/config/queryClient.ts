@@ -8,7 +8,7 @@ import { QueryClient, keepPreviousData } from '@tanstack/react-query';
  *
  * Configuration Strategy:
  * - Stale time: 30 seconds - Data considered fresh (fast refresh)
- * - Cache time: 2 minutes - Keep unused data briefly
+ * - Cache time: 10 minutes - Returning to a page shows its data, not a loader
  * - Retry: Smart retry based on error type
  * - Refetch: On window focus and reconnect
  * - Placeholder data: keep previous result while a new query key loads, so the
@@ -27,7 +27,11 @@ export const queryClient = new QueryClient({
       staleTime: 30 * 1000, // 30 seconds - fast refresh for all data
 
       // How long unused data stays in cache
-      gcTime: 2 * 60 * 1000, // 2 minutes (formerly cacheTime)
+      // 10 minutes. At 2 minutes, going back to a page after a short read
+      // elsewhere found its data dropped and showed the loading state again —
+      // one of the "refreshes" on mobile, where people move between screens
+      // more slowly than on desktop.
+      gcTime: 10 * 60 * 1000,
 
       // Retry logic
       retry: (failureCount, error: any) => {

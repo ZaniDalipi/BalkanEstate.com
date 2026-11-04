@@ -100,6 +100,16 @@ export function onRouteChange(listener: () => void): () => void {
 }
 
 /**
+ * The key of the location the router has moved to. React renders that move as
+ * a transition, so for as long as the next page is still loading this differs
+ * from `useLocation().key`, which is the page still on screen. Null before the
+ * router exists.
+ */
+export function routerLocationKey(): string | null {
+  return router ? router.state.location.key : null;
+}
+
+/**
  * Switch language by moving to the same page under the new prefix. The
  * language gate on the `:lang` route then loads and applies it, so the URL and
  * the UI language can never disagree.

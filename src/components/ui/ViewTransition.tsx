@@ -25,7 +25,9 @@ interface ViewTransitionProps {
  * rendering suspended while it waited for the new view to commit — and a tap
  * that has visibly done nothing for a tenth of a second reads as a slow app,
  * however smooth the motion that follows. The view now swaps in the commit that
- * the navigation triggers, and nothing is played over it.
+ * the navigation triggers, and nothing is played over it. The only motion is
+ * a short opacity fade-in on the page that arrives (`.be-page-fade`, applied
+ * in PageStage), which starts in that same commit and so costs the tap nothing.
  *
  * What is left is the part that was never decoration: a stable node for the
  * edge-swipe back gesture to bind to. It takes no `viewKey` any more — with no
