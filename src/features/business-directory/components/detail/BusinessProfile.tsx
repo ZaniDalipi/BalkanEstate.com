@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'framer-motion';
 import { optimizeImageUrl } from '@/config/mediaConfig';
+import { API_URL } from '@/src/shared/api/config';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
@@ -53,7 +54,9 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const status = getOpenStatus(listing.businessHours, now);
   const channels = useMemo(() => contactChannels(listing), [listing]);
   const category = categoryLabel(listing, t);
-  const image = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
+  // The same 1200×630 share card the link-preview crawlers get (cover + logo + name).
+  const shareCard = `${API_URL}/og/business/${encodeURIComponent(listing.id)}/image.jpg?v=${Date.parse(listing.updatedAt).toString(36)}.g2`;
+  const photo = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
   const tint = optimizeImageUrl(listing.bannerUrl, { width: 160 });
   const { place, isLocating: isLocatingPlace } = useBusinessPlace(listing);
   // Only a real pin or address is close enough to quote a distance from.
@@ -62,18 +65,17 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   return (
     // Room for the bottom contact bar. Below md the app's scroll container
     // already reserves 3.5rem + the home-indicator inset, so only top that up.
-    <div className="relative min-h-screen overflow-x-clip bg-[#f5f5f7] pb-4 md:pb-24 lg:pb-0">
+    <div className="liquid-backdrop relative min-h-screen overflow-x-clip pb-10 md:pb-28 lg:pb-0">
       <SEO
         title={`${listing.name} – ${category}, ${listing.city}`}
         description={listing.description?.slice(0, 160) || `${listing.name}: ${category} in ${listing.city}, ${listing.country}.`}
-        image={image}
-        jsonLd={businessJsonLd(listing, typeof window !== 'undefined' ? window.location.href : '', image)}
+        image={shareCard}
+        jsonLd={businessJsonLd(listing, typeof window !== 'undefined' ? window.location.href : '', photo)}
       />
       {/* Ambient tint: the cover photo, blurred, behind the glass. */}
       {tint && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[640px] overflow-hidden" aria-hidden="true">
-          <img src={tint} alt="" className="h-full w-full scale-125 object-cover opacity-40 blur-3xl saturate-150" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#f5f5f7]/60 to-[#f5f5f7]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[700px] overflow-hidden [mask-image:linear-gradient(to_bottom,black_30%,transparent)]" aria-hidden="true">
+          <img src={tint} alt="" className="h-full w-full scale-125 object-cover opacity-45 blur-3xl saturate-150" />
         </div>
       )}
 

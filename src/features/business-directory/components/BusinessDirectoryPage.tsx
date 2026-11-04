@@ -307,7 +307,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="liquid-backdrop min-h-screen">
       {/* === PREMIUM HERO SECTION === */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900" />
@@ -360,7 +360,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.35, type: 'spring', stiffness: 300, damping: 28 }}
             >
-              <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-5 md:p-6 border border-white/20 shadow-2xl shadow-black/20">
+              <div className="liquid-dark rounded-[24px] p-3 sm:rounded-[30px] sm:p-5 md:p-6">
                 <form onSubmit={handleSearch}>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-3 sm:left-4 flex items-center pointer-events-none">
@@ -408,7 +408,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                       )}
                       <motion.button
                         type="submit"
-                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary hover:to-blue-700 text-white font-bold rounded-lg sm:rounded-xl text-xs sm:text-sm transition-colors hover:shadow-lg hover:shadow-primary/30"
+                        className="liquid-tint rounded-full px-4 py-2 text-xs font-bold sm:px-6 sm:py-2.5 sm:text-sm"
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -435,7 +435,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                             key={cat}
                             type="button"
                             onClick={() => handleCategoryClick(cat)}
-                            className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 text-white/70 hover:text-white rounded-lg transition-colors"
+                            className="liquid-dark rounded-full px-3 py-1.5 text-xs text-white/85 hover:text-white"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 + i * 0.05 }}
@@ -457,7 +457,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         {/* Wave divider */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 80V40C240 0 480 0 720 40C960 80 1200 80 1440 40V80H0Z" fill="#fafafa" />
+            <path d="M0 80V40C240 0 480 0 720 40C960 80 1200 80 1440 40V80H0Z" fill="#f2f2f7" />
           </svg>
         </div>
       </div>
@@ -471,8 +471,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           viewport={{ once: true, amount: 0.5 }}
           variants={scaleInVariants}
         >
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl shadow-neutral-200/50 border border-neutral-100/80 p-4 sm:p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+          <div className="liquid-surface rounded-[28px] p-3 sm:p-5">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
               {[
                 { icon: 'chart' as SoftIconName, value: total, label: t('stats.totalListings'), color: 'from-primary/10 to-blue-500/10' },
                 { icon: 'store' as SoftIconName, value: businessCount, label: t('stats.businesses'), color: 'from-blue-500/10 to-cyan-500/10' },
@@ -481,7 +481,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
-                  className={`text-center p-3 rounded-xl bg-gradient-to-br ${stat.color}`}
+                  className={`liquid-control rounded-2xl p-3 text-center`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -516,16 +516,16 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         >
           {/* Scrollable tabs wrapper on mobile */}
           <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-neutral-200/80 shadow-sm min-w-max">
+            <div className="liquid-control flex min-w-max items-center gap-1 rounded-full p-1">
               {tabs.map((tab) => (
                 <motion.button
                   key={tab.key}
                   type="button"
                   onClick={() => handleTabChange(tab.key)}
-                  className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
+                  className={`relative flex min-h-[40px] items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition-colors duration-200 sm:px-4 sm:text-sm ${
                     activeTab === tab.key
                       ? 'text-white'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
+                      : 'text-neutral-600 hover:text-neutral-900'
                   }`}
                   whileHover={activeTab !== tab.key ? { scale: 1.02 } : {}}
                   whileTap={{ scale: 0.97 }}
@@ -533,7 +533,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                   {activeTab === tab.key && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 rounded-lg shadow-md shadow-primary/25"
+                      className="liquid-tint absolute inset-0 rounded-full"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -551,10 +551,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
             <motion.button
               type="button"
               onClick={() => setViewMode(v => v === 'grid' ? 'map' : 'grid')}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold transition-all text-xs sm:text-sm flex-shrink-0 ${
+              className={`flex min-h-[40px] flex-shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold sm:px-4 sm:py-2.5 sm:text-sm ${
                 viewMode === 'map'
-                  ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                  : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
+                  ? 'liquid-tint'
+                  : 'liquid-control text-neutral-700'
               }`}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
@@ -580,7 +580,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                 type="button"
                 onClick={() => requireAuth(handleSurpriseMe)}
                 disabled={surpriseAnim}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 transition-shadow flex-shrink-0 text-xs sm:text-sm disabled:opacity-70"
+                className="liquid-tint liquid-tint--amber flex min-h-[40px] flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold disabled:opacity-70 sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -598,7 +598,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
             <motion.button
               type="button"
               onClick={handleCreateClick}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-shadow flex-shrink-0 text-xs sm:text-sm"
+              className="liquid-tint flex min-h-[40px] flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -639,7 +639,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Category filters */}
         <motion.div
-          className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide mb-4 -mx-4 px-4 sm:mx-0 sm:px-0"
+          className="flex gap-1.5 sm:gap-2 overflow-x-auto py-2 scrollbar-hide mb-3 -mx-4 px-4 sm:-mx-1 sm:px-1"
           variants={fadeUpVariants}
           initial="hidden"
           whileInView="visible"
@@ -648,10 +648,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           <motion.button
             type="button"
             onClick={() => handleCategoryClick('')}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex-shrink-0 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 ${
               selectedCategory === ''
-                ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
+                ? 'liquid-tint'
+                : 'liquid-control text-neutral-700'
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -663,10 +663,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               key={category}
               type="button"
               onClick={() => handleCategoryClick(category)}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 whitespace-nowrap ${
                 selectedCategory === category
-                  ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                  : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/30 hover:shadow-md'
+                  ? 'liquid-tint'
+                  : 'liquid-control text-neutral-700'
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -706,7 +706,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               transition={{ duration: 0.3 }}
             >
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border border-gray-100/80">
+                <div key={i} className="liquid-surface overflow-hidden rounded-[28px]">
                   <div className="h-20 sm:h-24 relative overflow-hidden bg-neutral-200">
                     <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
                   </div>
@@ -796,7 +796,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                 <motion.button
                   type="button"
                   onClick={handleCreateClick}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-shadow"
+                  className="liquid-tint inline-flex min-h-[48px] items-center gap-2 rounded-full px-6 py-3 font-semibold"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -821,7 +821,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-xs sm:text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 liquid-control rounded-full text-xs sm:text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
               whileHover={page > 1 ? { scale: 1.03 } : {}}
               whileTap={page > 1 ? { scale: 0.97 } : {}}
             >
@@ -834,7 +834,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200 text-xs sm:text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 liquid-control rounded-full text-xs sm:text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
               whileHover={page < totalPages ? { scale: 1.03 } : {}}
               whileTap={page < totalPages ? { scale: 0.97 } : {}}
             >

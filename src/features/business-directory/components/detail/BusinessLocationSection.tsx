@@ -27,7 +27,7 @@ interface BusinessLocationSectionProps {
 }
 
 /** A big map: most of a phone screen, and the full height of the section on desktop. */
-const MAP_BOX = 'relative isolate h-[340px] overflow-hidden rounded-2xl ring-1 ring-black/[0.06] sm:h-[440px] lg:h-[560px] landscape:h-[300px]';
+const MAP_BOX = 'liquid-map relative isolate h-[340px] overflow-hidden rounded-[22px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7),0_12px_30px_-18px_rgba(15,23,42,0.4)] sm:h-[440px] lg:h-[560px] landscape:h-[300px]';
 
 /**
  * Where they are and how to get there, full width: a big map (or satellite)

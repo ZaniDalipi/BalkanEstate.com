@@ -30,7 +30,7 @@ export const BusinessContactSection: React.FC<BusinessContactSectionProps> = ({ 
           return (
             <li key={c.id} className="flex items-center">
               <a href={c.href} {...channelLinkProps(c.external)} className="group flex min-h-[56px] min-w-0 flex-1 items-center gap-3 rounded-2xl px-2 py-2 transition hover:bg-black/[0.03]">
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-black/[0.05] ${meta.tint}`}>
+                <span className={`liquid-control flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] ${meta.tint}`}>
                   <meta.Icon className="h-7 w-7" />
                 </span>
                 <span className="min-w-0 flex-1">

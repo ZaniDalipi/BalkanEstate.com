@@ -121,8 +121,11 @@ export const getBusinessListing = async (
       return;
     }
 
-    // Increment view count (fire-and-forget)
-    BusinessListing.updateOne({ _id: listing._id }, { $inc: { views: 1 } }).catch(() => {});
+    // Increment view count (fire-and-forget) — but not for the link-preview
+    // renderer (flagged x-be-prerender), which is a crawler, not a person.
+    if (req.get('x-be-prerender') !== '1') {
+      BusinessListing.updateOne({ _id: listing._id }, { $inc: { views: 1 } }).catch(() => {});
+    }
 
     res.status(200).json({ listing: transformLean(listing) });
   } catch (error: any) {

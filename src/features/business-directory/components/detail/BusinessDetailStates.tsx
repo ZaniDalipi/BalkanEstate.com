@@ -10,7 +10,7 @@ const Bone: React.FC<{ className: string }> = ({ className }) => <div className=
 export const BusinessDetailSkeleton: React.FC = () => {
   const { t } = useTranslation('businessDirectory');
   return (
-    <div className="min-h-screen bg-[#f5f5f7]" aria-busy="true" aria-label={t('detail.loading', 'Loading business…')}>
+    <div className="liquid-backdrop min-h-screen" aria-busy="true" aria-label={t('detail.loading', 'Loading business…')}>
       <div className="mx-auto max-w-6xl sm:px-6">
         <Bone className="h-44 !rounded-none sm:h-60 sm:!rounded-[32px] lg:h-80" />
         <div className={`${GLASS_CARD} mx-3 -mt-16 p-5 sm:mx-6 sm:-mt-24 lg:mx-10`}>
@@ -39,7 +39,7 @@ export const BusinessDetailSkeleton: React.FC = () => {
 export const BusinessNotFound: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { t } = useTranslation('businessDirectory');
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] px-4">
+    <div className="liquid-backdrop flex min-h-screen items-center justify-center px-4">
       <div className={`${GLASS_CARD} max-w-md p-8 text-center`}>
         <SoftIcon name="store" className="mx-auto mb-5 block h-20 w-20" />
         <h1 className="mb-2 text-xl font-bold text-neutral-900">{t('detail.notFound', 'Listing Not Found')}</h1>

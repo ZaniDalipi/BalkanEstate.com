@@ -32,7 +32,7 @@ export function GlassSegmented<T extends string>({ options, value, onChange, lab
       role="radiogroup"
       aria-label={label}
       onKeyDown={onKeyDown}
-      className={`inline-flex gap-0.5 rounded-full bg-white/75 p-1 shadow-[0_6px_20px_-8px_rgba(15,23,42,0.35)] ring-1 ring-black/[0.06] backdrop-blur-xl ${className}`}
+      className={`liquid-control inline-flex gap-0.5 rounded-full p-1 ${className}`}
     >
       {options.map((o) => {
         const active = o.value === value;
@@ -45,7 +45,7 @@ export function GlassSegmented<T extends string>({ options, value, onChange, lab
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(o.value)}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-full font-semibold transition ${pad} ${
-              active ? 'bg-white text-neutral-900 shadow-sm ring-1 ring-black/[0.04]' : 'text-neutral-600 hover:text-neutral-900'
+              active ? 'bg-white text-neutral-900 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.25),inset_0_1px_0_#fff] ring-1 ring-black/[0.04]' : 'text-neutral-600 hover:text-neutral-900'
             }`}
           >
             {o.Icon && <o.Icon className="h-4 w-4" />}
