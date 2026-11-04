@@ -11,11 +11,14 @@ const h = vi.hoisted(() => ({
   user: null as null | { id: string },
   askBusiness: vi.fn(),
   getTravelRoute: vi.fn(),
+  geocodePlace: vi.fn(),
+  map: vi.fn(),
 }));
 
 vi.mock('@/src/features/business-directory/api/businessExtrasApi', () => ({
   askBusiness: (...args: unknown[]) => h.askBusiness(...args),
   getTravelRoute: (...args: unknown[]) => h.getTravelRoute(...args),
+  geocodePlace: (...args: unknown[]) => h.geocodePlace(...args),
 }));
 
 vi.mock('@/src/features/business-directory/hooks/useBusinessListings', () => {
@@ -37,7 +40,12 @@ vi.mock('@/context/AppContext', () => ({
 vi.mock('@/src/components/seo', () => ({ SEO: () => null }));
 vi.mock('@/components/shared/Footer', () => ({ default: () => null }));
 vi.mock('@/shared/components/NotificationCenter', () => ({ default: () => null }));
-vi.mock('./detail/BusinessLocationMap', () => ({ default: () => <div data-testid="location-map" /> }));
+vi.mock('./detail/BusinessLocationMap', () => ({
+  default: (props: { precision: string; business: { lat: number; lng: number } }) => {
+    h.map(props);
+    return <div data-testid="location-map" data-precision={props.precision} />;
+  },
+}));
 
 const listing: BusinessListing = {
   id: 'b1', slug: 'regina', owner: { id: 'owner1', name: 'sales' }, listingType: 'business',
@@ -72,6 +80,8 @@ const mockGeolocation = (result: 'ok' | 'denied') => {
 beforeEach(() => {
   h.askBusiness.mockReset();
   h.getTravelRoute.mockReset();
+  h.geocodePlace.mockReset();
+  h.map.mockReset();
   h.detail = { listing, isLoading: false, error: null };
   h.list = { listings: [], total: 0, isLoading: false, error: null };
   h.user = null;
@@ -182,5 +192,35 @@ describe('BusinessDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /detail.route.fromMe/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('detail.route.denied');
     expect(screen.getAllByRole('link', { name: 'detail.route.openIn' }).length).toBe(2);
+  });
+
+  it('without a pin, finds the address on the map and says it is approximate', async () => {
+    h.detail = { listing: { ...listing, latitude: undefined, longitude: undefined }, isLoading: false, error: null };
+    h.geocodePlace.mockResolvedValue({ lat: 40.4512, lng: 19.4811 });
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    expect(await screen.findByTestId('location-map')).toHaveAttribute('data-precision', 'address');
+    expect(h.geocodePlace).toHaveBeenCalledWith('Rruga Pavllo Flloko, Vlorë', 'al');
+    expect(h.map).toHaveBeenLastCalledWith(expect.objectContaining({ business: { lat: 40.4512, lng: 19.4811 } }));
+    expect(screen.getByText('detail.map.approximate')).toBeInTheDocument();
+  });
+
+  it('falls back to the city, and to directions when nothing is found', async () => {
+    h.detail = { listing: { ...listing, latitude: undefined, longitude: undefined }, isLoading: false, error: null };
+    h.geocodePlace.mockResolvedValue(null);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    await waitFor(() => expect(h.geocodePlace).toHaveBeenCalledTimes(2));
+    expect(h.geocodePlace).toHaveBeenLastCalledWith('Vlore, Albania', 'al');
+    const location = within(screen.getByRole('region', { name: 'detail.location' }));
+    expect(await location.findByRole('link', { name: 'detail.getDirections' })).toBeInTheDocument();
+    expect(location.queryByTestId('location-map')).not.toBeInTheDocument();
+  });
+
+  it('shows the numbers up top, the full address and the owner', () => {
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    expect(screen.getByText('detail.stats.services')).toBeInTheDocument();
+    expect(screen.getByText('detail.stats.offered')).toBeInTheDocument();
+    expect(screen.getAllByText(/^Rruga Pavllo Flloko, Vlorë, Albania$/).length).toBeGreaterThan(0);
+    const owner = within(screen.getByRole('region', { name: 'detail.owner' }));
+    expect(owner.getByText('sales')).toBeInTheDocument();
   });
 });

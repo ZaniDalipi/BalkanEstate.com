@@ -135,7 +135,13 @@
     "stats": {
       "services": "Usluge",
       "views": "Pregledi",
-      "memberSince": "Član od"
+      "memberSince": "Član od",
+      "offered": "u ponudi",
+      "profileViews": "pregleda profila",
+      "yearsAgo_one": "prije {{count}} godine",
+      "yearsAgo_few": "prije {{count}} godine",
+      "yearsAgo_other": "prije {{count}} godina",
+      "thisYear": "ove godine"
     },
     "cta": {
       "title": "Spremni za saradnju sa {{name}}?",
@@ -210,7 +216,14 @@
     "map": {
       "layer": "Stil karte",
       "standard": "Karta",
-      "satellite": "Satelit"
+      "satellite": "Satelit",
+      "approximate": "Približno — postavljeno prema adresi",
+      "cityOnly": "Približno — samo područje grada",
+      "finding": "Tražimo adresu na karti…",
+      "label": "Karta: {{name}}",
+      "gestureDesktop": "Koristite Ctrl + skrolanje za zumiranje",
+      "gestureMac": "Koristite ⌘ + skrolanje za zumiranje",
+      "gestureMobile": "Koristite dva prsta za pomjeranje karte"
     },
     "ask": {
       "title": "Pitajte o: {{name}}",

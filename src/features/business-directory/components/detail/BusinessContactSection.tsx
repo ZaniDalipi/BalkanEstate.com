@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Copy } from 'lucide-react';
-import UserAvatar from '@/components/shared/UserAvatar';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import type { ContactChannel } from '../../utils/contactChannels';
 import { CHANNEL_META, channelLinkProps } from './channelMeta';
@@ -16,15 +15,14 @@ interface BusinessContactSectionProps {
 
 const COPYABLE = new Set(['call', 'email', 'whatsapp', 'viber']);
 
-/** Every way to reach them as tappable rows, their socials, and who runs the listing. */
+/** Every way to reach them as tappable rows, and their socials. */
 export const BusinessContactSection: React.FC<BusinessContactSectionProps> = ({ listing, channels, onCopy }) => {
   const { t } = useTranslation('businessDirectory');
   const rows = channels.filter((c) => c.id !== 'directions');
-  const owner = listing.owner;
   const hasSocial = Object.values(listing.socialMedia ?? {}).some((v) => !!v?.trim());
 
   return (
-    <DetailSection id="business-contact" icon="phone" title={t('detail.contactInfo', 'Contact')}>
+    <DetailSection id="business-contact" icon="phone" title={t('detail.contactInfo', 'Contact')} subtitle={t('detail.getInTouch', 'Reach out to get started')}>
       <ul className="-mx-2 divide-y divide-black/[0.06]">
         {rows.map((c) => {
           const meta = CHANNEL_META[c.id];
@@ -62,20 +60,6 @@ export const BusinessContactSection: React.FC<BusinessContactSectionProps> = ({ 
         </div>
       )}
 
-      {owner?.name && (
-        <div className="mt-4 flex items-center gap-3 border-t border-black/[0.06] pt-4">
-          <span className="h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-white shadow-sm">
-            <UserAvatar src={owner.avatarUrl} alt={owner.name} seed={owner.id || owner.name} width={88} className="h-full w-full object-cover" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-[12px] font-medium text-neutral-500">{t('detail.listedBy', 'Listed by')}</span>
-            <span className="block truncate text-[15px] font-semibold text-neutral-900">
-              {owner.name}
-              <span className="font-normal text-neutral-500"> · {listing.listingType === 'individual' ? t('detail.ownerIndividual', 'Independent Professional') : t('detail.ownerBusiness', 'Business Owner')}</span>
-            </span>
-          </span>
-        </div>
-      )}
     </DetailSection>
   );
 };

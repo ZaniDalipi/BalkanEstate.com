@@ -1,10 +1,11 @@
 import React, { Suspense, lazy, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Copy } from 'lucide-react';
+import { Copy, Info } from 'lucide-react';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import type { VisitorLocation } from '../../hooks/useVisitorLocation';
 import { useTravelRoute } from '../../hooks/useTravelRoute';
 import { directionsUrl, fullAddress } from '../../utils/businessFacts';
+import type { BusinessPlace } from '../../utils/businessPlace';
 import type { TravelMode } from '../../utils/travel';
 import { DetailSection } from './DetailSection';
 import { GlassSegmented } from './GlassSegmented';
@@ -14,42 +15,64 @@ import type { MapLayer } from './BusinessLocationMap';
 
 const BusinessLocationMap = lazy(() => import('./BusinessLocationMap'));
 
-const hasPin = (l: BusinessListing): l is BusinessListing & { latitude: number; longitude: number } =>
-  Number.isFinite(l.latitude) && Number.isFinite(l.longitude);
-
 interface BusinessLocationSectionProps {
   listing: BusinessListing;
+  /** Their pin, or the address looked up; null while looking or when not found. */
+  place: BusinessPlace | null;
+  isLocatingPlace: boolean;
   location: VisitorLocation;
   onLocate: () => void;
   onCopy: (value: string) => void;
 }
 
+const MAP_BOX = 'relative isolate -mx-1 mb-4 h-72 overflow-hidden rounded-2xl ring-1 ring-black/[0.06] sm:h-80';
+
 /** Where they are and how to get there: map (or satellite), route from the visitor, address. */
-export const BusinessLocationSection: React.FC<BusinessLocationSectionProps> = ({ listing, location, onLocate, onCopy }) => {
+export const BusinessLocationSection: React.FC<BusinessLocationSectionProps> = ({ listing, place, isLocatingPlace, location, onLocate, onCopy }) => {
   const { t } = useTranslation('businessDirectory');
   const [layer, setLayer] = useState<MapLayer>('map');
   const [mode, setMode] = useState<TravelMode>('car');
   const address = fullAddress(listing);
-  const business = hasPin(listing) ? { lat: listing.latitude, lng: listing.longitude } : null;
+  const business = place?.position ?? null;
   const visitor = location.status === 'ready' ? location.position : null;
   const route = useTravelRoute(visitor, business, mode);
 
   return (
     <DetailSection id="business-location" icon="pin" title={t('detail.location', 'Location')}>
-      {business && (
-        <div className="relative isolate -mx-1 mb-4 h-64 overflow-hidden rounded-2xl ring-1 ring-black/[0.06] sm:h-72">
+      {place ? (
+        <div className={MAP_BOX}>
           <Suspense fallback={<div className="h-full w-full animate-pulse bg-neutral-200/70" aria-hidden="true" />}>
-            <BusinessLocationMap business={business} label={listing.name} layer={layer} visitor={visitor} path={route.data?.path} />
+            <BusinessLocationMap
+              business={place.position}
+              precision={place.precision}
+              name={listing.name}
+              logoUrl={listing.logoUrl}
+              layer={layer}
+              visitor={visitor}
+              path={route.data?.path ?? null}
+            />
           </Suspense>
           <GlassSegmented<MapLayer>
             size="sm"
-            className="absolute right-2.5 top-2.5 z-[500]"
+            className="absolute right-2.5 top-2.5 z-10"
             label={t('detail.map.layer', 'Map style')}
             value={layer}
             onChange={setLayer}
             options={[{ value: 'map', label: t('detail.map.standard', 'Map') }, { value: 'satellite', label: t('detail.map.satellite', 'Satellite') }]}
           />
         </div>
+      ) : isLocatingPlace ? (
+        <div className={`${MAP_BOX} flex items-center justify-center bg-neutral-100 text-sm text-neutral-500`} role="status">
+          {t('detail.map.finding', 'Finding the address on the map…')}
+        </div>
+      ) : null}
+      {place && place.precision !== 'pin' && (
+        <p className="-mt-2 mb-4 flex items-center gap-1.5 text-[13px] text-neutral-600">
+          <Info className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          {place.precision === 'address'
+            ? t('detail.map.approximate', 'Approximate — placed from the address')
+            : t('detail.map.cityOnly', 'Approximate — city area only')}
+        </p>
       )}
 
       {business ? (

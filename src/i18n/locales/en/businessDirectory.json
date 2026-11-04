@@ -131,7 +131,12 @@
     "stats": {
       "services": "Services",
       "views": "Views",
-      "memberSince": "Member since"
+      "memberSince": "Member since",
+      "offered": "offered",
+      "profileViews": "profile views",
+      "yearsAgo_one": "{{count}} year ago",
+      "yearsAgo_other": "{{count}} years ago",
+      "thisYear": "this year"
     },
     "licensed": "Licensed",
     "languages": "Languages",
@@ -209,7 +214,14 @@
     "map": {
       "layer": "Map style",
       "standard": "Map",
-      "satellite": "Satellite"
+      "satellite": "Satellite",
+      "approximate": "Approximate — placed from the address",
+      "cityOnly": "Approximate — city area only",
+      "finding": "Finding the address on the map…",
+      "label": "Map showing {{name}}",
+      "gestureDesktop": "Use Ctrl + scroll to zoom the map",
+      "gestureMac": "Use ⌘ + scroll to zoom the map",
+      "gestureMobile": "Use two fingers to move the map"
     },
     "ask": {
       "title": "Ask about {{name}}",

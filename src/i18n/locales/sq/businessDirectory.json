@@ -131,7 +131,12 @@
     "stats": {
       "services": "Shërbime",
       "views": "Shikime",
-      "memberSince": "Anëtar që nga"
+      "memberSince": "Anëtar që nga",
+      "offered": "të ofruara",
+      "profileViews": "shikime profili",
+      "yearsAgo_one": "{{count}} vit më parë",
+      "yearsAgo_other": "{{count}} vjet më parë",
+      "thisYear": "këtë vit"
     },
     "licensed": "I licensuar",
     "languages": "Gjuhët",
@@ -209,7 +214,14 @@
     "map": {
       "layer": "Stili i hartës",
       "standard": "Harta",
-      "satellite": "Satelit"
+      "satellite": "Satelit",
+      "approximate": "Përafërsisht — vendosur sipas adresës",
+      "cityOnly": "Përafërsisht — vetëm zona e qytetit",
+      "finding": "Po e gjejmë adresën në hartë…",
+      "label": "Harta që tregon {{name}}",
+      "gestureDesktop": "Përdorni Ctrl + rrotullim për zmadhim",
+      "gestureMac": "Përdorni ⌘ + rrotullim për zmadhim",
+      "gestureMobile": "Përdorni dy gishta për të lëvizur hartën"
     },
     "ask": {
       "title": "Pyet për {{name}}",

@@ -9,6 +9,7 @@ import { useNow } from '../../hooks/useNow';
 import { useScrolledPast } from '../../hooks/useScrolledPast';
 import { useShareAndCopy } from '../../hooks/useShareAndCopy';
 import { useVisitorLocation } from '../../hooks/useVisitorLocation';
+import { useBusinessPlace } from '../../hooks/useBusinessPlace';
 import { haversineKm } from '../../utils/travel';
 import { getOpenStatus } from '../../utils/businessHours';
 import { categoryLabel } from '../../utils/categoryStyle';
@@ -24,6 +25,7 @@ import { BusinessHoursSection } from './BusinessHoursSection';
 import { BusinessIdentityCard } from './BusinessIdentityCard';
 import { BusinessLocationSection } from './BusinessLocationSection';
 import { BusinessMobileActionBar } from './BusinessMobileActionBar';
+import { BusinessOwnerSection } from './BusinessOwnerSection';
 import { BusinessQuickActions } from './BusinessQuickActions';
 import { BusinessTopBar } from './BusinessTopBar';
 import { DetailToast } from './DetailToast';
@@ -62,8 +64,9 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const category = categoryLabel(listing, t);
   const image = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
   const tint = optimizeImageUrl(listing.bannerUrl, { width: 160 });
-  const hasPin = Number.isFinite(listing.latitude) && Number.isFinite(listing.longitude);
-  const distanceKm = location.status === 'ready' && hasPin ? haversineKm(location.position, { lat: listing.latitude!, lng: listing.longitude! }) : null;
+  const { place, isLocating: isLocatingPlace } = useBusinessPlace(listing);
+  // Only a real pin or address is close enough to quote a distance from.
+  const distanceKm = location.status === 'ready' && place && place.precision !== 'city' ? haversineKm(location.position, place.position) : null;
 
   return (
     // Room for the bottom contact bar. Below md the app's scroll container
@@ -105,10 +108,11 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
             <BusinessAskSection listing={listing} channels={channels} inputRef={askInputRef} />
             <BusinessFactsSection listing={listing} now={now} />
             <BusinessHoursSection hours={listing.businessHours} status={status} now={now} />
+            <BusinessOwnerSection listing={listing} />
           </div>
           <aside className="min-w-0 space-y-5" aria-label={t('detail.contactInfo', 'Contact')}>
             <BusinessContactSection listing={listing} channels={channels} onCopy={copy} />
-            <BusinessLocationSection listing={listing} location={location} onLocate={locate} onCopy={copy} />
+            <BusinessLocationSection listing={listing} place={place} isLocatingPlace={isLocatingPlace} location={location} onLocate={locate} onCopy={copy} />
           </aside>
         </div>
 

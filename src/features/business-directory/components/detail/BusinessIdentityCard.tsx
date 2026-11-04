@@ -6,7 +6,8 @@ import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import type { OpenStatus } from '../../utils/businessHours';
 import { categoryGradient, categoryIcon, categoryLabel } from '../../utils/categoryStyle';
-import { shortLocation, yearsInBusiness } from '../../utils/businessFacts';
+import { fullAddress, yearsInBusiness } from '../../utils/businessFacts';
+import { BusinessStatsStrip } from './BusinessStatsStrip';
 import { formatDistance } from '../../utils/travel';
 import { GLASS_CHIP, GLASS_FLOAT } from './glassStyles';
 import { OpenStatusBadge } from './OpenStatusBadge';
@@ -57,9 +58,9 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
             <span aria-hidden="true">·</span>
             <span>{isIndividual ? t('types.individual', 'Individual') : t('types.business', 'Business')}</span>
           </p>
-          <p className="mt-1 flex items-center gap-1 text-sm text-neutral-500">
-            <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">{shortLocation(l)}</span>
+          <p className="mt-1 flex items-start gap-1 text-sm text-neutral-500" title={fullAddress(l)}>
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="line-clamp-2">{fullAddress(l)}</span>
           </p>
           <OpenStatusBadge status={status} className="mt-1.5" />
         </div>
@@ -91,6 +92,8 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
           )}
         </ul>
       )}
+
+      <BusinessStatsStrip listing={l} now={now} />
 
       <div className="mt-4 sm:mt-5">{children}</div>
     </div>

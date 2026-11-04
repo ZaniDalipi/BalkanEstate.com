@@ -1,75 +1,61 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { CircleMarker, MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useReducedMotion } from 'framer-motion';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { optimizeImageUrl } from '@/config/mediaConfig';
+import type { PlacePrecision } from '../../utils/businessPlace';
 import type { LatLng } from '../../utils/travel';
+import { useBusinessMap, type MapLayer } from './map/useBusinessMap';
 
-export type MapLayer = 'map' | 'satellite';
+export type { MapLayer };
 
 interface BusinessLocationMapProps {
   business: LatLng;
-  label: string;
+  precision: PlacePrecision;
+  name: string;
+  logoUrl?: string;
   layer: MapLayer;
   visitor?: LatLng | null;
   /** [lat, lng] pairs of the route, when there is one. */
   path?: Array<[number, number]> | null;
 }
 
-const TILES: Record<MapLayer, { url: string; attribution: string }> = {
-  map: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' },
-  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' },
-};
-
-const PIN_HTML =
-  '<span style="display:flex;width:40px;height:40px;align-items:center;justify-content:center;border-radius:9999px 9999px 9999px 0;transform:rotate(-45deg);background:#0252CD;box-shadow:0 8px 20px -6px rgba(2,82,205,.7);border:3px solid #fff">' +
-  '<span style="width:12px;height:12px;border-radius:9999px;background:#fff"></span></span>';
-
-/** Keep the business, the visitor and the route in view whenever they change. */
-const FitToTrip: React.FC<{ points: Array<[number, number]> }> = ({ points }) => {
-  const map = useMap();
-  const latest = useRef(points);
-  latest.current = points;
-  // Refit only when the trip itself changes, not on every new array.
-  const key = points.length > 1 ? `${points[0]}|${points[points.length - 1]}|${points.length}` : '';
-  useEffect(() => {
-    if (key) map.fitBounds(L.latLngBounds(latest.current), { padding: [36, 36], maxZoom: 16 });
-  }, [map, key]);
-  return null;
-};
-
 /**
- * A view-only map of the business — no search box, no draggable pin. Shows
- * the visitor and the route once they ask for it, with a satellite option.
- * Wheel zoom is off so the page scrolls past it; on touch, one finger scrolls
- * the page and the map's own buttons zoom.
+ * The business on a MapLibre map: 3D buildings with theirs raised in blue,
+ * a logo badge on the spot, satellite on request, and the visitor's route.
+ * Two fingers (or Ctrl/⌘ + scroll) move it, so the page still scrolls.
  */
-const BusinessLocationMap: React.FC<BusinessLocationMapProps> = ({ business, label, layer, visitor, path }) => {
-  const icon = useMemo(() => L.divIcon({ className: '', iconSize: [40, 48], iconAnchor: [20, 46], html: PIN_HTML }), []);
-  const touch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
-  const tiles = TILES[layer];
-  const fitPoints = useMemo<Array<[number, number]>>(
-    () => (path && path.length > 1 ? path : visitor ? [[visitor.lat, visitor.lng], [business.lat, business.lng]] : []),
-    [path, visitor, business.lat, business.lng],
-  );
+const BusinessLocationMap: React.FC<BusinessLocationMapProps> = ({ business, precision, name, logoUrl, layer, visitor = null, path = null }) => {
+  const { t } = useTranslation('businessDirectory');
+  const reduceMotion = !!useReducedMotion();
+  const container = useRef<HTMLDivElement>(null);
+  const { ready, foundBuilding } = useBusinessMap(container, {
+    business,
+    precision,
+    name,
+    logoUrl: logoUrl ? optimizeImageUrl(logoUrl, { width: 112, height: 112 }) || logoUrl : undefined,
+    layer,
+    visitor,
+    path,
+    reduceMotion,
+    gestureText: {
+      desktop: t('detail.map.gestureDesktop', 'Use Ctrl + scroll to zoom the map'),
+      mac: t('detail.map.gestureMac', 'Use ⌘ + scroll to zoom the map'),
+      mobile: t('detail.map.gestureMobile', 'Use two fingers to move the map'),
+    },
+  });
 
   return (
-    <MapContainer center={[business.lat, business.lng]} zoom={15} scrollWheelZoom={false} dragging={!touch} className="h-full w-full">
-      <TileLayer key={layer} url={tiles.url} attribution={tiles.attribution} />
-      {path && path.length > 1 && (
-        <>
-          <Polyline positions={path} pathOptions={{ color: '#ffffff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }} />
-          <Polyline positions={path} pathOptions={{ color: '#0A84FF', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' }} />
-        </>
-      )}
-      {visitor && (
-        <>
-          <CircleMarker center={[visitor.lat, visitor.lng]} radius={16} pathOptions={{ stroke: false, fillColor: '#0A84FF', fillOpacity: 0.18 }} />
-          <CircleMarker center={[visitor.lat, visitor.lng]} radius={7} pathOptions={{ color: '#ffffff', weight: 3, fillColor: '#0A84FF', fillOpacity: 1 }} />
-        </>
-      )}
-      <Marker position={[business.lat, business.lng]} icon={icon} title={label} alt={label} keyboard={false} />
-      <FitToTrip points={fitPoints} />
-    </MapContainer>
+    <div className="relative h-full w-full">
+      <div
+        ref={container}
+        className="h-full w-full"
+        data-shape={foundBuilding === null ? 'pending' : foundBuilding ? 'building' : 'area'}
+        role="region"
+        aria-label={t('detail.map.label', { name, defaultValue: 'Map showing {{name}}' })}
+      />
+      {!ready && <div className="absolute inset-0 animate-pulse bg-neutral-200/70" aria-hidden="true" />}
+    </div>
   );
 };
 

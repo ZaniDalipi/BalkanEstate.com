@@ -131,7 +131,12 @@
     "stats": {
       "services": "Услуги",
       "views": "Прегледи",
-      "memberSince": "Член од"
+      "memberSince": "Член од",
+      "offered": "во понуда",
+      "profileViews": "прегледи на профилот",
+      "yearsAgo_one": "пред {{count}} година",
+      "yearsAgo_other": "пред {{count}} години",
+      "thisYear": "оваа година"
     },
     "licensed": "Лиценциран",
     "languages": "Јазици",
@@ -209,7 +214,14 @@
     "map": {
       "layer": "Стил на мапата",
       "standard": "Мапа",
-      "satellite": "Сателит"
+      "satellite": "Сателит",
+      "approximate": "Приближно — поставено според адресата",
+      "cityOnly": "Приближно — само подрачјето на градот",
+      "finding": "Ја бараме адресата на мапата…",
+      "label": "Мапа: {{name}}",
+      "gestureDesktop": "Користете Ctrl + скролање за зумирање",
+      "gestureMac": "Користете ⌘ + скролање за зумирање",
+      "gestureMobile": "Користете два прста за поместување на мапата"
     },
     "ask": {
       "title": "Прашајте за {{name}}",

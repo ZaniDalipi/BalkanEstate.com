@@ -131,7 +131,13 @@
     "stats": {
       "services": "Servicii",
       "views": "Vizualizări",
-      "memberSince": "Membru din"
+      "memberSince": "Membru din",
+      "offered": "oferite",
+      "profileViews": "vizualizări profil",
+      "yearsAgo_one": "acum {{count}} an",
+      "yearsAgo_few": "acum {{count}} ani",
+      "yearsAgo_other": "acum {{count}} de ani",
+      "thisYear": "anul acesta"
     },
     "licensed": "Licențiat",
     "languages": "Limbi",
@@ -210,7 +216,14 @@
     "map": {
       "layer": "Stil hartă",
       "standard": "Hartă",
-      "satellite": "Satelit"
+      "satellite": "Satelit",
+      "approximate": "Aproximativ — după adresă",
+      "cityOnly": "Aproximativ — doar zona orașului",
+      "finding": "Căutăm adresa pe hartă…",
+      "label": "Hartă: {{name}}",
+      "gestureDesktop": "Folosește Ctrl + derulare pentru zoom",
+      "gestureMac": "Folosește ⌘ + derulare pentru zoom",
+      "gestureMobile": "Folosește două degete pentru a muta harta"
     },
     "ask": {
       "title": "Întreabă despre {{name}}",

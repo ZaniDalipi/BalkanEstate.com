@@ -17,7 +17,7 @@ export const BusinessAboutSection: React.FC<{ listing: BusinessListing }> = ({ l
   const folds = description.length > ABOUT_FOLD_CHARS;
 
   return (
-    <DetailSection id="business-about" icon="clipboard" title={t('detail.about', 'About')}>
+    <DetailSection id="business-about" icon="clipboard" title={t('detail.about', 'About')} subtitle={t('detail.aboutSubtitle', 'Who we are & what we do')}>
       {description && (
         <>
           <p

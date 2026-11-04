@@ -27,3 +27,19 @@ export const askBusiness = (listingId: string, question: string, history: AskTur
     method: 'POST',
     body: { question, history },
   });
+
+interface GeocodeRow {
+  lat: string;
+  lon: string;
+}
+
+/** Look an address up through our geocoding proxy (OpenStreetMap Nominatim); null when nothing matches. */
+export const geocodePlace = async (query: string, countryCode: string | null): Promise<LatLng | null> => {
+  const params = new URLSearchParams({ query });
+  if (countryCode) params.set('countryCode', countryCode);
+  const rows = await apiRequest<GeocodeRow[]>(`/geocoding/search?${params.toString()}`);
+  const first = Array.isArray(rows) ? rows[0] : undefined;
+  const lat = Number(first?.lat);
+  const lng = Number(first?.lon);
+  return first && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+};
