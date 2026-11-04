@@ -14,8 +14,15 @@ export function spinnerPhase(nowMs: number, turnS: number = SPINNER_TURN_S): num
   return phase < 0 ? phase + 1 : phase;
 }
 
-/** A negative `animation-delay` that starts the spin at the current angle. */
-export function spinnerPhaseDelay(nowMs: number = typeof performance !== 'undefined' ? performance.now() : 0): string {
-  const seconds = spinnerPhase(nowMs) * SPINNER_TURN_S;
+/**
+ * A negative `animation-delay` that starts a looping animation of `turnS`
+ * seconds where it would be right now, so a loader that replaces another
+ * carries on instead of restarting from its first frame.
+ */
+export function spinnerPhaseDelay(
+  nowMs: number = typeof performance !== 'undefined' ? performance.now() : 0,
+  turnS: number = SPINNER_TURN_S,
+): string {
+  const seconds = spinnerPhase(nowMs, turnS) * turnS;
   return `${-Number(seconds.toFixed(3))}s`;
 }

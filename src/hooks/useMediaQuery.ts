@@ -69,6 +69,18 @@ export function useShortLandscape(): boolean {
   return useMediaQuery(SHORT_LANDSCAPE_QUERY);
 }
 
+/**
+ * A desktop: a mouse or trackpad and at least the md breakpoint. A phone held
+ * sideways is wide enough for the desktop layout but still a fingertip
+ * device, so it does not count.
+ */
+export const DESKTOP_POINTER_QUERY = '(min-width: 768px) and (hover: hover) and (pointer: fine)';
+
+/** True on a desktop (see DESKTOP_POINTER_QUERY). */
+export function useDesktopPointer(): boolean {
+  return useMediaQuery(DESKTOP_POINTER_QUERY);
+}
+
 /** True when the visitor asked the OS to reduce motion. */
 export function useReducedMotion(): boolean {
   return useMediaQuery('(prefers-reduced-motion: reduce)');
