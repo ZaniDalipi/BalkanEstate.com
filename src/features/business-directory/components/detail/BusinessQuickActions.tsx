@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Share } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { ContactChannel } from '../../utils/contactChannels';
 import { CHANNEL_META, channelLinkProps } from './channelMeta';
 
@@ -28,13 +28,20 @@ export const BusinessQuickActions = React.forwardRef<HTMLDivElement, BusinessQui
         return (
           // Phones fit four buttons: the fourth channel (still in the contact card) makes way for Share.
           <a key={a.id} href={a.href} {...channelLinkProps(a.external)} className={`${i === 0 ? PRIMARY : SECONDARY} ${i >= 3 ? 'max-sm:hidden' : ''}`}>
-            <meta.Icon className="h-[22px] w-[22px]" />
+            {i === 0 ? (
+              // Soft icons are coloured: on the filled button they sit on a white disc to stay visible.
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm">
+                <meta.Icon className="h-6 w-6" />
+              </span>
+            ) : (
+              <meta.Icon className="h-7 w-7" />
+            )}
             <span className="max-w-full truncate">{t(meta.actionKey, meta.actionDefault)}</span>
           </a>
         );
       })}
       <button type="button" onClick={onShare} className={SECONDARY}>
-        <Share className="h-[22px] w-[22px]" strokeWidth={2} aria-hidden="true" />
+        <SoftIcon name="share" className="h-7 w-7" />
         <span>{t('detail.share', 'Share')}</span>
       </button>
     </div>

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Camera, FilePen, ImageIcon, MoveVertical, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useEscapeLayer } from '@/src/features/developments/components/public/explorer/useEscapeLayer';
 
 interface BannerCustomizeMenuProps {
@@ -61,21 +62,21 @@ export const BannerCustomizeMenu: React.FC<BannerCustomizeMenuProps> = ({ hasBan
             transition={{ duration: 0.15 }}
           >
             <button type="button" role="menuitem" className={ITEM} onClick={run(onEdit)}>
-              <FilePen className="h-[18px] w-[18px] text-neutral-500" aria-hidden="true" />
+              <SoftIcon name="pencil" className="h-6 w-6" />
               {t('edit.button', 'Edit Listing')}
             </button>
             <button type="button" role="menuitem" className={ITEM} onClick={run(onChangeBanner)} disabled={busy}>
-              <ImageIcon className="h-[18px] w-[18px] text-neutral-500" aria-hidden="true" />
+              <SoftIcon name="photo" className="h-6 w-6" />
               {hasBanner ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}
             </button>
             {hasBanner && (
               <button type="button" role="menuitem" className={ITEM} onClick={run(onReposition)}>
-                <MoveVertical className="h-[18px] w-[18px] text-neutral-500" aria-hidden="true" />
+                <SoftIcon name="sliders" className="h-6 w-6" />
                 {t('banner.reposition', 'Reposition Banner')}
               </button>
             )}
             <button type="button" role="menuitem" className={ITEM} onClick={run(onChangeLogo)} disabled={busy}>
-              <Camera className="h-[18px] w-[18px] text-neutral-500" aria-hidden="true" />
+              <SoftIcon name="camera" className="h-6 w-6" />
               {hasLogo ? t('form.logoChange', 'Change Logo') : t('form.logoUpload', 'Upload Logo')}
             </button>
           </motion.div>

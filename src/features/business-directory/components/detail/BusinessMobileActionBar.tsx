@@ -59,7 +59,9 @@ export const BusinessMobileActionBar: React.FC<BusinessMobileActionBarProps> = (
             })()}
             {call && (
               <a href={call.href} className={`${PRIMARY_ACTION} h-12 shrink-0 px-5 text-[15px]`}>
-                <CHANNEL_META.call.Icon className="h-5 w-5" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm">
+                  <CHANNEL_META.call.Icon className="h-5 w-5" />
+                </span>
                 {t('detail.actions.call', 'Call')}
               </a>
             )}

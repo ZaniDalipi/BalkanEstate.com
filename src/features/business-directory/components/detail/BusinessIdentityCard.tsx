@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BadgeCheck, MapPin, Navigation } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
@@ -58,7 +58,7 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
             <span>{isIndividual ? t('types.individual', 'Individual') : t('types.business', 'Business')}</span>
           </p>
           <p className="mt-1 flex items-start gap-1 text-sm text-neutral-500" title={fullAddress(l)}>
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <SoftIcon name="pin" className="h-5 w-5 shrink-0" />
             <span className="line-clamp-2">{fullAddress(l)}</span>
           </p>
           <OpenStatusBadge status={status} className="mt-1.5" />
@@ -70,7 +70,7 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
           {distanceKm !== null && (
             <li>
               <button type="button" onClick={onDistanceClick} className={`${CHIP} !bg-primary/10 !text-primary-dark !ring-primary/15 transition hover:!bg-primary/15`}>
-                <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
+                <SoftIcon name="car" className="h-4 w-4" />
                 {t('detail.route.fromYou', { distance: formatDistance(distanceKm, i18n.language || 'en'), defaultValue: '{{distance}} from you' })}
               </button>
             </li>

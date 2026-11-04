@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { Toast } from '../../hooks/useShareAndCopy';
 
 /** A frosted confirmation pill above the bottom bar ("Link copied"). */
@@ -18,9 +18,7 @@ export const DetailToast: React.FC<{ toast: Toast }> = ({ toast }) => {
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
-            {toast.tone === 'ok'
-              ? <CheckCircle2 className="h-5 w-5 text-emerald-400" aria-hidden="true" />
-              : <XCircle className="h-5 w-5 text-rose-400" aria-hidden="true" />}
+            <SoftIcon name={toast.tone === 'ok' ? 'check' : 'xmark'} className="h-5 w-5" />
             {toast.text}
           </motion.p>
         )}

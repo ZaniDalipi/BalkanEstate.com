@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Copy, Info } from 'lucide-react';
+import { Copy } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import type { VisitorLocation } from '../../hooks/useVisitorLocation';
 import { useTravelRoute } from '../../hooks/useTravelRoute';
@@ -75,7 +76,7 @@ export const BusinessLocationSection: React.FC<BusinessLocationSectionProps> = (
           ) : null}
           {place && place.precision !== 'pin' && (
             <p className="mt-2 flex items-center gap-1.5 text-[13px] text-neutral-600">
-              <Info className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <SoftIcon name="info" className="h-5 w-5 shrink-0" />
               {place.precision === 'address'
                 ? t('detail.map.approximate', 'Approximate — placed from the address')
                 : t('detail.map.cityOnly', 'Approximate — city area only')}

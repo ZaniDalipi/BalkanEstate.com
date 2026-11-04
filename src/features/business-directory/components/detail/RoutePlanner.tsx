@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bike, Car, ExternalLink, Footprints, Loader2, LocateFixed, MapPinOff } from 'lucide-react';
+import { Bike, Car, ExternalLink, Footprints, Loader2 } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { VisitorLocation } from '../../hooks/useVisitorLocation';
 import { appleMapsDirections, googleMapsDirections, haversineKm, prefersAppleMaps, type LatLng, type TravelMode, type TravelRoute } from '../../utils/travel';
 import { GlassSegmented, type SegmentOption } from './GlassSegmented';
@@ -62,13 +63,13 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({ business, location, 
         <button type="button" onClick={onLocate} disabled={location.status === 'locating'} className={`${SECONDARY_ACTION} min-h-[52px] w-full text-[15px] disabled:opacity-70`}>
           {location.status === 'locating'
             ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-            : <LocateFixed className="h-5 w-5" aria-hidden="true" />}
+            : <SoftIcon name="target" className="h-6 w-6" />}
           {location.status === 'locating' ? t('detail.route.locating', 'Finding you…') : blocked ? t('detail.route.retry', 'Try my location again') : t('detail.route.fromMe', 'Distance & route from my location')}
         </button>
       )}
       {blocked ? (
         <p role="alert" className="flex items-start gap-2 text-sm text-rose-700">
-          <MapPinOff className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <SoftIcon name="warning" className="h-5 w-5 shrink-0" />
           {location.status === 'denied'
             ? t('detail.route.denied', 'Location is turned off for this site. Allow it in your browser settings — or let your maps app find you.')
             : t('detail.route.unavailable', 'We couldn’t find your location. Your maps app can still take you there.')}
