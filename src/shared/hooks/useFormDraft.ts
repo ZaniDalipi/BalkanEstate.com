@@ -66,13 +66,17 @@ interface AutosaveOptions {
  * right away when the page is hidden or closed (the app is quit, the phone
  * locks, the tab is closed) and when the form unmounts, so nothing typed is
  * lost to the debounce. A value equal to `empty` removes the draft instead.
+ *
+ * Returns true while the form holds something worth keeping (it differs from
+ * `empty`): pass it to <FormLeaveGuard dirty /> to ask before leaving.
  */
-export function useDraftAutosave<T>(draft: FormDraft<T>, value: T, empty: T, options: AutosaveOptions = {}): void {
+export function useDraftAutosave<T>(draft: FormDraft<T>, value: T, empty: T, options: AutosaveOptions = {}): boolean {
   const { delayMs = 500, ttlMs = FORM_DRAFT_TTL_MS } = options;
   const serialized = useMemo(() => JSON.stringify(value), [value]);
   const latest = useRef({ value, empty, key: draft.key, ttlMs });
   latest.current = { value, empty, key: draft.key, ttlMs };
   const { stoppedRef } = draft;
+  const emptySerialized = useMemo(() => JSON.stringify(empty), [empty]);
 
   const persist = useCallback(() => {
     const { value: current, empty: blank, key, ttlMs: ttl } = latest.current;
@@ -100,4 +104,6 @@ export function useDraftAutosave<T>(draft: FormDraft<T>, value: T, empty: T, opt
       persist();
     };
   }, [persist]);
+
+  return serialized !== emptySerialized;
 }

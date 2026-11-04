@@ -23,6 +23,7 @@ import { ErrorBoundary } from '@/src/app/components/ErrorBoundary';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { Button } from '@/components/ui/liquid-glass-button';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, TagListInput,
@@ -74,13 +75,15 @@ const GeminiDescriptionGenerator: React.FC<{
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
         formContainerRef,
         currentUser, isAuthenticating, isLoadingUserData,
-        restoredDraft, discardDraft,
+        restoredDraft, discardDraft, leaveGuard,
     } = useListingForm(propertyToEdit, prefill, initialListingType);
 
     // --- Step-based rendering ---
 
     if (step === 'preview' && previewProperty) {
         return (
+            <>
+            <FormLeaveGuard {...leaveGuard} />
             <ListingPreview
                 property={previewProperty}
                 isSubmitting={isSubmitting}
@@ -92,6 +95,7 @@ const GeminiDescriptionGenerator: React.FC<{
                 onBack={handleBackToForm}
                 onPublish={handleSubmit}
             />
+            </>
         );
     }
 
@@ -173,6 +177,7 @@ const GeminiDescriptionGenerator: React.FC<{
 
     return (
         <>
+        <FormLeaveGuard {...leaveGuard} />
         {generatingModal}
         {/* Full-screen blurred overlay shown while the listing is being published */}
         <ListingSubmitOverlay

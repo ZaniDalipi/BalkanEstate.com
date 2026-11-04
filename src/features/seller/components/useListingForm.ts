@@ -1787,6 +1787,21 @@ export const useListingForm = (
         }
     };
 
+    // Ask before leaving a new listing that has content (back button, links).
+    // Sending, or a listing already created, lets the navigation through.
+    const leaveBypassRef = useMemo(() => ({
+        get current() { return draftDoneRef.current || submitLockRef.current; },
+    }), []);
+    const leaveGuard = {
+        dirty: !!draftStorageKey && draftReady && (step === 'init' || step === 'form' || step === 'preview')
+            && draftHasContent(buildDraft()),
+        bypassRef: leaveBypassRef,
+        onDiscard: () => {
+            draftDoneRef.current = true;
+            if (draftStorageKey) clearListingDraft(draftStorageKey);
+        },
+    };
+
     return {
         // State
         mode, setMode,
@@ -1809,6 +1824,7 @@ export const useListingForm = (
         previewProperty,
         fieldErrors,
         restoredDraft, discardDraft,
+        leaveGuard,
         // Computed
         getZoomLevel, cityData,
         // Handlers

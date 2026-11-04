@@ -13,6 +13,7 @@ import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft'
 import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
 import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -142,7 +143,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const [selectedCity, setSelectedCity] = useState(start.formData.city);
   const [availableCities, setAvailableCities] = useState<CityData[]>(() => citiesOf(start.formData.country));
 
-  useDraftAutosave<BusinessListingDraft>(
+  const isDirty = useDraftAutosave<BusinessListingDraft>(
     draft,
     { listingType, formData, contactPhone, whatsappPhone, viberPhone, lat, lng },
     blank,
@@ -527,6 +528,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
           </Animated>
         )}
 
+        <FormLeaveGuard dirty={isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
         <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-6" />
 
         <form onSubmit={handleSubmit} className="space-y-6">

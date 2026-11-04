@@ -28,7 +28,7 @@ export function useContactForm(overrides?: Partial<ContactFormData>, draftKey: s
   const [blank] = useState<ContactFormData>(() => ({ ...INITIAL_FORM_DATA, ...overrides }));
   const draft = useFormDraft<ContactFormData>(draftKey);
   const [formData, setFormData] = useState<ContactFormData>(() => draft.restored ?? blank);
-  useDraftAutosave(draft, formData, blank);
+  const isDirty = useDraftAutosave(draft, formData, blank);
   // One send at a time: a double click lands here before the button re-renders disabled
   const sendingRef = useRef(false);
   const [errors, setErrors] = useState<ContactFormErrors>({});
@@ -167,5 +167,7 @@ export function useContactForm(overrides?: Partial<ContactFormData>, draftKey: s
     reset,
     draftSavedAt: draft.restoredAt,
     discardDraft,
+    /** Props for <FormLeaveGuard />: ask before leaving with an unsent message */
+    leaveGuard: { dirty: isDirty, bypassRef: draft.stoppedRef, onDiscard: draft.finish },
   };
 }

@@ -20,6 +20,7 @@ import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '@/context/AppContext';
 import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 
 // Inline SVG icons to avoid importing full icon set
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -79,6 +80,7 @@ const ContactUsPage: React.FC = () => {
     reset,
     draftSavedAt,
     discardDraft,
+    leaveGuard,
   } = useContactForm(
     advertisingOverrides,
     // A message started from an ad or report link has its own prefill; only the plain form keeps a draft
@@ -201,6 +203,7 @@ const ContactUsPage: React.FC = () => {
                   <ContactSuccess onReset={reset} />
                 ) : (
                   <>
+                    <FormLeaveGuard {...leaveGuard} />
                     <DraftRestoredNotice savedAt={draftSavedAt} onDiscard={discardDraft} className="mb-6" />
                     <ContactForm
                       formData={formData}

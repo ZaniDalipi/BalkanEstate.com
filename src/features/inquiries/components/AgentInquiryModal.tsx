@@ -3,6 +3,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { useTranslation } from 'react-i18next';
 import { sendAgentInquiry } from '@/services/apiService';
 import { XMarkIcon } from '@/constants';
@@ -57,7 +58,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
   // An unsent message is kept on this device until it is sent
   const draft = useFormDraft<typeof blank>(formDraftKey(`agent-inquiry-${agent.userId || agent.agentId || agent.id}`, userId));
   const [formData, setFormData] = useState(() => draft.restored ?? blank);
-  useDraftAutosave(draft, formData, blank);
+  const isDirty = useDraftAutosave(draft, formData, blank);
   const sendingRef = useRef(false);
 
   const discardDraft = () => {
@@ -314,6 +315,8 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                   <p className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
+
+              <FormLeaveGuard dirty={isOpen && isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
 
               <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 

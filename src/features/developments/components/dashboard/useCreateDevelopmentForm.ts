@@ -37,7 +37,7 @@ export function useCreateDevelopmentForm() {
 
   const [form, setForm] = useState<BasicsForm>(draft.restored?.form ?? EMPTY);
   const [location, setLocation] = useState<LocationValue>(draft.restored?.location ?? EMPTY_LOCATION);
-  useDraftAutosave<CreateDevelopmentDraft>(draft, { form, location }, EMPTY_DRAFT);
+  const isDirty = useDraftAutosave<CreateDevelopmentDraft>(draft, { form, location }, EMPTY_DRAFT);
 
   const discardDraft = () => {
     draft.discard();
@@ -95,5 +95,6 @@ export function useCreateDevelopmentForm() {
     form, set, location, setLocation, fieldError, submitError, sheet, setSheet, onSubmit,
     isLoading: isLoading || isSubmitting,
     draftSavedAt: draft.restoredAt, discardDraft,
+    leaveGuard: { dirty: isDirty, bypassRef: draft.stoppedRef, onDiscard: draft.finish },
   };
 }

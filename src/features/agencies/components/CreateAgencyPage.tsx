@@ -11,11 +11,11 @@ import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { API_URL } from '@/src/shared/api/config';
 import { Upload, X } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
-import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { agencyDraftKey } from '../utils/agencyDraft';
 
 const AGENCY_TYPES: ReadonlyArray<{ value: 'standard' | 'luxury' | 'commercial' | 'boutique' | 'team'; label: string; icon: SoftIconName }> = [
@@ -122,7 +122,6 @@ const CreateAgencyPage: React.FC = () => {
   const prefillUserRef = useRef(draft.restored === null);
   const [currentStep, setCurrentStep] = useState(draft.restored?.currentStep ?? 1);
   const totalSteps = 4;
-  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const [formData, setFormData] = useState<AgencyFormData>(draft.restored?.formData ?? EMPTY_AGENCY_FORM);
@@ -213,6 +212,8 @@ const CreateAgencyPage: React.FC = () => {
   }, [state.pendingAgencyData, state.currentUser]);
 
   // Keep what was typed on this device; nothing meaningful typed means no draft
+  // Moving on to payment is the next step, not leaving the form
+  const continuingRef = useRef(false);
   useDraftAutosave<AgencyDraft | null>(draft, hasUnsavedChanges ? { formData, currentStep } : null, null);
 
   const discardDraft = () => {
@@ -375,6 +376,7 @@ const CreateAgencyPage: React.FC = () => {
     // Note: logoFile cannot be serialized to context - it's handled by the confirmation page or modal
     dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: { ...agencyData, _hasLogoFile: !!logoFile } });
 
+    continuingRef.current = true;
     if (canSkipPayment) {
       // User has enterprise subscription, redirect to confirmation/creation
       navigate(paths.createAgencyConfirm());
@@ -384,19 +386,12 @@ const CreateAgencyPage: React.FC = () => {
     }
   };
 
-  const handleGoBack = () => {
-    if (hasUnsavedChanges) {
-      setShowCloseConfirmation(true);
-    } else {
-      navigate(paths.account());
-    }
-  };
+  // With unsent data, FormLeaveGuard asks whether to keep the draft first
+  const handleGoBack = () => navigate(paths.account());
 
-  const handleConfirmGoBack = () => {
-    setShowCloseConfirmation(false);
-    // Clear pending agency data when confirming to leave
+  const discardOnLeave = () => {
+    draft.finish();
     dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
-    navigate(paths.account());
   };
 
   const inputClasses = "w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all duration-200 hover:border-neutral-400";
@@ -413,16 +408,7 @@ const CreateAgencyPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Confirmation modal for unsaved changes */}
-      <ConfirmationModal
-        isOpen={showCloseConfirmation}
-        onClose={() => setShowCloseConfirmation(false)}
-        onConfirm={handleConfirmGoBack}
-        title={t('confirmation.unsavedChanges.title', 'Unsaved Changes')}
-        message={t('confirmation.unsavedChanges.message', 'You have unsaved changes. Are you sure you want to leave?')}
-        confirmLabel={t('confirmation.unsavedChanges.confirm', 'Leave')}
-        cancelLabel={t('common.cancel', 'Cancel')}
-        type="warning"
-      />
+      <FormLeaveGuard dirty={hasUnsavedChanges} bypassRef={continuingRef} onDiscard={discardOnLeave} />
       {/* Hero Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 landscape:py-6">
         <div className="absolute inset-0 opacity-10">

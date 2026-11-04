@@ -3,6 +3,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
@@ -67,7 +68,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
   // An unsent request is kept on this device until it is sent
   const draft = useFormDraft<typeof blank>(formDraftKey(`villa-booking-${property.id}`, userId));
   const [form, setForm] = useState(() => draft.restored ?? blank);
-  useDraftAutosave(draft, form, blank);
+  const isDirty = useDraftAutosave(draft, form, blank);
   const sendingRef = useRef(false);
 
   const discardDraft = () => {
@@ -327,6 +328,8 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                     <p className="text-[13px] text-[#d70015]">{error}</p>
                   </div>
                 )}
+
+                <FormLeaveGuard dirty={isOpen && isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
 
                 <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 

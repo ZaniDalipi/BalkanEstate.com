@@ -903,6 +903,11 @@
   "formDraft": {
     "restoredTitle": "We restored what you entered last time.",
     "restoredMessage": "Saved on this device on {{date}}.",
-    "startOver": "Discard and start over"
+    "startOver": "Discard and start over",
+    "leaveTitle": "Leave this form?",
+    "leaveMessage": "You have not sent it yet. Save it as a draft on this device to finish later, or discard it.",
+    "stay": "Keep editing",
+    "keepDraft": "Save draft and leave",
+    "discard": "Discard and leave"
   }
 }
