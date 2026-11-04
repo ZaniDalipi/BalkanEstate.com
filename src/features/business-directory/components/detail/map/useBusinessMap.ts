@@ -21,6 +21,8 @@ export interface BusinessMapOptions {
   reduceMotion: boolean;
 }
 
+/** Room for the badge (tile above the point, name label below it) when framing a trip. */
+const TRIP_PADDING = { top: 120, bottom: 56, left: 96, right: 96 };
 const ZOOM: Record<PlacePrecision, number> = { pin: 17.6, address: 17, city: 13 };
 /** The dot at the foot of the stem sits on the point: 44px tile + 46px stem + half the 10px dot, less its 3px overlap. */
 const MARKER_OFFSET: [number, number] = [0, -92];
@@ -92,7 +94,7 @@ export function useBusinessMap(container: React.RefObject<HTMLDivElement>, o: Bu
     const points: Array<[number, number]> = path && path.length > 1 ? path.map(([a, b]) => [b, a]) : visitor ? [[visitor.lng, visitor.lat], [lng, lat]] : [];
     if (points.length > 1) {
       const bounds = points.reduce((b, p) => b.extend(p), new maplibregl.LngLatBounds(points[0], points[0]));
-      map.fitBounds(bounds, { padding: 56, maxZoom: 16, pitch: 30, duration: reduceMotion ? 0 : 900 });
+      map.fitBounds(bounds, { padding: TRIP_PADDING, maxZoom: 16, pitch: 30, duration: reduceMotion ? 0 : 900 });
     }
   }, [ready, visitor, path, lat, lng, reduceMotion]);
 

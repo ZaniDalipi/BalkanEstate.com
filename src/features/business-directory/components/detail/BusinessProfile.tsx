@@ -94,13 +94,17 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
           <div className="min-w-0 space-y-5">
             <BusinessAboutSection listing={listing} />
             <BusinessFactsSection listing={listing} now={now} />
-            <BusinessHoursSection hours={listing.businessHours} status={status} now={now} />
             <BusinessOwnerSection listing={listing} />
           </div>
           <aside className="min-w-0 space-y-5" aria-label={t('detail.contactInfo', 'Contact')}>
             <BusinessContactSection listing={listing} channels={channels} onCopy={copy} />
-            <BusinessLocationSection listing={listing} place={place} isLocatingPlace={isLocatingPlace} location={location} onLocate={locate} onCopy={copy} />
+            <BusinessHoursSection hours={listing.businessHours} status={status} now={now} />
           </aside>
+        </div>
+
+        {/* Location gets the full width: a big map, with the route beside it on desktop. */}
+        <div className="mt-5 px-3 sm:mt-6 sm:px-0">
+          <BusinessLocationSection listing={listing} place={place} isLocatingPlace={isLocatingPlace} location={location} onLocate={locate} onCopy={copy} />
         </div>
 
         <SimilarBusinesses listing={listing} />

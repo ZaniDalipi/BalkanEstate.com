@@ -12,7 +12,7 @@ interface Stat {
 
 /**
  * The at-a-glance numbers, App Store style: small caps label, big value,
- * caption — divided columns that swipe sideways on phones.
+ * caption — divided columns from the tablet up, a wrapping grid of tiles on phones.
  */
 export const BusinessStatsStrip: React.FC<{ listing: BusinessListing; now: Date }> = ({ listing: l, now }) => {
   const { t, i18n } = useTranslation('businessDirectory');
@@ -35,12 +35,16 @@ export const BusinessStatsStrip: React.FC<{ listing: BusinessListing; now: Date 
   }
 
   return (
-    <dl className="-mx-4 mt-4 flex snap-x overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:-mx-7 lg:px-7 [&::-webkit-scrollbar]:hidden">
+    // Phones: a 3-column grid of small tiles (wraps, nothing cut off). From sm: one App Store row with dividers.
+    <dl className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:gap-0">
       {stats.map((s, i) => (
-        <div key={s.key} className={`flex min-w-[96px] flex-1 snap-start flex-col items-center px-3 text-center ${i > 0 ? 'border-l border-black/[0.08]' : ''}`}>
-          <dt className="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">{s.label}</dt>
-          <dd className="mt-1 text-[22px] font-bold leading-tight text-neutral-800 tabular-nums">{s.value}</dd>
-          <dd className="max-w-[120px] truncate text-[12px] text-neutral-500">{s.caption}</dd>
+        <div
+          key={s.key}
+          className={`flex min-w-0 flex-col items-center rounded-xl bg-black/[0.03] px-1.5 py-2 text-center sm:flex-1 sm:rounded-none sm:bg-transparent sm:px-3 sm:py-0 ${i > 0 ? 'sm:border-l sm:border-black/[0.08]' : ''}`}
+        >
+          <dt className="max-w-full truncate text-[10px] font-semibold uppercase tracking-wide text-neutral-500 sm:text-[11px]">{s.label}</dt>
+          <dd className="mt-0.5 text-lg font-bold leading-tight text-neutral-800 tabular-nums sm:mt-1 sm:text-[22px]">{s.value}</dd>
+          <dd className="max-w-full truncate text-[11px] text-neutral-500 sm:max-w-[120px] sm:text-[12px]">{s.caption}</dd>
         </div>
       ))}
     </dl>
