@@ -31,3 +31,10 @@ describe('spinnerPhaseDelay', () => {
     expect(spinnerPhaseDelay(1234)).toBe(spinnerPhaseDelay(1234 + SPINNER_TURN_S * 1000));
   });
 });
+
+describe('spinnerPhaseDelay with another loop length', () => {
+  it('works for the 1.8s logo float as well', () => {
+    expect(spinnerPhaseDelay(900, 1.8)).toBe('-0.9s');
+    expect(spinnerPhaseDelay(1800 + 450, 1.8)).toBe('-0.45s');
+  });
+});
