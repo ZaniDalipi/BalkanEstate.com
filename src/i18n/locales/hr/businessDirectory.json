@@ -190,7 +190,49 @@
     },
     "yearsInBusiness_one": "{{count}} godina poslovanja",
     "yearsInBusiness_few": "{{count}} godine poslovanja",
-    "yearsInBusiness_other": "{{count}} godina poslovanja"
+    "yearsInBusiness_other": "{{count}} godina poslovanja",
+    "route": {
+      "straight": "{{distance}} zračnom linijom",
+      "noRoute": "Trenutno ne možemo izračunati rutu — aplikacija za karte ispod može.",
+      "car": "Autom",
+      "foot": "Pješice",
+      "bike": "Biciklom",
+      "modeLabel": "Način putovanja",
+      "openIn": "Otvori u {{app}}",
+      "locating": "Tražimo vas…",
+      "retry": "Pokušaj ponovno s lokacijom",
+      "fromMe": "Udaljenost i ruta od moje lokacije",
+      "denied": "Lokacija je isključena za ovu stranicu. Dopustite je u postavkama preglednika — ili neka vas aplikacija za karte pronađe.",
+      "unavailable": "Nismo mogli pronaći vašu lokaciju. Aplikacija za karte vas ipak može odvesti.",
+      "privacy": "Vaša se lokacija koristi samo za izračun rute. Ne sprema se.",
+      "fromYou": "{{distance}} od vas"
+    },
+    "map": {
+      "layer": "Stil karte",
+      "standard": "Karta",
+      "satellite": "Satelit"
+    },
+    "ask": {
+      "title": "Pitajte o: {{name}}",
+      "badge": "AI",
+      "suggestions": "Predložena pitanja",
+      "limited": "Previše pitanja za sada — tvrtka vam može odgovoriti izravno.",
+      "unavailable": "Trenutno ne mogu odgovoriti — tvrtka vam može reći izravno.",
+      "thinking": "Razmišljam…",
+      "inputLabel": "Vaše pitanje za {{name}}",
+      "placeholder": "Pitajte bilo što o njima…",
+      "send": "Pošalji",
+      "disclaimer": "Odgovori dolaze samo iz ovog profila i mogu biti nepotpuni — važne pojedinosti potvrdite s tvrtkom.",
+      "entry": "Pitajte bilo što o: {{name}}",
+      "suggest": {
+        "weekend": "Rade li subotom?",
+        "areas": "Koja područja pokrivaju?",
+        "languages": "Govore li engleski?",
+        "payment": "Kako mogu platiti?",
+        "services": "Koje usluge nude?",
+        "quote": "Kako dobiti ponudu?"
+      }
+    }
   },
   "days": {
     "monday": "Ponedjeljak",

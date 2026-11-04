@@ -1,26 +1,33 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BadgeCheck, MapPin } from 'lucide-react';
+import { BadgeCheck, MapPin, Navigation } from 'lucide-react';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import type { OpenStatus } from '../../utils/businessHours';
 import { categoryGradient, categoryIcon, categoryLabel } from '../../utils/categoryStyle';
 import { shortLocation, yearsInBusiness } from '../../utils/businessFacts';
+import { formatDistance } from '../../utils/travel';
 import { GLASS_CHIP, GLASS_FLOAT } from './glassStyles';
 import { OpenStatusBadge } from './OpenStatusBadge';
+
+/** Facts chips, a touch smaller on phones so three fit a row. */
+const CHIP = `${GLASS_CHIP} max-sm:px-2.5 max-sm:py-1 max-sm:text-[13px]`;
 
 interface BusinessIdentityCardProps {
   listing: BusinessListing;
   status: OpenStatus;
   now: Date;
   titleRef: React.Ref<HTMLHeadingElement>;
+  /** Straight-line km from the visitor, once their location is known. */
+  distanceKm: number | null;
+  onDistanceClick: () => void;
   children: React.ReactNode; // the action row
 }
 
 /** Who they are, at a glance: logo, name, trade, place, open status and the facts people ask first. */
-export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ listing: l, status, now, titleRef, children }) => {
-  const { t } = useTranslation('businessDirectory');
+export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ listing: l, status, now, titleRef, distanceKm, onDistanceClick, children }) => {
+  const { t, i18n } = useTranslation('businessDirectory');
   const years = yearsInBusiness(l.yearEstablished, now);
   const isIndividual = l.listingType === 'individual';
 
@@ -58,10 +65,18 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
         </div>
       </div>
 
-      {(years !== null || l.priceRange || l.licenseNumber) && (
-        <ul className="mt-4 flex flex-wrap gap-1.5 sm:gap-2 [&>li]:max-sm:px-2.5 [&>li]:max-sm:py-1 [&>li]:max-sm:text-[13px]" aria-label={t('detail.highlights', 'Highlights')}>
+      {(years !== null || l.priceRange || l.licenseNumber || distanceKm !== null) && (
+        <ul className="mt-4 flex flex-wrap gap-1.5 sm:gap-2" aria-label={t('detail.highlights', 'Highlights')}>
+          {distanceKm !== null && (
+            <li>
+              <button type="button" onClick={onDistanceClick} className={`${CHIP} !bg-primary/10 !text-primary-dark !ring-primary/15 transition hover:!bg-primary/15`}>
+                <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
+                {t('detail.route.fromYou', { distance: formatDistance(distanceKm, i18n.language || 'en'), defaultValue: '{{distance}} from you' })}
+              </button>
+            </li>
+          )}
           {years !== null && (
-            <li className={GLASS_CHIP}>
+            <li className={CHIP}>
               <SoftIcon name="calendar" className="h-4 w-4" />
               {years >= 1
                 ? t('detail.yearsInBusiness', { count: years, defaultValue: '{{count}} years in business' })
@@ -69,10 +84,10 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
             </li>
           )}
           {l.licenseNumber && (
-            <li className={GLASS_CHIP}><SoftIcon name="docCheck" className="h-4 w-4" />{t('detail.licensed', 'Licensed')}</li>
+            <li className={CHIP}><SoftIcon name="docCheck" className="h-4 w-4" />{t('detail.licensed', 'Licensed')}</li>
           )}
           {l.priceRange && (
-            <li className={GLASS_CHIP}><SoftIcon name="cash" className="h-4 w-4" /><span className="font-semibold text-emerald-700">{l.priceRange}</span></li>
+            <li className={CHIP}><SoftIcon name="cash" className="h-4 w-4" /><span className="font-semibold text-emerald-700">{l.priceRange}</span></li>
           )}
         </ul>
       )}

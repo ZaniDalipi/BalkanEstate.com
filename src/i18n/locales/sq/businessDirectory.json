@@ -189,7 +189,49 @@
       "opensOn": "Hapet {{day}}, {{time}}"
     },
     "yearsInBusiness_one": "{{count}} vit në biznes",
-    "yearsInBusiness_other": "{{count}} vjet në biznes"
+    "yearsInBusiness_other": "{{count}} vjet në biznes",
+    "route": {
+      "straight": "{{distance}} në vijë ajrore",
+      "noRoute": "Nuk arritëm ta llogarisim rrugën tani — aplikacioni i hartave më poshtë mundet.",
+      "car": "Me makinë",
+      "foot": "Në këmbë",
+      "bike": "Me biçikletë",
+      "modeLabel": "Mënyra e udhëtimit",
+      "openIn": "Hap në {{app}}",
+      "locating": "Po ju gjejmë…",
+      "retry": "Provo sërish vendndodhjen",
+      "fromMe": "Distanca dhe rruga nga vendndodhja ime",
+      "denied": "Vendndodhja është e çaktivizuar për këtë faqe. Lejojeni te cilësimet e shfletuesit — ose lëreni aplikacionin e hartave t’ju gjejë.",
+      "unavailable": "Nuk e gjetëm vendndodhjen tuaj. Aplikacioni i hartave mund t’ju çojë gjithsesi.",
+      "privacy": "Vendndodhja juaj përdoret vetëm për të llogaritur rrugën. Nuk ruhet.",
+      "fromYou": "{{distance}} larg jush"
+    },
+    "map": {
+      "layer": "Stili i hartës",
+      "standard": "Harta",
+      "satellite": "Satelit"
+    },
+    "ask": {
+      "title": "Pyet për {{name}}",
+      "badge": "AI",
+      "suggestions": "Pyetje të sugjeruara",
+      "limited": "Shumë pyetje për momentin — biznesi mund t’ju përgjigjet drejtpërdrejt.",
+      "unavailable": "Nuk mund të përgjigjem tani — biznesi mund t’jua thotë drejtpërdrejt.",
+      "thinking": "Duke menduar…",
+      "inputLabel": "Pyetja juaj për {{name}}",
+      "placeholder": "Pyetni çfarëdo për ta…",
+      "send": "Dërgo",
+      "disclaimer": "Përgjigjet vijnë vetëm nga ky profil dhe mund të jenë të paplota — konfirmoni detajet e rëndësishme me biznesin.",
+      "entry": "Pyet çfarëdo për {{name}}",
+      "suggest": {
+        "weekend": "A janë hapur të shtunën?",
+        "areas": "Në cilat zona punojnë?",
+        "languages": "A flasin anglisht?",
+        "payment": "Si mund të paguaj?",
+        "services": "Çfarë shërbimesh ofrojnë?",
+        "quote": "Si të marr një ofertë çmimi?"
+      }
+    }
   },
   "days": {
     "monday": "E hënë",

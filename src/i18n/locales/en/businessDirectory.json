@@ -189,7 +189,49 @@
       "opensOn": "Opens {{day}} {{time}}"
     },
     "yearsInBusiness_one": "{{count}} year in business",
-    "yearsInBusiness_other": "{{count}} years in business"
+    "yearsInBusiness_other": "{{count}} years in business",
+    "route": {
+      "straight": "{{distance}} in a straight line",
+      "noRoute": "We couldn’t work out a route right now — the maps app below can.",
+      "car": "Drive",
+      "foot": "Walk",
+      "bike": "Cycle",
+      "modeLabel": "Travel mode",
+      "openIn": "Open in {{app}}",
+      "locating": "Finding you…",
+      "retry": "Try my location again",
+      "fromMe": "Distance & route from my location",
+      "denied": "Location is turned off for this site. Allow it in your browser settings — or let your maps app find you.",
+      "unavailable": "We couldn’t find your location. Your maps app can still take you there.",
+      "privacy": "Your location is only used to work out the route. It isn’t saved.",
+      "fromYou": "{{distance}} from you"
+    },
+    "map": {
+      "layer": "Map style",
+      "standard": "Map",
+      "satellite": "Satellite"
+    },
+    "ask": {
+      "title": "Ask about {{name}}",
+      "badge": "AI",
+      "suggestions": "Suggested questions",
+      "limited": "That’s a lot of questions for now — the business can answer the rest directly.",
+      "unavailable": "I can’t answer right now — the business can tell you directly.",
+      "thinking": "Thinking…",
+      "inputLabel": "Your question for {{name}}",
+      "placeholder": "Ask anything about them…",
+      "send": "Send",
+      "disclaimer": "Answers come only from this profile and may be incomplete — confirm important details with the business.",
+      "entry": "Ask anything about {{name}}",
+      "suggest": {
+        "weekend": "Are they open on Saturday?",
+        "areas": "Which areas do they cover?",
+        "languages": "Do they speak English?",
+        "payment": "How can I pay?",
+        "services": "What services do they offer?",
+        "quote": "How do I get a quote?"
+      }
+    }
   },
   "days": {
     "monday": "Monday",

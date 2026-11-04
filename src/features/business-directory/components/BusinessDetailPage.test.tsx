@@ -1,6 +1,7 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import BusinessDetailPage from './BusinessDetailPage';
 
@@ -8,6 +9,13 @@ const h = vi.hoisted(() => ({
   detail: { listing: null as unknown, isLoading: false, error: null as unknown },
   list: { listings: [] as unknown[], total: 0, isLoading: false, error: null },
   user: null as null | { id: string },
+  askBusiness: vi.fn(),
+  getTravelRoute: vi.fn(),
+}));
+
+vi.mock('@/src/features/business-directory/api/businessExtrasApi', () => ({
+  askBusiness: (...args: unknown[]) => h.askBusiness(...args),
+  getTravelRoute: (...args: unknown[]) => h.getTravelRoute(...args),
 }));
 
 vi.mock('@/src/features/business-directory/hooks/useBusinessListings', () => {
@@ -42,7 +50,28 @@ const listing: BusinessListing = {
   isActive: true, isVerified: false, views: 7, createdAt: '2026-11-01T00:00:00Z', updatedAt: '2026-11-01T00:00:00Z',
 };
 
+/** The page with a fresh query cache (the route and the chat use React Query). */
+const renderPage = (ui: React.ReactElement) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+};
+
+/** Pretend the browser can locate the visitor (or refuses to). */
+const mockGeolocation = (result: 'ok' | 'denied') => {
+  Object.defineProperty(navigator, 'geolocation', {
+    configurable: true,
+    value: {
+      getCurrentPosition: (ok: PositionCallback, fail: PositionErrorCallback) =>
+        result === 'ok'
+          ? ok({ coords: { latitude: 41.3275, longitude: 19.8187, accuracy: 30 } } as GeolocationPosition)
+          : fail({ code: 1, PERMISSION_DENIED: 1 } as GeolocationPositionError),
+    },
+  });
+};
+
 beforeEach(() => {
+  h.askBusiness.mockReset();
+  h.getTravelRoute.mockReset();
   h.detail = { listing, isLoading: false, error: null };
   h.list = { listings: [], total: 0, isLoading: false, error: null };
   h.user = null;
@@ -50,7 +79,7 @@ beforeEach(() => {
 
 describe('BusinessDetailPage', () => {
   it('puts the ways to reach the business at the top, with dialable links', () => {
-    render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     expect(screen.getByRole('heading', { level: 1, name: /Regina Group Construction/ })).toBeInTheDocument();
     const actions = within(screen.getByRole('group', { name: 'detail.actions.label' }));
     expect(actions.getByRole('link', { name: /detail.actions.call/ })).toHaveAttribute('href', 'tel:+355686060190');
@@ -60,7 +89,7 @@ describe('BusinessDetailPage', () => {
   });
 
   it('shows the phone readably, socials as brand links, and facts in one list', () => {
-    render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     expect(screen.getAllByText('+355 68 606 0190').length).toBeGreaterThan(0);
     const socials = screen.getAllByRole('link', { name: 'detail.openSocial' }).map((a) => a.getAttribute('href'));
     expect(socials).toEqual(['https://facebook.com/regina', 'https://instagram.com/regina']);
@@ -70,14 +99,15 @@ describe('BusinessDetailPage', () => {
   });
 
   it('shows a view-only map — no location editor on a public profile', () => {
-    render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     return screen.findByTestId('location-map').then(() => {
-      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      // The page has a text box now (the chat); the location card must not.
+      expect(within(screen.getByRole('region', { name: 'detail.location' })).queryByRole('textbox')).not.toBeInTheDocument();
     });
   });
 
   it('folds a long description behind "Read more"', () => {
-    render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     const more = screen.getByRole('button', { name: 'detail.readMore' });
     expect(more).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(more);
@@ -86,19 +116,19 @@ describe('BusinessDetailPage', () => {
 
   it('suggests other businesses in the same trade, but not this one', () => {
     h.list = { ...h.list, listings: [listing, { ...listing, id: 'b2', slug: 'other', name: 'Other Builders' }] };
-    render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     const similar = within(screen.getByRole('region', { name: 'detail.similar' }));
     expect(similar.getByRole('link', { name: /Other Builders/ })).toBeInTheDocument();
     expect(similar.queryByRole('link', { name: /Regina/ })).not.toBeInTheDocument();
   });
 
   it('gives the owner Edit and Customize; visitors get neither', () => {
-    const { unmount } = render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    const { unmount } = renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     expect(screen.queryByRole('button', { name: 'edit.button' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /banner.customize/ })).not.toBeInTheDocument();
     unmount();
     h.user = { id: 'owner1' };
-    render(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'edit.button' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /banner.customize/ })).toBeInTheDocument();
   });
@@ -106,8 +136,51 @@ describe('BusinessDetailPage', () => {
   it('when the listing is gone, says so and offers the way back', () => {
     h.detail = { listing: null, isLoading: false, error: new Error('404') };
     const onBack = vi.fn();
-    render(<BusinessDetailPage listingId="gone" onBack={onBack} />);
+    renderPage(<BusinessDetailPage listingId="gone" onBack={onBack} />);
     fireEvent.click(screen.getByRole('button', { name: /detail.backToDirectory/ }));
     expect(onBack).toHaveBeenCalled();
+  });
+
+  it('answers a suggested question from the profile, with the next step under it', async () => {
+    h.askBusiness.mockResolvedValue({ answer: 'Yes — they speak English and Italian.', action: 'whatsapp' });
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    const chat = within(screen.getByRole('region', { name: 'detail.ask.title' }));
+    fireEvent.click(chat.getByRole('button', { name: 'detail.ask.suggest.languages' }));
+    await waitFor(() => expect(h.askBusiness).toHaveBeenCalledWith('regina', 'detail.ask.suggest.languages', []));
+    expect(await chat.findByText('Yes — they speak English and Italian.')).toBeInTheDocument();
+    expect(chat.getByRole('link', { name: /detail.actions.whatsapp/ })).toHaveAttribute('href', 'https://wa.me/355686060190');
+  });
+
+  it('when the assistant is down, says so and offers the business directly', async () => {
+    h.askBusiness.mockRejectedValue(Object.assign(new Error('down'), { statusCode: 503 }));
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    const chat = within(screen.getByRole('region', { name: 'detail.ask.title' }));
+    fireEvent.change(chat.getByLabelText('detail.ask.inputLabel'), { target: { value: 'Do you build pools?' } });
+    fireEvent.click(chat.getByRole('button', { name: 'detail.ask.send' }));
+    expect(await chat.findByText('detail.ask.unavailable')).toBeInTheDocument();
+    expect(chat.getByRole('link', { name: /detail.actions.whatsapp/ })).toBeInTheDocument();
+  });
+
+  it('shows time and distance from the visitor, and a distance chip up top', async () => {
+    mockGeolocation('ok');
+    h.getTravelRoute.mockResolvedValue({ distanceMeters: 112_400, durationSeconds: 5_100, path: [[41.3, 19.8], [40.45, 19.48]] });
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /detail.route.fromMe/ }));
+    expect(await screen.findByText('1 hr 25 min')).toBeInTheDocument();
+    expect(screen.getByText('112 km')).toBeInTheDocument();
+    expect(h.getTravelRoute).toHaveBeenCalledWith({ lat: 41.3275, lng: 19.8187 }, { lat: 40.45, lng: 19.48 }, 'car');
+    expect(screen.getByRole('button', { name: 'detail.route.fromYou' })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'detail.route.openIn' }).map((a) => a.getAttribute('href')))
+      .toContain('https://www.google.com/maps/dir/?api=1&origin=41.3275,19.8187&destination=40.45,19.48&travelmode=driving');
+    fireEvent.click(screen.getByRole('radio', { name: /detail.route.foot/ }));
+    await waitFor(() => expect(h.getTravelRoute).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), 'foot'));
+  });
+
+  it('if location is refused, explains and still offers the maps apps', async () => {
+    mockGeolocation('denied');
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /detail.route.fromMe/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('detail.route.denied');
+    expect(screen.getAllByRole('link', { name: 'detail.route.openIn' }).length).toBe(2);
   });
 });

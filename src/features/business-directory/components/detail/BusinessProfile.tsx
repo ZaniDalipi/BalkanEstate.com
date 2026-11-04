@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useReducedMotion } from 'framer-motion';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
@@ -7,11 +8,15 @@ import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { useNow } from '../../hooks/useNow';
 import { useScrolledPast } from '../../hooks/useScrolledPast';
 import { useShareAndCopy } from '../../hooks/useShareAndCopy';
+import { useVisitorLocation } from '../../hooks/useVisitorLocation';
+import { haversineKm } from '../../utils/travel';
 import { getOpenStatus } from '../../utils/businessHours';
 import { categoryLabel } from '../../utils/categoryStyle';
 import { contactChannels, quickActions } from '../../utils/contactChannels';
 import { businessJsonLd } from '../../utils/businessJsonLd';
+import { AskEntryButton } from './AskEntryButton';
 import { BusinessAboutSection } from './BusinessAboutSection';
+import { BusinessAskSection } from './BusinessAskSection';
 import { BusinessBanner } from './BusinessBanner';
 import { BusinessContactSection } from './BusinessContactSection';
 import { BusinessFactsSection } from './BusinessFactsSection';
@@ -43,13 +48,22 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const actionsRef = useRef<HTMLDivElement>(null);
   const titlePast = useScrolledPast(titleRef);
   const actionsPast = useScrolledPast(actionsRef);
+  const askInputRef = useRef<HTMLInputElement>(null);
   const { toast, share, copy } = useShareAndCopy(listing.name);
+  const { location, locate } = useVisitorLocation();
+  const reduceMotion = useReducedMotion();
+  const jumpTo = (id: string, then?: () => void) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    then?.();
+  };
 
   const status = getOpenStatus(listing.businessHours, now);
   const channels = useMemo(() => contactChannels(listing), [listing]);
   const category = categoryLabel(listing, t);
   const image = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
   const tint = optimizeImageUrl(listing.bannerUrl, { width: 160 });
+  const hasPin = Number.isFinite(listing.latitude) && Number.isFinite(listing.longitude);
+  const distanceKm = location.status === 'ready' && hasPin ? haversineKm(location.position, { lat: listing.latitude!, lng: listing.longitude! }) : null;
 
   return (
     // Room for the bottom contact bar. Below md the app's scroll container
@@ -73,19 +87,28 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
 
       <main className="relative mx-auto max-w-6xl sm:px-6 sm:pt-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))]">
         <BusinessBanner listing={listing} isOwner={isOwner} />
-        <BusinessIdentityCard listing={listing} status={status} now={now} titleRef={titleRef}>
+        <BusinessIdentityCard
+          listing={listing}
+          status={status}
+          now={now}
+          titleRef={titleRef}
+          distanceKm={distanceKm}
+          onDistanceClick={() => jumpTo('business-location')}
+        >
           <BusinessQuickActions ref={actionsRef} actions={quickActions(channels)} onShare={share} />
+          <AskEntryButton name={listing.name} onClick={() => jumpTo('business-ask', () => askInputRef.current?.focus({ preventScroll: true }))} />
         </BusinessIdentityCard>
 
         <div className="mt-5 grid gap-5 px-3 sm:mt-6 sm:px-0 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
           <div className="min-w-0 space-y-5">
             <BusinessAboutSection listing={listing} />
+            <BusinessAskSection listing={listing} channels={channels} inputRef={askInputRef} />
             <BusinessFactsSection listing={listing} now={now} />
             <BusinessHoursSection hours={listing.businessHours} status={status} now={now} />
           </div>
           <aside className="min-w-0 space-y-5" aria-label={t('detail.contactInfo', 'Contact')}>
             <BusinessContactSection listing={listing} channels={channels} onCopy={copy} />
-            <BusinessLocationSection listing={listing} onCopy={copy} />
+            <BusinessLocationSection listing={listing} location={location} onLocate={locate} onCopy={copy} />
           </aside>
         </div>
 

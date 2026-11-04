@@ -11,6 +11,19 @@ import {
   getMyBusinessListings,
 } from '../controllers/businessListingController';
 import { protect } from '../middleware/auth';
+import rateLimit from 'express-rate-limit';
+import { askBusinessListing } from '../controllers/businessAssistantController';
+
+/** "Ask the business": public, so limited per visitor IP to protect the AI quota. */
+const askRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  standardHeaders: false,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development',
+  message: { message: 'You have asked a lot of questions — please try again later, or contact the business directly.' },
+  validate: { xForwardedForHeader: false },
+});
 
 const router = express.Router();
 
@@ -43,6 +56,7 @@ router.post('/', protect, createBusinessListing);
 
 // Parameterized routes
 router.get('/:id', getBusinessListing);
+router.post('/:id/ask', askRateLimiter, askBusinessListing);
 router.put('/:id', protect, updateBusinessListing);
 router.delete('/:id', protect, deleteBusinessListing);
 router.post('/:id/upload-logo', protect, upload.single('logo'), uploadBusinessLogo);

@@ -190,7 +190,49 @@
     },
     "yearsInBusiness_one": "{{count}} an de activitate",
     "yearsInBusiness_few": "{{count}} ani de activitate",
-    "yearsInBusiness_other": "{{count}} de ani de activitate"
+    "yearsInBusiness_other": "{{count}} de ani de activitate",
+    "route": {
+      "straight": "{{distance}} în linie dreaptă",
+      "noRoute": "Nu am putut calcula un traseu acum — aplicația de hărți de mai jos poate.",
+      "car": "Cu mașina",
+      "foot": "Pe jos",
+      "bike": "Cu bicicleta",
+      "modeLabel": "Mod de deplasare",
+      "openIn": "Deschide în {{app}}",
+      "locating": "Te căutăm…",
+      "retry": "Încearcă din nou locația",
+      "fromMe": "Distanța și traseul de la locația mea",
+      "denied": "Locația este dezactivată pentru acest site. Permite-o din setările browserului — sau lasă aplicația de hărți să te găsească.",
+      "unavailable": "Nu ți-am putut găsi locația. Aplicația de hărți te poate duce totuși acolo.",
+      "privacy": "Locația ta este folosită doar pentru a calcula traseul. Nu este salvată.",
+      "fromYou": "la {{distance}} de tine"
+    },
+    "map": {
+      "layer": "Stil hartă",
+      "standard": "Hartă",
+      "satellite": "Satelit"
+    },
+    "ask": {
+      "title": "Întreabă despre {{name}}",
+      "badge": "AI",
+      "suggestions": "Întrebări sugerate",
+      "limited": "Prea multe întrebări deocamdată — afacerea îți poate răspunde direct.",
+      "unavailable": "Nu pot răspunde acum — afacerea îți poate spune direct.",
+      "thinking": "Mă gândesc…",
+      "inputLabel": "Întrebarea ta pentru {{name}}",
+      "placeholder": "Întreabă orice despre ei…",
+      "send": "Trimite",
+      "disclaimer": "Răspunsurile vin doar din acest profil și pot fi incomplete — confirmă detaliile importante cu afacerea.",
+      "entry": "Întreabă orice despre {{name}}",
+      "suggest": {
+        "weekend": "Sunt deschiși sâmbăta?",
+        "areas": "Ce zone acoperă?",
+        "languages": "Vorbesc engleză?",
+        "payment": "Cum pot plăti?",
+        "services": "Ce servicii oferă?",
+        "quote": "Cum primesc o ofertă de preț?"
+      }
+    }
   },
   "days": {
     "monday": "Luni",
