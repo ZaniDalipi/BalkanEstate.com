@@ -11,7 +11,6 @@ export const BusinessDetailSkeleton: React.FC = () => {
   const { t } = useTranslation('businessDirectory');
   return (
     <div className="min-h-screen bg-[#f5f5f7]" aria-busy="true" aria-label={t('detail.loading', 'Loading business…')}>
-      <div className="h-14" />
       <div className="mx-auto max-w-6xl sm:px-6">
         <Bone className="h-44 !rounded-none sm:h-60 sm:!rounded-[32px] lg:h-80" />
         <div className={`${GLASS_CARD} mx-3 -mt-16 p-5 sm:mx-6 sm:-mt-24 lg:mx-10`}>

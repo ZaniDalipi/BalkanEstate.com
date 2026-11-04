@@ -19,7 +19,6 @@ interface BusinessIdentityCardProps {
   listing: BusinessListing;
   status: OpenStatus;
   now: Date;
-  titleRef: React.Ref<HTMLHeadingElement>;
   /** Straight-line km from the visitor, once their location is known. */
   distanceKm: number | null;
   onDistanceClick: () => void;
@@ -27,7 +26,7 @@ interface BusinessIdentityCardProps {
 }
 
 /** Who they are, at a glance: logo, name, trade, place, open status and the facts people ask first. */
-export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ listing: l, status, now, titleRef, distanceKm, onDistanceClick, children }) => {
+export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ listing: l, status, now, distanceKm, onDistanceClick, children }) => {
   const { t, i18n } = useTranslation('businessDirectory');
   const years = yearsInBusiness(l.yearEstablished, now);
   const isIndividual = l.listingType === 'individual';
@@ -35,7 +34,7 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
   return (
     <div className={`${GLASS_FLOAT} mx-3 -mt-16 p-4 sm:mx-6 sm:-mt-24 sm:p-6 lg:mx-10 lg:p-7 landscape:-mt-12`}>
       <div className="flex items-start gap-4 sm:gap-6">
-        <div className={`relative -mt-10 h-20 w-20 shrink-0 overflow-hidden rounded-[22px] bg-gradient-to-br shadow-[0_12px_30px_-10px_rgba(15,23,42,0.35)] ring-4 ring-white sm:-mt-16 sm:h-28 sm:w-28 sm:rounded-[28px] lg:h-32 lg:w-32 ${categoryGradient(l.category)}`}>
+        <div className={`relative -mt-10 h-20 w-20 shrink-0 overflow-hidden rounded-[22px] bg-gradient-to-br shadow-[0_12px_30px_-10px_rgba(15,23,42,0.35)] ring-4 ring-white sm:-mt-16 sm:h-28 sm:w-28 sm:rounded-[28px] landscape:-mt-6 landscape:h-20 landscape:w-20 lg:h-32 lg:w-32 ${categoryGradient(l.category)}`}>
           {l.logoUrl ? (
             <img src={optimizeImageUrl(l.logoUrl, { width: 256, height: 256 }) || l.logoUrl} alt={t('detail.logoAlt', { name: l.name, defaultValue: '{{name}} logo' })} className="h-full w-full bg-white object-contain p-1.5" />
           ) : (
@@ -46,7 +45,7 @@ export const BusinessIdentityCard: React.FC<BusinessIdentityCardProps> = ({ list
         </div>
 
         <div className="min-w-0 flex-1">
-          <h1 ref={titleRef} className="text-[22px] font-bold leading-tight tracking-tight text-neutral-900 sm:text-3xl lg:text-[34px]">
+          <h1 className="text-[22px] font-bold leading-tight tracking-tight text-neutral-900 sm:text-3xl lg:text-[34px]">
             {l.name}
             {l.isVerified && (
               <BadgeCheck className="ml-1.5 inline-block h-6 w-6 -translate-y-0.5 fill-primary text-white sm:h-7 sm:w-7" aria-label={t('verified', 'Verified')} role="img" />

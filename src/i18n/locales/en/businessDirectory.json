@@ -149,7 +149,6 @@
       "sendEmail": "Send Email"
     },
     "established": "Est. {{year}}",
-    "directory": "Directory",
     "actions": {
       "label": "Contact options",
       "call": "Call",
@@ -347,8 +346,7 @@
     "status": "Listing Status",
     "statusActiveDesc": "Your listing is visible to everyone",
     "statusInactiveDesc": "Your listing is hidden from the directory",
-    "success": "Your listing has been updated successfully",
-    "short": "Edit"
+    "success": "Your listing has been updated successfully"
   },
   "myBusinesses": {
     "title": "My Businesses",

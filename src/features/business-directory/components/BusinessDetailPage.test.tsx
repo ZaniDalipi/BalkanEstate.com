@@ -12,6 +12,7 @@ const h = vi.hoisted(() => ({
   getTravelRoute: vi.fn(),
   geocodePlace: vi.fn(),
   map: vi.fn(),
+  editForm: vi.fn(),
 }));
 
 vi.mock('@/src/features/business-directory/api/businessExtrasApi', () => ({
@@ -38,6 +39,12 @@ vi.mock('@/context/AppContext', () => ({
 vi.mock('@/src/components/seo', () => ({ SEO: () => null }));
 vi.mock('@/components/shared/Footer', () => ({ default: () => null }));
 vi.mock('@/shared/components/NotificationCenter', () => ({ default: () => null }));
+vi.mock('./EditBusinessListingForm', () => ({
+  default: () => {
+    h.editForm();
+    return <div data-testid="edit-form" />;
+  },
+}));
 vi.mock('./detail/BusinessLocationMap', () => ({
   default: (props: { precision: string; business: { lat: number; lng: number } }) => {
     h.map(props);
@@ -79,6 +86,7 @@ beforeEach(() => {
   h.getTravelRoute.mockReset();
   h.geocodePlace.mockReset();
   h.map.mockReset();
+  h.editForm.mockReset();
   h.detail = { listing, isLoading: false, error: null };
   h.list = { listings: [], total: 0, isLoading: false, error: null };
   h.user = null;
@@ -129,15 +137,24 @@ describe('BusinessDetailPage', () => {
     expect(similar.queryByRole('link', { name: /Regina/ })).not.toBeInTheDocument();
   });
 
-  it('gives the owner Edit and Customize; visitors get neither', () => {
+  it('gives the owner Edit and Customize; visitors get neither', async () => {
     const { unmount } = renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
     expect(screen.queryByRole('button', { name: 'edit.button' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /banner.customize/ })).not.toBeInTheDocument();
     unmount();
     h.user = { id: 'owner1' };
     renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
-    expect(screen.getByRole('button', { name: 'edit.button' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /banner.customize/ })).toBeInTheDocument();
+    // Edit lives in the owner's Customize menu (the page uses the app's own header now).
+    fireEvent.click(screen.getByRole('button', { name: /banner.customize/ }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'edit.button' }));
+    expect(await screen.findByTestId('edit-form')).toBeInTheDocument();
+  });
+
+  it('its back button steps back through history (via the page\'s onBack)', () => {
+    const onBack = vi.fn();
+    renderPage(<BusinessDetailPage listingId="regina" onBack={onBack} />);
+    fireEvent.click(screen.getByRole('button', { name: /common:back/ }));
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 
   it('when the listing is gone, says so and offers the way back', () => {

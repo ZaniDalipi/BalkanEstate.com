@@ -150,7 +150,6 @@
       "sendEmail": "Trimite email"
     },
     "established": "Înființat în {{year}}",
-    "directory": "Director",
     "actions": {
       "label": "Opțiuni de contact",
       "call": "Sună",
@@ -349,8 +348,7 @@
     "status": "Starea anunțului",
     "statusActiveDesc": "Anunțul tău este vizibil pentru toți",
     "statusInactiveDesc": "Anunțul tău este ascuns din director",
-    "success": "Anunțul tău a fost actualizat cu succes",
-    "short": "Editează"
+    "success": "Anunțul tău a fost actualizat cu succes"
   },
   "myBusinesses": {
     "title": "Afacerile mele",

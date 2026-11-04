@@ -150,7 +150,6 @@
       "sendEmail": "Pošaljite email"
     },
     "established": "Osnovano {{year}}.",
-    "directory": "Imenik",
     "actions": {
       "label": "Opcije kontakta",
       "call": "Pozovi",
@@ -349,8 +348,7 @@
     "status": "Status oglasa",
     "statusActiveDesc": "Vaš oglas je vidljiv svima",
     "statusInactiveDesc": "Vaš oglas je sakriven iz imenika",
-    "success": "Vaš oglas je uspješno ažuriran",
-    "short": "Uredi"
+    "success": "Vaš oglas je uspješno ažuriran"
   },
   "myBusinesses": {
     "title": "Moji biznisi",

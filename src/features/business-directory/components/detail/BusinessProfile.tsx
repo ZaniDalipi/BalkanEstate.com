@@ -25,7 +25,6 @@ import { BusinessLocationSection } from './BusinessLocationSection';
 import { BusinessMobileActionBar } from './BusinessMobileActionBar';
 import { BusinessOwnerSection } from './BusinessOwnerSection';
 import { BusinessQuickActions } from './BusinessQuickActions';
-import { BusinessTopBar } from './BusinessTopBar';
 import { DetailToast } from './DetailToast';
 import { SimilarBusinesses } from './SimilarBusinesses';
 
@@ -44,9 +43,7 @@ interface BusinessProfileProps {
 export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwner, onBack, onEdit }) => {
   const { t } = useTranslation('businessDirectory');
   const now = useNow();
-  const titleRef = useRef<HTMLHeadingElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
-  const titlePast = useScrolledPast(titleRef);
   const actionsPast = useScrolledPast(actionsRef);
   const { toast, share, copy } = useShareAndCopy(listing.name);
   const { location, locate } = useVisitorLocation();
@@ -80,15 +77,13 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
         </div>
       )}
 
-      <BusinessTopBar name={listing.name} showTitle={titlePast} isOwner={isOwner} onBack={onBack} onEdit={onEdit} onShare={share} />
-
-      <main className="relative mx-auto max-w-6xl sm:px-6 sm:pt-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))]">
-        <BusinessBanner listing={listing} isOwner={isOwner} />
+      {/* The app's own header sits above: the mobile bar (title + history-aware back) or the desktop pills. */}
+      <div className="relative mx-auto max-w-6xl sm:px-6 sm:pt-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))]">
+        <BusinessBanner listing={listing} isOwner={isOwner} onBack={onBack} onEdit={onEdit} />
         <BusinessIdentityCard
           listing={listing}
           status={status}
           now={now}
-          titleRef={titleRef}
           distanceKm={distanceKm}
           onDistanceClick={() => jumpTo('business-location')}
         >
@@ -109,7 +104,7 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
         </div>
 
         <SimilarBusinesses listing={listing} />
-      </main>
+      </div>
 
       <div className="relative mt-10">
         <Footer />

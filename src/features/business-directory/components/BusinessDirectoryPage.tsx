@@ -14,7 +14,7 @@ import { SearchIcon, PlusIcon, MicrophoneIcon, ArrowPathIcon, MapIcon } from '@/
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 
-import { navigate } from '@/src/app/router/navigation';
+import { goBack, navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { generateBusinessSlug } from '@/utils/slug';
 import Footer from '@/components/shared/Footer';
@@ -251,8 +251,11 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     }
   }, []);
 
+  // Back like the platform's own back: to wherever the visitor came from
+  // (search, home, another business); the directory only when there is no
+  // history to return to (a shared link, a fresh tab).
   const handleBackToList = useCallback(() => {
-    navigate(paths.businessDirectory(activeTab === 'all' ? undefined : activeTab), { direction: 'back' });
+    goBack(paths.businessDirectory(activeTab === 'all' ? undefined : activeTab));
   }, [activeTab]);
 
   // Auth-guarded create click - require login for any create/list action

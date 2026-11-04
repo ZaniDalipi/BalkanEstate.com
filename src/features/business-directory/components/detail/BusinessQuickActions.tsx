@@ -26,14 +26,14 @@ export const BusinessQuickActions = React.forwardRef<HTMLDivElement, BusinessQui
       {actions.map((a, i) => {
         const meta = CHANNEL_META[a.id];
         return (
-          <a key={a.id} href={a.href} {...channelLinkProps(a.external)} className={i === 0 ? PRIMARY : SECONDARY}>
+          // Phones fit four buttons: the fourth channel (still in the contact card) makes way for Share.
+          <a key={a.id} href={a.href} {...channelLinkProps(a.external)} className={`${i === 0 ? PRIMARY : SECONDARY} ${i >= 3 ? 'max-sm:hidden' : ''}`}>
             <meta.Icon className="h-[22px] w-[22px]" />
             <span className="max-w-full truncate">{t(meta.actionKey, meta.actionDefault)}</span>
           </a>
         );
       })}
-      {/* The top bar carries Share on phones; here from the tablet up. */}
-      <button type="button" onClick={onShare} className={`${SECONDARY} max-sm:hidden`}>
+      <button type="button" onClick={onShare} className={SECONDARY}>
         <Share className="h-[22px] w-[22px]" strokeWidth={2} aria-hidden="true" />
         <span>{t('detail.share', 'Share')}</span>
       </button>

@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Camera, ImageIcon, MoveVertical, Pencil } from 'lucide-react';
+import { Camera, FilePen, ImageIcon, MoveVertical, Pencil } from 'lucide-react';
 import { useEscapeLayer } from '@/src/features/developments/components/public/explorer/useEscapeLayer';
 
 interface BannerCustomizeMenuProps {
   hasBanner: boolean;
   hasLogo: boolean;
   busy: boolean;
+  onEdit: () => void;
   onChangeBanner: () => void;
   onReposition: () => void;
   onChangeLogo: () => void;
@@ -15,8 +16,8 @@ interface BannerCustomizeMenuProps {
 
 const ITEM = 'flex min-h-[44px] w-full items-center gap-3 px-4 text-left text-[15px] text-neutral-800 transition hover:bg-black/[0.04] disabled:opacity-50';
 
-/** Owner-only menu on the banner: change banner, reposition it, change logo. */
-export const BannerCustomizeMenu: React.FC<BannerCustomizeMenuProps> = ({ hasBanner, hasLogo, busy, onChangeBanner, onReposition, onChangeLogo }) => {
+/** Owner-only menu on the banner: edit the listing, change or reposition the banner, change the logo. */
+export const BannerCustomizeMenu: React.FC<BannerCustomizeMenuProps> = ({ hasBanner, hasLogo, busy, onEdit, onChangeBanner, onReposition, onChangeLogo }) => {
   const { t } = useTranslation('businessDirectory');
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -53,12 +54,16 @@ export const BannerCustomizeMenu: React.FC<BannerCustomizeMenuProps> = ({ hasBan
         {open && (
           <motion.div
             role="menu"
-            className="absolute right-0 top-full z-50 mt-2 min-w-[220px] overflow-hidden rounded-2xl bg-white/90 py-1 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl"
+            className="absolute left-0 top-full z-50 mt-2 min-w-[220px] overflow-hidden rounded-2xl bg-white/90 py-1 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl"
             initial={reduce ? false : { opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
           >
+            <button type="button" role="menuitem" className={ITEM} onClick={run(onEdit)}>
+              <FilePen className="h-[18px] w-[18px] text-neutral-500" aria-hidden="true" />
+              {t('edit.button', 'Edit Listing')}
+            </button>
             <button type="button" role="menuitem" className={ITEM} onClick={run(onChangeBanner)} disabled={busy}>
               <ImageIcon className="h-[18px] w-[18px] text-neutral-500" aria-hidden="true" />
               {hasBanner ? t('form.bannerChange', 'Change Banner') : t('form.bannerUpload', 'Upload Banner')}

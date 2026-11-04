@@ -149,7 +149,6 @@
       "sendEmail": "Dërgo Email"
     },
     "established": "Themeluar më {{year}}",
-    "directory": "Drejtoria",
     "actions": {
       "label": "Mundësitë e kontaktit",
       "call": "Telefono",
@@ -347,8 +346,7 @@
     "status": "Statusi i Listimit",
     "statusActiveDesc": "Listimi juaj është i dukshëm për të gjithë",
     "statusInactiveDesc": "Listimi juaj është i fshehur nga drejtoria",
-    "success": "Listimi juaj u përditësua me sukses",
-    "short": "Ndrysho"
+    "success": "Listimi juaj u përditësua me sukses"
   },
   "myBusinesses": {
     "title": "Bizneset e mia",

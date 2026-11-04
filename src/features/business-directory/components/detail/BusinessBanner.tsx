@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, MoveVertical } from 'lucide-react';
+import { ChevronLeft, Loader2, MoveVertical } from 'lucide-react';
 import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { useBannerReposition } from '../../hooks/useBannerReposition';
@@ -10,13 +10,24 @@ import { BannerCustomizeMenu } from './BannerCustomizeMenu';
 
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif';
 const PILL = 'min-h-[44px] rounded-full px-5 text-sm font-semibold shadow-lg transition active:scale-[0.97]';
+/** Frosted pill on the photo — same look as the customise button. */
+const PILL_GLASS = 'min-h-[44px] items-center gap-1 rounded-full bg-black/35 px-4 text-sm font-semibold text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/50';
 
 /**
  * The cover photo (or the category colour when there is none). Inset with
- * rounded corners from the tablet up, edge to edge on phones. Owners get the
- * customise menu and drag-to-reposition here.
+ * rounded corners from the tablet up, edge to edge on phones. Carries the
+ * page's back button from md up, and for owners the customise menu (edit,
+ * banner, logo) and drag-to-reposition.
  */
-export const BusinessBanner: React.FC<{ listing: BusinessListing; isOwner: boolean }> = ({ listing, isOwner }) => {
+interface BusinessBannerProps {
+  listing: BusinessListing;
+  isOwner: boolean;
+  /** History-aware back (the page's own, shown from md up). */
+  onBack: () => void;
+  onEdit: () => void;
+}
+
+export const BusinessBanner: React.FC<BusinessBannerProps> = ({ listing, isOwner, onBack, onEdit }) => {
   const { t } = useTranslation('businessDirectory');
   const banner = useBannerReposition(listing);
   const uploads = useBusinessImageUploads(listing);
@@ -44,18 +55,28 @@ export const BusinessBanner: React.FC<{ listing: BusinessListing; isOwner: boole
       {/* Soft fade so the floating card reads against any photo. */}
       {!banner.isRepositioning && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/25 to-transparent" />}
 
-      {isOwner && !banner.isRepositioning && (
-        <div className="absolute right-3 top-3 z-20 sm:right-4 sm:top-4">
-          <input ref={uploads.bannerInputRef} type="file" accept={ACCEPT} onChange={uploads.onBannerChange} className="hidden" />
-          <input ref={uploads.logoInputRef} type="file" accept={ACCEPT} onChange={uploads.onLogoChange} className="hidden" />
-          <BannerCustomizeMenu
-            hasBanner={!!listing.bannerUrl}
-            hasLogo={!!listing.logoUrl}
-            busy={uploading}
-            onChangeBanner={() => uploads.bannerInputRef.current?.click()}
-            onReposition={banner.start}
-            onChangeLogo={() => uploads.logoInputRef.current?.click()}
-          />
+      {!banner.isRepositioning && (
+        <div className="absolute left-3 top-3 z-20 flex items-center gap-2 sm:left-4 sm:top-4">
+          {/* Phones go back with the app bar's own back button; from md up the page carries one. */}
+          <button type="button" onClick={onBack} className={`${PILL_GLASS} hidden md:inline-flex`}>
+            <ChevronLeft className="-ml-1 h-5 w-5" aria-hidden="true" />
+            {t('common:back', 'Back')}
+          </button>
+          {isOwner && (
+            <>
+              <input ref={uploads.bannerInputRef} type="file" accept={ACCEPT} onChange={uploads.onBannerChange} className="hidden" />
+              <input ref={uploads.logoInputRef} type="file" accept={ACCEPT} onChange={uploads.onLogoChange} className="hidden" />
+              <BannerCustomizeMenu
+                hasBanner={!!listing.bannerUrl}
+                hasLogo={!!listing.logoUrl}
+                busy={uploading}
+                onEdit={onEdit}
+                onChangeBanner={() => uploads.bannerInputRef.current?.click()}
+                onReposition={banner.start}
+                onChangeLogo={() => uploads.logoInputRef.current?.click()}
+              />
+            </>
+          )}
         </div>
       )}
 
