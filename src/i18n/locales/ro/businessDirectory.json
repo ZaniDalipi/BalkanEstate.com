@@ -244,7 +244,13 @@
         "payment": "Cum pot plăti?",
         "services": "Ce servicii oferă?",
         "quote": "Cum primesc o ofertă de preț?"
-      }
+      },
+      "remaining_one": "Mai ai {{count}} întrebare pentru această vizită",
+      "remaining_few": "Mai ai {{count}} întrebări pentru această vizită",
+      "remaining_other": "Mai ai {{count}} de întrebări pentru această vizită",
+      "cooldown": "Poți întreba din nou în câteva clipe.",
+      "visitLimit": "Aceasta este limita de întrebări pentru această vizită — afacerea îți poate răspunde direct la restul.",
+      "wait": "O clipă — poți întreba din nou în {{seconds}} s."
     }
   },
   "days": {

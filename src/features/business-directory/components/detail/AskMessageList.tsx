@@ -12,7 +12,7 @@ interface AskMessageListProps {
 }
 
 /** One tappable next step under an answer: "WhatsApp them", "Get directions"… */
-const ActionLink: React.FC<{ channel: ContactChannel }> = ({ channel }) => {
+export const AskActionLink: React.FC<{ channel: ContactChannel }> = ({ channel }) => {
   const { t } = useTranslation('businessDirectory');
   const meta = CHANNEL_META[channel.id];
   return (
@@ -57,14 +57,16 @@ export const AskMessageList: React.FC<AskMessageListProps> = ({ messages, isAski
               <p className="rounded-[20px] rounded-tl-md bg-white px-4 py-2.5 text-[15px] leading-relaxed text-neutral-800 shadow-sm ring-1 ring-black/[0.05]">
                 {m.role === 'assistant'
                   ? m.text
-                  : m.reason === 'limited'
-                    ? t('detail.ask.limited', 'That’s a lot of questions for now — the business can answer the rest directly.')
-                    : t('detail.ask.unavailable', 'I can’t answer right now — the business can tell you directly.')}
+                  : m.reason === 'wait'
+                    ? t('detail.ask.wait', { seconds: m.retryAfterSeconds ?? 30, defaultValue: 'One moment — you can ask again in {{seconds}} s.' })
+                    : m.reason === 'limited'
+                      ? t('detail.ask.limited', 'That’s a lot of questions for now — the business can answer the rest directly.')
+                      : t('detail.ask.unavailable', 'I can’t answer right now — the business can tell you directly.')}
               </p>
               {m.role === 'assistant' && m.action !== 'none' && channels.some((c) => c.id === m.action) && (
-                <ActionLink channel={channels.find((c) => c.id === m.action)!} />
+                <AskActionLink channel={channels.find((c) => c.id === m.action)!} />
               )}
-              {m.role === 'error' && fallback && <ActionLink channel={fallback} />}
+              {m.role === 'error' && m.reason !== 'wait' && fallback && <AskActionLink channel={fallback} />}
             </div>
           </div>
         ),

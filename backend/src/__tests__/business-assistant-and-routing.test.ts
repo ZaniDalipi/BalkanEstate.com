@@ -98,8 +98,8 @@ describe('validateAskBody', () => {
     expect(result.isValid).toBe(true);
     if (result.isValid) {
       expect(result.value.question).toBe('Do you speak Italian?');
-      expect(result.value.history).toHaveLength(8);
-      expect(result.value.history[0].text).toBe('t4');
+      expect(result.value.history).toHaveLength(6);
+      expect(result.value.history[0].text).toBe('t6');
     }
   });
 

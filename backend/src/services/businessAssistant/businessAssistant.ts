@@ -57,7 +57,9 @@ export interface ListingFacts {
 export type Validation<T> = { isValid: true; value: T } | { isValid: false; error: string };
 
 export const MAX_QUESTION_CHARS = 500;
-export const MAX_HISTORY_TURNS = 8;
+export const MAX_HISTORY_TURNS = 6;
+/** Each earlier turn is trimmed to this, to keep prompts (and cost) small. */
+export const MAX_TURN_CHARS = 500;
 
 /** Check the request body: a question, and an optional short history of the chat so far. */
 export function validateAskBody(body: unknown): Validation<AskInput> {
@@ -72,7 +74,7 @@ export function validateAskBody(body: unknown): Validation<AskInput> {
     if ((t?.role !== 'user' && t?.role !== 'assistant') || typeof t.text !== 'string' || !t.text.trim()) {
       return { isValid: false, error: 'each history entry needs role (user|assistant) and text' };
     }
-    history.push({ role: t.role, text: t.text.trim().slice(0, 1000) });
+    history.push({ role: t.role, text: t.text.trim().slice(0, MAX_TURN_CHARS) });
   }
   return { isValid: true, value: { question, history: history.slice(-MAX_HISTORY_TURNS) } };
 }

@@ -242,7 +242,12 @@
         "payment": "How can I pay?",
         "services": "What services do they offer?",
         "quote": "How do I get a quote?"
-      }
+      },
+      "remaining_one": "{{count}} question left for this visit",
+      "remaining_other": "{{count}} questions left for this visit",
+      "cooldown": "You can ask again in a moment.",
+      "visitLimit": "That’s the question limit for this visit — the business can answer the rest directly.",
+      "wait": "One moment — you can ask again in {{seconds}} s."
     }
   },
   "days": {

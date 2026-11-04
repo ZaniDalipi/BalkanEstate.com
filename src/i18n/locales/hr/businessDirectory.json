@@ -244,7 +244,13 @@
         "payment": "Kako mogu platiti?",
         "services": "Koje usluge nude?",
         "quote": "Kako dobiti ponudu?"
-      }
+      },
+      "remaining_one": "Preostalo je još {{count}} pitanje za ovaj posjet",
+      "remaining_few": "Preostala su još {{count}} pitanja za ovaj posjet",
+      "remaining_other": "Preostalo je još {{count}} pitanja za ovaj posjet",
+      "cooldown": "Uskoro možete ponovno pitati.",
+      "visitLimit": "To je ograničenje pitanja za ovaj posjet — ostalo vam tvrtka može odgovoriti izravno.",
+      "wait": "Trenutak — ponovno možete pitati za {{seconds}} s."
     }
   },
   "days": {

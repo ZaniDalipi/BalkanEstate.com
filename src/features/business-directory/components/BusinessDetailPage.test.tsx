@@ -223,4 +223,14 @@ describe('BusinessDetailPage', () => {
     const owner = within(screen.getByRole('region', { name: 'detail.owner' }));
     expect(owner.getByText('sales')).toBeInTheDocument();
   });
+
+  it('when the server says slow down, asks the visitor to wait (no contact hand-off needed)', async () => {
+    h.askBusiness.mockRejectedValue(Object.assign(new Error('slow'), { statusCode: 429, details: { reason: 'burst', retryAfterSeconds: 40 } }));
+    renderPage(<BusinessDetailPage listingId="regina" onBack={vi.fn()} />);
+    const chat = within(screen.getByRole('region', { name: 'detail.ask.title' }));
+    fireEvent.click(chat.getByRole('button', { name: 'detail.ask.suggest.quote' }));
+    expect(await chat.findByText('detail.ask.wait')).toBeInTheDocument();
+    expect(chat.queryByRole('link', { name: /detail.actions.whatsapp/ })).not.toBeInTheDocument();
+    expect(chat.getByRole('button', { name: 'detail.ask.send' })).toBeDisabled();
+  });
 });
