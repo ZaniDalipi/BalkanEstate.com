@@ -11,7 +11,7 @@ import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { useAppContext } from '@/context/AppContext';
 import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
-import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
+import { businessEditDraftKey } from '../utils/businessDrafts';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 
@@ -108,7 +108,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
   const { state } = useAppContext();
   const userId = state.currentUser?.id;
   const { run: runSubmit, isSubmitting } = useSubmitGuard();
-  const draft = useFormDraft<BusinessEditDraft>(userId ? formDraftKey(`business-listing-edit-${listing.id}`, userId) : null);
+  const draft = useFormDraft<BusinessEditDraft>(userId ? businessEditDraftKey(listing.id, userId) : null);
   const [saved] = useState(() => fromListing(listing));
   const start = draft.restored ?? saved;
 

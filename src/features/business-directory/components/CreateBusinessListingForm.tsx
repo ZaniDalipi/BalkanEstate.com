@@ -11,7 +11,7 @@ import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { useAppContext } from '@/context/AppContext';
 import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
-import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
+import { businessCreateDraftKey } from '../utils/businessDrafts';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 
@@ -104,7 +104,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const { uploadBanner } = useUploadBusinessBanner();
   const currentUser = state.currentUser;
   const { run: runSubmit, isSubmitting } = useSubmitGuard();
-  const draft = useFormDraft<BusinessListingDraft>(currentUser?.id ? formDraftKey('business-listing', currentUser.id) : null);
+  const draft = useFormDraft<BusinessListingDraft>(currentUser?.id ? businessCreateDraftKey(currentUser.id) : null);
   const [blank] = useState(() => emptyDraft(currentUser?.phone || '', currentUser?.email || ''));
   const start = draft.restored ?? blank;
 

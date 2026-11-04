@@ -69,6 +69,7 @@ export const paths = {
 
   businessDirectory: (tab?: BusinessDirectoryTab) =>
     tab ? `/business-directory/${tab}` : '/business-directory',
+  businessListingNew: () => '/business-directory/new',
   businessListing: (slugOrId: string) => `/business-directory/${seg(slugOrId)}`,
 
   savedSearches: () => '/saved-searches',

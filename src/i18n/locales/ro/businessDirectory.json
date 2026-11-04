@@ -286,7 +286,21 @@
     "editSuccessMessage": "Anunțul afacerii a fost actualizat.",
     "errorTitle": "Încărcarea afacerilor a eșuat",
     "errorMessage": "Ceva nu a mers bine. Încearcă mai târziu.",
-    "backToList": "Înapoi la Afacerile mele"
+    "backToList": "Înapoi la Afacerile mele",
+    "drafts": {
+      "title": "Ciorne",
+      "subtitle": "Încă nepublicat. Salvat doar pe acest dispozitiv.",
+      "badge": "Ciornă",
+      "untitled": "Afacere fără nume",
+      "savedAt": "Salvat pe acest dispozitiv la {{date}}",
+      "keptUntil": "păstrat până la {{date}}",
+      "continue": "Continuă",
+      "discard": "Renunță",
+      "discardTitle": "Renunțați la această ciornă?",
+      "discardMessage": "Ce ați completat va fi șters de pe acest dispozitiv. Acțiunea nu poate fi anulată.",
+      "unsavedChanges": "Modificări nesalvate",
+      "continueEditing": "Continuă editarea"
+    }
   },
   "delete": {
     "confirmTitle": "Șterge anunțul",

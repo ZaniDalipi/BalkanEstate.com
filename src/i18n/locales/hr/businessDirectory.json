@@ -286,7 +286,21 @@
     "editSuccessMessage": "Oglas tvrtke je ažuriran.",
     "errorTitle": "Učitavanje tvrtki nije uspjelo",
     "errorMessage": "Nešto je pošlo po zlu. Pokušajte kasnije.",
-    "backToList": "Natrag na Moje tvrtke"
+    "backToList": "Natrag na Moje tvrtke",
+    "drafts": {
+      "title": "Skice",
+      "subtitle": "Još nije objavljeno. Spremljeno samo na ovom uređaju.",
+      "badge": "Skica",
+      "untitled": "Tvrtka bez naziva",
+      "savedAt": "Spremljeno na ovom uređaju {{date}}",
+      "keptUntil": "čuva se do {{date}}",
+      "continue": "Nastavi",
+      "discard": "Odbaci",
+      "discardTitle": "Odbaciti ovu skicu?",
+      "discardMessage": "Ono što ste unijeli bit će izbrisano s ovog uređaja. Ovo se ne može poništiti.",
+      "unsavedChanges": "Nespremljene izmjene",
+      "continueEditing": "Nastavi uređivanje"
+    }
   },
   "delete": {
     "confirmTitle": "Izbriši oglas",
