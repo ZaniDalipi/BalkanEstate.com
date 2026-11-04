@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUpdateBusinessListing, useUploadBusinessLogo, useUploadBusinessBanner } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType, type BusinessListing, PRICE_RANGES, PAYMENT_METHODS, BALKAN_LANGUAGES, type PriceRange, type PaymentMethod } from '@/src/shared/types/businessListing.types';
@@ -8,6 +8,14 @@ import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import PhoneInput, { parsePhoneValue } from '@/src/shared/components/ui/PhoneInput';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
+import { useAppContext } from '@/context/AppContext';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
+import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
+import { businessEditDraftKey } from '../utils/businessDrafts';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -44,27 +52,21 @@ const CATEGORY_ICONS: Record<string, SoftIconName> = {
   other: 'clipboard',
 };
 
-const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listing, onBack, onSuccess }) => {
-  const { t } = useTranslation('businessDirectory');
-  const { updateListing, isLoading, error } = useUpdateBusinessListing();
-  const { uploadLogo } = useUploadBusinessLogo();
-  const { uploadBanner } = useUploadBusinessBanner();
+/** Unsaved edits kept on this device until they are saved (new logo/banner files are not kept) */
+interface BusinessEditDraft {
+  listingType: ListingType;
+  formData: CreateBusinessListingData;
+  contactPhone: string;
+  whatsappPhone: string;
+  viberPhone: string;
+  lat: number;
+  lng: number;
+  isActive: boolean;
+}
 
-  const fieldRefs = {
-    name: useRef<HTMLInputElement>(null),
-    category: useRef<HTMLDivElement>(null),
-    contactPhone: useRef<HTMLInputElement>(null),
-    country: useRef<HTMLSelectElement>(null),
-    city: useRef<HTMLSelectElement>(null),
-  };
-
-  // Initialize from existing listing
-  const [listingType, setListingType] = useState<ListingType>(listing.listingType);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(listing.logoUrl || null);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(listing.bannerUrl || null);
-  const [formData, setFormData] = useState<CreateBusinessListingData>({
+const fromListing = (listing: BusinessListing): BusinessEditDraft => ({
+  listingType: listing.listingType,
+  formData: {
     name: listing.name,
     description: listing.description || '',
     category: listing.category,
@@ -91,37 +93,88 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
       tiktok: listing.socialMedia?.tiktok || '',
     },
     businessHours: listing.businessHours || {},
-  });
+  },
+  contactPhone: listing.contactPhone || '',
+  whatsappPhone: listing.whatsapp || '',
+  viberPhone: listing.viber || '',
+  lat: listing.latitude || 0,
+  lng: listing.longitude || 0,
+  isActive: listing.isActive,
+});
+
+const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listing, onBack, onSuccess }) => {
+  const { t } = useTranslation('businessDirectory');
+  const { updateListing, isLoading, error } = useUpdateBusinessListing();
+  const { uploadLogo } = useUploadBusinessLogo();
+  const { uploadBanner } = useUploadBusinessBanner();
+  const { state } = useAppContext();
+  const userId = state.currentUser?.id;
+  const { run: runSubmit, isSubmitting } = useSubmitGuard();
+  const draft = useFormDraft<BusinessEditDraft>(userId ? businessEditDraftKey(listing.id, userId) : null);
+  const [saved] = useState(() => fromListing(listing));
+  const start = draft.restored ?? saved;
+
+  const fieldRefs = {
+    name: useRef<HTMLInputElement>(null),
+    category: useRef<HTMLDivElement>(null),
+    contactPhone: useRef<HTMLInputElement>(null),
+    country: useRef<HTMLSelectElement>(null),
+    city: useRef<HTMLSelectElement>(null),
+  };
+
+  // Initialize from existing listing
+  const [listingType, setListingType] = useState<ListingType>(start.listingType);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(listing.logoUrl || null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(listing.bannerUrl || null);
+  const [formData, setFormData] = useState<CreateBusinessListingData>(start.formData);
 
   const [serviceInput, setServiceInput] = useState('');
   const [languageInput, setLanguageInput] = useState('');
   const [serviceAreaInput, setServiceAreaInput] = useState('');
 
   // Phone fields as E.164 strings
-  const [contactPhone, setContactPhone] = useState(listing.contactPhone || '');
-  const [whatsappPhone, setWhatsappPhone] = useState(listing.whatsapp || '');
-  const [viberPhone, setViberPhone] = useState(listing.viber || '');
+  const [contactPhone, setContactPhone] = useState(start.contactPhone);
+  const [whatsappPhone, setWhatsappPhone] = useState(start.whatsappPhone);
+  const [viberPhone, setViberPhone] = useState(start.viberPhone);
 
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<FieldErrorKey | null>(null);
   const [showHours, setShowHours] = useState(
-    !!(listing.businessHours && Object.values(listing.businessHours).some(Boolean))
+    !!(start.formData.businessHours && Object.values(start.formData.businessHours).some(Boolean))
   );
-  const [lat, setLat] = useState(listing.latitude || 0);
-  const [lng, setLng] = useState(listing.longitude || 0);
-  const [showMap, setShowMap] = useState(!!(listing.latitude && listing.longitude));
-  const [selectedCountry, setSelectedCountry] = useState(listing.country);
-  const [selectedCity, setSelectedCity] = useState(listing.city);
-  const [availableCities, setAvailableCities] = useState<CityData[]>([]);
-  const [isActive, setIsActive] = useState(listing.isActive);
+  const [lat, setLat] = useState(start.lat);
+  const [lng, setLng] = useState(start.lng);
+  const [showMap, setShowMap] = useState(start.lat !== 0 && start.lng !== 0);
+  const [selectedCountry, setSelectedCountry] = useState(start.formData.country);
+  const [selectedCity, setSelectedCity] = useState(start.formData.city);
+  const [availableCities, setAvailableCities] = useState<CityData[]>(
+    () => BALKAN_LOCATIONS.find(c => c.name === start.formData.country)?.cities ?? [],
+  );
+  const [isActive, setIsActive] = useState(start.isActive);
 
-  // Initialize available cities based on the listing's country
-  useEffect(() => {
-    const country = BALKAN_LOCATIONS.find(c => c.name === listing.country);
-    if (country) {
-      setAvailableCities(country.cities);
-    }
-  }, [listing.country]);
+  const isDirty = useDraftAutosave<BusinessEditDraft>(
+    draft,
+    { listingType, formData, contactPhone, whatsappPhone, viberPhone, lat, lng, isActive },
+    saved,
+  );
+
+  const discardDraft = useCallback(() => {
+    draft.discard();
+    setListingType(saved.listingType);
+    setFormData(saved.formData);
+    setContactPhone(saved.contactPhone);
+    setWhatsappPhone(saved.whatsappPhone);
+    setViberPhone(saved.viberPhone);
+    setLat(saved.lat);
+    setLng(saved.lng);
+    setShowMap(saved.lat !== 0 && saved.lng !== 0);
+    setSelectedCountry(saved.formData.country);
+    setSelectedCity(saved.formData.city);
+    setAvailableCities(BALKAN_LOCATIONS.find(c => c.name === saved.formData.country)?.cities ?? []);
+    setIsActive(saved.isActive);
+  }, [draft, saved]);
 
   const inputClasses = (field?: FieldErrorKey) =>
     `w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
@@ -338,8 +391,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
     }
   }, [addService]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitChanges = async () => {
     clearErrors();
 
     if (!formData.name.trim()) { setValidationError('name', t('form.errors.nameRequired')); return; }
@@ -422,11 +474,18 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
         }
       }
 
+      draft.finish();
       onSuccess();
     } catch (err: any) {
       setFormError(err?.message || t('form.errors.generic'));
     }
-  }, [formData, listingType, lat, lng, logoFile, bannerFile, isActive, contactPhone, whatsappPhone, viberPhone, listing.id, updateListing, uploadLogo, uploadBanner, onSuccess, t, clearErrors, setValidationError]);
+  };
+
+  // One save at a time: a double click must not send the update twice
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void runSubmit(submitChanges);
+  };
 
   const displayError = formError || (error as Error)?.message;
 
@@ -482,7 +541,10 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
           </Animated>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <FormLeaveGuard dirty={isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
+        <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-6" />
+
+        <form onSubmit={handleSubmit} className="space-y-6" onKeyDown={handleFormEnterKey}>
           {/* Active/Inactive toggle */}
           <Animated variant="fadeInUp">
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
@@ -1231,20 +1293,22 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
               <button
                 type="button"
                 onClick={onBack}
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
                 className="flex-1 py-3.5 border-2 border-neutral-300 text-neutral-700 font-bold rounded-xl hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
               >
                 {t('edit.cancel', { defaultValue: 'Cancel' })}
               </button>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
+                aria-busy={isSubmitting}
                 className="flex-[2] py-3.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99] text-base"
               >
-                {isLoading ? t('edit.saving', { defaultValue: 'Saving...' }) : t('edit.save', { defaultValue: 'Save Changes' })}
+                {isLoading || isSubmitting ? t('edit.saving', { defaultValue: 'Saving...' }) : t('edit.save', { defaultValue: 'Save Changes' })}
               </button>
             </div>
           </Animated>
+          <SubmitShortcutHint className="mt-2" />
         </form>
       </div>
     </div>

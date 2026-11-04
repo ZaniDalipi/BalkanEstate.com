@@ -879,5 +879,18 @@
     "title": "Pagina nu a putut fi încărcată",
     "retry": "Încercați din nou"
   }
-}
+},
+  "formDraft": {
+    "restoredTitle": "Am restabilit ce ați completat data trecută.",
+    "restoredMessage": "Salvat pe acest dispozitiv la {{date}}.",
+    "startOver": "Renunță și începe de la capăt",
+    "leaveTitle": "Părăsiți acest formular?",
+    "leaveMessage": "Nu l-ați trimis încă. Salvați-l ca ciornă pe acest dispozitiv pentru a-l termina mai târziu sau renunțați la el.",
+    "stay": "Continuă editarea",
+    "keepDraft": "Salvează ciorna și ieși",
+    "discard": "Renunță și ieși"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "sau apăsați"
+  }
 }

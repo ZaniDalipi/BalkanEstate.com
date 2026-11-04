@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { clearAgencyDraft } from '../utils/agencyDraft';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { createAgency } from '@/src/features/agencies/api/agencyApi';
@@ -143,7 +144,12 @@ const AgencyPaymentPage: React.FC = () => {
     return Math.max(0, enterprisePlan.price - discount);
   };
 
+  // One request at a time: a double click must not start two payments or create two agencies
+  const busyRef = useRef(false);
+
   const handlePayment = async () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setIsLoading(true);
     setError('');
 
@@ -177,13 +183,15 @@ const AgencyPaymentPage: React.FC = () => {
     } catch (err: any) {
       setError(err.message || t('payment.error', 'Failed to initiate payment. Please try again.'));
     } finally {
+      busyRef.current = false;
       setIsLoading(false);
     }
   };
 
   // Handle direct agency creation when user already has Enterprise subscription
   const handleCreateAgency = async () => {
-    if (!pendingAgencyData) return;
+    if (!pendingAgencyData || busyRef.current) return;
+    busyRef.current = true;
 
     setIsLoading(true);
     setError('');
@@ -199,8 +207,9 @@ const AgencyPaymentPage: React.FC = () => {
 
       const data = await createAgency(agencyData);
 
-      // Clear pending data
+      // Clear pending data, and the form's saved draft
       dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
+      clearAgencyDraft(state.currentUser?.id);
 
       // Immediately refresh user data so the creator has access to the dashboard right away
       try {
@@ -233,6 +242,7 @@ const AgencyPaymentPage: React.FC = () => {
     } catch (err: any) {
       setError(err.message || 'Failed to create agency. Please try again.');
     } finally {
+      busyRef.current = false;
       setIsLoading(false);
     }
   };

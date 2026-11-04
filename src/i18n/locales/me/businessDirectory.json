@@ -286,7 +286,21 @@
     "editSuccessMessage": "Oglas firme je ažuriran.",
     "errorTitle": "Učitavanje firmi nije uspjelo",
     "errorMessage": "Nešto je pošlo naopako. Pokušajte kasnije.",
-    "backToList": "Nazad na Moje firme"
+    "backToList": "Nazad na Moje firme",
+    "drafts": {
+      "title": "Nacrti",
+      "subtitle": "Još nije objavljeno. Sačuvano samo na ovom uređaju.",
+      "badge": "Nacrt",
+      "untitled": "Posao bez naziva",
+      "savedAt": "Sačuvano na ovom uređaju {{date}}",
+      "keptUntil": "čuva se do {{date}}",
+      "continue": "Nastavi",
+      "discard": "Odbaci",
+      "discardTitle": "Odbaciti ovaj nacrt?",
+      "discardMessage": "Ono što ste unijeli biće izbrisano sa ovog uređaja. Ovo se ne može poništiti.",
+      "unsavedChanges": "Nesačuvane izmjene",
+      "continueEditing": "Nastavi uređivanje"
+    }
   },
   "delete": {
     "confirmTitle": "Obriši oglas",

@@ -41,6 +41,10 @@ if ('requestIdleCallback' in window) {
   setTimeout(initSentry, 0);
 }
 
+// Unsent form drafts expire; drop old ones once the app is idle
+import { pruneExpiredFormDrafts } from './src/shared/utils/formDraftStorage';
+setTimeout(() => pruneExpiredFormDrafts(), 5000);
+
 // Suppress console logs in production for security
 import { suppressConsoleLogs } from './src/utils/logger';
 suppressConsoleLogs();

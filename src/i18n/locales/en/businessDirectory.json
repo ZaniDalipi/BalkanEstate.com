@@ -285,7 +285,21 @@
     "editSuccessMessage": "Business listing has been updated.",
     "errorTitle": "Failed to load businesses",
     "errorMessage": "Something went wrong. Please try again later.",
-    "backToList": "Back to My Businesses"
+    "backToList": "Back to My Businesses",
+    "drafts": {
+      "title": "Drafts",
+      "subtitle": "Not published yet. Saved on this device only.",
+      "badge": "Draft",
+      "untitled": "Untitled business",
+      "savedAt": "Saved on this device on {{date}}",
+      "keptUntil": "kept until {{date}}",
+      "continue": "Continue",
+      "discard": "Discard",
+      "discardTitle": "Discard this draft?",
+      "discardMessage": "What you entered will be deleted from this device. This cannot be undone.",
+      "unsavedChanges": "Unsaved changes",
+      "continueEditing": "Continue editing"
+    }
   },
   "delete": {
     "confirmTitle": "Delete Listing",

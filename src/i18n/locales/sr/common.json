@@ -879,5 +879,18 @@
   "loadError": {
     "title": "Страница није могла да се учита",
     "retry": "Покушајте поново"
+  },
+  "formDraft": {
+    "restoredTitle": "Vratili smo ono što ste uneli prošli put.",
+    "restoredMessage": "Sačuvano na ovom uređaju {{date}}.",
+    "startOver": "Odbaci i počni ispočetka",
+    "leaveTitle": "Napustiti ovaj obrazac?",
+    "leaveMessage": "Još ga niste poslali. Sačuvajte ga kao nacrt na ovom uređaju da ga završite kasnije ili ga odbacite.",
+    "stay": "Nastavi uređivanje",
+    "keepDraft": "Sačuvaj nacrt i izađi",
+    "discard": "Odbaci i izađi"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "ili pritisnite"
   }
 }

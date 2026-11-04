@@ -285,7 +285,21 @@
     "editSuccessMessage": "Shpallja e biznesit u përditësua.",
     "errorTitle": "Ngarkimi i bizneseve dështoi",
     "errorMessage": "Diçka shkoi keq. Provoni përsëri më vonë.",
-    "backToList": "Kthehu te Bizneset e mia"
+    "backToList": "Kthehu te Bizneset e mia",
+    "drafts": {
+      "title": "Draftet",
+      "subtitle": "Ende të papublikuara. Të ruajtura vetëm në këtë pajisje.",
+      "badge": "Draft",
+      "untitled": "Biznes pa emër",
+      "savedAt": "Ruajtur në këtë pajisje më {{date}}",
+      "keptUntil": "ruhet deri më {{date}}",
+      "continue": "Vazhdo",
+      "discard": "Hidhe",
+      "discardTitle": "Ta hedhësh këtë draft?",
+      "discardMessage": "Ajo që keni plotësuar do të fshihet nga kjo pajisje. Kjo nuk mund të zhbëhet.",
+      "unsavedChanges": "Ndryshime të paruajtura",
+      "continueEditing": "Vazhdo redaktimin"
+    }
   },
   "delete": {
     "confirmTitle": "Fshi shpalljen",

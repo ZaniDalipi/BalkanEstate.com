@@ -17,6 +17,10 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import { SEO } from '@/src/components/seo';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { useAppContext } from '@/context/AppContext';
+import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 
 // Inline SVG icons to avoid importing full icon set
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -27,6 +31,7 @@ const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const ContactUsPage: React.FC = () => {
   const { t } = useTranslation(['contact', 'common']);
+  const userId = useAppContext().state.currentUser?.id;
 
   // Preselect the "advertising" subject (and a starter message) when arriving
   // from a "Your Ad Here" placeholder (?topic=advertise).
@@ -73,7 +78,14 @@ const ContactUsPage: React.FC = () => {
     handleSubmit,
     setField,
     reset,
-  } = useContactForm(advertisingOverrides);
+    draftSavedAt,
+    discardDraft,
+    leaveGuard,
+  } = useContactForm(
+    advertisingOverrides,
+    // A message started from an ad or report link has its own prefill; only the plain form keeps a draft
+    advertisingOverrides ? null : formDraftKey('contact', userId),
+  );
 
   const [isAdImageUploading, setIsAdImageUploading] = useState(false);
 
@@ -190,18 +202,22 @@ const ContactUsPage: React.FC = () => {
                 {isSuccess ? (
                   <ContactSuccess onReset={reset} />
                 ) : (
-                  <ContactForm
-                    formData={formData}
-                    errors={errors}
-                    isSubmitting={isSubmitting}
-                    submitError={submitError}
-                    onChange={handleChange}
-                    onPhoneChange={handlePhoneChange}
-                    onSubmit={onFormSubmit}
-                    onAdImageSelect={handleAdImageSelect}
-                    onAdImageClear={handleAdImageClear}
-                    isAdImageUploading={isAdImageUploading}
-                  />
+                  <>
+                    <FormLeaveGuard {...leaveGuard} />
+                    <DraftRestoredNotice savedAt={draftSavedAt} onDiscard={discardDraft} className="mb-6" />
+                    <ContactForm
+                      formData={formData}
+                      errors={errors}
+                      isSubmitting={isSubmitting}
+                      submitError={submitError}
+                      onChange={handleChange}
+                      onPhoneChange={handlePhoneChange}
+                      onSubmit={onFormSubmit}
+                      onAdImageSelect={handleAdImageSelect}
+                      onAdImageClear={handleAdImageClear}
+                      isAdImageUploading={isAdImageUploading}
+                    />
+                  </>
                 )}
               </div>
             </div>

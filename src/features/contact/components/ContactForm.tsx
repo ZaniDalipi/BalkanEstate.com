@@ -7,6 +7,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ContactFormData, ContactFormErrors } from '../types';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 interface ContactFormProps {
   formData: ContactFormData;
@@ -76,7 +78,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
   const errorClasses = 'text-xs text-red-500 mt-1 ml-1';
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5" noValidate>
+    <form onSubmit={onSubmit} className="space-y-5" noValidate onKeyDown={handleFormEnterKey}>
       {submitError && (
         <div className="p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-xl" role="alert">
           <p className="text-red-700 text-sm">{submitError}</p>
@@ -313,6 +315,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
           </>
         )}
       </button>
+      <SubmitShortcutHint className="-mt-3" />
 
       <p className="text-xs text-neutral-400 text-center">
         {t('contact:form.privacyNote', 'By submitting, you agree to our Privacy Policy. We will never share your information.')}

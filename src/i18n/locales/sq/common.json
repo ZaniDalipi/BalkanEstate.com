@@ -879,5 +879,18 @@
     "title": "Kjo faqe nuk mund të ngarkohej",
     "retry": "Provo përsëri"
   }
-}
+},
+  "formDraft": {
+    "restoredTitle": "Rikthyem atë që kishit plotësuar herën e fundit.",
+    "restoredMessage": "Ruajtur në këtë pajisje më {{date}}.",
+    "startOver": "Hidhe dhe fillo nga e para",
+    "leaveTitle": "Të largoheni nga ky formular?",
+    "leaveMessage": "Ende nuk e keni dërguar. Ruajeni si draft në këtë pajisje për ta përfunduar më vonë, ose hidheni.",
+    "stay": "Vazhdo plotësimin",
+    "keepDraft": "Ruaj draftin dhe dil",
+    "discard": "Hidhe dhe dil"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "ose shtypni"
+  }
 }

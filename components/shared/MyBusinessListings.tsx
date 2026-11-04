@@ -14,6 +14,9 @@ import {
 import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { useAppContext } from '@/context/AppContext';
+import BusinessDraftsSection from '@/src/features/business-directory/components/drafts/BusinessDraftsSection';
+import { useBusinessDrafts } from '@/src/features/business-directory/components/drafts/useBusinessDrafts';
 
 const EditBusinessListingForm = lazy(() => import('@/src/features/business-directory/components/EditBusinessListingForm'));
 
@@ -47,6 +50,12 @@ const MyBusinessListings: React.FC = () => {
   const { confirm } = useConfirmation();
   const { success, error: notifyError } = useNotification();
   const [editingListing, setEditingListing] = useState<BusinessListing | null>(null);
+  const userId = useAppContext().state.currentUser?.id;
+  const { createDraft, editDrafts, discardCreateDraft } = useBusinessDrafts(
+    userId,
+    // Read again when returning from the edit form, which may have saved or cleared a draft
+    editingListing ? [] : listings.map(l => l.id),
+  );
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
     const urlSlug = generateBusinessSlug(listing);
@@ -71,10 +80,12 @@ const MyBusinessListings: React.FC = () => {
   }, [refetch, success, t]);
 
   const handleDelete = useCallback(async (listing: BusinessListing) => {
-    const confirmed = await confirm(
-      t('businessDirectory:delete.confirmTitle', 'Delete Listing'),
-      t('businessDirectory:delete.confirmMessage', { name: listing.name, defaultValue: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.' }),
-    );
+    const confirmed = await confirm({
+      title: t('businessDirectory:delete.confirmTitle', 'Delete Listing'),
+      message: t('businessDirectory:delete.confirmMessage', { name: listing.name, defaultValue: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.' }),
+      confirmLabel: t('businessDirectory:myBusinesses.delete', 'Delete'),
+      type: 'danger',
+    });
     if (!confirmed) return;
 
     try {
@@ -92,7 +103,7 @@ const MyBusinessListings: React.FC = () => {
   }, [deleteListing, confirm, success, notifyError, t]);
 
   const handleCreateNew = useCallback(() => {
-    navigate(paths.businessDirectory());
+    navigate(paths.businessListingNew());
   }, []);
 
   // Loading skeleton
@@ -173,8 +184,10 @@ const MyBusinessListings: React.FC = () => {
         </button>
       </div>
 
-      {/* Empty state */}
-      {listings.length === 0 && (
+      <BusinessDraftsSection draft={createDraft} onDiscard={discardCreateDraft} />
+
+      {/* Empty state (a draft in progress already says how to go on) */}
+      {listings.length === 0 && !createDraft && (
         <div className="text-center py-16 px-4">
           <SoftIcon name="store" className="block w-20 h-20 mx-auto mb-5" />
           <h3 className="text-lg font-bold text-neutral-700 mb-2">
@@ -205,6 +218,7 @@ const MyBusinessListings: React.FC = () => {
               onView={navigateToListing}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              hasDraft={listing.id in editDrafts}
             />
           ))}
         </div>
@@ -220,9 +234,11 @@ interface BusinessListingCardProps {
   onView: (listing: BusinessListing) => void;
   onEdit: (listing: BusinessListing) => void;
   onDelete: (listing: BusinessListing) => void;
+  /** Unsaved edits to this business are kept on this device */
+  hasDraft?: boolean;
 }
 
-const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onView, onEdit, onDelete }) => {
+const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onView, onEdit, onDelete, hasDraft = false }) => {
   const { t } = useTranslation('businessDirectory');
   const gradient = CATEGORY_GRADIENTS[listing.category] || CATEGORY_GRADIENTS.other;
   const isIndividual = listing.listingType === 'individual';
@@ -251,6 +267,11 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
           }`}>
             {listing.isActive ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
           </span>
+          {hasDraft && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/90 text-amber-950 backdrop-blur-sm border border-amber-300/40">
+              {t('myBusinesses.drafts.unsavedChanges', 'Unsaved changes')}
+            </span>
+          )}
           {listing.isVerified && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 text-emerald-600 backdrop-blur-sm border border-white/30 flex items-center gap-0.5">
               <SoftIcon name="shield" className="w-4 h-4" />
@@ -321,7 +342,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 text-xs font-semibold rounded-xl transition-colors border border-neutral-200"
           >
             <PencilIcon className="w-3.5 h-3.5" />
-            {t('myBusinesses.edit', 'Edit')}
+            {hasDraft ? t('myBusinesses.drafts.continueEditing', 'Continue editing') : t('myBusinesses.edit', 'Edit')}
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(listing); }}

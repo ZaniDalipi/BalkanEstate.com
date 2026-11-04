@@ -23,6 +23,9 @@ import { ErrorBoundary } from '@/src/app/components/ErrorBoundary';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { Button } from '@/components/ui/liquid-glass-button';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, TagListInput,
@@ -74,13 +77,15 @@ const GeminiDescriptionGenerator: React.FC<{
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
         formContainerRef,
         currentUser, isAuthenticating, isLoadingUserData,
-        restoredDraft, discardDraft,
+        restoredDraft, discardDraft, leaveGuard,
     } = useListingForm(propertyToEdit, prefill, initialListingType);
 
     // --- Step-based rendering ---
 
     if (step === 'preview' && previewProperty) {
         return (
+            <>
+            <FormLeaveGuard {...leaveGuard} />
             <ListingPreview
                 property={previewProperty}
                 isSubmitting={isSubmitting}
@@ -92,6 +97,7 @@ const GeminiDescriptionGenerator: React.FC<{
                 onBack={handleBackToForm}
                 onPublish={handleSubmit}
             />
+            </>
         );
     }
 
@@ -173,6 +179,7 @@ const GeminiDescriptionGenerator: React.FC<{
 
     return (
         <>
+        <FormLeaveGuard {...leaveGuard} />
         {generatingModal}
         {/* Full-screen blurred overlay shown while the listing is being published */}
         <ListingSubmitOverlay
@@ -183,7 +190,7 @@ const GeminiDescriptionGenerator: React.FC<{
         />
         {/* noValidate: validation is handled in useListingForm so every missing
             field is highlighted at once instead of one native browser tooltip */}
-        <form className="listing-form" noValidate onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+        <form className="listing-form" noValidate onSubmit={handleSubmit} onKeyDown={handleFormEnterKey}>
             {restoredDraft && (
                 <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm" role="status">
                     <p className="flex-1 text-amber-900">
@@ -967,6 +974,7 @@ const GeminiDescriptionGenerator: React.FC<{
                             )}
                         </Button>
                     </div>
+                    <SubmitShortcutHint className="mt-2 sm:text-right" />
                  </div>
             )}
         </form>

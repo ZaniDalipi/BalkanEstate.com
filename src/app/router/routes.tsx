@@ -84,13 +84,16 @@ const WithSidebar: React.FC<{ page: SidebarPage }> = ({ page: Page }) => {
   return <Page onToggleSidebar={openSidebar} />;
 };
 
-/** `/business-directory/{businesses,individuals,mine}` pick a tab; anything else is a listing. */
-const BusinessDirectoryRoute: React.FC<{ tab?: BusinessDirectoryTab }> = ({ tab }) => {
+/**
+ * `/business-directory/{businesses,individuals,mine}` pick a tab, `/new` opens
+ * the create form; anything else is a listing.
+ */
+const BusinessDirectoryRoute: React.FC<{ tab?: BusinessDirectoryTab; creating?: boolean }> = ({ tab, creating }) => {
   const { listingSlug } = useParams();
   // SEO slugs end in `_EncodedId` ("acme-law-in-skopje_Ab12"); plain ids have none.
   const underscore = listingSlug?.lastIndexOf('_') ?? -1;
   const listingId = listingSlug && underscore > 0 ? listingSlug.slice(underscore + 1) : listingSlug ?? null;
-  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} />);
+  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} creating={creating} />);
 };
 
 type AppRoute = RouteObject & { handle?: RouteHandle };
@@ -124,6 +127,7 @@ const pageRoutes: AppRoute[] = [
   page('business-directory/businesses', { view: 'business-directory' }, <BusinessDirectoryRoute tab="businesses" />),
   page('business-directory/individuals', { view: 'business-directory' }, <BusinessDirectoryRoute tab="individuals" />),
   page('business-directory/mine', { view: 'business-directory' }, <BusinessDirectoryRoute tab="mine" />),
+  page('business-directory/new', { view: 'business-directory' }, <BusinessDirectoryRoute creating />),
   page(
     'business-directory/:listingSlug',
     { view: 'business-directory', detail: 'business-listing', scrollParams: ['listingSlug'] },

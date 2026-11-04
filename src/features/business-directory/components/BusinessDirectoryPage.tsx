@@ -14,7 +14,7 @@ import { SearchIcon, PlusIcon, MicrophoneIcon, ArrowPathIcon, MapIcon } from '@/
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 
-import { navigate } from '@/src/app/router/navigation';
+import { navigate, goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { generateBusinessSlug } from '@/utils/slug';
 import Footer from '@/components/shared/Footer';
@@ -23,9 +23,10 @@ interface BusinessDirectoryPageProps {
   selectedListingId?: string | null;
   /** The tab the URL names; the "all" tab when absent. */
   initialTab?: Exclude<TabType, 'all'>;
+  /** `/business-directory/new`: the create form (signed in only; signed out sees the list) */
+  creating?: boolean;
 }
 
-type SubView = 'list' | 'detail' | 'create';
 type TabType = 'all' | 'businesses' | 'individuals' | 'mine';
 type ViewMode = 'grid' | 'map';
 
@@ -85,14 +86,13 @@ const scaleInVariants = {
   visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 28 } },
 };
 
-const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId, initialTab }) => {
+const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId, initialTab, creating = false }) => {
   const { t } = useTranslation('businessDirectory');
   const { state, dispatch } = useAppContext();
 
 
-  // The open listing is the URL's; creating one is a local step on the list.
+  // The open listing and the create form are the URL's
   const selectedListingId = propListingId ?? null;
-  const [subView, setSubView] = useState<SubView>('list');
 
   // Filters
   const [searchInput, setSearchInput] = useState('');
@@ -265,11 +265,12 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   }, [state.currentUser, dispatch]);
 
   const handleCreateClick = useCallback(() => {
-    requireAuth(() => setSubView('create'));
+    requireAuth(() => navigate(paths.businessListingNew()));
   }, [requireAuth]);
 
   const handleCreateSuccess = useCallback(() => {
-    setSubView('list');
+    // Replace, so Back does not return to an emptied form
+    navigate(paths.businessDirectory('mine'), { replace: true });
     setPage(1);
     setSearch('');
     setSelectedCategory('');
@@ -289,8 +290,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     return <BusinessDetailPage listingId={selectedListingId} onBack={handleBackToList} />;
   }
 
-  if (subView === 'create') {
-    return <CreateBusinessListingForm onBack={() => setSubView('list')} onSuccess={handleCreateSuccess} />;
+  if (creating && state.currentUser) {
+    return <CreateBusinessListingForm onBack={() => goBack(paths.businessDirectory())} onSuccess={handleCreateSuccess} />;
   }
 
   const tabs: { key: TabType; label: string; icon: SoftIconName | null }[] = [
