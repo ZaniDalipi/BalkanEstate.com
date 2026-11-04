@@ -909,5 +909,8 @@
     "stay": "Keep editing",
     "keepDraft": "Save draft and leave",
     "discard": "Discard and leave"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "or press"
   }
 }

@@ -889,5 +889,8 @@
     "stay": "Vazhdo plotësimin",
     "keepDraft": "Ruaj draftin dhe dil",
     "discard": "Hidhe dhe dil"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "ose shtypni"
   }
 }

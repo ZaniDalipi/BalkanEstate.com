@@ -16,6 +16,8 @@ import { CreateImportPicker } from './CreateImportPicker';
 import { useCreateDevelopmentForm } from './useCreateDevelopmentForm';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 /**
  * Step 1 of the development wizard: basic information.
@@ -44,7 +46,7 @@ const CreateDevelopmentForm: React.FC = () => {
       <FormLeaveGuard {...leaveGuard} />
       <DraftRestoredNotice savedAt={draftSavedAt} onDiscard={discardDraft} className="mb-4" />
 
-      <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-white p-5 space-y-5" noValidate>
+      <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-white p-5 space-y-5" noValidate onKeyDown={handleFormEnterKey}>
         <Input
           label={t('wizard.name')}
           placeholder={t('wizard.namePlaceholder')}
@@ -104,6 +106,7 @@ const CreateDevelopmentForm: React.FC = () => {
             {isLoading ? t('wizard.creating') : t('wizard.submit')}
           </Button>
         </div>
+        <SubmitShortcutHint className="mt-2" />
       </form>
     </main>
   );

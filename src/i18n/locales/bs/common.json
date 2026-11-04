@@ -885,5 +885,8 @@
     "stay": "Nastavi uređivanje",
     "keepDraft": "Sačuvaj nacrt i izađi",
     "discard": "Odbaci i izađi"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "ili pritisnite"
   }
 }

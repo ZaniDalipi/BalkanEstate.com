@@ -110,4 +110,19 @@ describe('CreateBusinessListingForm', () => {
     expect(createListing).toHaveBeenCalledTimes(1);
     expect(readFormDraft(KEY)).toBeNull();
   });
+
+  it('does not create the listing on Enter in a field, only on Ctrl+Enter', async () => {
+    writeFormDraft(KEY, savedDraft);
+    createListing.mockResolvedValue({ listing: { id: 'b1' } });
+    render(<CreateBusinessListingForm onBack={vi.fn()} onSuccess={vi.fn()} />);
+    const name = document.querySelector<HTMLInputElement>('input[name="name"]')!;
+
+    // fireEvent returns false when the default action (the browser's Enter-to-submit) was cancelled
+    expect(fireEvent.keyDown(name, { key: 'Enter' })).toBe(false);
+    await act(async () => {});
+    expect(createListing).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(name, { key: 'Enter', ctrlKey: true });
+    await waitFor(() => expect(createListing).toHaveBeenCalledTimes(1));
+  });
 });

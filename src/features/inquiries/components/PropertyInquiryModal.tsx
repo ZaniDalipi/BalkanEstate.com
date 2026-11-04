@@ -12,6 +12,8 @@ import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { optimizeImageUrl } from '@/config/mediaConfig';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 interface PropertyInquiryModalProps {
   property: Property;
@@ -226,7 +228,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
 
               <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" onKeyDown={handleFormEnterKey}>
                 {/* Name */}
                 <div className="relative">
                   <input
@@ -346,6 +348,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                     </>
                   )}
                 </button>
+                <SubmitShortcutHint className="mt-2" />
               </form>
 
               <p className="mt-4 text-xs text-neutral-500 text-center">

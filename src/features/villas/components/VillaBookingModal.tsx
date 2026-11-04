@@ -14,6 +14,8 @@ import { XMarkIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { validateName, validateEmail, validatePhone, sanitizeText } from '@/shared/utils/validation';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 interface VillaBookingModalProps {
   property: Property;
@@ -333,7 +335,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
 
                 <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5" onKeyDown={handleFormEnterKey}>
                   {isForRent && (<>
                   {/* Dates */}
                   <div className="grid grid-cols-2 gap-3">
@@ -443,6 +445,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
 
                   {/* Quiet legal fine print */}
                   <div className="pt-1"><Disclaimer /></div>
+                  <SubmitShortcutHint className="mt-2" />
                 </form>
               </>
             )}

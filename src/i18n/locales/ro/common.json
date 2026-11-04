@@ -889,5 +889,8 @@
     "stay": "Continuă editarea",
     "keepDraft": "Salvează ciorna și ieși",
     "discard": "Renunță și ieși"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "sau apăsați"
   }
 }

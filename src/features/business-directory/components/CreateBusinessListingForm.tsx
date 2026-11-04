@@ -14,6 +14,8 @@ import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
 import { businessCreateDraftKey } from '../utils/businessDrafts';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -531,7 +533,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
         <FormLeaveGuard dirty={isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
         <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-6" />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" onKeyDown={handleFormEnterKey}>
           {/* Listing type selector */}
           <Animated variant="fadeInUp">
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
@@ -1255,6 +1257,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
               {isLoading || isSubmitting ? t('form.submitting') : t('form.submit')}
             </button>
           </Animated>
+          <SubmitShortcutHint className="mt-2" />
         </form>
       </div>
     </div>

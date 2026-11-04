@@ -17,6 +17,8 @@ import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft'
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { agencyDraftKey } from '../utils/agencyDraft';
+import { enterKeyAction } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 const AGENCY_TYPES: ReadonlyArray<{ value: 'standard' | 'luxury' | 'commercial' | 'boutique' | 'team'; label: string; icon: SoftIconName }> = [
   { value: 'standard', label: 'Standard', icon: 'home' },
@@ -386,6 +388,22 @@ const CreateAgencyPage: React.FC = () => {
     }
   };
 
+  // Enter does not send the form; Ctrl/⌘+Enter moves to the next step, and on the last one sends it
+  const onAgencyFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    const action = enterKeyAction({
+      key: e.key,
+      ctrlKey: e.ctrlKey,
+      metaKey: e.metaKey,
+      isComposing: e.nativeEvent.isComposing,
+      targetTag: (e.target as HTMLElement).tagName ?? '',
+    });
+    if (action === 'ignore') return;
+    e.preventDefault();
+    if (action !== 'submit') return;
+    if (currentStep < totalSteps) handleNextStep();
+    else e.currentTarget.requestSubmit();
+  };
+
   // With unsent data, FormLeaveGuard asks whether to keep the draft first
   const handleGoBack = () => navigate(paths.account());
 
@@ -537,7 +555,7 @@ const CreateAgencyPage: React.FC = () => {
 
         <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-6" />
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} onKeyDown={onAgencyFormKeyDown}>
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
@@ -1066,6 +1084,7 @@ const CreateAgencyPage: React.FC = () => {
               </button>
             )}
           </div>
+          <SubmitShortcutHint className="mt-2" />
         </form>
       </div>
 

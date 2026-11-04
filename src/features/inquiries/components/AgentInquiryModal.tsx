@@ -10,6 +10,8 @@ import { XMarkIcon } from '@/constants';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 interface Agent {
   id: string;
@@ -320,7 +322,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
 
               <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5" onKeyDown={handleFormEnterKey}>
 
                 {/* Name + Email — stacked on mobile, side-by-side on tablet+ */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -423,6 +425,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                     </>
                   )}
                 </button>
+                <SubmitShortcutHint className="mt-2" />
               </form>
 
               <p className="mt-3 text-xs text-neutral-400 text-center leading-relaxed">
