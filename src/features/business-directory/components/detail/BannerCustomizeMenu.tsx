@@ -46,7 +46,7 @@ export const BannerCustomizeMenu: React.FC<BannerCustomizeMenuProps> = ({ hasBan
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-black/35 px-4 text-sm font-semibold text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/50"
+        className="liquid-dark inline-flex min-h-[44px] items-center gap-2 rounded-full px-4 text-sm font-semibold transition active:scale-[0.97]"
       >
         <Pencil className="h-4 w-4" aria-hidden="true" />
         {t('banner.customize', 'Customize')}
@@ -55,7 +55,7 @@ export const BannerCustomizeMenu: React.FC<BannerCustomizeMenuProps> = ({ hasBan
         {open && (
           <motion.div
             role="menu"
-            className="absolute left-0 top-full z-50 mt-2 min-w-[220px] overflow-hidden rounded-2xl bg-white/90 py-1 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl"
+            className="liquid-surface absolute left-0 top-full z-50 mt-2 min-w-[230px] overflow-hidden rounded-[22px] py-1.5"
             initial={reduce ? false : { opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97 }}

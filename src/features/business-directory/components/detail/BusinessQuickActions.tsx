@@ -11,8 +11,8 @@ interface BusinessQuickActionsProps {
 
 const BUTTON =
   'group flex min-h-[64px] min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-1 rounded-2xl px-1.5 py-2 text-[12px] font-semibold transition active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-[72px] sm:text-[13px]';
-const PRIMARY = `${BUTTON} bg-primary text-white shadow-[0_10px_24px_-10px_rgba(2,82,205,0.7)] hover:bg-primary-dark`;
-const SECONDARY = `${BUTTON} bg-primary/[0.07] text-primary hover:bg-primary/[0.12]`;
+const PRIMARY = `${BUTTON} liquid-tint`;
+const SECONDARY = `${BUTTON} liquid-control text-primary`;
 
 /**
  * The place-card action row: Call (filled), then a messenger, directions,

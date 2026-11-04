@@ -11,7 +11,7 @@ import { BannerCustomizeMenu } from './BannerCustomizeMenu';
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif';
 const PILL = 'min-h-[44px] rounded-full px-5 text-sm font-semibold shadow-lg transition active:scale-[0.97]';
 /** Frosted pill on the photo — same look as the customise button. */
-const PILL_GLASS = 'min-h-[44px] items-center gap-1 rounded-full bg-black/35 px-4 text-sm font-semibold text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/50';
+const PILL_GLASS = 'liquid-dark min-h-[44px] items-center gap-1 rounded-full px-4 text-sm font-semibold transition active:scale-[0.97]';
 
 /**
  * The cover photo (or the category colour when there is none). Inset with

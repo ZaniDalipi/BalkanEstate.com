@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { languageLabel, yearsInBusiness } from '../../utils/businessFacts';
+import { GLASS_TILE } from './glassStyles';
 
 interface Stat {
   key: string;
@@ -12,7 +13,7 @@ interface Stat {
 
 /**
  * The at-a-glance numbers, App Store style: small caps label, big value,
- * caption — divided columns from the tablet up, a wrapping grid of tiles on phones.
+ * caption — on frosted glass tiles.
  */
 export const BusinessStatsStrip: React.FC<{ listing: BusinessListing; now: Date }> = ({ listing: l, now }) => {
   const { t, i18n } = useTranslation('businessDirectory');
@@ -35,12 +36,12 @@ export const BusinessStatsStrip: React.FC<{ listing: BusinessListing; now: Date 
   }
 
   return (
-    // Phones: a 3-column grid of small tiles (wraps, nothing cut off). From sm: one App Store row with dividers.
-    <dl className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:gap-0">
-      {stats.map((s, i) => (
+    // Glass tiles: a wrapping 3-column grid on phones, one row from the tablet up.
+    <dl className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:gap-2.5">
+      {stats.map((s) => (
         <div
           key={s.key}
-          className={`flex min-w-0 flex-col items-center rounded-xl bg-black/[0.03] px-1.5 py-2 text-center sm:flex-1 sm:rounded-none sm:bg-transparent sm:px-3 sm:py-0 ${i > 0 ? 'sm:border-l sm:border-black/[0.08]' : ''}`}
+          className={`${GLASS_TILE} flex min-w-0 flex-col items-center px-1.5 py-2.5 text-center sm:flex-1 sm:px-3 sm:py-3`}
         >
           <dt className="max-w-full truncate text-[10px] font-semibold uppercase tracking-wide text-neutral-500 sm:text-[11px]">{s.label}</dt>
           <dd className="mt-0.5 text-lg font-bold leading-tight text-neutral-800 tabular-nums sm:mt-1 sm:text-[22px]">{s.value}</dd>
