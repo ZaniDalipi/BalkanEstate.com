@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DualRange } from './DualRange';
 
@@ -15,7 +15,31 @@ beforeAll(() => {
   };
 });
 
+afterEach(() => vi.useRealTimers());
+
 describe('DualRange', () => {
+  it('follows the finger at once but reports to the page at a gentle pace', () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    render(<DualRange min={0} max={600} low={0} high={600} onChange={onChange} minLabel="Area min" maxLabel="Area max" />);
+    const min = screen.getByRole('slider', { name: 'Area min' });
+    const track = min.parentElement as HTMLElement;
+
+    fireEvent.pointerDown(track, { clientX: 100, pointerId: 1, button: 0 });
+    expect(onChange).toHaveBeenLastCalledWith(100, 600);
+    for (const x of [110, 120, 130, 140]) fireEvent.pointerMove(track, { clientX: x, pointerId: 1 });
+    expect(min).toHaveAttribute('aria-valuenow', '140');
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(150);
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).toHaveBeenLastCalledWith(140, 600);
+
+    fireEvent.pointerMove(track, { clientX: 200, pointerId: 1 });
+    fireEvent.pointerUp(track, { pointerId: 1 });
+    expect(onChange).toHaveBeenLastCalledWith(200, 600);
+  });
+
   it('drags the nearest thumb with a pointer (touch-friendly track)', () => {
     render(<Harness />);
     const min = screen.getByRole('slider', { name: 'Floors min' });

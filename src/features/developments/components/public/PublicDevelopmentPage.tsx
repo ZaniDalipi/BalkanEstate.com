@@ -68,7 +68,7 @@ const PublicDevelopmentPage: React.FC = () => {
   }
 
   return (
-    <main className="w-full bg-white pb-12">
+    <main className="w-full overflow-x-clip bg-white pb-12">
       <div className="mx-auto max-w-6xl px-4 pt-4">
         <button type="button" onClick={() => navigate(paths.developments(), { direction: 'back' })} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />

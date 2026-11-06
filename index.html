@@ -255,9 +255,14 @@
 
     <!-- Inline critical styles (moved from body for best practices) -->
     <style>
-      /* Prevent horizontal scrolling on all devices */
+      /* Prevent horizontal scrolling on all devices. iOS Safari still lets a
+         finger pan the page sideways under `hidden` whenever anything pokes
+         past the edge; `clip` (Safari 16+) leaves nothing to pan, and
+         `hidden` stays as the fallback for older engines. */
       html, body {
         overflow-x: hidden;
+        overflow-x: clip;
+        overscroll-behavior-x: none;
         max-width: 100vw;
       }
 
