@@ -16,11 +16,19 @@ interface StageTopBarProps {
   onToggleFullscreen: () => void;
 }
 
+/**
+ * While an action's popup (e.g. the budget panel, `aria-haspopup="dialog"`) is
+ * open, the bar rises above the building chips, the legend and the stats card
+ * below the picture, so the popup is always the top layer. The filters toggle
+ * has no popup of its own, so the filters overlay still covers the bar.
+ */
+const RAISED_WHILE_POPUP_OPEN = 'has-[[aria-haspopup=dialog][aria-expanded=true]]:z-40';
+
 /** The bar over the top of the picture: breadcrumb on the left, helper/filters/full-screen buttons on the right. */
 export const StageTopBar: React.FC<StageTopBarProps> = (p) => {
   const { t } = useTranslation('developments');
   return (
-    <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
+    <div className={`pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 ${RAISED_WHILE_POPUP_OPEN}`}>
       <div className="pointer-events-auto">
         <ExplorerBreadcrumb crumbs={p.crumbs} onSelect={p.onCrumb} />
       </div>
