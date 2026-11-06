@@ -1,5 +1,5 @@
 import React from 'react';
-import { DualRange } from '../../../scene/DualRange';
+import { DualRange } from '../../../scene/dualRange/DualRange';
 
 interface RangeFilterProps {
   label: string;
