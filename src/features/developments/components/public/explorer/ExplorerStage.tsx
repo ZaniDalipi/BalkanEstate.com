@@ -77,7 +77,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         'bg-slate-900',
         // Off full screen, desktop keeps the controls in bands above/below the
         // image so they never cover the top or ground-floor apartments.
-        full ? 'fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
+        full ? 'explorer-stage-full fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
       <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
@@ -117,16 +117,16 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           onToggleFullscreen={fs.toggle}
         />
 
-        <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0">
+        <div className="absolute bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)] left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-[calc(var(--stage-safe-right,0px)+0.75rem)] lg:translate-x-0">
           <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
         </div>
       </div>
 
-      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-3 top-16 p-0')}>
+      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-[calc(var(--stage-safe-left,0px)+0.75rem)] top-[calc(var(--stage-safe-top,0px)+4rem)] p-0')}>
         <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
       </div>
 
-      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3')}>
+      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-[calc(var(--stage-safe-bottom,0px)+5rem)] left-[calc(var(--stage-safe-left,0px)+0.75rem)] p-0 lg:bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)]')}>
         <ExplorerLegend
           counts={p.legend}
           selected={p.selectedAvailability}

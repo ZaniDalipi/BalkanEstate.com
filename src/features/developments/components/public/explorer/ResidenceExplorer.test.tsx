@@ -71,4 +71,16 @@ describe('ResidenceExplorer', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'East Gate' })[0]);
     expect(await screen.findByRole('button', { name: 'B2 · 3 available' })).toBeInTheDocument();
   });
+
+  it('keeps the full-screen controls clear of the status bar and home indicator', async () => {
+    views.byTarget['building:b1'] = [view('east', [])];
+    render(<Harness />);
+    const stage = await screen.findByRole('region', { name: 'Interactive residence explorer' });
+    expect(stage).not.toHaveClass('explorer-stage-full');
+    fireEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    const full = screen.getByRole('region', { name: 'Interactive residence explorer' });
+    expect(full).toHaveClass('explorer-stage-full');
+    const bar = screen.getByRole('button', { name: 'Exit full screen' }).closest('.absolute');
+    expect(bar?.className).toContain('top-[calc(var(--stage-safe-top,0px)+0.75rem)]');
+  });
 });
