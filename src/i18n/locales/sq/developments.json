@@ -454,6 +454,14 @@
       "homes": "Banesa: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Banesa me tur 360°: {{n}}"
+    },
+    "showcase": {
+      "back": "Kthehu te ndërtesa",
+      "backPlain": "Kthehu",
+      "mode": "Pamja e planit të katit",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Plani i katit: {{name}}"
     }
   },
   "feature": {

@@ -456,6 +456,14 @@
       "homes": "Locuințe: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Locuințe cu tur 360°: {{n}}"
+    },
+    "showcase": {
+      "back": "Înapoi la clădire",
+      "backPlain": "Înapoi",
+      "mode": "Vizualizarea planului",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Planul pentru {{name}}"
     }
   },
   "feature": {

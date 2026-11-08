@@ -146,6 +146,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
       actions={<BudgetAssistant units={p.units} city={p.city} country={p.country} onShow={trip.start} buttonClassName={EXPLORER_PILL} />}
       focus={trip.focus}
       onFocusArrive={trip.onArrive}
+      openUnitId={p.openUnitId}
       filters={
         <UnitFilters units={p.units} criteria={p.criteria} onChange={p.onCriteriaChange} matchCount={matched.length} defaultExpanded />
       }

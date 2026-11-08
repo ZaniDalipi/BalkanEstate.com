@@ -22,15 +22,24 @@ interface Size {
   height: number;
 }
 
+/** How deep a {@link fitBox} glide goes: share of the frame the region fills, and the zoom cap. */
+export interface FlyOptions {
+  fill?: number;
+  maxScale?: number;
+}
+
 const IDENTITY: PanZoomTransform = { scale: 1, x: 0, y: 0 };
 const DOUBLE_TAP_MS = 300;
 /** Length of a programmatic {@link flyTo} glide. */
 export const FLY_MS = 900;
 
-/** The transform that centres `box` (normalised 0–1 image coordinates) and zooms until it fills about half the frame. */
-export const fitBox = (box: Bounds, size: Size, maxScale = 4): PanZoomTransform => {
+/**
+ * The transform that centres `box` (normalised 0–1 image coordinates) and
+ * zooms until it fills `fill` of the frame (about half by default).
+ */
+export const fitBox = (box: Bounds, size: Size, maxScale = 4, fill = 0.5): PanZoomTransform => {
   const span = Math.max(0.02, box.maxX - box.minX, box.maxY - box.minY);
-  const scale = Math.min(maxScale, Math.max(1.5, 0.5 / span));
+  const scale = Math.min(maxScale, Math.max(1.5, fill / span));
   const cx = ((box.minX + box.maxX) / 2) * size.width;
   const cy = ((box.minY + box.maxY) / 2) * size.height;
   return { scale, x: size.width / 2 - cx * scale, y: size.height / 2 - cy * scale };
@@ -169,17 +178,27 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     lastTap.current = { time: now, x: e.clientX, y: e.clientY };
   };
 
-  /** Glide (CSS transition) to a region, e.g. the budget helper taking a buyer to an apartment. */
-  const flyTo = useCallback(
-    (box: Bounds) => {
+  /**
+   * Glide (CSS transition) to a transform. Returns false, doing nothing, when
+   * the frame has no size yet (nothing on screen to glide).
+   */
+  const glideTo = useCallback(
+    (next: PanZoomTransform) => {
       const s = size();
-      if (!s.width || !s.height) return;
+      if (!s.width || !s.height) return false;
       clearTimeout(flyTimer.current);
       setFlying(true);
-      apply(fitBox(box, s, maxScale));
+      apply(next);
       flyTimer.current = setTimeout(() => setFlying(false), FLY_MS);
+      return true;
     },
-    [apply, maxScale]
+    [apply]
+  );
+
+  /** Glide to a region, e.g. the budget helper taking a buyer to an apartment; false when there is no frame yet. */
+  const flyTo = useCallback(
+    (box: Bounds, opts: FlyOptions = {}) => glideTo(fitBox(box, size(), Math.min(maxScale, opts.maxScale ?? maxScale), opts.fill)),
+    [glideTo, maxScale]
   );
 
   /** True (once) if the press that ended was a pan/pinch/double-tap rather than a tap. */
@@ -220,6 +239,7 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     zoomOut: () => zoomBy(1 / 1.5),
     reset: () => setTransform(IDENTITY),
     flyTo,
+    glideTo,
     consumeDrag,
     handlers: {
       onPointerDown: onPointerDown as (e: React.PointerEvent) => void,

@@ -148,6 +148,7 @@ The server **rejects** invalid shapes and never clamps them. It rejects:
 | --- | --- |
 | Public explorer | `components/public/explorer/` (stage, canvas, tooltip, legend, view switcher, building chips) |
 | Apartment drawer | `components/public/explorer/drawer/` |
+| Apartment dive + showcase | `components/public/explorer/dive/` (`useApartmentDive`, `DiveVeil`), `components/public/explorer/drawer/showcase/` (`ApartmentShowcase`, `FloorPlanModel`, `showcaseMotion.ts`) |
 | Budget helper | `components/public/explorer/budget/` (button, teaser, panel, form, cards), `useFlyToUnit.ts` + `useFlyFocus.ts` (the guided trip), `utils/budgetMatch.ts`, `hooks/useLocationPrice.ts` |
 | Region editor | `components/scene/editor/` with `hooks/usePolygonEditor.ts` (reducer, undo/redo) and `hooks/useEditorViewport.ts` |
 | Dashboard | `components/dashboard/` (tabbed manage page, inventory table, unit edit dialog, linked listings, settings) |
@@ -689,7 +690,8 @@ the Zillow sheet:
   as before. With "reduce motion" the sheet jumps instead of sliding.
 - The sheet is always as tall as "full" and is moved with a transform
   (`useSheetMotion`); the rules (snap points, flick, who owns the gesture) are
-  pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer.
+  pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer
+  (beside the apartment showcase, see 7b-11).
 
 ## 7b-7. 360° virtual tours
 
@@ -873,6 +875,45 @@ unique per entrance, so "A1" can exist behind both Entrance 1 and Entrance 2.
   - backend: `__tests__/developments/residence-gallery.test.ts`;
   - frontend: `residencePhotos.test.ts`, `ResidenceGallerySection.test.tsx`,
     `ResidencePhotosButton.test.tsx`.
+
+## 7b-11. Diving into an apartment
+
+Clicking an apartment on the building picture no longer cuts straight to its
+details; the explorer takes the buyer *into* it:
+
+| The dive | Showcase (3D) | Showcase (flat) |
+| --- | --- | --- |
+| ![Dive](./images/residence-explorer/40-apartment-dive.png) | ![Showcase](./images/residence-explorer/41-apartment-showcase.jpg) | ![Flat plan](./images/residence-explorer/42-apartment-showcase-flat.jpg) |
+
+1. **The dive** (`dive/useApartmentDive.ts`). The camera pushes in on the
+   apartment (about 2.5× at most, so the rendering stays sharp) while the rest
+   of the facade washes out to warm paper (`DiveVeil`, a mask over the picture
+   in the pan/zoom layer) and only the apartment keeps its colour. The stage
+   controls (crumbs, chips, legend, camera arrows, zoom) fade out meanwhile:
+   the canvas sets `data-immersed`, and each control carries
+   `HIDE_WHEN_IMMERSED` (a `group-has-*` variant on the stage, no state
+   lifted). After `DIVE_MS` (650 ms) the apartment opens as before (`?unit=`).
+2. **The showcase** (desktop, `drawer/showcase/`). When the apartment has a
+   floor plan, the page beside the details column turns into the same paper,
+   and the plan rises from the apartment's place on the facade into a tilted
+   model on a board (`FloorPlanModel`, CSS 3D). **2D / 3D** lays it flat to
+   read it. **Back to building** (just **Back** when the apartment was opened
+   from the list) closes it, like Esc, Back or the close button. The details
+   column no longer repeats the plan as its main picture there; its
+   **Floor plan** button still opens the zoomable viewer. Without a plan the
+   page is dimmed as before.
+3. **Back to the building.** When the apartment closes, the camera glides back
+   to exactly where the buyer was, and the controls return.
+
+On phones there is no showcase: the dive ends with the half-height sheet and
+the apartment lit up above it. An apartment opened from elsewhere (the list, a
+shared link, the budget helper) is lit up the same way, without moving the
+camera. Buildings, floors, entrances and listings open at once, as before, and
+so does everything under "reduce motion".
+
+The geometry (where the plan starts its rise, which copy of the apartment is on
+screen) is pure and tested in `showcaseMotion.test.ts`; the flow in
+`dive/ApartmentDive.test.tsx` and `drawer/DesktopShowcase.test.tsx`.
 
 ## 7b-3. Errors in the reader's language
 

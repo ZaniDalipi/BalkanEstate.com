@@ -430,6 +430,14 @@
       "homes": "Homes: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Homes with a 360° tour: {{n}}"
+    },
+    "showcase": {
+      "back": "Back to building",
+      "backPlain": "Back",
+      "mode": "Floor plan view",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Floor plan of {{name}}"
     }
   },
   "feature": {

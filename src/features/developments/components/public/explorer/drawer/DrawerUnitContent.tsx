@@ -19,10 +19,12 @@ interface DrawerUnitContentProps {
   unitId: string;
   preview?: PublicUnit;
   onChildModalChange: (open: boolean) => void;
+  /** Desktop: the apartment's floor plan is shown beside the details (see DesktopBackdrop). */
+  besideShowcase?: boolean;
 }
 
 /** The drawer body: media, heading + price, specs, features and the actions. */
-export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unitId, preview, onChildModalChange }) => {
+export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unitId, preview, onChildModalChange, besideShowcase }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
   const { unit: full, development, listings, companions, isLoading, error } = usePublicUnit(slug, unitId);
@@ -49,7 +51,7 @@ export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unit
 
   return (
     <div className="pb-6">
-      <UnitMedia unit={unit} primaryListing={primary} onModalChange={onChildModalChange} />
+      <UnitMedia unit={unit} primaryListing={primary} onModalChange={onChildModalChange} planBeside={besideShowcase && !!unit.floorplan?.url} />
       <div className="space-y-5 px-5 pt-5">
         <header>
           <div className="flex flex-wrap items-center gap-2 pr-12">

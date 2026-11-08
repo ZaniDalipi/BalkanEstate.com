@@ -63,6 +63,31 @@ describe('usePanZoom', () => {
     expect(result.current.transform.scale).toBe(2);
     expect(result.current.consumeDrag()).toBe(true);
   });
+
+  it('glides to a transform and back, clamped to the frame', () => {
+    const { result } = setup();
+    let started = false;
+    act(() => {
+      started = result.current.flyTo({ minX: 0.45, minY: 0.45, maxX: 0.55, maxY: 0.55 }, { fill: 0.3, maxScale: 2.5 });
+    });
+    expect(started).toBe(true);
+    expect(result.current.transform.scale).toBe(2.5);
+    expect(result.current.contentStyle.transition).toMatch(/^transform /);
+    act(() => {
+      result.current.glideTo({ scale: 1, x: 0, y: 0 });
+    });
+    expect(result.current.transform).toEqual({ scale: 1, x: 0, y: 0 });
+  });
+
+  it('does not glide while the frame has no size', () => {
+    const { result } = renderHook(() => usePanZoom());
+    let started = true;
+    act(() => {
+      started = result.current.flyTo({ minX: 0.4, minY: 0.4, maxX: 0.6, maxY: 0.6 });
+    });
+    expect(started).toBe(false);
+    expect(result.current.transform.scale).toBe(1);
+  });
 });
 
 describe('pan/zoom math', () => {
@@ -88,5 +113,10 @@ describe('fitBox', () => {
   it('never zooms less than 1.5× nor past the maximum', () => {
     expect(fitBox({ minX: 0, minY: 0, maxX: 1, maxY: 1 }, { width: 100, height: 100 }).scale).toBe(1.5);
     expect(fitBox({ minX: 0.5, minY: 0.5, maxX: 0.501, maxY: 0.501 }, { width: 100, height: 100 }, 4).scale).toBe(4);
+  });
+
+  it('a smaller fill zooms in less', () => {
+    const box = { minX: 0.4, minY: 0.4, maxX: 0.6, maxY: 0.6 };
+    expect(fitBox(box, { width: 1000, height: 500 }, 4, 0.36).scale).toBeCloseTo(1.8);
   });
 });

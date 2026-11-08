@@ -1,6 +1,4 @@
 import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit } from '../../../types';
 import { usePanZoom } from '../../../hooks/usePanZoom';
@@ -10,11 +8,15 @@ import { EntranceMarkers } from './EntranceMarkers';
 import { RegionLayer } from './RegionLayer';
 import { RegionCard } from './RegionCard';
 import { ZoomControls } from './ZoomControls';
+import { ViewPicture } from './ViewPicture';
 import type { RegionDisplayMode } from './regionPaint';
 import { useFlyFocus, type ExplorerFocus } from './useFlyFocus';
 import { useHotspotInteraction } from './useHotspotInteraction';
 import { useRegionCard, type BuildingFacts } from './useRegionCard';
 import { linkedHotspotIds } from '../../../utils/unitCompanions';
+import { DiveVeil } from './dive/DiveVeil';
+import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
+import { useApartmentDive } from './dive/useApartmentDive';
 
 export interface ExplorerCanvasProps {
   view: Pick<PublicSceneView, 'imageUrl' | 'imageWidth' | 'imageHeight' | 'hotspots' | 'viewName'>;
@@ -32,6 +34,8 @@ export interface ExplorerCanvasProps {
   /** Region to glide to and highlight (the budget helper); `onFocusArrive` fires once there. */
   focus?: ExplorerFocus;
   onFocusArrive?: (h: Hotspot) => void;
+  /** The apartment open in the details sheet (null: none). Given, clicking an apartment dives into it first. */
+  openUnitId?: string | null;
   className?: string;
 }
 
@@ -40,7 +44,7 @@ export interface ExplorerCanvasProps {
  * regions (normalised 0–1 points scaled into the image's own viewBox) and the
  * building name tags, all in one pan/zoom layer so they stay glued to the
  * facade at any zoom. Hovering (or tapping) a region lights it up and opens its
- * card; clicking opens it.
+ * card; clicking opens it, an apartment after a short dive into it.
  */
 export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   view,
@@ -54,16 +58,17 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   fullscreen,
   focus,
   onFocusArrive,
+  openUnitId,
   className,
 }) => {
-  const { t } = useTranslation('developments');
   const pz = usePanZoom({ wheelAlwaysZooms: fullscreen });
-  const { hover, bind, activate, dismiss, cardHandlers, showFor, scheduleClose } = useHotspotInteraction(pz.consumeDrag, onActivate);
+  const hotspots = useMemo(() => [...view.hotspots].sort((a, b) => (a.z ?? 0) - (b.z ?? 0)), [view.hotspots]);
+  const dive = useApartmentDive(hotspots, openUnitId, pz, onActivate);
+  const { hover, bind, activate, dismiss, cardHandlers, showFor, scheduleClose } = useHotspotInteraction(pz.consumeDrag, dive.activate);
   const cardFor = useRegionCard(unitsById, buildingsById, buildingFacts, entrancesById);
   const W = view.imageWidth || 1600;
   const H = view.imageHeight || 900;
 
-  const hotspots = useMemo(() => [...view.hotspots].sort((a, b) => (a.z ?? 0) - (b.z ?? 0)), [view.hotspots]);
   const hovered = hover ? hotspots.find((h) => h.id === hover.id) : undefined;
   const focused = focus ? hotspots.find((h) => h.id === focus.hotspotId) : undefined;
   // Its parking spot / storage room (or its apartment) light up with the hovered unit.
@@ -81,20 +86,10 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
       {...pz.handlers}
       onClick={() => !pz.consumeDrag() && dismiss()}
       data-testid="explorer-canvas"
+      data-immersed={dive.veil ? 'true' : undefined}
     >
       <div className={cn('absolute inset-0', pz.isZoomed ? 'cursor-grab active:cursor-grabbing' : '')} style={pz.contentStyle}>
-        <img
-          src={optimizeImageUrl(view.imageUrl, { width: 1920 })}
-          srcSet={imageSrcSet(view.imageUrl, [800, 1280, 1920, 2560]) || undefined}
-          sizes="100vw"
-          alt={view.viewName || t('scene.exploreHeading', 'Explore the development')}
-          draggable={false}
-          // A failed image hides itself so buyers see the dark stage, not a broken-image icon.
-          onError={(e) => {
-            e.currentTarget.style.visibility = 'hidden';
-          }}
-          className="pointer-events-none absolute inset-0 h-full w-full object-fill"
-        />
+        <ViewPicture url={view.imageUrl} name={view.viewName} />
         <RegionLayer
           width={W}
           height={H}
@@ -125,9 +120,10 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
           onLeave={(h) => scheduleClose(h.id)}
           onSelect={activate}
         />
+        <DiveVeil hotspot={dive.veil} width={W} height={H} />
       </div>
 
-      <div className="absolute bottom-3 right-3 z-10 hidden sm:block">
+      <div className={cn('absolute bottom-3 right-3 z-10 hidden sm:block', HIDE_WHEN_IMMERSED)}>
         <ZoomControls onZoomIn={pz.zoomIn} onZoomOut={pz.zoomOut} onReset={pz.reset} isZoomed={pz.isZoomed} />
       </div>
 

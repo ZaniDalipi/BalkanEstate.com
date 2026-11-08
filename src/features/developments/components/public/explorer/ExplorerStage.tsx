@@ -15,6 +15,7 @@ import { ExplorerLegend } from './ExplorerLegend';
 import { usePseudoFullscreen } from './usePseudoFullscreen';
 import { useDisplayMode } from './useDisplayMode';
 import type { BuildingFacts } from './useRegionCard';
+import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
 
 export interface ExplorerStageProps {
   views: PublicSceneView[];
@@ -42,6 +43,8 @@ export interface ExplorerStageProps {
   /** Region the explorer is gliding to; see ExplorerCanvas. */
   focus?: ExplorerFocus;
   onFocusArrive?: (h: Hotspot) => void;
+  /** The apartment open in the details sheet; see ExplorerCanvas. */
+  openUnitId?: string | null;
 }
 
 /**
@@ -49,6 +52,7 @@ export interface ExplorerStageProps {
  * the breadcrumb, building chips, legend, camera arrows and zoom laid over it.
  * On phones the chips and legend flow below the image so they don't bury it.
  * ←/→ switch camera views; the full-screen toggle portals the stage to <body>.
+ * While the buyer dives into an apartment the controls fade away (`group/stage`).
  */
 export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
@@ -74,7 +78,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
       onKeyDown={onKeyDown}
       style={full ? { zIndex: 4000 } : undefined}
       className={cn(
-        'bg-slate-900',
+        'group/stage bg-slate-900',
         // Off full screen, desktop keeps the controls in bands above/below the
         // image so they never cover the top or ground-floor apartments.
         full ? 'fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
@@ -102,6 +106,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
               fullscreen={full}
               focus={p.focus}
               onFocusArrive={p.onFocusArrive}
+              openUnitId={p.openUnitId}
             />
           </motion.div>
         )}
@@ -117,16 +122,16 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           onToggleFullscreen={fs.toggle}
         />
 
-        <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0">
+        <div className={cn('absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0', HIDE_WHEN_IMMERSED)}>
           <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
         </div>
       </div>
 
-      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-3 top-16 p-0')}>
+      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-3 top-16 p-0', HIDE_WHEN_IMMERSED)}>
         <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
       </div>
 
-      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3')}>
+      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3', HIDE_WHEN_IMMERSED)}>
         <ExplorerLegend
           counts={p.legend}
           selected={p.selectedAvailability}

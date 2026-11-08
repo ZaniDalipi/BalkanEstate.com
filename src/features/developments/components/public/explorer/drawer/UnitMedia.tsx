@@ -13,6 +13,8 @@ interface UnitMediaProps {
   unit: PublicUnit;
   primaryListing?: LinkedListing;
   onModalChange: (open: boolean) => void;
+  /** The floor plan is already on show beside the details (desktop showcase): don't repeat it as the hero. */
+  planBeside?: boolean;
 }
 
 /**
@@ -20,7 +22,7 @@ interface UnitMediaProps {
  * ImageViewerModal / FloorPlanViewerModal (portalled so the drawer's transform
  * can't trap their fixed positioning).
  */
-export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onModalChange }) => {
+export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onModalChange, planBeside }) => {
   const { t } = useTranslation('developments');
   const photos = unitGallery(unit, primaryListing);
   const [viewer, setViewer] = useState<{ kind: 'photos'; index: number } | { kind: 'plan' } | null>(null);
@@ -32,7 +34,7 @@ export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onMo
     setViewer(null);
     onModalChange(false);
   };
-  const hero = photos[0] ?? unit.floorplan?.url;
+  const hero = photos[0] ?? (planBeside ? undefined : unit.floorplan?.url);
 
   return (
     <div>
@@ -40,7 +42,7 @@ export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onMo
         <button type="button" onClick={() => (photos.length ? open({ kind: 'photos', index: 0 }) : open({ kind: 'plan' }))} className="block w-full" aria-label={t('explorer.drawer.openGallery', 'Open photos')}>
           <img src={optimizeImageUrl(hero, { width: 960 })} srcSet={imageSrcSet(hero, [480, 960, 1280]) || undefined} sizes="(min-width: 768px) 460px, 100vw" alt="" className="aspect-[4/3] w-full bg-slate-100 object-cover" />
         </button>
-      ) : (
+      ) : planBeside ? null : (
         <div className="flex aspect-[16/9] w-full items-center justify-center bg-slate-100 text-slate-400">
           <Building2 className="h-12 w-12" aria-hidden="true" />
         </div>

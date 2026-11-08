@@ -456,6 +456,14 @@
       "homes": "Stanova: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Stanova s 360° šetnjom: {{n}}"
+    },
+    "showcase": {
+      "back": "Natrag na zgradu",
+      "backPlain": "Natrag",
+      "mode": "Prikaz tlocrta",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Tlocrt: {{name}}"
     }
   },
   "feature": {
