@@ -132,6 +132,22 @@ describe('desktop apartment showcase', () => {
     expect(screen.queryByRole('button', { name: 'Back to building' })).not.toBeInTheDocument();
   });
 
+  it('without a floor plan, the apartment’s photos rise instead, and the card does not repeat them', async () => {
+    const photos = ['https://media.test/a.jpg', 'https://media.test/b.jpg', 'https://media.test/c.jpg'];
+    h.detail = { ...detail({ floorplan: undefined }), unit: { ...detail({ floorplan: undefined }).unit, gallery: photos.map((url) => ({ url })) } };
+    mount();
+    const showcase = await screen.findByTestId('apartment-showcase');
+    expect(within(showcase).getByRole('img', { name: 'Apt A12, photo 1' })).toBeInTheDocument();
+    expect(within(showcase).queryByRole('group', { name: 'Floor plan view' })).not.toBeInTheDocument();
+    const dock = within(showcase).getByRole('group', { name: 'Open photos' });
+    fireEvent.click(within(dock).getByRole('button', { name: 'Photo 2' }));
+    expect(within(dock).getByRole('button', { name: 'Photo 2' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(showcase).getByRole('img', { name: 'Apt A12, photo 2' })).toBeInTheDocument();
+    // The details card shows no photos of its own.
+    expect(screen.getAllByRole('button', { name: 'Photo 2' })).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'Open photos' })).not.toBeInTheDocument();
+  });
+
   it('without a floor plan, the page is dimmed as before and a click on it closes', async () => {
     h.detail = detail({ floorplan: undefined });
     const router = mount();

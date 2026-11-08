@@ -31,7 +31,7 @@ export const StageTopBar: React.FC<StageTopBarProps> = (p) => {
   return (
     <div className={`pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 ${RAISED_WHILE_POPUP_OPEN} ${HIDE_WHEN_IMMERSED}`}>
       <div className="pointer-events-auto">
-        <ExplorerBreadcrumb crumbs={p.crumbs} onSelect={p.onCrumb} />
+        {p.crumbs.length > 0 && <ExplorerBreadcrumb crumbs={p.crumbs} onSelect={p.onCrumb} />}
       </div>
       <div className="pointer-events-auto relative flex gap-2">
         {p.actions}

@@ -32,6 +32,11 @@ const IDENTITY: PanZoomTransform = { scale: 1, x: 0, y: 0 };
 const DOUBLE_TAP_MS = 300;
 /** Length of a programmatic {@link flyTo} glide. */
 export const FLY_MS = 900;
+/** A long camera flight starts gently and settles softly (see `flyPath`). */
+export const FLIGHT_EASE = 'cubic-bezier(0.45, 0.05, 0.2, 1)';
+
+/** The CSS transform of the content layer for a pan/zoom state. */
+export const transformCss = (t: PanZoomTransform): string => `translate(${t.x}px, ${t.y}px) scale(${t.scale})`;
 
 /**
  * The transform that centres `box` (normalised 0–1 image coordinates) and
@@ -79,6 +84,9 @@ interface PointerLike {
  */
 export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, wheelAlwaysZooms = false }: UsePanZoomOptions = {}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  /** The transformed content layer; `flyPath` animates it directly. */
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const flight = useRef<Animation | null>(null);
   const [transform, setTransform] = useState<PanZoomTransform>(IDENTITY);
   const tRef = useRef(transform);
   tRef.current = transform;
@@ -88,7 +96,13 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
   const lastTap = useRef<{ time: number; x: number; y: number } | null>(null);
   const [flying, setFlying] = useState(false);
   const flyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(flyTimer.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(flyTimer.current);
+      flight.current?.cancel();
+    },
+    []
+  );
 
   const size = (): Size => {
     const r = containerRef.current?.getBoundingClientRect();
@@ -201,6 +215,52 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     [glideTo, maxScale]
   );
 
+  /** Where the picture is on screen right now: mid-flight, that is not yet the committed state. */
+  const liveTransform = useCallback((): PanZoomTransform => {
+    const el = contentRef.current;
+    if (!flight.current || !el || typeof DOMMatrixReadOnly === 'undefined') return tRef.current;
+    const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+    return { scale: m.a, x: m.e, y: m.f };
+  }, []);
+
+  /** End a `flyPath` flight now: the picture snaps to where the flight was going. */
+  const stopFlight = useCallback(() => {
+    flight.current?.cancel();
+    flight.current = null;
+  }, []);
+
+  /**
+   * Fly the camera through `frames` (each clamped to the frame) over `ms`.
+   * The end state is committed at once and the animation plays over it, so
+   * React and the screen agree the moment the flight ends or is stopped.
+   * Without the Web Animations API it simply arrives. False when the frame
+   * has no size yet.
+   */
+  const flyPath = useCallback(
+    (frames: PanZoomTransform[], ms: number, easing = FLIGHT_EASE) => {
+      const s = size();
+      if (!s.width || !s.height || frames.length === 0) return false;
+      const path = frames.map((f) => clampTransform(f, s, minScale, maxScale));
+      clearTimeout(flyTimer.current);
+      setFlying(false);
+      flight.current?.cancel();
+      flight.current = null;
+      const el = contentRef.current;
+      if (el && typeof el.animate === 'function' && ms > 0 && path.length > 1) {
+        const anim = el.animate(path.map((t) => ({ transform: transformCss(t) })), { duration: ms, easing, fill: 'forwards' });
+        anim.onfinish = () => {
+          if (flight.current !== anim) return;
+          anim.cancel();
+          flight.current = null;
+        };
+        flight.current = anim;
+      }
+      setTransform(path[path.length - 1]);
+      return true;
+    },
+    [minScale, maxScale]
+  );
+
   /** True (once) if the press that ended was a pan/pinch/double-tap rather than a tap. */
   const consumeDrag = useCallback(() => {
     const was = dragged.current;
@@ -233,13 +293,19 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
 
   return {
     containerRef,
+    contentRef,
     transform,
+    /** The frame's size now (0 × 0 before it is laid out). */
+    frameSize: size,
     isZoomed: transform.scale > 1.01,
     zoomIn: () => zoomBy(1.5),
     zoomOut: () => zoomBy(1 / 1.5),
     reset: () => setTransform(IDENTITY),
     flyTo,
     glideTo,
+    flyPath,
+    stopFlight,
+    liveTransform,
     consumeDrag,
     handlers: {
       onPointerDown: onPointerDown as (e: React.PointerEvent) => void,
@@ -248,7 +314,7 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
       onPointerCancel: onPointerUp as (e: React.PointerEvent) => void,
     },
     contentStyle: {
-      transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+      transform: transformCss(transform),
       transformOrigin: '0 0',
       transition: flying ? `transform ${FLY_MS}ms cubic-bezier(0.22, 0.8, 0.26, 1)` : undefined,
     } as React.CSSProperties,

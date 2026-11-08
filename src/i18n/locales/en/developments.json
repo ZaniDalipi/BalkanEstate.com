@@ -437,8 +437,15 @@
       "mode": "Floor plan view",
       "tilted": "3D",
       "flat": "2D",
-      "planAlt": "Floor plan of {{name}}"
-    }
+      "planAlt": "Floor plan of {{name}}",
+      "photoAlt": "{{name}}, photo {{n}}"
+    },
+    "dive": {
+      "skip": "Skip",
+      "status": "Taking you to {{name}}"
+    },
+    "bathrooms_one": "{{count}} bathroom",
+    "bathrooms_other": "{{count}} bathrooms"
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -1532,5 +1539,13 @@
     "remove": "Remove photo {{n}}",
     "removeMessage": "The photo is removed from the residence page.",
     "showAll": "Photos ({{n}})"
+  },
+  "immersive": {
+    "headline": "Find your home in {{name}}",
+    "priceFrom": "From {{price}}",
+    "hint": "Hover the building and choose an apartment",
+    "back": "All residences",
+    "nav": "Residence",
+    "cta": "View apartments"
   }
 }

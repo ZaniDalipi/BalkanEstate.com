@@ -6,13 +6,14 @@ import type { DevelopmentBuilding, DevelopmentEntrance, DevelopmentFloor, Hotspo
 import type { ExplorerNav } from '../../../hooks/useExplorerUrlState';
 import { hasActiveCriteria, toggleIn, type UnitCriteria } from '../../../utils/unitFilters';
 import { UnitFilters } from '../UnitFilters';
-import { ExplorerStage } from './ExplorerStage';
+import { ExplorerStage, type ExplorerStageProps } from './ExplorerStage';
 import { useExplorerData } from './useExplorerData';
 import { useExplorerTarget } from './useExplorerTarget';
 import { BudgetAssistant } from './budget/BudgetAssistant';
 import { EXPLORER_PILL } from './explorerPill';
 import { FloorByFloor } from './FloorByFloor';
 import { useFlyToUnit } from './useFlyToUnit';
+import { ImmersiveStage } from './immersive/ImmersiveStage';
 
 export interface ResidenceExplorerProps {
   slug: string;
@@ -36,6 +37,8 @@ export interface ResidenceExplorerProps {
   header?: React.ReactNode;
   /** Rendered instead when no view is published (e.g. the cover hero). */
   fallback?: React.ReactNode;
+  /** Full-screen hero (desktop): the residence's bar and headline over an edge-to-edge rendering. */
+  immersive?: { nav: React.ReactNode; intro: React.ReactNode };
 }
 
 /**
@@ -77,7 +80,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
   };
 
   if (target.isLoading && target.views.length === 0 && !p.nav.building) {
-    return <div className="aspect-video w-full animate-pulse bg-slate-200" aria-busy="true" />;
+    return <div className={p.immersive ? 'h-dvh w-full animate-pulse bg-slate-800' : 'aspect-video w-full animate-pulse bg-slate-200'} aria-busy="true" />;
   }
   if (target.nothingPublished) return <>{p.fallback ?? null}</>;
 
@@ -121,37 +124,42 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
   // A building/floor picture with nothing marked on it yet: keep every apartment reachable below it.
   const unmarked = type !== 'development' && !target.isLoading && target.views.every((v) => v.hotspots.length === 0);
 
+  const stage: ExplorerStageProps = {
+    views: target.views,
+    viewIndex: target.viewIndex,
+    onViewIndex: (i) => go({ ...p.nav, view: target.views[i]?.viewKey }),
+    crumbs: target.crumbs,
+    onCrumb: (i) => go(target.navForCrumb(i)),
+    buildings: target.type === 'floor' ? [] : p.buildings,
+    activeBuildingId: target.buildingId,
+    onBuilding: (b) => go({ building: b.id }),
+    legend,
+    selectedAvailability: p.criteria.availability ?? [],
+    onToggleAvailability: (s) => p.onCriteriaChange(toggleIn(p.criteria, 'availability', s)),
+    unitsById,
+    matchedIds,
+    buildingsById,
+    entrancesById,
+    buildingFacts,
+    onActivate,
+    activeFilters: hasActiveCriteria(p.criteria),
+    actions: <BudgetAssistant units={p.units} city={p.city} country={p.country} onShow={trip.start} buttonClassName={EXPLORER_PILL} />,
+    focus: trip.focus,
+    onFocusArrive: trip.onArrive,
+    openUnitId: p.openUnitId,
+    filters: <UnitFilters units={p.units} criteria={p.criteria} onChange={p.onCriteriaChange} matchCount={matched.length} defaultExpanded />,
+  };
   return (
     <>
-    {p.header}
-    <ExplorerStage
-      views={target.views}
-      viewIndex={target.viewIndex}
-      onViewIndex={(i) => go({ ...p.nav, view: target.views[i]?.viewKey })}
-      crumbs={target.crumbs}
-      onCrumb={(i) => go(target.navForCrumb(i))}
-      buildings={target.type === 'floor' ? [] : p.buildings}
-      activeBuildingId={target.buildingId}
-      onBuilding={(b) => go({ building: b.id })}
-      legend={legend}
-      selectedAvailability={p.criteria.availability ?? []}
-      onToggleAvailability={(s) => p.onCriteriaChange(toggleIn(p.criteria, 'availability', s))}
-      unitsById={unitsById}
-      matchedIds={matchedIds}
-      buildingsById={buildingsById}
-      entrancesById={entrancesById}
-      buildingFacts={buildingFacts}
-      onActivate={onActivate}
-      activeFilters={hasActiveCriteria(p.criteria)}
-      actions={<BudgetAssistant units={p.units} city={p.city} country={p.country} onShow={trip.start} buttonClassName={EXPLORER_PILL} />}
-      focus={trip.focus}
-      onFocusArrive={trip.onArrive}
-      openUnitId={p.openUnitId}
-      filters={
-        <UnitFilters units={p.units} criteria={p.criteria} onChange={p.onCriteriaChange} matchCount={matched.length} defaultExpanded />
-      }
-    />
-    {unmarked && floorList(undefined, t('explorer.unmarkedNote', 'Apartments aren’t marked on this picture yet — choose one floor by floor below.'))}
+      {p.immersive ? (
+        <ImmersiveStage {...stage} nav={p.immersive.nav} intro={p.immersive.intro} />
+      ) : (
+        <>
+          {p.header}
+          <ExplorerStage {...stage} />
+        </>
+      )}
+      {unmarked && floorList(undefined, t('explorer.unmarkedNote', 'Apartments aren’t marked on this picture yet — choose one floor by floor below.'))}
     </>
   );
 };

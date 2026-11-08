@@ -13,8 +13,8 @@ interface UnitMediaProps {
   unit: PublicUnit;
   primaryListing?: LinkedListing;
   onModalChange: (open: boolean) => void;
-  /** The floor plan is already on show beside the details (desktop showcase): don't repeat it as the hero. */
-  planBeside?: boolean;
+  /** The showcase beside the details already shows the plan or photos (desktop): no hero picture here. */
+  heroBeside?: boolean;
 }
 
 /**
@@ -22,7 +22,7 @@ interface UnitMediaProps {
  * ImageViewerModal / FloorPlanViewerModal (portalled so the drawer's transform
  * can't trap their fixed positioning).
  */
-export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onModalChange, planBeside }) => {
+export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onModalChange, heroBeside }) => {
   const { t } = useTranslation('developments');
   const photos = unitGallery(unit, primaryListing);
   const [viewer, setViewer] = useState<{ kind: 'photos'; index: number } | { kind: 'plan' } | null>(null);
@@ -34,7 +34,9 @@ export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onMo
     setViewer(null);
     onModalChange(false);
   };
-  const hero = photos[0] ?? (planBeside ? undefined : unit.floorplan?.url);
+  const hero = heroBeside ? undefined : photos[0] ?? unit.floorplan?.url;
+  // Beside the showcase the photos are already on show there: only the plan viewer stays here.
+  const thumbs = heroBeside ? [] : photos.slice(1, 6);
 
   return (
     <div>
@@ -42,19 +44,19 @@ export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onMo
         <button type="button" onClick={() => (photos.length ? open({ kind: 'photos', index: 0 }) : open({ kind: 'plan' }))} className="block w-full" aria-label={t('explorer.drawer.openGallery', 'Open photos')}>
           <img src={optimizeImageUrl(hero, { width: 960 })} srcSet={imageSrcSet(hero, [480, 960, 1280]) || undefined} sizes="(min-width: 768px) 460px, 100vw" alt="" className="aspect-[4/3] w-full bg-slate-100 object-cover" />
         </button>
-      ) : planBeside ? null : (
+      ) : heroBeside ? null : (
         <div className="flex aspect-[16/9] w-full items-center justify-center bg-slate-100 text-slate-400">
           <Building2 className="h-12 w-12" aria-hidden="true" />
         </div>
       )}
-      {(photos.length > 1 || unit.floorplan?.url) && (
+      {(thumbs.length > 0 || unit.floorplan?.url) && (
         <div className="flex gap-2 overflow-x-auto px-5 pt-3">
-          {photos.slice(1, 6).map((url, i) => (
+          {thumbs.map((url, i) => (
             <button key={url} type="button" onClick={() => open({ kind: 'photos', index: i + 1 })} className="shrink-0 overflow-hidden rounded-lg" aria-label={`${t('explorer.drawer.photo', 'Photo')} ${i + 2}`}>
               <img src={optimizeImageUrl(url, { width: 160 })} alt="" className="h-14 w-20 object-cover" loading="lazy" />
             </button>
           ))}
-          {photos.length > 6 && (
+          {!heroBeside && photos.length > 6 && (
             <button type="button" onClick={() => open({ kind: 'photos', index: 0 })} className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700">
               <Images className="h-4 w-4" aria-hidden="true" />+{photos.length - 6}
             </button>

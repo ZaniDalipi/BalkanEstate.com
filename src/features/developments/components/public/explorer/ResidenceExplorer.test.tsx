@@ -26,14 +26,15 @@ const buildings = [
 ] as DevelopmentBuilding[];
 const units = [{ id: 'u1', unitNumber: 'A1', unitType: 'apartment', availability: 'available', buildingId: 'b1', floorId: 'f', listingIds: [] }] as unknown as PublicUnit[];
 
-const Harness: React.FC<{ onOpen?: (id: string) => void }> = ({ onOpen = () => undefined }) => {
+const Harness: React.FC<{ onOpen?: (id: string) => void; immersive?: boolean }> = ({ onOpen = () => undefined, immersive }) => {
   const [nav, setNav] = useState<ExplorerNav>({});
   return (
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <ResidenceExplorer
         slug="res" residenceName="East Gate" buildings={buildings} floors={[]} units={units}
         criteria={EMPTY_CRITERIA} onCriteriaChange={() => undefined} nav={nav} onNavChange={setNav}
-        onOpenUnit={onOpen} fallback={<p>cover-hero</p>}
+        onOpenUnit={onOpen} fallback={<p>cover-hero</p>} header={<p>title-strip</p>}
+        immersive={immersive ? { nav: <nav aria-label="Residence">residence-bar</nav>, intro: <h1>Find your home in East Gate</h1> } : undefined}
       />
     </QueryClientProvider>
   );
@@ -55,6 +56,7 @@ describe('ResidenceExplorer', () => {
     const onOpen = vi.fn();
     render(<Harness onOpen={onOpen} />);
     fireEvent.click(await screen.findByRole('button', { name: /Apt A1/ }));
+    fireEvent.click(screen.getByRole('button', { name: /View apartment/ }));
     expect(onOpen).toHaveBeenCalledWith('u1');
   });
 
@@ -70,5 +72,27 @@ describe('ResidenceExplorer', () => {
     expect(await screen.findByText('View front', { selector: 'span' })).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'East Gate' })[0]);
     expect(await screen.findByRole('button', { name: 'B2 · 3 available' })).toBeInTheDocument();
+  });
+
+  it('full-screen hero: the residence bar and headline lie over the picture, which fills the stage', async () => {
+    views.byTarget['development:'] = [view('site', [{ id: 'hb', shape: 'polygon', points: tri, linkType: 'building', linkId: 'b2', z: 0 }])];
+    views.byTarget['building:b2'] = [view('front', []), view('back', [])];
+    render(<Harness immersive />);
+    const stage = await screen.findByTestId('immersive-stage');
+    expect(stage).toContainElement(screen.getByRole('navigation', { name: 'Residence' }));
+    expect(stage).toContainElement(screen.getByRole('heading', { name: 'Find your home in East Gate' }));
+    expect(screen.queryByText('title-strip')).not.toBeInTheDocument();
+    // The picture covers the stage (not a letterboxed box sized to the picture).
+    expect(screen.getByTestId('explorer-canvas')).toHaveClass('absolute', 'inset-0');
+    // At the residence itself the bar names it already: no one-step trail.
+    expect(screen.queryByRole('navigation', { name: 'Explorer navigation' })).not.toBeInTheDocument();
+    // Inside a building the trail is back, and still leads home.
+    fireEvent.click(screen.getByRole('button', { name: 'B2 · 3 available' }));
+    expect(await screen.findByText('View front', { selector: 'span' })).toBeInTheDocument();
+    const trail = screen.getByRole('navigation', { name: 'Explorer navigation' });
+    expect(screen.getByTestId('immersive-stage')).toContainElement(trail);
+    fireEvent.click(screen.getAllByRole('button', { name: 'East Gate' })[0]);
+    expect(await screen.findByRole('button', { name: 'B2 · 3 available' })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Explorer navigation' })).not.toBeInTheDocument();
   });
 });

@@ -9,7 +9,6 @@ import { useExplorerUrlState } from '../../hooks/useExplorerUrlState';
 import { useUnitDrawer } from '../../hooks/useUnitDrawer';
 import { filterUnits, hasActiveCriteria } from '../../utils/unitFilters';
 import { LoadingState, ErrorState } from '../shared/States';
-import { ResidenceHero } from './ResidenceHero';
 import { StatsBar } from './StatsBar';
 import { AvailabilityBar } from './AvailabilityBar';
 import { UnitFilters } from './UnitFilters';
@@ -17,10 +16,10 @@ import { UnitsBrowser } from './UnitsBrowser';
 import { FollowCard } from './FollowCard';
 import { ResidenceLocation } from './ResidenceLocation';
 import { ResidenceExplorer } from './explorer/ResidenceExplorer';
-import { ResidenceTitleBar } from './explorer/ResidenceTitleBar';
 import { ResidenceSections } from './explorer/ResidenceSections';
 import { ApartmentDetailsDrawer } from './explorer/drawer/ApartmentDetailsDrawer';
 import { BuilderShowcase } from './builder/BuilderShowcase';
+import { useResidenceChrome } from './hero/useResidenceChrome';
 
 const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -47,6 +46,7 @@ const PublicDevelopmentPage: React.FC = () => {
     { id: 'units', label: t('units.heading', 'Available homes') },
     { id: 'location', label: t('detail.location', 'Location') },
   ];
+  const chrome = useResidenceChrome({ development, summary, sections, onSection: scrollToId });
 
   if (isLoading) {
     return (
@@ -69,12 +69,14 @@ const PublicDevelopmentPage: React.FC = () => {
 
   return (
     <main className="w-full overflow-x-clip bg-white pb-12">
-      <div className="mx-auto max-w-6xl px-4 pt-4">
-        <button type="button" onClick={() => navigate(paths.developments(), { direction: 'back' })} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          {t('public.backToList', 'Back to developments')}
-        </button>
-      </div>
+      {!chrome.desktop && (
+        <div className="mx-auto max-w-6xl px-4 pt-4">
+          <button type="button" onClick={() => navigate(paths.developments(), { direction: 'back' })} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            {t('public.backToList', 'Back to developments')}
+          </button>
+        </div>
+      )}
 
       <div ref={explorerRef}>
         <ResidenceExplorer
@@ -92,12 +94,9 @@ const PublicDevelopmentPage: React.FC = () => {
           openUnitId={drawer.unitId}
           city={development.city}
           country={development.country}
-          header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} onViewBuilder={() => scrollToId('builder')} />}
-          fallback={
-            <div className="mx-auto max-w-6xl px-4">
-              <ResidenceHero development={development} onViewUnits={() => scrollToId('units')} />
-            </div>
-          }
+          header={chrome.header}
+          fallback={chrome.fallback}
+          immersive={chrome.immersive}
         />
       </div>
 

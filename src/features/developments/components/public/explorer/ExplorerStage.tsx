@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,7 @@ import { StageTopBar } from './StageTopBar';
 import type { ExplorerFocus } from './useFlyFocus';
 import { BuildingChips } from './BuildingChips';
 import { ExplorerLegend } from './ExplorerLegend';
-import { usePseudoFullscreen } from './usePseudoFullscreen';
-import { useDisplayMode } from './useDisplayMode';
+import { useStageControls } from './immersive/useStageControls';
 import type { BuildingFacts } from './useRegionCard';
 import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
 
@@ -56,20 +55,11 @@ export interface ExplorerStageProps {
  */
 export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
-  const fs = usePseudoFullscreen<HTMLElement>();
-  const [showFilters, setShowFilters] = useState(false);
-  const [mode, setMode] = useDisplayMode();
+  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown } = useStageControls(p.views.length, p.viewIndex, p.onViewIndex);
   const reduced = useReducedMotion();
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
   const float = full ? 'absolute' : 'relative sm:absolute';
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const tag = (e.target as HTMLElement).tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || p.views.length < 2) return;
-    if (e.key === 'ArrowRight') p.onViewIndex((p.viewIndex + 1) % p.views.length);
-    else if (e.key === 'ArrowLeft') p.onViewIndex((p.viewIndex - 1 + p.views.length) % p.views.length);
-  };
 
   const stage = (
     <section

@@ -461,8 +461,15 @@
       "mode": "Pamja e planit të katit",
       "tilted": "3D",
       "flat": "2D",
-      "planAlt": "Plani i katit: {{name}}"
-    }
+      "planAlt": "Plani i katit: {{name}}",
+      "photoAlt": "{{name}}, foto {{n}}"
+    },
+    "dive": {
+      "skip": "Kapërce",
+      "status": "Po ju çojmë te {{name}}"
+    },
+    "bathrooms_one": "{{count}} banjë",
+    "bathrooms_other": "{{count}} banja"
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -1532,5 +1539,13 @@
     "remove": "Hiq foton {{n}}",
     "removeMessage": "Fotoja hiqet nga faqja e rezidencës.",
     "showAll": "Fotot ({{n}})"
+  },
+  "immersive": {
+    "headline": "Gjeni shtëpinë tuaj në {{name}}",
+    "priceFrom": "Nga {{price}}",
+    "hint": "Kaloni mbi ndërtesë dhe zgjidhni një apartament",
+    "back": "Të gjitha rezidencat",
+    "nav": "Rezidenca",
+    "cta": "Shiko apartamentet"
   }
 }

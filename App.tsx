@@ -219,6 +219,8 @@ const MainLayout: React.FC = () => {
   const isAgentDetail = detail === 'agent';
   const isAgencyDetail = detail === 'agency';
   const isBusinessDetail = detail === 'business-listing';
+  // A residence opens as its own full-screen page: only the sidebar of the app stays.
+  const isResidenceDetail = detail === 'residence';
 
   // Subscription expiry modals
   const userId = state.currentUser?.id || state.currentUser?._id || state.currentUser?.email || '';
@@ -250,7 +252,7 @@ const MainLayout: React.FC = () => {
   // Back to Site / account), so the global floating header is suppressed there to avoid
   // it overlapping and covering those controls.
   const hasOwnHeader = view === 'agency-dashboard';
-  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !hasOwnHeader;
+  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !hasOwnHeader && !isResidenceDetail;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
@@ -445,7 +447,7 @@ const MainLayout: React.FC = () => {
             pages, where a bar pinned over the map gets in the way of panning,
             the results sheet and the map controls. Also hidden on a business
             profile, whose own Call / WhatsApp bar sits in that same spot. */}
-        {adPage && !isFullHeightView && !isBusinessDetail && (
+        {adPage && !isFullHeightView && !isBusinessDetail && !(isResidenceDetail && !isMobile) && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>

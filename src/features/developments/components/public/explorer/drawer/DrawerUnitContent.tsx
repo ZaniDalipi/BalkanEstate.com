@@ -2,16 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePublicUnit } from '../../../../hooks/useDevelopment';
 import type { PublicUnit } from '../../../../types';
-import { formatPrice } from '../../../../utils/format';
-import { unitArea } from '../../../../utils/unitFilters';
-import { AvailabilityBadge } from '../../../shared/Badges';
-import { useUnitText } from '../useUnitText';
 import { UnitMedia } from './UnitMedia';
+import { UnitHeader } from './UnitHeader';
 import { UnitSpecs } from './UnitSpecs';
 import { UnitActions } from './UnitActions';
 import { DrawerCompanions } from './DrawerCompanions';
 import { useUnitDrawer } from '../../../../hooks/useUnitDrawer';
-import { TourBadge } from '../../../shared/TourBadge';
 import { TourButton } from './TourButton';
 
 interface DrawerUnitContentProps {
@@ -19,14 +15,13 @@ interface DrawerUnitContentProps {
   unitId: string;
   preview?: PublicUnit;
   onChildModalChange: (open: boolean) => void;
-  /** Desktop: the apartment's floor plan is shown beside the details (see DesktopBackdrop). */
+  /** Desktop: the details are the floating card beside the apartment showcase, which already shows its plan or photos. */
   besideShowcase?: boolean;
 }
 
 /** The drawer body: media, heading + price, specs, features and the actions. */
 export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unitId, preview, onChildModalChange, besideShowcase }) => {
   const { t } = useTranslation('developments');
-  const txt = useUnitText();
   const { unit: full, development, listings, companions, isLoading, error } = usePublicUnit(slug, unitId);
   const drawer = useUnitDrawer();
   const unit = full ?? preview;
@@ -45,32 +40,12 @@ export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unit
   }
 
   const primary = listings.find((l) => l.id === unit.primaryListingId);
-  const area = unitArea(unit);
-  const showPrice = !unit.priceOnRequest && typeof unit.price === 'number' && unit.price > 0;
-  const perSqm = unit.pricePerSqm ?? (showPrice && area ? Math.round(unit.price! / area) : undefined);
 
   return (
     <div className="pb-6">
-      <UnitMedia unit={unit} primaryListing={primary} onModalChange={onChildModalChange} planBeside={besideShowcase && !!unit.floorplan?.url} />
-      <div className="space-y-5 px-5 pt-5">
-        <header>
-          <div className="flex flex-wrap items-center gap-2 pr-12">
-            <h2 className="text-2xl font-bold text-slate-900">{txt.title(unit)}</h2>
-            <AvailabilityBadge state={unit.availability} />
-            {unit.virtualTourUrl && <TourBadge />}
-          </div>
-          <p className="mt-1 text-sm text-slate-500">
-            {[unit.buildingName, unit.floorLabel || null, unit.unitType ? t(`explorer.unitType.${unit.unitType}`, unit.unitType.replace(/_/g, ' ')) : null]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-          <div className="mt-3">
-            <p className="text-2xl font-extrabold text-slate-900">{txt.price(unit)}</p>
-            {showPrice && perSqm ? (
-              <p className="text-sm text-slate-500">{formatPrice(perSqm, unit.currency)}/m²</p>
-            ) : null}
-          </div>
-        </header>
+      <UnitMedia unit={unit} primaryListing={primary} onModalChange={onChildModalChange} heroBeside={besideShowcase} />
+      <div className={besideShowcase ? 'space-y-5 px-6 pt-6' : 'space-y-5 px-5 pt-5'}>
+        <UnitHeader unit={unit} variant={besideShowcase ? 'card' : 'sheet'} />
 
         <TourButton unit={unit} />
 

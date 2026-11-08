@@ -11,8 +11,8 @@
 import { useMatches, useParams } from 'react-router-dom';
 import type { AppView } from '@/types';
 
-/** A detail page open "inside" its section — a listing, a profile. */
-export type DetailKind = 'property' | 'agency' | 'agent' | 'business-listing';
+/** A detail page open "inside" its section — a listing, a profile, a residence. */
+export type DetailKind = 'property' | 'agency' | 'agent' | 'business-listing' | 'residence';
 
 export interface RouteHandle {
   /** The section this page belongs to (sidebar highlight, ads, page title). */

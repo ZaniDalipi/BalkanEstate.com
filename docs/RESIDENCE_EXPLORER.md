@@ -33,8 +33,9 @@ browser. The styling lives in `components/public/explorer/regionPaint.ts`.
 - apartments: floor-plan preview, number, floor, area, bedrooms, price, status, **View apartment**
 - buildings: available of total, floors, price from, **Explore building**
 
-The pointer can move onto the card and press its button. On touch, the first tap
-shows it.
+The pointer can move onto the card and press its button. Clicking an apartment
+pins its card beside it; the card's button flies into the apartment (see
+7b-11). On touch, the first tap shows it.
 
 **Residence picture.** Building regions on the residence (site plan) picture get
 a name tag (the building's code, else its name) and open that building. A
@@ -148,7 +149,8 @@ The server **rejects** invalid shapes and never clamps them. It rejects:
 | --- | --- |
 | Public explorer | `components/public/explorer/` (stage, canvas, tooltip, legend, view switcher, building chips) |
 | Apartment drawer | `components/public/explorer/drawer/` |
-| Apartment dive + showcase | `components/public/explorer/dive/` (`useApartmentDive`, `DiveVeil`), `components/public/explorer/drawer/showcase/` (`ApartmentShowcase`, `FloorPlanModel`, `showcaseMotion.ts`) |
+| Residence page (desktop) | `components/public/hero/` (`ResidenceNav`, `ResidenceIntro`, `useResidenceChrome`), `components/public/explorer/immersive/` (`ImmersiveStage`, `coverBox`, `useStageControls`) |
+| Flight into an apartment + showcase | `components/public/explorer/dive/` (`useApartmentDive`, `flightPath`, `DiveVeil`, `DiveHud`, `diveTimeline`), `components/public/explorer/drawer/showcase/` (`ApartmentShowcase`, `FloorPlanModel`, `showcaseMedia`, `showcaseMotion`) |
 | Budget helper | `components/public/explorer/budget/` (button, teaser, panel, form, cards), `useFlyToUnit.ts` + `useFlyFocus.ts` (the guided trip), `utils/budgetMatch.ts`, `hooks/useLocationPrice.ts` |
 | Region editor | `components/scene/editor/` with `hooks/usePolygonEditor.ts` (reducer, undo/redo) and `hooks/useEditorViewport.ts` |
 | Dashboard | `components/dashboard/` (tabbed manage page, inventory table, unit edit dialog, linked listings, settings) |
@@ -691,7 +693,8 @@ the Zillow sheet:
 - The sheet is always as tall as "full" and is moved with a transform
   (`useSheetMotion`); the rules (snap points, flick, who owns the gesture) are
   pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer
-  (beside the apartment showcase, see 7b-11).
+  (beside the apartment showcase, see 7b-11), and the residence opens as a
+  full-screen page of its own.
 
 ## 7b-7. 360° virtual tours
 
@@ -876,44 +879,65 @@ unique per entrance, so "A1" can exist behind both Entrance 1 and Entrance 2.
   - frontend: `residencePhotos.test.ts`, `ResidenceGallerySection.test.tsx`,
     `ResidencePhotosButton.test.tsx`.
 
-## 7b-11. Diving into an apartment
+## 7b-11. The residence page and the flight into an apartment
 
-Clicking an apartment on the building picture no longer cuts straight to its
-details; the explorer takes the buyer *into* it:
+**A page of its own.** On desktop a residence opens as its own full-screen
+page, like the builder's website: only the app's sidebar stays (the route has
+`detail: 'residence'`, so `App.tsx` drops the floating header and the sticky
+ad there). The rendering fills the screen edge to edge
+(`explorer/immersive/ImmersiveStage.tsx`; `coverBox.ts` never crops more than
+12 % off a side, and a blurred copy fills any band left over), with the
+residence's own bar on top (`hero/ResidenceNav.tsx`: back to all residences,
+logo and name, its sections, photos, share, **View apartments**) and the
+headline on the left (`hero/ResidenceIntro.tsx`: "Find your home in
+<name>", what is free and from what price). The rest of the page follows as
+you scroll. `hero/useResidenceChrome.tsx` decides this per device: phones keep
+the title strip above the picture and the app's back button.
 
-| The dive | Showcase (3D) | Showcase (flat) |
+| Full-screen page | Click an apartment: its card | The flight: a white model |
 | --- | --- | --- |
-| ![Dive](./images/residence-explorer/40-apartment-dive.png) | ![Showcase](./images/residence-explorer/41-apartment-showcase.jpg) | ![Flat plan](./images/residence-explorer/42-apartment-showcase-flat.jpg) |
+| ![Hero](./images/residence-explorer/43-residence-hero.jpg) | ![Card](./images/residence-explorer/44-apartment-card-pinned.jpg) | ![Model](./images/residence-explorer/40-apartment-dive.jpg) |
 
-1. **The dive** (`dive/useApartmentDive.ts`). The camera pushes in on the
-   apartment (about 2.5× at most, so the rendering stays sharp) while the rest
-   of the facade washes out to warm paper (`DiveVeil`, a mask over the picture
-   in the pan/zoom layer) and only the apartment keeps its colour. The stage
-   controls (crumbs, chips, legend, camera arrows, zoom) fade out meanwhile:
-   the canvas sets `data-immersed`, and each control carries
-   `HIDE_WHEN_IMMERSED` (a `group-has-*` variant on the stage, no state
-   lifted). After `DIVE_MS` (650 ms) the apartment opens as before (`?unit=`).
-2. **The showcase** (desktop, `drawer/showcase/`). When the apartment has a
-   floor plan, the page beside the details column turns into the same paper,
-   and the plan rises from the apartment's place on the facade into a tilted
-   model on a board (`FloorPlanModel`, CSS 3D). **2D / 3D** lays it flat to
-   read it. **Back to building** (just **Back** when the apartment was opened
-   from the list) closes it, like Esc, Back or the close button. The details
-   column no longer repeats the plan as its main picture there; its
-   **Floor plan** button still opens the zoomable viewer. Without a plan the
-   page is dimmed as before.
-3. **Back to the building.** When the apartment closes, the camera glides back
-   to exactly where the buyer was, and the controls return.
+| The plan rises (3D) | Laid flat (2D) | No plan: its photos |
+| --- | --- | --- |
+| ![Showcase](./images/residence-explorer/41-apartment-showcase.jpg) | ![Flat plan](./images/residence-explorer/42-apartment-showcase-flat.jpg) | ![Photos](./images/residence-explorer/45-apartment-showcase-photos.jpg) |
 
-On phones there is no showcase: the dive ends with the half-height sheet and
-the apartment lit up above it. An apartment opened from elsewhere (the list, a
-shared link, the budget helper) is lit up the same way, without moving the
-camera. Buildings, floors, entrances and listings open at once, as before, and
-so does everything under "reduce motion".
+**Choosing an apartment.** Hovering shows its card; **clicking an apartment
+pins the card** beside it (on the side with more room, `placeCardBeside`), and
+hovering other apartments on the way to it doesn't replace it. The card's
+**View apartment** (or a second click, or Enter on the focused apartment)
+starts the flight. Other regions (buildings, floors, listings) still open at
+once.
 
-The geometry (where the plan starts its rise, which copy of the apartment is on
-screen) is pure and tested in `showcaseMotion.test.ts`; the flow in
-`dive/ApartmentDive.test.tsx` and `drawer/DesktopShowcase.test.tsx`.
+**The flight** (`dive/`, timings in `diveTimeline.ts`):
+
+1. The page's controls fade (`data-immersed` + `HIDE_WHEN_IMMERSED`); only
+   **Back to building** and **Skip** remain (`DiveHud`), and a screen reader
+   hears "Taking you to Apt 4B".
+2. The camera climbs and pushes in towards the apartment for about 2 s along a
+   gentle arc (`flightPath.ts`: steady zoom, a lifted curve, clamped to the
+   picture), played with the Web Animations API by `usePanZoom.flyPath`.
+3. From 1.25 s the building turns into a white architectural model (a
+   bleached copy of the rendering under a paper wash, masked around the
+   apartment by `holeMask.ts`); only the apartment keeps its colour.
+4. At 2.25 s the apartment opens (`?unit=`). On desktop the paper settles and
+   what the developer posted rises out of the apartment's place on the facade
+   (`drawer/showcase/`): the floor plan as a tilted model with a 3D / 2D
+   switch, else the photos with a thumbnail dock (`showcaseMedia.ts`). The
+   details float in as a card on the right (`UnitHeader` "card": status and
+   floor, name, rooms and size, the price in a dark pill), without repeating
+   the plan or photos. With nothing posted, the page dims as before.
+5. **Back to building** (or Esc, Back, the close button) flies the camera back
+   out along the same kind of path; the page's controls return once it lands.
+
+**Skip** opens the apartment at once; **Back** or Esc during the flight turn
+around. On phones the flight ends in the half-height sheet with the apartment
+lit above it. Under "reduce motion" everything opens at once.
+
+Tests: `dive/ApartmentDive.test.tsx` (the steps, Skip, Back, Esc, the way
+back), `flightPath`, `holeMask`, `coverBox`, `placeCard`, `showcaseMedia`,
+`drawer/DesktopShowcase.test.tsx`, `ResidenceExplorer.test.tsx` (the
+full-screen hero) and `hero/ResidenceHero.test.tsx`.
 
 ## 7b-3. Errors in the reader's language
 

@@ -12,7 +12,8 @@ import { useSheetMotion } from '../../../../hooks/useSheetMotion';
 import { DrawerUnitContent } from './DrawerUnitContent';
 import { SheetHandle } from './SheetHandle';
 import { DesktopBackdrop } from './DesktopBackdrop';
-import { useIsDesktop } from './useIsDesktop';
+import { useIsDesktop } from '../../../../hooks/useIsDesktop';
+import { useShowcase } from './showcase/useShowcase';
 
 interface ApartmentDetailsDrawerProps {
   slug: string;
@@ -42,6 +43,9 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
   // Phones: the sheet follows the finger, settles on half / full / closed, and the building behind dims and clears with it.
   const sheet = useSheetMotion({ enabled: !desktop, panelRef: ref, contentRef, onClose, reduceMotion: reduce });
   const { size } = sheet;
+  // Desktop: the plan or photos rise beside the details, which then float as a card.
+  const showcase = useShowcase(slug, unitId, preview, desktop);
+  const floating = !!showcase.media;
 
   // Phones: bring the apartment (in the building view) into the space above the sheet.
   useEffect(() => {
@@ -79,25 +83,29 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
         className={`min-h-0 flex-1 overscroll-contain ${desktop || size === 'full' ? 'overflow-y-auto' : 'overflow-hidden'}`}
         style={desktop ? undefined : { touchAction: size === 'full' ? 'auto' : 'pan-x' }}
       >
-        {unitId && <DrawerUnitContent slug={slug} unitId={unitId} preview={preview} onChildModalChange={setChildModalOpen} besideShowcase={desktop} />}
+        {unitId && <DrawerUnitContent slug={slug} unitId={unitId} preview={preview} onChildModalChange={setChildModalOpen} besideShowcase={floating} />}
       </div>
     </>
   );
 
   // Inline z-index (not a class) so isTopmostLayer reads the same stacking everywhere.
   if (desktop) {
-    const hidden = { x: '100%' };
+    const hidden = floating ? { x: 72, opacity: 0 } : { x: '100%' };
     return (
       <div className="fixed inset-0" style={{ zIndex: 4500 }}>
-        {/* The dialog spans the screen: the apartment showcase (or the dimmed page) left, the details column right. */}
+        {/* The dialog spans the screen: the apartment showcase (or the dimmed page) left, the details right. */}
         <div {...dialog} className="absolute inset-0 flex outline-none">
-          {unitId && <DesktopBackdrop slug={slug} unitId={unitId} preview={preview} onClose={onClose} />}
+          <DesktopBackdrop unit={showcase.unit} media={showcase.media} onClose={onClose} />
           <motion.div
             initial={reduce ? { opacity: 0 } : hidden}
-            animate={reduce ? { opacity: 1 } : { x: 0 }}
-            exit={reduce ? { opacity: 0 } : hidden}
-            transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
-            className="relative flex h-full w-full max-w-[460px] shrink-0 flex-col bg-white shadow-2xl"
+            animate={reduce ? { opacity: 1 } : { x: 0, opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { ...hidden, transition: { duration: 0.3, ease: 'easeIn' } }}
+            transition={floating && !reduce ? { duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] } : { type: 'tween', duration: 0.25, ease: 'easeOut' }}
+            className={
+              floating
+                ? 'absolute right-6 top-1/2 flex max-h-[calc(100dvh-3rem)] w-[min(420px,calc(100%-3rem))] -translate-y-1/2 flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_40px_90px_-30px_rgba(60,40,20,0.45)] ring-1 ring-black/5'
+                : 'relative flex h-full w-full max-w-[460px] shrink-0 flex-col bg-white shadow-2xl'
+            }
           >
             {body}
           </motion.div>

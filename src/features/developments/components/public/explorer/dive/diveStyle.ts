@@ -5,6 +5,9 @@
  */
 export const DIVE_PAPER = '#f1ede6';
 
+/** Bleaches the rendering into a white architectural model (warm, like card stock). */
+export const GHOST_FILTER = 'grayscale(1) contrast(0.36) brightness(1.75) sepia(0.28)';
+
 /**
  * The explorer canvas marks itself `data-immersed` while an apartment is being
  * dived into or is open. Stage controls (crumbs, chips, legend, camera arrows,

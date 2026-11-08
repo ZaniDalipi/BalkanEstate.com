@@ -32,6 +32,12 @@ async function prepare(page: Page) {
   );
 }
 
+/** Clicking an apartment pins its card; the card's button flies into the apartment and opens it. */
+async function openApartment(page: Page, apartment: ReturnType<Page['locator']>) {
+  await apartment.click();
+  await page.getByRole('tooltip').getByRole('button', { name: /View apartment/ }).click();
+}
+
 test.describe('Residence explorer (public)', () => {
   test('residence → building → camera views → apartment drawer', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Desktop pointer flow');
@@ -50,7 +56,7 @@ test.describe('Residence explorer (public)', () => {
     await page.getByRole('button', { name: 'Next view' }).click();
     await page.getByRole('button', { name: 'Previous view' }).click();
 
-    await page.getByRole('group', { name: REGIONS }).getByRole('button', { name: /Available/ }).first().click();
+    await openApartment(page, page.getByRole('group', { name: REGIONS }).getByRole('button', { name: /Available/ }).first());
     const drawer = page.getByRole('dialog', { name: 'Apartment details' });
     await expect(drawer).toBeVisible({ timeout: 10000 });
     expect(page.url()).toContain('unit=');
@@ -102,11 +108,13 @@ test.describe('Residence explorer (public)', () => {
     const target = units.find((u) => u.buildingName === 'Seaside Tower 1' && u.availability === 'available' && !u.hasListing);
     test.skip(!target, 'No available unit without a listing in the demo data');
     await regions.getByRole('button', { name: /Seaside Tower 1/ }).first().click();
-    await page
-      .getByRole('group', { name: REGIONS })
-      .getByRole('button', { name: new RegExp(`Apt ${target!.unitNumber} `) })
-      .first()
-      .click();
+    await openApartment(
+      page,
+      page
+        .getByRole('group', { name: REGIONS })
+        .getByRole('button', { name: new RegExp(`Apt ${target!.unitNumber} `) })
+        .first()
+    );
 
     const form = page.getByRole('form', { name: 'Ask about this apartment' });
     await expect(form).toBeVisible({ timeout: 10000 });

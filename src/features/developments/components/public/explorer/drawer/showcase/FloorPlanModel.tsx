@@ -11,6 +11,8 @@ interface FloorPlanModelProps {
   tilted: boolean;
   /** Where the apartment was on screen; the plan rises from there. */
   origin: ScreenBox | null;
+  /** 'contain' a plan on its white board (default), or let a photo 'cover' the frame. */
+  fill?: 'contain' | 'cover';
 }
 
 /** Thickness of the board the plan is printed on, seen along its front edges when tilted. */
@@ -24,7 +26,7 @@ const SLAB_W = 'w-3';
  * stage. The board's size comes from CSS, so it is measured before the model
  * appears and the rise starts exactly over the apartment.
  */
-export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin }) => {
+export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain' }) => {
   const reduced = useReducedMotion();
   const slot = useRef<HTMLDivElement>(null);
   const [from, setFrom] = useState<PlanPose | null>(null);
@@ -47,7 +49,7 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
           style={{ transformStyle: 'preserve-3d' }}
           initial={reduced ? false : from}
           animate={pose}
-          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 55, damping: 14, mass: 0.9, opacity: { duration: 0.25 } }}
+          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 38, damping: 12, mass: 1, opacity: { duration: 0.35 } }}
           data-testid="floor-plan-model"
           data-pose={tilted ? 'tilted' : 'flat'}
         >
@@ -57,7 +59,7 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
             sizes="(min-width: 1280px) 760px, 60vw"
             alt={alt}
             draggable={false}
-            className="absolute inset-0 h-full w-full select-none rounded-[3px] bg-white object-contain p-[3%] shadow-[0_40px_70px_-30px_rgba(70,50,30,0.45)]"
+            className={`absolute inset-0 h-full w-full select-none bg-white shadow-[0_40px_70px_-30px_rgba(70,50,30,0.45)] ${fill === 'cover' ? 'rounded-2xl object-cover' : 'rounded-[3px] object-contain p-[3%]'}`}
           />
           {/* The board's front and left edges, folded back under the plan. */}
           <div aria-hidden="true" className={`absolute inset-x-0 top-full ${SLAB} origin-top bg-[#ddd5c9]`} style={{ transform: 'rotateX(-90deg)' }} />

@@ -463,8 +463,16 @@
       "mode": "Vizualizarea planului",
       "tilted": "3D",
       "flat": "2D",
-      "planAlt": "Planul pentru {{name}}"
-    }
+      "planAlt": "Planul pentru {{name}}",
+      "photoAlt": "{{name}}, fotografia {{n}}"
+    },
+    "dive": {
+      "skip": "Omite",
+      "status": "Vă ducem la {{name}}"
+    },
+    "bathrooms_one": "{{count}} baie",
+    "bathrooms_few": "{{count}} băi",
+    "bathrooms_other": "{{count}} de băi"
   },
   "feature": {
     "big_terrace": "Cu terasă mare",
@@ -1543,5 +1551,13 @@
     "remove": "Elimină fotografia {{n}}",
     "removeMessage": "Fotografia este eliminată de pe pagina ansamblului.",
     "showAll": "Fotografii ({{n}})"
+  },
+  "immersive": {
+    "headline": "Găsiți-vă casa în {{name}}",
+    "priceFrom": "De la {{price}}",
+    "hint": "Treceți peste clădire și alegeți un apartament",
+    "back": "Toate rezidențele",
+    "nav": "Rezidență",
+    "cta": "Vedeți apartamentele"
   }
 }

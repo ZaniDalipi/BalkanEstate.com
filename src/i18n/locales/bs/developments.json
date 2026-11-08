@@ -463,8 +463,16 @@
       "mode": "Prikaz tlocrta",
       "tilted": "3D",
       "flat": "2D",
-      "planAlt": "Tlocrt: {{name}}"
-    }
+      "planAlt": "Tlocrt: {{name}}",
+      "photoAlt": "{{name}}, fotografija {{n}}"
+    },
+    "dive": {
+      "skip": "Preskoči",
+      "status": "Vodimo vas do: {{name}}"
+    },
+    "bathrooms_one": "{{count}} kupatilo",
+    "bathrooms_few": "{{count}} kupatila",
+    "bathrooms_other": "{{count}} kupatila"
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",
@@ -1543,5 +1551,13 @@
     "remove": "Ukloni fotografiju {{n}}",
     "removeMessage": "Fotografija se uklanja sa stranice rezidencije.",
     "showAll": "Fotografije ({{n}})"
+  },
+  "immersive": {
+    "headline": "Pronađite svoj dom u {{name}}",
+    "priceFrom": "Od {{price}}",
+    "hint": "Pređite mišem preko zgrade i odaberite stan",
+    "back": "Sve rezidencije",
+    "nav": "Rezidencija",
+    "cta": "Pogledajte stanove"
   }
 }

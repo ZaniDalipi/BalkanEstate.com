@@ -137,7 +137,7 @@ const pageRoutes: AppRoute[] = [
   // Residences / Developments (public, read-only)
   page('developments', { view: 'developments' }, guarded(<PublicDevelopmentsPage />)),
   page('developments/:slug/units/:unitId', { view: 'developments', pageParams: ['slug', 'unitId'] }, guarded(<UnitDetailPage />)),
-  page('developments/:slug', { view: 'developments', pageParams: ['slug'] }, guarded(<PublicDevelopmentPage />)),
+  page('developments/:slug', { view: 'developments', detail: 'residence', pageParams: ['slug'] }, guarded(<PublicDevelopmentPage />)),
 
   // The user's own space
   page('saved-searches', { view: 'saved-searches', ...noindex }, <SavedSearchesPage />),
