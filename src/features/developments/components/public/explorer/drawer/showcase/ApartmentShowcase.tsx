@@ -10,6 +10,7 @@ import { useUnitText } from '../../useUnitText';
 import { FloorPlanModel } from './FloorPlanModel';
 import { apartmentBox } from './showcaseMotion';
 import type { ShowcaseMedia } from './showcaseMedia';
+import { FRAME_DRIVEN } from '../../../motion/frameDriven';
 
 interface ApartmentShowcaseProps {
   unit: PublicUnit;
@@ -42,6 +43,7 @@ export const ApartmentShowcase: React.FC<ApartmentShowcaseProps> = ({ unit, medi
 
   return (
     <motion.div
+      {...FRAME_DRIVEN}
       className={cn('relative flex h-full min-w-0 flex-1 items-center justify-center overflow-hidden', className)}
       style={{ background: `radial-gradient(ellipse at 45% 45%, #fbfaf7 0%, ${DIVE_PAPER} 60%, #e6e0d6 100%)` }}
       initial={reduced ? false : { opacity: 0 }}

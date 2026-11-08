@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import type { PublicUnit } from '../../../../types';
 import { ApartmentShowcase } from './showcase/ApartmentShowcase';
 import type { ShowcaseMedia } from './showcase/showcaseMedia';
+import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 interface DesktopBackdropProps {
   unit?: PublicUnit;
@@ -21,6 +22,7 @@ export const DesktopBackdrop: React.FC<DesktopBackdropProps> = ({ unit, media, o
   if (unit && media) return <ApartmentShowcase key={unit.id} unit={unit} media={media} onClose={onClose} className="pr-[min(468px,45%)]" />;
   return (
     <motion.div
+      {...FRAME_DRIVEN}
       className="h-full min-w-0 flex-1 bg-slate-950/50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

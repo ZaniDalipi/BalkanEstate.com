@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { imageSrcSet, optimizeImageUrl } from '@/config/mediaConfig';
 import { PLAN_POSES, riseFrom, type PlanPose, type ScreenBox } from './showcaseMotion';
+import { FRAME_DRIVEN } from '../../../motion/frameDriven';
 
 interface FloorPlanModelProps {
   url: string;
@@ -45,6 +46,7 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
     >
       {from && (
         <motion.div
+          {...FRAME_DRIVEN}
           className="absolute inset-0"
           style={{ transformStyle: 'preserve-3d' }}
           initial={reduced ? false : from}

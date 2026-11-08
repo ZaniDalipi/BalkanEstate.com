@@ -6,6 +6,7 @@ import { ViewPicture } from '../ViewPicture';
 import { DIVE_PAPER, GHOST_FILTER } from './diveStyle';
 import type { DivePhase } from './diveTimeline';
 import { holeMask } from './holeMask';
+import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 interface DiveVeilProps {
   /** The apartment left in colour; undefined fades the veil away. */
@@ -39,6 +40,7 @@ export const DiveVeil: React.FC<DiveVeilProps> = ({ hotspot, phase = 'open', ima
       {mask && (
         <motion.div
           key="veil"
+          {...FRAME_DRIVEN}
           aria-hidden="true"
           data-testid="dive-veil"
           data-phase={phase}
@@ -48,6 +50,7 @@ export const DiveVeil: React.FC<DiveVeilProps> = ({ hotspot, phase = 'open', ima
           exit={{ opacity: 0, transition: fade(0.9) }}
         >
           <motion.div
+            {...FRAME_DRIVEN}
             className="absolute inset-0"
             style={{ WebkitMaskImage: mask, maskImage: mask, WebkitMaskSize: '100% 100%', maskSize: '100% 100%' }}
             initial={reduced ? false : { opacity: 0 }}
@@ -56,6 +59,7 @@ export const DiveVeil: React.FC<DiveVeilProps> = ({ hotspot, phase = 'open', ima
           >
             <ViewPicture url={imageUrl} decorative style={{ filter: GHOST_FILTER }} />
             <motion.div
+              {...FRAME_DRIVEN}
               className="absolute inset-0"
               style={{ background: DIVE_PAPER }}
               initial={reduced ? false : { opacity: 0 }}
@@ -64,6 +68,7 @@ export const DiveVeil: React.FC<DiveVeilProps> = ({ hotspot, phase = 'open', ima
             />
           </motion.div>
           <motion.svg
+            {...FRAME_DRIVEN}
             viewBox={`0 0 ${W} ${H}`}
             preserveAspectRatio="none"
             className="absolute inset-0 h-full w-full"

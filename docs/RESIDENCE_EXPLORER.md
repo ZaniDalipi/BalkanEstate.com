@@ -930,6 +930,14 @@ once.
 5. **Back to building** (or Esc, Back, the close button) flies the camera back
    out along the same kind of path; the page's controls return once it lands.
 
+**No blinking.** Every full-screen layer that fades or moves (the white model,
+the flight's buttons, the showcase and its plan, the details card, the dim
+backdrop, the picture's fade-in and the headline) spreads `FRAME_DRIVEN`
+(`components/public/motion/frameDriven.ts`), so framer-motion animates it frame
+by frame. As a native browser animation it ends by showing the old value for
+one frame, which on a layer this size is a visible flash. Use it on any new
+full-screen fade.
+
 **Skip** opens the apartment at once; **Back** or Esc during the flight turn
 around. On phones the flight ends in the half-height sheet with the apartment
 lit above it. Under "reduce motion" everything opens at once.

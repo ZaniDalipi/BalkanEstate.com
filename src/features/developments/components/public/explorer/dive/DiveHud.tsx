@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import type { PublicUnit } from '../../../../types';
 import { useUnitText } from '../useUnitText';
+import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 interface DiveHudProps {
   /** Shown while flying in, until the apartment opens. */
@@ -32,6 +33,7 @@ export const DiveHud: React.FC<DiveHudProps> = ({ show, unit, onBack, onSkip }) 
       {show && (
         <motion.div
           key="hud"
+          {...FRAME_DRIVEN}
           className="absolute inset-0 z-20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -15,6 +15,7 @@ import { ExplorerLegend } from './ExplorerLegend';
 import { useStageControls } from './immersive/useStageControls';
 import type { BuildingFacts } from './useRegionCard';
 import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
+import { FRAME_DRIVEN } from '../motion/frameDriven';
 
 export interface ExplorerStageProps {
   views: PublicSceneView[];
@@ -79,6 +80,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           // Each picture fades in, so drilling into a building after the glide reads as one move.
           <motion.div
             key={view.viewKey}
+            {...FRAME_DRIVEN}
             className="w-full"
             initial={reduced ? false : { opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}

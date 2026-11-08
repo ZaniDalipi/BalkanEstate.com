@@ -13,6 +13,7 @@ import { StageTopBar } from '../StageTopBar';
 import { ViewSwitcher } from '../ViewSwitcher';
 import { HIDE_WHEN_IMMERSED } from '../dive/diveStyle';
 import { useStageControls } from './useStageControls';
+import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 export interface ImmersiveStageProps extends ExplorerStageProps {
   /** The residence's own bar along the top (back, name, sections, call to action). */
@@ -60,6 +61,7 @@ export const ImmersiveStage: React.FC<ImmersiveStageProps> = (p) => {
       {view && (
         <motion.div
           key={view.viewKey}
+          {...FRAME_DRIVEN}
           className="absolute inset-0"
           initial={reduced ? false : { opacity: 0, scale: 1.04 }}
           animate={{ opacity: 1, scale: 1 }}

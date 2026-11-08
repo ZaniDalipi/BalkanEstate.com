@@ -5,6 +5,7 @@ import { MousePointerClick } from 'lucide-react';
 import type { Development, UnitsSummary } from '../../../types';
 import { formatPrice } from '../../../utils/format';
 import { splitAtToken } from '../../../utils/splitAtToken';
+import { FRAME_DRIVEN } from '../motion/frameDriven';
 
 interface ResidenceIntroProps {
   development: Development;
@@ -12,7 +13,7 @@ interface ResidenceIntroProps {
 }
 
 const NAME = '\u0000name\u0000';
-const rise = (delay: number) => ({ initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] } });
+const rise = (delay: number) => ({ ...FRAME_DRIVEN, initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] } });
 
 /**
  * The hero's headline over the rendering: where it is, "Find your home in

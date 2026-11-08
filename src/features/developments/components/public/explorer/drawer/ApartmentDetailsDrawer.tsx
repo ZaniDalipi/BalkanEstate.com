@@ -14,6 +14,7 @@ import { SheetHandle } from './SheetHandle';
 import { DesktopBackdrop } from './DesktopBackdrop';
 import { useIsDesktop } from '../../../../hooks/useIsDesktop';
 import { useShowcase } from './showcase/useShowcase';
+import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 interface ApartmentDetailsDrawerProps {
   slug: string;
@@ -97,6 +98,7 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
         <div {...dialog} className="absolute inset-0 flex outline-none">
           <DesktopBackdrop unit={showcase.unit} media={showcase.media} onClose={onClose} />
           <motion.div
+            {...FRAME_DRIVEN}
             initial={reduce ? { opacity: 0 } : hidden}
             animate={reduce ? { opacity: 1 } : { x: 0, opacity: 1 }}
             exit={reduce ? { opacity: 0 } : { ...hidden, transition: { duration: 0.3, ease: 'easeIn' } }}
