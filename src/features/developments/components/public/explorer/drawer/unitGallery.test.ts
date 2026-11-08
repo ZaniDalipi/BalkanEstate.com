@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { unitGallery } from './unitGallery';
+import { unitGallery, unitPhotos } from './unitGallery';
 
 describe('unitGallery', () => {
   it('prefers the unit gallery', () => {
@@ -9,5 +9,12 @@ describe('unitGallery', () => {
     expect(unitGallery({ gallery: [] }, { id: 'l', images: [{ url: 'x' }] })).toEqual(['x']);
     expect(unitGallery({}, { id: 'l', images: [], imageUrl: 'cover' })).toEqual(['cover']);
     expect(unitGallery({}, undefined)).toEqual([]);
+  });
+});
+
+describe('unitPhotos', () => {
+  it('keeps the listing’s room tags so the showcase can label each photo', () => {
+    expect(unitPhotos({}, { id: 'l', images: [{ url: 'x', tag: 'kitchen' }, { url: 'y' }] })).toEqual([{ url: 'x', tag: 'kitchen' }, { url: 'y' }]);
+    expect(unitPhotos({ gallery: [{ url: 'a' }] }, { id: 'l', images: [{ url: 'x', tag: 'kitchen' }] })).toEqual([{ url: 'a' }]);
   });
 });

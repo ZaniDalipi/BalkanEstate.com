@@ -419,7 +419,8 @@ export interface LinkedListing {
   id: string;
   title?: string;
   imageUrl?: string;
-  images?: { url: string }[];
+  /** `tag` is the listing's room tag for the photo (living_room, kitchen, …), when it has one. */
+  images?: { url: string; tag?: string }[];
   price?: number;
   listingType?: 'sale' | 'rent';
   beds?: number;

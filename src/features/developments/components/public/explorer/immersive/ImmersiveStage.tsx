@@ -1,6 +1,5 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
@@ -13,7 +12,7 @@ import { StageTopBar } from '../StageTopBar';
 import { ViewSwitcher } from '../ViewSwitcher';
 import { HIDE_WHEN_IMMERSED } from '../dive/diveStyle';
 import { useStageControls } from './useStageControls';
-import { FRAME_DRIVEN } from '../../motion/frameDriven';
+import { OrbitView } from '../orbit/OrbitView';
 
 export interface ImmersiveStageProps extends ExplorerStageProps {
   /** The residence's own bar along the top (back, name, sections, call to action). */
@@ -34,8 +33,8 @@ const SCRIMS = 'pointer-events-none absolute';
  */
 export const ImmersiveStage: React.FC<ImmersiveStageProps> = (p) => {
   const { t } = useTranslation('developments');
-  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown } = useStageControls(p.views.length, p.viewIndex, p.onViewIndex);
-  const reduced = useReducedMotion();
+  const targetKey = p.crumbs.map((c) => c.key).join('/');
+  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown, orbit } = useStageControls(p.views, p.viewIndex, p.onViewIndex, targetKey);
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
   // At the residence itself the bar and headline already name it; the trail appears once inside a building.
@@ -51,22 +50,14 @@ export const ImmersiveStage: React.FC<ImmersiveStageProps> = (p) => {
       data-testid="immersive-stage"
     >
       {view && (
-        <img
-          src={optimizeImageUrl(view.imageUrl, { width: 640 })}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl"
-        />
-      )}
-      {view && (
-        <motion.div
-          key={view.viewKey}
-          {...FRAME_DRIVEN}
-          className="absolute inset-0"
-          initial={reduced ? false : { opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        >
+        // Each view carries its own blurred backdrop, so the whole picture swings round the building together.
+        <OrbitView viewKey={`${targetKey}:${view.viewKey}`} dir={orbit.dir} fill>
+          <img
+            src={optimizeImageUrl(view.imageUrl, { width: 640 })}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl"
+          />
           <ExplorerCanvas
             fit="cover"
             view={view}
@@ -82,7 +73,7 @@ export const ImmersiveStage: React.FC<ImmersiveStageProps> = (p) => {
             onFocusArrive={p.onFocusArrive}
             openUnitId={p.openUnitId}
           />
-        </motion.div>
+        </OrbitView>
       )}
 
       <div className={cn(SCRIMS, 'inset-x-0 top-0 h-44 bg-gradient-to-b from-black/60 via-black/25 to-transparent', HIDE_WHEN_IMMERSED)} />
@@ -124,7 +115,7 @@ export const ImmersiveStage: React.FC<ImmersiveStageProps> = (p) => {
       </div>
 
       <div className={cn('absolute bottom-6 left-1/2 z-10 -translate-x-1/2', HIDE_WHEN_IMMERSED)}>
-        <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
+        <ViewSwitcher views={p.views} index={p.viewIndex} onChange={orbit.switchTo} />
       </div>
 
       {showFilters && (

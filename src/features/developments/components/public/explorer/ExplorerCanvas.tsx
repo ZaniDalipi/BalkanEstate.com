@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useIsPresent } from 'framer-motion';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit } from '../../../types';
 import { usePanZoom } from '../../../hooks/usePanZoom';
@@ -76,6 +77,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   const W = view.imageWidth || 1600;
   const H = view.imageHeight || 900;
   const cover = fit === 'cover';
+  // Swinging away to another camera view: its card and buttons go at once.
+  const present = useIsPresent();
 
   const hovered = hover ? hotspots.find((h) => h.id === hover.id) : undefined;
   const focused = focus ? hotspots.find((h) => h.id === focus.hotspotId) : undefined;
@@ -126,7 +129,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
         <ZoomControls onZoomIn={pz.zoomIn} onZoomOut={pz.zoomOut} onReset={pz.reset} isZoomed={pz.isZoomed} />
       </div>
 
-      {hover && hovered && card && (
+      {present && hover && hovered && card && (
         <RegionCard
           anchor={hover.rect}
           unit={card.unit}
@@ -142,7 +145,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
         />
       )}
 
-      <DiveHud show={dive.flying} unit={dive.target ? unitsById.get(dive.target.linkId) : undefined} onBack={dive.cancel} onSkip={dive.skip} />
+      <DiveHud show={present && dive.flying} unit={dive.target ? unitsById.get(dive.target.linkId) : undefined} onBack={dive.cancel} onSkip={dive.skip} />
     </div>
   );
 };

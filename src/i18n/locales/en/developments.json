@@ -438,7 +438,10 @@
       "tilted": "3D",
       "flat": "2D",
       "planAlt": "Floor plan of {{name}}",
-      "photoAlt": "{{name}}, photo {{n}}"
+      "photoAlt": "{{name}}, photo {{n}}",
+      "prevPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "photoOf": "{{n}} of {{total}}"
     },
     "dive": {
       "skip": "Skip",

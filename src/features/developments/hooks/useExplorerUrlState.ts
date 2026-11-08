@@ -162,7 +162,8 @@ export function useExplorerUrlState(delayMs = 300) {
     // switching camera views within one is not.
     if (nav.building !== prev.building || nav.floor !== prev.floor) {
       const qs = buildExplorerSearch({ criteria: current.current.criteria, nav }, currentSearch());
-      navigate(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
+      // The explorer shows its own loading; this is not a page change.
+      navigate(`${window.location.pathname}${qs ? `?${qs}` : ''}`, { inPage: true });
     }
   }, []);
 

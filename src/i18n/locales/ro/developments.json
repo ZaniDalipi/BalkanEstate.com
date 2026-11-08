@@ -464,7 +464,10 @@
       "tilted": "3D",
       "flat": "2D",
       "planAlt": "Planul pentru {{name}}",
-      "photoAlt": "{{name}}, fotografia {{n}}"
+      "photoAlt": "{{name}}, fotografia {{n}}",
+      "prevPhoto": "Fotografia anterioară",
+      "nextPhoto": "Fotografia următoare",
+      "photoOf": "{{n}} din {{total}}"
     },
     "dive": {
       "skip": "Omite",

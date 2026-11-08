@@ -43,6 +43,8 @@ export function useUnitDrawer() {
         // Switching unit inside an open drawer must not stack entries.
         replace: alreadyOpen,
         state: { [DRAWER_STATE]: alreadyOpen ? pushedByUs : true },
+        // The sheet shows its own loading; this is not a page change.
+        inPage: true,
       });
     },
     [location.pathname, location.search, pushedByUs]
@@ -51,7 +53,7 @@ export function useUnitDrawer() {
   const close = useCallback(() => {
     const target = withUnit(location.pathname, liveParams(location.pathname, location.search), null);
     if (pushedByUs) goBack(target);
-    else navigate(target, { replace: true });
+    else navigate(target, { replace: true, inPage: true });
   }, [location.pathname, location.search, pushedByUs]);
 
   return { unitId, isOpen: !!unitId, open, close };

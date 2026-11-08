@@ -464,7 +464,10 @@
       "tilted": "3D",
       "flat": "2D",
       "planAlt": "Tlocrt: {{name}}",
-      "photoAlt": "{{name}}, fotografija {{n}}"
+      "photoAlt": "{{name}}, fotografija {{n}}",
+      "prevPhoto": "Prethodna fotografija",
+      "nextPhoto": "Sljedeća fotografija",
+      "photoOf": "{{n}} od {{total}}"
     },
     "dive": {
       "skip": "Preskoči",

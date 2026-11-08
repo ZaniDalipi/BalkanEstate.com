@@ -14,6 +14,8 @@ interface FloorPlanModelProps {
   origin: ScreenBox | null;
   /** 'contain' a plan on its white board (default), or let a photo 'cover' the frame. */
   fill?: 'contain' | 'cover';
+  /** Shown in the rising frame instead of the single picture (the photo carousel). */
+  children?: React.ReactNode;
 }
 
 /** Thickness of the board the plan is printed on, seen along its front edges when tilted. */
@@ -27,7 +29,7 @@ const SLAB_W = 'w-3';
  * stage. The board's size comes from CSS, so it is measured before the model
  * appears and the rise starts exactly over the apartment.
  */
-export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain' }) => {
+export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain', children }) => {
   const reduced = useReducedMotion();
   const slot = useRef<HTMLDivElement>(null);
   const [from, setFrom] = useState<PlanPose | null>(null);
@@ -55,17 +57,21 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
           data-testid="floor-plan-model"
           data-pose={tilted ? 'tilted' : 'flat'}
         >
-          <img
-            src={optimizeImageUrl(url, { width: 1280 })}
-            srcSet={imageSrcSet(url, [640, 960, 1280, 1920]) || undefined}
-            sizes="(min-width: 1280px) 760px, 60vw"
-            alt={alt}
-            draggable={false}
-            className={`absolute inset-0 h-full w-full select-none bg-white shadow-[0_40px_70px_-30px_rgba(70,50,30,0.45)] ${fill === 'cover' ? 'rounded-2xl object-cover' : 'rounded-[3px] object-contain p-[3%]'}`}
-          />
-          {/* The board's front and left edges, folded back under the plan. */}
-          <div aria-hidden="true" className={`absolute inset-x-0 top-full ${SLAB} origin-top bg-[#ddd5c9]`} style={{ transform: 'rotateX(-90deg)' }} />
-          <div aria-hidden="true" className={`absolute inset-y-0 right-full ${SLAB_W} origin-right bg-[#cbc2b4]`} style={{ transform: 'rotateY(-90deg)' }} />
+          {children ?? (
+            <>
+              <img
+                src={optimizeImageUrl(url, { width: 1280 })}
+                srcSet={imageSrcSet(url, [640, 960, 1280, 1920]) || undefined}
+                sizes="(min-width: 1280px) 760px, 60vw"
+                alt={alt}
+                draggable={false}
+                className={`absolute inset-0 h-full w-full select-none bg-white shadow-[0_40px_70px_-30px_rgba(70,50,30,0.45)] ${fill === 'cover' ? 'rounded-2xl object-cover' : 'rounded-[3px] object-contain p-[3%]'}`}
+              />
+              {/* The board's front and left edges, folded back under the plan. */}
+              <div aria-hidden="true" className={`absolute inset-x-0 top-full ${SLAB} origin-top bg-[#ddd5c9]`} style={{ transform: 'rotateX(-90deg)' }} />
+              <div aria-hidden="true" className={`absolute inset-y-0 right-full ${SLAB_W} origin-right bg-[#cbc2b4]`} style={{ transform: 'rotateY(-90deg)' }} />
+            </>
+          )}
         </motion.div>
       )}
     </div>

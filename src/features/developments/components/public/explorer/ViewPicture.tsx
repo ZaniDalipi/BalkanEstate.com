@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { imageSrcSet, optimizeImageUrl } from '@/config/mediaConfig';
+import { viewPictureSources } from './orbit/viewSources';
 import { cn } from '@/src/lib/utils';
 
 interface ViewPictureProps {
@@ -19,11 +19,12 @@ interface ViewPictureProps {
  */
 export const ViewPicture: React.FC<ViewPictureProps> = ({ url, name, decorative, className, style }) => {
   const { t } = useTranslation('developments');
+  const { src, srcSet, sizes } = viewPictureSources(url);
   return (
     <img
-      src={optimizeImageUrl(url, { width: 1920 })}
-      srcSet={imageSrcSet(url, [800, 1280, 1920, 2560]) || undefined}
-      sizes="100vw"
+      src={src}
+      srcSet={srcSet}
+      sizes={sizes}
       alt={decorative ? '' : name || t('scene.exploreHeading', 'Explore the development')}
       aria-hidden={decorative || undefined}
       draggable={false}

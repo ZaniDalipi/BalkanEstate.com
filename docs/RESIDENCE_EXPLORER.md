@@ -923,12 +923,43 @@ once.
 4. At 2.25 s the apartment opens (`?unit=`). On desktop the paper settles and
    what the developer posted rises out of the apartment's place on the facade
    (`drawer/showcase/`): the floor plan as a tilted model with a 3D / 2D
-   switch, else the photos with a thumbnail dock (`showcaseMedia.ts`). The
+   switch, else the photos as a bouncy, labelled carousel (`showcaseMedia.ts`). The
    details float in as a card on the right (`UnitHeader` "card": status and
    floor, name, rooms and size, the price in a dark pill), without repeating
    the plan or photos. With nothing posted, the page dims as before.
 5. **Back to building** (or Esc, Back, the close button) flies the camera back
    out along the same kind of path; the page's controls return once it lands.
+
+**Around the building.** Switching camera views (the arrows, the dots, ←/→)
+moves like one camera circling one building (`explorer/orbit/`): the picture
+on show swings away round a pivot behind the building while the next swings
+in from the other side on top of it, crossfading with a touch of motion blur;
+the outgoing picture stays opaque underneath until it is covered, so the screen
+never dips dark. Next goes one way round, previous the other; a link or Back
+goes the short way round (`orbitDirection`). The next picture is downloaded
+and decoded before the swing starts, and the views either side preload in the
+background (`preloadViewPicture`, same sources as the picture itself), so it
+never arrives half loaded. A different building or the residence fades in
+instead.
+
+| Orbiting to the side view | A photo dealt in | Labelled photos |
+| --- | --- | --- |
+| ![Orbit](./images/residence-explorer/46-view-orbit.jpg) | ![Deal](./images/residence-explorer/47-photo-deal.jpg) | ![Labels](./images/residence-explorer/45-apartment-showcase-photos.jpg) |
+
+**Photos.** An apartment shown by its photos gets a carousel
+(`drawer/showcase/PhotoCarousel.tsx`): the next photo flies in tilted from the
+side you are heading to, overshoots and bounces into place while the current
+one is flung off the other way; arrows sit either side, ←/→ work, and a
+sideways drag turns the photo (it springs back if let go early). Each photo is
+labelled by its room from the listing's photo tag (`photoLabels`: "Living
+room", "Bedroom 1", "Bedroom 2", else "Photo 3"; the names come from the
+`property` namespace), on the photo with its position ("2 / 5") and under each
+thumbnail of the filmstrip (`PhotoDock`), whose highlight springs across.
+
+**No page-loading circle.** Opening an apartment or a building only changes
+what the residence page shows, and it has its own loading states, so those
+navigations pass `inPage: true` and the app's page-loading circle
+(`NavigationPendingIndicator`) stays away.
 
 **No blinking.** Every full-screen layer that fades or moves (the white model,
 the flight's buttons, the showcase and its plan, the details card, the dim

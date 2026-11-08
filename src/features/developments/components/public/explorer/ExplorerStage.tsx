@@ -1,6 +1,5 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit, UnitAvailability } from '../../../types';
@@ -15,7 +14,7 @@ import { ExplorerLegend } from './ExplorerLegend';
 import { useStageControls } from './immersive/useStageControls';
 import type { BuildingFacts } from './useRegionCard';
 import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
-import { FRAME_DRIVEN } from '../motion/frameDriven';
+import { OrbitView } from './orbit/OrbitView';
 
 export interface ExplorerStageProps {
   views: PublicSceneView[];
@@ -56,8 +55,8 @@ export interface ExplorerStageProps {
  */
 export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
-  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown } = useStageControls(p.views.length, p.viewIndex, p.onViewIndex);
-  const reduced = useReducedMotion();
+  const targetKey = p.crumbs.map((c) => c.key).join('/');
+  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown, orbit } = useStageControls(p.views, p.viewIndex, p.onViewIndex, targetKey);
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
   const float = full ? 'absolute' : 'relative sm:absolute';
@@ -77,15 +76,8 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
     >
       <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
         {view && (
-          // Each picture fades in, so drilling into a building after the glide reads as one move.
-          <motion.div
-            key={view.viewKey}
-            {...FRAME_DRIVEN}
-            className="w-full"
-            initial={reduced ? false : { opacity: 0, scale: 1.02 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          >
+          // Views of one building orbit into each other; a new building fades in, so drilling in after the glide reads as one move.
+          <OrbitView viewKey={`${targetKey}:${view.viewKey}`} dir={orbit.dir}>
             <ExplorerCanvas
               view={view}
               unitsById={p.unitsById}
@@ -100,7 +92,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
               onFocusArrive={p.onFocusArrive}
               openUnitId={p.openUnitId}
             />
-          </motion.div>
+          </OrbitView>
         )}
 
         <StageTopBar
@@ -115,7 +107,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         />
 
         <div className={cn('absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0', HIDE_WHEN_IMMERSED)}>
-          <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
+          <ViewSwitcher views={p.views} index={p.viewIndex} onChange={orbit.switchTo} />
         </div>
       </div>
 

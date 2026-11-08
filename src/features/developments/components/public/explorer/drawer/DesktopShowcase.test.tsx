@@ -148,6 +148,33 @@ describe('desktop apartment showcase', () => {
     expect(screen.queryByRole('button', { name: 'Open photos' })).not.toBeInTheDocument();
   });
 
+  it('labels the listing’s photos by room, and the arrows, dock and ←/→ deal them in turn', async () => {
+    h.detail = {
+      ...detail({ floorplan: undefined, primaryListingId: 'p1', hasListing: true }),
+      listings: [
+        { id: 'p1', title: 'Listing', images: [{ url: 'https://media.test/a.jpg', tag: 'living_room' }, { url: 'https://media.test/b.jpg', tag: 'bedroom' }, { url: 'https://media.test/c.jpg', tag: 'bedroom' }] },
+      ],
+    };
+    mount();
+    const showcase = await screen.findByTestId('apartment-showcase');
+    const dock = within(showcase).getByRole('group', { name: 'Open photos' });
+    expect(within(dock).getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(['Living room', 'Bedroom 1', 'Bedroom 2']);
+    const pressed = () => within(dock).getAllByRole('button').find((b) => b.getAttribute('aria-pressed') === 'true')?.getAttribute('aria-label');
+    expect(pressed()).toBe('Living room');
+    expect(within(showcase).getByText('1 / 3')).toBeInTheDocument();
+
+    fireEvent.click(within(showcase).getByRole('button', { name: 'Next photo' }));
+    expect(pressed()).toBe('Bedroom 1');
+    expect(within(showcase).getByRole('img', { name: 'Apt A12, photo 2' })).toBeInTheDocument();
+
+    fireEvent.click(within(showcase).getByRole('button', { name: 'Previous photo' }));
+    fireEvent.click(within(showcase).getByRole('button', { name: 'Previous photo' }));
+    expect(pressed()).toBe('Bedroom 2');
+
+    fireEvent.keyDown(within(dock).getByRole('button', { name: 'Bedroom 2' }), { key: 'ArrowRight' });
+    expect(pressed()).toBe('Living room');
+  });
+
   it('without a floor plan, the page is dimmed as before and a click on it closes', async () => {
     h.detail = detail({ floorplan: undefined });
     const router = mount();

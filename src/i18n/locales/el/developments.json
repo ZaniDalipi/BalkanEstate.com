@@ -462,7 +462,10 @@
       "tilted": "3D",
       "flat": "2D",
       "planAlt": "Κάτοψη: {{name}}",
-      "photoAlt": "{{name}}, φωτογραφία {{n}}"
+      "photoAlt": "{{name}}, φωτογραφία {{n}}",
+      "prevPhoto": "Προηγούμενη φωτογραφία",
+      "nextPhoto": "Επόμενη φωτογραφία",
+      "photoOf": "{{n}} από {{total}}"
     },
     "dive": {
       "skip": "Παράλειψη",

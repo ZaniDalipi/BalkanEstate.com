@@ -462,7 +462,10 @@
       "tilted": "3D",
       "flat": "2D",
       "planAlt": "Разпределение: {{name}}",
-      "photoAlt": "{{name}}, снимка {{n}}"
+      "photoAlt": "{{name}}, снимка {{n}}",
+      "prevPhoto": "Предишна снимка",
+      "nextPhoto": "Следваща снимка",
+      "photoOf": "{{n}} от {{total}}"
     },
     "dive": {
       "skip": "Пропусни",

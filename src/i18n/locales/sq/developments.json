@@ -462,7 +462,10 @@
       "tilted": "3D",
       "flat": "2D",
       "planAlt": "Plani i katit: {{name}}",
-      "photoAlt": "{{name}}, foto {{n}}"
+      "photoAlt": "{{name}}, foto {{n}}",
+      "prevPhoto": "Fotoja e mëparshme",
+      "nextPhoto": "Fotoja tjetër",
+      "photoOf": "{{n}} nga {{total}}"
     },
     "dive": {
       "skip": "Kapërce",

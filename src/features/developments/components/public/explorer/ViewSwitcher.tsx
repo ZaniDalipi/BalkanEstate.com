@@ -7,7 +7,8 @@ import type { PublicSceneView } from '../../../types';
 interface ViewSwitcherProps {
   views: PublicSceneView[];
   index: number;
-  onChange: (index: number) => void;
+  /** `step` is -1 / 1 for the arrows (which way round to go), absent for a dot. */
+  onChange: (index: number, step?: number) => void;
 }
 
 const DIRECTION_DEFAULTS: Record<string, string> = {
@@ -37,7 +38,7 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ views, index, onChan
   const { t } = useTranslation('developments');
   const nameOf = useViewName();
   if (views.length < 2) return null;
-  const go = (d: number) => onChange((index + d + views.length) % views.length);
+  const go = (d: number) => onChange((index + d + views.length) % views.length, d);
   const current = views[index];
   return (
     <div className="flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>

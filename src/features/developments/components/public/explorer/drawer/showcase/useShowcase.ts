@@ -1,6 +1,6 @@
 import { usePublicUnit } from '../../../../../hooks/useDevelopment';
 import type { PublicUnit } from '../../../../../types';
-import { unitGallery } from '../unitGallery';
+import { unitPhotos } from '../unitGallery';
 import { showcaseMedia } from './showcaseMedia';
 
 /**
@@ -11,6 +11,6 @@ export function useShowcase(slug: string, unitId: string | null, preview: Public
   const { unit: full, listings } = usePublicUnit(slug, unitId ?? undefined);
   const unit = full ?? preview;
   const primary = unit ? listings.find((l) => l.id === unit.primaryListingId) : undefined;
-  const media = desktop && unit ? showcaseMedia(unit, unitGallery(unit, primary)) : null;
+  const media = desktop && unit ? showcaseMedia(unit, unitPhotos(unit, primary)) : null;
   return { unit, media };
 }

@@ -391,7 +391,8 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
       images: (Array.isArray(l.images) ? l.images : [])
         .filter((img) => img && typeof img.url === 'string')
         .slice(0, 6)
-        .map((img) => ({ url: img.url })),
+        // The room tag (living_room, kitchen…) labels the photo in the apartment showcase.
+        .map((img) => ({ url: img.url, ...(typeof img.tag === 'string' && img.tag ? { tag: img.tag } : {}) })),
       price: l.price,
       listingType: l.listingType,
       beds: l.beds,

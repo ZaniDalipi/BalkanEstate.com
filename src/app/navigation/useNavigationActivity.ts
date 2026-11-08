@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { onRouteChange, routerLocationKey } from '@/src/app/router/navigation';
+import { isInPageState, onRouteChange, routerLocationIsInPage, routerLocationKey } from '@/src/app/router/navigation';
 import { IDLE, navReducer, shouldShow, type NavEvent, type NavPhase } from './navActivity';
 
 /** How often the phase is re-checked while a page change is in progress. */
@@ -17,7 +17,7 @@ const TICK_MS = 50;
  */
 export function useNavigationActivity(): boolean {
   // Inside the router tree this is the committed location — the page showing.
-  const { key } = useLocation();
+  const { key, state } = useLocation();
   const queryClient = useQueryClient();
   const shownKey = useRef(key);
   const phase = useRef<NavPhase>(IDLE);
@@ -46,7 +46,8 @@ export function useNavigationActivity(): boolean {
       }, TICK_MS);
     };
     const stopRoutes = onRouteChange(() => {
-      if (routerLocationKey() !== shownKey.current) send({ type: 'start', at: performance.now() });
+      // An in-page change (a sheet, a building of the same page) is not a page loading.
+      if (routerLocationKey() !== shownKey.current && !routerLocationIsInPage()) send({ type: 'start', at: performance.now() });
     });
     const stopQueries = queryClient.getQueryCache().subscribe(() => {
       if (phase.current.kind !== 'settling') return;
@@ -66,8 +67,10 @@ export function useNavigationActivity(): boolean {
   useEffect(() => {
     if (shownKey.current === key) return;
     shownKey.current = key;
+    // Nothing was loading and the page only changed what it shows: its own fetches are not a page load.
+    if (phase.current.kind === 'idle' && isInPageState(state)) return;
     send({ type: 'shown', at: performance.now(), fetching: queryClient.isFetching() });
-  }, [key, queryClient, send]);
+  }, [key, state, queryClient, send]);
 
   return visible;
 }
