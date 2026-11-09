@@ -1245,7 +1245,9 @@
     "code": {
       "label": "Cod de deblocare",
       "required": "Introduceți codul de deblocare pe care vi l-am trimis după ce am stabilit plata.",
-      "format": "Codurile au litere, cifre, - și _ (3–64 caractere)."
+      "format": "Codurile au litere, cifre, - și _ (3–64 caractere).",
+      "applied": "Cod aplicat: plătiți {{amount}} în loc de {{list}}.",
+      "appliedNext": "Scrieți-ne pentru rest (e-mailul conține deja codul și prețul); după plată vă trimitem un cod de deblocare de introdus aici."
     },
     "quantity": {
       "label": "Clădiri de adăugat",
@@ -1261,7 +1263,8 @@
       "each": "{{n}} × preț",
       "discount": "Reducere Premium ({{pct}}%)",
       "total": "Total",
-      "validity": "O singură plată, valabilă {{months}} luni — nu pe viață. Nu se reînnoiește singură."
+      "validity": "O singură plată, valabilă {{months}} luni — nu pe viață. Nu se reînnoiește singură.",
+      "code": "Cod {{code}}"
     },
     "done": {
       "pass": "Abonamentul de ansamblu este activ",
@@ -1307,7 +1310,8 @@
       "copy": "Copiază adresa",
       "copied": "Copiat",
       "copyFailed": "Copierea nu a reușit. Selectați {{email}} mai sus sau scrieți din aplicația dvs. de e-mail.",
-      "passItem": "Abonament ansamblu"
+      "passItem": "Abonament ansamblu",
+      "withCode": "cu codul {{code}}"
     }
   },
   "pricingSection": {

@@ -2207,7 +2207,15 @@
       "title": "New unlock codes",
       "tooLong": "{{max}} characters at most.",
       "uses": "Uses per code",
-      "usesHint": "Each account can use a code once"
+      "usesHint": "Each account can use a code once",
+      "discount": "Discount",
+      "discountFull": "Whole price (unlocks at once)",
+      "discountPercent": "Percent off",
+      "discountFixed": "Amount off (€)",
+      "percentValue": "Percent off (%)",
+      "fixedValue": "Amount off (€)",
+      "percentHint": "1 to {{max}}; the owner pays the rest",
+      "fixedHint": "Never more than the price; the owner pays the rest"
     },
     "intro": "Owners type a code in “Buy Residence Pass” to unlock it without paying online. Each code covers the full price of what it unlocks.",
     "kind": {
@@ -2232,6 +2240,11 @@
     "title": "Unlock codes",
     "until": "until {{date}}",
     "usedBy": "Used by",
-    "uses": "{{used}} of {{limit}} used"
+    "uses": "{{used}} of {{limit}} used",
+    "discount": {
+      "full": "Whole price",
+      "percent": "{{value}}% off",
+      "fixed": "{{amount}} off"
+    }
   }
 }

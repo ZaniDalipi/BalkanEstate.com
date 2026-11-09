@@ -20,7 +20,7 @@ const nav = vi.hoisted(() => ({ router: null as null | { navigate: (to: string) 
 vi.mock('@/src/app/router/navigation', () => ({ navigate: (to: string) => nav.router!.navigate(to) }));
 
 const code = (over: Partial<ResidenceCode> = {}): ResidenceCode => ({
-  id: 'c1', code: 'RES-7K3P-QW9X', kind: 'pass', status: 'active', usedCount: 0, usageLimit: 1,
+  id: 'c1', code: 'RES-7K3P-QW9X', kind: 'pass', discountType: 'percentage', discountValue: 100, status: 'active', usedCount: 0, usageLimit: 1,
   validFrom: '2026-11-01T00:00:00Z', validUntil: '2027-02-01T00:00:00Z', note: 'Vardar Homes', isSent: false, sentAt: null,
   createdAt: '2026-11-01T00:00:00Z', createdBy: 'Admin', uses: [], ...over,
 });
@@ -53,7 +53,7 @@ describe('Admin › Residences › Unlock codes', () => {
   });
 
   it('creates codes, checking the form first, and shows them ready to copy', async () => {
-    api.createResidenceCodes.mockResolvedValue({ codes: ['RES-AAAA-BBBB', 'RES-CCCC-DDDD'], kind: 'extra_building', validUntil: '2027-01-01T00:00:00Z', usageLimit: 1 });
+    api.createResidenceCodes.mockResolvedValue({ codes: ['RES-AAAA-BBBB', 'RES-CCCC-DDDD'], kind: 'extra_building', discountType: 'percentage', discountValue: 100, validUntil: '2027-01-01T00:00:00Z', usageLimit: 1 });
     mount();
     fireEvent.click(await screen.findByRole('button', { name: 'New codes' }));
     fireEvent.click(screen.getByLabelText('Extra buildings'));
@@ -65,10 +65,31 @@ describe('Admin › Residences › Unlock codes', () => {
     fireEvent.change(screen.getByLabelText('How many codes'), { target: { value: '2' } });
     fireEvent.change(screen.getByLabelText('Note (who it is for)'), { target: { value: ' Vardar Homes ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create codes' }));
-    await waitFor(() => expect(api.createResidenceCodes).toHaveBeenCalledWith({ kind: 'extra_building', count: 2, usageLimit: 1, days: 90, note: 'Vardar Homes' }));
+    await waitFor(() => expect(api.createResidenceCodes).toHaveBeenCalledWith({ kind: 'extra_building', discountType: 'percentage', discountValue: 100, count: 2, usageLimit: 1, days: 90, note: 'Vardar Homes' }));
     const ready = await screen.findByRole('region', { name: 'Codes ready: 2' });
     expect(within(ready).getByText('RES-AAAA-BBBB')).toBeInTheDocument();
     expect(within(ready).getByRole('button', { name: 'Copy all' })).toBeInTheDocument();
+  });
+
+  it('creates discount codes: a percentage or an amount off, checked first', async () => {
+    api.createResidenceCodes.mockResolvedValue({ codes: ['RES-EEEE-FFFF'], kind: 'pass', discountType: 'percentage', discountValue: 20, validUntil: '2027-01-01T00:00:00Z', usageLimit: 1 });
+    mount();
+    fireEvent.click(await screen.findByRole('button', { name: 'New codes' }));
+    fireEvent.click(screen.getByLabelText('Percent off'));
+    fireEvent.change(screen.getByLabelText('Percent off (%)'), { target: { value: '100' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create codes' }));
+    expect(await screen.findByText('Enter a whole number from 1 to 99.')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Percent off (%)'), { target: { value: '20' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create codes' }));
+    await waitFor(() => expect(api.createResidenceCodes).toHaveBeenCalledWith(expect.objectContaining({ kind: 'pass', discountType: 'percentage', discountValue: 20 })));
+    expect(await screen.findByText(/20% off/)).toBeInTheDocument();
+  });
+
+  it('shows each code’s discount in the list', async () => {
+    api.listResidenceCodes.mockResolvedValue({ items: [code({ id: 'c3', code: 'RES-FIX-0050', discountType: 'fixed', discountValue: 50 })], total: 1, page: 1, pageSize: 25 });
+    mount();
+    const row = (await screen.findByText('RES-FIX-0050')).closest('li') as HTMLElement;
+    expect(row).toHaveTextContent(/€\s?50 off|50\s?€ off/);
   });
 
   it('marks a code sent, switches it off, and deletes an unused one only on a second press', async () => {

@@ -1245,7 +1245,9 @@
     "code": {
       "label": "Kod za otključavanje",
       "required": "Unesite kod za otključavanje koji smo vam poslali nakon dogovora o plaćanju.",
-      "format": "Kodovi imaju slova, brojeve, - i _ (3–64 znaka)."
+      "format": "Kodovi imaju slova, brojeve, - i _ (3–64 znaka).",
+      "applied": "Kod primijenjen: plaćate {{amount}} umjesto {{list}}.",
+      "appliedNext": "Pišite nam za ostatak (e-mail već sadrži kod i cijenu); kad bude plaćeno, šaljemo vam kod za otključavanje koji unosite ovdje."
     },
     "quantity": {
       "label": "Zgrade za dodavanje",
@@ -1261,7 +1263,8 @@
       "each": "{{n}} × cijena",
       "discount": "Premium popust ({{pct}}%)",
       "total": "Ukupno",
-      "validity": "Jedna uplata, vrijedi {{months}} mjeseci — nije doživotno. Ne obnavlja se samo."
+      "validity": "Jedna uplata, vrijedi {{months}} mjeseci — nije doživotno. Ne obnavlja se samo.",
+      "code": "Kod {{code}}"
     },
     "done": {
       "pass": "Paket rezidencije je aktivan",
@@ -1307,7 +1310,8 @@
       "copy": "Kopiraj adresu",
       "copied": "Kopirano",
       "copyFailed": "Kopiranje nije uspjelo. Označite {{email}} iznad ili pišite na nju iz svoje aplikacije za e-poštu.",
-      "passItem": "Paket rezidencije"
+      "passItem": "Paket rezidencije",
+      "withCode": "s kodom {{code}}"
     }
   },
   "pricingSection": {

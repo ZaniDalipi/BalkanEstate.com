@@ -1,9 +1,10 @@
 /**
  * Residence unlock codes, the pure part: what an admin may ask for, what a
- * code looks like, and where a code stands. While online payment is off, an
- * owner unlocks a Residence Pass (or extra buildings) with a code that covers
- * the whole price; these are those codes (DiscountCode, 100 %, naming one
- * residence product, source 'residence').
+ * code looks like, and where a code stands. A code names one residence
+ * product (DiscountCode, source 'residence') and takes a percentage or an
+ * amount off its price. One that covers the whole price unlocks it at once;
+ * any other lowers the price the owner pays (by arrangement while online
+ * payment is off).
  */
 import crypto from 'crypto';
 import { RESIDENCE_PRODUCTS } from '../../../config/residenceBilling';
@@ -14,7 +15,10 @@ export type ResidenceCodeKind = (typeof RESIDENCE_CODE_KINDS)[number];
 export const RESIDENCE_CODE_PRODUCTS: Record<ResidenceCodeKind, string> = { pass: RESIDENCE_PRODUCTS.pass, extra_building: RESIDENCE_PRODUCTS.extraBuilding };
 export const RESIDENCE_PRODUCT_IDS: string[] = Object.values(RESIDENCE_CODE_PRODUCTS);
 
-export const CODE_LIMITS = { maxCount: 50, maxUses: 100, minDays: 1, maxDays: 730, defaultDays: 90, note: 200 } as const;
+export const CODE_LIMITS = { maxCount: 50, maxUses: 100, minDays: 1, maxDays: 730, defaultDays: 90, note: 200, maxPercent: 100, maxFixed: 10000 } as const;
+
+export const CODE_DISCOUNT_TYPES = ['percentage', 'fixed'] as const;
+export type CodeDiscountType = (typeof CODE_DISCOUNT_TYPES)[number];
 
 export type ResidenceCodeStatus = 'active' | 'used' | 'expired' | 'disabled' | 'scheduled';
 
@@ -30,6 +34,9 @@ export function newResidenceCode(random: (n: number) => Buffer = crypto.randomBy
 
 export interface CreateCodesInput {
   kind: ResidenceCodeKind;
+  /** Percentage (1–100; 100 is the whole price) or euros off (1–10 000). */
+  discountType: CodeDiscountType;
+  discountValue: number;
   count: number;
   usageLimit: number;
   validUntil: Date;
@@ -49,6 +56,12 @@ export function parseCreateCodes(body: Record<string, unknown> | undefined, now 
   const raw = body ?? {};
   const kind = raw.kind as ResidenceCodeKind;
   if (!RESIDENCE_CODE_KINDS.includes(kind)) throw new ValidationError('kind must be "pass" or "extra_building"', { code: 'FIELD_INVALID', field: 'kind' });
+  const discountType = (raw.discountType ?? 'percentage') as CodeDiscountType;
+  if (!CODE_DISCOUNT_TYPES.includes(discountType)) throw new ValidationError('discountType must be "percentage" or "fixed"', { code: 'FIELD_INVALID', field: 'discountType' });
+  const discountValue =
+    discountType === 'percentage'
+      ? wholeIn(raw.discountValue, 'discountValue', 1, CODE_LIMITS.maxPercent, 100)
+      : wholeIn(raw.discountValue, 'discountValue', 1, CODE_LIMITS.maxFixed, Number.NaN);
   const count = wholeIn(raw.count, 'count', 1, CODE_LIMITS.maxCount, 1);
   const usageLimit = wholeIn(raw.usageLimit, 'usageLimit', 1, CODE_LIMITS.maxUses, 1);
   const days = wholeIn(raw.days, 'days', CODE_LIMITS.minDays, CODE_LIMITS.maxDays, CODE_LIMITS.defaultDays);
@@ -57,7 +70,7 @@ export function parseCreateCodes(body: Record<string, unknown> | undefined, now 
   if (note.length > CODE_LIMITS.note) throw new ValidationError('note is too long', { code: 'FIELD_TOO_LONG', field: 'note', params: { max: CODE_LIMITS.note } });
   const validUntil = new Date(now.getTime() + days * 86_400_000);
   validUntil.setUTCHours(23, 59, 59, 999);
-  return { kind, count, usageLimit, validUntil, ...(note ? { note } : {}) };
+  return { kind, discountType, discountValue, count, usageLimit, validUntil, ...(note ? { note } : {}) };
 }
 
 /** Where a code stands, in the order an admin cares about. */

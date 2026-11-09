@@ -13,7 +13,7 @@ interface CreatedCodesProps {
 /** The codes just created, ready to copy one by one or all at once and send to the owner. */
 export const CreatedCodes: React.FC<CreatedCodesProps> = ({ result, onDone }) => {
   const { t, i18n } = useTranslation(['admin']);
-  const { kindLabel } = useResidenceCodeText();
+  const { kindLabel, discountLabel } = useResidenceCodeText();
   const { copied, failed, copy } = useCopyText();
   const until = new Date(result.validUntil).toLocaleDateString(i18n.language, { dateStyle: 'medium' });
 
@@ -26,7 +26,7 @@ export const CreatedCodes: React.FC<CreatedCodesProps> = ({ result, onDone }) =>
             {t('admin:residenceCodes.created.title', { count: result.codes.length, defaultValue: 'Codes ready: {{count}}' })}
           </h2>
           <p className="text-sm text-gray-600">
-            {t('admin:residenceCodes.created.subtitle', { kind: kindLabel(result.kind), date: until, uses: result.usageLimit, defaultValue: '{{kind}} · valid until {{date}} · {{uses}} use(s) each' })}
+            {t('admin:residenceCodes.created.subtitle', { kind: `${kindLabel(result.kind)} · ${discountLabel(result.discountType, result.discountValue)}`, date: until, uses: result.usageLimit, defaultValue: '{{kind}} · valid until {{date}} · {{uses}} use(s) each' })}
           </p>
         </div>
         <button

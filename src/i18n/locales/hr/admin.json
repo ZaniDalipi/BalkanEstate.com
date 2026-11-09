@@ -2190,7 +2190,15 @@
       "title": "Novi kodovi za otključavanje",
       "tooLong": "Najviše {{max}} znakova.",
       "uses": "Korištenja po kodu",
-      "usesHint": "Svaki račun može iskoristiti kod jednom"
+      "usesHint": "Svaki račun može iskoristiti kod jednom",
+      "discount": "Popust",
+      "discountFull": "Puna cijena (otključava odmah)",
+      "discountPercent": "Postotak popusta",
+      "discountFixed": "Iznos popusta (€)",
+      "percentValue": "Postotak popusta (%)",
+      "fixedValue": "Iznos popusta (€)",
+      "percentHint": "1 do {{max}}; vlasnik plaća ostatak",
+      "fixedHint": "Nikad više od cijene; vlasnik plaća ostatak"
     },
     "intro": "Vlasnici upisuju kod u “Kupi Residence Pass” kako bi ga otključali bez online plaćanja. Svaki kod pokriva punu cijenu onoga što otključava.",
     "kind": {
@@ -2215,6 +2223,11 @@
     "title": "Kodovi za otključavanje",
     "until": "do {{date}}",
     "usedBy": "Iskoristio/la",
-    "uses": "Iskorišteno {{used}} od {{limit}}"
+    "uses": "Iskorišteno {{used}} od {{limit}}",
+    "discount": {
+      "full": "Puna cijena",
+      "percent": "{{value}}% popusta",
+      "fixed": "{{amount}} popusta"
+    }
   }
 }

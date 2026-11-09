@@ -604,8 +604,16 @@ before this change, from `developmentSlug`/`unitId`/`developmentId`.
   create the codes owners type in "Buy Residence Pass": for a **Residence
   Pass** or **extra buildings**, 1–50 at once, 1–100 uses each (an account uses
   a code once), valid 1–730 days (default 90), with a note on who it is for.
-  Codes read `RES-XXXX-XXXX` (no 0/O/1/I) and cover the full price (100 %,
-  naming that residence product, source `residence`). The list shows each
+  Codes read `RES-XXXX-XXXX` (no 0/O/1/I) and name that residence product
+  (source `residence`). Each takes **the whole price** (it unlocks the purchase
+  at once), **a percentage** (1–99 %) or **an amount** (1–10 000 €) off. A
+  discount code is not spent at checkout: the owner's buy dialog shows the
+  code's line and the new total ("Code applied: you pay 119 € instead of
+  149 €"), and the email to sales carries the code and that price; once the
+  rest is paid by arrangement, an admin sends a whole-price code (or grants the
+  pass). When online payment is switched on, that lower total is what checkout
+  charges (`PAYMENT_NOT_CONFIGURED` already carries `amount`, `listAmount`,
+  `discount` and `couponCode`). The list shows each
   code's status (ready, used, expired, switched off, not yet valid), its uses
   and **which residences used it**; codes can be copied (one or all just
   created), marked sent, switched off and on, and deleted while unused (a used

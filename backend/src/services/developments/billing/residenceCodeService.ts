@@ -18,7 +18,7 @@ const MAX_TRIES = 5;
 
 const isDuplicate = (e: unknown) => (e as { code?: number })?.code === 11000;
 
-/** Create `count` codes; each covers the whole price of the product it names. */
+/** Create `count` codes, each taking the asked percentage or amount off the product it names. */
 export async function createResidenceCodes(adminId: unknown, body: Record<string, unknown> | undefined, now = new Date()) {
   const input = parseCreateCodes(body, now);
   const codes: string[] = [];
@@ -27,8 +27,8 @@ export async function createResidenceCodes(adminId: unknown, body: Record<string
       try {
         const doc = await DiscountCode.create({
           code: newResidenceCode(),
-          discountType: 'percentage',
-          discountValue: 100,
+          discountType: input.discountType,
+          discountValue: input.discountValue,
           validFrom: now,
           validUntil: input.validUntil,
           usageLimit: input.usageLimit,
@@ -45,7 +45,7 @@ export async function createResidenceCodes(adminId: unknown, body: Record<string
       }
     }
   }
-  return { codes, kind: input.kind, validUntil: input.validUntil, usageLimit: input.usageLimit };
+  return { codes, kind: input.kind, discountType: input.discountType, discountValue: input.discountValue, validUntil: input.validUntil, usageLimit: input.usageLimit };
 }
 
 const SEARCH = /^[A-Za-z0-9-]{1,40}$/;
@@ -81,6 +81,8 @@ export async function listResidenceCodes(query: Record<string, unknown>, now = n
       id: String(d._id),
       code: d.code,
       kind: kindOf(d.applicablePlans),
+      discountType: d.discountType,
+      discountValue: d.discountValue,
       status: codeStatus(d, now),
       usedCount: d.usedCount,
       usageLimit: d.usageLimit,

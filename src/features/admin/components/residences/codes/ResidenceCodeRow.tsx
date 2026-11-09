@@ -25,7 +25,7 @@ const ACTION = 'min-h-[44px] rounded-lg border px-3 text-sm font-medium disabled
  */
 export const ResidenceCodeRow: React.FC<ResidenceCodeRowProps> = ({ code, copied, busy, onCopy, onChange, onDelete }) => {
   const { t, i18n } = useTranslation(['admin']);
-  const { kindLabel } = useResidenceCodeText();
+  const { kindLabel, discountLabel } = useResidenceCodeText();
   const [confirming, setConfirming] = useState(false);
   const day = (iso: string) => new Date(iso).toLocaleDateString(i18n.language, { dateStyle: 'medium' });
 
@@ -40,7 +40,7 @@ export const ResidenceCodeRow: React.FC<ResidenceCodeRowProps> = ({ code, copied
             {code.isSent && <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">{t('admin:residenceCodes.sent', 'Sent')}</span>}
           </div>
           <p className="text-sm text-gray-600">
-            {kindLabel(code.kind)} · {t('admin:residenceCodes.uses', { used: code.usedCount, limit: code.usageLimit, defaultValue: '{{used}} of {{limit}} used' })} · {t('admin:residenceCodes.until', { date: day(code.validUntil), defaultValue: 'until {{date}}' })}
+            {kindLabel(code.kind)} · {discountLabel(code.discountType, code.discountValue)} · {t('admin:residenceCodes.uses', { used: code.usedCount, limit: code.usageLimit, defaultValue: '{{used}} of {{limit}} used' })} · {t('admin:residenceCodes.until', { date: day(code.validUntil), defaultValue: 'until {{date}}' })}
           </p>
           {code.note && <p className="mt-0.5 break-words text-sm text-gray-800">{code.note}</p>}
           {code.uses.length > 0 && (

@@ -11,10 +11,11 @@ describe('residence unlock codes: rules', () => {
   });
 
   it('takes what an admin asks for, with sensible defaults', () => {
-    expect(parseCreateCodes({ kind: 'pass' }, NOW)).toEqual({ kind: 'pass', count: 1, usageLimit: 1, validUntil: new Date('2027-02-07T23:59:59.999Z') });
-    expect(parseCreateCodes({ kind: 'extra_building', count: '5', usageLimit: 3, days: 30, note: '  For Vardar Homes  ' }, NOW)).toEqual({
-      kind: 'extra_building', count: 5, usageLimit: 3, validUntil: new Date('2026-12-09T23:59:59.999Z'), note: 'For Vardar Homes',
+    expect(parseCreateCodes({ kind: 'pass' }, NOW)).toEqual({ kind: 'pass', discountType: 'percentage', discountValue: 100, count: 1, usageLimit: 1, validUntil: new Date('2027-02-07T23:59:59.999Z') });
+    expect(parseCreateCodes({ kind: 'extra_building', discountType: 'percentage', discountValue: 20, count: '5', usageLimit: 3, days: 30, note: '  For Vardar Homes  ' }, NOW)).toEqual({
+      kind: 'extra_building', discountType: 'percentage', discountValue: 20, count: 5, usageLimit: 3, validUntil: new Date('2026-12-09T23:59:59.999Z'), note: 'For Vardar Homes',
     });
+    expect(parseCreateCodes({ kind: 'pass', discountType: 'fixed', discountValue: '50' }, NOW)).toMatchObject({ discountType: 'fixed', discountValue: 50 });
   });
 
   it('refuses anything else, naming the field', () => {
@@ -28,6 +29,12 @@ describe('residence unlock codes: rules', () => {
     fails({ kind: 'pass', days: 731 }, 'FIELD_RANGE', 'days');
     fails({ kind: 'pass', note: 'x'.repeat(201) }, 'FIELD_TOO_LONG', 'note');
     fails({ kind: 'pass', note: { $gt: '' } }, 'FIELD_INVALID', 'note');
+    fails({ kind: 'pass', discountType: 'free' }, 'FIELD_INVALID', 'discountType');
+    fails({ kind: 'pass', discountValue: 0 }, 'FIELD_RANGE', 'discountValue');
+    fails({ kind: 'pass', discountValue: 101 }, 'FIELD_RANGE', 'discountValue');
+    // An amount off must be given (no default), and stays within 1–10 000 €.
+    fails({ kind: 'pass', discountType: 'fixed' }, 'FIELD_RANGE', 'discountValue');
+    fails({ kind: 'pass', discountType: 'fixed', discountValue: 10001 }, 'FIELD_RANGE', 'discountValue');
   });
 
   it('says where a code stands', () => {

@@ -48,4 +48,18 @@ describe('admin residence unlock codes', () => {
     const user = await makeUser();
     expect((await request(adminApp).get(ADMIN).set(auth(tokenFor(user._id)))).status).toBe(403);
   });
+
+  it('a discount code lowers the price without spending itself; the owner learns what is left to pay', async () => {
+    const admin = await makeUser({ role: 'admin' });
+    const made = await request(adminApp).post(ADMIN).set(auth(tokenFor(admin._id))).send({ kind: 'pass', discountType: 'percentage', discountValue: 20 });
+    const [code] = made.body.codes as string[];
+    const t = await setupDevelopment();
+    const res = await request(app).post(`/api/dashboard/developments/${t.devEnc}/billing/checkout`).set(auth(t.ownerToken)).send({ kind: 'pass', couponCode: code });
+    expect(res.status).toBe(503);
+    expect(res.body.code).toBe('PAYMENT_NOT_CONFIGURED');
+    expect(res.body.details).toMatchObject({ couponCode: code });
+    expect(res.body.details.amount).toBeCloseTo(res.body.details.listAmount * 0.8, 2);
+    expect((await DiscountCode.findOne({ code }))?.usedCount).toBe(0);
+  });
 });
+

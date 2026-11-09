@@ -23,6 +23,10 @@ export interface BillingRefusal {
   reason?: string;
   /** COUPON_INVALID with reason `minimum`: the minimum amount in euros. */
   min?: number;
+  /** PAYMENT_NOT_CONFIGURED after a discount code: the price before it, the amount off, and the code. */
+  listAmount?: number;
+  discount?: number;
+  couponCode?: string;
 }
 
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
@@ -41,5 +45,8 @@ export function billingRefusal(error: unknown): BillingRefusal | null {
     amount: num(d.amount),
     reason: typeof d.reason === 'string' ? d.reason : undefined,
     min: num(d.min),
+    listAmount: num(d.listAmount),
+    discount: num(d.discount),
+    couponCode: typeof d.couponCode === 'string' && /^[A-Z0-9_-]{3,64}$/.test(d.couponCode) ? d.couponCode : undefined,
   };
 }

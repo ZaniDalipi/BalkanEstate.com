@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ResidenceCodeFilter, ResidenceCodeKind, ResidenceCodeStatus } from '../../../api/residenceCodeAdminApi';
+import type { ResidenceCodeDiscountType, ResidenceCodeFilter, ResidenceCodeKind, ResidenceCodeStatus } from '../../../api/residenceCodeAdminApi';
 
 /** Wording for Admin › Residences › Unlock codes. */
 export function useResidenceCodeText() {
-  const { t } = useTranslation(['admin']);
+  const { t, i18n } = useTranslation(['admin']);
   const kindLabel = useCallback(
     (k: ResidenceCodeKind) => (k === 'pass' ? t('admin:residenceCodes.kind.pass', 'Residence Pass') : t('admin:residenceCodes.kind.extra_building', 'Extra buildings')),
     [t]
@@ -31,5 +31,14 @@ export function useResidenceCodeText() {
       })[f],
     [t]
   );
-  return { kindLabel, statusLabel, filterLabel };
+  const discountLabel = useCallback(
+    (type: ResidenceCodeDiscountType, value: number) => {
+      if (type === 'percentage' && value >= 100) return t('admin:residenceCodes.discount.full', 'Whole price');
+      if (type === 'percentage') return t('admin:residenceCodes.discount.percent', { value, defaultValue: '{{value}}% off' });
+      const amount = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+      return t('admin:residenceCodes.discount.fixed', { amount, defaultValue: '{{amount}} off' });
+    },
+    [t, i18n.language]
+  );
+  return { kindLabel, statusLabel, filterLabel, discountLabel };
 }

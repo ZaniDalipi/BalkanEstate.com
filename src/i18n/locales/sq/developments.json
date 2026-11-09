@@ -1236,7 +1236,9 @@
     "code": {
       "label": "Kodi i zhbllokimit",
       "required": "Futni kodin e zhbllokimit që ju dërguam pasi ramë dakord për pagesën.",
-      "format": "Kodet kanë shkronja, numra, - dhe _ (3–64 karaktere)."
+      "format": "Kodet kanë shkronja, numra, - dhe _ (3–64 karaktere).",
+      "applied": "Kodi u aplikua: paguani {{amount}} në vend të {{list}}.",
+      "appliedNext": "Na shkruani për pjesën tjetër (emaili e ka tashmë kodin dhe çmimin); pasi të paguhet, ju dërgojmë një kod zhbllokimi për ta shkruar këtu."
     },
     "quantity": {
       "label": "Ndërtesa për të shtuar",
@@ -1252,7 +1254,8 @@
       "each": "{{n}} × çmimi",
       "discount": "Zbritje Premium ({{pct}}%)",
       "total": "Gjithsej",
-      "validity": "Një pagesë, e vlefshme për {{months}} muaj — jo pa afat. Nuk rinovohet vetë."
+      "validity": "Një pagesë, e vlefshme për {{months}} muaj — jo pa afat. Nuk rinovohet vetë.",
+      "code": "Kodi {{code}}"
     },
     "done": {
       "pass": "Paketa e Rezidencës është aktive",
@@ -1296,7 +1299,8 @@
       "copy": "Kopjo adresën",
       "copied": "U kopjua",
       "copyFailed": "Nuk u kopjua. Zgjidhni {{email}} më lart, ose shkruajini nga aplikacioni juaj i postës.",
-      "passItem": "Paketa e Rezidencës"
+      "passItem": "Paketa e Rezidencës",
+      "withCode": "me kodin {{code}}"
     }
   },
   "pricingSection": {

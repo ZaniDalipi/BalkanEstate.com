@@ -2183,7 +2183,15 @@
       "title": "Coduri noi de deblocare",
       "tooLong": "Cel mult {{max}} caractere.",
       "uses": "Utilizări per cod",
-      "usesHint": "Fiecare cont poate folosi un cod o singură dată"
+      "usesHint": "Fiecare cont poate folosi un cod o singură dată",
+      "discount": "Reducere",
+      "discountFull": "Prețul întreg (deblochează imediat)",
+      "discountPercent": "Procent reducere",
+      "discountFixed": "Sumă reducere (€)",
+      "percentValue": "Procent reducere (%)",
+      "fixedValue": "Sumă reducere (€)",
+      "percentHint": "De la 1 la {{max}}; proprietarul plătește restul",
+      "fixedHint": "Niciodată mai mult decât prețul; proprietarul plătește restul"
     },
     "intro": "Proprietarii introduc un cod în „Cumpără Residence Pass” pentru a-l debloca fără plată online. Fiecare cod acoperă prețul întreg al ce deblochează.",
     "kind": {
@@ -2208,6 +2216,11 @@
     "title": "Coduri de deblocare",
     "until": "până la {{date}}",
     "usedBy": "Folosit de",
-    "uses": "{{used}} din {{limit}} folosite"
+    "uses": "{{used}} din {{limit}} folosite",
+    "discount": {
+      "full": "Prețul întreg",
+      "percent": "{{value}}% reducere",
+      "fixed": "{{amount}} reducere"
+    }
   }
 }

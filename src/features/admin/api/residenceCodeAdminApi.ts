@@ -4,11 +4,15 @@ import { apiRequest } from '@/src/shared/api';
 export type ResidenceCodeKind = 'pass' | 'extra_building';
 export type ResidenceCodeStatus = 'active' | 'used' | 'expired' | 'disabled' | 'scheduled';
 export type ResidenceCodeFilter = 'all' | 'active' | 'used' | 'expired' | 'disabled';
+/** Percentage (100 = the whole price: the code unlocks at once) or euros off. */
+export type ResidenceCodeDiscountType = 'percentage' | 'fixed';
 
 export interface ResidenceCode {
   id: string;
   code: string;
   kind: ResidenceCodeKind;
+  discountType: ResidenceCodeDiscountType;
+  discountValue: number;
   status: ResidenceCodeStatus;
   usedCount: number;
   usageLimit: number;
@@ -31,6 +35,8 @@ export interface ResidenceCodeList {
 
 export interface CreateResidenceCodes {
   kind: ResidenceCodeKind;
+  discountType: ResidenceCodeDiscountType;
+  discountValue: number;
   count: number;
   usageLimit: number;
   days: number;
@@ -40,6 +46,8 @@ export interface CreateResidenceCodes {
 export interface CreatedResidenceCodes {
   codes: string[];
   kind: ResidenceCodeKind;
+  discountType: ResidenceCodeDiscountType;
+  discountValue: number;
   validUntil: string;
   usageLimit: number;
 }

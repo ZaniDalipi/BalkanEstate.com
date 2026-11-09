@@ -6,6 +6,7 @@ import { useApiErrorText } from '@/src/features/developments/hooks/useApiErrorTe
 import type { CreateResidenceCodes, CreatedResidenceCodes, ResidenceCodeKind } from '../../../api/residenceCodeAdminApi';
 import { CODE_FORM_DEFAULTS, CODE_FORM_LIMITS, codeFormPayload, validateCodeForm, type CodeFormError, type CodeFormErrors, type CodeFormField, type CodeFormValues } from './residenceCodeForm';
 import { useResidenceCodeText } from './useResidenceCodeText';
+import { CodeDiscountField } from './CodeDiscountField';
 
 interface CreateCodesFormProps {
   onCreate: (body: CreateResidenceCodes) => Promise<CreatedResidenceCodes>;
@@ -48,7 +49,7 @@ export const CreateCodesForm: React.FC<CreateCodesFormProps> = ({ onCreate, onCr
       setFormError(apiText.describe(err).text);
     }
   };
-  const field = (key: Exclude<CodeFormField, 'note'>, label: string, hint: string) => (
+  const field = (key: Exclude<CodeFormField, 'note' | 'discountValue'>, label: string, hint: string) => (
     <Input label={label} value={values[key]} onChange={(e) => set({ [key]: e.target.value })} inputMode="numeric" error={text(errors[key])} helperText={hint} disabled={busy} />
   );
 
@@ -67,6 +68,14 @@ export const CreateCodesForm: React.FC<CreateCodesFormProps> = ({ onCreate, onCr
           ))}
         </div>
       </fieldset>
+      <CodeDiscountField
+        choice={values.discount}
+        value={values.discountValue}
+        onChoice={(discount) => set({ discount, discountValue: '' })}
+        onValue={(discountValue) => set({ discountValue })}
+        error={text(errors.discountValue)}
+        disabled={busy}
+      />
       <div className="grid gap-4 sm:grid-cols-3">
         {field('count', t('admin:residenceCodes.form.count', 'How many codes'), t('admin:residenceCodes.form.countHint', { max: CODE_FORM_LIMITS.maxCount, defaultValue: 'Up to {{max}} at once' }))}
         {field('usageLimit', t('admin:residenceCodes.form.uses', 'Uses per code'), t('admin:residenceCodes.form.usesHint', 'Each account can use a code once'))}

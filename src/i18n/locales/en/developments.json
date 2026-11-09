@@ -1236,7 +1236,9 @@
     "code": {
       "label": "Unlock code",
       "required": "Enter the unlock code we sent you after agreeing the payment.",
-      "format": "Codes use letters, numbers, - and _ (3–64 characters)."
+      "format": "Codes use letters, numbers, - and _ (3–64 characters).",
+      "applied": "Code applied: you pay {{amount}} instead of {{list}}.",
+      "appliedNext": "Write to us about the rest (the email already has the code and price); once it is paid we send you an unlock code to enter here."
     },
     "quantity": {
       "label": "Buildings to add",
@@ -1252,7 +1254,8 @@
       "each": "{{n}} × price",
       "discount": "Premium discount ({{pct}}%)",
       "total": "Total",
-      "validity": "One payment, valid for {{months}} months — not a lifetime pass. It doesn’t renew by itself."
+      "validity": "One payment, valid for {{months}} months — not a lifetime pass. It doesn’t renew by itself.",
+      "code": "Code {{code}}"
     },
     "done": {
       "pass": "Residence Pass active",
@@ -1296,7 +1299,8 @@
       "copy": "Copy address",
       "copied": "Copied",
       "copyFailed": "Couldn’t copy. Select {{email}} above, or write to it from your email app.",
-      "passItem": "Residence Pass"
+      "passItem": "Residence Pass",
+      "withCode": "with code {{code}}"
     }
   },
   "pricingSection": {

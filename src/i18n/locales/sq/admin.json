@@ -2198,7 +2198,15 @@
       "title": "Kode të reja zhbllokimi",
       "tooLong": "Maksimumi {{max}} karaktere.",
       "uses": "Përdorime për kod",
-      "usesHint": "Çdo llogari mund ta përdorë një kod një herë"
+      "usesHint": "Çdo llogari mund ta përdorë një kod një herë",
+      "discount": "Zbritja",
+      "discountFull": "Çmimi i plotë (zhbllokon menjëherë)",
+      "discountPercent": "Përqindje zbritje",
+      "discountFixed": "Shumë zbritje (€)",
+      "percentValue": "Përqindja e zbritjes (%)",
+      "fixedValue": "Shuma e zbritjes (€)",
+      "percentHint": "1 deri në {{max}}; pronari paguan pjesën tjetër",
+      "fixedHint": "Asnjëherë më shumë se çmimi; pronari paguan pjesën tjetër"
     },
     "intro": "Pronarët shkruajnë një kod te “Bli Kartën e Rezidencës” për ta zhbllokuar pa paguar online. Çdo kod mbulon çmimin e plotë të asaj që zhbllokon.",
     "kind": {
@@ -2223,6 +2231,11 @@
     "title": "Kodet e zhbllokimit",
     "until": "deri më {{date}}",
     "usedBy": "Përdorur nga",
-    "uses": "{{used}} nga {{limit}} të përdorura"
+    "uses": "{{used}} nga {{limit}} të përdorura",
+    "discount": {
+      "full": "Çmimi i plotë",
+      "percent": "{{value}}% zbritje",
+      "fixed": "{{amount}} zbritje"
+    }
   }
 }
