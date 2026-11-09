@@ -223,7 +223,9 @@
       "gestureDesktop": "Koristite Ctrl + skrolovanje za zumiranje",
       "gestureMac": "Koristite ⌘ + skrolovanje za zumiranje",
       "gestureMobile": "Koristite dva prsta za pomjeranje mape"
-    }
+    },
+    "residences": "Rezidencije",
+    "residencesSubtitle": "Stanovi koje {{name}} gradi na BalkanEstate"
   },
   "days": {
     "monday": "Ponedeljak",

@@ -221,7 +221,9 @@
       "gestureDesktop": "Χρησιμοποιήστε Ctrl + κύλιση για ζουμ",
       "gestureMac": "Χρησιμοποιήστε ⌘ + κύλιση για ζουμ",
       "gestureMobile": "Χρησιμοποιήστε δύο δάχτυλα για να μετακινήσετε τον χάρτη"
-    }
+    },
+    "residences": "Έργα",
+    "residencesSubtitle": "Κατοικίες που χτίζει η {{name}} στο BalkanEstate"
   },
   "days": {
     "monday": "Δευτέρα",

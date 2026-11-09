@@ -138,4 +138,15 @@ describe('the company page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Agency profile' }));
     expect(h.navigate).toHaveBeenCalledWith('/agencies/north-macedonia/vardar-homes');
   });
+
+  it('a company linked from the Business Directory links back to its directory page', async () => {
+    const linked = { ...builder, source: 'business' as const, businessSlug: 'balkan-build-skopje' };
+    h.development = residence({ builder: linked });
+    h.developer.mockResolvedValue({ builder: linked, residences: [residence({ builder: linked })] });
+    mount();
+    fireEvent.click(await screen.findByRole('button', { name: 'Business Directory page' }));
+    expect(h.navigate).toHaveBeenCalledWith('/business-directory/balkan-build-skopje');
+    expect(screen.getByText('Developer of East Gate')).toBeInTheDocument();
+  });
 });
+

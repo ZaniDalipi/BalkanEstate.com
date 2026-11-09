@@ -197,9 +197,10 @@ the endpoint returns 404.
 
 | Method & path | Notes |
 | --- | --- |
-| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). With no builder named, an agency-owned residence's `builder` is its agency (`source: 'agency'`, `agencySlug`, public agency-page fields only). |
+| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). A builder linked to a live Business Directory company shows that company's details (`source: 'business'`, `businessSlug`; never the link id); with no builder named, an agency-owned residence's `builder` is its agency (`source: 'agency'`, `agencySlug`, public agency-page fields only). |
 | `GET /:slug/units` | Visible units only, with effective availability. `priceOnRequest` hides price and price/m². Only non-draft listing ids, encoded. |
 | `GET /:slug/units/:unitId` | Unit + development + sanitised listings. 404 for a hidden unit. |
+| `GET /by-business/:business` | The published residences linked to a live Business Directory company (its slug or id), as list cards (at most 24). Unknown or offline: an empty list. |
 | `GET /:slug/developer` | The builder (no storage keys) and the company's residences as list cards: this one, then up to 12 other published residences of the same account naming the same builder. 404 `BUILDER_NOT_FOUND` when the residence has no builder. |
 | `GET /:slug/views?targetType&targetId` | Published views only. Hotspots are filtered to visible units, live buildings and floors, and non-draft listings. |
 | `GET /:slug/scene` | Legacy: the `main` (or lowest `sortOrder`) published view. |
@@ -1089,6 +1090,30 @@ logo, cover, address, phone, email, website, socials; never its registration
 number, team or billing; links only http(s)). A residence owned by a person
 with no builder named has no company page and shows no link to one.
 
+**Linked to the Business Directory.** In the builder form (dashboard →
+Settings → The builder) the owner can link the builder to one of **their own**
+Business Directory companies (`BuilderBusinessLink`; with none, **Add your
+company** opens the directory's form). Linked, buyers see the company's
+directory details everywhere the builder shows (residence page, company page),
+kept up to date there; what the owner typed fills what the business does not
+say (tagline, completed projects, YouTube). The company page gets a **Business
+Directory page** button, and the business's directory page gets a
+**Residences** section listing every published residence linked to it
+(`BusinessResidencesSection`). The company's residences also include every
+residence linked to the same business, whichever account published it.
+
+- Only the owner of a live business can link it (`PUT
+  /api/dashboard/developments/:id/builder/business { businessId | null }`,
+  `project.edit`); anyone else's, a missing or an offline one is the same 404
+  `BUSINESS_NOT_FOUND`, so a business's existence is not given away.
+- The link (`builder.businessListingId`) is never sent to buyers; they get the
+  company's directory page address (`businessSlug`). The dashboard gets it
+  encoded like every other id (`encodeRefsOnJSON` now handles nested paths).
+- A business that goes offline stops showing: the typed builder (or the
+  agency) shows again. Only the directory page's public fields are used
+  (`builderBusiness.ts`; links only http(s), years in range).
+- Saving the builder text keeps the link; Unlink removes it.
+
 **Getting there and back.** "Built by <company> ›" under the headline of the
 full-screen page (every screen size), "The builder" / "The company" in the
 residence's bar (from 1280px) and its section bar, the phone byline, and the
@@ -1128,9 +1153,11 @@ in the page's own section bar (the bar no longer wraps at 1024px). Checked at
 Tests: `developer/DeveloperPage.test.tsx` (the page, the residences and their
 links, Try again, no builder, the bar), `hero/useResidenceSections.test.tsx`,
 `residenceSections`, `builderLinks` (map search), `companyLabel`,
-`BuilderShowcase`, `ResidenceHero` (the headline's byline). Backend:
-`builder-match.test.ts` and `residence-company.test.ts` (run), and
-`developer-public.test.ts` (same account and builder only, no ids, 404s, the
+`BuilderShowcase`, `ResidenceHero` (the headline's byline), `BuilderBusinessLink`,
+`BusinessResidencesSection`. Backend:
+`builder-match.test.ts`, `residence-company.test.ts`, `builder-business.test.ts`,
+`web-address.test.ts`, `utils/encodeRefsOnJSON.test.ts` (run), and
+`builder-business-link.test.ts` and `developer-public.test.ts` (same account and builder only, no ids, 404s, the
 agency standing in), which needs MongoDB and was not run in the session that
 added it.
 

@@ -28,6 +28,7 @@ import { BusinessOwnerSection } from './BusinessOwnerSection';
 import { BusinessQuickActions } from './BusinessQuickActions';
 import { DetailToast } from './DetailToast';
 import { SimilarBusinesses } from './SimilarBusinesses';
+import { BusinessResidencesSection } from './BusinessResidencesSection';
 
 interface BusinessProfileProps {
   listing: BusinessListing;
@@ -108,6 +109,8 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
         <div className="mt-5 px-3 sm:mt-6 sm:px-0">
           <BusinessLocationSection listing={listing} place={place} isLocatingPlace={isLocatingPlace} location={location} onLocate={locate} onCopy={copy} />
         </div>
+
+        <BusinessResidencesSection listing={listing} />
 
         <SimilarBusinesses listing={listing} />
       </div>

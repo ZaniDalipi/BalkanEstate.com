@@ -7,6 +7,7 @@
 import Agency from '../../models/Agency';
 import type { IDevelopment } from '../../models/Development';
 import { BUILDER_LIMITS as L } from './builderProfile';
+import { businessAsBuilder } from './builderBusiness';
 
 /** Only what the agency's public page already shows. */
 const PUBLIC_AGENCY_FIELDS = 'name slug description logo coverImage email phone address zipCode city country website facebookUrl instagramUrl linkedinUrl';
@@ -83,3 +84,16 @@ export const loadOwnerAgency = async (development: Pick<IDevelopment, 'ownerType
   development.ownerType === 'agency' && development.agencyId
     ? ((await Agency.findById(development.agencyId).select(PUBLIC_AGENCY_FIELDS).lean()) as AgencyLike | null)
     : null;
+
+/**
+ * The company buyers see behind a residence, most specific first: its linked
+ * Business Directory company (with what the owner typed filling the gaps),
+ * else the builder the owner typed, else the agency that published it.
+ */
+export function resolveCompany(
+  typed: Record<string, unknown> | undefined,
+  business: Parameters<typeof businessAsBuilder>[0],
+  agency: AgencyLike | null | undefined
+): Record<string, unknown> | undefined {
+  return businessAsBuilder(business, typed ?? {}) ?? (typed?.name ? typed : undefined) ?? agencyAsBuilder(agency);
+}

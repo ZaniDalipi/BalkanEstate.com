@@ -30,6 +30,7 @@ export const API_ERROR_TEXT: Record<string, string> = {
   LISTING_NOT_FOUND: 'This listing no longer exists.',
   RESIDENCE_NOT_FOUND: 'This residence no longer exists. Reload the page.',
   BUILDER_NOT_FOUND: 'This residence has not introduced its builder yet.',
+  BUSINESS_NOT_FOUND: 'This company is not one of your Business Directory listings. Pick one you own.',
   AGENCY_NOT_FOUND: 'This agency no longer exists. Reload the page.',
   VIEW_NOT_FOUND: 'This view no longer exists. Reload the page.',
   UNIT_NUMBER_TAKEN: 'Unit {{number}} already exists here. Use another number.',

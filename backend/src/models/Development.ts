@@ -61,6 +61,11 @@ export interface IDevelopmentBuilder {
   socials?: Partial<Record<BuilderSocialNetwork, string>>;
   logo?: IDevelopmentImage;
   banner?: IDevelopmentImage;
+  /**
+   * The company's Business Directory listing, when the owner linked one they
+   * own: buyers then see its details (kept up to date there). Never sent out.
+   */
+  businessListingId?: mongoose.Types.ObjectId;
 }
 
 export interface IDevelopmentStats {
@@ -236,6 +241,7 @@ const DevelopmentSchema: Schema = new Schema(
       },
       logo: { url: { type: String }, publicId: { type: String } },
       banner: { url: { type: String }, publicId: { type: String } },
+      businessListingId: { type: Schema.Types.ObjectId, ref: 'BusinessListing', index: true },
     },
     coverMediaId: {
       type: Schema.Types.ObjectId,
@@ -312,6 +318,6 @@ DevelopmentSchema.index({ ownerId: 1, 'billing.trialStartedAt': 1 });
 DevelopmentSchema.index({ agencyId: 1, 'billing.agencyYearStart': 1 });
 
 // Encode every reference in JSON so the client compares like with like.
-encodeRefsOnJSON(DevelopmentSchema, ['ownerId', 'agencyId', 'coverMediaId']);
+encodeRefsOnJSON(DevelopmentSchema, ['ownerId', 'agencyId', 'coverMediaId', 'builder.businessListingId']);
 
 export default mongoose.model<IDevelopment>('Development', DevelopmentSchema);

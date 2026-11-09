@@ -291,10 +291,17 @@ export interface DevelopmentBuilder {
   socials?: Partial<Record<BuilderSocialNetwork, string>>;
   logo?: { url: string };
   banner?: { url: string };
-  /** Public only: 'agency' when no builder was named and the publishing agency stands in (from its agency page). */
-  source?: 'agency';
+  /**
+   * Public only: 'business' when the builder is linked to its Business Directory company (its details shown),
+   * 'agency' when no builder was named and the publishing agency stands in (from its agency page).
+   */
+  source?: 'agency' | 'business';
   /** With `source: 'agency'`: the agency's own page. */
   agencySlug?: string;
+  /** With `source: 'business'`: the company's Business Directory page. */
+  businessSlug?: string;
+  /** Dashboard only: the linked Business Directory listing (encoded id). */
+  businessListingId?: string;
 }
 
 /** The company behind a residence, on its own page: its profile and its other residences on the platform. */

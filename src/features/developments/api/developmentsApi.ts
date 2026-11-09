@@ -217,6 +217,14 @@ export const uploadBuilderImage = (id: string, kind: 'logo' | 'banner', file: Fi
 export const deleteBuilderImage = (id: string, kind: 'logo' | 'banner'): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(`${DASH}/${id}/builder/${kind}`, { method: 'DELETE', requiresAuth: true });
 
+/** Link the builder to a Business Directory company the user owns (null unlinks). */
+export const linkBuilderBusiness = (id: string, businessId: string | null): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/builder/business`, { method: 'PUT', body: { businessId }, requiresAuth: true });
+
+/** The published residences a Business Directory company builds (its directory page). */
+export const getBusinessResidences = (business: string): Promise<{ residences: Development[] }> =>
+  apiRequest<{ residences: Development[] }>(`${PUBLIC}/by-business/${encodeURIComponent(business)}`);
+
 export const createDevelopment = (payload: CreateDevelopmentPayload): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(DASH, {
     method: 'POST',

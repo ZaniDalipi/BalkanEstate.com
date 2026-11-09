@@ -221,7 +221,9 @@
       "gestureDesktop": "Përdorni Ctrl + rrotullim për zmadhim",
       "gestureMac": "Përdorni ⌘ + rrotullim për zmadhim",
       "gestureMobile": "Përdorni dy gishta për të lëvizur hartën"
-    }
+    },
+    "residences": "Rezidenca",
+    "residencesSubtitle": "Banesa që ndërton {{name}} në BalkanEstate"
   },
   "days": {
     "monday": "E hënë",

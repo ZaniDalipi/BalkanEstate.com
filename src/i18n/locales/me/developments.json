@@ -1450,7 +1450,8 @@
     "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz.",
     "RESIDENCE_GALLERY_FULL": "Rezidencija može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
     "GALLERY_ORDER_INVALID": "Fotografije su se u međuvremenu promijenile. Osvježite stranicu i pokušajte ponovo.",
-    "BUILDER_NOT_FOUND": "Ova rezidencija još nije predstavila investitora."
+    "BUILDER_NOT_FOUND": "Ova rezidencija još nije predstavila investitora.",
+    "BUSINESS_NOT_FOUND": "Ova kompanija nije među vašim unosima u Imeniku firmi. Izaberite onu koju posjedujete."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1524,7 +1525,8 @@
     "companyLabel": "Kompanija",
     "companyBy": "Od",
     "companyOf": "Kompanija iza projekta {{name}}",
-    "agencyPage": "Profil agencije"
+    "agencyPage": "Profil agencije",
+    "businessPage": "Stranica u Imeniku firmi"
   },
   "entrance": {
     "label": "Ulaz",
@@ -1591,5 +1593,20 @@
     "back": "Sve rezidencije",
     "nav": "Rezidencija",
     "cta": "Pogledajte stanove"
+  },
+  "builderBusiness": {
+    "title": "Kompanija u Imeniku firmi",
+    "intro": "Kad je povezana, kupci vide njene podatke i stranicu; njena stranica prikazuje ovu rezidenciju. Mogu se povezati samo kompanije koje posjedujete.",
+    "pick": "Vaša kompanija",
+    "link": "Poveži kompaniju",
+    "none": "Još nemate kompaniju u Imeniku firmi. Dodajte je jednom i povežite sa svim svojim rezidencijama.",
+    "add": "Dodajte svoju kompaniju",
+    "loadError": "Vaše firme nije bilo moguće učitati.",
+    "notLinked": "Nije povezano sa kompanijom iz Imenika firmi.",
+    "linked": "Povezano: kupci vide njene podatke iz Imenika firmi",
+    "linkedOther": "Povezana kompanija",
+    "inactive": "Nije aktivna u imeniku, pa kupci za sada vide polja ispod.",
+    "view": "Pogledaj njenu stranicu",
+    "unlink": "Odveži"
   }
 }

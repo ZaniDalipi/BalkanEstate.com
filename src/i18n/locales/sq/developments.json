@@ -1439,7 +1439,8 @@
     "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër.",
     "RESIDENCE_GALLERY_FULL": "Një rezidencë mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
     "GALLERY_ORDER_INVALID": "Fotot ndryshuan ndërkohë. Ringarkoni faqen dhe provoni përsëri.",
-    "BUILDER_NOT_FOUND": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin."
+    "BUILDER_NOT_FOUND": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin.",
+    "BUSINESS_NOT_FOUND": "Kjo kompani nuk është ndër listimet tuaja në Drejtorinë e Bizneseve. Zgjidhni një që e zotëroni."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1513,7 +1514,8 @@
     "companyLabel": "Kompania",
     "companyBy": "Nga",
     "companyOf": "Kompania pas {{name}}",
-    "agencyPage": "Profili i agjencisë"
+    "agencyPage": "Profili i agjencisë",
+    "businessPage": "Faqja në Drejtorinë e Bizneseve"
   },
   "entrance": {
     "label": "Hyrja",
@@ -1579,5 +1581,20 @@
     "back": "Të gjitha rezidencat",
     "nav": "Rezidenca",
     "cta": "Shiko apartamentet"
+  },
+  "builderBusiness": {
+    "title": "Kompania në Drejtorinë e Bizneseve",
+    "intro": "Kur lidhet, blerësit shohin të dhënat dhe faqen e saj; faqja e saj e liston këtë rezidencë. Mund të lidhen vetëm kompanitë që zotëroni.",
+    "pick": "Kompania juaj",
+    "link": "Lidh kompaninë",
+    "none": "Ende nuk keni kompani në Drejtorinë e Bizneseve. Shtojeni një herë dhe lidheni me të gjitha rezidencat tuaja.",
+    "add": "Shtoni kompaninë tuaj",
+    "loadError": "Bizneset tuaja nuk mund të ngarkoheshin.",
+    "notLinked": "Nuk është e lidhur me një kompani të Drejtorisë së Bizneseve.",
+    "linked": "E lidhur: blerësit shohin të dhënat e saj nga Drejtoria e Bizneseve",
+    "linkedOther": "Një kompani e lidhur",
+    "inactive": "Nuk është aktive në drejtori, ndaj blerësit shohin fushat më poshtë tani për tani.",
+    "view": "Shiko faqen e saj",
+    "unlink": "Shkëput"
   }
 }

@@ -7,6 +7,7 @@ import { paths } from '@/src/app/router/paths';
 import type { DevelopmentBuilder } from '../../../types';
 import { BuilderLogo } from '../builder/BuilderLogo';
 import { isAgencyCompany } from '../../../utils/companyLabel';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface DeveloperHeroProps {
   builder: DevelopmentBuilder;
@@ -44,6 +45,17 @@ export const DeveloperHero: React.FC<DeveloperHeroProps> = ({ builder, residence
           </p>
           <h1 className="break-words text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{builder.name}</h1>
           {builder.tagline && <p className="mt-1 text-base text-slate-600">{builder.tagline}</p>}
+          {builder.source === 'business' && builder.businessSlug && (
+            <button
+              type="button"
+              onClick={() => navigate(paths.businessListing(builder.businessSlug as string))}
+              className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-800 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <SoftIcon name="store" className="h-5 w-5" />
+              {t('builderPublic.businessPage', 'Business Directory page')}
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
           {agency && builder.agencySlug && (
             <button
               type="button"

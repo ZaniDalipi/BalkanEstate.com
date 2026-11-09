@@ -221,7 +221,9 @@
       "gestureDesktop": "Use Ctrl + scroll to zoom the map",
       "gestureMac": "Use ⌘ + scroll to zoom the map",
       "gestureMobile": "Use two fingers to move the map"
-    }
+    },
+    "residences": "Residences",
+    "residencesSubtitle": "Homes {{name}} builds on BalkanEstate"
   },
   "days": {
     "monday": "Monday",

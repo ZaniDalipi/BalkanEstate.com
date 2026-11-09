@@ -223,7 +223,9 @@
       "gestureDesktop": "Folosește Ctrl + derulare pentru zoom",
       "gestureMac": "Folosește ⌘ + derulare pentru zoom",
       "gestureMobile": "Folosește două degete pentru a muta harta"
-    }
+    },
+    "residences": "Ansambluri",
+    "residencesSubtitle": "Locuințe construite de {{name}} pe BalkanEstate"
   },
   "days": {
     "monday": "Luni",

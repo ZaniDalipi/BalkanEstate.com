@@ -275,11 +275,13 @@ export const updateDevelopment = async (
     if (key === 'builder') {
       // Text fields only: the logo and banner have their own upload endpoints and are kept.
       const fields = normalizeBuilderText(value);
-      const kept: Record<string, { url: string; publicId?: string }> = {};
+      const kept: Record<string, unknown> = {};
       for (const kind of ['logo', 'banner'] as const) {
         const img = development.builder?.[kind];
         if (img?.url) kept[kind] = { url: img.url, ...(img.publicId ? { publicId: img.publicId } : {}) };
       }
+      // The Business Directory link has its own endpoint (it checks who owns the business) and is kept.
+      if (development.builder?.businessListingId) kept.businessListingId = development.builder.businessListingId;
       development.set('builder', fields || Object.keys(kept).length ? { ...(fields ?? {}), ...kept } : undefined);
       continue;
     }

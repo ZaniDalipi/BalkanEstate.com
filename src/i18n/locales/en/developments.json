@@ -1439,7 +1439,8 @@
     "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first.",
     "RESIDENCE_GALLERY_FULL": "A residence can have at most {{max}} photos. {{remaining}} more can be added.",
     "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again.",
-    "BUILDER_NOT_FOUND": "This residence has not introduced its builder yet."
+    "BUILDER_NOT_FOUND": "This residence has not introduced its builder yet.",
+    "BUSINESS_NOT_FOUND": "This company is not one of your Business Directory listings. Pick one you own."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1513,7 +1514,8 @@
     "companyLabel": "The company",
     "companyBy": "By",
     "companyOf": "The company behind {{name}}",
-    "agencyPage": "Agency profile"
+    "agencyPage": "Agency profile",
+    "businessPage": "Business Directory page"
   },
   "entrance": {
     "label": "Entrance",
@@ -1579,5 +1581,20 @@
     "back": "All residences",
     "nav": "Residence",
     "cta": "View apartments"
+  },
+  "builderBusiness": {
+    "title": "Company in the Business Directory",
+    "intro": "Linked, buyers see its details and page; its page lists this residence. Only companies you own can be linked.",
+    "pick": "Your company",
+    "link": "Link company",
+    "none": "You have no company in the Business Directory yet. Add it once and link it to all your residences.",
+    "add": "Add your company",
+    "loadError": "Your businesses could not be loaded.",
+    "notLinked": "Not linked to a Business Directory company.",
+    "linked": "Linked: buyers see its Business Directory details",
+    "linkedOther": "A linked company",
+    "inactive": "It is not live in the directory, so buyers see the fields below for now.",
+    "view": "View its page",
+    "unlink": "Unlink"
   }
 }

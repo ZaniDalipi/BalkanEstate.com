@@ -7,6 +7,7 @@ import { useBuilderImages } from '../../../hooks/useBuilderImages';
 import { BuilderFields } from './BuilderFields';
 import { BuilderImageField } from './BuilderImageField';
 import { useBuilderForm } from './useBuilderForm';
+import { BuilderBusinessLink } from './BuilderBusinessLink';
 
 interface BuilderSectionProps {
   development: Development;
@@ -35,6 +36,7 @@ export const BuilderSection: React.FC<BuilderSectionProps> = ({ development, can
           ? t('builder.intro', 'The company building this residence. Buyers see it at the top of the residence page, with its banner, logo and contacts.')
           : t('details.readOnly', 'Only owners and admins can change these details.')}
       </p>
+      <BuilderBusinessLink development={development} canEdit={canEdit} />
       <div className="mb-6 grid gap-4 sm:grid-cols-[auto_1fr]">
         <BuilderImageField kind="logo" url={development.builder?.logo?.url} disabled={!canEdit} onUpload={(file) => images.upload({ kind: 'logo', file })} onRemove={() => images.remove('logo')} />
         <BuilderImageField kind="banner" url={development.builder?.banner?.url} disabled={!canEdit} onUpload={(file) => images.upload({ kind: 'banner', file })} onRemove={() => images.remove('banner')} />

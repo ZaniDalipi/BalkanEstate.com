@@ -40,7 +40,7 @@ import {
   listPreviewImages,
 } from '../services/developments/developmentPublicService';
 import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
-import { getPublicDeveloper } from '../services/developments/developerPublicService';
+import { getPublicDeveloper, listBusinessResidences } from '../services/developments/developerPublicService';
 import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
 import { recomputeOwnerBilling, setResidenceStatus } from '../services/developments/billing/residenceBillingService';
 
@@ -410,6 +410,15 @@ export const getPublicDeveloperProfile = async (req: Request, res: Response): Pr
     res.json(await getPublicDeveloper(req.params.slug));
   } catch (error) {
     sendServiceError(res, error, 'get public developer');
+  }
+};
+
+/** GET /api/developments/by-business/:business — the published residences a Business Directory company builds. */
+export const getBusinessResidences = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await listBusinessResidences(req.params.business));
+  } catch (error) {
+    sendServiceError(res, error, 'list business residences');
   }
 };
 

@@ -221,7 +221,9 @@
       "gestureDesktop": "Използвайте Ctrl + превъртане за мащабиране",
       "gestureMac": "Използвайте ⌘ + превъртане за мащабиране",
       "gestureMobile": "Използвайте два пръста, за да местите картата"
-    }
+    },
+    "residences": "Комплекси",
+    "residencesSubtitle": "Жилища, които {{name}} строи в BalkanEstate"
   },
   "days": {
     "monday": "Понеделник",

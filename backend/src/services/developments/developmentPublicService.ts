@@ -25,7 +25,8 @@ import { resolveEffectiveAvailability } from './unitAvailability';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
 import { effectiveTour } from './unitTour';
 import { isPropertyImageTag } from '../../config/propertyImageTags';
-import { agencyAsBuilder, loadOwnerAgency } from './residenceCompany';
+import { loadOwnerAgency, resolveCompany } from './residenceCompany';
+import { loadLinkedBusiness } from './builderBusiness';
 
 const LIVE = { $exists: false } as const;
 
@@ -101,6 +102,8 @@ const publicBuilder = (b: IDevelopment['builder']): Record<string, unknown> | un
     else delete plain[kind];
   }
   delete plain._id;
+  // The Business Directory link is internal (buyers get the company's page address instead).
+  delete plain.businessListingId;
   const socials = plain.socials as Record<string, unknown> | undefined;
   if (!socials || Object.values(socials).every((v) => !v)) delete plain.socials;
   return plain;
@@ -258,15 +261,16 @@ const floorsWithPublishedViews = async (developmentId: mongoose.Types.ObjectId):
 export const getPublicDevelopmentDetail = async (slug: unknown) => {
   const development = await loadPublishedDevelopment(slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
-  // No builder named: the publishing agency stands in as the company behind the residence.
-  const needsCompany = !development.builder?.name?.trim();
-  const [{ buildings, floors, entrances }, units, floorsWithViews, ownerAgency] = await Promise.all([
+  // The company behind it: its linked business, else the builder typed, else the publishing agency.
+  const needsAgency = !development.builder?.name?.trim();
+  const [{ buildings, floors, entrances }, units, floorsWithViews, ownerAgency, business] = await Promise.all([
     loadStructureMaps(developmentId),
     DevelopmentUnit.find(visibleUnitFilter(developmentId)).select(
       'buildingId entranceId availability listingIds primaryListingId virtualTourUrl'
     ),
     floorsWithPublishedViews(developmentId),
-    needsCompany ? loadOwnerAgency(development) : Promise.resolve(null),
+    needsAgency ? loadOwnerAgency(development) : Promise.resolve(null),
+    loadLinkedBusiness(development),
   ]);
   const listings = await loadListingStatuses(units);
 
@@ -294,7 +298,7 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
   }
 
   const publicDevelopment = toPublicDevelopment(development);
-  const company = needsCompany ? agencyAsBuilder(ownerAgency) : undefined;
+  const company = resolveCompany(publicDevelopment.builder as Record<string, unknown> | undefined, business, ownerAgency);
   if (company) publicDevelopment.builder = company;
   return {
     development: publicDevelopment,

@@ -1450,7 +1450,8 @@
     "ENTRANCE_IN_USE": "{{count}} unități folosesc încă această intrare. Mutați-le mai întâi la altă intrare.",
     "RESIDENCE_GALLERY_FULL": "Un ansamblu poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
     "GALLERY_ORDER_INVALID": "Fotografiile s-au schimbat între timp. Reîncărcați pagina și încercați din nou.",
-    "BUILDER_NOT_FOUND": "Acest ansamblu nu și-a prezentat încă constructorul."
+    "BUILDER_NOT_FOUND": "Acest ansamblu nu și-a prezentat încă constructorul.",
+    "BUSINESS_NOT_FOUND": "Această companie nu este printre înregistrările dvs. din Catalogul de firme. Alegeți una pe care o dețineți."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1524,7 +1525,8 @@
     "companyLabel": "Compania",
     "companyBy": "De la",
     "companyOf": "Compania din spatele {{name}}",
-    "agencyPage": "Profilul agenției"
+    "agencyPage": "Profilul agenției",
+    "businessPage": "Pagina din Catalogul de firme"
   },
   "entrance": {
     "label": "Intrare",
@@ -1591,5 +1593,20 @@
     "back": "Toate rezidențele",
     "nav": "Rezidență",
     "cta": "Vedeți apartamentele"
+  },
+  "builderBusiness": {
+    "title": "Compania din Catalogul de firme",
+    "intro": "Odată legată, cumpărătorii îi văd datele și pagina; pagina ei afișează acest ansamblu. Se pot lega doar companiile pe care le dețineți.",
+    "pick": "Compania dvs.",
+    "link": "Leagă compania",
+    "none": "Nu aveți încă o companie în Catalogul de firme. Adăugați-o o dată și legați-o de toate ansamblurile dvs.",
+    "add": "Adăugați compania dvs.",
+    "loadError": "Firmele dvs. nu au putut fi încărcate.",
+    "notLinked": "Nu este legat de o companie din Catalogul de firme.",
+    "linked": "Legată: cumpărătorii îi văd datele din Catalogul de firme",
+    "linkedOther": "O companie legată",
+    "inactive": "Nu este activă în catalog, așa că deocamdată cumpărătorii văd câmpurile de mai jos.",
+    "view": "Vezi pagina ei",
+    "unlink": "Dezleagă"
   }
 }
