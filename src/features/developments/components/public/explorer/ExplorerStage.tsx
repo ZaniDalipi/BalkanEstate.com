@@ -41,6 +41,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         'group/stage bg-slate-900',
         // Off full screen, desktop keeps the controls in bands above/below the
         // image so they never cover the top or ground-floor apartments.
+        // In full screen the stage sets the safe-area insets its controls add (index.css, .explorer-stage-full).
         full ? 'explorer-stage-full fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
@@ -77,24 +78,26 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           onToggleFullscreen={fs.toggle}
         />
 
-        <div className="absolute bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)] left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-[calc(var(--stage-safe-right,0px)+0.75rem)] lg:translate-x-0">
-          <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
+        <div className={cn('absolute bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)] left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-[calc(var(--stage-safe-right,0px)+0.75rem)] lg:translate-x-0', HIDE_WHEN_IMMERSED)}>
+          <ViewSwitcher views={p.views} index={p.viewIndex} onChange={orbit.switchTo} />
         </div>
       </div>
 
-      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-[calc(var(--stage-safe-left,0px)+0.75rem)] top-[calc(var(--stage-safe-top,0px)+4rem)] p-0')}>
-        <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
-      </div>
-
-      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-[calc(var(--stage-safe-bottom,0px)+5rem)] left-[calc(var(--stage-safe-left,0px)+0.75rem)] p-0 lg:bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)]')}>
-        <ExplorerLegend
-          counts={p.legend}
-          selected={p.selectedAvailability}
-          onToggle={p.onToggleAvailability}
-          showAvailability={mode === 'availability'}
-          onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
-        />
-      </div>
+      <ExplorerStageControls
+        fullscreen={full}
+        buildings={p.buildings}
+        activeBuildingId={p.activeBuildingId}
+        onBuilding={p.onBuilding}
+        floors={p.floors}
+        activeFloorId={p.activeFloorId}
+        onFloor={p.onFloor}
+        onPreviewFloor={preview.setPreviewFloorId}
+        legend={p.legend}
+        selectedAvailability={p.selectedAvailability}
+        onToggleAvailability={p.onToggleAvailability}
+        showAvailability={mode === 'availability'}
+        onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
+      />
 
       {showFilters && (
         <FiltersOverlay fullscreen={full} onClose={() => setShowFilters(false)}>
