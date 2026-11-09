@@ -2,44 +2,23 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import type { DevelopmentBuilding, DevelopmentEntrance, DevelopmentFloor, Hotspot, PublicUnit } from '../../../types';
+import type { Hotspot } from '../../../types';
 import type { ExplorerNav } from '../../../hooks/useExplorerUrlState';
-import { hasActiveCriteria, toggleIn, type UnitCriteria } from '../../../utils/unitFilters';
+import { hasActiveCriteria, toggleIn } from '../../../utils/unitFilters';
 import { UnitFilters } from '../UnitFilters';
 import { ExplorerStage, type ExplorerStageProps } from './ExplorerStage';
 import { useExplorerData } from './useExplorerData';
 import { useExplorerTarget } from './useExplorerTarget';
 import { BudgetAssistant } from './budget/BudgetAssistant';
 import { EXPLORER_PILL } from './explorerPill';
-import { FloorByFloor } from './FloorByFloor';
+import { BuildingFloors } from './BuildingFloors';
 import { useFlyToUnit } from './useFlyToUnit';
 import { ImmersiveStage } from './immersive/ImmersiveStage';
+import { floorStack } from './floors/floorStack';
+import { usePrefetchPublicViews } from '../../../hooks/useScenes';
+import type { ResidenceExplorerProps } from './residenceExplorerProps';
 
-export interface ResidenceExplorerProps {
-  slug: string;
-  residenceName: string;
-  buildings: DevelopmentBuilding[];
-  floors: DevelopmentFloor[];
-  /** Entrances with the homes they serve; marked on the pictures as door pins. */
-  entrances?: DevelopmentEntrance[];
-  units: PublicUnit[];
-  criteria: UnitCriteria;
-  onCriteriaChange: (c: UnitCriteria) => void;
-  nav: ExplorerNav;
-  onNavChange: (n: ExplorerNav) => void;
-  onOpenUnit: (unitId: string) => void;
-  /** The apartment open in the details sheet (from `?unit=`). */
-  openUnitId?: string | null;
-  /** Where the residence is: the budget helper compares prices with this city's average. */
-  city?: string;
-  country?: string;
-  /** Rendered above the stage when there is something to explore. */
-  header?: React.ReactNode;
-  /** Rendered instead when no view is published (e.g. the cover hero). */
-  fallback?: React.ReactNode;
-  /** Full-screen hero (desktop): the residence's bar and headline over an edge-to-edge rendering. */
-  immersive?: { nav: React.ReactNode; intro: React.ReactNode };
-}
+export type { ResidenceExplorerProps };
 
 /**
  * Public interactive explorer: Residence (development views) → Building
@@ -52,6 +31,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
   const { t } = useTranslation('developments');
   const target = useExplorerTarget({ slug: p.slug, residenceName: p.residenceName, nav: p.nav, buildings: p.buildings, floors: p.floors });
 
+  const prefetchViews = usePrefetchPublicViews(p.slug);
   const { type, buildingId } = target;
   const floorId = p.nav.floor;
   const { unitsById, buildingsById, entrancesById, buildingFacts, matched, matchedIds, legend } = useExplorerData({
@@ -94,15 +74,13 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
     else if (h.linkType === 'entrance') p.onCriteriaChange({ ...p.criteria, entrances: [h.linkId] });
   };
 
-  const building = target.buildingId ? buildingsById.get(target.buildingId) : undefined;
-  const floorList = (
-    back?: { label: string; onClick: () => void },
-    note?: string
-  ) => (
-    <FloorByFloor
-      title={building?.name ?? t('scene.linkTypes.building', 'Building')}
-      floors={p.floors.filter((f) => f.buildingId === target.buildingId && (!floorId || f.id === floorId))}
-      units={p.units.filter((u) => (floorId ? u.floorId === floorId : u.buildingId === target.buildingId))}
+  const floorList = (back?: { label: string; onClick: () => void }, note?: string) => (
+    <BuildingFloors
+      building={target.buildingId ? buildingsById.get(target.buildingId) : undefined}
+      buildingId={target.buildingId}
+      floorId={floorId}
+      floors={p.floors}
+      units={p.units}
       matchedIds={matchedIds}
       onOpenUnit={p.onOpenUnit}
       openUnitId={p.openUnitId}
@@ -124,6 +102,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
   // A building/floor picture with nothing marked on it yet: keep every apartment reachable below it.
   const unmarked = type !== 'development' && !target.isLoading && target.views.every((v) => v.hotspots.length === 0);
 
+  const floorStops = target.type === 'development' ? [] : floorStack(p.floors, target.buildingId, p.units);
   const stage: ExplorerStageProps = {
     views: target.views,
     viewIndex: target.viewIndex,
@@ -147,6 +126,14 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
     focus: trip.focus,
     onFocusArrive: trip.onArrive,
     openUnitId: p.openUnitId,
+    // Inside a building, its floors: the elevator. A floor that isn't one of them (a stale link) has no stop.
+    floors: floorStops,
+    activeFloorId: floorStops.some((f) => f.id === floorId) ? floorId : undefined,
+    onFloor: (id) => go(id ? { building: target.buildingId, floor: id } : { building: target.buildingId }),
+    // Pointing at a floor with a picture starts loading it, so choosing it opens at once.
+    onPointFloor: (id) => {
+      if (floorStops.find((f) => f.id === id)?.hasPicture) prefetchViews('floor', id);
+    },
     filters: <UnitFilters units={p.units} criteria={p.criteria} onChange={p.onCriteriaChange} matchCount={matched.length} defaultExpanded />,
   };
   return (

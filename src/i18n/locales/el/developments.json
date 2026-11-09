@@ -465,14 +465,26 @@
       "photoAlt": "{{name}}, φωτογραφία {{n}}",
       "prevPhoto": "Προηγούμενη φωτογραφία",
       "nextPhoto": "Επόμενη φωτογραφία",
-      "photoOf": "{{n}} από {{total}}"
+      "photoOf": "{{n}} από {{total}}",
+      "modes": "Τι να εμφανιστεί",
+      "modeFloor": "Στον όροφό του",
+      "modePhotos": "Φωτογραφίες",
+      "floorAlt": "{{floor}}: επισημασμένο το {{name}}",
+      "loading": "Φόρτωση της εικόνας του ορόφου…",
+      "floorFailed": "Η εικόνα του ορόφου δεν φορτώθηκε.",
+      "retry": "Δοκιμάστε ξανά"
     },
     "dive": {
       "skip": "Παράλειψη",
       "status": "Σας μεταφέρουμε στο {{name}}"
     },
     "bathrooms_one": "{{count}} μπάνιο",
-    "bathrooms_other": "{{count}} μπάνια"
+    "bathrooms_other": "{{count}} μπάνια",
+    "floors": {
+      "title": "Όροφοι",
+      "whole": "Όλο το κτίριο",
+      "hasPlan": "Έχει κάτοψη"
+    }
   },
   "feature": {
     "big_terrace": "Με μεγάλη βεράντα",

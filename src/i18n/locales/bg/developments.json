@@ -465,14 +465,26 @@
       "photoAlt": "{{name}}, снимка {{n}}",
       "prevPhoto": "Предишна снимка",
       "nextPhoto": "Следваща снимка",
-      "photoOf": "{{n}} от {{total}}"
+      "photoOf": "{{n}} от {{total}}",
+      "modes": "Какво да се покаже",
+      "modeFloor": "На своя етаж",
+      "modePhotos": "Снимки",
+      "floorAlt": "{{floor}}: {{name}} е отбелязан",
+      "loading": "Зареждане на изображението на етажа…",
+      "floorFailed": "Изображението на етажа не можа да се зареди.",
+      "retry": "Опитай отново"
     },
     "dive": {
       "skip": "Пропусни",
       "status": "Отиваме до {{name}}"
     },
     "bathrooms_one": "{{count}} баня",
-    "bathrooms_other": "{{count}} бани"
+    "bathrooms_other": "{{count}} бани",
+    "floors": {
+      "title": "Етажи",
+      "whole": "Цялата сграда",
+      "hasPlan": "Има разпределение"
+    }
   },
   "feature": {
     "big_terrace": "С голяма тераса",

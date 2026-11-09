@@ -467,7 +467,14 @@
       "photoAlt": "{{name}}, фотографија {{n}}",
       "prevPhoto": "Претходна фотографија",
       "nextPhoto": "Следећа фотографија",
-      "photoOf": "{{n}} од {{total}}"
+      "photoOf": "{{n}} од {{total}}",
+      "modes": "Шта приказати",
+      "modeFloor": "На свом спрату",
+      "modePhotos": "Фотографије",
+      "floorAlt": "{{floor}}: {{name}} истакнут",
+      "loading": "Учитавање слике спрата…",
+      "floorFailed": "Слика спрата није могла да се учита.",
+      "retry": "Покушај поново"
     },
     "dive": {
       "skip": "Прескочи",
@@ -475,7 +482,12 @@
     },
     "bathrooms_one": "{{count}} купатило",
     "bathrooms_few": "{{count}} купатила",
-    "bathrooms_other": "{{count}} купатила"
+    "bathrooms_other": "{{count}} купатила",
+    "floors": {
+      "title": "Спратови",
+      "whole": "Цела зграда",
+      "hasPlan": "Има план спрата"
+    }
   },
   "feature": {
     "big_terrace": "Са великом терасом",

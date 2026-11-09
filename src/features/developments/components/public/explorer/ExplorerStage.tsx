@@ -2,49 +2,18 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/src/lib/utils';
-import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit, UnitAvailability } from '../../../types';
 import { ExplorerCanvas } from './ExplorerCanvas';
 import { ViewSwitcher } from './ViewSwitcher';
-import type { Crumb } from './ExplorerBreadcrumb';
 import { FiltersOverlay } from './FiltersOverlay';
 import { StageTopBar } from './StageTopBar';
-import type { ExplorerFocus } from './useFlyFocus';
-import { BuildingChips } from './BuildingChips';
-import { ExplorerLegend } from './ExplorerLegend';
 import { useStageControls } from './immersive/useStageControls';
-import type { BuildingFacts } from './useRegionCard';
 import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
 import { OrbitView } from './orbit/OrbitView';
+import { ExplorerStageControls } from './ExplorerStageControls';
+import { useFloorPreview } from './floors/useFloorPreview';
+import type { ExplorerStageProps } from './explorerStageProps';
 
-export interface ExplorerStageProps {
-  views: PublicSceneView[];
-  viewIndex: number;
-  onViewIndex: (i: number) => void;
-  crumbs: Crumb[];
-  onCrumb: (i: number) => void;
-  buildings: DevelopmentBuilding[];
-  activeBuildingId?: string;
-  onBuilding: (b: DevelopmentBuilding) => void;
-  legend: Array<{ state: UnitAvailability; count: number }>;
-  selectedAvailability: readonly UnitAvailability[];
-  onToggleAvailability: (s: UnitAvailability) => void;
-  unitsById: Map<string, PublicUnit>;
-  matchedIds?: Set<string>;
-  buildingsById: Map<string, DevelopmentBuilding>;
-  entrancesById?: Map<string, DevelopmentEntrance>;
-  buildingFacts?: Map<string, BuildingFacts>;
-  onActivate: (h: Hotspot) => void;
-  /** The shared filter panel, shown over the stage on demand. */
-  filters: React.ReactNode;
-  activeFilters: boolean;
-  /** Extra buttons before the filters toggle (the budget helper); their popups anchor under the bar. */
-  actions?: React.ReactNode;
-  /** Region the explorer is gliding to; see ExplorerCanvas. */
-  focus?: ExplorerFocus;
-  onFocusArrive?: (h: Hotspot) => void;
-  /** The apartment open in the details sheet; see ExplorerCanvas. */
-  openUnitId?: string | null;
-}
+export type { ExplorerStageProps };
 
 /**
  * Full-bleed explorer layout (East Gate B2): the rendering edge to edge with
@@ -56,10 +25,11 @@ export interface ExplorerStageProps {
 export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
   const targetKey = p.crumbs.map((c) => c.key).join('/');
-  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown, orbit } = useStageControls(p.views, p.viewIndex, p.onViewIndex, targetKey);
+  const level = p.floors?.find((f) => f.id === p.activeFloorId)?.level;
+  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown, orbit } = useStageControls(p.views, p.viewIndex, p.onViewIndex, targetKey, level);
+  const preview = useFloorPreview(p.unitsById, p.onPointFloor);
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
-  const float = full ? 'absolute' : 'relative sm:absolute';
 
   const stage = (
     <section
@@ -77,7 +47,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
       <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
         {view && (
           // Views of one building orbit into each other; a new building fades in, so drilling in after the glide reads as one move.
-          <OrbitView viewKey={`${targetKey}:${view.viewKey}`} dir={orbit.dir}>
+          <OrbitView viewKey={`${targetKey}:${view.viewKey}`} move={orbit.move}>
             <ExplorerCanvas
               view={view}
               unitsById={p.unitsById}
@@ -91,6 +61,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
               focus={p.focus}
               onFocusArrive={p.onFocusArrive}
               openUnitId={p.openUnitId}
+              litUnitIds={preview.litUnitIds}
             />
           </OrbitView>
         )}
@@ -111,19 +82,21 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         </div>
       </div>
 
-      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-3 top-16 p-0', HIDE_WHEN_IMMERSED)}>
-        <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
-      </div>
-
-      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3', HIDE_WHEN_IMMERSED)}>
-        <ExplorerLegend
-          counts={p.legend}
-          selected={p.selectedAvailability}
-          onToggle={p.onToggleAvailability}
-          showAvailability={mode === 'availability'}
-          onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
-        />
-      </div>
+      <ExplorerStageControls
+        fullscreen={full}
+        buildings={p.buildings}
+        activeBuildingId={p.activeBuildingId}
+        onBuilding={p.onBuilding}
+        floors={p.floors}
+        activeFloorId={p.activeFloorId}
+        onFloor={p.onFloor}
+        onPreviewFloor={preview.setPreviewFloorId}
+        legend={p.legend}
+        selectedAvailability={p.selectedAvailability}
+        onToggleAvailability={p.onToggleAvailability}
+        showAvailability={mode === 'availability'}
+        onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
+      />
 
       {showFilters && (
         <FiltersOverlay fullscreen={full} onClose={() => setShowFilters(false)}>

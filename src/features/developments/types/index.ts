@@ -153,6 +153,8 @@ export interface DevelopmentFloor {
   level: number;
   kind: string;
   order: number;
+  /** Public only: the floor has a published picture (the explorer opens it there). */
+  hasViews?: boolean;
 }
 
 export interface DevelopmentUnit {

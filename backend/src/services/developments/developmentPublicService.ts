@@ -24,6 +24,7 @@ import { toObjectId } from './developmentRefs';
 import { resolveEffectiveAvailability } from './unitAvailability';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
 import { effectiveTour } from './unitTour';
+import { isPropertyImageTag } from '../../config/propertyImageTags';
 
 const LIVE = { $exists: false } as const;
 
@@ -242,15 +243,26 @@ const loadStructureMaps = async (developmentId: mongoose.Types.ObjectId) => {
   };
 };
 
+/**
+ * Floors with at least one published picture: the explorer's floor picker
+ * opens those on their picture. Same rule as the public views (published,
+ * not deleted), so a draft never shows through.
+ */
+const floorsWithPublishedViews = async (developmentId: mongoose.Types.ObjectId): Promise<Set<string>> => {
+  const ids = await DevelopmentScene.distinct('targetId', { developmentId, targetType: 'floor', deletedAt: null, published: { $ne: null } });
+  return new Set(ids.map(String));
+};
+
 /** GET /:slug → { development, buildings (with stats), floors } */
 export const getPublicDevelopmentDetail = async (slug: unknown) => {
   const development = await loadPublishedDevelopment(slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
-  const [{ buildings, floors, entrances }, units] = await Promise.all([
+  const [{ buildings, floors, entrances }, units, floorsWithViews] = await Promise.all([
     loadStructureMaps(developmentId),
     DevelopmentUnit.find(visibleUnitFilter(developmentId)).select(
       'buildingId entranceId availability listingIds primaryListingId virtualTourUrl'
     ),
+    floorsWithPublishedViews(developmentId),
   ]);
   const listings = await loadListingStatuses(units);
 
@@ -291,6 +303,7 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
       const json = f.toJSON() as Record<string, unknown>;
       delete json.floorplanMediaId;
       delete json.deletedAt;
+      json.hasViews = floorsWithViews.has(String(f._id));
       return json;
     }),
     entrances: entrances.map((e) => toPublicEntrance(e, entranceStats.get(String(e._id)))),
@@ -391,8 +404,8 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
       images: (Array.isArray(l.images) ? l.images : [])
         .filter((img) => img && typeof img.url === 'string')
         .slice(0, 6)
-        // The room tag (living_room, kitchen…) labels the photo in the apartment showcase.
-        .map((img) => ({ url: img.url, ...(typeof img.tag === 'string' && img.tag ? { tag: img.tag } : {}) })),
+        // The room tag (living_room, kitchen…) labels the photo in the apartment showcase; only known tags go out.
+        .map((img) => ({ url: img.url, ...(isPropertyImageTag(img.tag) ? { tag: img.tag } : {}) })),
       price: l.price,
       listingType: l.listingType,
       beds: l.beds,

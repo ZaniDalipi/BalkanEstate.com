@@ -465,14 +465,26 @@
       "photoAlt": "{{name}}, foto {{n}}",
       "prevPhoto": "Fotoja e mëparshme",
       "nextPhoto": "Fotoja tjetër",
-      "photoOf": "{{n}} nga {{total}}"
+      "photoOf": "{{n}} nga {{total}}",
+      "modes": "Çfarë të shfaqet",
+      "modeFloor": "Në katin e vet",
+      "modePhotos": "Fotot",
+      "floorAlt": "{{floor}}: {{name}} i theksuar",
+      "loading": "Po ngarkohet fotoja e katit…",
+      "floorFailed": "Fotoja e katit nuk mund të ngarkohej.",
+      "retry": "Provo përsëri"
     },
     "dive": {
       "skip": "Kapërce",
       "status": "Po ju çojmë te {{name}}"
     },
     "bathrooms_one": "{{count}} banjë",
-    "bathrooms_other": "{{count}} banja"
+    "bathrooms_other": "{{count}} banja",
+    "floors": {
+      "title": "Katet",
+      "whole": "E gjithë ndërtesa",
+      "hasPlan": "Ka plan kati"
+    }
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",

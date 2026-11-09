@@ -16,6 +16,8 @@ interface FloorPlanModelProps {
   fill?: 'contain' | 'cover';
   /** Shown in the rising frame instead of the single picture (the photo carousel). */
   children?: React.ReactNode;
+  /** Widest it grows, in CSS pixels (a wide floor picture can take more of the stage than a plan). */
+  maxWidth?: number;
 }
 
 /** Thickness of the board the plan is printed on, seen along its front edges when tilted. */
@@ -29,7 +31,7 @@ const SLAB_W = 'w-3';
  * stage. The board's size comes from CSS, so it is measured before the model
  * appears and the rise starts exactly over the apartment.
  */
-export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain', children }) => {
+export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain', children, maxWidth = 760 }) => {
   const reduced = useReducedMotion();
   const slot = useRef<HTMLDivElement>(null);
   const [from, setFrom] = useState<PlanPose | null>(null);
@@ -44,7 +46,8 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
     <div
       ref={slot}
       className="relative"
-      style={{ width: `min(100% - 3rem, 760px, (100dvh - 11rem) * ${ratio})`, aspectRatio: String(ratio), perspective: 2400 }}
+      // Sized to the showcase's stage area (a size container): room for the buttons above and the dock below.
+      style={{ width: `min(100cqw - 3rem, ${maxWidth}px, (100cqh - 9rem) * ${ratio})`, aspectRatio: String(ratio), perspective: 2400 }}
     >
       {from && (
         <motion.div

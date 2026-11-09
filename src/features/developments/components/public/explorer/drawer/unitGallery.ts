@@ -24,3 +24,7 @@ export function unitPhotos(unit: Pick<PublicUnit, 'gallery'>, primary?: LinkedLi
   if (listing.length) return listing;
   return primary?.imageUrl ? [{ url: primary.imageUrl }] : [];
 }
+
+/** Whether the unit has a photo or a plan to lead its details with. */
+export const hasUnitMedia = (unit: Pick<PublicUnit, 'gallery' | 'floorplan'>, primary?: LinkedListing): boolean =>
+  !!unit.floorplan?.url || unitPhotos(unit, primary).length > 0;

@@ -151,6 +151,7 @@ const PublicDevelopmentPage: React.FC = () => {
         onClose={drawer.close}
         preview={units.find((u) => u.id === drawer.unitId)}
         revealRef={explorerRef}
+        floors={floors}
       />
     </main>
   );

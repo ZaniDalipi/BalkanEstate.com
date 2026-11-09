@@ -87,6 +87,23 @@ describe('useExplorerUrlState', () => {
     // …switching camera view inside it is not.
     act(() => result.current.setNav({ building: 'b2', view: 'back' }));
     expect(navigateMock).toHaveBeenCalledTimes(1);
+    expect(navigateMock.mock.calls[0][1]).toEqual({ inPage: true, replace: false });
+  });
+
+  it('a floor is one Back step: entering it pushes, riding the elevator to the next floor replaces', () => {
+    navigateMock.mockClear();
+    const { result } = renderHook(() => useExplorerUrlState());
+    act(() => result.current.setNav({ building: 'b2' }));
+    act(() => result.current.setNav({ building: 'b2', floor: 'f1' }));
+    act(() => result.current.setNav({ building: 'b2', floor: 'f3' }));
+    act(() => result.current.setNav({ building: 'b2' }));
+    const steps = navigateMock.mock.calls.map(([url, opts]) => [new URLSearchParams(String(url).split('?')[1]).get('f'), opts.replace]);
+    expect(steps).toEqual([
+      [null, false],
+      ['f1', false],
+      ['f3', true],
+      [null, false],
+    ]);
   });
 });
 

@@ -1,28 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PublicSceneView } from '../../../../types';
 import { orbitDirection, type OrbitDir } from './orbitDirection';
+import { FADE, sceneMove, type SceneMove } from './sceneMove';
 import { preloadViewPicture } from './viewSources';
 
 /**
- * Switching camera views as one camera circling one building. `switchTo`
- * first makes sure the next picture is downloaded and decoded (the neighbours
- * of the current view preload in the background), then switches; `dir` says
- * which way to swing: the way the buyer pressed (← / →), else the short way
- * round (a link, Back, the budget helper's trip). A different building or the
- * residence (`targetKey`) is no orbit: it fades.
+ * Moving between the explorer's pictures as one camera: switching camera views
+ * circles the building, switching floors rides the elevator, entering a floor
+ * zooms in (see `sceneMove`). `switchTo` first makes sure the next camera
+ * view's picture is downloaded and decoded (the neighbours of the current view
+ * preload in the background), then switches, swinging the way the buyer
+ * pressed (← / →); a link or Back goes the short way round. `level` is the
+ * floor's level while a floor is on show.
  */
-export function useViewOrbit(views: PublicSceneView[], viewIndex: number, targetKey: string, onViewIndex: (i: number) => void) {
+export function useViewOrbit(views: PublicSceneView[], viewIndex: number, targetKey: string, onViewIndex: (i: number) => void, level?: number) {
   const viewKey = views[viewIndex]?.viewKey ?? '';
-  const [dir, setDir] = useState<OrbitDir>(0);
+  const [move, setMove] = useState<SceneMove>(FADE);
   const [asked, setAsked] = useState<{ key: string; dir: OrbitDir } | null>(null);
-  const [shown, setShown] = useState({ viewKey, targetKey, index: viewIndex });
+  const [shown, setShown] = useState({ viewKey, targetKey, index: viewIndex, level });
   const request = useRef(0);
 
-  // A new view is on show: work out which way the camera went (adjusting state as the view changes).
+  // A new picture is on show: work out how the camera got there (adjusting state as the view changes).
   if (shown.viewKey !== viewKey || shown.targetKey !== targetKey) {
-    const sameBuilding = shown.targetKey === targetKey;
-    setDir(!sameBuilding ? 0 : asked?.key === viewKey ? asked.dir : orbitDirection(shown.index, viewIndex, views.length));
-    setShown({ viewKey, targetKey, index: viewIndex });
+    const way = asked?.key === viewKey && shown.targetKey === targetKey ? asked.dir : undefined;
+    setMove(sceneMove({ ...shown, count: views.length }, { targetKey, index: viewIndex, level, count: views.length }, way));
+    setShown({ viewKey, targetKey, index: viewIndex, level });
     setAsked(null);
   }
 
@@ -64,5 +66,5 @@ export function useViewOrbit(views: PublicSceneView[], viewIndex: number, target
     []
   );
 
-  return { dir, switchTo };
+  return { move, switchTo };
 }

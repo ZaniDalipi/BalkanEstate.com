@@ -5,13 +5,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ApartmentDetailsDrawer } from './ApartmentDetailsDrawer';
 import { useUnitDrawer } from '../../../../hooks/useUnitDrawer';
-import type { PublicUnitDetail } from '../../../../types';
+import type { DevelopmentFloor, PublicSceneView, PublicUnitDetail } from '../../../../types';
 
 vi.mock('react-i18next', async () => (await import('../__tests__/i18nMock')).default);
 
 const h = vi.hoisted(() => ({
   router: null as null | { navigate: (to: unknown, o?: unknown) => Promise<void> },
   detail: null as null | PublicUnitDetail,
+  views: null as null | (() => Promise<{ views: PublicSceneView[] }>),
+  floors: undefined as undefined | Pick<DevelopmentFloor, 'id' | 'hasViews'>[],
 }));
 
 vi.mock('@/src/app/router/navigation', () => ({
@@ -21,6 +23,7 @@ vi.mock('@/src/app/router/navigation', () => ({
 }));
 vi.mock('../../../../api/developmentsApi', () => ({
   getPublicUnit: () => Promise.resolve(h.detail),
+  getPublicViews: () => (h.views ? h.views() : Promise.resolve({ views: [] })),
   sendUnitInquiry: vi.fn(),
 }));
 vi.mock('@/context/AppContext', () => ({
@@ -60,7 +63,7 @@ const Harness = ({ onFacade }: { onFacade: boolean }) => {
   return (
     <>
       {onFacade && <FacadeRegion />}
-      <ApartmentDetailsDrawer slug="res" unitId={d.unitId} onClose={d.close} />
+      <ApartmentDetailsDrawer slug="res" unitId={d.unitId} onClose={d.close} floors={h.floors} />
     </>
   );
 };
@@ -81,6 +84,8 @@ const mount = (onFacade = true) => {
 const matchMedia = window.matchMedia;
 beforeEach(() => {
   h.detail = detail();
+  h.views = null;
+  h.floors = undefined;
   // A desktop screen: the details open as a column beside the showcase.
   window.matchMedia = ((query: string) => ({
     matches: query === '(min-width: 768px)',
@@ -184,5 +189,66 @@ describe('desktop apartment showcase', () => {
     expect(dimmed).not.toBeNull();
     fireEvent.click(dimmed as Element);
     await waitFor(() => expect(router.state.location.search).toBe(''));
+  });
+
+  describe('the apartment on its floor’s picture', () => {
+    const floorView: PublicSceneView = {
+      viewKey: 'ground', viewDirection: 'custom', sortOrder: 0, imageUrl: 'https://media.test/ground.jpg', imageWidth: 1600, imageHeight: 900,
+      hotspots: [{ id: 'r1', shape: 'rect', points: [[0.1, 0.1], [0.4, 0.5]], linkType: 'unit', linkId: 'u1', z: 0 }],
+    };
+    const onGround = (over: Partial<PublicUnitDetail['unit']> = {}) => detail({ floorLabel: 'Ground floor', ...over });
+
+    it('offers it beside the plan: “On its floor” shows the floor picture the developer posted, the apartment outlined', async () => {
+      h.detail = onGround();
+      h.floors = [{ id: 'f', hasViews: true }];
+      h.views = () => Promise.resolve({ views: [floorView] });
+      mount();
+      const showcase = await screen.findByTestId('apartment-showcase');
+      const modes = await within(showcase).findByRole('group', { name: 'What to show' });
+      // The apartment's own plan leads; its floor is one press away.
+      expect(within(modes).getByRole('button', { name: 'Floor plan' })).toHaveAttribute('aria-pressed', 'true');
+      fireEvent.click(within(modes).getByRole('button', { name: 'On its floor' }));
+      expect(within(modes).getByRole('button', { name: 'On its floor' })).toHaveAttribute('aria-pressed', 'true');
+      const shot = within(showcase).getByTestId('floor-shot');
+      expect(within(shot).getByRole('img', { name: 'Ground floor: Apt A12 highlighted' })).toBeInTheDocument();
+      expect(shot.querySelector('polygon')?.getAttribute('points')).toBe('160,90 640,90 640,450 160,450');
+    });
+
+    it('leads with it when the apartment has no plan or photos', async () => {
+      h.detail = onGround({ floorplan: undefined });
+      h.floors = [{ id: 'f', hasViews: true }];
+      h.views = () => Promise.resolve({ views: [floorView] });
+      mount();
+      const showcase = await screen.findByTestId('apartment-showcase');
+      expect(await within(showcase).findByTestId('floor-shot')).toBeInTheDocument();
+      // Only one thing to show: no switch.
+      expect(within(showcase).queryByRole('group', { name: 'What to show' })).not.toBeInTheDocument();
+    });
+
+    it('never asks for the picture of a floor known to have none', async () => {
+      const views = vi.fn(() => Promise.resolve({ views: [floorView] }));
+      h.views = views;
+      h.detail = onGround({ floorplan: undefined });
+      h.floors = [{ id: 'f', hasViews: false }];
+      mount();
+      await screen.findByRole('heading', { name: 'Apt A12' });
+      expect(views).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('apartment-showcase')).not.toBeInTheDocument();
+    });
+
+    it('says when the picture could not load, and tries again on request', async () => {
+      let fail = true;
+      h.views = () => (fail ? Promise.reject(new Error('offline')) : Promise.resolve({ views: [floorView] }));
+      h.detail = onGround({ floorplan: undefined });
+      h.floors = [{ id: 'f', hasViews: true }];
+      mount();
+      const showcase = await screen.findByTestId('apartment-showcase');
+      expect(await within(showcase).findByRole('alert')).toHaveTextContent('The floor picture could not be loaded.');
+      // The details beside it stay usable.
+      expect(screen.getByRole('heading', { name: 'Apt A12' })).toBeInTheDocument();
+      fail = false;
+      fireEvent.click(within(showcase).getByRole('button', { name: 'Try again' }));
+      expect(await within(showcase).findByTestId('floor-shot')).toBeInTheDocument();
+    });
   });
 });

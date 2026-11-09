@@ -9,13 +9,14 @@ import { useViewOrbit } from '../orbit/useViewOrbit';
  * What every explorer stage layout shares: full screen, the filters panel,
  * the region display mode, and switching camera views (the arrows, the dots,
  * ←/→) as one camera circling the building (`orbit`). `targetKey` names what
- * the views are of (the residence, a building, a floor).
+ * the views are of (the residence, a building, a floor); `level` is the
+ * floor's, so moving between floors rides the elevator.
  */
-export function useStageControls(views: PublicSceneView[], viewIndex: number, onViewIndex: (i: number) => void, targetKey: string) {
+export function useStageControls(views: PublicSceneView[], viewIndex: number, onViewIndex: (i: number) => void, targetKey: string, level?: number) {
   const fs = usePseudoFullscreen<HTMLElement>();
   const [showFilters, setShowFilters] = useState(false);
   const [mode, setMode] = useDisplayMode();
-  const orbit = useViewOrbit(views, viewIndex, targetKey, onViewIndex);
+  const orbit = useViewOrbit(views, viewIndex, targetKey, onViewIndex, level);
   const n = views.length;
 
   const onKeyDown = (e: React.KeyboardEvent) => {

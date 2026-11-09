@@ -465,14 +465,26 @@
       "photoAlt": "{{name}}, фотографија {{n}}",
       "prevPhoto": "Претходна фотографија",
       "nextPhoto": "Следна фотографија",
-      "photoOf": "{{n}} од {{total}}"
+      "photoOf": "{{n}} од {{total}}",
+      "modes": "Што да се прикаже",
+      "modeFloor": "На својот кат",
+      "modePhotos": "Фотографии",
+      "floorAlt": "{{floor}}: {{name}} истакнат",
+      "loading": "Се вчитува сликата на катот…",
+      "floorFailed": "Сликата на катот не можеше да се вчита.",
+      "retry": "Обиди се повторно"
     },
     "dive": {
       "skip": "Прескокни",
       "status": "Ве водиме до: {{name}}"
     },
     "bathrooms_one": "{{count}} бања",
-    "bathrooms_other": "{{count}} бањи"
+    "bathrooms_other": "{{count}} бањи",
+    "floors": {
+      "title": "Катови",
+      "whole": "Цела зграда",
+      "hasPlan": "Има план на катот"
+    }
   },
   "feature": {
     "big_terrace": "Со голема тераса",

@@ -197,7 +197,7 @@ the endpoint returns 404.
 
 | Method & path | Notes |
 | --- | --- |
-| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`. |
+| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). |
 | `GET /:slug/units` | Visible units only, with effective availability. `priceOnRequest` hides price and price/m². Only non-draft listing ids, encoded. |
 | `GET /:slug/units/:unitId` | Unit + development + sanitised listings. 404 for a hidden unit. |
 | `GET /:slug/views?targetType&targetId` | Published views only. Hotspots are filtered to visible units, live buildings and floors, and non-draft listings. |
@@ -977,6 +977,85 @@ Tests: `dive/ApartmentDive.test.tsx` (the steps, Skip, Back, Esc, the way
 back), `flightPath`, `holeMask`, `coverBox`, `placeCard`, `showcaseMedia`,
 `drawer/DesktopShowcase.test.tsx`, `ResidenceExplorer.test.tsx` (the
 full-screen hero) and `hero/ResidenceHero.test.tsx`.
+
+## 7b-12. Floors: the elevator, and the apartment on its floor
+
+Developers upload a picture per floor in the explorer editor (the floor's plan
+with its apartments drawn on it). Buyers can now go straight to a floor, and
+every apartment is shown on its floor's picture.
+
+| The elevator: pointing lights the floor | A floor opened | The apartment on its floor |
+| --- | --- | --- |
+| ![Elevator](./images/residence-explorer/48-floor-elevator.jpg) | ![Floor](./images/residence-explorer/49-floor-opened.jpg) | ![On its floor](./images/residence-explorer/50-apartment-on-its-floor.jpg) |
+
+| Tablet held upright | Phone: no photos or plan, the floor leads |
+| --- | --- |
+| ![Tablet](./images/residence-explorer/51-tablet-on-its-floor.jpg) | ![Phone](./images/residence-explorer/52-phone-floor-picture.jpg) |
+
+**The elevator** (`explorer/floors/`). Inside a building the stage lists its
+floors, top first (`floorStack.ts`: a building with fewer than two floors gets
+none). Beside the full-screen picture it is a slim column of floor numbers, a
+green dot where homes are free, that opens wide on hover or keyboard focus
+(name, "2 available", a plan icon where the floor has a picture), so it hides
+as little of the picture as possible. On the page explorer and on phones it is
+a row of chips under the building chips. Pointing at a floor (mouse or focus,
+not a touch) lights its homes up on the building (`useFloorPreview` →
+`litUnitIds`) and starts loading its picture if it has one
+(`usePrefetchPublicViews`), so choosing it opens at once. **Whole building**
+comes back out. It sits below the budget hint and beside, never over, the zoom
+buttons, on a phone held sideways too.
+
+**Moves** (`orbit/sceneMove.ts`): building → floor zooms in, floor → floor
+rides the lift up or down (by level), floor → building zooms out; another
+building or the residence fades. All frame-driven: a screen recording of
+zoom in, lift and zoom out shows no one-frame flash. On a floor the headline
+steps aside, as the picture is a plan to read.
+
+**Back.** Opening a floor from the building adds a history entry; moving
+floor to floor replaces it (`useExplorerUrlState`), so Back always returns to
+the whole building, not through every floor visited. A link to a floor that is
+not one of the building's (stale) opens without a stop lit; a floor without a
+picture opens floor by floor, as before.
+
+**The apartment on its floor** (`drawer/showcase/`). The showcase beside the
+details shows what there is, most telling first: **Floor plan** (the
+apartment's own plan, 3D / 2D), **On its floor** (the floor's picture, the rest
+of the floor washed out and the apartment outlined in teal, captioned "Floor 4 ·
+Aria"), **Photos**. A switch appears when there is more than one. An apartment
+with nothing but its floor picture (no plan, no photos) still gets the flight
+and the showcase. On phones the floor picture is a section of the sheet, or
+its first picture when the apartment has no photo or plan (`UnitFloorShot`).
+
+- **Which picture**: `pickFloorShot` takes the first view of the floor where
+  the apartment is marked, else the floor's first picture; views without an
+  image are skipped. `regionOutline` refuses marks with points that are not
+  numbers or that enclose nothing (the plain floor shows instead) and keeps
+  outlines on the picture.
+- **Only when there is one**: `GET /:slug` now says per floor whether it has a
+  published picture (`floors[].hasViews`). The details only ask for the views of
+  such a floor; others are never requested.
+- **Waiting and failing** (`floorShotState`): a picture on its way is waited
+  for, so the plan does not give way to the floor a moment later (a quiet
+  placeholder stands in). If it cannot load, the stage or the sheet says so
+  ("The floor picture could not be loaded.") with **Try again**; the details
+  beside it stay usable, and other media still show.
+- **Layout**: from 1024 px and on a phone held sideways the card sits beside
+  the showcase; on a tablet held upright it sits under it (`showcaseLayout.ts`,
+  `detailsCardMotion`: from the right beside it, from below under it). The
+  pictures size to the free area (container units), never to the whole screen.
+
+**Room tags.** Listing photos carry their room tag only when it is one of the
+platform's tags (`isPropertyImageTag` in `backend/src/config/propertyImageTags.ts`);
+anything else is dropped before it leaves the server.
+
+Tests: `floorStack`, `FloorPicker`, `useFloorPreview`, `sceneMove`,
+`useViewOrbit`, `useExplorerUrlState` (floor to floor replaces), `floorShot`,
+`floorShotState`, `showcaseMedia`, `detailsCardMotion`, `unitGallery`,
+`drawer/DesktopShowcase.test.tsx` (On its floor; leads when alone; never asks
+for a floor without a picture; Try again) and `drawer/PhoneFloorShot.test.tsx`.
+Backend: `propertyImageTags.test.ts` (run) and two new cases in
+`public-explorer.test.ts` (`hasViews`, room tags), which need MongoDB and were
+not run in the session that added them.
 
 ## 7b-3. Errors in the reader's language
 

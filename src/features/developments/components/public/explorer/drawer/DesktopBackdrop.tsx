@@ -1,25 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { PublicUnit } from '../../../../types';
 import { ApartmentShowcase } from './showcase/ApartmentShowcase';
-import type { ShowcaseMedia } from './showcase/showcaseMedia';
+import type { Showcase } from './showcase/useShowcase';
 import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 interface DesktopBackdropProps {
-  unit?: PublicUnit;
-  /** What the developer posted for the apartment (see `showcaseMedia`); null: nothing to show. */
-  media: ShowcaseMedia | null;
+  showcase: Showcase;
   onClose: () => void;
 }
 
 /**
- * What sits behind the apartment details on desktop: the apartment showcase
- * (its floor plan as a 3D model, else its photos) when there is something to
- * show, else the dimmed page, which closes the details when clicked.
+ * What sits behind the apartment details on tablet and up: the apartment
+ * showcase (its plan, its floor's picture, its photos) when there is
+ * something to show or its floor picture is on its way, else the dimmed
+ * page, which closes the details when clicked.
  */
-export const DesktopBackdrop: React.FC<DesktopBackdropProps> = ({ unit, media, onClose }) => {
-  // The details float as a card on the right: the plan centres in the room left of it.
-  if (unit && media) return <ApartmentShowcase key={unit.id} unit={unit} media={media} onClose={onClose} className="pr-[min(468px,45%)]" />;
+export const DesktopBackdrop: React.FC<DesktopBackdropProps> = ({ showcase, onClose }) => {
+  const { unit, media, floor, open } = showcase;
+  if (unit && open) return <ApartmentShowcase key={unit.id} unit={unit} media={media} floor={floor} onClose={onClose} />;
   return (
     <motion.div
       {...FRAME_DRIVEN}

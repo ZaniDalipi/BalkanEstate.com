@@ -24,7 +24,7 @@ export const PhotoDock: React.FC<PhotoDockProps> = ({ photos, labels, index, onS
     <div
       role="group"
       aria-label={t('explorer.drawer.openGallery', 'Open photos')}
-      className="absolute bottom-5 left-1/2 z-10 flex max-w-[calc(100%-2rem)] -translate-x-1/2 gap-1 overflow-x-auto rounded-2xl bg-white/95 p-1.5 shadow-md ring-1 ring-black/5"
+      className="absolute bottom-4 left-1/2 z-10 flex max-w-[calc(100%-2rem)] -translate-x-1/2 gap-1 overflow-x-auto rounded-2xl bg-white/95 p-1.5 shadow-md ring-1 ring-black/5 landscape:bottom-2 landscape:p-1"
     >
       {photos.map((p, i) => {
         const on = i === index;
@@ -35,7 +35,7 @@ export const PhotoDock: React.FC<PhotoDockProps> = ({ photos, labels, index, onS
             aria-pressed={on}
             aria-label={labels[i]}
             onClick={() => onSelect(i)}
-            className="relative flex w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl px-1 pb-1 pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="relative flex w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl px-1 pb-1 pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary landscape:w-14 landscape:gap-0"
           >
             {on && (
               <motion.span
@@ -47,9 +47,9 @@ export const PhotoDock: React.FC<PhotoDockProps> = ({ photos, labels, index, onS
             <img
               src={optimizeImageUrl(p.url, { width: 160 })}
               alt=""
-              className={cn('relative z-10 h-11 w-[68px] rounded-lg object-cover transition', on ? 'opacity-100' : 'opacity-75 hover:opacity-100')}
+              className={cn('relative z-10 h-11 w-[68px] rounded-lg object-cover transition landscape:h-8 landscape:w-12', on ? 'opacity-100' : 'opacity-75 hover:opacity-100')}
             />
-            <span className={cn('relative z-10 w-full truncate text-center text-[11px] font-semibold leading-tight transition-colors', on ? 'text-white' : 'text-slate-600')} aria-hidden="true">
+            <span className={cn('relative z-10 w-full truncate text-center text-[11px] font-semibold leading-tight transition-colors landscape:hidden', on ? 'text-white' : 'text-slate-600')} aria-hidden="true">
               {labels[i]}
             </span>
           </button>

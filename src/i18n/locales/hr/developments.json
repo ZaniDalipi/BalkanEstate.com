@@ -467,7 +467,14 @@
       "photoAlt": "{{name}}, fotografija {{n}}",
       "prevPhoto": "Prethodna fotografija",
       "nextPhoto": "Sljedeća fotografija",
-      "photoOf": "{{n}} od {{total}}"
+      "photoOf": "{{n}} od {{total}}",
+      "modes": "Što prikazati",
+      "modeFloor": "Na svom katu",
+      "modePhotos": "Fotografije",
+      "floorAlt": "{{floor}}: {{name}} istaknut",
+      "loading": "Učitavanje slike kata…",
+      "floorFailed": "Slika kata nije se mogla učitati.",
+      "retry": "Pokušaj ponovno"
     },
     "dive": {
       "skip": "Preskoči",
@@ -475,7 +482,12 @@
     },
     "bathrooms_one": "{{count}} kupaonica",
     "bathrooms_few": "{{count}} kupaonice",
-    "bathrooms_other": "{{count}} kupaonica"
+    "bathrooms_other": "{{count}} kupaonica",
+    "floors": {
+      "title": "Katovi",
+      "whole": "Cijela zgrada",
+      "hasPlan": "Ima tlocrt"
+    }
   },
   "feature": {
     "big_terrace": "S velikom terasom",

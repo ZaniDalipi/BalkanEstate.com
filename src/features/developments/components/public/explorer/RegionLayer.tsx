@@ -19,13 +19,15 @@ interface RegionLayerProps {
   matchedIds?: Set<string>;
   mode: RegionDisplayMode;
   activeId?: string;
+  /** Homes lit up together (the floor the buyer points at in the floor picker). */
+  litUnitIds?: Set<string>;
   linkedIds: Set<string>;
   focused?: Hotspot;
   bind: (h: Hotspot) => Bindings;
 }
 
 /** The SVG overlay of a picture: every region, painted by state, plus the budget helper's pulse. */
-export const RegionLayer: React.FC<RegionLayerProps> = ({ width: W, height: H, hotspots, unitsById, buildingsById, entrancesById, matchedIds, mode, activeId, linkedIds, focused, bind }) => {
+export const RegionLayer: React.FC<RegionLayerProps> = ({ width: W, height: H, hotspots, unitsById, buildingsById, entrancesById, matchedIds, mode, activeId, litUnitIds, linkedIds, focused, bind }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
   return (
@@ -44,7 +46,7 @@ export const RegionLayer: React.FC<RegionLayerProps> = ({ width: W, height: H, h
             state={unit?.availability}
             matched={unit && matchedIds ? matchedIds.has(unit.id) : undefined}
             mode={mode}
-            active={activeId === h.id}
+            active={activeId === h.id || (!!unit && !!litUnitIds?.has(unit.id))}
             linked={linkedIds.has(h.id)}
             label={txt.hotspotLabel(h, unitsById, buildingsById, entrancesById)}
             interactive={interactive}

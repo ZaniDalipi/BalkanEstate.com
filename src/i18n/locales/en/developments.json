@@ -441,14 +441,26 @@
       "photoAlt": "{{name}}, photo {{n}}",
       "prevPhoto": "Previous photo",
       "nextPhoto": "Next photo",
-      "photoOf": "{{n}} of {{total}}"
+      "photoOf": "{{n}} of {{total}}",
+      "modes": "What to show",
+      "modeFloor": "On its floor",
+      "modePhotos": "Photos",
+      "floorAlt": "{{floor}}: {{name}} highlighted",
+      "loading": "Loading the floor picture…",
+      "floorFailed": "The floor picture could not be loaded.",
+      "retry": "Try again"
     },
     "dive": {
       "skip": "Skip",
       "status": "Taking you to {{name}}"
     },
     "bathrooms_one": "{{count}} bathroom",
-    "bathrooms_other": "{{count}} bathrooms"
+    "bathrooms_other": "{{count}} bathrooms",
+    "floors": {
+      "title": "Floors",
+      "whole": "Whole building",
+      "hasPlan": "Has a floor plan"
+    }
   },
   "feature": {
     "big_terrace": "With big terrace",

@@ -467,7 +467,14 @@
       "photoAlt": "{{name}}, fotografia {{n}}",
       "prevPhoto": "Fotografia anterioară",
       "nextPhoto": "Fotografia următoare",
-      "photoOf": "{{n}} din {{total}}"
+      "photoOf": "{{n}} din {{total}}",
+      "modes": "Ce se afișează",
+      "modeFloor": "Pe etajul său",
+      "modePhotos": "Fotografii",
+      "floorAlt": "{{floor}}: {{name}} evidențiat",
+      "loading": "Se încarcă imaginea etajului…",
+      "floorFailed": "Imaginea etajului nu a putut fi încărcată.",
+      "retry": "Încearcă din nou"
     },
     "dive": {
       "skip": "Omite",
@@ -475,7 +482,12 @@
     },
     "bathrooms_one": "{{count}} baie",
     "bathrooms_few": "{{count}} băi",
-    "bathrooms_other": "{{count}} de băi"
+    "bathrooms_other": "{{count}} de băi",
+    "floors": {
+      "title": "Etaje",
+      "whole": "Toată clădirea",
+      "hasPlan": "Are plan de etaj"
+    }
   },
   "feature": {
     "big_terrace": "Cu terasă mare",

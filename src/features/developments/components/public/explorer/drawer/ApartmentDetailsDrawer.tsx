@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import type { PublicUnit } from '../../../../types';
+import type { DevelopmentFloor, PublicUnit } from '../../../../types';
 import { useFocusTrap } from './useFocusTrap';
 import { useEscapeLayer } from '../useEscapeLayer';
 import { revealAboveSheet } from '../../../../utils/revealAboveSheet';
@@ -11,10 +11,9 @@ import { SHEET_SHARE } from '../../../../utils/sheetSnap';
 import { useSheetMotion } from '../../../../hooks/useSheetMotion';
 import { DrawerUnitContent } from './DrawerUnitContent';
 import { SheetHandle } from './SheetHandle';
-import { DesktopBackdrop } from './DesktopBackdrop';
+import { DesktopDetails } from './DesktopDetails';
 import { useIsDesktop } from '../../../../hooks/useIsDesktop';
 import { useShowcase } from './showcase/useShowcase';
-import { FRAME_DRIVEN } from '../../motion/frameDriven';
 
 interface ApartmentDetailsDrawerProps {
   slug: string;
@@ -25,12 +24,14 @@ interface ApartmentDetailsDrawerProps {
   preview?: PublicUnit;
   /** On phones, the open apartment inside it (or it) is scrolled into view above the half-height sheet. */
   revealRef?: React.RefObject<HTMLElement>;
+  /** The residence's floors: which have a picture to show the apartment on. */
+  floors?: Pick<DevelopmentFloor, 'id' | 'hasViews'>[];
 }
 
 /** Wait for the sheet to slide in (and the explorer to settle) before scrolling behind it. */
 const REVEAL_DELAY_MS = 300;
 
-const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ slug, unitId, onClose, preview, revealRef, desktop }) => {
+const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ slug, unitId, onClose, preview, revealRef, floors, desktop }) => {
   const { t } = useTranslation('developments');
   const ref = useRef<HTMLDivElement>(null);
   const [childModalOpen, setChildModalOpen] = useState(false);
@@ -44,9 +45,9 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
   // Phones: the sheet follows the finger, settles on half / full / closed, and the building behind dims and clears with it.
   const sheet = useSheetMotion({ enabled: !desktop, panelRef: ref, contentRef, onClose, reduceMotion: reduce });
   const { size } = sheet;
-  // Desktop: the plan or photos rise beside the details, which then float as a card.
-  const showcase = useShowcase(slug, unitId, preview, desktop);
-  const floating = !!showcase.media;
+  // Tablet and up: the plan, floor picture or photos rise beside the details, which then float as a card.
+  const showcase = useShowcase(slug, unitId, preview, { desktop, floors });
+  const floating = showcase.open;
 
   // Phones: bring the apartment (in the building view) into the space above the sheet.
   useEffect(() => {
@@ -84,35 +85,16 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
         className={`min-h-0 flex-1 overscroll-contain ${desktop || size === 'full' ? 'overflow-y-auto' : 'overflow-hidden'}`}
         style={desktop ? undefined : { touchAction: size === 'full' ? 'auto' : 'pan-x' }}
       >
-        {unitId && <DrawerUnitContent slug={slug} unitId={unitId} preview={preview} onChildModalChange={setChildModalOpen} besideShowcase={floating} />}
+        {unitId && <DrawerUnitContent slug={slug} unitId={unitId} preview={preview} onChildModalChange={setChildModalOpen} besideShowcase={floating} floors={floors} />}
       </div>
     </>
   );
 
-  // Inline z-index (not a class) so isTopmostLayer reads the same stacking everywhere.
   if (desktop) {
-    const hidden = floating ? { x: 72, opacity: 0 } : { x: '100%' };
     return (
-      <div className="fixed inset-0" style={{ zIndex: 4500 }}>
-        {/* The dialog spans the screen: the apartment showcase (or the dimmed page) left, the details right. */}
-        <div {...dialog} className="absolute inset-0 flex outline-none">
-          <DesktopBackdrop unit={showcase.unit} media={showcase.media} onClose={onClose} />
-          <motion.div
-            {...FRAME_DRIVEN}
-            initial={reduce ? { opacity: 0 } : hidden}
-            animate={reduce ? { opacity: 1 } : { x: 0, opacity: 1 }}
-            exit={reduce ? { opacity: 0 } : { ...hidden, transition: { duration: 0.3, ease: 'easeIn' } }}
-            transition={floating && !reduce ? { duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] } : { type: 'tween', duration: 0.25, ease: 'easeOut' }}
-            className={
-              floating
-                ? 'absolute right-6 top-1/2 flex max-h-[calc(100dvh-3rem)] w-[min(420px,calc(100%-3rem))] -translate-y-1/2 flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_40px_90px_-30px_rgba(60,40,20,0.45)] ring-1 ring-black/5'
-                : 'relative flex h-full w-full max-w-[460px] shrink-0 flex-col bg-white shadow-2xl'
-            }
-          >
-            {body}
-          </motion.div>
-        </div>
-      </div>
+      <DesktopDetails dialog={dialog} showcase={showcase} onClose={onClose}>
+        {body}
+      </DesktopDetails>
     );
   }
   return (
@@ -130,9 +112,9 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
 };
 
 /**
- * Apartment details: on desktop a right-hand column beside the apartment
- * showcase (the floor plan rising as a 3D model; the dimmed page when there is
- * no plan), on phones a bottom sheet that opens at half height (the building
+ * Apartment details: on tablet and up a card beside the apartment showcase
+ * (its plan rising as a 3D model, its floor's picture, its photos; a
+ * right-hand column over the dimmed page when there is nothing), on phones a bottom sheet that opens at half height (the building
  * stays in view above it) and grows to full height from its handle. Portalled to <body> at z 4500 — above the explorer (4000), below the
  * platform modals (≥ 5000) it opens (inquiry, viewing, gallery). Focus is
  * trapped while open and Esc closes it unless a modal is stacked above

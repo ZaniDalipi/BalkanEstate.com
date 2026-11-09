@@ -159,11 +159,13 @@ export function useExplorerUrlState(delayMs = 300) {
     const prev = current.current.nav;
     setState((s) => ({ ...s, nav }));
     // Entering or leaving a building/floor is a step the Back button should undo;
-    // switching camera views within one is not.
+    // switching camera views within one is not, and neither is riding the
+    // elevator from floor to floor (Back then leaves the floors for the building).
     if (nav.building !== prev.building || nav.floor !== prev.floor) {
       const qs = buildExplorerSearch({ criteria: current.current.criteria, nav }, currentSearch());
+      const floorToFloor = !!prev.floor && !!nav.floor && nav.building === prev.building;
       // The explorer shows its own loading; this is not a page change.
-      navigate(`${window.location.pathname}${qs ? `?${qs}` : ''}`, { inPage: true });
+      navigate(`${window.location.pathname}${qs ? `?${qs}` : ''}`, { inPage: true, replace: floorToFloor });
     }
   }, []);
 

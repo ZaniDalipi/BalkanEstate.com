@@ -42,6 +42,8 @@ export interface ExplorerCanvasProps {
   onFocusArrive?: (h: Hotspot) => void;
   /** The apartment open in the details sheet (null: none). Given, opening an apartment flies into it first. */
   openUnitId?: string | null;
+  /** Homes to light up together (the floor pointed at in the floor picker). */
+  litUnitIds?: Set<string>;
   className?: string;
 }
 
@@ -66,6 +68,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   focus,
   onFocusArrive,
   openUnitId,
+  litUnitIds,
   className,
 }) => {
   const pz = usePanZoom({ wheelAlwaysZooms: fullscreen });
@@ -115,6 +118,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
             matchedIds={matchedIds}
             mode={mode}
             activeId={hover?.id}
+            litUnitIds={litUnitIds}
             linkedIds={linkedIds}
             focused={focused}
             bind={bind}
