@@ -1438,7 +1438,8 @@
     "ENTRANCE_NAME_TAKEN": "This building already has an entrance called “{{name}}”.",
     "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first.",
     "RESIDENCE_GALLERY_FULL": "A residence can have at most {{max}} photos. {{remaining}} more can be added.",
-    "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again."
+    "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again.",
+    "BUILDER_NOT_FOUND": "This residence has not introduced its builder yet."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1496,7 +1497,19 @@
     "projects": "Completed projects",
     "license": "Licence",
     "office": "Office",
-    "email": "Email"
+    "email": "Email",
+    "aboutCompany": "About the company",
+    "developerOf": "Developer of {{name}}",
+    "aboutHeading": "About {{name}}",
+    "officeContact": "Office and contact",
+    "openInMaps": "Open in Maps",
+    "residencesHeading": "Residences by {{name}}",
+    "thisResidence": "This residence",
+    "residencesLoading": "Loading their other residences…",
+    "residencesError": "Their other residences could not be loaded.",
+    "backTo": "Back to {{name}}",
+    "noProfile": "This residence has not introduced its builder yet.",
+    "seeHomes": "See the homes in {{name}}"
   },
   "entrance": {
     "label": "Entrance",

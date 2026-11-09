@@ -32,3 +32,16 @@ export const siteLabel = (value: string | undefined): string | undefined => {
 /** Years since founding, or undefined (future or missing year). */
 export const yearsActive = (foundedYear: number | undefined, now = new Date()): number | undefined =>
   typeof foundedYear === 'number' && foundedYear <= now.getFullYear() ? now.getFullYear() - foundedYear : undefined;
+
+/** Addresses longer than this are not a plain office address: no map link. */
+const MAX_ADDRESS = 300;
+
+/**
+ * A map search for the builder's office (opens in the visitor's map app or
+ * Google Maps). Only the public address goes into the link, encoded.
+ */
+export const mapsSearchHref = (address: string | undefined): string | undefined => {
+  const text = address?.replace(/\s+/g, ' ').trim();
+  if (!text || text.length > MAX_ADDRESS) return undefined;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(text)}`;
+};

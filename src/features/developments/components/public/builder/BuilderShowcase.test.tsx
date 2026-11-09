@@ -20,6 +20,15 @@ const builder: DevelopmentBuilder = {
 };
 
 describe('BuilderShowcase', () => {
+  it('leads to the company’s own page when there is one', () => {
+    const onOpenPage = vi.fn();
+    const { rerender } = render(<BuilderShowcase builder={builder} onOpenPage={onOpenPage} />);
+    fireEvent.click(screen.getByRole('button', { name: /builderPublic.aboutCompany/ }));
+    expect(onOpenPage).toHaveBeenCalled();
+    rerender(<BuilderShowcase builder={builder} />);
+    expect(screen.queryByRole('button', { name: /builderPublic.aboutCompany/ })).toBeNull();
+  });
+
   it('shows the company, its record and how to reach it', () => {
     render(<BuilderShowcase builder={builder} />);
     expect(screen.getByRole('heading', { name: 'Balkan Build Group' })).toBeInTheDocument();

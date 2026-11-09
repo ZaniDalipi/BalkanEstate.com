@@ -6,6 +6,7 @@
 import { apiRequest, uploadRequest, blobRequest } from '@/src/shared/api';
 import type { ImportRowPayload } from '../utils/csvImport';
 import type {
+  PublicDeveloper,
   Development,
   DevelopmentBuilding,
   DevelopmentEntrance,
@@ -91,6 +92,10 @@ export interface PublicDevelopmentDetail {
 
 export const getPublicDevelopment = (slug: string): Promise<PublicDevelopmentDetail> =>
   apiRequest<PublicDevelopmentDetail>(`${PUBLIC}/${encodeURIComponent(slug)}`);
+
+/** The company behind a published residence (404 `BUILDER_NOT_FOUND` when it has none). */
+export const getPublicDeveloper = (slug: string): Promise<PublicDeveloper> =>
+  apiRequest<PublicDeveloper>(`${PUBLIC}/${encodeURIComponent(slug)}/developer`);
 
 export const getPublicDevelopmentUnits = (
   slug: string

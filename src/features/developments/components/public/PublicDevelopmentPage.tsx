@@ -20,8 +20,7 @@ import { ResidenceSections } from './explorer/ResidenceSections';
 import { ApartmentDetailsDrawer } from './explorer/drawer/ApartmentDetailsDrawer';
 import { BuilderShowcase } from './builder/BuilderShowcase';
 import { useResidenceChrome } from './hero/useResidenceChrome';
-
-const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+import { useResidenceSections } from './hero/useResidenceSections';
 
 /**
  * Public residence page. The interactive explorer is the full-bleed hero
@@ -40,13 +39,9 @@ const PublicDevelopmentPage: React.FC = () => {
   const drawer = useUnitDrawer();
   const matchedUnits = useMemo(() => filterUnits(units, criteria), [units, criteria]);
 
-  const sections = [
-    ...(development?.builder?.name ? [{ id: 'builder', label: t('builderPublic.label', 'The builder') }] : []),
-    { id: 'overview', label: t('detail.overview', 'Overview') },
-    { id: 'units', label: t('units.heading', 'Available homes') },
-    { id: 'location', label: t('detail.location', 'Location') },
-  ];
-  const chrome = useResidenceChrome({ development, summary, sections, onSection: scrollToId });
+  // "The builder" opens the company's own page; the other sections scroll.
+  const { sections, onSection, openDeveloper } = useResidenceSections(development);
+  const chrome = useResidenceChrome({ development, summary, sections, onSection });
 
   if (isLoading) {
     return (
@@ -109,7 +104,7 @@ const PublicDevelopmentPage: React.FC = () => {
           <ul className="flex gap-1 py-2">
             {sections.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => scrollToId(s.id)} className="min-h-[44px] whitespace-nowrap rounded-full px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <button type="button" onClick={() => onSection(s.id)} className="min-h-[44px] whitespace-nowrap rounded-full px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">
                   {s.label}
                 </button>
               </li>
@@ -124,7 +119,7 @@ const PublicDevelopmentPage: React.FC = () => {
           </div>
         )}
 
-        <BuilderShowcase builder={development.builder} />
+        <BuilderShowcase builder={development.builder} onOpenPage={openDeveloper} />
 
         <ResidenceSections development={development} buildings={buildings} floors={floors} />
 

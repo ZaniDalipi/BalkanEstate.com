@@ -1438,7 +1438,8 @@
     "ENTRANCE_NAME_TAKEN": "Kjo ndërtesë ka tashmë një hyrje me emrin “{{name}}”.",
     "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër.",
     "RESIDENCE_GALLERY_FULL": "Një rezidencë mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
-    "GALLERY_ORDER_INVALID": "Fotot ndryshuan ndërkohë. Ringarkoni faqen dhe provoni përsëri."
+    "GALLERY_ORDER_INVALID": "Fotot ndryshuan ndërkohë. Ringarkoni faqen dhe provoni përsëri.",
+    "BUILDER_NOT_FOUND": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1496,7 +1497,19 @@
     "projects": "Projekte të përfunduara",
     "license": "Licenca",
     "office": "Zyra",
-    "email": "Email"
+    "email": "Email",
+    "aboutCompany": "Rreth kompanisë",
+    "developerOf": "Ndërtuesi i {{name}}",
+    "aboutHeading": "Rreth {{name}}",
+    "officeContact": "Zyra dhe kontakti",
+    "openInMaps": "Hap në Harta",
+    "residencesHeading": "Rezidencat nga {{name}}",
+    "thisResidence": "Kjo rezidencë",
+    "residencesLoading": "Po ngarkohen rezidencat e tjera…",
+    "residencesError": "Rezidencat e tjera nuk mund të ngarkoheshin.",
+    "backTo": "Kthehu te {{name}}",
+    "noProfile": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin.",
+    "seeHomes": "Shiko banesat në {{name}}"
   },
   "entrance": {
     "label": "Hyrja",

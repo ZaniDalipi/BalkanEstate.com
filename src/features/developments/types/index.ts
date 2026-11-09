@@ -293,6 +293,13 @@ export interface DevelopmentBuilder {
   banner?: { url: string };
 }
 
+/** The company behind a residence, on its own page: its profile and its other residences on the platform. */
+export interface PublicDeveloper {
+  builder: DevelopmentBuilder;
+  /** This residence first, then the other published residences of the same account naming the same builder (newest first, at most 12 others). */
+  residences: Development[];
+}
+
 /** What the builder form sends: its text fields (logo and banner upload separately). */
 export type BuilderPayload = Omit<DevelopmentBuilder, 'logo' | 'banner'>;
 

@@ -27,7 +27,9 @@ export const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
   className,
 }) => {
   const { t } = useTranslation('developments');
-  const { name, city, country, category, stats, status, coverImage } = development;
+  const { name, city, country, category, stats, status } = development;
+  // Lists send a picture for every residence (cover, gallery or explorer picture); else its cover.
+  const coverImage = development.previewImage || development.coverImage;
   const available = stats?.available ?? 0;
 
   return (

@@ -200,6 +200,7 @@ the endpoint returns 404.
 | `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). |
 | `GET /:slug/units` | Visible units only, with effective availability. `priceOnRequest` hides price and price/m². Only non-draft listing ids, encoded. |
 | `GET /:slug/units/:unitId` | Unit + development + sanitised listings. 404 for a hidden unit. |
+| `GET /:slug/developer` | The builder (no storage keys) and the company's residences as list cards: this one, then up to 12 other published residences of the same account naming the same builder. 404 `BUILDER_NOT_FOUND` when the residence has no builder. |
 | `GET /:slug/views?targetType&targetId` | Published views only. Hotspots are filtered to visible units, live buildings and floors, and non-draft listings. |
 | `GET /:slug/scene` | Legacy: the `main` (or lowest `sortOrder`) published view. |
 | `POST /:slug/units/:unitId/inquiries` | `{name, email, phone?, message}`, rate limited to 30/h. Returns 403 `inquiries_disabled` when the development turned inquiries off. |
@@ -1056,6 +1057,69 @@ for a floor without a picture; Try again) and `drawer/PhoneFloorShot.test.tsx`.
 Backend: `propertyImageTags.test.ts` (run) and two new cases in
 `public-explorer.test.ts` (`hasViews`, room tags), which need MongoDB and were
 not run in the session that added them.
+
+## 7b-13. The company behind the residence (its own page)
+
+The builder named on a residence (dashboard → builder form: name, tagline,
+about, founded, completed projects, licence, office address, website, phone,
+email, socials, logo, banner) now has a page of its own:
+`/developments/<slug>/developer` (`components/public/developer/`), full screen
+like the residence page (route `detail: 'residence'`).
+
+| The company page | Office, contact, its residences | Phone |
+| --- | --- | --- |
+| ![Company](./images/residence-explorer/53-company-page.jpg) | ![Office](./images/residence-explorer/54-company-office-residences.jpg) | ![Phone](./images/residence-explorer/55-company-page-phone.jpg) |
+
+**What it shows**: the banner, logo, name and tagline ("Developer of Aria
+Residences"); the track record (`BuilderFacts`, shared with the residence
+page); "About <company>"; **Office and contact**: the office address with
+**Open in Maps** (a map search for the address, `mapsSearchHref`; nothing for
+an empty or overlong address) and the website, phone, email and socials
+(`BuilderContacts`, which only ever links plain http(s), `tel:` and `mailto:`);
+**Residences by <company>**: this residence first, marked, then the others it
+builds here; and **See the homes in <residence>**.
+
+**Getting there and back.** "The builder" in the residence's bar, the
+residence page's section bar, the phone byline ("Built by …") and the builder
+section's new **About the company** button open it
+(`hero/useResidenceSections.ts`). On the company page the same bar marks "The
+builder" as the current page (`aria-current`); its other sections, "View
+apartments" and "See the homes" go back to the residence page and open at that
+section (history state `{ section }`, read by `arrivalSection`, which ignores
+anything but `overview`, `units` and `location`). **Back to <residence>** is
+history back when the buyer came from it, so it lands where they were. The
+residence page keeps a shorter builder section (about text clamped to four
+lines) with the button to the full page.
+
+![Builder section on the residence page](./images/residence-explorer/56-residence-builder-section.jpg)
+
+**Data protection.** `GET /api/developments/:slug/developer` returns the
+builder (no storage keys) and the company's residences as list cards (no
+`ownerId`/`agencyId`): this one, then at most 12 other published residences
+of the **same account** (the same agency, or the same owner) that name the
+same builder (`sameBuilderName`: case, spacing and accent forms ignored, never
+fuzzy). Builder names are free text, so another account typing the same name
+never appears on the page. A residence without a builder answers 404
+`BUILDER_NOT_FOUND`; the page then says so and leads back, without asking.
+
+**States.** The page uses the residence's cached data, so it opens at once
+from the residence. While the other residences load, two placeholders stand in;
+if they cannot load, the page says so with **Try again** and the rest stays
+usable. A residence that is not published (or a wrong link) shows "Not found"
+with the way back to all residences.
+
+**Layout.** Phones: one column under the app's header with "Back to
+<residence>"; facts in one column, two from 640px; cards one, two, three
+across. From 1280px the residence bar lists its sections; below that they are
+in the page's own section bar (the bar no longer wraps at 1024px). Checked at
+390×664, 844×390, 768×1024, 1024×768 and 1440×900 with no sideways scrolling.
+
+Tests: `developer/DeveloperPage.test.tsx` (the page, the residences and their
+links, Try again, no builder, the bar), `hero/useResidenceSections.test.tsx`,
+`residenceSections`, `builderLinks` (map search), `BuilderShowcase`. Backend:
+`builder-match.test.ts` (run) and `developer-public.test.ts` (same account and
+builder only, no ids, 404s), which needs MongoDB and was not run in the session
+that added it.
 
 ## 7b-3. Errors in the reader's language
 

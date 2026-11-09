@@ -7,6 +7,7 @@ import {
   listPublicUnits,
   getPublicUnit,
   getResidenceForListing,
+  getPublicDeveloperProfile,
 } from '../controllers/developmentController';
 import { getPublishedScene, listPublicViews } from '../controllers/developmentSceneController';
 import { sendUnitInquiry } from '../controllers/developmentInquiryController';
@@ -50,6 +51,7 @@ router.get('/for-listing/:listingId', getResidenceForListing);
 
 router.get('/:slug/scene', getPublishedScene);
 router.get('/:slug/views', listPublicViews);
+router.get('/:slug/developer', getPublicDeveloperProfile);
 router.get('/:slug/units/:unitId', getPublicUnit);
 router.post('/:slug/units/:unitId/inquiries', unitInquiryRateLimiter, sendUnitInquiry);
 router.get('/:slug/units', listPublicUnits);

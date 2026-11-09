@@ -1449,7 +1449,8 @@
     "ENTRANCE_NAME_TAKEN": "Ova zgrada već ima ulaz pod nazivom „{{name}}”.",
     "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz.",
     "RESIDENCE_GALLERY_FULL": "Rezidencija može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
-    "GALLERY_ORDER_INVALID": "Fotografije su se u međuvremenu promijenile. Osvježite stranicu i pokušajte ponovo."
+    "GALLERY_ORDER_INVALID": "Fotografije su se u međuvremenu promijenile. Osvježite stranicu i pokušajte ponovo.",
+    "BUILDER_NOT_FOUND": "Ova rezidencija još nije predstavila investitora."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1507,7 +1508,19 @@
     "projects": "Završeni projekti",
     "license": "Licenca",
     "office": "Ured",
-    "email": "E-pošta"
+    "email": "E-pošta",
+    "aboutCompany": "O kompaniji",
+    "developerOf": "Investitor projekta {{name}}",
+    "aboutHeading": "O kompaniji {{name}}",
+    "officeContact": "Ured i kontakt",
+    "openInMaps": "Otvori u Mapama",
+    "residencesHeading": "Rezidencije kompanije {{name}}",
+    "thisResidence": "Ova rezidencija",
+    "residencesLoading": "Učitavanje ostalih rezidencija…",
+    "residencesError": "Ostale rezidencije nije bilo moguće učitati.",
+    "backTo": "Nazad na {{name}}",
+    "noProfile": "Ova rezidencija još nije predstavila investitora.",
+    "seeHomes": "Pogledaj stanove u {{name}}"
   },
   "entrance": {
     "label": "Ulaz",

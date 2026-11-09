@@ -40,6 +40,7 @@ import {
   listPreviewImages,
 } from '../services/developments/developmentPublicService';
 import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
+import { getPublicDeveloper } from '../services/developments/developerPublicService';
 import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
 import { recomputeOwnerBilling, setResidenceStatus } from '../services/developments/billing/residenceBillingService';
 
@@ -400,6 +401,15 @@ export const getPublicBySlug = async (req: Request, res: Response): Promise<void
     res.json(await getPublicDevelopmentDetail(req.params.slug));
   } catch (error) {
     sendServiceError(res, error, 'get public development');
+  }
+};
+
+/** GET /api/developments/:slug/developer — the company behind the residence and its other residences. */
+export const getPublicDeveloperProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await getPublicDeveloper(req.params.slug));
+  } catch (error) {
+    sendServiceError(res, error, 'get public developer');
   }
 };
 
