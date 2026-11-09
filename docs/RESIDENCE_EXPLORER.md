@@ -197,7 +197,7 @@ the endpoint returns 404.
 
 | Method & path | Notes |
 | --- | --- |
-| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). |
+| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). With no builder named, an agency-owned residence's `builder` is its agency (`source: 'agency'`, `agencySlug`, public agency-page fields only). |
 | `GET /:slug/units` | Visible units only, with effective availability. `priceOnRequest` hides price and price/m². Only non-draft listing ids, encoded. |
 | `GET /:slug/units/:unitId` | Unit + development + sanitised listings. 404 for a hidden unit. |
 | `GET /:slug/developer` | The builder (no storage keys) and the company's residences as list cards: this one, then up to 12 other published residences of the same account naming the same builder. 404 `BUILDER_NOT_FOUND` when the residence has no builder. |
@@ -1079,9 +1079,20 @@ an empty or overlong address) and the website, phone, email and socials
 **Residences by <company>**: this residence first, marked, then the others it
 builds here; and **See the homes in <residence>**.
 
-**Getting there and back.** "The builder" in the residence's bar, the
-residence page's section bar, the phone byline ("Built by …") and the builder
-section's new **About the company** button open it
+**When there is one.** The page exists when the owner named a builder
+(dashboard → the residence → **Settings** → **The builder**), or, with no
+builder named, when an **agency** published the residence: the agency then
+stands in as **The company** ("By Vardar Homes", "The company behind <residence>",
+with an **Agency profile** button to its agency page), built from the public
+fields of its agency page only (`residenceCompany.ts`: name, description,
+logo, cover, address, phone, email, website, socials; never its registration
+number, team or billing; links only http(s)). A residence owned by a person
+with no builder named has no company page and shows no link to one.
+
+**Getting there and back.** "Built by <company> ›" under the headline of the
+full-screen page (every screen size), "The builder" / "The company" in the
+residence's bar (from 1280px) and its section bar, the phone byline, and the
+builder section's **About the company** button open it
 (`hero/useResidenceSections.ts`). On the company page the same bar marks "The
 builder" as the current page (`aria-current`); its other sections, "View
 apartments" and "See the homes" go back to the residence page and open at that
@@ -1097,7 +1108,7 @@ lines) with the button to the full page.
 builder (no storage keys) and the company's residences as list cards (no
 `ownerId`/`agencyId`): this one, then at most 12 other published residences
 of the **same account** (the same agency, or the same owner) that name the
-same builder (`sameBuilderName`: case, spacing and accent forms ignored, never
+same builder (or, for an agency standing in, its residences with no builder named) (`sameBuilderName`: case, spacing and accent forms ignored, never
 fuzzy). Builder names are free text, so another account typing the same name
 never appears on the page. A residence without a builder answers 404
 `BUILDER_NOT_FOUND`; the page then says so and leads back, without asking.
@@ -1116,10 +1127,12 @@ in the page's own section bar (the bar no longer wraps at 1024px). Checked at
 
 Tests: `developer/DeveloperPage.test.tsx` (the page, the residences and their
 links, Try again, no builder, the bar), `hero/useResidenceSections.test.tsx`,
-`residenceSections`, `builderLinks` (map search), `BuilderShowcase`. Backend:
-`builder-match.test.ts` (run) and `developer-public.test.ts` (same account and
-builder only, no ids, 404s), which needs MongoDB and was not run in the session
-that added it.
+`residenceSections`, `builderLinks` (map search), `companyLabel`,
+`BuilderShowcase`, `ResidenceHero` (the headline's byline). Backend:
+`builder-match.test.ts` and `residence-company.test.ts` (run), and
+`developer-public.test.ts` (same account and builder only, no ids, 404s, the
+agency standing in), which needs MongoDB and was not run in the session that
+added it.
 
 ## 7b-3. Errors in the reader's language
 

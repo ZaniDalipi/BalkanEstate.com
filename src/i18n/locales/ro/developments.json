@@ -1520,7 +1520,11 @@
     "residencesError": "Celelalte ansambluri nu au putut fi încărcate.",
     "backTo": "Înapoi la {{name}}",
     "noProfile": "Acest ansamblu nu și-a prezentat încă constructorul.",
-    "seeHomes": "Vezi locuințele din {{name}}"
+    "seeHomes": "Vezi locuințele din {{name}}",
+    "companyLabel": "Compania",
+    "companyBy": "De la",
+    "companyOf": "Compania din spatele {{name}}",
+    "agencyPage": "Profilul agenției"
   },
   "entrance": {
     "label": "Intrare",

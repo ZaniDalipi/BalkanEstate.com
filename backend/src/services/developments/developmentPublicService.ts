@@ -25,6 +25,7 @@ import { resolveEffectiveAvailability } from './unitAvailability';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
 import { effectiveTour } from './unitTour';
 import { isPropertyImageTag } from '../../config/propertyImageTags';
+import { agencyAsBuilder, loadOwnerAgency } from './residenceCompany';
 
 const LIVE = { $exists: false } as const;
 
@@ -257,12 +258,15 @@ const floorsWithPublishedViews = async (developmentId: mongoose.Types.ObjectId):
 export const getPublicDevelopmentDetail = async (slug: unknown) => {
   const development = await loadPublishedDevelopment(slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
-  const [{ buildings, floors, entrances }, units, floorsWithViews] = await Promise.all([
+  // No builder named: the publishing agency stands in as the company behind the residence.
+  const needsCompany = !development.builder?.name?.trim();
+  const [{ buildings, floors, entrances }, units, floorsWithViews, ownerAgency] = await Promise.all([
     loadStructureMaps(developmentId),
     DevelopmentUnit.find(visibleUnitFilter(developmentId)).select(
       'buildingId entranceId availability listingIds primaryListingId virtualTourUrl'
     ),
     floorsWithPublishedViews(developmentId),
+    needsCompany ? loadOwnerAgency(development) : Promise.resolve(null),
   ]);
   const listings = await loadListingStatuses(units);
 
@@ -289,8 +293,11 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
     stats.set(key, s);
   }
 
+  const publicDevelopment = toPublicDevelopment(development);
+  const company = needsCompany ? agencyAsBuilder(ownerAgency) : undefined;
+  if (company) publicDevelopment.builder = company;
   return {
-    development: toPublicDevelopment(development),
+    development: publicDevelopment,
     buildings: buildings.map((b) => {
       const json = b.toJSON() as Record<string, unknown>;
       delete json.coverMediaId;

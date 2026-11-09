@@ -1509,7 +1509,11 @@
     "residencesError": "Their other residences could not be loaded.",
     "backTo": "Back to {{name}}",
     "noProfile": "This residence has not introduced its builder yet.",
-    "seeHomes": "See the homes in {{name}}"
+    "seeHomes": "See the homes in {{name}}",
+    "companyLabel": "The company",
+    "companyBy": "By",
+    "companyOf": "The company behind {{name}}",
+    "agencyPage": "Agency profile"
   },
   "entrance": {
     "label": "Entrance",

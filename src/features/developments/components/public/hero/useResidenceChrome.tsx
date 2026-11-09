@@ -59,6 +59,9 @@ export function useResidenceChrome({ development, summary, sections, onSection }
         <div className="pt-4">{hero}</div>
       </>
     ),
-    immersive: { nav: nav('picture'), intro: <ResidenceIntro development={development} summary={summary} /> },
+    immersive: {
+      nav: nav('picture'),
+      intro: <ResidenceIntro development={development} summary={summary} onViewBuilder={development.builder?.name ? () => onSection('builder') : undefined} />,
+    },
   };
 }

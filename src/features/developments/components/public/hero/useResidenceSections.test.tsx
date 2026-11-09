@@ -40,6 +40,11 @@ describe('useResidenceSections', () => {
     expect(result.openDeveloper).toBeTypeOf('function');
   });
 
+  it('calls the publishing agency “The company” when it stands in for the builder', () => {
+    mount({ ...withBuilder, builder: { name: 'Vardar Homes', source: 'agency' } });
+    expect(result.sections[0]).toEqual({ id: 'builder', label: 'The company' });
+  });
+
   it('without a builder there is no company page to open', () => {
     mount({ ...withBuilder, builder: undefined });
     expect(result.sections.map((s) => s.id)).toEqual(['overview', 'units', 'location']);

@@ -1509,7 +1509,11 @@
     "residencesError": "Другите комплекси не можаха да се заредят.",
     "backTo": "Обратно към {{name}}",
     "noProfile": "Този комплекс все още не е представил строителя си.",
-    "seeHomes": "Виж жилищата в {{name}}"
+    "seeHomes": "Виж жилищата в {{name}}",
+    "companyLabel": "Компанията",
+    "companyBy": "От",
+    "companyOf": "Компанията зад {{name}}",
+    "agencyPage": "Профил на агенцията"
   },
   "entrance": {
     "label": "Вход",

@@ -6,6 +6,7 @@ import type { DevelopmentBuilder } from '../../../types';
 import { BuilderContacts } from './BuilderContacts';
 import { BuilderFacts } from './BuilderFacts';
 import { BuilderLogo } from './BuilderLogo';
+import { companyLabel } from '../../../utils/companyLabel';
 
 interface BuilderShowcaseProps {
   builder?: DevelopmentBuilder;
@@ -30,7 +31,7 @@ export const BuilderShowcase: React.FC<BuilderShowcaseProps> = ({ builder, onOpe
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" aria-hidden="true" />
         <p className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 sm:left-6">
-          {t('builderPublic.label', 'The builder')}
+          {companyLabel(t, builder)}
         </p>
       </div>
       <div className="px-4 pb-6 sm:px-6">

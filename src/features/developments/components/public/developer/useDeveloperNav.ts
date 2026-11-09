@@ -4,6 +4,7 @@ import { goBack, navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import type { Development } from '../../../types';
 import { isResidenceSection, sectionState } from '../../../utils/residenceSections';
+import { companyLabel } from '../../../utils/companyLabel';
 import type { NavSection } from '../hero/ResidenceNav';
 
 /**
@@ -15,15 +16,16 @@ import type { NavSection } from '../hero/ResidenceNav';
 export function useDeveloperNav(development: Development | undefined) {
   const { t } = useTranslation('developments');
   const slug = development?.slug ?? '';
+  const builderLabel = companyLabel(t, development?.builder);
 
   const sections: NavSection[] = useMemo(
     () => [
-      { id: 'builder', label: t('builderPublic.label', 'The builder') },
+      { id: 'builder', label: builderLabel },
       { id: 'overview', label: t('detail.overview', 'Overview') },
       { id: 'units', label: t('units.heading', 'Available homes') },
       { id: 'location', label: t('detail.location', 'Location') },
     ],
-    [t]
+    [builderLabel, t]
   );
 
   const residence = paths.development(slug);

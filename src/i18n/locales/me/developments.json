@@ -1520,7 +1520,11 @@
     "residencesError": "Ostale rezidencije nije bilo moguće učitati.",
     "backTo": "Nazad na {{name}}",
     "noProfile": "Ova rezidencija još nije predstavila investitora.",
-    "seeHomes": "Pogledaj stanove u {{name}}"
+    "seeHomes": "Pogledaj stanove u {{name}}",
+    "companyLabel": "Kompanija",
+    "companyBy": "Od",
+    "companyOf": "Kompanija iza projekta {{name}}",
+    "agencyPage": "Profil agencije"
   },
   "entrance": {
     "label": "Ulaz",

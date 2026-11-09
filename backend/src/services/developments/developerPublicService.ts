@@ -1,6 +1,7 @@
 /**
  * The company behind a residence, as buyers see it on its own page: the
- * builder's public profile and the other residences it builds on the platform.
+ * builder's public profile (or, with no builder named, the publishing
+ * agency's: see residenceCompany) and the other residences on the platform.
  *
  * "Other residences" are only those published by the SAME account (the same
  * agency, or the same owner) that name the same builder. Builder names are
@@ -12,6 +13,7 @@ import { NotFoundError } from './developmentListingService';
 import { listPreviewImages, loadPublishedDevelopment, toPublicDevelopment } from './developmentPublicService';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
 import { sameBuilderName } from './builderMatch';
+import { agencyAsBuilder, loadOwnerAgency } from './residenceCompany';
 
 /** At most this many OTHER residences are listed on the company's page (this one comes first, on top). */
 export const DEVELOPER_RESIDENCES_LIMIT = 12;
@@ -24,23 +26,26 @@ const sameAccount = (d: IDevelopment): Record<string, unknown> =>
 
 export const getPublicDeveloper = async (slug: unknown) => {
   const development = await loadPublishedDevelopment(slug);
-  const name = development.builder?.name;
-  if (!name || !name.trim()) throw new NotFoundError('This residence has no builder profile', { code: 'BUILDER_NOT_FOUND' });
+  // An agency-owned residence's other residences without a builder named have the same agency behind them.
+  const agency = await loadOwnerAgency(development);
+  const agencyName = typeof agency?.name === 'string' ? agency.name : undefined;
+  const builder = development.builder?.name?.trim() ? toPublicDevelopment(development).builder : agencyAsBuilder(agency);
+  const name = (builder as { name?: string } | undefined)?.name;
+  if (!builder || !name) throw new NotFoundError('This residence has no builder profile', { code: 'BUILDER_NOT_FOUND' });
 
   const candidates = await Development.find({
     ...publicResidenceFilter(),
     ...sameAccount(development),
     _id: { $ne: development._id },
-    'builder.name': { $exists: true },
   })
     .sort({ publishedAt: -1 })
     .limit(SCAN_LIMIT);
-  const others = candidates.filter((d) => sameBuilderName(d.builder?.name, name)).slice(0, DEVELOPER_RESIDENCES_LIMIT);
+  const companyOf = (d: IDevelopment) => (d.builder?.name?.trim() ? d.builder.name : agencyName);
+  const others = candidates.filter((d) => sameBuilderName(companyOf(d), name)).slice(0, DEVELOPER_RESIDENCES_LIMIT);
   // This residence first, so its card has a picture too (lists pick one for every residence).
   const residences = [development, ...others];
   const previews = await listPreviewImages(residences);
 
-  const { builder } = toPublicDevelopment(development);
   return {
     builder,
     residences: residences.map((d) => {

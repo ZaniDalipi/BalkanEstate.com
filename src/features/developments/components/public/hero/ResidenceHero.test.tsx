@@ -20,6 +20,13 @@ describe('ResidenceIntro', () => {
     expect(screen.getByText('Hover the building and choose an apartment')).toBeInTheDocument();
   });
 
+  it('names the company behind it, which opens its page', () => {
+    const onViewBuilder = vi.fn();
+    render(<ResidenceIntro development={development} onViewBuilder={onViewBuilder} />);
+    fireEvent.click(screen.getByRole('button', { name: /Built by\s*Aria Build/ }));
+    expect(onViewBuilder).toHaveBeenCalled();
+  });
+
   it('leaves out the numbers until the homes are known', () => {
     render(<ResidenceIntro development={development} />);
     expect(screen.queryByText(/available/)).not.toBeInTheDocument();

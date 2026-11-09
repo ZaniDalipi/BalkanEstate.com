@@ -124,4 +124,18 @@ describe('the company page', () => {
     fireEvent.click(within(bar).getByRole('button', { name: 'Back to East Gate' }));
     expect(h.goBack).toHaveBeenCalledWith('/developments/east-gate');
   });
+
+  it('when the agency that published the residence stands in, calls it the company and links its agency page', async () => {
+    const agency = { name: 'Vardar Homes', source: 'agency' as const, agencySlug: 'north-macedonia/vardar-homes', about: 'We sell and build.' };
+    h.development = residence({ builder: agency });
+    h.developer.mockResolvedValue({ builder: agency, residences: [residence({ builder: agency })] });
+    asDesktop();
+    mount();
+    expect(await screen.findByText('The company behind East Gate')).toBeInTheDocument();
+    expect(screen.queryByText('Developer of East Gate')).not.toBeInTheDocument();
+    const bar = screen.getByRole('navigation', { name: 'Residence' });
+    expect(within(bar).getByRole('button', { name: 'The company' })).toHaveAttribute('aria-current', 'page');
+    fireEvent.click(screen.getByRole('button', { name: 'Agency profile' }));
+    expect(h.navigate).toHaveBeenCalledWith('/agencies/north-macedonia/vardar-homes');
+  });
 });

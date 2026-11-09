@@ -4,9 +4,10 @@
  * name the same builder, with no account ids or storage keys.
  */
 import request from 'supertest';
+import Agency from '../../models/Agency';
 import { createDevelopment } from '../../services/developments/developmentService';
 import { setResidenceStatus } from '../../services/developments/billing/residenceBillingService';
-import { buildApp, setupDevelopment, makeUser, encodeId } from './helpers/explorerHarness';
+import { buildApp, setupDevelopment, makeUser, encodeId, tokenFor } from './helpers/explorerHarness';
 
 const app = buildApp();
 const PUB = '/api/developments';
@@ -61,5 +62,34 @@ describe('GET /:slug/developer', () => {
     const hidden = await request(app).get(`${PUB}/${draft.slug}/developer`);
     expect(hidden.status).toBe(404);
     expect(hidden.body.code).toBe('RESIDENCE_NOT_FOUND');
+  });
+
+  it('with no builder named, an agency-owned residence shows its agency as the company (public fields only)', async () => {
+    const owner = await makeUser();
+    const agency = await Agency.create({
+      name: 'Vardar Homes', slug: `mk/vardar-${Date.now()}`, email: `vardar-${Date.now()}@test.com`, phone: '+38923000000',
+      city: 'Skopje', country: 'North Macedonia', description: 'We build in Skopje.', registrationNumber: 'PIB-SECRET-1',
+      ownerId: owner._id,
+      subscription: { status: 'active', startDate: new Date(Date.now() - 86_400_000), expiresAt: new Date(Date.now() + 300 * 86_400_000), amount: 1000, currency: 'EUR', autoRenew: false },
+    });
+    const token = tokenFor(owner._id);
+    const make = async (name: string) => {
+      const res = await request(app).post('/api/dashboard/developments').set({ Authorization: `Bearer ${token}` }).send({ name, country: 'North Macedonia', city: 'Skopje', category: 'apartment_building' });
+      await request(app).post(`/api/dashboard/developments/${res.body.development.id}/publish`).set({ Authorization: `Bearer ${token}` }).send({});
+      return res.body.development as { slug: string };
+    };
+    const first = await make('Vardar One');
+    const second = await make('Vardar Two');
+
+    const detail = await request(app).get(`${PUB}/${first.slug}`);
+    expect(detail.body.development.builder).toMatchObject({ name: 'Vardar Homes', source: 'agency', about: 'We build in Skopje.' });
+    expect(JSON.stringify(detail.body)).not.toMatch(/PIB-SECRET-1|invitationCode|registrationNumber/);
+    expect(allStrings(detail.body)).not.toContain(String(agency._id));
+
+    const company = await request(app).get(`${PUB}/${first.slug}/developer`);
+    expect(company.status).toBe(200);
+    expect(company.body.builder).toMatchObject({ name: 'Vardar Homes', source: 'agency' });
+    expect(company.body.residences.map((r: { slug: string }) => r.slug).sort()).toEqual([first.slug, second.slug].sort());
+    expect(company.body.residences[0].slug).toBe(first.slug);
   });
 });

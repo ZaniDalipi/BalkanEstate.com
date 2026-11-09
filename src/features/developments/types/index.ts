@@ -291,6 +291,10 @@ export interface DevelopmentBuilder {
   socials?: Partial<Record<BuilderSocialNetwork, string>>;
   logo?: { url: string };
   banner?: { url: string };
+  /** Public only: 'agency' when no builder was named and the publishing agency stands in (from its agency page). */
+  source?: 'agency';
+  /** With `source: 'agency'`: the agency's own page. */
+  agencySlug?: string;
 }
 
 /** The company behind a residence, on its own page: its profile and its other residences on the platform. */

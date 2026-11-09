@@ -1509,7 +1509,11 @@
     "residencesError": "Rezidencat e tjera nuk mund të ngarkoheshin.",
     "backTo": "Kthehu te {{name}}",
     "noProfile": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin.",
-    "seeHomes": "Shiko banesat në {{name}}"
+    "seeHomes": "Shiko banesat në {{name}}",
+    "companyLabel": "Kompania",
+    "companyBy": "Nga",
+    "companyOf": "Kompania pas {{name}}",
+    "agencyPage": "Profili i agjencisë"
   },
   "entrance": {
     "label": "Hyrja",

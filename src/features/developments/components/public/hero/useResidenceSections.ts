@@ -5,6 +5,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import type { Development } from '../../../types';
 import { arrivalSection } from '../../../utils/residenceSections';
+import { companyLabel } from '../../../utils/companyLabel';
 import type { NavSection } from './ResidenceNav';
 
 /** Wait for the page (and the app's own scroll to the top) before scrolling to a section. */
@@ -22,15 +23,16 @@ export function useResidenceSections(development: Development | undefined) {
   const location = useLocation();
   const slug = development?.slug;
   const hasBuilder = !!development?.builder?.name;
+  const builderLabel = companyLabel(t, development?.builder);
 
   const sections: NavSection[] = useMemo(
     () => [
-      ...(hasBuilder ? [{ id: 'builder', label: t('builderPublic.label', 'The builder') }] : []),
+      ...(hasBuilder ? [{ id: 'builder', label: builderLabel }] : []),
       { id: 'overview', label: t('detail.overview', 'Overview') },
       { id: 'units', label: t('units.heading', 'Available homes') },
       { id: 'location', label: t('detail.location', 'Location') },
     ],
-    [hasBuilder, t]
+    [hasBuilder, builderLabel, t]
   );
 
   const openDeveloper = useCallback(() => {
