@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Building2, LayoutGrid } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { cn } from '@/src/lib/utils';
 import type { FloorStop } from './floorStack';
 
@@ -49,18 +49,20 @@ export const FloorStopButton: React.FC<FloorStopButtonProps> = ({ stop, on, layo
       {on && <motion.span layoutId={`floor-picker-${layout}`} className="absolute inset-0 rounded-xl bg-slate-900" transition={reduced ? { duration: 0 } : SPRING} aria-hidden="true" />}
       {column ? (
         <span className="relative flex h-9 w-9 shrink-0 items-center justify-center text-[15px] font-bold tabular-nums landscape:h-7 landscape:w-7 landscape:text-[13px]" aria-hidden="true">
-          {stop ? stop.level : <Building2 className="h-4 w-4" />}
+          {stop ? stop.level : <SoftIcon name="building" className="h-6 w-6 landscape:h-5 landscape:w-5" />}
           {stop && stop.available > 0 && <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />}
         </span>
       ) : (
-        !stop && <Building2 className="relative h-4 w-4 shrink-0" aria-hidden="true" />
+        !stop && <SoftIcon name="building" className="relative h-5 w-5 shrink-0" />
       )}
       <span className={cn('relative min-w-0 flex-1', column && DETAIL)} aria-hidden="true">
         <span className="block truncate">{name}</span>
         {free && <span className={cn('block truncate text-[11px] font-medium landscape:hidden', on ? 'text-white/75' : 'text-emerald-700')}>{free}</span>}
       </span>
       {stop?.hasPicture && (
-        <LayoutGrid className={cn('relative h-3.5 w-3.5 shrink-0', on ? 'text-white/80' : 'text-slate-400', column && DETAIL)} aria-label={t('explorer.floors.hasPlan', 'Has a floor plan')} role="img" />
+        <span role="img" aria-label={t('explorer.floors.hasPlan', 'Has a floor plan')} className={cn('relative flex shrink-0', column && DETAIL)}>
+          <SoftIcon name="mapGrid" className="h-5 w-5" />
+        </span>
       )}
     </button>
   );

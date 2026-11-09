@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RotateCw } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { FloorShotState } from './floorShotState';
 
 interface ShowcaseWaitingProps {
@@ -23,7 +23,7 @@ export const ShowcaseWaiting: React.FC<ShowcaseWaitingProps> = ({ floor }) => {
           onClick={floor.retry}
           className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
-          <RotateCw className="h-4 w-4" aria-hidden="true" />
+          <SoftIcon name="refresh" className="h-5 w-5" />
           {t('explorer.showcase.retry', 'Try again')}
         </button>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, MapPin } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { DevelopmentBuilder } from '../../../types';
 import { mailHref, mapsSearchHref, safeWebHref, telHref } from '../../../utils/builderLinks';
 import { BuilderContacts } from '../builder/BuilderContacts';
@@ -21,8 +22,8 @@ export const DeveloperOffice: React.FC<{ builder: DevelopmentBuilder }> = ({ bui
       <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         {address && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex min-w-0 items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+            <p className="flex min-w-0 items-center gap-3">
+              <SoftIcon name="pin" className="h-9 w-9 shrink-0" />
               <span className="min-w-0 break-words text-base font-medium text-slate-900">
                 <span className="sr-only">{t('builderPublic.office', 'Office')}: </span>
                 {address}

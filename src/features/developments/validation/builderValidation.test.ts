@@ -58,9 +58,19 @@ describe('builderPayload / builderToForm', () => {
     });
     expect(builderPayload(form())).toBeNull();
   });
-  it('round-trips a stored builder', () => {
-    const f = builderToForm({ name: 'B', foundedYear: 2004, socials: { youtube: 'https://youtu.be/x' } });
-    expect(f).toMatchObject({ name: 'B', foundedYear: '2004', completedProjects: '', socials: { youtube: 'https://youtu.be/x', facebook: '' } });
+  it('round-trips a stored builder; the fields show addresses without https://, which saving adds back', () => {
+    const f = builderToForm({ name: 'B', foundedYear: 2004, website: 'https://www.b.mk', socials: { youtube: 'https://youtu.be/x' } });
+    expect(f).toMatchObject({ name: 'B', foundedYear: '2004', completedProjects: '', website: 'www.b.mk', socials: { youtube: 'youtu.be/x', facebook: '' } });
+    expect(builderPayload(f)).toMatchObject({ website: 'https://www.b.mk', socials: { youtube: 'https://youtu.be/x' } });
+  });
+
+  it('takes addresses typed as www.x.com or x.com', () => {
+    const typed = form({ name: 'B', website: 'balkanestateai.com', socials: { facebook: 'www.facebook.com/bb', instagram: 'instagram.com/bb' } });
+    expect(validateBuilderForm(typed, NOW)).toEqual({});
+    expect(builderPayload(typed)).toMatchObject({ website: 'https://balkanestateai.com', socials: { facebook: 'https://www.facebook.com/bb', instagram: 'https://instagram.com/bb' } });
+    // The company's own site in a social field is not that network.
+    expect(validateBuilderForm(form({ name: 'B', socials: { facebook: 'balkanestateai.com' } }), NOW)).toEqual({ 'socials.facebook': { code: 'SOCIAL_HOST', params: { network: 'Facebook' } } });
+    expect(validateBuilderForm(form({ name: 'B', website: 'balkanestateai' }), NOW)).toEqual({ website: { code: 'URL_INVALID' } });
   });
 });
 

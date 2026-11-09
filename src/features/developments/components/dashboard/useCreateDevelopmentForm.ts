@@ -8,6 +8,7 @@ import type { CreateDevelopmentPayload } from '../../types';
 import { validateCreateDevelopment, type CreateDevelopmentErrors } from '../../validation/developmentValidation';
 import { useApiErrorText } from '../../hooks/useApiErrorText';
 import { holdImportFile } from './inventory/import/pendingImport';
+import { toWebUrl } from '../../utils/webAddress';
 import { useAppContext } from '@/context/AppContext';
 import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
@@ -71,6 +72,8 @@ export function useCreateDevelopmentForm() {
     try {
       const { development } = await create({
         ...form,
+        // Typed without https://; saved with it.
+        website: toWebUrl(form.website) || undefined,
         name: form.name.trim(),
         country: location.country.trim(),
         city: location.city.trim(),

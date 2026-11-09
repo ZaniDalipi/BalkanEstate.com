@@ -16,6 +16,7 @@ import {
   type DevelopmentConstructionStatus,
 } from '../../config/developments';
 import { normalizeBuilderText } from './builderProfile';
+import { withHttps } from './webAddress';
 
 /** A trimmed string, or '' for anything that isn't a string (so bad input is a 400, not a crash). */
 const text = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
@@ -100,7 +101,7 @@ export const createDevelopment = async (
       field: 'constructionStatus',
     });
   }
-  assertWebsite(input.website);
+  const website = normalizeWebsite(input.website);
   if (!text(input.name)) throw new ValidationError('name is required', { code: 'FIELD_REQUIRED', field: 'name' });
   if (!text(input.country)) throw new ValidationError('country is required', { code: 'FIELD_REQUIRED', field: 'country' });
   if (!text(input.city)) throw new ValidationError('city is required', { code: 'FIELD_REQUIRED', field: 'city' });
@@ -147,7 +148,7 @@ export const createDevelopment = async (
     constructionStatus: input.constructionStatus ?? 'planned',
     ...timeline,
     amenities: normalizeAmenities(input.amenities),
-    website: input.website,
+    website,
     contact: normalizeContact(input.contact),
     allowUnitInquiries: typeof input.allowUnitInquiries === 'boolean' ? input.allowUnitInquiries : true,
     status: 'draft',
@@ -236,7 +237,10 @@ export const updateDevelopment = async (
   for (const key of EDITABLE_FIELDS) {
     if (!(key in updates)) continue;
     const value = updates[key];
-    if (key === 'website') assertWebsite(value);
+    if (key === 'website') {
+      development.website = normalizeWebsite(value);
+      continue;
+    }
     if (key === 'category' && !isValidCategory(value)) {
       throw new ValidationError(`category must be one of: ${DEVELOPMENT_CATEGORIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'category' });
     }
@@ -420,12 +424,25 @@ export function normalizeContact(value: unknown): { name?: string; email?: strin
   return { ...(name ? { name } : {}), ...(email ? { email } : {}), ...(phone ? { phone } : {}) };
 }
 
-/** The website is rendered as a link: only http(s) URLs are accepted. */
-function assertWebsite(value: unknown): void {
-  if (value === undefined || value === null || value === '') return;
-  if (typeof value !== 'string' || !/^https?:\/\/[^\s]+$/i.test(value.trim())) {
-    throw new ValidationError('website must be an http(s) URL', { code: 'URL_INVALID', field: 'website' });
+/**
+ * The website is rendered as a link: an http(s) address on a dotted host, with
+ * https:// added when it was typed without a scheme ("www.x.com"). Empty
+ * clears it.
+ */
+export function normalizeWebsite(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  const invalid = () => new ValidationError('website must be an http(s) URL', { code: 'URL_INVALID', field: 'website' });
+  if (typeof value !== 'string' || value.length > 300) throw invalid();
+  const href = withHttps(value);
+  if (!href) return undefined;
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    throw invalid();
   }
+  if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.username || url.password || !url.hostname.includes('.') || /\s/.test(href)) throw invalid();
+  return href;
 }
 
 export class ForbiddenError extends Error {

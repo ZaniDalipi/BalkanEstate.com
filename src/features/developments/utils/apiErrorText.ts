@@ -14,7 +14,7 @@ export const API_ERROR_TEXT: Record<string, string> = {
   FIELD_RANGE: 'Enter a number from {{min}} to {{max}}.',
   TOO_MANY_ITEMS: 'At most {{max}} entries.',
   EMAIL_INVALID: 'Enter a valid email address, like name@example.com.',
-  URL_INVALID: 'Enter a full web address starting with https://.',
+  URL_INVALID: 'Enter a web address like www.example.com.',
   PHONE_INVALID: 'Enter a valid phone number, like +389 2 123 4567.',
   SOCIAL_HOST: 'This must be a link to {{network}}.',
   CURRENCY_EUR_ONLY: 'Prices are in euros (EUR).',

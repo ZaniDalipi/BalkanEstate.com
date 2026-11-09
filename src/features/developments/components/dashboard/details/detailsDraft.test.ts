@@ -44,4 +44,14 @@ describe('residence details draft', () => {
     expect(toDraft(dev)).toMatchObject({ lat: '41.327500', lng: '19.818700', yearBuilt: '' });
     expect(changedFields({ ...toDraft(dev), constructionStatus: 'completed', yearBuilt: '2019' }, dev)).toEqual({ constructionStatus: 'completed', yearBuilt: 2019 });
   });
+
+  it('shows the website without https:// and sends it back with it, only when it changed', () => {
+    const withSite = { ...dev, website: 'http://plaza.al' } as Development;
+    expect(toDraft(withSite).website).toBe('plaza.al');
+    // Untouched: nothing is sent, even though the stored address had http://.
+    expect(changedFields(toDraft(withSite), withSite)).toEqual({});
+    expect(changedFields({ ...toDraft(withSite), website: 'www.plaza.al' }, withSite)).toEqual({ website: 'https://www.plaza.al' });
+    expect(changedFields({ ...toDraft(withSite), website: '' }, withSite)).toEqual({ website: '' });
+  });
 });
+

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/src/shared/components/ui/Input';
+import { WebAddressInput } from '../../shared/WebAddressInput';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { TextArea } from './TextArea';
 import { TimelineField } from './TimelineField';
@@ -80,13 +81,11 @@ export const AboutSection: React.FC<SectionProps> = ({ draft, set, errors, disab
         onChange={(description) => set({ description })}
         disabled={disabled}
       />
-      <Input
+      <WebAddressInput
         label={t('wizard.website')}
-        placeholder="https://"
         value={draft.website}
-        onChange={(e) => set({ website: e.target.value })}
+        onValueChange={(website) => set({ website })}
         error={errors.website}
-        inputMode="url"
         disabled={disabled}
       />
     </Fieldset>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RotateCw } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { Development } from '../../../types';
 import { DevelopmentCard } from '../../shared/DevelopmentCard';
 
@@ -56,7 +56,7 @@ export const DeveloperResidences: React.FC<DeveloperResidencesProps> = ({ builde
             onClick={onRetry}
             className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-slate-300 bg-white px-4 font-semibold text-slate-800 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <RotateCw className="h-4 w-4" aria-hidden="true" />
+            <SoftIcon name="refresh" className="h-5 w-5" />
             {t('explorer.showcase.retry', 'Try again')}
           </button>
         </div>

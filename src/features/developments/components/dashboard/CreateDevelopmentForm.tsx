@@ -4,6 +4,7 @@ import { goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
+import { WebAddressInput } from '../shared/WebAddressInput';
 import { FormSelect } from '../shared/FormSelect';
 import { LocationFields } from './details/LocationFields';
 import {
@@ -79,12 +80,11 @@ const CreateDevelopmentForm: React.FC = () => {
           />
         </div>
 
-        <Input
+        <WebAddressInput
           label={t('wizard.website')}
-          placeholder="https://"
           value={form.website ?? ''}
-          onChange={(e) => set('website', e.target.value)}
-          inputMode="url"
+          onValueChange={(website) => set('website', website)}
+          error={fieldError('website')}
         />
 
         <CreateImportPicker file={sheet} onChange={setSheet} />
