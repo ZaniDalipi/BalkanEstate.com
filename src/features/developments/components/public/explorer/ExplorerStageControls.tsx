@@ -34,10 +34,23 @@ export const ExplorerStageControls: React.FC<ExplorerStageControlsProps> = (p) =
   const float = full ? 'absolute' : 'relative sm:absolute';
   return (
     <>
-      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-[calc(var(--stage-safe-left,0px)+0.75rem)] top-[calc(var(--stage-safe-top,0px)+4rem)] p-0', HIDE_WHEN_IMMERSED)}>
-        <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
+      {/*
+        Bounded on both sides, so a row longer than the screen scrolls sideways instead of running off it.
+        The box spans the width but takes no taps itself (the picture under it stays clickable); its rows do.
+      */}
+      <div
+        className={cn(
+          float,
+          'pointer-events-none z-10 px-3 pt-3 sm:left-3 sm:right-3 sm:top-16 sm:p-0',
+          full && 'left-[calc(var(--stage-safe-left,0px)+0.75rem)] right-[calc(var(--stage-safe-right,0px)+0.75rem)] top-[calc(var(--stage-safe-top,0px)+4rem)] p-0',
+          HIDE_WHEN_IMMERSED
+        )}
+      >
+        <div className="pointer-events-auto w-fit max-w-full">
+          <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
+        </div>
         {p.floors && p.onFloor && p.floors.length > 0 && (
-          <div className="mt-2">
+          <div className="pointer-events-auto mt-2 w-fit max-w-full">
             <FloorPicker stops={p.floors} activeId={p.activeFloorId} onSelect={p.onFloor} onPreview={p.onPreviewFloor} layout="row" />
           </div>
         )}

@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ResidenceExplorer } from './ResidenceExplorer';
 import { EMPTY_CRITERIA } from '../../../utils/unitFilters';
 import type { ExplorerNav } from '../../../hooks/useExplorerUrlState';
-import type { DevelopmentBuilding, PublicSceneView, PublicUnit } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentFloor, PublicSceneView, PublicUnit } from '../../../types';
 
 vi.mock('react-i18next', async () => (await import('./__tests__/i18nMock')).default);
 const views = vi.hoisted(() => ({ byTarget: {} as Record<string, PublicSceneView[]> }));
@@ -26,12 +26,12 @@ const buildings = [
 ] as DevelopmentBuilding[];
 const units = [{ id: 'u1', unitNumber: 'A1', unitType: 'apartment', availability: 'available', buildingId: 'b1', floorId: 'f', listingIds: [] }] as unknown as PublicUnit[];
 
-const Harness: React.FC<{ onOpen?: (id: string) => void; immersive?: boolean }> = ({ onOpen = () => undefined, immersive }) => {
+const Harness: React.FC<{ onOpen?: (id: string) => void; immersive?: boolean; floors?: DevelopmentFloor[] }> = ({ onOpen = () => undefined, immersive, floors = [] }) => {
   const [nav, setNav] = useState<ExplorerNav>({});
   return (
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <ResidenceExplorer
-        slug="res" residenceName="East Gate" buildings={buildings} floors={[]} units={units}
+        slug="res" residenceName="East Gate" buildings={buildings} floors={floors} units={units}
         criteria={EMPTY_CRITERIA} onCriteriaChange={() => undefined} nav={nav} onNavChange={setNav}
         onOpenUnit={onOpen} fallback={<p>cover-hero</p>} header={<p>title-strip</p>}
         immersive={immersive ? { nav: <nav aria-label="Residence">residence-bar</nav>, intro: <h1>Find your home in East Gate</h1> } : undefined}
@@ -107,4 +107,21 @@ describe('ResidenceExplorer', () => {
     const bar = screen.getByRole('button', { name: 'Exit full screen' }).closest('.absolute');
     expect(bar?.className).toContain('top-[calc(var(--stage-safe-top,0px)+0.75rem)]');
   });
+
+  it('in full screen the building and floor rows are bounded on both sides, so a long row scrolls sideways', async () => {
+    views.byTarget['building:b1'] = [view('east', [])];
+    const floors = [1, 2, 3].map((level) => ({ id: `f${level}`, developmentId: 'd', buildingId: 'b1', label: `Floor ${level}`, level, kind: 'residential', order: level })) as DevelopmentFloor[];
+    render(<Harness floors={floors} />);
+    await screen.findByRole('navigation', { name: 'Floors' });
+    fireEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    const row = screen.getByRole('navigation', { name: 'Floors' });
+    expect(row).toHaveClass('max-w-full', 'overflow-x-auto');
+    // Without a right edge the box grew with the row, which then never had to scroll (it ran off the screen).
+    const box = row.parentElement?.parentElement as HTMLElement;
+    expect(box.className).toContain('right-[calc(var(--stage-safe-right,0px)+0.75rem)]');
+    // The box spans the width but lets taps through to the picture; the rows take them.
+    expect(box).toHaveClass('pointer-events-none');
+    expect(row.parentElement).toHaveClass('pointer-events-auto', 'max-w-full');
+  });
 });
+
