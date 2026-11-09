@@ -14,7 +14,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import InteractionHeatmap from './InteractionHeatmap';
 import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
-import { ResidenceManager } from './residences/ResidenceManager';
+import { ResidencesAdmin } from './residences/ResidencesAdmin';
 import PricingManager from './PricingManager';
 import InquiryManager from './InquiryManager';
 import AgentRequestManager from './AgentRequestManager';
@@ -241,7 +241,7 @@ const AdminDashboard: React.FC = () => {
       case 'agencies':
         return <AgencyManager />;
       case 'residences':
-        return <ResidenceManager />;
+        return <ResidencesAdmin />;
       case 'settings':
         return <SystemSettings />;
       case 'howItWorks':

@@ -1440,7 +1440,9 @@
     "RESIDENCE_GALLERY_FULL": "A residence can have at most {{max}} photos. {{remaining}} more can be added.",
     "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again.",
     "BUILDER_NOT_FOUND": "This residence has not introduced its builder yet.",
-    "BUSINESS_NOT_FOUND": "This company is not one of your Business Directory listings. Pick one you own."
+    "BUSINESS_NOT_FOUND": "This company is not one of your Business Directory listings. Pick one you own.",
+    "CODE_IN_USE": "This code was used, so it stays for the records. Switch it off instead.",
+    "CODE_NOT_FOUND": "This code no longer exists. Reload the page."
   },
   "notices": {
     "trialEndsSoon": {

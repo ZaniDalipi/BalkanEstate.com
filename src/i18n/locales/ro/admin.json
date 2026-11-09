@@ -230,7 +230,8 @@
       "sourceReferralDesc": "Utilizați pentru recompense din recomandări de utilizatori",
       "description": "Descriere",
       "descriptionPlaceholder": "Notă internă despre acest cod...",
-      "createCode": "Creează Cod"
+      "createCode": "Creează Cod",
+      "residenceHint": "Codurile de deblocare pentru ansambluri se creează mai ușor în Ansambluri › Coduri de deblocare (trebuie să numească un produs pentru ansambluri și să acopere prețul întreg)."
     },
     "bulk": {
       "numberOfCodes": "Număr de Coduri",
@@ -1950,7 +1951,9 @@
       "sellerProYearly": "Vânzător Pro (anual)",
       "enterprisePlan": "Planul Enterprise",
       "agentProMonthly": "Agent Pro (lunar)",
-      "agentProYearly": "Agent Pro (anual)"
+      "agentProYearly": "Agent Pro (anual)",
+      "residenceExtraBuilding": "Clădiri suplimentare pentru ansambluri",
+      "residencePass": "Residence Pass (12 luni)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Preluarea statisticilor a eșuat",
@@ -2139,5 +2142,72 @@
       "range": "Folosește un număr de la 1 la {{max}}.",
       "belowUsed": "Acest ansamblu are deja {{used}} clădiri."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Apăsați din nou pentru a șterge",
+    "copied": "Copiat",
+    "copy": "Copiază",
+    "copyCode": "Copiază {{code}}",
+    "copyFailed": "Copierea nu este permisă aici: selectați codul și copiați-l manual.",
+    "created": {
+      "copyAll": "Copiază tot",
+      "done": "Gata",
+      "subtitle": "{{kind}} · valabil până la {{date}} · {{uses}} utilizare/utilizări fiecare",
+      "title": "Coduri gata: {{count}}"
+    },
+    "delete": "Șterge",
+    "disable": "Dezactivează",
+    "empty": "Niciun cod nu corespunde.",
+    "emptyAll": "Încă nu există coduri. Creați primul cu „Coduri noi”.",
+    "enable": "Activează",
+    "filter": {
+      "active": "Gata de folosit",
+      "all": "Toate",
+      "disabled": "Dezactivate",
+      "expired": "Expirate",
+      "used": "Folosite"
+    },
+    "filterLabel": "Stare",
+    "form": {
+      "cancel": "Anulează",
+      "count": "Câte coduri",
+      "countHint": "Până la {{max}} odată",
+      "create": "Creează codurile",
+      "creating": "Se creează…",
+      "days": "Valabil (zile)",
+      "daysHint": "Până la {{max}} zile",
+      "kind": "Ce deblochează",
+      "note": "Notă (pentru cine este)",
+      "notePlaceholder": "ex. Vardar Homes, convenit la telefon",
+      "range": "Introduceți un număr întreg de la {{min}} la {{max}}.",
+      "title": "Coduri noi de deblocare",
+      "tooLong": "Cel mult {{max}} caractere.",
+      "uses": "Utilizări per cod",
+      "usesHint": "Fiecare cont poate folosi un cod o singură dată"
+    },
+    "intro": "Proprietarii introduc un cod în „Cumpără Residence Pass” pentru a-l debloca fără plată online. Fiecare cod acoperă prețul întreg al ce deblochează.",
+    "kind": {
+      "extra_building": "Clădiri suplimentare",
+      "pass": "Residence Pass"
+    },
+    "loadError": "Codurile nu au putut fi încărcate.",
+    "markSent": "Marchează ca trimis",
+    "markUnsent": "Marchează ca netrimis",
+    "new": "Coduri noi",
+    "removedResidence": "un ansamblu șters",
+    "search": "Găsește un cod",
+    "searchPlaceholder": "ex. RES-7K3P",
+    "sent": "Trimis",
+    "status": {
+      "active": "Gata de folosit",
+      "disabled": "Dezactivat",
+      "expired": "Expirat",
+      "scheduled": "Încă nevalabil",
+      "used": "Folosit"
+    },
+    "title": "Coduri de deblocare",
+    "until": "până la {{date}}",
+    "usedBy": "Folosit de",
+    "uses": "{{used}} din {{limit}} folosite"
   }
 }

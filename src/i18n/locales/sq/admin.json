@@ -230,7 +230,8 @@
       "sourceReferralDesc": "Përdor për shpërblime referimi të përdoruesve",
       "description": "Përshkrimi",
       "descriptionPlaceholder": "Shënim i brendshëm për këtë kod...",
-      "createCode": "Krijo kod"
+      "createCode": "Krijo kod",
+      "residenceHint": "Kodet e zhbllokimit për rezidencat krijohen më lehtë te Rezidencat › Kodet e zhbllokimit (duhet të emërtojnë një produkt rezidence dhe të mbulojnë çmimin e plotë)."
     },
     "bulk": {
       "numberOfCodes": "Numri i Kodeve",
@@ -1963,7 +1964,9 @@
       "sellerProYearly": "Shitës Pro (vjetor)",
       "enterprisePlan": "Plani Enterprise",
       "agentProMonthly": "Agjent Pro (mujor)",
-      "agentProYearly": "Agjent Pro (vjetor)"
+      "agentProYearly": "Agjent Pro (vjetor)",
+      "residenceExtraBuilding": "Ndërtesa shtesë të rezidencës",
+      "residencePass": "Karta e Rezidencës (12 muaj)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Marrja e statistikave dështoi",
@@ -2154,5 +2157,72 @@
       "range": "Përdorni një numër nga 1 deri në {{max}}.",
       "belowUsed": "Kjo rezidencë ka tashmë {{used}} ndërtesa."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Shtyp sërish për ta fshirë",
+    "copied": "U kopjua",
+    "copy": "Kopjo",
+    "copyCode": "Kopjo {{code}}",
+    "copyFailed": "Kopjimi nuk lejohet këtu: zgjidhni kodin dhe kopjojeni me dorë.",
+    "created": {
+      "copyAll": "Kopjo të gjitha",
+      "done": "U krye",
+      "subtitle": "{{kind}} · i vlefshëm deri më {{date}} · {{uses}} përdorim(e) secili",
+      "title": "Kodet gati: {{count}}"
+    },
+    "delete": "Fshi",
+    "disable": "Çaktivizo",
+    "empty": "Asnjë kod nuk përputhet.",
+    "emptyAll": "Ende nuk ka kode. Krijoni të parin me “Kode të reja”.",
+    "enable": "Aktivizo",
+    "filter": {
+      "active": "Gati për përdorim",
+      "all": "Të gjitha",
+      "disabled": "Të çaktivizuara",
+      "expired": "Të skaduara",
+      "used": "Të përdorura"
+    },
+    "filterLabel": "Statusi",
+    "form": {
+      "cancel": "Anulo",
+      "count": "Sa kode",
+      "countHint": "Deri në {{max}} njëherësh",
+      "create": "Krijo kodet",
+      "creating": "Po krijohen…",
+      "days": "I vlefshëm për (ditë)",
+      "daysHint": "Deri në {{max}} ditë",
+      "kind": "Çfarë zhbllokojnë",
+      "note": "Shënim (për kë është)",
+      "notePlaceholder": "p.sh. Vardar Homes, rënë dakord me telefon",
+      "range": "Shkruani një numër të plotë nga {{min}} deri në {{max}}.",
+      "title": "Kode të reja zhbllokimi",
+      "tooLong": "Maksimumi {{max}} karaktere.",
+      "uses": "Përdorime për kod",
+      "usesHint": "Çdo llogari mund ta përdorë një kod një herë"
+    },
+    "intro": "Pronarët shkruajnë një kod te “Bli Kartën e Rezidencës” për ta zhbllokuar pa paguar online. Çdo kod mbulon çmimin e plotë të asaj që zhbllokon.",
+    "kind": {
+      "extra_building": "Ndërtesa shtesë",
+      "pass": "Karta e Rezidencës"
+    },
+    "loadError": "Kodet nuk mund të ngarkoheshin.",
+    "markSent": "Shëno si të dërguar",
+    "markUnsent": "Shëno si të padërguar",
+    "new": "Kode të reja",
+    "removedResidence": "një rezidencë e fshirë",
+    "search": "Gjej një kod",
+    "searchPlaceholder": "p.sh. RES-7K3P",
+    "sent": "Dërguar",
+    "status": {
+      "active": "Gati për përdorim",
+      "disabled": "I çaktivizuar",
+      "expired": "I skaduar",
+      "scheduled": "Ende jo i vlefshëm",
+      "used": "I përdorur"
+    },
+    "title": "Kodet e zhbllokimit",
+    "until": "deri më {{date}}",
+    "usedBy": "Përdorur nga",
+    "uses": "{{used}} nga {{limit}} të përdorura"
   }
 }

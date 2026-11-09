@@ -1440,7 +1440,9 @@
     "RESIDENCE_GALLERY_FULL": "Një rezidencë mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
     "GALLERY_ORDER_INVALID": "Fotot ndryshuan ndërkohë. Ringarkoni faqen dhe provoni përsëri.",
     "BUILDER_NOT_FOUND": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin.",
-    "BUSINESS_NOT_FOUND": "Kjo kompani nuk është ndër listimet tuaja në Drejtorinë e Bizneseve. Zgjidhni një që e zotëroni."
+    "BUSINESS_NOT_FOUND": "Kjo kompani nuk është ndër listimet tuaja në Drejtorinë e Bizneseve. Zgjidhni një që e zotëroni.",
+    "CODE_IN_USE": "Ky kod është përdorur, ndaj mbetet në regjistër. Çaktivizojeni në vend të kësaj.",
+    "CODE_NOT_FOUND": "Ky kod nuk ekziston më. Ringarkoni faqen."
   },
   "notices": {
     "trialEndsSoon": {

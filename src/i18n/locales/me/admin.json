@@ -230,7 +230,8 @@
       "sourceReferralDesc": "Koristite za nagrade od preporuka korisnika",
       "description": "Opis",
       "descriptionPlaceholder": "Interna bilješka o ovom kodu...",
-      "createCode": "Kreiraj Kod"
+      "createCode": "Kreiraj Kod",
+      "residenceHint": "Kodovi za otključavanje rezidencija lakše se prave u Rezidencije › Kodovi za otključavanje (moraju navesti proizvod rezidencije i pokriti punu cijenu)."
     },
     "bulk": {
       "numberOfCodes": "Broj Kodova",
@@ -1956,7 +1957,9 @@
       "sellerProYearly": "Prodavac Pro (godišnje)",
       "enterprisePlan": "Enterprise plan",
       "agentProMonthly": "Agent Pro (mjesečno)",
-      "agentProYearly": "Agent Pro (godišnje)"
+      "agentProYearly": "Agent Pro (godišnje)",
+      "residenceExtraBuilding": "Dodatne zgrade rezidencije",
+      "residencePass": "Residence Pass (12 mjeseci)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Preuzimanje statistike nije uspjelo",
@@ -2147,5 +2150,72 @@
       "range": "Koristite broj od 1 do {{max}}.",
       "belowUsed": "Ova rezidencija već ima {{used}} zgrada."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Pritisnite ponovo za brisanje",
+    "copied": "Kopirano",
+    "copy": "Kopiraj",
+    "copyCode": "Kopiraj {{code}}",
+    "copyFailed": "Kopiranje ovdje nije dozvoljeno: označite kod i kopirajte ga ručno.",
+    "created": {
+      "copyAll": "Kopiraj sve",
+      "done": "Gotovo",
+      "subtitle": "{{kind}} · važi do {{date}} · {{uses}} korišćenje/a po kodu",
+      "title": "Kodovi spremni: {{count}}"
+    },
+    "delete": "Obriši",
+    "disable": "Isključi",
+    "empty": "Nijedan kod ne odgovara.",
+    "emptyAll": "Još nema kodova. Napravite prvi pomoću “Novi kodovi”.",
+    "enable": "Uključi",
+    "filter": {
+      "active": "Spremno za korišćenje",
+      "all": "Svi",
+      "disabled": "Isključeni",
+      "expired": "Istekli",
+      "used": "Iskorišćeni"
+    },
+    "filterLabel": "Status",
+    "form": {
+      "cancel": "Otkaži",
+      "count": "Koliko kodova",
+      "countHint": "Do {{max}} odjednom",
+      "create": "Napravi kodove",
+      "creating": "Pravljenje…",
+      "days": "Važi (dana)",
+      "daysHint": "Do {{max}} dana",
+      "kind": "Šta otključavaju",
+      "note": "Napomena (za koga je)",
+      "notePlaceholder": "npr. Vardar Homes, dogovoreno telefonom",
+      "range": "Unesite cio broj od {{min}} do {{max}}.",
+      "title": "Novi kodovi za otključavanje",
+      "tooLong": "Najviše {{max}} znakova.",
+      "uses": "Korišćenja po kodu",
+      "usesHint": "Svaki nalog može iskoristiti kod jednom"
+    },
+    "intro": "Vlasnici upisuju kod u “Kupi Residence Pass” da ga otključaju bez online plaćanja. Svaki kod pokriva punu cijenu onoga što otključava.",
+    "kind": {
+      "extra_building": "Dodatne zgrade",
+      "pass": "Residence Pass"
+    },
+    "loadError": "Kodove nije bilo moguće učitati.",
+    "markSent": "Označi kao poslato",
+    "markUnsent": "Označi kao neposlato",
+    "new": "Novi kodovi",
+    "removedResidence": "obrisana rezidencija",
+    "search": "Pronađi kod",
+    "searchPlaceholder": "npr. RES-7K3P",
+    "sent": "Poslato",
+    "status": {
+      "active": "Spremno za korišćenje",
+      "disabled": "Isključen",
+      "expired": "Istekao",
+      "scheduled": "Još ne važi",
+      "used": "Iskorišćen"
+    },
+    "title": "Kodovi za otključavanje",
+    "until": "do {{date}}",
+    "usedBy": "Iskoristio/la",
+    "uses": "Iskorišćeno {{used}} od {{limit}}"
   }
 }

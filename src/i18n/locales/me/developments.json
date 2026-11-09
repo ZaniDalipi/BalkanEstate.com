@@ -1451,7 +1451,9 @@
     "RESIDENCE_GALLERY_FULL": "Rezidencija može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
     "GALLERY_ORDER_INVALID": "Fotografije su se u međuvremenu promijenile. Osvježite stranicu i pokušajte ponovo.",
     "BUILDER_NOT_FOUND": "Ova rezidencija još nije predstavila investitora.",
-    "BUSINESS_NOT_FOUND": "Ova kompanija nije među vašim unosima u Imeniku firmi. Izaberite onu koju posjedujete."
+    "BUSINESS_NOT_FOUND": "Ova kompanija nije među vašim unosima u Imeniku firmi. Izaberite onu koju posjedujete.",
+    "CODE_IN_USE": "Ovaj kod je iskorišćen, pa ostaje u evidenciji. Umjesto toga ga isključite.",
+    "CODE_NOT_FOUND": "Ovaj kod više ne postoji. Ponovo učitajte stranicu."
   },
   "notices": {
     "trialEndsSoon": {

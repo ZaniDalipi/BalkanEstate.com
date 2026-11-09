@@ -60,6 +60,7 @@ import {
   getUserActivityLogs,
 } from '../controllers/activityLogController';
 import { triggerDailyReportManually } from '../jobs/dailyActivityReportJob';
+import { createResidenceCodesAdmin, deleteResidenceCodeAdmin, listResidenceCodesAdmin, updateResidenceCodeAdmin } from '../controllers/adminResidenceCodeController';
 import {
   getAllSubscriptions,
   getSubscriptionById,
@@ -170,6 +171,11 @@ router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetai
 
 // ===== Residences (no payment provider yet: limits and passes are set here) =====
 router.get('/residences', logAdminAction('VIEW_RESIDENCES'), listResidencesAdmin);
+// Unlock codes for Residence Passes and extra buildings (declared before /residences/:id/…).
+router.get('/residences/codes', logAdminAction('VIEW_RESIDENCE_CODES'), listResidenceCodesAdmin);
+router.post('/residences/codes', logAdminAction('CREATE_RESIDENCE_CODES'), createResidenceCodesAdmin);
+router.patch('/residences/codes/:id', logAdminAction('UPDATE_RESIDENCE_CODE'), updateResidenceCodeAdmin);
+router.delete('/residences/codes/:id', logAdminAction('DELETE_RESIDENCE_CODE'), deleteResidenceCodeAdmin);
 router.patch('/residences/:id/building-limit', logAdminAction('SET_RESIDENCE_BUILDING_LIMIT'), setBuildingLimitAdmin);
 router.post('/residences/:id/grant', logAdminAction('GRANT_RESIDENCE_PASS'), grantResidenceAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);

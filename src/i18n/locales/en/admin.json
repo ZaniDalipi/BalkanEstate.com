@@ -235,7 +235,8 @@
       "sourceReferralDesc": "Use for user referral rewards",
       "description": "Description",
       "descriptionPlaceholder": "Internal note about this code...",
-      "createCode": "Create Code"
+      "createCode": "Create Code",
+      "residenceHint": "Residence unlock codes are easier to make in Residences › Unlock codes (they must name a residence product and cover its full price)."
     },
     "bulk": {
       "numberOfCodes": "Number of Codes",
@@ -1972,7 +1973,9 @@
       "enterprisePlan": "Enterprise Plan",
       "agentProMonthly": "Agent Pro (Monthly)",
       "agentProYearly": "Agent Pro (Yearly)",
-      "buyerPro": "Buyer Pro"
+      "buyerPro": "Buyer Pro",
+      "residenceExtraBuilding": "Residence extra buildings",
+      "residencePass": "Residence Pass (12 months)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Failed to fetch stats",
@@ -2163,5 +2166,72 @@
       "range": "Use a number from 1 to {{max}}.",
       "belowUsed": "This residence already has {{used}} buildings."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Press again to delete",
+    "copied": "Copied",
+    "copy": "Copy",
+    "copyCode": "Copy {{code}}",
+    "copyFailed": "Copying is not allowed here: select the code and copy it by hand.",
+    "created": {
+      "copyAll": "Copy all",
+      "done": "Done",
+      "subtitle": "{{kind}} · valid until {{date}} · {{uses}} use(s) each",
+      "title": "Codes ready: {{count}}"
+    },
+    "delete": "Delete",
+    "disable": "Switch off",
+    "empty": "No codes match.",
+    "emptyAll": "No codes yet. Create the first with “New codes”.",
+    "enable": "Switch on",
+    "filter": {
+      "active": "Ready to use",
+      "all": "All",
+      "disabled": "Switched off",
+      "expired": "Expired",
+      "used": "Used"
+    },
+    "filterLabel": "Status",
+    "form": {
+      "cancel": "Cancel",
+      "count": "How many codes",
+      "countHint": "Up to {{max}} at once",
+      "create": "Create codes",
+      "creating": "Creating…",
+      "days": "Valid for (days)",
+      "daysHint": "Up to {{max}} days",
+      "kind": "What they unlock",
+      "note": "Note (who it is for)",
+      "notePlaceholder": "e.g. Vardar Homes, agreed by phone",
+      "range": "Enter a whole number from {{min}} to {{max}}.",
+      "title": "New unlock codes",
+      "tooLong": "{{max}} characters at most.",
+      "uses": "Uses per code",
+      "usesHint": "Each account can use a code once"
+    },
+    "intro": "Owners type a code in “Buy Residence Pass” to unlock it without paying online. Each code covers the full price of what it unlocks.",
+    "kind": {
+      "extra_building": "Extra buildings",
+      "pass": "Residence Pass"
+    },
+    "loadError": "Could not load the codes.",
+    "markSent": "Mark sent",
+    "markUnsent": "Mark not sent",
+    "new": "New codes",
+    "removedResidence": "a removed residence",
+    "search": "Find a code",
+    "searchPlaceholder": "e.g. RES-7K3P",
+    "sent": "Sent",
+    "status": {
+      "active": "Ready to use",
+      "disabled": "Switched off",
+      "expired": "Expired",
+      "scheduled": "Not yet valid",
+      "used": "Used"
+    },
+    "title": "Unlock codes",
+    "until": "until {{date}}",
+    "usedBy": "Used by",
+    "uses": "{{used}} of {{limit}} used"
   }
 }

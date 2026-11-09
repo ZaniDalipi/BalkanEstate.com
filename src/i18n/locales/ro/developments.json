@@ -1451,7 +1451,9 @@
     "RESIDENCE_GALLERY_FULL": "Un ansamblu poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
     "GALLERY_ORDER_INVALID": "Fotografiile s-au schimbat între timp. Reîncărcați pagina și încercați din nou.",
     "BUILDER_NOT_FOUND": "Acest ansamblu nu și-a prezentat încă constructorul.",
-    "BUSINESS_NOT_FOUND": "Această companie nu este printre înregistrările dvs. din Catalogul de firme. Alegeți una pe care o dețineți."
+    "BUSINESS_NOT_FOUND": "Această companie nu este printre înregistrările dvs. din Catalogul de firme. Alegeți una pe care o dețineți.",
+    "CODE_IN_USE": "Acest cod a fost folosit, așa că rămâne în evidență. Dezactivați-l în schimb.",
+    "CODE_NOT_FOUND": "Acest cod nu mai există. Reîncărcați pagina."
   },
   "notices": {
     "trialEndsSoon": {

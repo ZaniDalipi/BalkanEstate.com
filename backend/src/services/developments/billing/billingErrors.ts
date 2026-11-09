@@ -8,7 +8,8 @@ export type BillingErrorCode =
   | 'TRIAL_LIMIT'
   | 'BUILDING_LIMIT'
   | 'PAYMENT_NOT_CONFIGURED'
-  | 'COUPON_INVALID';
+  | 'COUPON_INVALID'
+  | 'CODE_IN_USE';
 
 export class BillingError extends Error {
   statusCode: number;

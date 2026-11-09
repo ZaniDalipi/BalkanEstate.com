@@ -207,6 +207,9 @@ export const adminKeys = {
   /** Residences admin: list per filters, and an agency's free residences. */
   residences: (params?: { search?: string; filter?: string; page?: number }) => ['admin', 'residences', params ?? {}] as const,
   residencesAll: () => ['admin', 'residences'] as const,
+  /** Unlock codes for Residence Passes and extra buildings (per filters). */
+  residenceCodes: (params?: { status?: string; search?: string; page?: number }) => ['admin', 'residence-codes', params ?? {}] as const,
+  residenceCodesAll: () => ['admin', 'residence-codes'] as const,
   agencyResidenceAllowance: (agencyId: string) => ['admin', 'agencyResidenceAllowance', agencyId] as const,
 };
 

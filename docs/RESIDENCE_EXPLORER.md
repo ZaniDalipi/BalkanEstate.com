@@ -600,6 +600,20 @@ before this change, from `developmentSlug`/`unitId`/`developmentId`.
   `applicablePlans`; general subscription codes do not apply. An admin grant
   also works. To switch real payment on, Paysera checkout calls `applyPurchase`
   from the webhook for `productId` values starting with `residence_`.
+- **Unlock codes (Admin › Residences › Unlock codes, `?tab=codes`).** Admins
+  create the codes owners type in "Buy Residence Pass": for a **Residence
+  Pass** or **extra buildings**, 1–50 at once, 1–100 uses each (an account uses
+  a code once), valid 1–730 days (default 90), with a note on who it is for.
+  Codes read `RES-XXXX-XXXX` (no 0/O/1/I) and cover the full price (100 %,
+  naming that residence product, source `residence`). The list shows each
+  code's status (ready, used, expired, switched off, not yet valid), its uses
+  and **which residences used it**; codes can be copied (one or all just
+  created), marked sent, switched off and on, and deleted while unused (a used
+  code stays for the records: `CODE_IN_USE`). Filters by status and search by
+  code. API: `GET/POST /api/admin/residences/codes`, `PATCH/DELETE
+  /api/admin/residences/codes/:id` (`residenceCodeService.ts`, rules in
+  `residenceCodes.ts`). The general Discount codes form also lists the two
+  residence products now.
 - **Daily job:** `runResidenceBillingJob` (cron 08:07) sends the day-10 and
   day-14 reminders and the offline notice, in-app and by email, once each. It
   also recomputes plan coverage. On startup, residences published before
