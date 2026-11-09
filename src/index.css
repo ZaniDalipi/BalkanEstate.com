@@ -1473,6 +1473,19 @@ html[data-zoom] {
   --sidebar-rail-w: calc(5rem + env(safe-area-inset-left, 0px));
 }
 
+/* Residence explorer in full screen: the stage covers the whole viewport, so
+   in the installed app its floating controls would sit under the status bar,
+   the notch and the home indicator. Its controls add these insets to their
+   offsets; off full screen the variables are unset and fall back to 0. The
+   top reuses the floating-search pad (minus its own 8px gap) so Android PWAs
+   that report a 0 inset still get the 44px floor. */
+.explorer-stage-full {
+  --stage-safe-top: calc(var(--floating-search-top-pad, 8px) - 8px);
+  --stage-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --stage-safe-left: env(safe-area-inset-left, 0px);
+  --stage-safe-right: env(safe-area-inset-right, 0px);
+}
+
 /* Top of the home hero.
    In a browser the address bar sits above this and a plain padding is enough.
    Installed as a PWA there is nothing above it at all, so the heading landed

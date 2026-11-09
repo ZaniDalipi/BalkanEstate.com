@@ -74,25 +74,15 @@ describe('ResidenceExplorer', () => {
     expect(await screen.findByRole('button', { name: 'B2 · 3 available' })).toBeInTheDocument();
   });
 
-  it('full-screen hero: the residence bar and headline lie over the picture, which fills the stage', async () => {
-    views.byTarget['development:'] = [view('site', [{ id: 'hb', shape: 'polygon', points: tri, linkType: 'building', linkId: 'b2', z: 0 }])];
-    views.byTarget['building:b2'] = [view('front', []), view('back', [])];
-    render(<Harness immersive />);
-    const stage = await screen.findByTestId('immersive-stage');
-    expect(stage).toContainElement(screen.getByRole('navigation', { name: 'Residence' }));
-    expect(stage).toContainElement(screen.getByRole('heading', { name: 'Find your home in East Gate' }));
-    expect(screen.queryByText('title-strip')).not.toBeInTheDocument();
-    // The picture covers the stage (not a letterboxed box sized to the picture).
-    expect(screen.getByTestId('explorer-canvas')).toHaveClass('absolute', 'inset-0');
-    // At the residence itself the bar names it already: no one-step trail.
-    expect(screen.queryByRole('navigation', { name: 'Explorer navigation' })).not.toBeInTheDocument();
-    // Inside a building the trail is back, and still leads home.
-    fireEvent.click(screen.getByRole('button', { name: 'B2 · 3 available' }));
-    expect(await screen.findByText('View front', { selector: 'span' })).toBeInTheDocument();
-    const trail = screen.getByRole('navigation', { name: 'Explorer navigation' });
-    expect(screen.getByTestId('immersive-stage')).toContainElement(trail);
-    fireEvent.click(screen.getAllByRole('button', { name: 'East Gate' })[0]);
-    expect(await screen.findByRole('button', { name: 'B2 · 3 available' })).toBeInTheDocument();
-    expect(screen.queryByRole('navigation', { name: 'Explorer navigation' })).not.toBeInTheDocument();
+  it('keeps the full-screen controls clear of the status bar and home indicator', async () => {
+    views.byTarget['building:b1'] = [view('east', [])];
+    render(<Harness />);
+    const stage = await screen.findByRole('region', { name: 'Interactive residence explorer' });
+    expect(stage).not.toHaveClass('explorer-stage-full');
+    fireEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    const full = screen.getByRole('region', { name: 'Interactive residence explorer' });
+    expect(full).toHaveClass('explorer-stage-full');
+    const bar = screen.getByRole('button', { name: 'Exit full screen' }).closest('.absolute');
+    expect(bar?.className).toContain('top-[calc(var(--stage-safe-top,0px)+0.75rem)]');
   });
 });

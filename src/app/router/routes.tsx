@@ -94,7 +94,7 @@ const BusinessDirectoryRoute: React.FC<{ tab?: BusinessDirectoryTab; creating?: 
   const { listingSlug } = useParams();
   // SEO slugs end in `_` + a 16-character encoded id, which may itself contain "_".
   const listingId = listingSlug ? businessIdFromSlug(listingSlug) : null;
-  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} />);
+  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} creating={creating} />);
 };
 
 type AppRoute = RouteObject & { handle?: RouteHandle };

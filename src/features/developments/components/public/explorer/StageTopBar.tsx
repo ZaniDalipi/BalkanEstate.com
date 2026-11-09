@@ -29,7 +29,7 @@ const RAISED_WHILE_POPUP_OPEN = 'has-[[aria-haspopup=dialog][aria-expanded=true]
 export const StageTopBar: React.FC<StageTopBarProps> = (p) => {
   const { t } = useTranslation('developments');
   return (
-    <div className={`pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 ${RAISED_WHILE_POPUP_OPEN} ${HIDE_WHEN_IMMERSED}`}>
+    <div className={`pointer-events-none absolute left-[calc(var(--stage-safe-left,0px)+0.75rem)] right-[calc(var(--stage-safe-right,0px)+0.75rem)] top-[calc(var(--stage-safe-top,0px)+0.75rem)] z-10 flex items-start justify-between gap-2 ${RAISED_WHILE_POPUP_OPEN}`}>
       <div className="pointer-events-auto">
         {p.crumbs.length > 0 && <ExplorerBreadcrumb crumbs={p.crumbs} onSelect={p.onCrumb} />}
       </div>
