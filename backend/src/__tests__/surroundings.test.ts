@@ -38,7 +38,9 @@ describe('osmSources', () => {
   it('recognises roads, ramps, railways, commercial airports and nightlife', () => {
     expect(kindOf({ highway: 'primary' })).toBe('primary');
     expect(kindOf({ highway: 'trunk_link' })).toBe('tertiary');
-    expect(kindOf({ highway: 'residential' })).toBeNull();
+    expect(kindOf({ highway: 'residential' })).toBe('street');
+    expect(kindOf({ highway: 'living_street' })).toBe('street');
+    expect(kindOf({ highway: 'footway' })).toBeNull();
     expect(kindOf({ railway: 'rail' })).toBe('railway');
     expect(kindOf({ railway: 'light_rail' })).toBe('tram');
     expect(kindOf({ aeroway: 'aerodrome', iata: 'TIA' })).toBe('airport');
@@ -113,6 +115,24 @@ describe('noiseModel', () => {
     expect(estimateTraffic([source('tertiary', 40), source('secondary', 200)]).nearestMainRoad)
       .toEqual({ kind: 'secondary', distanceM: 200 });
   });
+
+  it('names the street the home is on, even a quiet one', () => {
+    const traffic = estimateTraffic([
+      { ...source('street', 12, 'street:Rruga Kala'), name: 'Rruga Kala' },
+      source('primary', 260),
+    ]);
+    expect(traffic.nearestStreet).toEqual({ kind: 'street', name: 'Rruga Kala', distanceM: 12 });
+    expect(traffic.nearestMainRoad).toEqual({ kind: 'primary', distanceM: 260 });
+    expect(traffic.level).toBe('moderate');
+  });
+
+  it('counts the home\'s own street in the noise, a little', () => {
+    const quiet = estimateNoise([]);
+    const onStreet = estimateNoise([source('street', 10)]);
+    expect(onStreet.day.db).toBeGreaterThan(quiet.day.db);
+    expect(onStreet.day.band).toBe('noisy');
+    expect(estimateNoise([source('street', 120)]).day.band).toBe('moderate');
+  });
 });
 
 describe('promiseCache / hasUsableLocation', () => {
@@ -156,6 +176,7 @@ describe('getSurroundings', () => {
   it('asks for roads, rail, airports and nightlife around the point', () => {
     const q = buildOverpassQuery(40.618, 20.78);
     expect(q).toContain('way(around:500,40.618,20.78)[highway~');
+    expect(q).toContain('way(around:150,40.618,20.78)[highway~"^(residential|unclassified|living_street)$"]');
     expect(q).toContain('[aeroway=aerodrome][iata]');
     expect(q).toContain('nwr(around:150,40.618,20.78)[amenity~');
   });
@@ -163,9 +184,14 @@ describe('getSurroundings', () => {
   it('turns the answer into noise and traffic, and caches it', async () => {
     postSpy.mockResolvedValue(answer({ elements: [road(1, 'primary', 40, 'Bulevardi')] }));
     const report = await getSurroundings(HOME.lat, HOME.lng);
-    expect(report.traffic).toEqual({ level: 'busy', nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 40 } });
+    expect(report.traffic).toEqual({
+      level: 'busy',
+      nearestStreet: { kind: 'primary', name: 'Bulevardi', distanceM: 40 },
+      nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 40 },
+    });
     expect(report.noise.day.band).toBe('noisy');
-    await getSurroundings(HOME.lat + 0.00001, HOME.lng);
+    // Within the ~1 m rounding of the pin: the same place, served from the cache.
+    await getSurroundings(HOME.lat + 0.000001, HOME.lng);
     expect(postSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -212,7 +238,7 @@ describe('GET /properties/:id/surroundings', () => {
     postSpy.mockResolvedValue({ data: { elements: [] } } as AxiosResponse);
     const { status, body } = await call();
     expect(status).toBe(200);
-    expect(body).toMatchObject({ status: 'ok', noise: { day: { band: 'quiet' } }, traffic: { level: 'calm', nearestMainRoad: null } });
+    expect(body).toMatchObject({ status: 'ok', noise: { day: { band: 'quiet' } }, traffic: { level: 'calm', nearestStreet: null, nearestMainRoad: null } });
   });
 
   it('says so when the home has no location, without calling Overpass', async () => {

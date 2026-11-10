@@ -1074,7 +1074,8 @@
       "tram": "Tramvajska linija",
       "airport": "Aerodrom",
       "nightclub": "Noćni klub",
-      "bar": "Bar"
+      "bar": "Bar",
+      "street": "Stambena ulica"
     },
     "noise": {
       "title": "Buka u okolini",
@@ -1112,7 +1113,10 @@
       "slow": "Sporo",
       "liveSource": "Saobraćaj uživo od Googlea",
       "explain": "Uobičajeni nivo proizlazi iz vrste cesta oko nekretnine i njihove blizine. Mapa prikazuje Googleov saobraćaj uživo u ovom trenutku.",
-      "noLocation": "Ovaj oglas nema lokaciju na mapi, pa ne možemo prikazati saobraćaj."
-    }
+      "noLocation": "Ovaj oglas nema lokaciju na mapi, pa ne možemo prikazati saobraćaj.",
+      "nearestStreet": "Najbliža ulica: {{street}} ({{kind}}), udaljena {{distance}}",
+      "nearestStreetUnnamed": "Najbliža ulica: udaljena {{distance}}"
+    },
+    "unavailable": "Ova informacija još nije dostupna za ovaj oglas."
   }
 }

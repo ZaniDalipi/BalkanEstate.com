@@ -1073,7 +1073,8 @@
       "tram": "Tram line",
       "airport": "Airport",
       "nightclub": "Nightclub",
-      "bar": "Bar"
+      "bar": "Bar",
+      "street": "Residential street"
     },
     "noise": {
       "title": "Ambient noise",
@@ -1111,7 +1112,10 @@
       "slow": "Slow",
       "liveSource": "Live traffic by Google",
       "explain": "The typical level comes from the kind of roads around the home and how close they are. The map shows Google’s live traffic right now.",
-      "noLocation": "This listing has no map location, so we can't show traffic."
-    }
+      "noLocation": "This listing has no map location, so we can't show traffic.",
+      "nearestStreet": "Nearest street: {{street}} ({{kind}}), {{distance}} away",
+      "nearestStreetUnnamed": "Nearest street: {{distance}} away"
+    },
+    "unavailable": "This information isn't available for this listing yet."
   }
 }

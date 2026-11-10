@@ -1160,7 +1160,7 @@ Neighbourhood section (src/features/property-details/components/area-insights/)
   ├── NoiseCard   ┐ useSurroundings(id) → propertyKeys.surroundings(id)   (one request for both)
   └── TrafficCard ┘   └── GET /api/properties/:id/surroundings   getPropertySurroundings
                             └── services/surroundings/
-                                  ├── surroundingsService.ts  one Overpass query, cache ~11 m, 30 days
+                                  ├── surroundingsService.ts  one Overpass query from the home's pin (~1 m), 30 days
                                   ├── osmSources.ts           OSM roads/rail/airports/bars → sources + distance
                                   └── noiseModel.ts           estimateNoise (day/night dB) · estimateTraffic
         TrafficCard → "Show live traffic" → LiveTrafficMap (lazy): Google TrafficLayer
@@ -1191,6 +1191,15 @@ Key decisions:
   airports and venues point sources; levels add on an energy basis over a
   quiet-town background (42 dB day, 33 dB night). Each named road counts once,
   however many OSM pieces it has. Bands: day 45/55/65 dB, night 35/45/55 dB.
+- **Ids**: property ids leave the API encoded (16 characters, see
+  `utils/idObfuscation.ts`). The hooks accept that form and raw ObjectIds
+  (`hooks/isPropertyId.ts`), and `validatePropertyId` lets through whatever
+  `resolveId` decodes; checking for raw ObjectIds only had left price
+  history, area prices and these cards without data on real pages.
+- **Measured from the home's own pin**, rounded to ~1 m. Main roads, rail and
+  tram within 500 m, ordinary streets (residential, unclassified, living
+  street) within 150 m: the traffic card names the street the home is on and
+  the nearest main road, and the home's own street counts towards its noise.
 - **Typical traffic comes from road class and distance** (a primary road
   within 150 m is busy); **live traffic is Google's**, loaded only when asked,
   because every map load is billed.

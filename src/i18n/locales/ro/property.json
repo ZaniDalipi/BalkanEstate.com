@@ -1074,7 +1074,8 @@
       "tram": "Linie de tramvai",
       "airport": "Aeroport",
       "nightclub": "Club de noapte",
-      "bar": "Bar"
+      "bar": "Bar",
+      "street": "Stradă rezidențială"
     },
     "noise": {
       "title": "Zgomot ambiental",
@@ -1112,7 +1113,10 @@
       "slow": "Lent",
       "liveSource": "Trafic live de la Google",
       "explain": "Nivelul tipic vine din tipul drumurilor din jurul locuinței și cât de aproape sunt. Harta arată traficul live Google în acest moment.",
-      "noLocation": "Acest anunț nu are o locație pe hartă, așa că nu putem arăta traficul."
-    }
+      "noLocation": "Acest anunț nu are o locație pe hartă, așa că nu putem arăta traficul.",
+      "nearestStreet": "Cea mai apropiată stradă: {{street}} ({{kind}}), la {{distance}}",
+      "nearestStreetUnnamed": "Cea mai apropiată stradă: la {{distance}}"
+    },
+    "unavailable": "Această informație nu este încă disponibilă pentru acest anunț."
   }
 }

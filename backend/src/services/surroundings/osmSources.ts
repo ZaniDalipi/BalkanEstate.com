@@ -4,7 +4,9 @@
  */
 
 export type RoadKind = 'motorway' | 'trunk' | 'primary' | 'secondary' | 'tertiary';
-export type SourceKind = RoadKind | 'railway' | 'tram' | 'airport' | 'nightclub' | 'bar';
+/** Ordinary streets: residential, unclassified and living streets. */
+export type StreetKind = 'street';
+export type SourceKind = RoadKind | StreetKind | 'railway' | 'tram' | 'airport' | 'nightclub' | 'bar';
 
 export interface NoiseSource {
   kind: SourceKind;
@@ -71,6 +73,7 @@ export const kindOf = (tags: Record<string, string>): SourceKind | null => {
     if ((ROAD_KINDS as readonly string[]).includes(highway)) return highway as RoadKind;
     // Ramps carry less traffic than the road they join.
     if (/^(motorway|trunk|primary)_link$/.test(highway)) return 'tertiary';
+    if (highway === 'residential' || highway === 'unclassified' || highway === 'living_street') return 'street';
     return null;
   }
   if (tags.railway === 'rail') return 'railway';

@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { propertyKeys } from '@/src/shared/query/queryKeys';
 import { getAreaPrices } from '../api/areaPricesApi';
-import { isObjectId } from './isObjectId';
+import { isPropertyId } from './isPropertyId';
 
 export function useAreaPrices(propertyId: string | null | undefined) {
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: propertyKeys.areaPrices(propertyId ?? ''),
     queryFn: () => getAreaPrices(propertyId!),
-    enabled: !!propertyId && isObjectId(propertyId),
+    enabled: !!propertyId && isPropertyId(propertyId),
     // Neighbourhood prices move slowly
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

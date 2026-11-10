@@ -34,6 +34,7 @@ export const SOURCE_PROFILES: Record<SourceKind, SourceProfile> = {
   primary: { dayDb: 71, nightOffset: -9, shape: 'line', referenceM: 10 },
   secondary: { dayDb: 67, nightOffset: -10, shape: 'line', referenceM: 10 },
   tertiary: { dayDb: 63, nightOffset: -10, shape: 'line', referenceM: 10 },
+  street: { dayDb: 56, nightOffset: -10, shape: 'line', referenceM: 10 },
   railway: { dayDb: 70, nightOffset: -5, shape: 'line', referenceM: 10 },
   tram: { dayDb: 64, nightOffset: -12, shape: 'line', referenceM: 10 },
   airport: { dayDb: 62, nightOffset: -10, shape: 'point', referenceM: 1000 },
@@ -67,6 +68,8 @@ export interface NoiseEstimate {
 
 export interface TrafficEstimate {
   level: TrafficLevel;
+  /** The street closest to the home (any class): usually the one it is on. */
+  nearestStreet: { kind: RoadKind | 'street'; name?: string; distanceM: number } | null;
   /** Closest motorway…secondary road (else tertiary), if any is in reach. */
   nearestMainRoad: { kind: RoadKind; name?: string; distanceM: number } | null;
 }
@@ -136,7 +139,11 @@ const MAIN_ROADS: readonly RoadKind[] = ['motorway', 'trunk', 'primary', 'second
  * nearest roads: a main road at the door is busy, one a few blocks off is not.
  */
 export const estimateTraffic = (all: NoiseSource[]): TrafficEstimate => {
-  const roads = nearestPerGroup(all).filter((s) => (ROAD_KINDS as readonly string[]).includes(s.kind));
+  const groups = nearestPerGroup(all);
+  const roads = groups.filter((s) => (ROAD_KINDS as readonly string[]).includes(s.kind));
+  const street = groups
+    .filter((s) => s.kind === 'street' || (ROAD_KINDS as readonly string[]).includes(s.kind))
+    .sort((a, b) => a.distanceM - b.distanceM)[0];
   const within = (kinds: readonly SourceKind[], m: number) => roads.some((r) => kinds.includes(r.kind) && r.distanceM <= m);
 
   const level: TrafficLevel =
@@ -151,6 +158,9 @@ export const estimateTraffic = (all: NoiseSource[]): TrafficEstimate => {
 
   return {
     level,
+    nearestStreet: street
+      ? { kind: street.kind as RoadKind | 'street', ...(street.name ? { name: street.name } : {}), distanceM: street.distanceM }
+      : null,
     nearestMainRoad: nearest
       ? { kind: nearest.kind as RoadKind, ...(nearest.name ? { name: nearest.name } : {}), distanceM: nearest.distanceM }
       : null,

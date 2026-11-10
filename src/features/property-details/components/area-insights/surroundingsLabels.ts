@@ -29,6 +29,7 @@ export const SOURCE_LABELS: Record<SourceKind, string> = {
   primary: 'Main road',
   secondary: 'Secondary road',
   tertiary: 'Local through road',
+  street: 'Residential street',
   railway: 'Railway',
   tram: 'Tram line',
   airport: 'Airport',

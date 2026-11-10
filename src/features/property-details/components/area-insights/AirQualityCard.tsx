@@ -63,7 +63,9 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ propertyId }) => {
               ? t('property:areaInsights.airQuality.loadError', "We couldn't load air quality right now.")
               : data?.status === 'no-location'
                 ? t('property:areaInsights.airQuality.noLocation', "This listing has no map location, so we can't show its air quality.")
-                : t('property:areaInsights.airQuality.noData', 'No air quality data is available for this location yet.')
+                : data?.status === 'no-data'
+                  ? t('property:areaInsights.airQuality.noData', 'No air quality data is available for this location yet.')
+                  : t('property:areaInsights.unavailable', "This information isn't available for this listing yet.")
           }
         />
       )}

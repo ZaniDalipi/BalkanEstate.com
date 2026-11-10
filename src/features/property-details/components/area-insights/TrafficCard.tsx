@@ -72,7 +72,9 @@ const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
           onRetry={() => refetch()}
           message={error
             ? t('property:areaInsights.noise.loadError', "We couldn't load noise and traffic for this area right now.")
-            : t('property:areaInsights.traffic.noLocation', "This listing has no map location, so we can't show traffic.")}
+            : data?.status === 'no-location'
+              ? t('property:areaInsights.traffic.noLocation', "This listing has no map location, so we can't show traffic.")
+              : t('property:areaInsights.unavailable', "This information isn't available for this listing yet.")}
         />
       )}
     </InsightCard>
@@ -84,10 +86,26 @@ const TypicalTraffic: React.FC<{ traffic: Surroundings['traffic'] }> = ({ traffi
   const labels = useSurroundingsLabels();
   const style = TRAFFIC_LEVELS[traffic.level];
   const road = traffic.nearestMainRoad;
+  const street = traffic.nearestStreet;
+  // Name the home's own street unless it is the main road itself.
+  const showStreet = street && !(road && street.kind === road.kind && street.name === road.name);
   return (
     <div>
       <BandBadge label={labels.trafficLevel(traffic.level)} badge={style.badge} dot={style.dot} />
-      <p className="mt-3 text-sm text-neutral-600">
+      {showStreet && (
+        <p className="mt-3 text-sm text-neutral-600">
+          {street.name
+            ? t('property:areaInsights.traffic.nearestStreet', 'Nearest street: {{street}} ({{kind}}), {{distance}} away', {
+                street: street.name,
+                kind: labels.sourceKind(street.kind),
+                distance: labels.distance(street.distanceM),
+              })
+            : t('property:areaInsights.traffic.nearestStreetUnnamed', 'Nearest street: {{distance}} away', {
+                distance: labels.distance(street.distanceM),
+              })}
+        </p>
+      )}
+      <p className={`${showStreet ? 'mt-1' : 'mt-3'} text-sm text-neutral-600`}>
         {!road
           ? t('property:areaInsights.traffic.noMainRoad', 'No main road within 500 m.')
           : road.name

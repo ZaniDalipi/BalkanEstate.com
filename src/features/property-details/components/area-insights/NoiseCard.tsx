@@ -58,7 +58,9 @@ const NoiseCard: React.FC<NoiseCardProps> = ({ propertyId }) => {
           onRetry={() => refetch()}
           message={error
             ? t('property:areaInsights.noise.loadError', "We couldn't load noise and traffic for this area right now.")
-            : t('property:areaInsights.noise.noLocation', "This listing has no map location, so we can't estimate noise.")}
+            : data?.status === 'no-location'
+              ? t('property:areaInsights.noise.noLocation', "This listing has no map location, so we can't estimate noise.")
+              : t('property:areaInsights.unavailable', "This information isn't available for this listing yet.")}
         />
       )}
     </InsightCard>

@@ -27,24 +27,25 @@ export class SurroundingsUnavailableError extends Error {
 }
 
 /** How far each kind of source is looked for, in metres. */
-export const SEARCH_RADII = { roads: 500, airports: 4000, nightlife: 150 } as const;
+export const SEARCH_RADII = { roads: 500, streets: 150, airports: 4000, nightlife: 150 } as const;
 
 const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 5000;
 const REQUEST_TIMEOUT_MS = 25_000;
 
-/** Coordinates rounded to ~11 m: enough for distances to a road. */
-const roundCoord = (v: number) => Math.round(v * 10_000) / 10_000;
+/** The home's own pin, rounded to ~1 m: distances to the street it is on stay exact. */
+const roundCoord = (v: number) => Math.round(v * 100_000) / 100_000;
 
 export const buildOverpassQuery = (lat: number, lng: number): string => {
   const at = `${lat},${lng}`;
-  const { roads, airports, nightlife } = SEARCH_RADII;
+  const { roads, streets, airports, nightlife } = SEARCH_RADII;
   return [
     '[out:json][timeout:20];',
     '(',
     `  way(around:${roads},${at})[highway~"^(motorway|trunk|primary|secondary|tertiary)(_link)?$"];`,
     `  way(around:${roads},${at})[railway~"^(rail|tram|light_rail)$"];`,
+    `  way(around:${streets},${at})[highway~"^(residential|unclassified|living_street)$"];`,
     ');',
     'out tags geom;',
     '(',

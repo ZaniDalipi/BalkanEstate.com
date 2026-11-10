@@ -1073,7 +1073,8 @@
       "tram": "Linjë tramvaji",
       "airport": "Aeroport",
       "nightclub": "Klub nate",
-      "bar": "Bar"
+      "bar": "Bar",
+      "street": "Rrugë banimi"
     },
     "noise": {
       "title": "Zhurma e ambientit",
@@ -1111,7 +1112,10 @@
       "slow": "Ngadalë",
       "liveSource": "Trafiku live nga Google",
       "explain": "Niveli tipik vjen nga lloji i rrugëve rreth shtëpisë dhe sa afër janë. Harta tregon trafikun live të Google në këtë moment.",
-      "noLocation": "Kjo shpallje nuk ka vendndodhje në hartë, ndaj nuk mund të tregojmë trafikun."
-    }
+      "noLocation": "Kjo shpallje nuk ka vendndodhje në hartë, ndaj nuk mund të tregojmë trafikun.",
+      "nearestStreet": "Rruga më e afërt: {{street}} ({{kind}}), {{distance}} larg",
+      "nearestStreetUnnamed": "Rruga më e afërt: {{distance}} larg"
+    },
+    "unavailable": "Ky informacion nuk është ende i disponueshëm për këtë shpallje."
   }
 }

@@ -1,7 +1,7 @@
 import { apiRequest } from '@/src/shared/api';
 
 export type RoadKind = 'motorway' | 'trunk' | 'primary' | 'secondary' | 'tertiary';
-export type SourceKind = RoadKind | 'railway' | 'tram' | 'airport' | 'nightclub' | 'bar';
+export type SourceKind = RoadKind | 'street' | 'railway' | 'tram' | 'airport' | 'nightclub' | 'bar';
 export type NoiseBand = 'quiet' | 'moderate' | 'noisy' | 'veryNoisy';
 export type TrafficLevel = 'calm' | 'moderate' | 'busy';
 
@@ -21,6 +21,8 @@ export interface Surroundings {
   noise: { day: NoiseLevel; night: NoiseLevel; sources: NoiseSourceSummary[] };
   traffic: {
     level: TrafficLevel;
+    /** The street closest to the home: usually the one it is on. */
+    nearestStreet: { kind: RoadKind | 'street'; name?: string; distanceM: number } | null;
     nearestMainRoad: { kind: RoadKind; name?: string; distanceM: number } | null;
   };
 }
@@ -35,7 +37,8 @@ export async function getSurroundings(propertyId: string): Promise<SurroundingsR
   return validateSurroundingsResponse(data);
 }
 
-const SOURCE_KINDS: readonly string[] = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'railway', 'tram', 'airport', 'nightclub', 'bar'];
+const ROAD_KINDS: readonly string[] = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary'];
+const SOURCE_KINDS: readonly string[] = [...ROAD_KINDS, 'street', 'railway', 'tram', 'airport', 'nightclub', 'bar'];
 const BANDS: readonly string[] = ['quiet', 'moderate', 'noisy', 'veryNoisy'];
 const LEVELS: readonly string[] = ['calm', 'moderate', 'busy'];
 
@@ -57,8 +60,12 @@ export function validateSurroundingsResponse(data: unknown): SurroundingsRespons
     throw new Error('Invalid surroundings response');
   }
   const road = traffic.nearestMainRoad;
-  const nearestMainRoad = isSource(road) && (SOURCE_KINDS.slice(0, 5)).includes(road.kind)
+  const nearestMainRoad = isSource(road) && ROAD_KINDS.includes(road.kind)
     ? (road as Surroundings['traffic']['nearestMainRoad'])
+    : null;
+  const street = traffic.nearestStreet;
+  const nearestStreet = isSource(street) && (street.kind === 'street' || ROAD_KINDS.includes(street.kind))
+    ? (street as Surroundings['traffic']['nearestStreet'])
     : null;
   return {
     status: 'ok',
@@ -67,6 +74,6 @@ export function validateSurroundingsResponse(data: unknown): SurroundingsRespons
       night: noise.night,
       sources: Array.isArray(noise.sources) ? noise.sources.filter(isSource) : [],
     },
-    traffic: { level: traffic.level as TrafficLevel, nearestMainRoad },
+    traffic: { level: traffic.level as TrafficLevel, nearestStreet, nearestMainRoad },
   };
 }

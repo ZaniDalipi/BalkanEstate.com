@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { formatDistance } from '../surroundingsLabels';
 import { validateSurroundingsResponse } from '../../../api/surroundingsApi';
+import { isPropertyId } from '../../../hooks/isPropertyId';
 
 const ok = {
   status: 'ok',
@@ -9,7 +10,11 @@ const ok = {
     night: { db: 49, band: 'noisy' },
     sources: [{ kind: 'primary', name: 'Bulevardi', distanceM: 80 }],
   },
-  traffic: { level: 'busy', nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 80 } },
+  traffic: {
+    level: 'busy',
+    nearestStreet: { kind: 'street', name: 'Rruga Kala', distanceM: 15 },
+    nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 80 },
+  },
 };
 
 describe('formatDistance', () => {
@@ -32,8 +37,9 @@ describe('validateSurroundingsResponse', () => {
     const result = validateSurroundingsResponse({
       ...ok,
       noise: { ...ok.noise, sources: [...ok.noise.sources, { kind: 'volcano', distanceM: 5 }, { kind: 'bar', distanceM: -1 }] },
-      traffic: { level: 'calm', nearestMainRoad: { kind: 'railway', distanceM: 10 } },
+      traffic: { level: 'calm', nearestStreet: { kind: 'airport', distanceM: 3 }, nearestMainRoad: { kind: 'railway', distanceM: 10 } },
     });
+    expect(result.status === 'ok' && result.traffic.nearestStreet).toBeNull();
     expect(result.status === 'ok' && result.noise.sources).toHaveLength(1);
     expect(result.status === 'ok' && result.traffic.nearestMainRoad).toBeNull();
   });
@@ -43,5 +49,18 @@ describe('validateSurroundingsResponse', () => {
     expect(() => validateSurroundingsResponse(null)).toThrow();
     expect(() => validateSurroundingsResponse({ ...ok, noise: { ...ok.noise, day: { db: 'loud', band: 'noisy' } } })).toThrow();
     expect(() => validateSurroundingsResponse({ ...ok, traffic: { level: 'jammed' } })).toThrow();
+  });
+});
+
+describe('isPropertyId', () => {
+  it('accepts the encoded id the API hands out and a raw ObjectId', () => {
+    expect(isPropertyId('6_M28TTqCJUl1TrM')).toBe(true);
+    expect(isPropertyId('a9c75a9a00844de651e14ea9')).toBe(true);
+  });
+
+  it('rejects anything else', () => {
+    expect(isPropertyId('')).toBe(false);
+    expect(isPropertyId('BE-1234')).toBe(false);
+    expect(isPropertyId('6_M28TTqCJUl1TrM/x')).toBe(false);
   });
 });

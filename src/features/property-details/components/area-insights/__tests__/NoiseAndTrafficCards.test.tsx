@@ -26,7 +26,11 @@ const busy = {
     night: { db: 54, band: 'noisy' },
     sources: [{ kind: 'primary', name: 'Bulevardi', distanceM: 40 }, { kind: 'bar', distanceM: 90 }],
   },
-  traffic: { level: 'busy', nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 40 } },
+  traffic: {
+    level: 'busy',
+    nearestStreet: { kind: 'street', name: 'Rruga Kala', distanceM: 12 },
+    nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 40 },
+  },
 };
 
 beforeEach(() => {
@@ -64,12 +68,22 @@ describe('NoiseCard', () => {
   });
 });
 
+describe('with the encoded id the API hands out', () => {
+  it('asks for the data instead of claiming there is no location', async () => {
+    api.getSurroundings.mockResolvedValue(busy);
+    withClient(<NoiseCard propertyId="6_M28TTqCJUl1TrM" />);
+    expect(await screen.findByText('63')).toBeInTheDocument();
+    expect(api.getSurroundings).toHaveBeenCalledWith('6_M28TTqCJUl1TrM');
+  });
+});
+
 describe('TrafficCard', () => {
   it('rates the streets, names the nearest main road and loads the live map on request', async () => {
     api.getSurroundings.mockResolvedValue(busy);
     withClient(<TrafficCard propertyId={ID} lat={40.6} lng={20.8} />);
 
     expect(await screen.findByText('Busy street nearby')).toBeInTheDocument();
+    expect(screen.getByText('Nearest street: Rruga Kala (Residential street), 10 m away')).toBeInTheDocument();
     expect(screen.getByText('Nearest main road: Bulevardi (Main road), 40 m away')).toBeInTheDocument();
     expect(screen.queryByText('live traffic map')).not.toBeInTheDocument();
 
@@ -78,9 +92,14 @@ describe('TrafficCard', () => {
   });
 
   it('words an unnamed road without repeating its kind', async () => {
-    api.getSurroundings.mockResolvedValue({ ...busy, traffic: { level: 'moderate', nearestMainRoad: { kind: 'secondary', distanceM: 300 } } });
+    api.getSurroundings.mockResolvedValue({
+      ...busy,
+      traffic: { level: 'moderate', nearestStreet: { kind: 'secondary', distanceM: 300 }, nearestMainRoad: { kind: 'secondary', distanceM: 300 } },
+    });
     withClient(<TrafficCard propertyId={ID} lat={40.6} lng={20.8} />);
     expect(await screen.findByText('Nearest main road: a secondary road, 300 m away')).toBeInTheDocument();
+    // The home is on that main road, so it is not named twice.
+    expect(screen.queryByText(/^Nearest street/)).not.toBeInTheDocument();
   });
 
   it('explains a missing location instead of offering the map', async () => {

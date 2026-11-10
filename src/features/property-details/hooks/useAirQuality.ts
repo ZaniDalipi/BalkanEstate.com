@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { propertyKeys } from '@/src/shared/query/queryKeys';
 import { getAirQuality } from '../api/airQualityApi';
-import { isObjectId } from './isObjectId';
+import { isPropertyId } from './isPropertyId';
 
 export function useAirQuality(propertyId: string | null | undefined) {
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: propertyKeys.airQuality(propertyId ?? ''),
     queryFn: () => getAirQuality(propertyId!),
-    enabled: !!propertyId && isObjectId(propertyId),
+    enabled: !!propertyId && isPropertyId(propertyId),
     // Seasonal averages change twice a year
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
