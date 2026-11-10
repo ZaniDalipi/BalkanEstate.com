@@ -51,6 +51,9 @@ const askMirror = async (url: string, query: string, signal: AbortSignal): Promi
   const { data } = await axios.post(url, new URLSearchParams({ data: query }).toString(), {
     timeout: MIRROR_TIMEOUT_MS,
     signal,
+    // Answers are ~0.1–2 MB; refuse anything far larger, and never follow redirects.
+    maxContentLength: 25 * 1024 * 1024,
+    maxRedirects: 0,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'User-Agent': 'BalkanEstate Surroundings/1.0',

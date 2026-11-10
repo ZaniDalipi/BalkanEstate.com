@@ -93,12 +93,24 @@ describe('getSeasonalAirQuality', () => {
     expect(report.seasons[1]).toMatchObject({ season: 'winter', aqi: null, pm25: null });
   });
 
-  it('does not cache a failure', async () => {
-    getSpy.mockRejectedValue(new Error('network down'));
-    await expect(getSeasonalAirQuality(40, 19, now)).rejects.toThrow('unavailable');
-    getSpy.mockReset();
-    getSpy.mockResolvedValue(hourly(20, 5));
-    await expect(getSeasonalAirQuality(40, 19, now)).resolves.toBeDefined();
+  it('remembers a failure for 30 s, so visitors cannot hammer a provider that is down, then tries again', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      getSpy.mockRejectedValue(new Error('network down'));
+      await expect(getSeasonalAirQuality(40, 19, now)).rejects.toThrow('unavailable');
+      const callsAfterFailure = getSpy.mock.calls.length;
+      getSpy.mockReset();
+      getSpy.mockResolvedValue(hourly(20, 5));
+
+      await expect(getSeasonalAirQuality(40, 19, now)).rejects.toThrow('unavailable');
+      expect(getSpy).not.toHaveBeenCalled();
+      expect(callsAfterFailure).toBeGreaterThan(0);
+
+      jest.advanceTimersByTime(30_001);
+      await expect(getSeasonalAirQuality(40, 19, now)).resolves.toBeDefined();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

@@ -1,7 +1,7 @@
 /**
  * The warm-up queue works out new listings' noise and traffic ahead of their
  * first visitor: one lookup at a time, each home once, and no more than the
- * daily cap (public Overpass servers ask for about 100 automated queries a day).
+ * daily cap.
  */
 process.env.SKIP_TEST_DB = 'true';
 
@@ -60,10 +60,12 @@ describe('warmSurroundings', () => {
     expect(postSpy).not.toHaveBeenCalled();
   });
 
-  it('allows about 100 lookups a day on the public servers, more on your own', () => {
-    delete process.env.OVERPASS_URL;
-    expect(warmDailyCap()).toBe(100);
-    process.env.OVERPASS_URL = 'https://mine.example/api/interpreter';
-    expect(warmDailyCap()).toBe(5000);
+  it('allows 1000 lookups a day unless told otherwise', () => {
+    delete process.env.SURROUNDINGS_WARM_DAILY_CAP;
+    expect(warmDailyCap()).toBe(1000);
+    process.env.SURROUNDINGS_WARM_DAILY_CAP = '50';
+    expect(warmDailyCap()).toBe(50);
+    process.env.SURROUNDINGS_WARM_DAILY_CAP = 'lots';
+    expect(warmDailyCap()).toBe(1000);
   });
 });

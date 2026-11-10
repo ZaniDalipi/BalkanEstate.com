@@ -8,7 +8,7 @@ import axios, { type AxiosResponse } from 'axios';
 import { tileFor, tilesCovering } from '../services/surroundings/tileMath';
 import { tileFeaturesToSources, tileKindOf, type TileFeature } from '../services/surroundings/tileSources';
 import { osmRoadLines, tileRoadLines } from '../services/surroundings/roadLines';
-import { clearTileCaches, featuresAround, TilesUnavailableError } from '../services/surroundings/vectorTileClient';
+import { clearTileCaches, featuresAround, isTrustedTemplate, TilesUnavailableError } from '../services/surroundings/vectorTileClient';
 import { clearSurroundingsCache, getSurroundings } from '../services/surroundings/surroundingsService';
 
 const HOME = { lat: 41.3275, lng: 19.8187 };
@@ -100,6 +100,23 @@ describe('road lines for the map', () => {
   });
 });
 
+describe('isTrustedTemplate (SSRF guard)', () => {
+  const tileJson = 'https://tiles.openfreemap.org/planet';
+  it('accepts an https tile URL on the TileJSON host', () => {
+    expect(isTrustedTemplate('https://tiles.openfreemap.org/planet/2026/{z}/{x}/{y}.pbf', tileJson)).toBe(true);
+  });
+
+  it('refuses other hosts, internal addresses, plain http and nonsense', () => {
+    expect(isTrustedTemplate('https://evil.example/{z}/{x}/{y}.pbf', tileJson)).toBe(false);
+    expect(isTrustedTemplate('https://169.254.169.254/{z}/{x}/{y}', tileJson)).toBe(false);
+    expect(isTrustedTemplate('http://localhost:27017/{z}/{x}/{y}', tileJson)).toBe(false);
+    expect(isTrustedTemplate('http://tiles.openfreemap.org/planet/{z}/{x}/{y}.pbf', tileJson)).toBe(false);
+    expect(isTrustedTemplate('https://tiles.openfreemap.org.evil.example/{z}/{x}/{y}', tileJson)).toBe(false);
+    expect(isTrustedTemplate('https://tiles.openfreemap.org/no-placeholders.pbf', tileJson)).toBe(false);
+    expect(isTrustedTemplate(42, tileJson)).toBe(false);
+  });
+});
+
 describe('vector tile client', () => {
   let getSpy: jest.SpyInstance;
   beforeEach(() => {
@@ -110,10 +127,26 @@ describe('vector tile client', () => {
 
   it('reads the tile URL from the TileJSON and treats an empty tile as nothing there', async () => {
     getSpy.mockImplementation(async (url: string) => (url.endsWith('/planet')
-      ? { data: { tiles: ['https://t.example/2026/{z}/{x}/{y}.pbf'] } }
+      ? { data: { tiles: ['https://tiles.openfreemap.org/planet/2026/{z}/{x}/{y}.pbf'] } }
       : { data: new ArrayBuffer(0) }) as AxiosResponse);
     await expect(featuresAround(HOME.lat, HOME.lng)).resolves.toEqual([]);
-    expect(getSpy.mock.calls.some(([u]) => String(u).startsWith('https://t.example/2026/14/9093/6122.pbf'))).toBe(true);
+    expect(getSpy.mock.calls.some(([u]) => String(u).startsWith('https://tiles.openfreemap.org/planet/2026/14/9093/6122.pbf'))).toBe(true);
+  });
+
+  it('refuses a TileJSON that points the tiles at another host', async () => {
+    getSpy.mockResolvedValueOnce({ data: { tiles: ['https://internal.example/{z}/{x}/{y}.pbf'] } } as AxiosResponse);
+    await expect(featuresAround(HOME.lat, HOME.lng)).rejects.toBeInstanceOf(TilesUnavailableError);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('caps response sizes and never follows redirects', async () => {
+    getSpy.mockImplementation(async (url: string) => (url.endsWith('/planet')
+      ? { data: { tiles: ['https://tiles.openfreemap.org/planet/v/{z}/{x}/{y}.pbf'] } }
+      : { data: new ArrayBuffer(0) }) as AxiosResponse);
+    await featuresAround(HOME.lat, HOME.lng);
+    for (const [, config] of getSpy.mock.calls) {
+      expect(config).toMatchObject({ maxRedirects: 0, maxContentLength: expect.any(Number) });
+    }
   });
 
   it('fails as TilesUnavailableError when the TileJSON is broken or unreachable', async () => {
@@ -143,7 +176,7 @@ describe('getSurroundings sources', () => {
 
   it('uses the tiles and never asks Overpass when they answer', async () => {
     getSpy.mockImplementation(async (url: string) => (url.endsWith('/planet')
-      ? { data: { tiles: ['https://t.example/{z}/{x}/{y}.pbf'] } }
+      ? { data: { tiles: ['https://tiles.openfreemap.org/planet/v/{z}/{x}/{y}.pbf'] } }
       : { data: new ArrayBuffer(0) }) as AxiosResponse);
     const report = await getSurroundings(HOME.lat, HOME.lng);
     expect(report).toMatchObject({ traffic: { level: 'calm' }, roads: [] });

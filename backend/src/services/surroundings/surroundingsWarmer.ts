@@ -2,11 +2,10 @@
  * Works out a home's noise and traffic ahead of its first visitor, when the
  * listing is created or its pin moves, so the page shows them at once.
  *
- * Polite to the public Overpass servers, whose guideline for regular
- * automated use is about 100 queries a day: one lookup at a time, spaced,
- * and capped per day. With your own server (OVERPASS_URL) the cap is higher.
- *   SURROUNDINGS_WARM_DAILY_CAP    lookups per UTC day (default 100, or 5000 with OVERPASS_URL)
- *   SURROUNDINGS_WARM_INTERVAL_MS  gap between lookups (default 30 s)
+ * Lookups read OpenFreeMap's CDN tiles (no usage limits); Overpass is only
+ * the fallback. Still polite: one lookup at a time, spaced, capped per day.
+ *   SURROUNDINGS_WARM_DAILY_CAP    lookups per UTC day (default 1000)
+ *   SURROUNDINGS_WARM_INTERVAL_MS  gap between lookups (default 5 s)
  * Homes left over when the cap is reached are looked up when first visited.
  */
 
@@ -19,12 +18,12 @@ const MAX_QUEUE = 2000;
 export const warmDailyCap = (): number => {
   const configured = Number.parseInt(process.env.SURROUNDINGS_WARM_DAILY_CAP ?? '', 10);
   if (Number.isFinite(configured) && configured >= 0) return configured;
-  return process.env.OVERPASS_URL?.trim() ? 5000 : 100;
+  return 1000;
 };
 
 const warmIntervalMs = (): number => {
   const configured = Number.parseInt(process.env.SURROUNDINGS_WARM_INTERVAL_MS ?? '', 10);
-  return Number.isFinite(configured) && configured >= 0 ? configured : 30_000;
+  return Number.isFinite(configured) && configured >= 0 ? configured : 5_000;
 };
 
 const queue = new Map<string, { lat: number; lng: number }>();

@@ -114,6 +114,9 @@ const SECTION_DEFS: readonly SectionDef[] = [
   },
 ] as const;
 
+/** Page changes are measured at most this often (maps change the page on every pan). */
+const MUTATION_BATCH_MS = 250;
+
 /** A section becomes current once its top passes this far below the viewport top (under the header). */
 const ACTIVE_LINE_PX = 140;
 
@@ -201,15 +204,16 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
     recompute();
     timer = setTimeout(recompute, 800);
     // Sections that appear once their data arrives (zone dynamics after the
-    // area prices load) get their bookmark then; checks are batched per frame.
-    let frame = 0;
+    // area prices load) get their bookmark then. Maps change the page on
+    // every pan, so checks are batched: at most one per MUTATION_BATCH_MS.
+    let batch: ReturnType<typeof setTimeout> | undefined;
     const observer = typeof MutationObserver === 'function'
       ? new MutationObserver(() => {
-          if (frame) return;
-          frame = window.requestAnimationFrame(() => {
-            frame = 0;
+          if (batch) return;
+          batch = setTimeout(() => {
+            batch = undefined;
             recompute();
-          });
+          }, MUTATION_BATCH_MS);
         })
       : null;
     observer?.observe(document.body, { childList: true, subtree: true });
@@ -226,7 +230,7 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', onResize);
       observer?.disconnect();
-      if (frame) window.cancelAnimationFrame(frame);
+      clearTimeout(batch);
     };
   }, []);
 

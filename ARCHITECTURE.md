@@ -1237,9 +1237,16 @@ Key decisions:
   use. Google Maps: 10,000 free map loads a month (Essentials), then billed;
   the live traffic map loads only on request.
 - **Warm-up**: a new listing or a moved pin is looked up in the background
-  (`surroundingsWarmer.ts`), one at a time, 30 s apart, at most 100 a day on
-  the public servers (5,000 with your own `OVERPASS_URL`;
-  `SURROUNDINGS_WARM_DAILY_CAP`, `SURROUNDINGS_WARM_INTERVAL_MS`). Off under tests.
+  (`surroundingsWarmer.ts`), one at a time, 5 s apart, at most 1,000 a day
+  (`SURROUNDINGS_WARM_DAILY_CAP`, `SURROUNDINGS_WARM_INTERVAL_MS`); lookups
+  read CDN tiles, Overpass only as a fallback. Off under tests.
+- **Hardening**: a failed lookup is remembered for 30 s (`createPromiseCache`
+  `failureTtlMs`), so a burst of visits cannot hammer a provider that is down;
+  outbound calls cap response size (`maxContentLength`) and never follow
+  redirects; the tile URL from the remote TileJSON is only used on the same
+  https host (`isTrustedTemplate`, SSRF). All `/api` routes sit behind
+  `generalRateLimiter`, and lookups exist only for real listings, each place
+  once per cache period. OSM names render as text, never HTML.
 - **Page menu order and "you are here"** come from the layout, not the list
   (`sectionPositions.ts`): sections are ordered by where they sit, and the
   current one is the last to reach the line under the header — sticky
@@ -1255,7 +1262,8 @@ Key decisions:
   must be restricted by HTTP referrer in Google Cloud.
 - **Page menu**: Air Quality, Noise and Traffic follow Neighborhood, Zone
   Dynamics follows Area Prices (`PropertySectionNav`). Each card carries its
-  own `data-section`; the menu re-checks on DOM changes, so a section that
+  own `data-section`; the menu re-checks on DOM changes (batched, at most
+  every 250 ms — maps change the page on every pan), so a section that
   appears once its data loads gets its bookmark then.
 - **Typical traffic comes from road class and distance** (a primary road
   within 150 m is busy); **live traffic is Google's**, loaded only when asked,

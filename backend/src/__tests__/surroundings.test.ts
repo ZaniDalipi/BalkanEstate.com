@@ -146,6 +146,21 @@ describe('noiseModel', () => {
 });
 
 describe('promiseCache / hasUsableLocation', () => {
+  it('can remember a failure for a while', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      const cache = createPromiseCache<number>(60_000, 10, 1_000);
+      const load = jest.fn().mockRejectedValueOnce(new Error('down')).mockResolvedValue(3);
+      await expect(cache.get('k', load)).rejects.toThrow('down');
+      await expect(cache.get('k', load)).rejects.toThrow('down');
+      jest.advanceTimersByTime(1_001);
+      await expect(cache.get('k', load)).resolves.toBe(3);
+      expect(load).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('shares a call, and retries after a failure', async () => {
     const cache = createPromiseCache<number>(60_000, 10);
     const load = jest.fn().mockRejectedValueOnce(new Error('x')).mockResolvedValue(7);
@@ -205,13 +220,22 @@ describe('getSurroundings', () => {
     expect(postSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('treats an Overpass runtime remark as unavailable, and does not cache it', async () => {
+  it('treats an Overpass runtime remark as unavailable, remembers it for 30 s, then tries again', async () => {
     process.env.OVERPASS_URL = 'https://one.example/api/interpreter';
-    postSpy.mockResolvedValueOnce(answer({ elements: [], remark: 'runtime error: Query timed out' }));
-    await expect(getSurroundings(41, 20)).rejects.toThrow('timed out');
-    postSpy.mockResolvedValueOnce(answer({ elements: [] }));
-    await expect(getSurroundings(41, 20)).resolves.toMatchObject({ traffic: { level: 'calm' } });
-    delete process.env.OVERPASS_URL;
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      postSpy.mockResolvedValueOnce(answer({ elements: [], remark: 'runtime error: Query timed out' }));
+      await expect(getSurroundings(41, 20)).rejects.toThrow('timed out');
+      postSpy.mockResolvedValueOnce(answer({ elements: [] }));
+      await expect(getSurroundings(41, 20)).rejects.toThrow('timed out');
+      expect(postSpy).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(30_001);
+      await expect(getSurroundings(41, 20)).resolves.toMatchObject({ traffic: { level: 'calm' } });
+    } finally {
+      jest.useRealTimers();
+      delete process.env.OVERPASS_URL;
+    }
   });
 
   it('turns a network failure into unavailable', async () => {

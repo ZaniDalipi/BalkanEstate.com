@@ -36,25 +36,45 @@ export class TilesUnavailableError extends Error {
 
 const headers = { 'User-Agent': 'BalkanEstate Surroundings/1.0' };
 
+/** Tiles are ~0.1–1 MB; refuse anything far larger, and never follow redirects. */
+const LIMITS = { maxContentLength: 8 * 1024 * 1024, maxRedirects: 0 } as const;
+
+/**
+ * The tile URL comes from a remote TileJSON, so it is only trusted on the
+ * same https host as that TileJSON: a tampered file cannot send the server to
+ * an internal address (SSRF).
+ */
+export const isTrustedTemplate = (template: unknown, tileJsonUrl: string): template is string => {
+  if (typeof template !== 'string' || !/\{z\}.*\{x\}.*\{y\}/.test(template)) return false;
+  try {
+    const tile = new URL(template.replace('{z}', '0').replace('{x}', '0').replace('{y}', '0'));
+    const source = new URL(tileJsonUrl);
+    return tile.protocol === 'https:' && tile.host === source.host;
+  } catch {
+    return false;
+  }
+};
+
 /** The tile URL template; it names the weekly data release, so it is re-read every few hours. */
-const templateCache = createPromiseCache<string>(6 * 60 * 60 * 1000, 1);
+const templateCache = createPromiseCache<string>(6 * 60 * 60 * 1000, 1, 30_000);
 const tileTemplate = (): Promise<string> =>
   templateCache.get('template', async () => {
     const url = process.env.OPENFREEMAP_TILEJSON?.trim() || DEFAULT_TILEJSON;
-    const { data } = await axios.get(url, { timeout: REQUEST_TIMEOUT_MS, headers });
-    const template = (data as { tiles?: unknown } | null)?.tiles;
-    if (!Array.isArray(template) || typeof template[0] !== 'string' || !/\{z\}.*\{x\}.*\{y\}/.test(template[0])) {
-      throw new TilesUnavailableError('TileJSON has no tile URL');
+    const { data } = await axios.get(url, { timeout: REQUEST_TIMEOUT_MS, headers, ...LIMITS });
+    const tiles = (data as { tiles?: unknown } | null)?.tiles;
+    const template = Array.isArray(tiles) ? tiles[0] : undefined;
+    if (!isTrustedTemplate(template, url)) {
+      throw new TilesUnavailableError('TileJSON has no usable tile URL');
     }
-    return template[0];
+    return template;
   });
 
 /** Raw tiles, shared by neighbouring homes for a day. */
-const tileCache = createPromiseCache<Buffer>(24 * 60 * 60 * 1000, 64);
+const tileCache = createPromiseCache<Buffer>(24 * 60 * 60 * 1000, 64, 30_000);
 const fetchTile = (template: string, t: TileId): Promise<Buffer> => {
   const url = template.replace('{z}', String(t.z)).replace('{x}', String(t.x)).replace('{y}', String(t.y));
   return tileCache.get(url, async () => {
-    const { data } = await axios.get<ArrayBuffer>(url, { timeout: REQUEST_TIMEOUT_MS, headers, responseType: 'arraybuffer' });
+    const { data } = await axios.get<ArrayBuffer>(url, { timeout: REQUEST_TIMEOUT_MS, headers, responseType: 'arraybuffer', ...LIMITS });
     return Buffer.from(data);
   });
 };

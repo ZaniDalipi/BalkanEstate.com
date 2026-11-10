@@ -58,7 +58,10 @@ export const buildOverpassQuery = (lat: number, lng: number): string => {
   ].join('\n');
 };
 
-const cache = createPromiseCache<SurroundingsReport>(CACHE_TTL_MS, CACHE_MAX_ENTRIES);
+/** A failed lookup is remembered this long, so visitors cannot hammer a provider that is down. */
+export const FAILURE_TTL_MS = 30_000;
+
+const cache = createPromiseCache<SurroundingsReport>(CACHE_TTL_MS, CACHE_MAX_ENTRIES, FAILURE_TTL_MS);
 
 /** For tests. */
 export const clearSurroundingsCache = (): void => cache.clear();

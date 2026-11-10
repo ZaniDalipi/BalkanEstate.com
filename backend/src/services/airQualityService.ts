@@ -101,6 +101,9 @@ const fetchSeason = async (lat: number, lng: number, w: SeasonWindow): Promise<S
   try {
     const { data } = await axios.get(url, {
       timeout: REQUEST_TIMEOUT_MS,
+      // A season of hourly values is ~100 KB; refuse anything far larger, and never follow redirects.
+      maxContentLength: 5 * 1024 * 1024,
+      maxRedirects: 0,
       params: {
         latitude: lat,
         longitude: lng,
@@ -128,7 +131,10 @@ const fetchSeason = async (lat: number, lng: number, w: SeasonWindow): Promise<S
   }
 };
 
-const cache = createPromiseCache<AirQualityReport>(CACHE_TTL_MS, CACHE_MAX_ENTRIES);
+/** A failed lookup is remembered this long, so visitors cannot hammer the provider while it is down. */
+const FAILURE_TTL_MS = 30_000;
+
+const cache = createPromiseCache<AirQualityReport>(CACHE_TTL_MS, CACHE_MAX_ENTRIES, FAILURE_TTL_MS);
 
 /** For tests. */
 export const clearAirQualityCache = (): void => cache.clear();
