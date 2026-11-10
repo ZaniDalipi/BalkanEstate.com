@@ -693,7 +693,11 @@
     "priceHistory": "Историја на цени",
     "similar": "Слични имоти",
     "onThisPage": "На оваа страница",
-    "areaPrices": "Цени во близина"
+    "areaPrices": "Цени во близина",
+    "airQuality": "Квалитет на воздухот",
+    "noise": "Бучава",
+    "traffic": "Сообраќај",
+    "zoneDynamics": "Динамика на зоната"
   },
   "floorPlan": {
     "viewer": {
@@ -1116,6 +1120,7 @@
       "nearestStreet": "Најблиска улица: {{street}} ({{kind}}), оддалечена {{distance}}",
       "nearestStreetUnnamed": "Најблиска улица: оддалечена {{distance}}"
     },
-    "unavailable": "Оваа информација сè уште не е достапна за овој оглас."
+    "unavailable": "Оваа информација сè уште не е достапна за овој оглас.",
+    "loadingStreets": "Ги проверуваме улиците околу овој дом…"
   }
 }

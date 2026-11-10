@@ -761,7 +761,11 @@
     "priceHistory": "Istoricul prețurilor",
     "similar": "Proprietăți similare",
     "onThisPage": "Pe această pagină",
-    "areaPrices": "Prețuri în zonă"
+    "areaPrices": "Prețuri în zonă",
+    "airQuality": "Calitatea aerului",
+    "noise": "Zgomot",
+    "traffic": "Trafic",
+    "zoneDynamics": "Dinamica zonei"
   },
   "seo": {
     "description": "{{type}} cu {{beds}} dormitoare, {{baths}} băi de {{listingAction}} în {{city}}, {{country}}. {{sqft}}m² pentru €{{price}}.",
@@ -1117,6 +1121,7 @@
       "nearestStreet": "Cea mai apropiată stradă: {{street}} ({{kind}}), la {{distance}}",
       "nearestStreetUnnamed": "Cea mai apropiată stradă: la {{distance}}"
     },
-    "unavailable": "Această informație nu este încă disponibilă pentru acest anunț."
+    "unavailable": "Această informație nu este încă disponibilă pentru acest anunț.",
+    "loadingStreets": "Verificăm străzile din jurul acestei locuințe…"
   }
 }

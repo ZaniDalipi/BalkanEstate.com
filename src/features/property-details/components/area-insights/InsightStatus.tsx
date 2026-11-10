@@ -29,11 +29,14 @@ const InsightStatus: React.FC<InsightStatusProps> = ({ message, failed = false, 
   );
 };
 
-/** Two grey blocks while a card loads. */
-export const InsightSkeleton: React.FC = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse motion-reduce:animate-none" aria-hidden="true">
-    <div className="h-24 rounded-xl bg-neutral-100" />
-    <div className="h-24 rounded-xl bg-neutral-100" />
+/** Two grey blocks while a card loads, with an optional line saying what is happening. */
+export const InsightSkeleton: React.FC<{ caption?: string }> = ({ caption }) => (
+  <div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse motion-reduce:animate-none" aria-hidden="true">
+      <div className="h-24 rounded-xl bg-neutral-100" />
+      <div className="h-24 rounded-xl bg-neutral-100" />
+    </div>
+    {caption && <p role="status" className="mt-3 text-sm text-neutral-500">{caption}</p>}
   </div>
 );
 

@@ -760,7 +760,11 @@
     "priceHistory": "История на цените",
     "similar": "Подобни имоти",
     "onThisPage": "На тази страница",
-    "areaPrices": "Цени наблизо"
+    "areaPrices": "Цени наблизо",
+    "airQuality": "Качество на въздуха",
+    "noise": "Шум",
+    "traffic": "Трафик",
+    "zoneDynamics": "Динамика на района"
   },
   "seo": {
     "description": "{{type}} с {{beds}} спални, {{baths}} бани за {{listingAction}} в {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
@@ -1116,6 +1120,7 @@
       "nearestStreet": "Най-близка улица: {{street}} ({{kind}}), на {{distance}}",
       "nearestStreetUnnamed": "Най-близка улица: на {{distance}}"
     },
-    "unavailable": "Тази информация все още не е налична за тази обява."
+    "unavailable": "Тази информация все още не е налична за тази обява.",
+    "loadingStreets": "Проверяваме улиците около този имот…"
   }
 }

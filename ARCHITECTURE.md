@@ -1160,7 +1160,8 @@ Neighbourhood section (src/features/property-details/components/area-insights/)
   ├── NoiseCard   ┐ useSurroundings(id) → propertyKeys.surroundings(id)   (one request for both)
   └── TrafficCard ┘   └── GET /api/properties/:id/surroundings   getPropertySurroundings
                             └── services/surroundings/
-                                  ├── surroundingsService.ts  one Overpass query from the home's pin (~1 m), 30 days
+                                  ├── surroundingsService.ts  one query from the home's pin (~1 m); memory + Mongo (SurroundingsCache, TTL 30 days)
+                                  ├── overpassClient.ts       hedged across mirrors: next joins after 3 s, first answer wins
                                   ├── osmSources.ts           OSM roads/rail/airports/bars → sources + distance
                                   └── noiseModel.ts           estimateNoise (day/night dB) · estimateTraffic
         TrafficCard → "Show live traffic" → LiveTrafficMap (lazy): Google TrafficLayer
@@ -1200,6 +1201,16 @@ Key decisions:
   tram within 500 m, ordinary streets (residential, unclassified, living
   street) within 150 m: the traffic card names the street the home is on and
   the nearest main road, and the home's own street counts towards its noise.
+- **Overpass is hedged.** Public servers queue at busy times; one slow
+  server used to leave the cards loading for up to a minute. The first mirror
+  is asked at once, another joins every 3 s while none has answered (12 s
+  each), a failure moves on at once, and the first good answer cancels the
+  rest. Reports are stored in `SurroundingsCache` (bump `MODEL_VERSION` when
+  the model or query changes), so each home is looked up once a month.
+- **Page menu**: Air Quality, Noise and Traffic follow Neighborhood, Zone
+  Dynamics follows Area Prices (`PropertySectionNav`). Each card carries its
+  own `data-section`; the menu re-checks on DOM changes, so a section that
+  appears once its data loads gets its bookmark then.
 - **Typical traffic comes from road class and distance** (a primary road
   within 150 m is busy); **live traffic is Google's**, loaded only when asked,
   because every map load is billed.

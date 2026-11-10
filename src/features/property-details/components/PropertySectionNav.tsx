@@ -51,6 +51,24 @@ const SECTION_DEFS: readonly SectionDef[] = [
     icon: 'houses',
   },
   {
+    key: 'air-quality',
+    labelKey: 'property:sectionNav.airQuality',
+    fallback: 'Air Quality',
+    icon: 'leaf',
+  },
+  {
+    key: 'noise',
+    labelKey: 'property:sectionNav.noise',
+    fallback: 'Noise',
+    icon: 'mic',
+  },
+  {
+    key: 'traffic',
+    labelKey: 'property:sectionNav.traffic',
+    fallback: 'Traffic',
+    icon: 'car',
+  },
+  {
     key: 'availability',
     labelKey: 'property:sectionNav.availability',
     fallback: 'Availability',
@@ -79,6 +97,12 @@ const SECTION_DEFS: readonly SectionDef[] = [
     labelKey: 'property:sectionNav.areaPrices',
     fallback: 'Area Prices',
     icon: 'pin',
+  },
+  {
+    key: 'zone-dynamics',
+    labelKey: 'property:sectionNav.zoneDynamics',
+    fallback: 'Zone Dynamics',
+    icon: 'scales',
   },
   {
     key: 'similar',
@@ -147,8 +171,9 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
     [availableKeys, t]
   );
 
-  // Detect which sections exist. Re-checked shortly after mount because some
-  // sections (rental terms, lazy widgets) can render a beat later.
+  // Detect which sections exist. Re-checked shortly after mount and whenever
+  // the page's content changes, because some sections (rental terms, lazy
+  // widgets, cards waiting for data) render later.
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const recompute = () => {
@@ -163,7 +188,24 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
     };
     recompute();
     timer = setTimeout(recompute, 800);
-    return () => clearTimeout(timer);
+    // Sections that appear once their data arrives (zone dynamics after the
+    // area prices load) get their bookmark then; checks are batched per frame.
+    let frame = 0;
+    const observer = typeof MutationObserver === 'function'
+      ? new MutationObserver(() => {
+          if (frame) return;
+          frame = window.requestAnimationFrame(() => {
+            frame = 0;
+            recompute();
+          });
+        })
+      : null;
+    observer?.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      clearTimeout(timer);
+      observer?.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   const scrollToSection = useCallback((key: string) => {

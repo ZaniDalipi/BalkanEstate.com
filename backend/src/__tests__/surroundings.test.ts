@@ -196,10 +196,12 @@ describe('getSurroundings', () => {
   });
 
   it('treats an Overpass runtime remark as unavailable, and does not cache it', async () => {
+    process.env.OVERPASS_URL = 'https://one.example/api/interpreter';
     postSpy.mockResolvedValueOnce(answer({ elements: [], remark: 'runtime error: Query timed out' }));
     await expect(getSurroundings(41, 20)).rejects.toThrow('timed out');
     postSpy.mockResolvedValueOnce(answer({ elements: [] }));
     await expect(getSurroundings(41, 20)).resolves.toMatchObject({ traffic: { level: 'calm' } });
+    delete process.env.OVERPASS_URL;
   });
 
   it('turns a network failure into unavailable', async () => {

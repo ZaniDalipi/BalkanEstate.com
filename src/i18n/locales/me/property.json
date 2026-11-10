@@ -699,7 +699,11 @@
     "priceHistory": "Istorija cijena",
     "similar": "Slične nekretnine",
     "onThisPage": "Na ovoj stranici",
-    "areaPrices": "Cijene u blizini"
+    "areaPrices": "Cijene u blizini",
+    "airQuality": "Kvalitet vazduha",
+    "noise": "Buka",
+    "traffic": "Saobraćaj",
+    "zoneDynamics": "Dinamika zone"
   },
   "seo": {
     "title": "{{beds}}-sobni {{type}} za {{listingAction}} u {{city}}, {{country}} - €{{price}}",
@@ -1118,6 +1122,7 @@
       "nearestStreet": "Najbliža ulica: {{street}} ({{kind}}), udaljena {{distance}}",
       "nearestStreetUnnamed": "Najbliža ulica: udaljena {{distance}}"
     },
-    "unavailable": "Ova informacija još nije dostupna za ovaj oglas."
+    "unavailable": "Ova informacija još nije dostupna za ovaj oglas.",
+    "loadingStreets": "Provjeravamo ulice oko ove nekretnine…"
   }
 }

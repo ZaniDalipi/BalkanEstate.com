@@ -17,17 +17,20 @@ export interface InsightCardProps {
   tone: InsightTone;
   /** Content of the ⓘ popover. */
   info?: React.ReactNode;
+  /** The page-menu bookmark (`data-section`) this card answers to. */
+  sectionKey?: string;
   children: React.ReactNode;
 }
 
 /** The frame shared by the area cards: icon, title, ⓘ, tinted background. */
-const InsightCard: React.FC<InsightCardProps> = ({ icon: Icon, title, subtitle, tone, info, children }) => {
+const InsightCard: React.FC<InsightCardProps> = ({ icon: Icon, title, subtitle, tone, info, sectionKey, children }) => {
   const headingId = useId();
   const colours = TONES[tone];
   return (
     <section
       aria-labelledby={headingId}
-      className={`rounded-2xl border bg-gradient-to-br via-white to-white p-4 sm:p-6 landscape:p-3 shadow-sm ${colours.frame}`}
+      data-section={sectionKey}
+      className={`scroll-mt-24 rounded-2xl border bg-gradient-to-br via-white to-white p-4 sm:p-6 landscape:p-3 shadow-sm ${colours.frame}`}
     >
       <div className="mb-4 landscape:mb-2 flex items-start gap-3">
         <Icon aria-hidden="true" className={`mt-0.5 h-6 w-6 flex-shrink-0 ${colours.icon}`} />

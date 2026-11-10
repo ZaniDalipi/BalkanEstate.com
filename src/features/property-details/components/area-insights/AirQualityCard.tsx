@@ -42,6 +42,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ propertyId }) => {
       title={t('property:areaInsights.airQuality.title', 'Air quality')}
       subtitle={t('property:areaInsights.airQuality.subtitle', 'Seasonal averages at this location')}
       info={info}
+      sectionKey="air-quality"
     >
       {isLoading ? (
         <InsightSkeleton />

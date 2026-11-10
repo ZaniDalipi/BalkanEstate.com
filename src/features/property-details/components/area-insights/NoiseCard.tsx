@@ -36,9 +36,10 @@ const NoiseCard: React.FC<NoiseCardProps> = ({ propertyId }) => {
       title={t('property:areaInsights.noise.title', 'Ambient noise')}
       subtitle={t('property:areaInsights.noise.subtitle', 'Estimated sound level at this home')}
       info={info}
+      sectionKey="noise"
     >
       {isLoading ? (
-        <InsightSkeleton />
+        <InsightSkeleton caption={t('property:areaInsights.loadingStreets', 'Checking the streets around this home…')} />
       ) : data?.status === 'ok' ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 divide-y divide-neutral-200 sm:divide-y-0">

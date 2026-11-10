@@ -35,7 +35,7 @@ const ZoneDynamicsBody: React.FC<{ dynamics: ZoneDynamics; isRent: boolean }> = 
   const title = t('property:areaInsights.dynamics.title', 'Zone dynamics');
 
   return (
-    <section aria-labelledby={headingId} className="py-2">
+    <section aria-labelledby={headingId} data-section="zone-dynamics" className="scroll-mt-24 py-2">
       <div className="flex items-center gap-1">
         <h3 id={headingId} className="text-xl sm:text-2xl landscape:text-lg font-bold text-neutral-900">{title}</h3>
         <InfoPopover topic={title} align="start">

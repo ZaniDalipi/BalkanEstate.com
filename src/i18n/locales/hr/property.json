@@ -761,7 +761,11 @@
     "priceHistory": "Povijest cijena",
     "similar": "Slične nekretnine",
     "onThisPage": "Na ovoj stranici",
-    "areaPrices": "Cijene u blizini"
+    "areaPrices": "Cijene u blizini",
+    "airQuality": "Kvaliteta zraka",
+    "noise": "Buka",
+    "traffic": "Promet",
+    "zoneDynamics": "Dinamika zone"
   },
   "seo": {
     "description": "{{type}} s {{beds}} spavaćih soba, {{baths}} kupaonica za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
@@ -1117,6 +1121,7 @@
       "nearestStreet": "Najbliža ulica: {{street}} ({{kind}}), udaljena {{distance}}",
       "nearestStreetUnnamed": "Najbliža ulica: udaljena {{distance}}"
     },
-    "unavailable": "Ova informacija još nije dostupna za ovaj oglas."
+    "unavailable": "Ova informacija još nije dostupna za ovaj oglas.",
+    "loadingStreets": "Provjeravamo ulice oko ove nekretnine…"
   }
 }

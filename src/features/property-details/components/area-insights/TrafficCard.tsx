@@ -42,9 +42,10 @@ const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
       title={t('property:areaInsights.traffic.title', 'Traffic')}
       subtitle={t('property:areaInsights.traffic.subtitle', 'Street traffic around this home')}
       info={info}
+      sectionKey="traffic"
     >
       {isLoading ? (
-        <InsightSkeleton />
+        <InsightSkeleton caption={t('property:areaInsights.loadingStreets', 'Checking the streets around this home…')} />
       ) : data?.status === 'ok' ? (
         <>
           <TypicalTraffic traffic={data.traffic} />

@@ -760,7 +760,11 @@
     "priceHistory": "Historia e Çmimeve",
     "similar": "Prona të ngjashme",
     "onThisPage": "Në këtë faqe",
-    "areaPrices": "Çmimet përreth"
+    "areaPrices": "Çmimet përreth",
+    "airQuality": "Cilësia e ajrit",
+    "noise": "Zhurma",
+    "traffic": "Trafiku",
+    "zoneDynamics": "Dinamika e zonës"
   },
   "seo": {
     "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",
@@ -1116,6 +1120,7 @@
       "nearestStreet": "Rruga më e afërt: {{street}} ({{kind}}), {{distance}} larg",
       "nearestStreetUnnamed": "Rruga më e afërt: {{distance}} larg"
     },
-    "unavailable": "Ky informacion nuk është ende i disponueshëm për këtë shpallje."
+    "unavailable": "Ky informacion nuk është ende i disponueshëm për këtë shpallje.",
+    "loadingStreets": "Po kontrollojmë rrugët rreth kësaj shtëpie…"
   }
 }

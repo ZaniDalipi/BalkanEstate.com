@@ -761,7 +761,11 @@
     "priceHistory": "Историја цена",
     "similar": "Slične nekretnine",
     "onThisPage": "Na ovoj stranici",
-    "areaPrices": "Цене у близини"
+    "areaPrices": "Цене у близини",
+    "airQuality": "Квалитет ваздуха",
+    "noise": "Бука",
+    "traffic": "Саобраћај",
+    "zoneDynamics": "Динамика зоне"
   },
   "seo": {
     "description": "{{type}} са {{beds}} спаваћих соба, {{baths}} купатила за {{listingAction}} у {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",
@@ -1117,6 +1121,7 @@
       "nearestStreet": "Најближа улица: {{street}} ({{kind}}), удаљена {{distance}}",
       "nearestStreetUnnamed": "Најближа улица: удаљена {{distance}}"
     },
-    "unavailable": "Ова информација још није доступна за овај оглас."
+    "unavailable": "Ова информација још није доступна за овај оглас.",
+    "loadingStreets": "Проверавамо улице око ове некретнине…"
   }
 }
