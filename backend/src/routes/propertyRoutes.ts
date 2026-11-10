@@ -16,6 +16,8 @@ import {
   deleteRentalHistoryEntry,
   getPropertyPriceHistory,
   getAreaPrices,
+  getPropertyAirQuality,
+  getPropertySurroundings,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
 import { getFeatureMatches } from '../controllers/featureMatchController';
@@ -214,5 +216,7 @@ router.post('/:id/rental-history', protect, mutationRateLimiter, addRentalHistor
 router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, deleteRentalHistoryEntry);
 router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);
 router.get('/:id/area-prices', validatePropertyId, getAreaPrices);
+router.get('/:id/air-quality', validatePropertyId, getPropertyAirQuality);
+router.get('/:id/surroundings', validatePropertyId, getPropertySurroundings);
 
 export default router;

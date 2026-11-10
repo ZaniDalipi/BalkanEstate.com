@@ -14,9 +14,10 @@
 // matching `data-section` attribute. Bookmarks whose target is absent are
 // hidden so we never render a dead link.
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+import { naturalTop, orderByPosition, pickActiveSection, pinnedContainer } from './sectionPositions';
 
 const ICON_CLASS = 'w-5 h-5 flex-shrink-0';
 
@@ -30,7 +31,8 @@ interface SectionDef {
 
 // Static definitions live outside the component so the scroll/active-tracking
 // effects keep a stable reference (avoids re-subscribing on every render).
-// Order follows the page's vertical flow so active-section tracking is sensible.
+// This is only the starting order: once the page is laid out, the menu follows
+// where each section really is (see sectionPositions.ts).
 const SECTION_DEFS: readonly SectionDef[] = [
   {
     key: 'top',
@@ -49,6 +51,24 @@ const SECTION_DEFS: readonly SectionDef[] = [
     labelKey: 'property:sectionNav.neighborhood',
     fallback: 'Neighborhood',
     icon: 'houses',
+  },
+  {
+    key: 'air-quality',
+    labelKey: 'property:sectionNav.airQuality',
+    fallback: 'Air Quality',
+    icon: 'leaf',
+  },
+  {
+    key: 'noise',
+    labelKey: 'property:sectionNav.noise',
+    fallback: 'Noise',
+    icon: 'mic',
+  },
+  {
+    key: 'traffic',
+    labelKey: 'property:sectionNav.traffic',
+    fallback: 'Traffic',
+    icon: 'car',
   },
   {
     key: 'availability',
@@ -81,12 +101,24 @@ const SECTION_DEFS: readonly SectionDef[] = [
     icon: 'pin',
   },
   {
+    key: 'zone-dynamics',
+    labelKey: 'property:sectionNav.zoneDynamics',
+    fallback: 'Zone Dynamics',
+    icon: 'scales',
+  },
+  {
     key: 'similar',
     labelKey: 'property:sectionNav.similar',
     fallback: 'Similar Homes',
     icon: 'home',
   },
 ] as const;
+
+/** Page changes are measured at most this often (maps change the page on every pan). */
+const MUTATION_BATCH_MS = 250;
+
+/** A section becomes current once its top passes this far below the viewport top (under the header). */
+const ACTIVE_LINE_PX = 140;
 
 const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' &&
@@ -133,37 +165,73 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
   // The rail floats over the page; get out of the way while the 3D map fills
   // the viewport so it never covers the map's own controls or its shadows.
   const [overMap, setOverMap] = useState(false);
-  // Keys whose target section is actually present in the DOM (never a dead link).
-  const [availableKeys, setAvailableKeys] = useState<Set<string>>(
-    () => new Set(SECTION_DEFS.map((s) => s.key))
-  );
+  // Keys of the sections present in the DOM (never a dead link), top to
+  // bottom as laid out; 'top' always first.
+  const [order, setOrder] = useState<string[]>(() => SECTION_DEFS.map((s) => s.key));
+  // Sections inside a sticky container (the desktop sidebar): always on
+  // screen, so they never count as the one being read.
+  const pinnedRef = useRef<Map<string, boolean>>(new Map());
 
   const sections = useMemo(
     () =>
-      SECTION_DEFS.filter((s) => availableKeys.has(s.key)).map((s) => ({
-        ...s,
-        label: t(s.labelKey, s.fallback),
-      })),
-    [availableKeys, t]
+      order
+        .map((key) => SECTION_DEFS.find((s) => s.key === key))
+        .filter((s): s is SectionDef => !!s)
+        .map((s) => ({ ...s, label: t(s.labelKey, s.fallback) })),
+    [order, t]
   );
 
-  // Detect which sections exist. Re-checked shortly after mount because some
-  // sections (rental terms, lazy widgets) can render a beat later.
+  // Detect which sections exist. Re-checked shortly after mount and whenever
+  // the page's content changes, because some sections (rental terms, lazy
+  // widgets, cards waiting for data) render later.
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const recompute = () => {
-      const present = new Set<string>(['top']);
+      const measured: Array<{ key: string; naturalTop: number }> = [];
+      const pinned = new Map<string, boolean>();
       for (const s of SECTION_DEFS) {
-        if (s.key !== 'top' && findTarget(s.key)) present.add(s.key);
+        if (s.key === 'top') continue;
+        const el = findTarget(s.key);
+        if (!el) continue;
+        const container = pinnedContainer(el);
+        pinned.set(s.key, container !== null);
+        measured.push({ key: s.key, naturalTop: naturalTop(el, container) });
       }
-      setAvailableKeys((prev) => {
-        if (prev.size === present.size && [...present].every((k) => prev.has(k))) return prev;
-        return present;
-      });
+      pinnedRef.current = pinned;
+      const next = ['top', ...orderByPosition(measured)];
+      setOrder((prev) => (prev.length === next.length && prev.every((k, i) => k === next[i]) ? prev : next));
     };
     recompute();
     timer = setTimeout(recompute, 800);
-    return () => clearTimeout(timer);
+    // Sections that appear once their data arrives (zone dynamics after the
+    // area prices load) get their bookmark then. Maps change the page on
+    // every pan, so checks are batched: at most one per MUTATION_BATCH_MS.
+    let batch: ReturnType<typeof setTimeout> | undefined;
+    const observer = typeof MutationObserver === 'function'
+      ? new MutationObserver(() => {
+          if (batch) return;
+          batch = setTimeout(() => {
+            batch = undefined;
+            recompute();
+          }, MUTATION_BATCH_MS);
+        })
+      : null;
+    observer?.observe(document.body, { childList: true, subtree: true });
+    // Crossing a breakpoint changes the layout (the sidebar is sticky on
+    // desktop only), so measure again.
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(recompute, 150);
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', onResize);
+      observer?.disconnect();
+      clearTimeout(batch);
+    };
   }, []);
 
   const scrollToSection = useCallback((key: string) => {
@@ -188,13 +256,17 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        let current = 'top';
+        const positions = [];
         for (const s of SECTION_DEFS) {
           if (s.key === 'top') continue;
           const el = findTarget(s.key);
-          if (el && el.getBoundingClientRect().top <= 140) current = s.key;
+          if (el) positions.push({ key: s.key, top: el.getBoundingClientRect().top, pinned: pinnedRef.current.get(s.key) ?? false });
         }
-        setActiveKey(current);
+        const container = getScrollContainer();
+        const atBottom = container instanceof Window
+          ? window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+          : container.scrollTop + container.clientHeight >= container.scrollHeight - 2;
+        setActiveKey(pickActiveSection(positions, ACTIVE_LINE_PX, 'top', atBottom ? { viewportHeight: window.innerHeight } : undefined));
         const mapEl = findTarget('map');
         if (mapEl) {
           const rect = mapEl.getBoundingClientRect();
