@@ -1160,12 +1160,16 @@ Neighbourhood section (src/features/property-details/components/area-insights/)
   ├── NoiseCard   ┐ useSurroundings(id) → propertyKeys.surroundings(id)   (one request for both)
   └── TrafficCard ┘   └── GET /api/properties/:id/surroundings   getPropertySurroundings
                             └── services/surroundings/
-                                  ├── surroundingsService.ts  one query from the home's pin (~1 m); memory + Mongo (AreaInsightCache, TTL 30 days)
+                                  ├── surroundingsService.ts  from the home's pin (~1 m); memory + Mongo (AreaInsightCache, TTL 30 days)
+                                  ├── vectorTileClient.ts     OpenFreeMap vector tiles (z14 roads/poi, z10 airports), ~0.2–1 s
+                                  ├── tileSources.ts · roadLines.ts · tileMath.ts   tiles → noise sources and map road lines
+                                  ├── osmSources.ts           Overpass answer → sources (fallback when tiles fail)
                                   ├── surroundingsWarmer.ts   new listings / moved pins looked up ahead (models/hooks/surroundingsWarmup.ts)
                                   ├── overpassClient.ts       hedged across mirrors: next joins after 3 s, first answer wins
                                   ├── osmSources.ts           OSM roads/rail/airports/bars → sources + distance
                                   └── noiseModel.ts           estimateNoise (day/night dB) · estimateTraffic
-        TrafficCard → "Show live traffic" → LiveTrafficMap (lazy): Google TrafficLayer
+        TrafficCard → traffic/TrafficExplorer: day pattern chart · weekday/weekend + hour slider
+                      · TypicalTrafficMap (lazy Leaflet, roads coloured for that hour) · TrafficMapDialog (full screen)
 Area prices section → ZoneDynamicsCard (shares useAreaPrices — no extra request)
   └── area-prices response .dynamics = buildZoneDynamics(neighbours)   services/zoneDynamicsService.ts
         └── months of supply = on the market ÷ (closed in last 12 months / 12)
@@ -1202,6 +1206,18 @@ Key decisions:
   tram within 500 m, ordinary streets (residential, unclassified, living
   street) within 150 m: the traffic card names the street the home is on and
   the nearest main road, and the home's own street counts towards its noise.
+- **Vector tiles first.** OpenFreeMap's OpenMapTiles vector tiles (free, no
+  key, commercial use allowed, CDN) answer in ~0.2–1 s; the same lookups on
+  public Overpass took 17–60 s. Measured live: Tirana, Korçë, Budva and the
+  Tirana airport area give the same results as Overpass did. Overpass is only
+  the fallback when tiles cannot be read. `OPENFREEMAP_TILEJSON` can point at
+  another OpenMapTiles source. Road shapes within ~600 m travel with the
+  report (5–30 KB) for the traffic map.
+- **Traffic is a typical pattern, not live.** Free per-street historical
+  traffic does not exist, so busyness = road class × the standard hourly
+  shape of urban traffic on weekdays (08:00 and 15:00–18:00 peaks) and
+  weekends (11:00–17:00) — `traffic/trafficProfile.ts`; the card says so.
+  No Google traffic layer, so no Maps billing for it.
 - **Overpass is slow, so no page waits on it.** Measured live (Nov 2026):
   public servers took 17–19 s even for a one-node query, overpass-api.de reset
   connections from cloud hosts, two mirrors did not answer within 30 s.

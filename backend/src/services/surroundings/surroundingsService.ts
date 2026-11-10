@@ -1,18 +1,26 @@
 /**
- * What surrounds a home: estimated noise by day and night, and how busy the
- * nearby streets are. One Overpass (OpenStreetMap) query per home, measured
- * from its own pin; the answer is kept in memory and in MongoDB for 30 days.
+ * What surrounds a home: estimated noise by day and night, how busy the
+ * nearby streets are, and their shapes for the typical-traffic map. Measured
+ * from the home's own pin; kept in memory and in MongoDB for 30 days.
+ *
+ * Map data comes from OpenFreeMap's vector tiles (~0.2 s); only when those
+ * cannot be read does it fall back to Overpass (often 17–30 s).
  */
 
 import { readStored, writeStored } from '../../utils/storedCache';
 import { createPromiseCache } from '../../utils/promiseCache';
 import { toSources } from './osmSources';
+import { featuresAround } from './vectorTileClient';
+import { tileFeaturesToSources } from './tileSources';
+import { osmRoadLines, tileRoadLines, type RoadLine } from './roadLines';
 import { estimateNoise, estimateTraffic, type NoiseEstimate, type TrafficEstimate } from './noiseModel';
 import { OverpassUnavailableError, queryOverpass } from './overpassClient';
 
 export interface SurroundingsReport {
   noise: NoiseEstimate;
   traffic: TrafficEstimate;
+  /** Road shapes within ~600 m, for the typical-traffic map. */
+  roads: RoadLine[];
 }
 
 /** The provider is unreachable; the controller answers 503. */
@@ -22,7 +30,7 @@ export { OverpassUnavailableError as SurroundingsUnavailableError };
 export const SEARCH_RADII = { roads: 500, streets: 150, airports: 4000, nightlife: 150 } as const;
 
 /** Bump when the model or query changes, so stored reports are worked out again. */
-export const MODEL_VERSION = 'v3';
+export const MODEL_VERSION = 'v4';
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 5000;
@@ -70,8 +78,20 @@ export const getSurroundings = (lat: number, lng: number): Promise<SurroundingsR
   return cache.get(key, async () => {
     const stored = await readStored<SurroundingsReport>(key);
     if (stored) return stored;
-    const sources = toSources(await queryOverpass(buildOverpassQuery(rLat, rLng)), { lat: rLat, lng: rLng });
-    const report = { noise: estimateNoise(sources), traffic: estimateTraffic(sources) };
+    const home = { lat: rLat, lng: rLng };
+    let sources;
+    let roads: RoadLine[];
+    try {
+      const features = await featuresAround(rLat, rLng);
+      sources = tileFeaturesToSources(features, home);
+      roads = tileRoadLines(features, home);
+    } catch {
+      // Tiles unreadable (logged by the tile client): ask Overpass instead.
+      const elements = await queryOverpass(buildOverpassQuery(rLat, rLng));
+      sources = toSources(elements, home);
+      roads = osmRoadLines(elements, home);
+    }
+    const report: SurroundingsReport = { noise: estimateNoise(sources), traffic: estimateTraffic(sources), roads };
     void writeStored(key, report, CACHE_TTL_MS);
     return report;
   });

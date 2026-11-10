@@ -4,6 +4,13 @@
  */
 process.env.SKIP_TEST_DB = 'true';
 
+// These tests cover the Overpass path: the vector tiles are made unreachable so
+// every lookup falls back to it.
+jest.mock('../services/surroundings/vectorTileClient', () => ({
+  ...jest.requireActual('../services/surroundings/vectorTileClient'),
+  featuresAround: jest.fn().mockRejectedValue(new Error('tiles off in this test')),
+}));
+
 import axios, { type AxiosResponse } from 'axios';
 import mongoose from 'mongoose';
 import Property from '../models/Property';

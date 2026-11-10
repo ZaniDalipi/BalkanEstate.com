@@ -7,8 +7,12 @@ import NoiseCard from '../NoiseCard';
 import TrafficCard from '../TrafficCard';
 
 vi.mock('react-i18next', async () => (await import('@/src/features/developments/components/public/explorer/__tests__/i18nMock')).default);
-// The real map needs Google; the card only has to load it on request.
-vi.mock('../LiveTrafficMap', () => ({ default: () => <div>live traffic map</div> }));
+// Leaflet cannot draw in jsdom; the stub shows which day and hour it was given.
+vi.mock('../traffic/TypicalTrafficMap', () => ({
+  default: ({ day, hour, interactive }: { day: string; hour: number; interactive: boolean }) => (
+    <div>{`map ${interactive ? 'full' : 'card'} ${day} ${hour}`}</div>
+  ),
+}));
 
 const api = vi.hoisted(() => ({ getSurroundings: vi.fn() }));
 vi.mock('../../../api/surroundingsApi', async (importOriginal) => ({
@@ -32,6 +36,7 @@ const busy = {
     nearestStreet: { kind: 'street', name: 'Rruga Kala', distanceM: 12 },
     nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 40 },
   },
+  roads: [{ kind: 'primary', name: 'Bulevardi', points: [[40.6, 20.8], [40.601, 20.801]] }],
 };
 
 beforeEach(() => {
@@ -113,17 +118,54 @@ describe('with the encoded id the API hands out', () => {
 });
 
 describe('TrafficCard', () => {
-  it('rates the streets, names the nearest main road and loads the live map on request', async () => {
+  it('rates the streets and names the home\'s street and the nearest main road', async () => {
     api.getSurroundings.mockResolvedValue(busy);
     withClient(<TrafficCard propertyId={ID} lat={40.6} lng={20.8} />);
 
     expect(await screen.findByText('Busy street nearby')).toBeInTheDocument();
     expect(screen.getByText('Nearest street: Rruga Kala (Residential street), 10 m away')).toBeInTheDocument();
     expect(screen.getByText('Nearest main road: Bulevardi (Main road), 40 m away')).toBeInTheDocument();
-    expect(screen.queryByText('live traffic map')).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show live traffic' }));
-    expect(await screen.findByText('live traffic map')).toBeInTheDocument();
+  it('shows when it gets busy through the day, for weekdays and weekends', async () => {
+    api.getSurroundings.mockResolvedValue(busy);
+    withClient(<TrafficCard propertyId={ID} lat={40.6} lng={20.8} />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Weekdays' }));
+    expect(screen.getByRole('button', { name: 'Weekdays' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Busiest around 08:00–09:00, 15:00–18:00')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '17' } });
+    expect(screen.getByText('map card weekday 17')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Weekends' }));
+    expect(screen.getByText('Busiest around 11:00–17:00')).toBeInTheDocument();
+    expect(screen.getByText('map card weekend 17')).toBeInTheDocument();
+  });
+
+  it('opens the map full screen and closes it on Esc, focus back on the button', async () => {
+    api.getSurroundings.mockResolvedValue(busy);
+    withClient(<TrafficCard propertyId={ID} lat={40.6} lng={20.8} />);
+
+    const open = await screen.findByRole('button', { name: 'Open full-screen map' });
+    open.focus();
+    fireEvent.click(open);
+    const dialog = await screen.findByRole('dialog', { name: 'Typical traffic around this home' });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(await screen.findByText(/^map full /)).toBeInTheDocument();
+    expect(screen.queryByText(/^map card /)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close map' })).toHaveFocus();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(open).toHaveFocus();
+  });
+
+  it('shows the daily pattern without a map when the server sent no roads', async () => {
+    api.getSurroundings.mockResolvedValue({ ...busy, roads: [] });
+    withClient(<TrafficCard propertyId={ID} lat={40.6} lng={20.8} />);
+    expect(await screen.findByText(/^Busiest around/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Open full-screen map' })).not.toBeInTheDocument();
   });
 
   it('words an unnamed road without repeating its kind', async () => {

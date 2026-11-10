@@ -17,6 +17,14 @@ export interface NoiseSourceSummary {
   distanceM: number;
 }
 
+/** One road near the home, for the typical-traffic map. */
+export interface RoadLine {
+  kind: RoadKind | 'street';
+  name?: string;
+  /** [lat, lng] pairs. */
+  points: Array<[number, number]>;
+}
+
 export interface Surroundings {
   noise: { day: NoiseLevel; night: NoiseLevel; sources: NoiseSourceSummary[] };
   traffic: {
@@ -25,6 +33,8 @@ export interface Surroundings {
     nearestStreet: { kind: RoadKind | 'street'; name?: string; distanceM: number } | null;
     nearestMainRoad: { kind: RoadKind; name?: string; distanceM: number } | null;
   };
+  /** Road shapes within ~600 m; empty from servers older than the map. */
+  roads: RoadLine[];
 }
 
 export type SurroundingsResponse =
@@ -54,7 +64,22 @@ const isSource = (v: unknown): v is NoiseSourceSummary =>
   isRecord(v) && SOURCE_KINDS.includes(v.kind as string) && isDistance(v.distanceM) &&
   (v.name === undefined || typeof v.name === 'string');
 
-/** Validate the shape at the ingestion boundary; drop malformed sources. */
+/** At most this many roads are drawn; the server sends the nearest first. */
+const MAX_ROADS = 600;
+
+const isLatLng = (p: unknown): p is [number, number] =>
+  Array.isArray(p) && p.length === 2 &&
+  typeof p[0] === 'number' && Math.abs(p[0]) <= 90 &&
+  typeof p[1] === 'number' && Math.abs(p[1]) <= 180;
+
+const toRoad = (v: unknown): RoadLine | null => {
+  if (!isRecord(v) || !(v.kind === 'street' || ROAD_KINDS.includes(v.kind as string)) || !Array.isArray(v.points)) return null;
+  const points = v.points.filter(isLatLng);
+  if (points.length < 2) return null;
+  return { kind: v.kind as RoadLine['kind'], ...(typeof v.name === 'string' && v.name ? { name: v.name } : {}), points };
+};
+
+/** Validate the shape at the ingestion boundary; drop malformed sources and roads. */
 export function validateSurroundingsResponse(data: unknown): SurroundingsResponse {
   if (!isRecord(data)) throw new Error('Invalid surroundings response');
   if (data.status === 'no-location' || data.status === 'pending') return { status: data.status };
@@ -79,5 +104,8 @@ export function validateSurroundingsResponse(data: unknown): SurroundingsRespons
       sources: Array.isArray(noise.sources) ? noise.sources.filter(isSource) : [],
     },
     traffic: { level: traffic.level as TrafficLevel, nearestStreet, nearestMainRoad },
+    roads: Array.isArray(data.roads)
+      ? data.roads.slice(0, MAX_ROADS).map(toRoad).filter((r): r is RoadLine => r !== null)
+      : [],
   };
 }

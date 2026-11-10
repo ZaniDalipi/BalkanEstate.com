@@ -15,6 +15,7 @@ const ok = {
     nearestStreet: { kind: 'street', name: 'Rruga Kala', distanceM: 15 },
     nearestMainRoad: { kind: 'primary', name: 'Bulevardi', distanceM: 80 },
   },
+  roads: [{ kind: 'primary', name: 'Bulevardi', points: [[40.6, 20.8], [40.601, 20.801]] }],
 };
 
 describe('formatDistance', () => {
@@ -50,6 +51,29 @@ describe('validateSurroundingsResponse', () => {
     expect(() => validateSurroundingsResponse(null)).toThrow();
     expect(() => validateSurroundingsResponse({ ...ok, noise: { ...ok.noise, day: { db: 'loud', band: 'noisy' } } })).toThrow();
     expect(() => validateSurroundingsResponse({ ...ok, traffic: { level: 'jammed' } })).toThrow();
+  });
+});
+
+describe('roads for the map', () => {
+  it('keeps good roads and drops broken ones', () => {
+    const result = validateSurroundingsResponse({
+      ...ok,
+      roads: [
+        ...ok.roads,
+        { kind: 'street', points: [[40.6, 20.8], [40.6, 20.81]] },
+        { kind: 'runway', points: [[40.6, 20.8], [40.6, 20.81]] },
+        { kind: 'primary', points: [[40.6, 20.8]] },
+        { kind: 'primary', points: [[95, 20.8], [40.6, 'x']] },
+        'nonsense',
+      ],
+    });
+    expect(result.status === 'ok' && result.roads.map((r) => r.kind)).toEqual(['primary', 'street']);
+  });
+
+  it('treats a missing list as no roads', () => {
+    const { roads: _roads, ...older } = ok;
+    const result = validateSurroundingsResponse(older);
+    expect(result.status === 'ok' && result.roads).toEqual([]);
   });
 });
 

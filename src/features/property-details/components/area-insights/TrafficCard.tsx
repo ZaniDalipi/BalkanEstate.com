@@ -1,12 +1,12 @@
 /**
- * TrafficCard — how busy the streets around the home typically are (from the
- * class and distance of the nearest roads), and Google's live traffic on a
- * map that loads when the visitor asks for it.
+ * TrafficCard — how busy the streets around the home typically are: the
+ * level (from the class and distance of the nearest roads), the street it is
+ * on, and when traffic peaks through the day on a map (TrafficExplorer).
  */
 
-import React, { Suspense, lazy, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Car, Map as MapIcon } from 'lucide-react';
+import { Car } from 'lucide-react';
 import { useSurroundings } from '../../hooks/useSurroundings';
 import type { Surroundings } from '../../api/surroundingsApi';
 import InsightCard from './InsightCard';
@@ -14,8 +14,7 @@ import InsightStatus, { InsightSkeleton } from './InsightStatus';
 import BandBadge from './BandBadge';
 import { TRAFFIC_LEVELS } from './surroundingsLabels';
 import { useSurroundingsLabels } from './useSurroundingsLabels';
-
-const LiveTrafficMap = lazy(() => import('./LiveTrafficMap'));
+import TrafficExplorer from './traffic/TrafficExplorer';
 
 export interface TrafficCardProps {
   propertyId: string;
@@ -26,11 +25,10 @@ export interface TrafficCardProps {
 const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
   const { t } = useTranslation(['property']);
   const { data, isWaiting, gaveUp, error, refetch, isFetching } = useSurroundings(propertyId);
-  const [showMap, setShowMap] = useState(false);
 
   const info = (
     <>
-      <p>{t('property:areaInsights.traffic.explain', 'The typical level comes from the kind of roads around the home and how close they are. The map shows Google’s live traffic right now.')}</p>
+      <p>{t('property:areaInsights.traffic.explain', 'How busy it gets comes from the kind of roads around the home, how close they are, and the standard pattern of traffic through a weekday and a weekend day. It is a typical picture, not live or measured traffic.')}</p>
       <p className="mt-2 text-xs text-neutral-500">{t('property:areaInsights.mapSource', 'Map data © OpenStreetMap contributors')}</p>
     </>
   );
@@ -49,22 +47,7 @@ const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
       ) : data?.status === 'ok' ? (
         <>
           <TypicalTraffic traffic={data.traffic} />
-          <div className="mt-4">
-            {showMap ? (
-              <Suspense fallback={<div className="h-64 sm:h-72 landscape:h-48 rounded-xl bg-neutral-100 animate-pulse motion-reduce:animate-none" aria-hidden="true" />}>
-                <LiveTrafficMap lat={lat} lng={lng} />
-              </Suspense>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowMap(true)}
-                className="inline-flex min-h-[44px] landscape:min-h-[32px] items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <MapIcon aria-hidden="true" className="h-4 w-4" />
-                {t('property:areaInsights.traffic.showLive', 'Show live traffic')}
-              </button>
-            )}
-          </div>
+          <TrafficExplorer level={data.traffic.level} roads={data.roads} center={{ lat, lng }} />
         </>
       ) : (
         <InsightStatus
