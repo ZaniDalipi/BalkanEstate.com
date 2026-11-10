@@ -15,6 +15,7 @@
 
 import axios from 'axios';
 import { apiLogger } from '../utils/logger';
+import { createPromiseCache } from '../utils/promiseCache';
 
 export type Season = 'summer' | 'winter';
 
@@ -125,7 +126,7 @@ const fetchSeason = async (lat: number, lng: number, w: SeasonWindow): Promise<S
   }
 };
 
-const cache = new Map<string, { expires: number; value: Promise<AirQualityReport> }>();
+const cache = createPromiseCache<AirQualityReport>(CACHE_TTL_MS, CACHE_MAX_ENTRIES);
 
 /** For tests. */
 export const clearAirQualityCache = (): void => cache.clear();
@@ -139,19 +140,6 @@ export const getSeasonalAirQuality = (lat: number, lng: number, now: Date = new 
   const sLng = snapToGrid(lng);
   const windows = seasonWindows(now);
   const key = `${sLat},${sLng},${windows.map((w) => w.start).join(',')}`;
-
-  const hit = cache.get(key);
-  if (hit && hit.expires > Date.now()) return hit.value;
-
-  const value = Promise.all(windows.map((w) => fetchSeason(sLat, sLng, w))).then((seasons) => ({ seasons }));
-  cache.set(key, { expires: Date.now() + CACHE_TTL_MS, value });
-  value.catch(() => {
-    if (cache.get(key)?.value === value) cache.delete(key);
-  });
-
-  if (cache.size > CACHE_MAX_ENTRIES) {
-    const oldest = cache.keys().next().value;
-    if (oldest !== undefined) cache.delete(oldest);
-  }
-  return value;
+  return cache.get(key, () =>
+    Promise.all(windows.map((w) => fetchSeason(sLat, sLng, w))).then((seasons) => ({ seasons })));
 };

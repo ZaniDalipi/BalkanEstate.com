@@ -994,7 +994,6 @@
     }
   },
   "areaInsights": {
-    "howMeasured": "How is this measured?",
     "airQuality": {
       "title": "Air quality",
       "subtitle": "Seasonal averages at this location",
@@ -1061,6 +1060,58 @@
       "daysToSell": "Typically sold in {{count}} days",
       "daysToLet": "Typically let in {{count}} days",
       "explain": "Months of supply: the homes on the market nearby, divided by how many sold each month over the last year. Under 4 months favours sellers, over 7 favours buyers."
+    },
+    "about": "About: {{topic}}",
+    "mapSource": "Map data © OpenStreetMap contributors",
+    "sourceKind": {
+      "motorway": "Motorway",
+      "trunk": "Expressway",
+      "primary": "Main road",
+      "secondary": "Secondary road",
+      "tertiary": "Local through road",
+      "railway": "Railway",
+      "tram": "Tram line",
+      "airport": "Airport",
+      "nightclub": "Nightclub",
+      "bar": "Bar"
+    },
+    "noise": {
+      "title": "Ambient noise",
+      "subtitle": "Estimated sound level at this home",
+      "day": "Day · 07–23",
+      "night": "Night · 23–07",
+      "unit": "dB",
+      "band": {
+        "quiet": "Quiet",
+        "moderate": "Moderate",
+        "noisy": "Noisy",
+        "veryNoisy": "Very noisy"
+      },
+      "sourcesTitle": "Main sources nearby",
+      "noSources": "No busy roads, railways or nightlife close by.",
+      "explain": "An estimate, not a measurement: worked out from the roads, railways, airports and nightlife around the home and how far away they are. The WHO advises road noise below 53 dB by day and 45 dB at night.",
+      "loadError": "We couldn't load noise and traffic for this area right now.",
+      "noLocation": "This listing has no map location, so we can't estimate noise."
+    },
+    "traffic": {
+      "title": "Traffic",
+      "subtitle": "Street traffic around this home",
+      "level": {
+        "calm": "Quiet streets",
+        "moderate": "Moderate traffic",
+        "busy": "Busy street nearby"
+      },
+      "nearestRoad": "Nearest main road: {{road}} ({{kind}}), {{distance}} away",
+      "nearestRoadUnnamed": "Nearest main road: a {{kind}}, {{distance}} away",
+      "noMainRoad": "No main road within 500 m.",
+      "showLive": "Show live traffic",
+      "mapUnavailable": "The live traffic map isn't available right now.",
+      "mapLabel": "Live traffic map around this home",
+      "fast": "Fast",
+      "slow": "Slow",
+      "liveSource": "Live traffic by Google",
+      "explain": "The typical level comes from the kind of roads around the home and how close they are. The map shows Google’s live traffic right now.",
+      "noLocation": "This listing has no map location, so we can't show traffic."
     }
   }
 }

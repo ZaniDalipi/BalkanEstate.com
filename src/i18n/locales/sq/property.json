@@ -994,7 +994,6 @@
     }
   },
   "areaInsights": {
-    "howMeasured": "Si matet kjo?",
     "airQuality": {
       "title": "Cilësia e ajrit",
       "subtitle": "Mesatare sezonale në këtë vendndodhje",
@@ -1061,6 +1060,58 @@
       "daysToSell": "Zakonisht shitet brenda {{count}} ditësh",
       "daysToLet": "Zakonisht jepet me qira brenda {{count}} ditësh",
       "explain": "Muaj ofertë: pronat në treg përreth, pjesëtuar me sa u shitën çdo muaj gjatë vitit të fundit. Nën 4 muaj favorizon shitësit, mbi 7 favorizon blerësit."
+    },
+    "about": "Rreth: {{topic}}",
+    "mapSource": "Të dhënat e hartës © kontribuuesit e OpenStreetMap",
+    "sourceKind": {
+      "motorway": "Autostradë",
+      "trunk": "Rrugë e shpejtë",
+      "primary": "Rrugë kryesore",
+      "secondary": "Rrugë dytësore",
+      "tertiary": "Rrugë lokale kalimi",
+      "railway": "Hekurudhë",
+      "tram": "Linjë tramvaji",
+      "airport": "Aeroport",
+      "nightclub": "Klub nate",
+      "bar": "Bar"
+    },
+    "noise": {
+      "title": "Zhurma e ambientit",
+      "subtitle": "Niveli i vlerësuar i zërit në këtë shtëpi",
+      "day": "Ditë · 07–23",
+      "night": "Natë · 23–07",
+      "unit": "dB",
+      "band": {
+        "quiet": "E qetë",
+        "moderate": "Mesatare",
+        "noisy": "E zhurmshme",
+        "veryNoisy": "Shumë e zhurmshme"
+      },
+      "sourcesTitle": "Burimet kryesore përreth",
+      "noSources": "Nuk ka rrugë të ngarkuara, hekurudha apo jetë nate afër.",
+      "explain": "Vlerësim, jo matje: llogaritet nga rrugët, hekurudhat, aeroportet dhe jeta e natës rreth shtëpisë dhe nga largësia e tyre. OBSH këshillon zhurmë rrugore nën 53 dB ditën dhe 45 dB natën.",
+      "loadError": "Nuk mundëm të ngarkojmë zhurmën dhe trafikun për këtë zonë tani.",
+      "noLocation": "Kjo shpallje nuk ka vendndodhje në hartë, ndaj nuk mund të vlerësojmë zhurmën."
+    },
+    "traffic": {
+      "title": "Trafiku",
+      "subtitle": "Trafiku i rrugëve rreth kësaj shtëpie",
+      "level": {
+        "calm": "Rrugë të qeta",
+        "moderate": "Trafik mesatar",
+        "busy": "Rrugë e ngarkuar afër"
+      },
+      "nearestRoad": "Rruga kryesore më e afërt: {{road}} ({{kind}}), {{distance}} larg",
+      "nearestRoadUnnamed": "Rruga kryesore më e afërt: {{kind}}, {{distance}} larg",
+      "noMainRoad": "Asnjë rrugë kryesore brenda 500 m.",
+      "showLive": "Shfaq trafikun live",
+      "mapUnavailable": "Harta e trafikut live nuk është e disponueshme tani.",
+      "mapLabel": "Harta e trafikut live rreth kësaj shtëpie",
+      "fast": "Shpejt",
+      "slow": "Ngadalë",
+      "liveSource": "Trafiku live nga Google",
+      "explain": "Niveli tipik vjen nga lloji i rrugëve rreth shtëpisë dhe sa afër janë. Harta tregon trafikun live të Google në këtë moment.",
+      "noLocation": "Kjo shpallje nuk ka vendndodhje në hartë, ndaj nuk mund të tregojmë trafikun."
     }
   }
 }

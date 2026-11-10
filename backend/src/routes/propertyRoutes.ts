@@ -17,6 +17,7 @@ import {
   getPropertyPriceHistory,
   getAreaPrices,
   getPropertyAirQuality,
+  getPropertySurroundings,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
 import { getFeatureMatches } from '../controllers/featureMatchController';
@@ -216,5 +217,6 @@ router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, dele
 router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);
 router.get('/:id/area-prices', validatePropertyId, getAreaPrices);
 router.get('/:id/air-quality', validatePropertyId, getPropertyAirQuality);
+router.get('/:id/surroundings', validatePropertyId, getPropertySurroundings);
 
 export default router;

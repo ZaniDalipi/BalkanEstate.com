@@ -126,6 +126,9 @@ export const propertyKeys = {
   // Seasonal air quality at a property's location
   airQuality: (propertyId: string) => [...propertyKeys.all, propertyId, 'air-quality'] as const,
 
+  // Estimated noise and street traffic around a property
+  surroundings: (propertyId: string) => [...propertyKeys.all, propertyId, 'surroundings'] as const,
+
   // Ids of listings whose full text has every requested feature (AI search, amenity filters)
   featureMatches: (request: { features: string[]; flags: string[]; listingType?: string }) =>
     [...propertyKeys.public(), 'feature-matches', request] as const,

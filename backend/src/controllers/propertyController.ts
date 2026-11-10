@@ -50,6 +50,8 @@ import {
 } from '../services/areaPricesService';
 import { buildZoneDynamics } from '../services/zoneDynamicsService';
 import { getSeasonalAirQuality, AirQualityUnavailableError } from '../services/airQualityService';
+import { getSurroundings, SurroundingsUnavailableError } from '../services/surroundings/surroundingsService';
+import { hasUsableLocation } from '../utils/coordinates';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -2563,10 +2565,7 @@ export const getPropertyAirQuality = async (
     }
 
     const { lat, lng } = property as { lat?: number; lng?: number };
-    const located = typeof lat === 'number' && typeof lng === 'number' &&
-      Number.isFinite(lat) && Number.isFinite(lng) &&
-      Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
-    if (!located) {
+    if (!hasUsableLocation(lat, lng)) {
       res.json({ status: 'no-location' });
       return;
     }
@@ -2584,6 +2583,42 @@ export const getPropertyAirQuality = async (
     }
     propertyLogger.error('Get air quality error:', error);
     res.status(500).json({ message: 'Error fetching air quality' });
+  }
+};
+
+// @desc    Estimated noise (day/night) and street traffic around a property,
+//          from OpenStreetMap roads, railways, airports and nightlife
+// @route   GET /api/properties/:id/surroundings
+// @access  Public
+export const getPropertySurroundings = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id).select('lat lng').lean();
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const { lat, lng } = property as { lat?: number; lng?: number };
+    if (!hasUsableLocation(lat, lng)) {
+      res.json({ status: 'no-location' });
+      return;
+    }
+
+    const report = await getSurroundings(lat as number, lng as number);
+    res.json({ status: 'ok', ...report });
+  } catch (error: unknown) {
+    if (error instanceof SurroundingsUnavailableError) {
+      res.status(503).json({ message: 'Noise and traffic data is temporarily unavailable' });
+      return;
+    }
+    propertyLogger.error('Get surroundings error:', error);
+    res.status(500).json({ message: 'Error fetching surroundings' });
   }
 };
 

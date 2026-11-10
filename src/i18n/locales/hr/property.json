@@ -995,7 +995,6 @@
     }
   },
   "areaInsights": {
-    "howMeasured": "Kako se ovo mjeri?",
     "airQuality": {
       "title": "Kvaliteta zraka",
       "subtitle": "Sezonski prosjeci na ovoj lokaciji",
@@ -1062,6 +1061,58 @@
       "daysToSell": "Obično se proda za {{count}} dana",
       "daysToLet": "Obično se iznajmi za {{count}} dana",
       "explain": "Mjeseci ponude: nekretnine na tržištu u blizini, podijeljene s brojem prodanih mjesečno tijekom prošle godine. Ispod 4 mjeseca u korist je prodavatelja, iznad 7 u korist kupaca."
+    },
+    "about": "O: {{topic}}",
+    "mapSource": "Podaci karte © suradnici OpenStreetMapa",
+    "sourceKind": {
+      "motorway": "Autocesta",
+      "trunk": "Brza cesta",
+      "primary": "Glavna cesta",
+      "secondary": "Sporedna cesta",
+      "tertiary": "Lokalna prolazna cesta",
+      "railway": "Željeznica",
+      "tram": "Tramvajska linija",
+      "airport": "Zračna luka",
+      "nightclub": "Noćni klub",
+      "bar": "Bar"
+    },
+    "noise": {
+      "title": "Buka u okolici",
+      "subtitle": "Procijenjena razina zvuka kod ove nekretnine",
+      "day": "Dan · 07–23",
+      "night": "Noć · 23–07",
+      "unit": "dB",
+      "band": {
+        "quiet": "Tiho",
+        "moderate": "Umjereno",
+        "noisy": "Bučno",
+        "veryNoisy": "Vrlo bučno"
+      },
+      "sourcesTitle": "Glavni izvori u blizini",
+      "noSources": "Nema prometnih cesta, pruga ni noćnog života u blizini.",
+      "explain": "Procjena, ne mjerenje: izračunata iz cesta, pruga, zračnih luka i noćnog života oko nekretnine i njihove udaljenosti. SZO preporučuje buku prometa ispod 53 dB danju i 45 dB noću.",
+      "loadError": "Trenutačno nismo mogli učitati buku i promet za ovo područje.",
+      "noLocation": "Ovaj oglas nema lokaciju na karti, pa ne možemo procijeniti buku."
+    },
+    "traffic": {
+      "title": "Promet",
+      "subtitle": "Promet na ulicama oko ove nekretnine",
+      "level": {
+        "calm": "Mirne ulice",
+        "moderate": "Umjeren promet",
+        "busy": "Prometna ulica u blizini"
+      },
+      "nearestRoad": "Najbliža glavna cesta: {{road}} ({{kind}}), udaljena {{distance}}",
+      "nearestRoadUnnamed": "Najbliža glavna cesta: {{kind}}, udaljena {{distance}}",
+      "noMainRoad": "Nema glavne ceste unutar 500 m.",
+      "showLive": "Prikaži promet uživo",
+      "mapUnavailable": "Karta prometa uživo trenutačno nije dostupna.",
+      "mapLabel": "Karta prometa uživo oko ove nekretnine",
+      "fast": "Brzo",
+      "slow": "Sporo",
+      "liveSource": "Promet uživo s Googlea",
+      "explain": "Uobičajena razina proizlazi iz vrste cesta oko nekretnine i njihove blizine. Karta prikazuje Googleov promet uživo u ovom trenutku.",
+      "noLocation": "Ovaj oglas nema lokaciju na karti, pa ne možemo prikazati promet."
     }
   }
 }

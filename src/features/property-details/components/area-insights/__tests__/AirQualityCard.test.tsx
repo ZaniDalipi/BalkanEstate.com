@@ -20,7 +20,9 @@ const renderCard = () =>
     </QueryClientProvider>
   );
 
-beforeEach(() => api.getAirQuality.mockReset());
+beforeEach(() => {
+  api.getAirQuality.mockReset();
+});
 
 describe('AirQualityCard', () => {
   it('shows each season with its AQI, band and PM2.5, summer first', async () => {

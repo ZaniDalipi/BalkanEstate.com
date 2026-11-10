@@ -1144,44 +1144,63 @@ Key decisions:
 
 ---
 
-## Area Insights — Air Quality & Zone Dynamics
+## Area Insights — Air, Noise, Traffic & Zone Dynamics
 
-Two cards on every property page that say what living and buying in the area
-is like. Both work from the listing's coordinates and never block the page.
+Cards on every property page that say what living and buying in the area is
+like. All work from the listing's coordinates and never block the page.
 
 ```
-Neighbourhood section → AirQualityCard   src/features/property-details/components/area-insights/
-  └── useAirQuality(id) → propertyKeys.airQuality(id)   staleTime 24 h
-        └── GET /api/properties/:id/air-quality        getPropertyAirQuality (propertyController)
-              └── getSeasonalAirQuality(lat, lng)      services/airQualityService.ts
-                    ├── seasonWindows: latest full summer (Jun–Aug) and winter (Dec–Feb)
-                    ├── Open-Meteo air-quality API (Copernicus CAMS): hourly european_aqi + pm2_5
-                    ├── coveredMean: average, null under 50 % of hours
-                    └── cache: ~5 km grid cell, 7 days, failures not cached
+Neighbourhood section (src/features/property-details/components/area-insights/)
+  ├── AirQualityCard → useAirQuality(id) → propertyKeys.airQuality(id)
+  │     └── GET /api/properties/:id/air-quality     getPropertyAirQuality
+  │           └── services/airQualityService.ts
+  │                 ├── seasonWindows: latest full summer (Jun–Aug) and winter (Dec–Feb)
+  │                 ├── Open-Meteo air-quality API (Copernicus CAMS): hourly european_aqi + pm2_5
+  │                 └── cache: ~5 km grid cell, 7 days
+  ├── NoiseCard   ┐ useSurroundings(id) → propertyKeys.surroundings(id)   (one request for both)
+  └── TrafficCard ┘   └── GET /api/properties/:id/surroundings   getPropertySurroundings
+                            └── services/surroundings/
+                                  ├── surroundingsService.ts  one Overpass query, cache ~11 m, 30 days
+                                  ├── osmSources.ts           OSM roads/rail/airports/bars → sources + distance
+                                  └── noiseModel.ts           estimateNoise (day/night dB) · estimateTraffic
+        TrafficCard → "Show live traffic" → LiveTrafficMap (lazy): Google TrafficLayer
 Area prices section → ZoneDynamicsCard (shares useAreaPrices — no extra request)
   └── area-prices response .dynamics = buildZoneDynamics(neighbours)   services/zoneDynamicsService.ts
         └── months of supply = on the market ÷ (closed in last 12 months / 12)
 ```
 
+Shared pieces: `InsightCard` (frame, icon, title, ⓘ), `InsightStatus` (no data
+/ failure with `role="alert"` and *Try again*), `InfoPopover` (the ⓘ: Esc via
+`useEscapeLayer`, click outside, slides back on screen), `BandBadge`;
+`backend/src/utils/promiseCache.ts` (TTL cache that shares in-flight calls and
+never caches a failure) and `utils/coordinates.ts` (`hasUsableLocation`).
+
 | Answer | Card shows |
 |---|---|
-| `{ status: 'ok', seasons }` | each season: AQI, European band, PM2.5 |
-| `{ status: 'no-location' }` / `'no-data'` | a plain sentence, no retry |
+| `status: 'ok'` | air: AQI per season · noise: dB day and night, main sources · traffic: level, nearest main road |
+| `status: 'no-location'` / `'no-data'` | a plain sentence, no retry |
 | 503 (provider down) | `role="alert"` message with *Try again* |
-| dynamics `ok` | verdict, buyer → seller gauge (score 0–100), the figures |
-| dynamics `insufficient` (< 3 closings in a year) | a sentence saying there is too little data |
+| dynamics `ok` / `insufficient` | verdict, buyer → seller bar, figures in the ⓘ / a sentence |
 
 Key decisions:
-- **European AQI, not US AQI**: the EEA scale the region's authorities use
-  (0–20 good, 20–40 fair, 40–60 moderate, 60–80 poor, 80–100 very poor).
-- **Seasonal averages, not a live reading**: a buyer needs the typical summer
-  and the heating-season winter, which is when Balkan towns have smog.
-- **Licensing**: Open-Meteo's free host is non-commercial. Set
-  `OPEN_METEO_API_KEY` (backend) to use the commercial host; the source line
-  credits Copernicus CAMS, as its licence requires.
-- **Market verdict thresholds**: under 4 months of supply → seller's market,
-  over 7 → buyer's; rentals read landlord's / tenant's market. The gauge is on a
-  log scale centred on √28 ≈ 5.3 months.
+- **European AQI, not US AQI**: the EEA scale (0–20 good, 20–40 fair, 40–60
+  moderate, 60–80 poor, 80–100 very poor). **Seasonal averages**: a buyer
+  needs the typical summer and the heating-season winter.
+- **Noise is an estimate, and says so.** Roads and railways are line sources
+  (reference level at 10 m, −3 dB per doubling, −2 dB per 100 m for buildings),
+  airports and venues point sources; levels add on an energy basis over a
+  quiet-town background (42 dB day, 33 dB night). Each named road counts once,
+  however many OSM pieces it has. Bands: day 45/55/65 dB, night 35/45/55 dB.
+- **Typical traffic comes from road class and distance** (a primary road
+  within 150 m is busy); **live traffic is Google's**, loaded only when asked,
+  because every map load is billed.
+- **Licensing and load**: Open-Meteo's free host is non-commercial — set
+  `OPEN_METEO_API_KEY` for the commercial one. Overpass is a shared public
+  service — set `OVERPASS_URL` for a paid or self-hosted instance. Sources are
+  credited in each card's ⓘ (Copernicus CAMS, © OpenStreetMap contributors).
+- **Zone dynamics**: under 4 months of supply → seller's market, over 7 →
+  buyer's; rentals read landlord's / tenant's market. Laid out as a plain
+  section (title + ⓘ, verdict, explanation, bar); the figures sit in the ⓘ.
 
 ---
 

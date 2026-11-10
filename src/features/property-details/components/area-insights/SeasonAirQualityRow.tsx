@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SeasonAirQuality } from '../../api/airQualityApi';
 import { aqiBand, seasonYears } from './airQualityBands';
+import BandBadge from './BandBadge';
 
 export interface SeasonAirQualityRowProps {
   season: SeasonAirQuality;
@@ -31,7 +32,7 @@ const SeasonAirQualityRow: React.FC<SeasonAirQualityRowProps> = ({ season }) => 
               {t('property:areaInsights.airQuality.aqiUnit', 'AQI')}
             </span>
           </p>
-          <BandBadge aqi={season.aqi} />
+          <AqiBadge aqi={season.aqi} />
         </>
       )}
       {season.pm25 !== null && (
@@ -43,15 +44,10 @@ const SeasonAirQualityRow: React.FC<SeasonAirQualityRowProps> = ({ season }) => 
   );
 };
 
-const BandBadge: React.FC<{ aqi: number }> = ({ aqi }) => {
+const AqiBadge: React.FC<{ aqi: number }> = ({ aqi }) => {
   const { t } = useTranslation(['property']);
   const band = aqiBand(aqi);
-  return (
-    <span className={`mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${band.badge}`}>
-      <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${band.dot}`} />
-      {t(`property:areaInsights.airQuality.band.${band.key}`, band.label)}
-    </span>
-  );
+  return <BandBadge label={t(`property:areaInsights.airQuality.band.${band.key}`, band.label)} badge={band.badge} dot={band.dot} />;
 };
 
 export default SeasonAirQualityRow;

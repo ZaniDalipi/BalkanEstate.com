@@ -22,7 +22,7 @@ const MarketGauge: React.FC<MarketGaugeProps> = ({ score, isRent }) => {
     : t('property:areaInsights.dynamics.sellerSide', 'Favours sellers');
 
   return (
-    <div className="mt-5 landscape:mt-3 px-2">
+    <div className="mt-6 landscape:mt-3 px-1">
       <div
         role="img"
         aria-label={t('property:areaInsights.dynamics.gaugeLabel', '{{score}} out of 100: {{left}} at 0, {{right}} at 100', {
@@ -44,7 +44,7 @@ const MarketGauge: React.FC<MarketGaugeProps> = ({ score, isRent }) => {
           style={{ left: `${position}%` }}
         />
       </div>
-      <div className="mt-2 flex justify-between gap-4 text-sm" aria-hidden="true">
+      <div className="mt-2 flex justify-between gap-4 text-sm sm:text-base landscape:text-sm" aria-hidden="true">
         <span className="text-blue-700">{buyerSide}</span>
         <span className="text-right text-red-700">{sellerSide}</span>
       </div>

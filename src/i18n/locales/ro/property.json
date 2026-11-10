@@ -995,7 +995,6 @@
     }
   },
   "areaInsights": {
-    "howMeasured": "Cum se măsoară?",
     "airQuality": {
       "title": "Calitatea aerului",
       "subtitle": "Medii sezoniere în această locație",
@@ -1062,6 +1061,58 @@
       "daysToSell": "De obicei se vinde în {{count}} zile",
       "daysToLet": "De obicei se închiriază în {{count}} zile",
       "explain": "Luni de ofertă: locuințele de pe piață din apropiere, împărțite la câte s-au vândut lunar în ultimul an. Sub 4 luni favorizează vânzătorii, peste 7 favorizează cumpărătorii."
+    },
+    "about": "Despre: {{topic}}",
+    "mapSource": "Date hartă © contribuitorii OpenStreetMap",
+    "sourceKind": {
+      "motorway": "Autostradă",
+      "trunk": "Drum expres",
+      "primary": "Drum principal",
+      "secondary": "Drum secundar",
+      "tertiary": "Drum local de tranzit",
+      "railway": "Cale ferată",
+      "tram": "Linie de tramvai",
+      "airport": "Aeroport",
+      "nightclub": "Club de noapte",
+      "bar": "Bar"
+    },
+    "noise": {
+      "title": "Zgomot ambiental",
+      "subtitle": "Nivelul estimat al zgomotului la această locuință",
+      "day": "Zi · 07–23",
+      "night": "Noapte · 23–07",
+      "unit": "dB",
+      "band": {
+        "quiet": "Liniștit",
+        "moderate": "Moderat",
+        "noisy": "Zgomotos",
+        "veryNoisy": "Foarte zgomotos"
+      },
+      "sourcesTitle": "Surse principale în apropiere",
+      "noSources": "Nu există drumuri aglomerate, căi ferate sau viață de noapte în apropiere.",
+      "explain": "O estimare, nu o măsurătoare: calculată din drumurile, căile ferate, aeroporturile și viața de noapte din jurul locuinței și din distanța până la ele. OMS recomandă zgomot rutier sub 53 dB ziua și 45 dB noaptea.",
+      "loadError": "Nu am putut încărca acum zgomotul și traficul pentru această zonă.",
+      "noLocation": "Acest anunț nu are o locație pe hartă, așa că nu putem estima zgomotul."
+    },
+    "traffic": {
+      "title": "Trafic",
+      "subtitle": "Traficul pe străzile din jurul acestei locuințe",
+      "level": {
+        "calm": "Străzi liniștite",
+        "moderate": "Trafic moderat",
+        "busy": "Stradă aglomerată în apropiere"
+      },
+      "nearestRoad": "Cel mai apropiat drum principal: {{road}} ({{kind}}), la {{distance}}",
+      "nearestRoadUnnamed": "Cel mai apropiat drum principal: {{kind}}, la {{distance}}",
+      "noMainRoad": "Niciun drum principal pe o rază de 500 m.",
+      "showLive": "Arată traficul live",
+      "mapUnavailable": "Harta traficului live nu este disponibilă acum.",
+      "mapLabel": "Harta traficului live din jurul acestei locuințe",
+      "fast": "Rapid",
+      "slow": "Lent",
+      "liveSource": "Trafic live de la Google",
+      "explain": "Nivelul tipic vine din tipul drumurilor din jurul locuinței și cât de aproape sunt. Harta arată traficul live Google în acest moment.",
+      "noLocation": "Acest anunț nu are o locație pe hartă, așa că nu putem arăta traficul."
     }
   }
 }

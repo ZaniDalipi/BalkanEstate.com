@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import ZoneDynamicsCard from '../ZoneDynamicsCard';
 import type { ZoneDynamics } from '../../../api/areaPricesApi';
 
@@ -16,15 +16,23 @@ const seller: ZoneDynamics = {
   status: 'ok', verdict: 'seller', score: 84, monthsOfSupply: 2, activeCount: 2, closedLastYear: 12, medianDaysOnMarket: 45,
 };
 
-beforeEach(() => hook.useAreaPrices.mockReset());
+beforeEach(() => {
+  hook.useAreaPrices.mockReset();
+});
 
 describe('ZoneDynamicsCard', () => {
   it('names a seller\'s market, marks the gauge and lists the figures', () => {
     withDynamics(seller);
     render(<ZoneDynamicsCard property={{ id: 'p1', listingType: 'sale' }} />);
 
+    expect(screen.getByRole('heading', { name: 'Zone dynamics' })).toBeInTheDocument();
     expect(screen.getByText("This area is a seller's market")).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '84 out of 100: Favours buyers at 0, Favours sellers at 100' })).toBeInTheDocument();
+
+    // The figures behind the verdict sit behind the ⓘ, as on the page design.
+    expect(screen.queryByText('2 on the market')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'About: Zone dynamics' }));
+    expect(screen.getByRole('dialog', { name: 'Zone dynamics' })).toBeInTheDocument();
     expect(screen.getByText('2 on the market')).toBeInTheDocument();
     expect(screen.getByText('12 sold in the last 12 months')).toBeInTheDocument();
     expect(screen.getByText('≈ 2 months of supply')).toBeInTheDocument();
@@ -35,6 +43,7 @@ describe('ZoneDynamicsCard', () => {
     withDynamics({ ...seller, verdict: 'buyer', score: 20 });
     render(<ZoneDynamicsCard property={{ id: 'p1', listingType: 'rent' }} />);
     expect(screen.getByText("This area is a tenant's market")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'About: Zone dynamics' }));
     expect(screen.getByText('12 let in the last 12 months')).toBeInTheDocument();
     expect(screen.getByText('Favours landlords')).toBeInTheDocument();
   });

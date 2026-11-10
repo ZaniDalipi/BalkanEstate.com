@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { propertyKeys } from '@/src/shared/query/queryKeys';
 import { getAreaPrices } from '../api/areaPricesApi';
-
-/** The API validates :id as a Mongo ObjectId and rejects anything else with 400. */
-const isObjectId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
+import { isObjectId } from './isObjectId';
 
 export function useAreaPrices(propertyId: string | null | undefined) {
   const { data, isLoading, error, refetch, isFetching } = useQuery({
