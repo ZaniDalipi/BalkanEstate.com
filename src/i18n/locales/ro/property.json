@@ -993,5 +993,75 @@
     "imageEditorModal": {
       "iHaveSomeQuestionsAbout": "Am câteva întrebări despre această proprietate. Vă rog să vedeți adnotările mele:"
     }
+  },
+  "areaInsights": {
+    "howMeasured": "Cum se măsoară?",
+    "airQuality": {
+      "title": "Calitatea aerului",
+      "subtitle": "Medii sezoniere în această locație",
+      "summer": "Vara {{years}}",
+      "winter": "Iarna {{years}}",
+      "aqiUnit": "AQI",
+      "noSeason": "Nu există date pentru acest sezon",
+      "pm25": "PM2.5 {{value}} µg/m³",
+      "band": {
+        "good": "Bună",
+        "fair": "Acceptabilă",
+        "moderate": "Moderată",
+        "poor": "Slabă",
+        "veryPoor": "Foarte slabă",
+        "extremelyPoor": "Extrem de slabă"
+      },
+      "loadError": "Nu am putut încărca acum calitatea aerului.",
+      "noLocation": "Acest anunț nu are o locație pe hartă, așa că nu putem afișa calitatea aerului.",
+      "noData": "Încă nu există date despre calitatea aerului pentru această locație.",
+      "explain": "Indicele european al calității aerului merge de la 0 (aer curat) la peste 100 (extrem de slabă). Iarna valorile sunt adesea mai mari din cauza încălzirii locuințelor.",
+      "source": "Sursa: Serviciul Copernicus de monitorizare a atmosferei, prin Open-Meteo"
+    },
+    "dynamics": {
+      "title": "Dinamica zonei",
+      "buyerSide": "În favoarea cumpărătorilor",
+      "sellerSide": "În favoarea vânzătorilor",
+      "tenantSide": "În favoarea chiriașilor",
+      "landlordSide": "În favoarea proprietarilor",
+      "gaugeLabel": "{{score}} din 100: {{left}} la 0, {{right}} la 100",
+      "insufficient": "Nu sunt destule vânzări recente în apropiere pentru a spune dacă este o piață a cumpărătorilor sau a vânzătorilor.",
+      "insufficientRent": "Nu sunt destule închirieri recente în apropiere pentru a spune dacă zona favorizează chiriașii sau proprietarii.",
+      "sale": {
+        "seller": {
+          "title": "Această zonă este o piață a vânzătorilor",
+          "text": "Ofertă redusă — locuințele bune se vând repede, cu puțin loc de negociere."
+        },
+        "balanced": {
+          "title": "Această zonă este o piață echilibrată",
+          "text": "Oferta și cererea sunt echilibrate — prețurile se pot negocia de obicei în limite rezonabile."
+        },
+        "buyer": {
+          "title": "Această zonă este o piață a cumpărătorilor",
+          "text": "Multe opțiuni — cumpărătorii au timp să compare și loc de negociere."
+        }
+      },
+      "rent": {
+        "seller": {
+          "title": "Această zonă este o piață a proprietarilor",
+          "text": "Puține locuințe de închiriat — cele bune se închiriază repede."
+        },
+        "balanced": {
+          "title": "Această zonă este o piață de închirieri echilibrată",
+          "text": "Locuințele de închiriat și chiriașii sunt în echilibru."
+        },
+        "buyer": {
+          "title": "Această zonă este o piață a chiriașilor",
+          "text": "Multe locuințe de închiriat — chiriașii pot compara și negocia."
+        }
+      },
+      "onMarket": "{{count}} pe piață",
+      "soldLastYear": "{{count}} vândute în ultimele 12 luni",
+      "letLastYear": "{{count}} închiriate în ultimele 12 luni",
+      "supply": "≈ {{months}} luni de ofertă",
+      "daysToSell": "De obicei se vinde în {{count}} zile",
+      "daysToLet": "De obicei se închiriază în {{count}} zile",
+      "explain": "Luni de ofertă: locuințele de pe piață din apropiere, împărțite la câte s-au vândut lunar în ultimul an. Sub 4 luni favorizează vânzătorii, peste 7 favorizează cumpărătorii."
+    }
   }
 }

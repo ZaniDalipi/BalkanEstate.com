@@ -992,5 +992,75 @@
     "imageEditorModal": {
       "iHaveSomeQuestionsAbout": "Kam disa pyetje për këtë pronë. Ju lutemi shikoni shënimet e mia:"
     }
+  },
+  "areaInsights": {
+    "howMeasured": "Si matet kjo?",
+    "airQuality": {
+      "title": "Cilësia e ajrit",
+      "subtitle": "Mesatare sezonale në këtë vendndodhje",
+      "summer": "Verë {{years}}",
+      "winter": "Dimër {{years}}",
+      "aqiUnit": "AQI",
+      "noSeason": "Nuk ka të dhëna për këtë sezon",
+      "pm25": "PM2.5 {{value}} µg/m³",
+      "band": {
+        "good": "E mirë",
+        "fair": "Pranueshme",
+        "moderate": "Mesatare",
+        "poor": "E dobët",
+        "veryPoor": "Shumë e dobët",
+        "extremelyPoor": "Jashtëzakonisht e dobët"
+      },
+      "loadError": "Nuk mundëm të ngarkojmë cilësinë e ajrit tani.",
+      "noLocation": "Kjo shpallje nuk ka vendndodhje në hartë, ndaj nuk mund të tregojmë cilësinë e ajrit.",
+      "noData": "Ende nuk ka të dhëna për cilësinë e ajrit për këtë vendndodhje.",
+      "explain": "Indeksi Evropian i Cilësisë së Ajrit shkon nga 0 (ajër i pastër) deri mbi 100 (jashtëzakonisht i dobët). Në dimër vlerat shpesh janë më të larta për shkak të ngrohjes së shtëpive.",
+      "source": "Burimi: Shërbimi Copernicus për Monitorimin e Atmosferës, përmes Open-Meteo"
+    },
+    "dynamics": {
+      "title": "Dinamika e zonës",
+      "buyerSide": "Avantazh për blerësin",
+      "sellerSide": "Avantazh për shitësin",
+      "tenantSide": "Avantazh për qiramarrësin",
+      "landlordSide": "Avantazh për qiradhënësin",
+      "gaugeLabel": "{{score}} nga 100: {{left}} në 0, {{right}} në 100",
+      "insufficient": "Nuk ka mjaft shitje të fundit përreth për të thënë nëse ky është treg i blerësit apo i shitësit.",
+      "insufficientRent": "Nuk ka mjaft qiradhënie të fundit përreth për të thënë nëse zona favorizon qiramarrësit apo qiradhënësit.",
+      "sale": {
+        "seller": {
+          "title": "Kjo zonë është treg i shitësit",
+          "text": "Ofertë e ulët — pronat e mira shiten shpejt dhe me pak hapësirë negocimi."
+        },
+        "balanced": {
+          "title": "Kjo zonë është treg i balancuar",
+          "text": "Oferta dhe kërkesa janë të barabarta — çmimet zakonisht negociohen brenda arsyes."
+        },
+        "buyer": {
+          "title": "Kjo zonë është treg i blerësit",
+          "text": "Shumë zgjedhje — blerësit kanë kohë të krahasojnë dhe hapësirë për negocim."
+        }
+      },
+      "rent": {
+        "seller": {
+          "title": "Kjo zonë është treg i qiradhënësit",
+          "text": "Pak prona me qira — të mirat zihen shpejt."
+        },
+        "balanced": {
+          "title": "Kjo zonë është treg qiraje i balancuar",
+          "text": "Pronat me qira dhe qiramarrësit janë në ekuilibër."
+        },
+        "buyer": {
+          "title": "Kjo zonë është treg i qiramarrësit",
+          "text": "Shumë prona me qira — qiramarrësit mund të krahasojnë dhe negociojnë."
+        }
+      },
+      "onMarket": "{{count}} në treg",
+      "soldLastYear": "{{count}} të shitura në 12 muajt e fundit",
+      "letLastYear": "{{count}} të dhëna me qira në 12 muajt e fundit",
+      "supply": "≈ {{months}} muaj ofertë",
+      "daysToSell": "Zakonisht shitet brenda {{count}} ditësh",
+      "daysToLet": "Zakonisht jepet me qira brenda {{count}} ditësh",
+      "explain": "Muaj ofertë: pronat në treg përreth, pjesëtuar me sa u shitën çdo muaj gjatë vitit të fundit. Nën 4 muaj favorizon shitësit, mbi 7 favorizon blerësit."
+    }
   }
 }

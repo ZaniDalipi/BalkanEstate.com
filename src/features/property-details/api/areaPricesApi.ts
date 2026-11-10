@@ -37,6 +37,22 @@ export interface AreaTrendPoint {
   closedCount: number;
 }
 
+export type MarketVerdict = 'seller' | 'balanced' | 'buyer';
+
+/** Buyer's or seller's market, from months of supply nearby. */
+export type ZoneDynamics =
+  | {
+      status: 'ok';
+      verdict: MarketVerdict;
+      /** 0 = strongly favours buyers, 100 = strongly favours sellers. */
+      score: number;
+      monthsOfSupply: number;
+      activeCount: number;
+      closedLastYear: number;
+      medianDaysOnMarket: number | null;
+    }
+  | { status: 'insufficient'; activeCount: number; closedLastYear: number };
+
 export interface AreaPricesResponse {
   center: { lat: number; lng: number };
   radiusKm: number;
@@ -60,6 +76,8 @@ export interface AreaPricesResponse {
     subjectVsMedianPct: number | null;
   };
   trend: AreaTrendPoint[];
+  /** Absent from servers older than this field. */
+  dynamics?: ZoneDynamics;
   neighbours: AreaNeighbour[];
 }
 

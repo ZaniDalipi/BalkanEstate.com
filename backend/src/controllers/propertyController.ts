@@ -48,6 +48,8 @@ import {
   pricePerSqm,
   type AreaListing,
 } from '../services/areaPricesService';
+import { buildZoneDynamics } from '../services/zoneDynamicsService';
+import { getSeasonalAirQuality, AirQualityUnavailableError } from '../services/airQualityService';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -2543,6 +2545,48 @@ export const getPropertyPriceHistory = async (
     res.status(500).json({ message: 'Error fetching price history' });
   }
 };
+// @desc    Seasonal air quality (European AQI, PM2.5) at a property's location
+// @route   GET /api/properties/:id/air-quality
+// @access  Public
+export const getPropertyAirQuality = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id).select('lat lng').lean();
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const { lat, lng } = property as { lat?: number; lng?: number };
+    const located = typeof lat === 'number' && typeof lng === 'number' &&
+      Number.isFinite(lat) && Number.isFinite(lng) &&
+      Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
+    if (!located) {
+      res.json({ status: 'no-location' });
+      return;
+    }
+
+    const report = await getSeasonalAirQuality(lat as number, lng as number);
+    if (report.seasons.every((s) => s.aqi === null && s.pm25 === null)) {
+      res.json({ status: 'no-data' });
+      return;
+    }
+    res.json({ status: 'ok', seasons: report.seasons });
+  } catch (error: unknown) {
+    if (error instanceof AirQualityUnavailableError) {
+      res.status(503).json({ message: 'Air quality data is temporarily unavailable' });
+      return;
+    }
+    propertyLogger.error('Get air quality error:', error);
+    res.status(500).json({ message: 'Error fetching air quality' });
+  }
+};
+
 // @desc    Prices of the homes around a property: nearby listings, recent
 //          sales and the area's €/m² trend
 // @route   GET /api/properties/:id/area-prices
@@ -2642,6 +2686,7 @@ export const getAreaPrices = async (
       },
       stats: buildStats(neighbours, subjectValue),
       trend: buildTrend(listings, basis),
+      dynamics: buildZoneDynamics(neighbours),
       neighbours: neighbours.slice(0, MAX_NEIGHBOURS),
     });
   } catch (error: unknown) {

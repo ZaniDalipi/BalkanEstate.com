@@ -993,5 +993,75 @@
     "imageEditorModal": {
       "iHaveSomeQuestionsAbout": "Imam nekoliko pitanja o ovoj nekretnini. Molim pogledajte moje oznake:"
     }
+  },
+  "areaInsights": {
+    "howMeasured": "Kako se ovo mjeri?",
+    "airQuality": {
+      "title": "Kvalitet zraka",
+      "subtitle": "Sezonski prosjeci na ovoj lokaciji",
+      "summer": "Ljeto {{years}}",
+      "winter": "Zima {{years}}",
+      "aqiUnit": "AQI",
+      "noSeason": "Nema podataka za ovu sezonu",
+      "pm25": "PM2.5 {{value}} µg/m³",
+      "band": {
+        "good": "Dobar",
+        "fair": "Prihvatljiv",
+        "moderate": "Umjeren",
+        "poor": "Loš",
+        "veryPoor": "Vrlo loš",
+        "extremelyPoor": "Izuzetno loš"
+      },
+      "loadError": "Trenutno nismo mogli učitati kvalitet zraka.",
+      "noLocation": "Ovaj oglas nema lokaciju na mapi, pa ne možemo prikazati kvalitet zraka.",
+      "noData": "Za ovu lokaciju još nema podataka o kvalitetu zraka.",
+      "explain": "Evropski indeks kvaliteta zraka ide od 0 (čist zrak) do preko 100 (izuzetno loš). Zimi su vrijednosti često više zbog grijanja domova.",
+      "source": "Izvor: Copernicus servis za praćenje atmosfere, putem Open-Meteo"
+    },
+    "dynamics": {
+      "title": "Dinamika zone",
+      "buyerSide": "U korist kupaca",
+      "sellerSide": "U korist prodavaca",
+      "tenantSide": "U korist zakupaca",
+      "landlordSide": "U korist zakupodavaca",
+      "gaugeLabel": "{{score}} od 100: {{left}} na 0, {{right}} na 100",
+      "insufficient": "Nema dovoljno nedavnih prodaja u blizini da bi se reklo je li ovo tržište kupaca ili prodavaca.",
+      "insufficientRent": "Nema dovoljno nedavnih iznajmljivanja u blizini da bi se reklo ide li zona u korist zakupaca ili zakupodavaca.",
+      "sale": {
+        "seller": {
+          "title": "Ova zona je tržište prodavaca",
+          "text": "Mala ponuda — dobre nekretnine se brzo prodaju, uz malo prostora za pregovore."
+        },
+        "balanced": {
+          "title": "Ova zona je uravnoteženo tržište",
+          "text": "Ponuda i potražnja su izjednačene — o cijenama se obično može razumno pregovarati."
+        },
+        "buyer": {
+          "title": "Ova zona je tržište kupaca",
+          "text": "Mnogo izbora — kupci imaju vremena za poređenje i prostora za pregovore."
+        }
+      },
+      "rent": {
+        "seller": {
+          "title": "Ova zona je tržište zakupodavaca",
+          "text": "Malo nekretnina za izdavanje — dobre se brzo iznajme."
+        },
+        "balanced": {
+          "title": "Ova zona je uravnoteženo tržište najma",
+          "text": "Ponuda za izdavanje i zakupci su u ravnoteži."
+        },
+        "buyer": {
+          "title": "Ova zona je tržište zakupaca",
+          "text": "Mnogo nekretnina za izdavanje — zakupci mogu porediti i pregovarati."
+        }
+      },
+      "onMarket": "{{count}} na tržištu",
+      "soldLastYear": "{{count}} prodano u zadnjih 12 mjeseci",
+      "letLastYear": "{{count}} iznajmljeno u zadnjih 12 mjeseci",
+      "supply": "≈ {{months}} mjeseci ponude",
+      "daysToSell": "Obično se proda za {{count}} dana",
+      "daysToLet": "Obično se iznajmi za {{count}} dana",
+      "explain": "Mjeseci ponude: nekretnine na tržištu u blizini, podijeljene s brojem prodatih mjesečno tokom prošle godine. Ispod 4 mjeseca ide u korist prodavaca, preko 7 u korist kupaca."
+    }
   }
 }
