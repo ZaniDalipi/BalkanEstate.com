@@ -10,7 +10,9 @@ import Property from '../models/Property';
 import { getPropertySurroundings } from '../controllers/propertyController';
 import { kindOf, polylineDistance, toSources, type NoiseSource } from '../services/surroundings/osmSources';
 import { addLevels, bandFor, estimateNoise, estimateTraffic, levelAt } from '../services/surroundings/noiseModel';
-import { buildOverpassQuery, clearSurroundingsCache, getSurroundings } from '../services/surroundings/surroundingsService';
+import { buildOverpassQuery, clearSurroundingsCache, getSurroundings, getSurroundingsWithin } from '../services/surroundings/surroundingsService';
+import { describeHttpError } from '../utils/describeHttpError';
+import { AxiosError } from 'axios';
 import { createPromiseCache } from '../utils/promiseCache';
 import { hasUsableLocation } from '../utils/coordinates';
 
@@ -130,8 +132,9 @@ describe('noiseModel', () => {
     const quiet = estimateNoise([]);
     const onStreet = estimateNoise([source('street', 10)]);
     expect(onStreet.day.db).toBeGreaterThan(quiet.day.db);
-    expect(onStreet.day.band).toBe('noisy');
-    expect(estimateNoise([source('street', 120)]).day.band).toBe('moderate');
+    // A quiet side street: about 50–55 dB at the façade, as on EU noise maps.
+    expect(onStreet.day.band).toBe('moderate');
+    expect(estimateNoise([source('street', 150)]).day.band).toBe('quiet');
   });
 });
 
@@ -210,6 +213,46 @@ describe('getSurroundings', () => {
   });
 });
 
+describe('getSurroundingsWithin', () => {
+  let postSpy: jest.SpyInstance;
+  beforeEach(() => {
+    clearSurroundingsCache();
+    process.env.OVERPASS_URL = 'https://one.example/api/interpreter';
+    postSpy = jest.spyOn(axios, 'post');
+  });
+  afterEach(() => {
+    postSpy.mockRestore();
+    delete process.env.OVERPASS_URL;
+  });
+
+  it('answers pending while the lookup is slow, then ok from the same lookup', async () => {
+    let answer: (v: AxiosResponse) => void = () => undefined;
+    postSpy.mockImplementation(() => new Promise<AxiosResponse>((resolve) => { answer = resolve; }));
+    await expect(getSurroundingsWithin(HOME.lat, HOME.lng, 20)).resolves.toEqual({ status: 'pending' });
+    answer({ data: { elements: [] } } as AxiosResponse);
+    await expect(getSurroundingsWithin(HOME.lat, HOME.lng, 20)).resolves.toMatchObject({ status: 'ok' });
+    expect(postSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects when the lookup has already failed', async () => {
+    postSpy.mockRejectedValue(new Error('down'));
+    await expect(getSurroundingsWithin(HOME.lat, HOME.lng, 1000)).rejects.toThrow('unavailable');
+  });
+});
+
+describe('describeHttpError', () => {
+  it('keeps status and code but never the request URL, query or headers', () => {
+    const err = new AxiosError('Request failed', 'ERR_BAD_RESPONSE', {
+      url: 'https://customer-air-quality-api.open-meteo.com/v1/air-quality',
+      params: { apikey: 'SECRET-KEY' },
+      headers: { Authorization: 'Bearer SECRET-TOKEN' },
+    } as never, undefined, { status: 502 } as AxiosResponse);
+    const text = describeHttpError(err);
+    expect(text).toBe('HTTP 502 · ERR_BAD_RESPONSE · Request failed');
+    expect(text).not.toMatch(/SECRET|apikey|open-meteo/);
+  });
+});
+
 describe('GET /properties/:id/surroundings', () => {
   let postSpy: jest.SpyInstance;
   beforeEach(() => {
@@ -227,12 +270,14 @@ describe('GET /properties/:id/surroundings', () => {
     const req: any = { params: { id: String(new mongoose.Types.ObjectId()) }, query: {} };
     let body: any;
     let status = 200;
+    const headers: Record<string, string> = {};
     const res: any = {
       status: (code: number) => { status = code; return res; },
       json: (data: any) => { body = data; return res; },
+      set: (name: string, value: string) => { headers[name] = value; return res; },
     };
     await getPropertySurroundings(req, res);
-    return { status, body };
+    return { status, body, headers };
   };
 
   it('returns noise and traffic for a located home', async () => {
@@ -247,6 +292,18 @@ describe('GET /properties/:id/surroundings', () => {
     findHome({ lat: 0, lng: 0 });
     expect((await call()).body).toEqual({ status: 'no-location' });
     expect(postSpy).not.toHaveBeenCalled();
+  });
+
+  it('answers pending with Retry-After while the lookup is still running', async () => {
+    findHome({ lat: 42.2, lng: 20.3 });
+    postSpy.mockImplementation(() => new Promise(() => undefined));
+    jest.useFakeTimers();
+    const pending = call();
+    await jest.advanceTimersByTimeAsync(8_000);
+    const { body, headers } = await pending;
+    jest.useRealTimers();
+    expect(body).toEqual({ status: 'pending' });
+    expect(headers['Retry-After']).toBe('5');
   });
 
   it('answers 503 when Overpass is down and 404 for an unknown home', async () => {

@@ -34,7 +34,8 @@ export const SOURCE_PROFILES: Record<SourceKind, SourceProfile> = {
   primary: { dayDb: 71, nightOffset: -9, shape: 'line', referenceM: 10 },
   secondary: { dayDb: 67, nightOffset: -10, shape: 'line', referenceM: 10 },
   tertiary: { dayDb: 63, nightOffset: -10, shape: 'line', referenceM: 10 },
-  street: { dayDb: 56, nightOffset: -10, shape: 'line', referenceM: 10 },
+  // Quiet side streets: about 50–55 dB at the façade on EU strategic noise maps.
+  street: { dayDb: 54, nightOffset: -10, shape: 'line', referenceM: 10 },
   railway: { dayDb: 70, nightOffset: -5, shape: 'line', referenceM: 10 },
   tram: { dayDb: 64, nightOffset: -12, shape: 'line', referenceM: 10 },
   airport: { dayDb: 62, nightOffset: -10, shape: 'point', referenceM: 1000 },

@@ -11,18 +11,25 @@
 
 import axios from 'axios';
 import { apiLogger } from '../../utils/logger';
+import { describeHttpError } from '../../utils/describeHttpError';
 
 export const DEFAULT_OVERPASS_URLS = [
   'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ] as const;
 
-/** How long one mirror may take. The query's own [timeout:] stays below it. */
-export const MIRROR_TIMEOUT_MS = 12_000;
+/**
+ * How long one mirror may take. Public servers measured 17–19 s even for a
+ * one-node query at busy times, so this is generous: the lookup runs in the
+ * background (surroundingsService) and no page waits for it.
+ * The query's own [timeout:] stays below it.
+ */
+export const MIRROR_TIMEOUT_MS = 45_000;
 
 /** Wait this long for an answer before asking the next mirror too. */
-export const HEDGE_DELAY_MS = 3_000;
+export const HEDGE_DELAY_MS = 6_000;
 
 export class OverpassUnavailableError extends Error {
   constructor(message: string) {
@@ -97,7 +104,7 @@ export const queryOverpass = (query: string, urls: string[] = overpassUrls()): P
         (err: unknown) => {
           if (done) return;
           failed += 1;
-          apiLogger.warn(`Overpass mirror failed: ${url}`, err);
+          apiLogger.warn(`Overpass mirror failed: ${url}: ${describeHttpError(err)}`);
           if (failed >= urls.length) {
             finish();
             reject(err instanceof OverpassUnavailableError ? err : new OverpassUnavailableError('Map data provider unavailable'));

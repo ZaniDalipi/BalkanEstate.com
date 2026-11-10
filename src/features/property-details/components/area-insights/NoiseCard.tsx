@@ -20,7 +20,7 @@ export interface NoiseCardProps {
 
 const NoiseCard: React.FC<NoiseCardProps> = ({ propertyId }) => {
   const { t } = useTranslation(['property']);
-  const { data, isLoading, error, refetch, isFetching } = useSurroundings(propertyId);
+  const { data, isWaiting, gaveUp, error, refetch, isFetching } = useSurroundings(propertyId);
 
   const info = (
     <>
@@ -38,7 +38,7 @@ const NoiseCard: React.FC<NoiseCardProps> = ({ propertyId }) => {
       info={info}
       sectionKey="noise"
     >
-      {isLoading ? (
+      {isWaiting ? (
         <InsightSkeleton caption={t('property:areaInsights.loadingStreets', 'Checking the streets around this home…')} />
       ) : data?.status === 'ok' ? (
         <>
@@ -54,10 +54,12 @@ const NoiseCard: React.FC<NoiseCardProps> = ({ propertyId }) => {
         </>
       ) : (
         <InsightStatus
-          failed={!!error}
+          failed={!!error || gaveUp}
           retrying={isFetching}
           onRetry={() => refetch()}
-          message={error
+          message={gaveUp
+            ? t('property:areaInsights.stillChecking', 'The map servers are busy, so this is taking longer than usual. Try again in a minute.')
+            : error
             ? t('property:areaInsights.noise.loadError', "We couldn't load noise and traffic for this area right now.")
             : data?.status === 'no-location'
               ? t('property:areaInsights.noise.noLocation', "This listing has no map location, so we can't estimate noise.")

@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import { MAX_PENDING_POLLS, PENDING_POLL_MS } from '../../../hooks/useSurroundings';
 import NoiseCard from '../NoiseCard';
 import TrafficCard from '../TrafficCard';
 
@@ -65,6 +66,40 @@ describe('NoiseCard', () => {
     withClient(<NoiseCard propertyId={ID} />);
     expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't load noise and traffic");
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+});
+
+describe('while the server is still looking the home up', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('keeps checking, then shows the result', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    api.getSurroundings.mockResolvedValueOnce({ status: 'pending' }).mockResolvedValue(busy);
+    withClient(<NoiseCard propertyId={ID} />);
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Checking the streets around this home…');
+    await act(async () => { await vi.advanceTimersByTimeAsync(PENDING_POLL_MS); });
+    expect(await screen.findByText('63')).toBeInTheDocument();
+    expect(api.getSurroundings).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops after a few minutes and offers to try again', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    api.getSurroundings.mockResolvedValue({ status: 'pending' });
+    withClient(<NoiseCard propertyId={ID} />);
+    await screen.findByRole('status');
+
+    for (let i = 0; i < MAX_PENDING_POLLS; i++) {
+      await act(async () => { await vi.advanceTimersByTimeAsync(PENDING_POLL_MS); });
+    }
+    expect(await screen.findByRole('alert')).toHaveTextContent('The map servers are busy');
+    expect(api.getSurroundings).toHaveBeenCalledTimes(MAX_PENDING_POLLS);
+
+    api.getSurroundings.mockResolvedValue(busy);
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByText('63')).toBeInTheDocument();
   });
 });
 

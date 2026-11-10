@@ -16,6 +16,7 @@
 import axios from 'axios';
 import { apiLogger } from '../utils/logger';
 import { createPromiseCache } from '../utils/promiseCache';
+import { describeHttpError } from '../utils/describeHttpError';
 
 export type Season = 'summer' | 'winter';
 
@@ -121,7 +122,7 @@ const fetchSeason = async (lat: number, lng: number, w: SeasonWindow): Promise<S
     if (axios.isAxiosError(err) && err.response?.status === 400) {
       return { ...w, aqi: null, pm25: null };
     }
-    apiLogger.warn(`Air quality fetch failed for ${lat},${lng} ${w.start}..${w.end}`, err);
+    apiLogger.warn(`Air quality fetch failed for ${lat},${lng} ${w.start}..${w.end}: ${describeHttpError(err)}`);
     throw new AirQualityUnavailableError('Air quality provider unavailable');
   }
 };

@@ -46,6 +46,7 @@ describe('validateSurroundingsResponse', () => {
 
   it('passes no-location through and rejects broken answers', () => {
     expect(validateSurroundingsResponse({ status: 'no-location' })).toEqual({ status: 'no-location' });
+    expect(validateSurroundingsResponse({ status: 'pending' })).toEqual({ status: 'pending' });
     expect(() => validateSurroundingsResponse(null)).toThrow();
     expect(() => validateSurroundingsResponse({ ...ok, noise: { ...ok.noise, day: { db: 'loud', band: 'noisy' } } })).toThrow();
     expect(() => validateSurroundingsResponse({ ...ok, traffic: { level: 'jammed' } })).toThrow();

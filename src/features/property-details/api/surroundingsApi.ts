@@ -27,7 +27,11 @@ export interface Surroundings {
   };
 }
 
-export type SurroundingsResponse = ({ status: 'ok' } & Surroundings) | { status: 'no-location' };
+export type SurroundingsResponse =
+  | ({ status: 'ok' } & Surroundings)
+  | { status: 'no-location' }
+  /** Still being looked up on the server; ask again shortly. */
+  | { status: 'pending' };
 
 export async function getSurroundings(propertyId: string): Promise<SurroundingsResponse> {
   if (!propertyId || propertyId.trim() === '') {
@@ -53,7 +57,7 @@ const isSource = (v: unknown): v is NoiseSourceSummary =>
 /** Validate the shape at the ingestion boundary; drop malformed sources. */
 export function validateSurroundingsResponse(data: unknown): SurroundingsResponse {
   if (!isRecord(data)) throw new Error('Invalid surroundings response');
-  if (data.status === 'no-location') return { status: 'no-location' };
+  if (data.status === 'no-location' || data.status === 'pending') return { status: data.status };
   const { noise, traffic } = data;
   if (data.status !== 'ok' || !isRecord(noise) || !isRecord(traffic)) throw new Error('Invalid surroundings response');
   if (!isLevel(noise.day) || !isLevel(noise.night) || !LEVELS.includes(traffic.level as string)) {

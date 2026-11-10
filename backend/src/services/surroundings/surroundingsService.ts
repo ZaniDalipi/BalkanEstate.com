@@ -24,7 +24,7 @@ export { OverpassUnavailableError as SurroundingsUnavailableError };
 export const SEARCH_RADII = { roads: 500, streets: 150, airports: 4000, nightlife: 150 } as const;
 
 /** Bump when the model or query changes, so stored reports are worked out again. */
-export const MODEL_VERSION = 'v2';
+export const MODEL_VERSION = 'v3';
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 5000;
@@ -37,7 +37,7 @@ export const buildOverpassQuery = (lat: number, lng: number): string => {
   const { roads, streets, airports, nightlife } = SEARCH_RADII;
   return [
     // Below the client's per-mirror timeout, so a slow server says so itself.
-    '[out:json][timeout:10];',
+    '[out:json][timeout:40];',
     '(',
     `  way(around:${roads},${at})[highway~"^(motorway|trunk|primary|secondary|tertiary)(_link)?$"];`,
     `  way(around:${roads},${at})[railway~"^(rail|tram|light_rail)$"];`,
@@ -95,4 +95,29 @@ export const getSurroundings = (lat: number, lng: number): Promise<SurroundingsR
     void writeStored(key, report);
     return report;
   });
+};
+
+/** How long a page request waits for a fresh lookup before answering "pending". */
+export const PAGE_WAIT_MS = 8_000;
+
+export type SurroundingsLookup = { status: 'ok'; report: SurroundingsReport } | { status: 'pending' };
+
+/**
+ * The report if it is ready within `waitMs`, else "pending" while the lookup
+ * carries on in the background (shared by every caller for the same spot, and
+ * stored when it lands). A lookup that has already failed rejects, so the
+ * caller can answer 503; the next request then starts a new one.
+ */
+export const getSurroundingsWithin = async (lat: number, lng: number, waitMs = PAGE_WAIT_MS): Promise<SurroundingsLookup> => {
+  const lookup = getSurroundings(lat, lng);
+  lookup.catch(() => undefined); // still running when we answer "pending"; failures are logged in the client
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const pending = new Promise<SurroundingsLookup>((resolve) => {
+    timer = setTimeout(() => resolve({ status: 'pending' }), waitMs);
+  });
+  try {
+    return await Promise.race([lookup.then((report): SurroundingsLookup => ({ status: 'ok', report })), pending]);
+  } finally {
+    clearTimeout(timer);
+  }
 };

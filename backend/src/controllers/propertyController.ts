@@ -50,7 +50,7 @@ import {
 } from '../services/areaPricesService';
 import { buildZoneDynamics } from '../services/zoneDynamicsService';
 import { getSeasonalAirQuality, AirQualityUnavailableError } from '../services/airQualityService';
-import { getSurroundings, SurroundingsUnavailableError } from '../services/surroundings/surroundingsService';
+import { getSurroundingsWithin, SurroundingsUnavailableError } from '../services/surroundings/surroundingsService';
 import { hasUsableLocation } from '../utils/coordinates';
 
 /**
@@ -2610,8 +2610,14 @@ export const getPropertySurroundings = async (
       return;
     }
 
-    const report = await getSurroundings(lat as number, lng as number);
-    res.json({ status: 'ok', ...report });
+    const lookup = await getSurroundingsWithin(lat as number, lng as number);
+    if (lookup.status === 'pending') {
+      // Still being looked up; the page asks again shortly.
+      res.set('Retry-After', '5');
+      res.json({ status: 'pending' });
+      return;
+    }
+    res.json({ status: 'ok', ...lookup.report });
   } catch (error: unknown) {
     if (error instanceof SurroundingsUnavailableError) {
       res.status(503).json({ message: 'Noise and traffic data is temporarily unavailable' });

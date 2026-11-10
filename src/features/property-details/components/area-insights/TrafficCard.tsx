@@ -25,7 +25,7 @@ export interface TrafficCardProps {
 
 const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
   const { t } = useTranslation(['property']);
-  const { data, isLoading, error, refetch, isFetching } = useSurroundings(propertyId);
+  const { data, isWaiting, gaveUp, error, refetch, isFetching } = useSurroundings(propertyId);
   const [showMap, setShowMap] = useState(false);
 
   const info = (
@@ -44,7 +44,7 @@ const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
       info={info}
       sectionKey="traffic"
     >
-      {isLoading ? (
+      {isWaiting ? (
         <InsightSkeleton caption={t('property:areaInsights.loadingStreets', 'Checking the streets around this home…')} />
       ) : data?.status === 'ok' ? (
         <>
@@ -68,10 +68,12 @@ const TrafficCard: React.FC<TrafficCardProps> = ({ propertyId, lat, lng }) => {
         </>
       ) : (
         <InsightStatus
-          failed={!!error}
+          failed={!!error || gaveUp}
           retrying={isFetching}
           onRetry={() => refetch()}
-          message={error
+          message={gaveUp
+            ? t('property:areaInsights.stillChecking', 'The map servers are busy, so this is taking longer than usual. Try again in a minute.')
+            : error
             ? t('property:areaInsights.noise.loadError', "We couldn't load noise and traffic for this area right now.")
             : data?.status === 'no-location'
               ? t('property:areaInsights.traffic.noLocation', "This listing has no map location, so we can't show traffic.")

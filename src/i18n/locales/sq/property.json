@@ -1121,6 +1121,7 @@
       "nearestStreetUnnamed": "Rruga më e afërt: {{distance}} larg"
     },
     "unavailable": "Ky informacion nuk është ende i disponueshëm për këtë shpallje.",
-    "loadingStreets": "Po kontrollojmë rrugët rreth kësaj shtëpie…"
+    "loadingStreets": "Po kontrollojmë rrugët rreth kësaj shtëpie…",
+    "stillChecking": "Serverët e hartës janë të ngarkuar, ndaj po zgjat më shumë se zakonisht. Provo përsëri pas një minute."
   }
 }

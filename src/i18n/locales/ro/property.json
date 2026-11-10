@@ -1122,6 +1122,7 @@
       "nearestStreetUnnamed": "Cea mai apropiată stradă: la {{distance}}"
     },
     "unavailable": "Această informație nu este încă disponibilă pentru acest anunț.",
-    "loadingStreets": "Verificăm străzile din jurul acestei locuințe…"
+    "loadingStreets": "Verificăm străzile din jurul acestei locuințe…",
+    "stillChecking": "Serverele de hărți sunt aglomerate, așa că durează mai mult decât de obicei. Încercați din nou peste un minut."
   }
 }

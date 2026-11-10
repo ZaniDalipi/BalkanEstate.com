@@ -1122,6 +1122,7 @@
       "nearestStreetUnnamed": "Najbliža ulica: udaljena {{distance}}"
     },
     "unavailable": "Ova informacija još nije dostupna za ovaj oglas.",
-    "loadingStreets": "Provjeravamo ulice oko ove nekretnine…"
+    "loadingStreets": "Provjeravamo ulice oko ove nekretnine…",
+    "stillChecking": "Poslužitelji karata su zauzeti, pa ovo traje dulje nego inače. Pokušajte ponovno za minutu."
   }
 }

@@ -1121,6 +1121,7 @@
       "nearestStreetUnnamed": "Nearest street: {{distance}} away"
     },
     "unavailable": "This information isn't available for this listing yet.",
-    "loadingStreets": "Checking the streets around this home…"
+    "loadingStreets": "Checking the streets around this home…",
+    "stillChecking": "The map servers are busy, so this is taking longer than usual. Try again in a minute."
   }
 }

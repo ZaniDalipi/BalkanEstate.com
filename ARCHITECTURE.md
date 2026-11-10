@@ -1201,12 +1201,24 @@ Key decisions:
   tram within 500 m, ordinary streets (residential, unclassified, living
   street) within 150 m: the traffic card names the street the home is on and
   the nearest main road, and the home's own street counts towards its noise.
-- **Overpass is hedged.** Public servers queue at busy times; one slow
-  server used to leave the cards loading for up to a minute. The first mirror
-  is asked at once, another joins every 3 s while none has answered (12 s
-  each), a failure moves on at once, and the first good answer cancels the
-  rest. Reports are stored in `SurroundingsCache` (bump `MODEL_VERSION` when
-  the model or query changes), so each home is looked up once a month.
+- **Overpass is slow, so no page waits on it.** Measured live (Nov 2026):
+  public servers took 17–19 s even for a one-node query, overpass-api.de reset
+  connections from cloud hosts, two mirrors did not answer within 30 s.
+  `getSurroundingsWithin` waits 8 s; if the lookup is not done the API answers
+  `{ status: 'pending' }` (`Retry-After: 5`) and the lookup carries on in the
+  background: hedged across four mirrors (next joins every 6 s, 45 s each,
+  first good answer cancels the rest). `useSurroundings` polls every 5 s, at
+  most 24 times, then offers *Try again*. Reports land in `SurroundingsCache`
+  (bump `MODEL_VERSION` when the model or query changes), so a home is looked
+  up once a month and every later visit is instant.
+- **No secrets in logs**: outbound failures are logged through
+  `describeHttpError` (status, code, message) — never the axios error, whose
+  config carries URLs, query strings (the Open-Meteo `apikey`) and headers.
+- **What leaves the server**: only coordinates. Open-Meteo gets the pin snapped
+  to ~5 km; Overpass mirrors get the listing's public pin (~1 m). No user data.
+  `maps.mail.ru` is the last mirror; drop it with `OVERPASS_URL` if its
+  jurisdiction matters. The Google Maps key ships in the frontend by design and
+  must be restricted by HTTP referrer in Google Cloud.
 - **Page menu**: Air Quality, Noise and Traffic follow Neighborhood, Zone
   Dynamics follows Area Prices (`PropertySectionNav`). Each card carries its
   own `data-section`; the menu re-checks on DOM changes, so a section that
