@@ -2613,7 +2613,7 @@ export const getPropertySurroundings = async (
     const lookup = await getSurroundingsWithin(lat as number, lng as number);
     if (lookup.status === 'pending') {
       // Still being looked up; the page asks again shortly.
-      res.set('Retry-After', '5');
+      res.set('Retry-After', '2');
       res.json({ status: 'pending' });
       return;
     }

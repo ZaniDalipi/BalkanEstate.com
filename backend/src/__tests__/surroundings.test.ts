@@ -303,7 +303,7 @@ describe('GET /properties/:id/surroundings', () => {
     const { body, headers } = await pending;
     jest.useRealTimers();
     expect(body).toEqual({ status: 'pending' });
-    expect(headers['Retry-After']).toBe('5');
+    expect(headers['Retry-After']).toBe('2');
   });
 
   it('answers 503 when Overpass is down and 404 for an unknown home', async () => {

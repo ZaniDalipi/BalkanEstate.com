@@ -17,6 +17,7 @@ import axios from 'axios';
 import { apiLogger } from '../utils/logger';
 import { createPromiseCache } from '../utils/promiseCache';
 import { describeHttpError } from '../utils/describeHttpError';
+import { readStored, writeStored } from '../utils/storedCache';
 
 export type Season = 'summer' | 'winter';
 
@@ -141,6 +142,13 @@ export const getSeasonalAirQuality = (lat: number, lng: number, now: Date = new 
   const sLng = snapToGrid(lng);
   const windows = seasonWindows(now);
   const key = `${sLat},${sLng},${windows.map((w) => w.start).join(',')}`;
-  return cache.get(key, () =>
-    Promise.all(windows.map((w) => fetchSeason(sLat, sLng, w))).then((seasons) => ({ seasons })));
+  return cache.get(key, async () => {
+    const storeKey = `air-quality:${key}`;
+    const stored = await readStored<AirQualityReport>(storeKey);
+    if (stored) return stored;
+    const report = { seasons: await Promise.all(windows.map((w) => fetchSeason(sLat, sLng, w))) };
+    // Keep it until the next season ends at the latest; a fresh pair of seasons gives a new key.
+    void writeStored(storeKey, report, CACHE_TTL_MS);
+    return report;
+  });
 };

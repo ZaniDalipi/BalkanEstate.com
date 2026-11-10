@@ -4,7 +4,7 @@ import { getSurroundings } from '../api/surroundingsApi';
 import { isPropertyId } from './isPropertyId';
 
 /** While the server is still looking a home up, ask again this often… */
-export const PENDING_POLL_MS = 5_000;
+export const PENDING_POLL_MS = 2_000;
 /** …but no more than this many times (a few minutes), then offer a retry. */
 export const MAX_PENDING_POLLS = 24;
 

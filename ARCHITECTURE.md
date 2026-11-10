@@ -1160,7 +1160,8 @@ Neighbourhood section (src/features/property-details/components/area-insights/)
   ├── NoiseCard   ┐ useSurroundings(id) → propertyKeys.surroundings(id)   (one request for both)
   └── TrafficCard ┘   └── GET /api/properties/:id/surroundings   getPropertySurroundings
                             └── services/surroundings/
-                                  ├── surroundingsService.ts  one query from the home's pin (~1 m); memory + Mongo (SurroundingsCache, TTL 30 days)
+                                  ├── surroundingsService.ts  one query from the home's pin (~1 m); memory + Mongo (AreaInsightCache, TTL 30 days)
+                                  ├── surroundingsWarmer.ts   new listings / moved pins looked up ahead (models/hooks/surroundingsWarmup.ts)
                                   ├── overpassClient.ts       hedged across mirrors: next joins after 3 s, first answer wins
                                   ├── osmSources.ts           OSM roads/rail/airports/bars → sources + distance
                                   └── noiseModel.ts           estimateNoise (day/night dB) · estimateTraffic
@@ -1205,12 +1206,29 @@ Key decisions:
   public servers took 17–19 s even for a one-node query, overpass-api.de reset
   connections from cloud hosts, two mirrors did not answer within 30 s.
   `getSurroundingsWithin` waits 8 s; if the lookup is not done the API answers
-  `{ status: 'pending' }` (`Retry-After: 5`) and the lookup carries on in the
+  `{ status: 'pending' }` (`Retry-After: 2`) and the lookup carries on in the
   background: hedged across four mirrors (next joins every 6 s, 45 s each,
-  first good answer cancels the rest). `useSurroundings` polls every 5 s, at
-  most 24 times, then offers *Try again*. Reports land in `SurroundingsCache`
+  first good answer cancels the rest). `useSurroundings` polls every 2 s, at
+  most 24 times, then offers *Try again*. Reports land in `AreaInsightCache`
   (bump `MODEL_VERSION` when the model or query changes), so a home is looked
   up once a month and every later visit is instant.
+- **Usage limits** (checked Nov 2026). Open-Meteo: free for non-commercial
+  use only (~10,000 calls/day); a commercial site needs a paid plan and
+  `OPEN_METEO_API_KEY`. Air quality is stored in `AreaInsightCache` too, so a
+  ~5 km cell costs 2 calls per week at most. Overpass public servers: no hard
+  quota, but about 10,000 queries/day for occasional use and roughly 100/day
+  for regular automated use, no uptime guarantee — self-host or pay for heavy
+  use. Google Maps: 10,000 free map loads a month (Essentials), then billed;
+  the live traffic map loads only on request.
+- **Warm-up**: a new listing or a moved pin is looked up in the background
+  (`surroundingsWarmer.ts`), one at a time, 30 s apart, at most 100 a day on
+  the public servers (5,000 with your own `OVERPASS_URL`;
+  `SURROUNDINGS_WARM_DAILY_CAP`, `SURROUNDINGS_WARM_INTERVAL_MS`). Off under tests.
+- **Page menu order and "you are here"** come from the layout, not the list
+  (`sectionPositions.ts`): sections are ordered by where they sit, and the
+  current one is the last to reach the line under the header — sticky
+  sidebar sections (always on screen) never count, a nested section wins a
+  tie with its parent, and at the very bottom the lowest visible one wins.
 - **No secrets in logs**: outbound failures are logged through
   `describeHttpError` (status, code, message) — never the axios error, whose
   config carries URLs, query strings (the Open-Meteo `apikey`) and headers.
