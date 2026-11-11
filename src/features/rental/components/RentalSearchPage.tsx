@@ -27,6 +27,9 @@ import { Property } from '@/types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+import ListCollapseTab from '@/src/features/search/splitView/ListCollapseTab';
+import { useListCollapse } from '@/src/features/search/splitView/useListCollapse';
+import { SEARCH_LIST_PANEL_ID, splitListPanelClass, splitMapPanelClass } from '@/src/features/search/splitView/listCollapse';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -211,6 +214,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
+    // Split view only: the visitor can fold the list away and give the map the whole page.
+    const listCollapse = useListCollapse(showSplitView);
 
     // Off-screen behind the list panel, the map waits for idle rather than
     // being built inside the commit a navigation lands in — see
@@ -272,7 +277,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
-                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                <div id={SEARCH_LIST_PANEL_ID} className={`absolute inset-0 z-10 h-full w-full flex flex-col ${splitListPanelClass(listCollapse.collapsed)} search-list-panel lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || mobileView === 'list'}
                     data-settled={listSettledHidden} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
                     {/* Spacer for floating mobile header */}
@@ -575,13 +580,21 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
+                <div className={`h-full w-full ${splitMapPanelClass(listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || mobileView === 'map'}
                     >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
+
+                    {showSplitView && (
+                        <ListCollapseTab
+                            collapsed={listCollapse.collapsed}
+                            onToggle={listCollapse.toggle}
+                            count={isLoading ? null : listProperties.length}
+                        />
+                    )}
                 </div>
 
                 {/* Mobile/Tablet View Overlays */}

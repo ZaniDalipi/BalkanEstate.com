@@ -666,5 +666,13 @@
     "northWest": "Северозапад",
     "southEast": "Југоисток",
     "southWest": "Југозапад"
+  },
+  "listPanel": {
+    "hide": "Сакриј листу",
+    "hideHint": "Сакриј листу да видиш целу мапу",
+    "show": "Прикажи листу",
+    "showCount_one": "Прикажи листу, {{count}} резултат",
+    "showCount_few": "Прикажи листу, {{count}} резултата",
+    "showCount_other": "Прикажи листу, {{count}} резултата"
   }
 }

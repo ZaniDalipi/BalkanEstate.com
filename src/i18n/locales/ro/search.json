@@ -666,5 +666,13 @@
     "northWest": "Nord-vest",
     "southEast": "Sud-est",
     "southWest": "Sud-vest"
+  },
+  "listPanel": {
+    "hide": "Ascunde lista",
+    "hideHint": "Ascunde lista pentru a vedea toată harta",
+    "show": "Afișează lista",
+    "showCount_one": "Afișează lista, {{count}} rezultat",
+    "showCount_few": "Afișează lista, {{count}} rezultate",
+    "showCount_other": "Afișează lista, {{count}} de rezultate"
   }
 }

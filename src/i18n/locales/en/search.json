@@ -676,5 +676,12 @@
     "northWest": "North-west",
     "southEast": "South-east",
     "southWest": "South-west"
+  },
+  "listPanel": {
+    "hide": "Hide list",
+    "hideHint": "Hide the list to see the whole map",
+    "show": "Show list",
+    "showCount_one": "Show list, {{count}} result",
+    "showCount_other": "Show list, {{count}} results"
   }
 }

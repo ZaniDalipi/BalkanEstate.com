@@ -666,5 +666,12 @@
     "northWest": "Veriperëndim",
     "southEast": "Juglindje",
     "southWest": "Jugperëndim"
+  },
+  "listPanel": {
+    "hide": "Fshih listën",
+    "hideHint": "Fshih listën për të parë gjithë hartën",
+    "show": "Shfaq listën",
+    "showCount_one": "Shfaq listën, {{count}} rezultat",
+    "showCount_other": "Shfaq listën, {{count}} rezultate"
   }
 }

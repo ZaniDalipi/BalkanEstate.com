@@ -666,5 +666,13 @@
     "northWest": "Sjeverozapad",
     "southEast": "Jugoistok",
     "southWest": "Jugozapad"
+  },
+  "listPanel": {
+    "hide": "Sakrij listu",
+    "hideHint": "Sakrij listu i pogledaj cijelu kartu",
+    "show": "Prikaži listu",
+    "showCount_one": "Prikaži listu, {{count}} rezultat",
+    "showCount_few": "Prikaži listu, {{count}} rezultata",
+    "showCount_other": "Prikaži listu, {{count}} rezultata"
   }
 }
