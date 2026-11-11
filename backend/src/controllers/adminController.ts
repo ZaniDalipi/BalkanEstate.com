@@ -22,7 +22,7 @@ import {
   type ArchiveActor,
 } from '../services/listingArchiveService';
 import type { IUser } from '../models/User';
-import { changeUserRole } from '../services/userRoleService';
+import { changeUserRole, claimFirstSuperAdmin, superAdminStatus } from '../services/userRoleService';
 import { decideAccountDeletion } from '../utils/roleChangePolicy';
 
 /** The signed-in admin, as recorded on archived listings they remove. */
@@ -268,6 +268,35 @@ export const updateUserRoleAdmin = async (req: Request, res: Response): Promise<
   } catch (error) {
     adminLogger.error('Update user role error:', error);
     res.status(500).json({ message: 'Error updating role' });
+  }
+};
+
+// @desc    Whether the site has a super admin, and whether I may claim the first one
+// @route   GET /api/admin/super-admin/status
+// @access  Private/Admin
+export const getSuperAdminStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await superAdminStatus(req.user as IUser));
+  } catch (error) {
+    adminLogger.error('Super admin status error:', error);
+    res.status(500).json({ message: 'Error checking super admin status' });
+  }
+};
+
+// @desc    Become the site's first super admin (only while there is none)
+// @route   POST /api/admin/super-admin/claim
+// @access  Private/Admin
+export const claimSuperAdmin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await claimFirstSuperAdmin(req.user as IUser);
+    if (result.ok === false) {
+      res.status(result.status).json({ message: result.message, error: result.code });
+      return;
+    }
+    res.json({ message: 'You are now super admin', user: result.user });
+  } catch (error) {
+    adminLogger.error('Claim super admin error:', error);
+    res.status(500).json({ message: 'Error claiming super admin' });
   }
 };
 

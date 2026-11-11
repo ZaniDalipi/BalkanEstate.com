@@ -2297,5 +2297,14 @@
     "superAdminOnlyEdit": "Only a super admin can change an admin’s role.",
     "superAdminOnlyGrant": "Only a super admin can make someone admin or super admin.",
     "superAdminHint": "Admins manage the site; super admins can also give and remove admin roles."
+  },
+  "superAdminClaim": {
+    "title": "This site has no super admin yet",
+    "body": "A super admin can make other people admin or super admin. Only one admin can claim this, and only once; after that, super admins give the role from “Edit user”.",
+    "claim": "Become super admin",
+    "confirm": "Yes, make me super admin",
+    "cancel": "Cancel",
+    "working": "Working…",
+    "done": "You are now super admin. You can make other people admin or super admin from “Edit user”."
   }
 }

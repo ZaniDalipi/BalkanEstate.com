@@ -2273,5 +2273,14 @@
     "superAdminOnlyEdit": "Doar un super administrator poate schimba rolul unui administrator.",
     "superAdminOnlyGrant": "Doar un super administrator poate face pe cineva administrator sau super administrator.",
     "superAdminHint": "Administratorii gestionează site-ul; super administratorii pot și acorda sau retrage rolurile de administrator."
+  },
+  "superAdminClaim": {
+    "title": "Acest site nu are încă un super administrator",
+    "body": "Un super administrator poate face alte persoane administratori sau super administratori. Doar un administrator poate revendica rolul, o singură dată; după aceea, super administratorii acordă rolul din „Editează utilizatorul”.",
+    "claim": "Devino super administrator",
+    "confirm": "Da, fă-mă super administrator",
+    "cancel": "Anulează",
+    "working": "Se lucrează…",
+    "done": "Acum ești super administrator. Poți face alte persoane administratori sau super administratori din „Editează utilizatorul”."
   }
 }

@@ -217,6 +217,8 @@ export const adminKeys = {
   residenceCodes: (params?: { status?: string; search?: string; page?: number }) => ['admin', 'residence-codes', params ?? {}] as const,
   residenceCodesAll: () => ['admin', 'residence-codes'] as const,
   agencyResidenceAllowance: (agencyId: string) => ['admin', 'agencyResidenceAllowance', agencyId] as const,
+  /** Whether the site has a super admin yet (for claiming the first one). */
+  superAdminStatus: () => ['admin', 'super-admin-status'] as const,
   /** Removed, sold and rented listings (per filters). */
   archivedListings: (params?: { reason?: string; deletedBy?: string; search?: string; page?: number }) =>
     ['admin', 'archived-listings', params ?? {}] as const,

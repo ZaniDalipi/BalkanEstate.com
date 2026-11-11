@@ -5,8 +5,8 @@
 
 import mongoose from 'mongoose';
 import User, { IUser } from '../models/User';
-import { changeUserRole } from '../services/userRoleService';
-import { decideAccountDeletion, decideRoleChange, roleFieldsFor } from '../utils/roleChangePolicy';
+import { changeUserRole, claimFirstSuperAdmin, superAdminStatus } from '../services/userRoleService';
+import { decideAccountDeletion, decideRoleChange, decideSuperAdminClaim, roleFieldsFor } from '../utils/roleChangePolicy';
 
 jest.mock('../services/adminNotificationService', () => ({ notifyAdmins: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -99,5 +99,49 @@ describe('changeUserRole (database)', () => {
   it('answers 404 for a user that does not exist', async () => {
     const boss = await makeUser('boss2@example.com', 'super_admin');
     expect(await changeUserRole(boss, String(new mongoose.Types.ObjectId()), 'admin')).toMatchObject({ ok: false, status: 404 });
+  });
+});
+
+describe('decideSuperAdminClaim', () => {
+  it('lets an admin claim only while there is no super admin', () => {
+    expect(decideSuperAdminClaim({ actorRole: 'admin', superAdminCount: 0 })).toEqual({ ok: true });
+    expect(decideSuperAdminClaim({ actorRole: 'admin', superAdminCount: 1 })).toMatchObject({ ok: false, code: 'SUPER_ADMIN_EXISTS' });
+    expect(decideSuperAdminClaim({ actorRole: 'buyer', superAdminCount: 0 })).toMatchObject({ ok: false, code: 'ADMIN_REQUIRED' });
+  });
+});
+
+describe('claimFirstSuperAdmin (database)', () => {
+  const makeUser = (email: string, role: string) =>
+    User.create({ email, name: email.split('@')[0], password: 'Str0ng!Passw0rd', role });
+
+  beforeEach(async () => {
+    notifyAdmins.mockClear();
+    await mongoose.connection.collection('admin_bootstrap_locks').deleteMany({});
+  });
+
+  it('makes the first admin super admin from the panel, then closes the door', async () => {
+    const first = await makeUser('first@example.com', 'admin');
+    const second = await makeUser('second@example.com', 'admin');
+
+    expect(await superAdminStatus(first)).toEqual({ superAdminCount: 0, canClaim: true });
+    const result = await claimFirstSuperAdmin(first);
+
+    expect(result.ok).toBe(true);
+    expect((await User.findById(first._id).lean<IUser>())?.role).toBe('super_admin');
+    expect(notifyAdmins).toHaveBeenCalledWith(expect.objectContaining({ kind: 'role_changed', to: 'super_admin' }));
+
+    expect(await superAdminStatus(second)).toEqual({ superAdminCount: 1, canClaim: false });
+    expect(await claimFirstSuperAdmin(second)).toMatchObject({ ok: false, code: 'SUPER_ADMIN_EXISTS' });
+    expect((await User.findById(second._id).lean<IUser>())?.role).toBe('admin');
+  });
+
+  it('lets only one of two admins win when they claim at the same moment', async () => {
+    const a = await makeUser('a@example.com', 'admin');
+    const b = await makeUser('b@example.com', 'admin');
+
+    const results = await Promise.all([claimFirstSuperAdmin(a), claimFirstSuperAdmin(b)]);
+
+    expect(results.filter((r) => r.ok).length).toBe(1);
+    expect(await User.countDocuments({ role: 'super_admin' })).toBe(1);
   });
 });

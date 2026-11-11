@@ -2280,5 +2280,14 @@
     "superAdminOnlyEdit": "Samo super administrator može promijeniti ulogu administratora.",
     "superAdminOnlyGrant": "Samo super administrator može nekoga postaviti za administratora ili super administratora.",
     "superAdminHint": "Administratori upravljaju stranicom; super administratori mogu i dodjeljivati i uklanjati administratorske uloge."
+  },
+  "superAdminClaim": {
+    "title": "Ova stranica još nema super administratora",
+    "body": "Super administrator može druge postaviti za administratora ili super administratora. Ovo može preuzeti samo jedan administrator, i to samo jednom; nakon toga super administratori dodjeljuju ulogu preko “Uredi korisnika”.",
+    "claim": "Postani super administrator",
+    "confirm": "Da, postavi me za super administratora",
+    "cancel": "Odustani",
+    "working": "Radi se…",
+    "done": "Sada ste super administrator. Druge možete postaviti za administratora ili super administratora preko “Uredi korisnika”."
   }
 }

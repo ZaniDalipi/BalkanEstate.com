@@ -14,6 +14,7 @@ import { SoftIcon } from '@/src/shared/illustrations';
 import { useUserManager } from './useUserManager';
 import UserManagerDetail from './UserManagerDetail';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { ClaimSuperAdminCard } from './roles/ClaimSuperAdminCard';
 
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -137,6 +138,8 @@ const UserManager: React.FC = () => {
           </select>
         </div>
       </div>
+
+      <ClaimSuperAdminCard />
 
       {/* Success/Error Messages */}
       {successMessage && (

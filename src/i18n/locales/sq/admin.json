@@ -2288,5 +2288,14 @@
     "superAdminOnlyEdit": "Vetëm një super administrator mund të ndryshojë rolin e një administratori.",
     "superAdminOnlyGrant": "Vetëm një super administrator mund ta bëjë dikë administrator ose super administrator.",
     "superAdminHint": "Administratorët menaxhojnë faqen; super administratorët mund edhe të japin e të heqin rolet e administratorit."
+  },
+  "superAdminClaim": {
+    "title": "Kjo faqe nuk ka ende super administrator",
+    "body": "Një super administrator mund t’i bëjë të tjerët administratorë ose super administratorë. Vetëm një administrator mund ta marrë këtë rol, dhe vetëm një herë; pas kësaj, super administratorët e japin rolin nga “Ndrysho përdoruesin”.",
+    "claim": "Bëhu super administrator",
+    "confirm": "Po, më bëj super administrator",
+    "cancel": "Anulo",
+    "working": "Duke punuar…",
+    "done": "Tani jeni super administrator. Mund t’i bëni të tjerët administratorë ose super administratorë nga “Ndrysho përdoruesin”."
   }
 }

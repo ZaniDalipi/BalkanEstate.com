@@ -88,3 +88,26 @@ export function decideAccountDeletion(req: Omit<RoleChangeRequest, 'newRole'>): 
   }
   return { ok: true };
 }
+
+export type SuperAdminClaimDecision =
+  | { ok: true }
+  | { ok: false; status: 403 | 409; code: 'ADMIN_REQUIRED' | 'SUPER_ADMIN_EXISTS'; message: string };
+
+/**
+ * The first super admin can be claimed from the admin panel by an admin, but
+ * only while the site has none. Once one exists, only super admins promote.
+ */
+export function decideSuperAdminClaim(req: { actorRole: string; superAdminCount: number }): SuperAdminClaimDecision {
+  if (req.actorRole !== 'admin') {
+    return { ok: false, status: 403, code: 'ADMIN_REQUIRED', message: 'Only an admin can claim the super admin role.' };
+  }
+  if (req.superAdminCount > 0) {
+    return {
+      ok: false,
+      status: 409,
+      code: 'SUPER_ADMIN_EXISTS',
+      message: 'This site already has a super admin. Ask them to make you super admin.',
+    };
+  }
+  return { ok: true };
+}
