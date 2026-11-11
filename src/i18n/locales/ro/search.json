@@ -666,5 +666,63 @@
     "northWest": "Nord-vest",
     "southEast": "Sud-est",
     "southWest": "Sud-vest"
+  },
+  "terrain": {
+    "toggle": "Teren",
+    "toggleAria": "Instrument pentru teren și pantă",
+    "title": "Teren și pantă",
+    "expand": "Extinde panoul",
+    "collapse": "Restrânge panoul",
+    "instructions": "Atinge harta pentru a plasa colțurile 1, 2, 3… în jurul terenului. Adaugă cel puțin 3.",
+    "corners": "Colțuri: {{n}}",
+    "undo": "Anulează",
+    "clear": "Șterge",
+    "analyze": "Arată panta",
+    "errors": {
+      "edgesCross": "Laturile se intersectează. Anulează ultimul colț și plasează-l în altă parte.",
+      "tooSmall": "Zona este prea mică. Desenează cel puțin 10 × 10 m.",
+      "tooLarge": "Zona este prea mare. Fiecare latură trebuie să fie sub 7,5 km."
+    },
+    "loading": "Se citește terenul…",
+    "failed": {
+      "unavailable": "Datele de altitudine nu au putut fi încărcate acum.",
+      "busy": "Prea multe cereri. Așteaptă câteva minute și încearcă din nou.",
+      "rejected": "Această zonă nu poate fi analizată. Încearcă o zonă mai mică.",
+      "noData": "Nu există date de altitudine aici. Zona poate fi apă."
+    },
+    "retry": "Încearcă din nou",
+    "editArea": "Editează zona",
+    "redraw": "Desenează altă zonă",
+    "stats": {
+      "area": "Suprafață",
+      "elevation": "Interval de altitudine",
+      "meanSlope": "Pantă medie",
+      "maxSlope": "Panta maximă"
+    },
+    "disclaimer": "Estimare din date de altitudine cu rezoluție de ~{{resolution}} m. Nu este o ridicare topografică.",
+    "arrowsHint": "Săgețile arată sensul coborârii",
+    "legendTitle": "Evaluare · verdele este cel mai ușor de construit",
+    "classes": {
+      "flat": "Plat",
+      "gentle": "Ușor înclinat",
+      "moderate": "Moderat",
+      "steep": "Abrupt",
+      "verySteep": "Foarte abrupt"
+    },
+    "advice": {
+      "flat": "Ideal pentru construcție",
+      "gentle": "Ușor de construit, puțină nivelare",
+      "moderate": "Construibil pe niveluri decalate sau cu terase",
+      "steep": "Necesită ziduri de sprijin și fundații mai scumpe",
+      "verySteep": "Problematic pentru majoritatea clădirilor"
+    },
+    "spot": {
+      "title": "Cel mai bun loc de construit",
+      "easy": "Aproximativ {{area}} de teren plat sau ușor înclinat, dintr-o bucată.",
+      "workable": "Aici nu există teren plat. Partea cea mai puțin înclinată are aproximativ {{area}}, construibilă cu lucrări de terasament.",
+      "none": "Nu există un loc ușor de construit: cea mai mare parte a acestui teren este abruptă. Așteaptă-te la terase și ziduri de sprijin și consultă un inginer înainte de a cumpăra.",
+      "show": "Arată pe hartă",
+      "marker": "Cel mai bun loc"
+    }
   }
 }

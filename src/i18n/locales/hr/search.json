@@ -666,5 +666,63 @@
     "northWest": "Sjeverozapad",
     "southEast": "Jugoistok",
     "southWest": "Jugozapad"
+  },
+  "terrain": {
+    "toggle": "Teren",
+    "toggleAria": "Alat za teren i nagib",
+    "title": "Teren i nagib",
+    "expand": "Proširi ploču",
+    "collapse": "Sažmi ploču",
+    "instructions": "Dodirnite kartu kako biste postavili kutove 1, 2, 3… oko zemljišta. Dodajte barem 3.",
+    "corners": "Kutovi: {{n}}",
+    "undo": "Poništi",
+    "clear": "Očisti",
+    "analyze": "Prikaži nagib",
+    "errors": {
+      "edgesCross": "Rubovi se sijeku. Poništite zadnji kut i postavite ga negdje drugdje.",
+      "tooSmall": "Ovo područje je premalo. Nacrtajte barem 10 × 10 m.",
+      "tooLarge": "Ovo područje je preveliko. Neka svaka strana bude kraća od 7,5 km."
+    },
+    "loading": "Očitavanje terena…",
+    "failed": {
+      "unavailable": "Podaci o nadmorskoj visini trenutačno se ne mogu učitati.",
+      "busy": "Previše zahtjeva. Pričekajte nekoliko minuta i pokušajte ponovno.",
+      "rejected": "Ovo se područje ne može analizirati. Pokušajte s manjim područjem.",
+      "noData": "Ovdje nema podataka o visini. Područje je možda voda."
+    },
+    "retry": "Pokušaj ponovno",
+    "editArea": "Uredi područje",
+    "redraw": "Nacrtaj drugo područje",
+    "stats": {
+      "area": "Površina",
+      "elevation": "Raspon visine",
+      "meanSlope": "Prosječni nagib",
+      "maxSlope": "Najveći nagib"
+    },
+    "disclaimer": "Procjena iz podataka o visini razlučivosti ~{{resolution}} m. Nije geodetska izmjera.",
+    "arrowsHint": "Strelice pokazuju nizbrdo",
+    "legendTitle": "Ocjena · zeleno je najlakše za gradnju",
+    "classes": {
+      "flat": "Ravno",
+      "gentle": "Blago",
+      "moderate": "Umjereno",
+      "steep": "Strmo",
+      "verySteep": "Vrlo strmo"
+    },
+    "advice": {
+      "flat": "Idealno za gradnju",
+      "gentle": "Lako za gradnju, malo poravnavanja",
+      "moderate": "Gradivo uz polukatove ili terase",
+      "steep": "Potrebni potporni zidovi i skuplji temelji",
+      "verySteep": "Problematično za većinu građevina"
+    },
+    "spot": {
+      "title": "Najbolje mjesto za gradnju",
+      "easy": "Oko {{area}} ravnog do blago nagnutog zemljišta u jednom komadu.",
+      "workable": "Ovdje nema ravnog zemljišta. Najblaži dio ima oko {{area}}, gradiv uz zemljane radove.",
+      "none": "Nema lakog mjesta za gradnju: većina ovog zemljišta je strma. Očekujte terase i potporne zidove te se prije kupnje posavjetujte s inženjerom.",
+      "show": "Prikaži na karti",
+      "marker": "Najbolje mjesto"
+    }
   }
 }

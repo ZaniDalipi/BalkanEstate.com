@@ -6,6 +6,7 @@
  * - MapPopupOverlay (smart-positioned marker click popup)
  * - GoogleMapControls (desktop + mobile map controls, legend, layer toggles)
  * - GoogleMapMeasurement (measurement tool panel + save modal)
+ * - Terrain tool (slope map for a drawn area: ../terrain)
  * - googleMapConstants (types, colors, styles)
  *
  * The core map rendering (GoogleMap, markers via AdvancedMarkerElement,
@@ -13,6 +14,7 @@
  */
 
 import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
@@ -31,6 +33,7 @@ import GoogleMapControls from './GoogleMapControls';
 import GoogleMapMeasurement from './GoogleMapMeasurement';
 import { mapContainerStyle } from './googleMapConstants';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { TerrainMapLayers, TerrainPanel, useTerrainTool } from '../terrain';
 
 /**
  * Main GoogleMapComponent - composes hook + sub-components
@@ -53,6 +56,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
   // All state, refs, effects, and handlers from the custom hook
   const hook = useGoogleMap(props);
+  // Terrain (slope) tool: draw an area, see how steep it is and where to build.
+  const terrain = useTerrainTool(hook.map, hook.showTerrain);
 
   // Loading states - early returns MUST come after all hooks
   if (hook.loadError) {
@@ -179,6 +184,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
               />
             </OverlayViewF>
           ))}
+          {hook.showTerrain && (
+            <TerrainMapLayers map={hook.map} points={terrain.points} phase={terrain.phase} />
+          )}
         </GoogleMap>
 
         {/* Debug info overlay — desktop only */}
@@ -220,6 +228,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           isAtMeasurementLimit={hook.isAtMeasurementLimit}
         />
 
+        {/* Terrain (slope) panel */}
+        <AnimatePresence>
+          {hook.showTerrain && <TerrainPanel tool={terrain} onClose={() => hook.setShowTerrain(false)} />}
+        </AnimatePresence>
+
         {/* Map Controls (desktop + mobile, legend, layers, climate, drawing actions) */}
         <GoogleMapControls
           isMobile={isMobile}
@@ -248,6 +261,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           setShowLandmarks={hook.setShowLandmarks}
           showMeasurement={hook.showMeasurement}
           setShowMeasurement={hook.setShowMeasurement}
+          showTerrain={hook.showTerrain}
+          setShowTerrain={hook.setShowTerrain}
           showCadastre={hook.showCadastre}
           setShowCadastre={hook.setShowCadastre}
           isLegendOpen={hook.isLegendOpen}

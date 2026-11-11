@@ -676,5 +676,63 @@
     "northWest": "North-west",
     "southEast": "South-east",
     "southWest": "South-west"
+  },
+  "terrain": {
+    "toggle": "Terrain",
+    "toggleAria": "Terrain and slope tool",
+    "title": "Terrain & slope",
+    "expand": "Expand panel",
+    "collapse": "Collapse panel",
+    "instructions": "Tap the map to place corners 1, 2, 3… around the land. Add at least 3.",
+    "corners": "Corners: {{n}}",
+    "undo": "Undo",
+    "clear": "Clear",
+    "analyze": "Show slope",
+    "errors": {
+      "edgesCross": "The edges cross. Undo the last corner and place it somewhere else.",
+      "tooSmall": "This area is too small. Draw at least 10 × 10 m.",
+      "tooLarge": "This area is too large. Keep each side under 7.5 km."
+    },
+    "loading": "Reading the ground…",
+    "failed": {
+      "unavailable": "Elevation data could not be loaded right now.",
+      "busy": "Too many requests. Wait a few minutes and try again.",
+      "rejected": "This area cannot be analysed. Try a smaller area.",
+      "noData": "There is no elevation data here. The area may be water."
+    },
+    "retry": "Try again",
+    "editArea": "Edit area",
+    "redraw": "Draw another area",
+    "stats": {
+      "area": "Area",
+      "elevation": "Elevation range",
+      "meanSlope": "Average slope",
+      "maxSlope": "Steepest slope"
+    },
+    "disclaimer": "Estimate from ~{{resolution}} m elevation data. Not a topographic survey.",
+    "arrowsHint": "Arrows point downhill",
+    "legendTitle": "Rating · green is easiest to build on",
+    "classes": {
+      "flat": "Flat",
+      "gentle": "Gentle",
+      "moderate": "Moderate",
+      "steep": "Steep",
+      "verySteep": "Very steep"
+    },
+    "advice": {
+      "flat": "Ideal for building",
+      "gentle": "Easy to build, little levelling",
+      "moderate": "Buildable with split levels or terraces",
+      "steep": "Needs retaining walls and costlier foundations",
+      "verySteep": "Problematic for most buildings"
+    },
+    "spot": {
+      "title": "Best place to build",
+      "easy": "About {{area}} of flat to gentle ground in one piece.",
+      "workable": "No flat ground here. The gentlest piece is about {{area}}, buildable with some earthworks.",
+      "none": "No easy spot to build: most of this land is steep. Expect terraces and retaining walls, and ask an engineer before you buy.",
+      "show": "Show on map",
+      "marker": "Best spot"
+    }
   }
 }

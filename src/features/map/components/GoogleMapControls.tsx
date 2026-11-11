@@ -78,6 +78,10 @@ export interface GoogleMapControlsProps {
   showMeasurement: boolean;
   setShowMeasurement: (show: boolean) => void;
 
+  // Terrain (slope) tool
+  showTerrain: boolean;
+  setShowTerrain: (show: boolean) => void;
+
   // Cadastre
   showCadastre: boolean;
   setShowCadastre: (show: boolean) => void;
@@ -118,6 +122,8 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
   setShowLandmarks,
   showMeasurement,
   setShowMeasurement,
+  showTerrain,
+  setShowTerrain,
   showCadastre,
   setShowCadastre,
   isLegendOpen,
@@ -306,6 +312,19 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               <span className="inline leading-none landscape:hidden">{t('search:map.measure', 'Measure')}</span>
             </button>
 
+            {/* Terrain (slope) Tool Toggle */}
+            <button
+              onClick={() => setShowTerrain(!showTerrain)}
+              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
+                showTerrain ? 'bg-lime-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'
+              }`}
+              aria-label={t('search:terrain.toggleAria', 'Terrain and slope tool')}
+              aria-pressed={showTerrain}
+            >
+              <SoftIcon name="mountain" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">{t('search:terrain.toggle', 'Terrain')}</span>
+            </button>
+
             {/* Cadastre Layer Toggle */}
             <button
               onClick={() => setShowCadastre(!showCadastre)}
@@ -449,6 +468,16 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                   >
                     <SoftIcon name="ruler" className="w-5 h-5" />
                     <span>{t('common:aria.measure')}</span>
+                  </button>
+                  <button
+                    onClick={() => { setShowTerrain(!showTerrain); setIsLayerMenuOpen(false); }}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                      showTerrain ? 'bg-lime-600 text-white' : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    aria-pressed={showTerrain}
+                  >
+                    <SoftIcon name="mountain" className="w-5 h-5" />
+                    <span>{t('search:terrain.toggle', 'Terrain')}</span>
                   </button>
                   <button
                     onClick={() => setIsLegendOpen(!isLegendOpen)}

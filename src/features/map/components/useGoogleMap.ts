@@ -7,6 +7,7 @@
  * - Marker creation and clustering
  * - Drawing mode (rectangle selection)
  * - Measurement tools (distance/area)
+ * - Terrain (slope) tool toggle — the tool itself lives in ../terrain
  * - Layer management (cadastre, climate, 3D buildings, landmarks)
  * - Map style switching
  * - Fly-to animations
@@ -182,6 +183,24 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const [measurementIsPro, setMeasurementIsPro] = useState(false);
   const [measurementSaveError, setMeasurementSaveError] = useState<string | null>(null);
   const [isAtMeasurementLimit, setIsAtMeasurementLimit] = useState(false);
+
+  // Terrain (slope) tool. It and the measuring tool both take map taps, so
+  // opening one closes the other.
+  const [showTerrain, setShowTerrainState] = useState(false);
+  const setShowTerrain = useCallback((show: boolean) => {
+    setShowTerrainState(show);
+    if (show) {
+      setShowMeasurement(false);
+      setMapStyle('satellite');
+    }
+  }, []);
+  const setShowMeasurementOnly = useCallback((show: boolean) => {
+    setShowMeasurement(show);
+    if (show) setShowTerrainState(false);
+  }, []);
+  // While corners are being placed, a tap is a corner, not a parcel lookup.
+  const placingPointsRef = useRef(false);
+  placingPointsRef.current = showMeasurement || showTerrain;
 
   // Cadastre layer state
   const [showCadastre, setShowCadastre] = useState(false);
@@ -1715,7 +1734,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     const infoWindow = cadastreInfoWindowRef.current;
 
     const handleCadastreClick = async (e: google.maps.MapMouseEvent) => {
-      if (!e.latLng) return;
+      if (!e.latLng || placingPointsRef.current) return;
       const zoom = map.getZoom();
       const minZoom = cadastreConfig.minZoom || CADASTRE_MIN_ZOOM;
       if (!zoom || zoom < minZoom) return;
@@ -2225,7 +2244,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
     // Measurement
     showMeasurement,
-    setShowMeasurement,
+    setShowMeasurement: setShowMeasurementOnly,
     measurementPoints,
     setMeasurementPoints,
     measurementMode,
@@ -2257,6 +2276,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     handleOpenSaveModal,
     handleSaveMeasurementToBackend,
     handleQuickSave,
+
+    // Terrain
+    showTerrain,
+    setShowTerrain,
 
     // Climate
     selectedClimateRisk,

@@ -624,6 +624,51 @@ Key decisions:
 
 ---
 
+## Map Terrain Tool — slope and where to build
+
+"Terrain" on the search map (next to Measure): tap corners 1, 2, 3… around a
+piece of land, press **Show slope**, and the area is coloured by how steep it
+is, with arrows pointing downhill, the headline numbers (area, height range,
+average and steepest slope), the share of each slope band and a pin on the
+best place to build.
+
+```
+GoogleMapComponent
+  ├── useTerrainTool(map, showTerrain)        src/features/map/terrain/hooks
+  │     ├── useMapPointDrawing — map taps → corners (crosshair, no dbl-tap zoom)
+  │     ├── validateTerrainArea — ≥3 corners, edges don't cross, 100 m² – 7.5 km
+  │     ├── useElevationGrid(requestBounds(area))   TanStack Query, terrainKeys
+  │     │     └── GET /api/terrain/elevation-grid?south&west&north&east
+  │     └── analyzeTerrain(grid, area)        pure, utils/
+  │           ├── computeSlopeField   Horn's method, slope % + fall line per cell
+  │           ├── computeTerrainStats bands: flat <3, gentle <8, moderate <15, steep <25, very steep
+  │           ├── slopeArrows         one arrow per block, block-averaged gradient
+  │           └── findBuildSpot       largest easy patch (<8 %), its deepest cell
+  ├── TerrainMapLayers   outline, numbered corners, arrows, spot pin,
+  │     └── useSlopeGroundOverlay — drawSlopeImage → canvas → GroundOverlay
+  └── TerrainPanel       draw step / loading / failed / results
+```
+
+Key decisions:
+- **Heights come from Terrain Tiles** (AWS Open Data, Terrarium PNGs, free, no
+  key; `TERRAIN_TILES_URL` overrides). The backend
+  (`backend/src/services/terrain/`) reads the tiles, decodes them with sharp,
+  keeps up to 64 in memory, and returns heights on a grid of near-square cells
+  (8 m at the finest, at most 10 000 cells, boxes up to 8 km a side). Rate
+  limited per IP like routing; answers are cacheable for a day.
+- **Server samples, client analyses.** The endpoint is a plain height grid; all
+  the judgement (bands, arrows, best spot) is pure, unit-tested code in the
+  client, so tuning it never touches the server.
+- **Honest about precision.** The source survey is ~30 m (SRTM / EU-DEM), so
+  the panel says "estimate, not a topographic survey". Finer cells are
+  interpolated, which smooths the picture but adds no detail.
+- **Edges don't lie.** A cell at the grid edge or beside water extends the slope
+  from the neighbours it has instead of treating the gap as flat, and the
+  request box has a margin of ≥20 m (1.5 % of the side) around the area.
+- **One tool takes taps at a time.** Opening Terrain closes Measure and the
+  other way round; while either is open a tap places a corner instead of
+  opening the cadastre parcel popup.
+
 ## 3D Property Map — Sun & Shadows
 
 The 3D building view on a listing (`Map3DBuildings`, MapLibre) simulates where

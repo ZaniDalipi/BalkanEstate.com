@@ -666,5 +666,63 @@
     "northWest": "Veriperëndim",
     "southEast": "Juglindje",
     "southWest": "Jugperëndim"
+  },
+  "terrain": {
+    "toggle": "Terreni",
+    "toggleAria": "Mjeti i terrenit dhe pjerrësisë",
+    "title": "Terreni dhe pjerrësia",
+    "expand": "Zgjero panelin",
+    "collapse": "Palos panelin",
+    "instructions": "Prek hartën për të vendosur këndet 1, 2, 3… rreth tokës. Shto të paktën 3.",
+    "corners": "Kënde: {{n}}",
+    "undo": "Zhbëj",
+    "clear": "Pastro",
+    "analyze": "Shfaq pjerrësinë",
+    "errors": {
+      "edgesCross": "Brinjët kryqëzohen. Zhbëj këndin e fundit dhe vendose diku tjetër.",
+      "tooSmall": "Kjo zonë është shumë e vogël. Vizato të paktën 10 × 10 m.",
+      "tooLarge": "Kjo zonë është shumë e madhe. Mbaje çdo brinjë nën 7,5 km."
+    },
+    "loading": "Po lexohet terreni…",
+    "failed": {
+      "unavailable": "Të dhënat e lartësisë nuk mund të ngarkoheshin tani.",
+      "busy": "Shumë kërkesa. Prit disa minuta dhe provo përsëri.",
+      "rejected": "Kjo zonë nuk mund të analizohet. Provo një zonë më të vogël.",
+      "noData": "Nuk ka të dhëna lartësie këtu. Zona mund të jetë ujë."
+    },
+    "retry": "Provo përsëri",
+    "editArea": "Ndrysho zonën",
+    "redraw": "Vizato një zonë tjetër",
+    "stats": {
+      "area": "Sipërfaqja",
+      "elevation": "Intervali i lartësisë",
+      "meanSlope": "Pjerrësia mesatare",
+      "maxSlope": "Pjerrësia maksimale"
+    },
+    "disclaimer": "Vlerësim nga të dhëna lartësie rreth {{resolution}} m. Jo matje topografike.",
+    "arrowsHint": "Shigjetat tregojnë drejtimin e zbritjes",
+    "legendTitle": "Vlerësimi · e gjelbra është më e lehta për ndërtim",
+    "classes": {
+      "flat": "E rrafshët",
+      "gentle": "E butë",
+      "moderate": "Mesatare",
+      "steep": "E pjerrët",
+      "verySteep": "Shumë e pjerrët"
+    },
+    "advice": {
+      "flat": "Ideale për ndërtim",
+      "gentle": "E lehtë për ndërtim, pak nivelim",
+      "moderate": "E ndërtueshme me nivele të ndara ose tarraca",
+      "steep": "Kërkon mure mbajtëse dhe themele më të kushtueshme",
+      "verySteep": "Problematike për shumicën e ndërtesave"
+    },
+    "spot": {
+      "title": "Vendi më i mirë për ndërtim",
+      "easy": "Rreth {{area}} tokë e rrafshët deri në të butë në një copë.",
+      "workable": "Këtu nuk ka tokë të rrafshët. Pjesa më pak e pjerrët është rreth {{area}}, e ndërtueshme me disa punime dheu.",
+      "none": "Nuk ka vend të lehtë për ndërtim: pjesa më e madhe e kësaj toke është e pjerrët. Prit tarraca dhe mure mbajtëse, dhe pyet një inxhinier para se të blesh.",
+      "show": "Shfaq në hartë",
+      "marker": "Vendi më i mirë"
+    }
   }
 }

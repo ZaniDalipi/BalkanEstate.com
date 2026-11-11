@@ -399,3 +399,14 @@ export const gameRewardKeys = {
   all: ['gameRewards'] as const,
   status: () => [...gameRewardKeys.all, 'status'] as const,
 };
+
+// ============================================================================
+// Terrain Query Keys
+// Used by: map terrain (slope) tool — heights grid for a drawn area's box
+// ============================================================================
+
+export const terrainKeys = {
+  all: ['terrain'] as const,
+  grid: (bounds: { south: number; west: number; north: number; east: number }) =>
+    [...terrainKeys.all, 'grid', bounds.south, bounds.west, bounds.north, bounds.east] as const,
+};
