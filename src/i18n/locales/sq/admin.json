@@ -54,7 +54,8 @@
     "adBanners": "Banerët reklamues",
     "emailTemplates": "Shabllonet e email-it",
     "siteSettings": "Cilësimet e faqes",
-    "residences": "Rezidencat"
+    "residences": "Rezidencat",
+    "archivedListings": "Njoftimet e arkivuara"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -127,7 +128,8 @@
       "admin": "Administrator",
       "agent": "Agjent",
       "buyer": "Blerës",
-      "seller": "Shitës"
+      "seller": "Shitës",
+      "superAdmin": "Super administrator"
     },
     "status": {
       "active": "Aktiv",
@@ -230,7 +232,8 @@
       "sourceReferralDesc": "Përdor për shpërblime referimi të përdoruesve",
       "description": "Përshkrimi",
       "descriptionPlaceholder": "Shënim i brendshëm për këtë kod...",
-      "createCode": "Krijo kod"
+      "createCode": "Krijo kod",
+      "residenceHint": "Kodet e zhbllokimit për rezidencat krijohen më lehtë te Rezidencat › Kodet e zhbllokimit (duhet të emërtojnë një produkt rezidence dhe të mbulojnë çmimin e plotë)."
     },
     "bulk": {
       "numberOfCodes": "Numri i Kodeve",
@@ -1963,7 +1966,9 @@
       "sellerProYearly": "Shitës Pro (vjetor)",
       "enterprisePlan": "Plani Enterprise",
       "agentProMonthly": "Agjent Pro (mujor)",
-      "agentProYearly": "Agjent Pro (vjetor)"
+      "agentProYearly": "Agjent Pro (vjetor)",
+      "residenceExtraBuilding": "Ndërtesa shtesë të rezidencës",
+      "residencePass": "Karta e Rezidencës (12 muaj)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Marrja e statistikave dështoi",
@@ -2154,5 +2159,174 @@
       "range": "Përdorni një numër nga 1 deri në {{max}}.",
       "belowUsed": "Kjo rezidencë ka tashmë {{used}} ndërtesa."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Shtyp sërish për ta fshirë",
+    "copied": "U kopjua",
+    "copy": "Kopjo",
+    "copyCode": "Kopjo {{code}}",
+    "copyFailed": "Kopjimi nuk lejohet këtu: zgjidhni kodin dhe kopjojeni me dorë.",
+    "created": {
+      "copyAll": "Kopjo të gjitha",
+      "done": "U krye",
+      "subtitle": "{{kind}} · i vlefshëm deri më {{date}} · {{uses}} përdorim(e) secili",
+      "title": "Kodet gati: {{count}}"
+    },
+    "delete": "Fshi",
+    "disable": "Çaktivizo",
+    "empty": "Asnjë kod nuk përputhet.",
+    "emptyAll": "Ende nuk ka kode. Krijoni të parin me “Kode të reja”.",
+    "enable": "Aktivizo",
+    "filter": {
+      "active": "Gati për përdorim",
+      "all": "Të gjitha",
+      "disabled": "Të çaktivizuara",
+      "expired": "Të skaduara",
+      "used": "Të përdorura"
+    },
+    "filterLabel": "Statusi",
+    "form": {
+      "cancel": "Anulo",
+      "count": "Sa kode",
+      "countHint": "Deri në {{max}} njëherësh",
+      "create": "Krijo kodet",
+      "creating": "Po krijohen…",
+      "days": "I vlefshëm për (ditë)",
+      "daysHint": "Deri në {{max}} ditë",
+      "kind": "Çfarë zhbllokojnë",
+      "note": "Shënim (për kë është)",
+      "notePlaceholder": "p.sh. Vardar Homes, rënë dakord me telefon",
+      "range": "Shkruani një numër të plotë nga {{min}} deri në {{max}}.",
+      "title": "Kode të reja zhbllokimi",
+      "tooLong": "Maksimumi {{max}} karaktere.",
+      "uses": "Përdorime për kod",
+      "usesHint": "Çdo llogari mund ta përdorë një kod një herë",
+      "discount": "Zbritja",
+      "discountFull": "Çmimi i plotë (zhbllokon menjëherë)",
+      "discountPercent": "Përqindje zbritje",
+      "discountFixed": "Shumë zbritje (€)",
+      "percentValue": "Përqindja e zbritjes (%)",
+      "fixedValue": "Shuma e zbritjes (€)",
+      "percentHint": "1 deri në {{max}}; pronari paguan pjesën tjetër",
+      "fixedHint": "Asnjëherë më shumë se çmimi; pronari paguan pjesën tjetër"
+    },
+    "intro": "Pronarët shkruajnë një kod te “Bli Kartën e Rezidencës” për ta zhbllokuar pa paguar online. Çdo kod mbulon çmimin e plotë të asaj që zhbllokon.",
+    "kind": {
+      "extra_building": "Ndërtesa shtesë",
+      "pass": "Karta e Rezidencës"
+    },
+    "loadError": "Kodet nuk mund të ngarkoheshin.",
+    "markSent": "Shëno si të dërguar",
+    "markUnsent": "Shëno si të padërguar",
+    "new": "Kode të reja",
+    "removedResidence": "një rezidencë e fshirë",
+    "search": "Gjej një kod",
+    "searchPlaceholder": "p.sh. RES-7K3P",
+    "sent": "Dërguar",
+    "status": {
+      "active": "Gati për përdorim",
+      "disabled": "I çaktivizuar",
+      "expired": "I skaduar",
+      "scheduled": "Ende jo i vlefshëm",
+      "used": "I përdorur"
+    },
+    "title": "Kodet e zhbllokimit",
+    "until": "deri më {{date}}",
+    "usedBy": "Përdorur nga",
+    "uses": "{{used}} nga {{limit}} të përdorura",
+    "discount": {
+      "full": "Çmimi i plotë",
+      "percent": "{{value}}% zbritje",
+      "fixed": "{{amount}} zbritje"
+    }
+  },
+  "archive": {
+    "title": "Njoftimet e arkivuara",
+    "subtitle": "Njoftimet që u fshinë, u shitën ose u dhanë me qira: kush i hoqi, kur dhe çfarë ishin.",
+    "all": "Të gjitha",
+    "reasonFilter": "Arsyeja",
+    "search": "Kërko titull, adresë ose shitës",
+    "removedByFilter": "Hequr nga",
+    "removedByAnyone": "Hequr nga kushdo",
+    "reason": {
+      "deleted": "Fshirë",
+      "sold": "Shitur",
+      "rented": "Dhënë me qira"
+    },
+    "deleter": {
+      "owner": "Pronari",
+      "admin": "Një administrator",
+      "agency": "Agjencia"
+    },
+    "removedBy": {
+      "owner": "Hequr më {{date}} nga pronari ({{name}})",
+      "admin": "Hequr më {{date}} nga administratori {{name}}",
+      "agency": "Hequr më {{date}} nga agjencia ({{name}})"
+    },
+    "archivedOn": "Arkivuar më {{date}}",
+    "seller": "Shitësi: {{name}} ({{email}})",
+    "stats": "{{days}} ditë në treg · {{views}} shikime · {{saves}} ruajtje",
+    "wasStatus": "ishte {{status}}",
+    "status": {
+      "active": "aktiv",
+      "pending": "në pritje",
+      "draft": "draft",
+      "sold": "shitur",
+      "rented": "dhënë me qira"
+    },
+    "untitled": "Njoftim pa titull",
+    "loadError": "Arkivi nuk u ngarkua.",
+    "retry": "Provo përsëri",
+    "empty": "Asnjë njoftim i arkivuar nuk përputhet.",
+    "pages": "Faqet",
+    "prev": "Mëparshmja",
+    "next": "Tjetra",
+    "pageOf": "Faqja {{page}} nga {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "Nuk mund ta ndryshoni rolin tuaj. Kërkojini një super administratori tjetër.",
+    "superAdminOnlyEdit": "Vetëm një super administrator mund të ndryshojë rolin e një administratori.",
+    "superAdminOnlyGrant": "Vetëm një super administrator mund ta bëjë dikë administrator ose super administrator.",
+    "superAdminHint": "Administratorët menaxhojnë faqen; super administratorët mund edhe të japin e të heqin rolet e administratorit."
+  },
+  "superAdminClaim": {
+    "title": "Kjo faqe nuk ka ende super administrator",
+    "body": "Një super administrator mund t’i bëjë të tjerët administratorë ose super administratorë. Vetëm një administrator mund ta marrë këtë rol, dhe vetëm një herë; pas kësaj, super administratorët e japin rolin nga “Ndrysho përdoruesin”.",
+    "claim": "Bëhu super administrator",
+    "confirm": "Po, më bëj super administrator",
+    "cancel": "Anulo",
+    "working": "Duke punuar…",
+    "done": "Tani jeni super administrator. Mund t’i bëni të tjerët administratorë ose super administratorë nga “Ndrysho përdoruesin”."
+  },
+  "adminAlerts": {
+    "title": "Email-et e njoftimeve për administratorët",
+    "subtitle": "Kush merr email për përdorues të rinj, njoftime të reja dhe ndryshime të roleve të administratorëve. Administratorët i shohin edhe te zilja e njoftimeve.",
+    "loadError": "Cilësimet e njoftimeve nuk u ngarkuan.",
+    "retry": "Provo përsëri",
+    "disabled": "Njoftimet për administratorët janë fikur në server (ADMIN_NOTIFICATIONS=off). Asgjë nuk dërgohet derisa të hiqet.",
+    "sendingTo": "Po dërgohet te: {{list}}",
+    "sendingToNobody": "Ende nuk po dërgohet asnjë email.",
+    "source": {
+      "panel": "nga lista më poshtë",
+      "env": "nga cilësimi i serverit (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "çdo llogari administratori, sepse nuk është vendosur listë",
+      "none": "askush: shtoni një adresë më poshtë"
+    },
+    "superAdminOnly": "Vetëm një super administrator mund të ndryshojë se kush i merr këto email-e.",
+    "listLabel": "Adresat e email-it për njoftime",
+    "remove": "Hiq {{email}}",
+    "addLabel": "Shto një adresë email-i",
+    "placeholder": "emri@shembull.com",
+    "add": "Shto",
+    "invalid": "Email i pavlefshëm: {{list}}",
+    "tooMany": "Maksimumi {{max}} adresa.",
+    "save": "Ruaj adresat",
+    "saving": "Duke ruajtur…",
+    "saveError": "Adresat nuk u ruajtën.",
+    "emptyHint": "Lëreni listën bosh për të përdorur cilësimin e serverit ose email-in e çdo administratori.",
+    "test": "Dërgo email prove",
+    "testing": "Duke dërguar…",
+    "testSent": "Email-i prove u dërgua te {{list}}. Kontrolloni kutinë (dhe spam-in).",
+    "testFailed": "Nuk u dërgua te {{list}}."
   }
 }

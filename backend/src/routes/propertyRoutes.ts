@@ -16,8 +16,11 @@ import {
   deleteRentalHistoryEntry,
   getPropertyPriceHistory,
   getAreaPrices,
+  getPropertyAirQuality,
+  getPropertySurroundings,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
+import { getFeatureMatches } from '../controllers/featureMatchController';
 import { upload } from '../utils/upload';
 import { mutationRateLimiter } from '../middleware/security';
 import { validatePropertyId } from '../middleware/propertyValidation';
@@ -98,6 +101,10 @@ const router = express.Router();
  *                   $ref: '#/components/schemas/Pagination'
  */
 router.get('/', getProperties);
+
+// Which listings have every requested feature, read from the full listing text.
+// Registered before '/:id' so the path is not taken for a property id.
+router.get('/feature-matches', getFeatureMatches);
 
 /**
  * @swagger
@@ -209,5 +216,7 @@ router.post('/:id/rental-history', protect, mutationRateLimiter, addRentalHistor
 router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, deleteRentalHistoryEntry);
 router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);
 router.get('/:id/area-prices', validatePropertyId, getAreaPrices);
+router.get('/:id/air-quality', validatePropertyId, getPropertyAirQuality);
+router.get('/:id/surroundings', validatePropertyId, getPropertySurroundings);
 
 export default router;

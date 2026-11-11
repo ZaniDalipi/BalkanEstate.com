@@ -82,6 +82,10 @@ export interface Development {
   /** Present once the owner has named the builder. */
   builder?: DevelopmentBuilder;
   coverImage?: string;
+  /** Lists only: the cover, else the first gallery photo, else the first published explorer picture. */
+  previewImage?: string;
+  /** More photos of the residence, in the owner's order (at most 15). */
+  gallery?: DevelopmentPhoto[];
   /** Whether buyers may send an inquiry about a unit that has no linked listing. */
   allowUnitInquiries?: boolean;
   status: DevelopmentStatus;
@@ -89,6 +93,13 @@ export interface Development {
   stats: DevelopmentStats;
   createdAt: string;
   updatedAt: string;
+}
+
+/** A residence gallery photo (public: no storage key). */
+export interface DevelopmentPhoto {
+  url: string;
+  width?: number;
+  height?: number;
 }
 
 export interface DevelopmentBuilding {
@@ -142,6 +153,8 @@ export interface DevelopmentFloor {
   level: number;
   kind: string;
   order: number;
+  /** Public only: the floor has a published picture (the explorer opens it there). */
+  hasViews?: boolean;
 }
 
 export interface DevelopmentUnit {
@@ -278,6 +291,24 @@ export interface DevelopmentBuilder {
   socials?: Partial<Record<BuilderSocialNetwork, string>>;
   logo?: { url: string };
   banner?: { url: string };
+  /**
+   * Public only: 'business' when the builder is linked to its Business Directory company (its details shown),
+   * 'agency' when no builder was named and the publishing agency stands in (from its agency page).
+   */
+  source?: 'agency' | 'business';
+  /** With `source: 'agency'`: the agency's own page. */
+  agencySlug?: string;
+  /** With `source: 'business'`: the company's Business Directory page. */
+  businessSlug?: string;
+  /** Dashboard only: the linked Business Directory listing (encoded id). */
+  businessListingId?: string;
+}
+
+/** The company behind a residence, on its own page: its profile and its other residences on the platform. */
+export interface PublicDeveloper {
+  builder: DevelopmentBuilder;
+  /** This residence first, then the other published residences of the same account naming the same builder (newest first, at most 12 others). */
+  residences: Development[];
 }
 
 /** What the builder form sends: its text fields (logo and banner upload separately). */
@@ -408,7 +439,8 @@ export interface LinkedListing {
   id: string;
   title?: string;
   imageUrl?: string;
-  images?: { url: string }[];
+  /** `tag` is the listing's room tag for the photo (living_room, kitchen, …), when it has one. */
+  images?: { url: string; tag?: string }[];
   price?: number;
   listingType?: 'sale' | 'rent';
   beds?: number;

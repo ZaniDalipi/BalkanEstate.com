@@ -27,6 +27,10 @@ export const updateSystemSettings = async (req: Request, res: Response): Promise
     delete updates.createdAt;
     delete updates.updatedAt;
     delete updates.__v;
+    // Set only through /admin/alert-settings, which only super admins may change.
+    delete updates.adminNotificationEmails;
+    delete updates.modifiedBy;
+    delete updates.lastModified;
 
     const settings = await SystemSettings.getSettings();
 
@@ -66,8 +70,14 @@ export const updateSystemSettings = async (req: Request, res: Response): Promise
 // @access  Private/Admin
 export const resetSystemSettings = async (_req: Request, res: Response): Promise<void> => {
   try {
+    // Keep who gets the admin alerts: that list is a super admin's to change.
+    const previous = await SystemSettings.findOne().select('adminNotificationEmails').lean<{ adminNotificationEmails?: string[] }>();
     await SystemSettings.deleteMany({});
     const settings = await SystemSettings.getSettings();
+    if (previous?.adminNotificationEmails?.length) {
+      settings.adminNotificationEmails = previous.adminNotificationEmails;
+      await settings.save();
+    }
     res.json({
       message: 'System settings reset to defaults',
       settings,

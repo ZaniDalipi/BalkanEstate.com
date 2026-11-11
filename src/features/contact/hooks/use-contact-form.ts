@@ -3,10 +3,11 @@
  * Manages contact form state, validation, and submission
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { validateEmail, validateName, sanitizeText } from '@/src/shared/utils/validation';
 import { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 import type { ContactFormData, ContactFormErrors } from '../types';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
 
 const INITIAL_FORM_DATA: ContactFormData = {
   name: '',
@@ -19,8 +20,17 @@ const INITIAL_FORM_DATA: ContactFormData = {
 const MESSAGE_MIN_LENGTH = 10;
 const MESSAGE_MAX_LENGTH = 2000;
 
-export function useContactForm(overrides?: Partial<ContactFormData>) {
-  const [formData, setFormData] = useState<ContactFormData>({ ...INITIAL_FORM_DATA, ...overrides });
+/**
+ * @param draftKey where to keep an unsent message on this device (see
+ *   formDraftKey); null or omitted keeps nothing.
+ */
+export function useContactForm(overrides?: Partial<ContactFormData>, draftKey: string | null = null) {
+  const [blank] = useState<ContactFormData>(() => ({ ...INITIAL_FORM_DATA, ...overrides }));
+  const draft = useFormDraft<ContactFormData>(draftKey);
+  const [formData, setFormData] = useState<ContactFormData>(() => draft.restored ?? blank);
+  const isDirty = useDraftAutosave(draft, formData, blank);
+  // One send at a time: a double click lands here before the button re-renders disabled
+  const sendingRef = useRef(false);
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -95,14 +105,16 @@ export function useContactForm(overrides?: Partial<ContactFormData>) {
     async (
       submitFn: (data: ContactFormData) => Promise<void>
     ) => {
-      if (!validate()) return;
+      if (sendingRef.current || !validate()) return;
 
+      sendingRef.current = true;
       setIsSubmitting(true);
       setSubmitError(null);
 
       try {
         const sanitized = sanitizeFormData();
         await submitFn(sanitized);
+        draft.finish();
         setIsSuccess(true);
         setFormData(INITIAL_FORM_DATA);
       } catch (err) {
@@ -112,19 +124,28 @@ export function useContactForm(overrides?: Partial<ContactFormData>) {
             : 'Failed to send message. Please try again.'
         );
       } finally {
+        sendingRef.current = false;
         setIsSubmitting(false);
       }
     },
-    [validate, sanitizeFormData]
+    [validate, sanitizeFormData, draft]
   );
 
+  /** Throw away the restored draft and start from the empty form */
+  const discardDraft = useCallback(() => {
+    draft.discard();
+    setFormData(blank);
+    setErrors({});
+  }, [draft, blank]);
+
   const reset = useCallback(() => {
+    draft.discard();
     setFormData(INITIAL_FORM_DATA);
     setErrors({});
     setIsSubmitting(false);
     setIsSuccess(false);
     setSubmitError(null);
-  }, []);
+  }, [draft]);
 
   const setField = useCallback(
     (name: keyof ContactFormData, value: string | undefined) => {
@@ -144,5 +165,9 @@ export function useContactForm(overrides?: Partial<ContactFormData>) {
     handleSubmit,
     setField,
     reset,
+    draftSavedAt: draft.restoredAt,
+    discardDraft,
+    /** Props for <FormLeaveGuard />: ask before leaving with an unsent message */
+    leaveGuard: { dirty: isDirty, bypassRef: draft.stoppedRef, onDiscard: draft.finish },
   };
 }

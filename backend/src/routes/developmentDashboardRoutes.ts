@@ -59,7 +59,8 @@ import {
   unpublishScene,
 } from '../controllers/developmentSceneController';
 import { attachListing } from '../controllers/developmentSuggestionController';
-import { deleteBuilderImage, uploadBuilderImage } from '../controllers/developmentBuilderController';
+import { deleteBuilderImage, linkBuilderBusinessHandler, uploadBuilderImage } from '../controllers/developmentBuilderController';
+import { deleteGalleryPhoto, reorderGalleryPhotos, uploadGalleryPhotos } from '../controllers/developmentGalleryController';
 
 const router = express.Router();
 
@@ -133,7 +134,21 @@ router.post(
   singleImage('image'),
   uploadBuilderImage
 );
+// The residence's photo gallery (up to 15, besides the cover).
+router.post(
+  '/:developmentId/gallery',
+  protect,
+  uploadRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  galleryImages('images'),
+  uploadGalleryPhotos
+);
+router.patch('/:developmentId/gallery/order', protect, mutationRateLimiter, developmentAuth, requireDevelopmentPermission('media.upload'), reorderGalleryPhotos);
+router.delete('/:developmentId/gallery/:index', protect, mutationRateLimiter, developmentAuth, requireDevelopmentPermission('media.upload'), deleteGalleryPhoto);
 router.delete('/:developmentId/builder/:kind', protect, developmentAuth, requireDevelopmentPermission('media.upload'), deleteBuilderImage);
+// The builder's company in the Business Directory (only a business the user owns).
+router.put('/:developmentId/builder/business', protect, mutationRateLimiter, developmentAuth, requireDevelopmentPermission('project.edit'), linkBuilderBusinessHandler);
 router.patch(
   '/:developmentId',
   protect,

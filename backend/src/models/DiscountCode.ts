@@ -97,7 +97,7 @@ const discountCodeSchema = new Schema<IDiscountCode>(
     },
     source: {
       type: String,
-      enum: ['gamification', 'admin', 'promotion', 'referral', 'seasonal'],
+      enum: ['gamification', 'admin', 'promotion', 'referral', 'seasonal', 'residence'],
       default: 'admin',
     },
     isSent: {

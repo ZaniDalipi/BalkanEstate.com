@@ -4,6 +4,7 @@ import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { apiRequest } from '@/src/shared/api';
 import { ArrowPathIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { AdminAlertEmailsCard } from './settings/AdminAlertEmailsCard';
 
 interface SettingsSection {
   id: string;
@@ -394,6 +395,7 @@ const SystemSettings: React.FC = () => {
 
   const renderNotificationSettings = () => (
     <div className="space-y-6">
+      <AdminAlertEmailsCard />
       <div className="space-y-4">
         {[
           { key: 'notifyNewUser', label: t('admin:settings.notifyNewUser'), desc: t('admin:settings.notifyNewUserDesc') },

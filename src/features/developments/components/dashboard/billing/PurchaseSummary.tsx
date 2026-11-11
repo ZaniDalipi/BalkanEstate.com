@@ -3,18 +3,21 @@ import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import type { ResidenceBilling, ResidencePurchaseKind } from '../../../types';
 import { formatCharge } from '../../../utils/format';
+import type { AppliedCode } from '../../../utils/codeDiscount';
 
 interface PurchaseSummaryProps {
   kind: ResidencePurchaseKind;
   quantity: number;
   billing: ResidenceBilling;
+  /** A discount code the server accepted: its amount off, and the new total. */
+  applied?: AppliedCode | null;
 }
 
-/** What the buyer gets and what it costs (with the premium discount when there is one). */
-export const PurchaseSummary: React.FC<PurchaseSummaryProps> = ({ kind, quantity, billing }) => {
+/** What the buyer gets and what it costs (with the premium discount, and a discount code, when there are). */
+export const PurchaseSummary: React.FC<PurchaseSummaryProps> = ({ kind, quantity, billing, applied }) => {
   const { t } = useTranslation('developments');
   const q = kind === 'pass' ? billing.prices.pass : billing.prices.extraBuilding;
-  const total = Math.round(q.unitPrice * quantity * 100) / 100;
+  const total = applied ? applied.amount : Math.round(q.unitPrice * quantity * 100) / 100;
   const perks =
     kind === 'pass'
       ? [
@@ -49,10 +52,21 @@ export const PurchaseSummary: React.FC<PurchaseSummaryProps> = ({ kind, quantity
             </dd>
           </div>
         )}
+        {applied && (
+          <div className="flex justify-between text-emerald-700">
+            <dt>{t('billing.summary.code', { code: applied.code, defaultValue: 'Code {{code}}' })}</dt>
+            <dd>−{formatCharge(applied.discount)}</dd>
+          </div>
+        )}
         <div className="flex justify-between text-base font-semibold text-slate-900">
           <dt>{t('billing.summary.total', 'Total')}</dt>
           <dd>{formatCharge(total)}</dd>
         </div>
+        {kind === 'pass' && (
+          <p className="pt-1 text-xs leading-relaxed text-slate-600">
+            {t('billing.summary.validity', { months: billing.terms.passMonths, defaultValue: 'One payment, valid for {{months}} months — not a lifetime pass. It doesn’t renew by itself.' })}
+          </p>
+        )}
       </dl>
     </div>
   );

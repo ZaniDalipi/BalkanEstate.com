@@ -259,5 +259,24 @@
     "categoriesSection": {
       "exclusive": "✦ Ekskluzive"
     }
+  },
+  "residences": {
+    "title": "Rezidenca të reja",
+    "subtitle": "Eksploroni ndërtesa të reja kat pas kati dhe zgjidhni banesën tuaj.",
+    "viewAll": "Të gjitha rezidencat",
+    "viewAllCount": "Të gjitha {{n}} rezidencat",
+    "explore": "Eksploro rezidencën",
+    "available": "{{available}} nga {{total}} banesa të lira",
+    "builtBy": "Ndërtuar nga {{name}}",
+    "loadFailed": "Rezidencat e reja nuk u ngarkuan dot tani."
+  },
+  "businesses": {
+    "title": "Drejtoria e bizneseve",
+    "subtitle": "Ndërtues, avokatë, noterë, transportues dhe të tjerë — shërbime vendore të besueshme për shtëpinë tuaj.",
+    "viewAll": "Hap drejtorinë",
+    "viewAllCount": "Të gjitha {{n}} bizneset",
+    "loadFailed": "Bizneset nuk u ngarkuan dot tani.",
+    "prev": "Shfaq bizneset e mëparshme",
+    "next": "Shfaq më shumë biznese"
   }
 }

@@ -1,151 +1,36 @@
 import React from 'react';
-
 import { useTranslation } from 'react-i18next';
+import { useDesktopPointer } from '@/src/hooks/useMediaQuery';
+import { CircleSpinner } from './CircleSpinner';
+import { FloatingLogoLoader } from './FloatingLogoLoader';
+
 interface LogoLoaderProps {
   size?: 'sm' | 'md' | 'lg';
+  /** Show the BALKANESTATE wordmark. */
   showText?: boolean;
 }
 
-/** Length of every loop below, in seconds. */
-const CYCLE_S = 1.8;
-
 /**
- * A negative `animation-delay` that starts the loop wherever a wall-clock
- * animation would be right now.
+ * Full-area loader, one per kind of device:
  *
- * Navigating used to remount the loader — once for the route fetch, again for
- * the lazy chunk — and each remount restarted the buildings from frame zero, so
- * the logo visibly hitched mid-load. Seeding the phase off a shared clock makes
- * a remount invisible: the new instance picks the animation up exactly where
- * the old one left it.
+ * - **Desktop:** the official logo floating (FloatingLogoLoader).
+ * - **Phones and tablets:** the circular spinner, the same as the boot screen.
+ *   A floating logo is heavier to draw, and on a phone a plain circle reads as
+ *   "loading" at a glance.
+ *
+ * Every page loader (route fallbacks, Suspense fallbacks, LoadingOverlay)
+ * goes through here, so the choice is made in one place.
  */
-function phaseDelay(offsetS: number): string {
-  const now = typeof performance !== 'undefined' ? performance.now() / 1000 : 0;
-  const phase = (((now - offsetS) % CYCLE_S) + CYCLE_S) % CYCLE_S;
-  return `${-phase}s`;
-}
-
 export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = true }) => {
   const { t } = useTranslation();
-  const sizeMap = {
-    sm: 80,
-    md: 120,
-    lg: 160,
-  };
-  const px = sizeMap[size];
-
-  // Computed once per mount — the loop runs on the compositor from there.
-  const glowDelay = phaseDelay(0);
-  const leftDelay = phaseDelay(0);
-  const rightDelay = phaseDelay(0.15);
+  const desktop = useDesktopPointer();
+  if (desktop) return <FloatingLogoLoader size={size} showText={showText} />;
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <style>{`
-        @keyframes be-float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes be-building-left {
-          0%, 100% { transform: translateY(0px) scaleY(1); }
-          50% { transform: translateY(-8px) scaleY(1.03); }
-        }
-        @keyframes be-building-right {
-          0%, 100% { transform: translateY(0px) scaleY(1); }
-          50% { transform: translateY(-14px) scaleY(1.04); }
-        }
-        @keyframes be-glow {
-          0%, 100% { filter: drop-shadow(0 4px 12px rgba(96,165,250,0.3)); }
-          50% { filter: drop-shadow(0 8px 24px rgba(96,165,250,0.6)); }
-        }
-        @keyframes be-text-pulse {
-          0%, 100% { opacity: 0.7; }
-          50% { opacity: 1; }
-        }
-        .be-logo-wrap {
-          animation: be-glow 1.8s ease-in-out infinite;
-        }
-        .be-building-left {
-          transform-origin: bottom center;
-          animation: be-building-left 1.8s ease-in-out infinite;
-        }
-        .be-building-right {
-          transform-origin: bottom center;
-          animation: be-building-right 1.8s ease-in-out infinite 0.15s;
-        }
-        .be-text-anim {
-          animation: be-text-pulse 1.8s ease-in-out infinite;
-        }
-      `}</style>
-
-      <div className="be-logo-wrap" style={{ width: px, height: px, animationDelay: glowDelay }}>
-        <svg
-          viewBox="0 0 200 200"
-          width={px}
-          height={px}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            {/* Left building gradient */}
-            <linearGradient id="be-grad-left-face" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#93C5FD" />
-              <stop offset="100%" stopColor="#60A5FA" />
-            </linearGradient>
-            <linearGradient id="be-grad-left-side" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#60A5FA" />
-            </linearGradient>
-            <linearGradient id="be-grad-left-top" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#BFDBFE" />
-              <stop offset="100%" stopColor="#93C5FD" />
-            </linearGradient>
-
-            {/* Right building gradient */}
-            <linearGradient id="be-grad-right-face" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#93C5FD" />
-              <stop offset="100%" stopColor="#60A5FA" />
-            </linearGradient>
-            <linearGradient id="be-grad-right-side" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#60A5FA" />
-            </linearGradient>
-            <linearGradient id="be-grad-right-top" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#BFDBFE" />
-              <stop offset="100%" stopColor="#93C5FD" />
-            </linearGradient>
-          </defs>
-
-          {/* Left building (shorter) */}
-          <g className="be-building-left" style={{ animationDelay: leftDelay }}>
-            {/* Front face */}
-            <rect x="48" y="95" width="62" height="82" rx="8" fill="url(#be-grad-left-face)" />
-            {/* Right side face (3D depth) */}
-            <polygon points="110,95 124,82 124,164 110,177" fill="url(#be-grad-left-side)" />
-            {/* Top face */}
-            <polygon points="48,95 62,82 124,82 110,95" fill="url(#be-grad-left-top)" />
-            {/* Top rounding highlights */}
-            <ellipse cx="79" cy="82" rx="31" ry="6" fill="#BFDBFE" opacity="0.5" />
-          </g>
-
-          {/* Right building (taller) */}
-          <g className="be-building-right" style={{ animationDelay: rightDelay }}>
-            {/* Front face */}
-            <rect x="96" y="48" width="62" height="129" rx="8" fill="url(#be-grad-right-face)" />
-            {/* Right side face (3D depth) */}
-            <polygon points="158,48 172,35 172,164 158,177" fill="url(#be-grad-right-side)" />
-            {/* Top face */}
-            <polygon points="96,48 110,35 172,35 158,48" fill="url(#be-grad-right-top)" />
-            {/* Top rounding highlights */}
-            <ellipse cx="127" cy="35" rx="31" ry="6" fill="#BFDBFE" opacity="0.5" />
-          </g>
-        </svg>
-      </div>
-
+    <div className="flex flex-col items-center gap-4">
+      <CircleSpinner size={size} />
       {showText && (
-        <span
-          className="be-text-anim font-bold tracking-widest text-blue-400"
-          style={{ fontSize: px * 0.12, letterSpacing: '0.15em', animationDelay: glowDelay }}
-        >
+        <span className="text-xs font-semibold tracking-[0.2em] text-blue-400" aria-hidden="true">
           {t('common:ui.logoLoader.balkanestate', 'BALKANESTATE')}
         </span>
       )}

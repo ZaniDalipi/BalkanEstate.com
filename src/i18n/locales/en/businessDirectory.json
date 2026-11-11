@@ -131,7 +131,12 @@
     "stats": {
       "services": "Services",
       "views": "Views",
-      "memberSince": "Member since"
+      "memberSince": "Member since",
+      "offered": "offered",
+      "profileViews": "profile views",
+      "yearsAgo_one": "{{count}} year ago",
+      "yearsAgo_other": "{{count}} years ago",
+      "thisYear": "this year"
     },
     "licensed": "Licensed",
     "languages": "Languages",
@@ -143,7 +148,82 @@
       "callNow": "Call {{phone}}",
       "sendEmail": "Send Email"
     },
-    "established": "Est. {{year}}"
+    "established": "Est. {{year}}",
+    "actions": {
+      "label": "Contact options",
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "Email",
+      "website": "Website",
+      "directions": "Directions"
+    },
+    "atAGlance": "At a glance",
+    "copied": "Copied",
+    "copy": "Copy",
+    "copyAddress": "Copy address",
+    "copyFailed": "Couldn’t copy — select the text instead",
+    "copyValue": "Copy {{label}}",
+    "founded": "Founded",
+    "highlights": "Highlights",
+    "licenseNumber": "License number",
+    "listedBy": "Listed by",
+    "loading": "Loading business…",
+    "logoAlt": "{{name}} logo",
+    "openSocial": "{{network}} (opens in a new tab)",
+    "priceRange": "Price range",
+    "profileViews": "Profile views",
+    "readLess": "Show less",
+    "readMore": "Read more",
+    "seeAll": "See all",
+    "similar": "More in {{category}}",
+    "price": {
+      "budget": "Budget",
+      "mid": "Mid-range",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Open",
+      "closes": "Closes {{time}}",
+      "allDay": "24 hours",
+      "closed": "Closed",
+      "closedToday": "Closed today",
+      "opensAt": "Opens {{time}}",
+      "opensTomorrow": "Opens tomorrow {{time}}",
+      "opensOn": "Opens {{day}} {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} year in business",
+    "yearsInBusiness_other": "{{count}} years in business",
+    "route": {
+      "straight": "{{distance}} in a straight line",
+      "noRoute": "We couldn’t work out a route right now — the maps app below can.",
+      "car": "Drive",
+      "foot": "Walk",
+      "bike": "Cycle",
+      "modeLabel": "Travel mode",
+      "openIn": "Open in {{app}}",
+      "locating": "Finding you…",
+      "retry": "Try my location again",
+      "fromMe": "Distance & route from my location",
+      "denied": "Location is turned off for this site. Allow it in your browser settings — or let your maps app find you.",
+      "unavailable": "We couldn’t find your location. Your maps app can still take you there.",
+      "privacy": "Your location is only used to work out the route. It isn’t saved.",
+      "fromYou": "{{distance}} from you"
+    },
+    "map": {
+      "layer": "Map style",
+      "standard": "Map",
+      "satellite": "Satellite",
+      "approximate": "Approximate — placed from the address",
+      "cityOnly": "Approximate — city area only",
+      "finding": "Finding the address on the map…",
+      "label": "Map showing {{name}}",
+      "gestureDesktop": "Use Ctrl + scroll to zoom the map",
+      "gestureMac": "Use ⌘ + scroll to zoom the map",
+      "gestureMobile": "Use two fingers to move the map"
+    },
+    "residences": "Residences",
+    "residencesSubtitle": "Homes {{name}} builds on BalkanEstate"
   },
   "days": {
     "monday": "Monday",
@@ -285,7 +365,21 @@
     "editSuccessMessage": "Business listing has been updated.",
     "errorTitle": "Failed to load businesses",
     "errorMessage": "Something went wrong. Please try again later.",
-    "backToList": "Back to My Businesses"
+    "backToList": "Back to My Businesses",
+    "drafts": {
+      "title": "Drafts",
+      "subtitle": "Not published yet. Saved on this device only.",
+      "badge": "Draft",
+      "untitled": "Untitled business",
+      "savedAt": "Saved on this device on {{date}}",
+      "keptUntil": "kept until {{date}}",
+      "continue": "Continue",
+      "discard": "Discard",
+      "discardTitle": "Discard this draft?",
+      "discardMessage": "What you entered will be deleted from this device. This cannot be undone.",
+      "unsavedChanges": "Unsaved changes",
+      "continueEditing": "Continue editing"
+    }
   },
   "delete": {
     "confirmTitle": "Delete Listing",
@@ -308,5 +402,14 @@
       "preview": "Preview",
       "bannerPreview": "Banner preview"
     }
+  },
+  "paymentMethods": {
+    "cash": "Cash",
+    "credit_card": "Credit card",
+    "debit_card": "Debit card",
+    "bank_transfer": "Bank transfer",
+    "paypal": "PayPal",
+    "crypto": "Crypto",
+    "invoice": "Invoice"
   }
 }

@@ -77,7 +77,10 @@
     "last7Days": "Ultimele 7 zile",
     "last30Days": "Ultimele 30 de zile",
     "priceReduced": "Preț redus",
-    "priceIncreased": "Preț crescut"
+    "priceIncreased": "Preț crescut",
+    "constructionStatus": "Construcție",
+    "kitchens": "Bucătării",
+    "orientation": "Orientare"
   },
   "options": {
     "any": "Oricare",
@@ -603,7 +606,8 @@
       "openFilters": "Deschide filtrele",
       "myAccount": "Contul meu",
       "tapMap": "Atinge „Hartă”",
-      "viewToggle": "Comută vizualizarea"
+      "viewToggle": "Comută vizualizarea",
+      "recoveredFromCrash": "Pagina a repornit pentru a elibera memorie. Harta se încarcă când atingi Hartă."
     },
     "aiSearch": {
       "agent": "Agent",
@@ -648,5 +652,19 @@
     "climateRiskLayer": {
       "veryHigh": "Foarte ridicat"
     }
+  },
+  "constructionOptions": {
+    "ready": "Gata de mutare",
+    "underConstruction": "În construcție"
+  },
+  "orientationOptions": {
+    "north": "Nord",
+    "south": "Sud",
+    "east": "Est",
+    "west": "Vest",
+    "northEast": "Nord-est",
+    "northWest": "Nord-vest",
+    "southEast": "Sud-est",
+    "southWest": "Sud-vest"
   }
 }

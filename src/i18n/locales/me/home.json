@@ -259,5 +259,24 @@
     "categoriesSection": {
       "exclusive": "✦ Ekskluzivno"
     }
+  },
+  "residences": {
+    "title": "Nove rezidencije",
+    "subtitle": "Istražite nove zgrade sprat po sprat i izaberite svoj stan.",
+    "viewAll": "Sve rezidencije",
+    "viewAllCount": "Svih {{n}} rezidencija",
+    "explore": "Istraži rezidenciju",
+    "available": "{{available}} od {{total}} stanova slobodno",
+    "builtBy": "Gradi {{name}}",
+    "loadFailed": "Nove rezidencije trenutno nije moguće učitati."
+  },
+  "businesses": {
+    "title": "Imenik firmi",
+    "subtitle": "Graditelji, advokati, notari, selidbe i drugo — provjerene lokalne usluge za vaš dom.",
+    "viewAll": "Otvori imenik",
+    "viewAllCount": "Svih {{n}} firmi",
+    "loadFailed": "Firme trenutno nije moguće učitati.",
+    "prev": "Prikaži prethodne firme",
+    "next": "Prikaži još firmi"
   }
 }

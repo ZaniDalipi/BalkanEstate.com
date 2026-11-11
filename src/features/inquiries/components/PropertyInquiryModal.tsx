@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useAppContext } from '@/context/AppContext';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
+import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
@@ -7,6 +12,8 @@ import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { optimizeImageUrl } from '@/config/mediaConfig';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 interface PropertyInquiryModalProps {
   property: Property;
@@ -26,12 +33,23 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
   defaultPhone = '',
 }) => {
   const { t } = useTranslation(['property', 'common']);
-  const [formData, setFormData] = useState({
+  const userId = useAppContext().state.currentUser?.id;
+  const [blank] = useState(() => ({
     buyerName: defaultName,
     buyerEmail: defaultEmail,
     buyerPhone: defaultPhone,
     message: '',
-  });
+  }));
+  // An unsent message is kept on this device until it is sent
+  const draft = useFormDraft<typeof blank>(formDraftKey(`property-inquiry-${property.id}`, userId));
+  const [formData, setFormData] = useState(() => draft.restored ?? blank);
+  const isDirty = useDraftAutosave(draft, formData, blank);
+  const sendingRef = useRef(false);
+
+  const discardDraft = () => {
+    draft.discard();
+    setFormData(blank);
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +87,8 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
       return;
     }
 
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -88,10 +108,12 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
         buyerPhone: formData.buyerPhone.trim() || undefined,
         message: fullMessage,
       });
+      draft.finish();
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('property:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
     } finally {
+      sendingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -202,7 +224,11 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <FormLeaveGuard dirty={isOpen && isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
+
+              <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
+
+              <form onSubmit={handleSubmit} className="space-y-4" onKeyDown={handleFormEnterKey}>
                 {/* Name */}
                 <div className="relative">
                   <input
@@ -322,6 +348,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                     </>
                   )}
                 </button>
+                <SubmitShortcutHint className="mt-2" />
               </form>
 
               <p className="mt-4 text-xs text-neutral-500 text-center">

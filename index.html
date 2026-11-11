@@ -40,7 +40,8 @@
       })();
     </script>
 
-    <link rel="icon" type="image/svg+xml" href="/icons/logo-3d.svg" />
+    <!-- A 4KB PNG: the SVG logo embeds ~1MB of bitmaps and was downloaded on every page. -->
+    <link rel="icon" type="image/png" sizes="64x64" href="/icons/logo-3d-64.png" />
     <!-- maximum-scale=1 stops iOS Safari zooming the page when a form field
          under 16px is tapped, so fields can follow the fluid text size (see
          index.css → Fluid root size). iOS still allows pinch-zoom with it;
@@ -254,9 +255,14 @@
 
     <!-- Inline critical styles (moved from body for best practices) -->
     <style>
-      /* Prevent horizontal scrolling on all devices */
+      /* Prevent horizontal scrolling on all devices. iOS Safari still lets a
+         finger pan the page sideways under `hidden` whenever anything pokes
+         past the edge; `clip` (Safari 16+) leaves nothing to pan, and
+         `hidden` stays as the fallback for older engines. */
       html, body {
         overflow-x: hidden;
+        overflow-x: clip;
+        overscroll-behavior-x: none;
         max-width: 100vw;
       }
 
@@ -329,11 +335,8 @@
         scroll-behavior: smooth;
       }
 
-      /* Better focus styles for accessibility */
-      :focus-visible {
-        outline: 2px solid #0252CD;
-        outline-offset: 2px;
-      }
+      /* The keyboard focus outline lives in src/index.css (@layer base), where
+         components with their own focus style can replace it. */
 
       /* Reduce motion for users who prefer it */
       @media (prefers-reduced-motion: reduce) {

@@ -54,7 +54,8 @@
     "adBanners": "Reklamni baneri",
     "emailTemplates": "Šabloni e-mailova",
     "siteSettings": "Podešavanja sajta",
-    "residences": "Rezidencije"
+    "residences": "Rezidencije",
+    "archivedListings": "Arhivirani oglasi"
   },
   "properties": {
     "title": "Upravljanje Nekretninama",
@@ -127,7 +128,8 @@
       "admin": "Administrator",
       "agent": "Agent",
       "buyer": "Kupac",
-      "seller": "Prodavac"
+      "seller": "Prodavac",
+      "superAdmin": "Super administrator"
     },
     "status": {
       "active": "Aktivan",
@@ -230,7 +232,8 @@
       "sourceReferralDesc": "Koristite za nagrade od preporuka korisnika",
       "description": "Opis",
       "descriptionPlaceholder": "Interna bilješka o ovom kodu...",
-      "createCode": "Kreiraj Kod"
+      "createCode": "Kreiraj Kod",
+      "residenceHint": "Kodovi za otključavanje rezidencija lakše se prave u Rezidencije › Kodovi za otključavanje (moraju navesti proizvod rezidencije i pokriti punu cijenu)."
     },
     "bulk": {
       "numberOfCodes": "Broj Kodova",
@@ -1956,7 +1959,9 @@
       "sellerProYearly": "Prodavac Pro (godišnje)",
       "enterprisePlan": "Enterprise plan",
       "agentProMonthly": "Agent Pro (mjesečno)",
-      "agentProYearly": "Agent Pro (godišnje)"
+      "agentProYearly": "Agent Pro (godišnje)",
+      "residenceExtraBuilding": "Dodatne zgrade rezidencije",
+      "residencePass": "Residence Pass (12 mjeseci)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Preuzimanje statistike nije uspjelo",
@@ -2147,5 +2152,174 @@
       "range": "Koristite broj od 1 do {{max}}.",
       "belowUsed": "Ova rezidencija već ima {{used}} zgrada."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Pritisnite ponovo za brisanje",
+    "copied": "Kopirano",
+    "copy": "Kopiraj",
+    "copyCode": "Kopiraj {{code}}",
+    "copyFailed": "Kopiranje ovdje nije dozvoljeno: označite kod i kopirajte ga ručno.",
+    "created": {
+      "copyAll": "Kopiraj sve",
+      "done": "Gotovo",
+      "subtitle": "{{kind}} · važi do {{date}} · {{uses}} korišćenje/a po kodu",
+      "title": "Kodovi spremni: {{count}}"
+    },
+    "delete": "Obriši",
+    "disable": "Isključi",
+    "empty": "Nijedan kod ne odgovara.",
+    "emptyAll": "Još nema kodova. Napravite prvi pomoću “Novi kodovi”.",
+    "enable": "Uključi",
+    "filter": {
+      "active": "Spremno za korišćenje",
+      "all": "Svi",
+      "disabled": "Isključeni",
+      "expired": "Istekli",
+      "used": "Iskorišćeni"
+    },
+    "filterLabel": "Status",
+    "form": {
+      "cancel": "Otkaži",
+      "count": "Koliko kodova",
+      "countHint": "Do {{max}} odjednom",
+      "create": "Napravi kodove",
+      "creating": "Pravljenje…",
+      "days": "Važi (dana)",
+      "daysHint": "Do {{max}} dana",
+      "kind": "Šta otključavaju",
+      "note": "Napomena (za koga je)",
+      "notePlaceholder": "npr. Vardar Homes, dogovoreno telefonom",
+      "range": "Unesite cio broj od {{min}} do {{max}}.",
+      "title": "Novi kodovi za otključavanje",
+      "tooLong": "Najviše {{max}} znakova.",
+      "uses": "Korišćenja po kodu",
+      "usesHint": "Svaki nalog može iskoristiti kod jednom",
+      "discount": "Popust",
+      "discountFull": "Puna cijena (otključava odmah)",
+      "discountPercent": "Procenat popusta",
+      "discountFixed": "Iznos popusta (€)",
+      "percentValue": "Procenat popusta (%)",
+      "fixedValue": "Iznos popusta (€)",
+      "percentHint": "1 do {{max}}; vlasnik plaća ostatak",
+      "fixedHint": "Nikad više od cijene; vlasnik plaća ostatak"
+    },
+    "intro": "Vlasnici upisuju kod u “Kupi Residence Pass” da ga otključaju bez online plaćanja. Svaki kod pokriva punu cijenu onoga što otključava.",
+    "kind": {
+      "extra_building": "Dodatne zgrade",
+      "pass": "Residence Pass"
+    },
+    "loadError": "Kodove nije bilo moguće učitati.",
+    "markSent": "Označi kao poslato",
+    "markUnsent": "Označi kao neposlato",
+    "new": "Novi kodovi",
+    "removedResidence": "obrisana rezidencija",
+    "search": "Pronađi kod",
+    "searchPlaceholder": "npr. RES-7K3P",
+    "sent": "Poslato",
+    "status": {
+      "active": "Spremno za korišćenje",
+      "disabled": "Isključen",
+      "expired": "Istekao",
+      "scheduled": "Još ne važi",
+      "used": "Iskorišćen"
+    },
+    "title": "Kodovi za otključavanje",
+    "until": "do {{date}}",
+    "usedBy": "Iskoristio/la",
+    "uses": "Iskorišćeno {{used}} od {{limit}}",
+    "discount": {
+      "full": "Puna cijena",
+      "percent": "{{value}}% popusta",
+      "fixed": "{{amount}} popusta"
+    }
+  },
+  "archive": {
+    "title": "Arhivirani oglasi",
+    "subtitle": "Oglasi koji su uklonjeni, prodati ili izdati: ko ih je uklonio, kada i šta su bili.",
+    "all": "Svi",
+    "reasonFilter": "Razlog",
+    "search": "Traži naslov, adresu ili prodavca",
+    "removedByFilter": "Uklonio",
+    "removedByAnyone": "Uklonio bilo ko",
+    "reason": {
+      "deleted": "Obrisan",
+      "sold": "Prodat",
+      "rented": "Izdat"
+    },
+    "deleter": {
+      "owner": "Vlasnik",
+      "admin": "Administrator",
+      "agency": "Agencija"
+    },
+    "removedBy": {
+      "owner": "Uklonjen {{date}} – vlasnik ({{name}})",
+      "admin": "Uklonjen {{date}} – administrator {{name}}",
+      "agency": "Uklonjen {{date}} – agencija ({{name}})"
+    },
+    "archivedOn": "Arhiviran {{date}}",
+    "seller": "Prodavac: {{name}} ({{email}})",
+    "stats": "{{days}} dana u oglasu · {{views}} pregleda · {{saves}} čuvanja",
+    "wasStatus": "bio je: {{status}}",
+    "status": {
+      "active": "aktivan",
+      "pending": "na čekanju",
+      "draft": "nacrt",
+      "sold": "prodat",
+      "rented": "izdat"
+    },
+    "untitled": "Oglas bez naslova",
+    "loadError": "Arhiva nije mogla da se učita.",
+    "retry": "Pokušaj ponovo",
+    "empty": "Nema arhiviranih oglasa koji odgovaraju.",
+    "pages": "Stranice",
+    "prev": "Prethodna",
+    "next": "Sljedeća",
+    "pageOf": "Stranica {{page}} od {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "Ne možete promijeniti svoju ulogu. Zamolite drugog super administratora.",
+    "superAdminOnlyEdit": "Samo super administrator može promijeniti ulogu administratora.",
+    "superAdminOnlyGrant": "Samo super administrator može nekoga postaviti za administratora ili super administratora.",
+    "superAdminHint": "Administratori upravljaju sajtom; super administratori mogu i dodjeljivati i uklanjati administratorske uloge."
+  },
+  "superAdminClaim": {
+    "title": "Ovaj sajt još nema super administratora",
+    "body": "Super administrator može druge postaviti za administratora ili super administratora. Ovo može preuzeti samo jedan administrator, i to samo jednom; nakon toga super administratori dodjeljuju ulogu preko “Uredi korisnika”.",
+    "claim": "Postani super administrator",
+    "confirm": "Da, postavi me za super administratora",
+    "cancel": "Otkaži",
+    "working": "Radi se…",
+    "done": "Sada ste super administrator. Druge možete postaviti za administratora ili super administratora preko “Uredi korisnika”."
+  },
+  "adminAlerts": {
+    "title": "E-mailovi s upozorenjima za administratore",
+    "subtitle": "Ko dobija e-mail za nove korisnike, nove oglase i promjene administratorskih uloga. Administratori ih vide i u zvoncu za obavještenja.",
+    "loadError": "Podešavanja upozorenja nijesu mogla da se učitaju.",
+    "retry": "Pokušaj ponovo",
+    "disabled": "Upozorenja za administratore su isključena na serveru (ADMIN_NOTIFICATIONS=off). Ništa se ne šalje dok se to ne ukloni.",
+    "sendingTo": "Šalje se na: {{list}}",
+    "sendingToNobody": "Još se ne šalju e-mailovi.",
+    "source": {
+      "panel": "sa liste ispod",
+      "env": "iz podešavanja servera (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "svim administratorskim nalozima, jer lista nije postavljena",
+      "none": "nikome: dodajte adresu ispod"
+    },
+    "superAdminOnly": "Samo super administrator može promijeniti ko dobija ove e-mailove.",
+    "listLabel": "E-mail adrese za upozorenja",
+    "remove": "Ukloni {{email}}",
+    "addLabel": "Dodaj e-mail adresu",
+    "placeholder": "ime@primjer.com",
+    "add": "Dodaj",
+    "invalid": "Nije ispravan e-mail: {{list}}",
+    "tooMany": "Najviše {{max}} adresa.",
+    "save": "Sačuvaj adrese",
+    "saving": "Čuvanje…",
+    "saveError": "Adrese nijesu mogle da se sačuvaju.",
+    "emptyHint": "Ostavite listu praznom da se koristi podešavanje servera ili e-mail svakog administratora.",
+    "test": "Pošalji probni e-mail",
+    "testing": "Slanje…",
+    "testSent": "Probni e-mail poslat na {{list}}. Provjerite inbox (i spam).",
+    "testFailed": "Slanje nije uspjelo na {{list}}."
   }
 }

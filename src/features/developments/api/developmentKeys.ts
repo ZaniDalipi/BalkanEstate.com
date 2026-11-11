@@ -19,6 +19,9 @@ export const developmentKeys = {
   /** Every published view of one target (the explorer's camera perspectives). */
   publicViews: (slug: string, targetType: string, targetId: string) =>
     [...developmentKeys.publicDetail(slug), 'views', targetType, targetId] as const,
+  /** The company behind a residence and its other residences. */
+  publicByBusiness: (business: string) => [...developmentKeys.public(), 'by-business', business] as const,
+  publicDeveloper: (slug: string) => [...developmentKeys.publicDetail(slug), 'developer'] as const,
   /** The residence a marketplace listing belongs to (listing detail page). */
   forListing: (listingId: string) => [...developmentKeys.public(), 'for-listing', listingId] as const,
   /** What a residence costs (pricing page). */

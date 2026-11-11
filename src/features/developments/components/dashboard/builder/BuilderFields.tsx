@@ -1,9 +1,19 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/src/shared/components/ui/Input';
+import { WebAddressInput } from '../../shared/WebAddressInput';
 import { BUILDER_SOCIAL_LABELS, BUILDER_SOCIAL_NETWORKS } from '../../../types';
 import { BUILDER_LIMITS, type BuilderField, type BuilderForm } from '../../../validation/builderValidation';
 import type { BuilderMessages } from './useBuilderForm';
+import type { BuilderSocialNetwork } from '../../../types';
+
+/** What each network's address looks like, typed without https://. */
+const SOCIAL_PLACEHOLDER: Record<BuilderSocialNetwork, string> = {
+  facebook: 'facebook.com/yourcompany',
+  instagram: 'instagram.com/yourcompany',
+  linkedin: 'linkedin.com/company/yourcompany',
+  youtube: 'youtube.com/@yourcompany',
+};
 
 interface BuilderFieldsProps {
   form: BuilderForm;
@@ -47,7 +57,7 @@ export const BuilderFields: React.FC<BuilderFieldsProps> = ({ form, set, errors,
         {field('licenseNumber', t('builder.licenseNumber', 'Licence / registration no.'), { maxLength: L.licenseNumber })}
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {field('website', t('builder.website', 'Website'), { type: 'url', inputMode: 'url', maxLength: L.website, placeholder: 'https://', autoComplete: 'url' })}
+        <WebAddressInput label={t('builder.website', 'Website')} value={form.website} onValueChange={(v) => set('website', v)} error={errors.website} disabled={disabled} maxLength={L.website} autoComplete="url" />
         {field('email', t('builder.email', 'Email'), { type: 'email', inputMode: 'email', maxLength: L.email, autoComplete: 'email' })}
         {field('phone', t('builder.phone', 'Phone'), { type: 'tel', inputMode: 'tel', maxLength: L.phone, placeholder: '+389 …', autoComplete: 'tel' })}
         {field('address', t('builder.address', 'Office address'), { maxLength: L.address, autoComplete: 'street-address' })}
@@ -56,15 +66,13 @@ export const BuilderFields: React.FC<BuilderFieldsProps> = ({ form, set, errors,
         <legend className="mb-2 text-sm font-medium text-gray-700">{t('builder.socials', 'Social media')}</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           {BUILDER_SOCIAL_NETWORKS.map((n) => (
-            <Input
+            <WebAddressInput
               key={n}
               label={BUILDER_SOCIAL_LABELS[n]}
-              type="url"
-              inputMode="url"
-              placeholder="https://"
+              placeholder={SOCIAL_PLACEHOLDER[n]}
               maxLength={L.social}
               value={form.socials[n]}
-              onChange={(e) => set(`socials.${n}`, e.target.value)}
+              onValueChange={(v) => set(`socials.${n}`, v)}
               error={errors[`socials.${n}`]}
               disabled={disabled}
             />

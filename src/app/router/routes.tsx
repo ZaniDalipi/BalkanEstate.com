@@ -21,6 +21,7 @@ import { useOpenSidebar } from './layoutContext';
 import { lazyWithRetry } from './lazyWithRetry';
 import { paths, type BusinessDirectoryTab } from './paths';
 import { registerRouter } from './navigation';
+import { businessIdFromSlug } from '@/utils/slug';
 import {
   AdminRoute,
   AgencyRoute,
@@ -66,6 +67,7 @@ const AboutPage = lazy(() => import('@/src/features/legal/components/AboutPage')
 const BlogPage = lazy(() => import('@/src/features/blog/components/BlogPage'));
 const PublicDevelopmentsPage = lazy(() => import('@/src/features/developments/components/public/PublicDevelopmentsPage'));
 const PublicDevelopmentPage = lazy(() => import('@/src/features/developments/components/public/PublicDevelopmentPage'));
+const DeveloperPage = lazy(() => import('@/src/features/developments/components/public/developer/DeveloperPage'));
 const UnitDetailPage = lazy(() => import('@/src/features/developments/components/public/UnitDetailPage'));
 const DevelopmentsDashboardPage = lazy(() => import('@/src/features/developments/components/dashboard/DevelopmentsDashboardPage'));
 const CreateDevelopmentForm = lazy(() => import('@/src/features/developments/components/dashboard/CreateDevelopmentForm'));
@@ -84,13 +86,15 @@ const WithSidebar: React.FC<{ page: SidebarPage }> = ({ page: Page }) => {
   return <Page onToggleSidebar={openSidebar} />;
 };
 
-/** `/business-directory/{businesses,individuals,mine}` pick a tab; anything else is a listing. */
-const BusinessDirectoryRoute: React.FC<{ tab?: BusinessDirectoryTab }> = ({ tab }) => {
+/**
+ * `/business-directory/{businesses,individuals,mine}` pick a tab, `/new` opens
+ * the create form; anything else is a listing.
+ */
+const BusinessDirectoryRoute: React.FC<{ tab?: BusinessDirectoryTab; creating?: boolean }> = ({ tab, creating }) => {
   const { listingSlug } = useParams();
-  // SEO slugs end in `_EncodedId` ("acme-law-in-skopje_Ab12"); plain ids have none.
-  const underscore = listingSlug?.lastIndexOf('_') ?? -1;
-  const listingId = listingSlug && underscore > 0 ? listingSlug.slice(underscore + 1) : listingSlug ?? null;
-  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} />);
+  // SEO slugs end in `_` + a 16-character encoded id, which may itself contain "_".
+  const listingId = listingSlug ? businessIdFromSlug(listingSlug) : null;
+  return guarded(<BusinessDirectoryPage selectedListingId={listingId} initialTab={tab} creating={creating} />);
 };
 
 type AppRoute = RouteObject & { handle?: RouteHandle };
@@ -124,6 +128,7 @@ const pageRoutes: AppRoute[] = [
   page('business-directory/businesses', { view: 'business-directory' }, <BusinessDirectoryRoute tab="businesses" />),
   page('business-directory/individuals', { view: 'business-directory' }, <BusinessDirectoryRoute tab="individuals" />),
   page('business-directory/mine', { view: 'business-directory' }, <BusinessDirectoryRoute tab="mine" />),
+  page('business-directory/new', { view: 'business-directory' }, <BusinessDirectoryRoute creating />),
   page(
     'business-directory/:listingSlug',
     { view: 'business-directory', detail: 'business-listing', scrollParams: ['listingSlug'] },
@@ -133,7 +138,8 @@ const pageRoutes: AppRoute[] = [
   // Residences / Developments (public, read-only)
   page('developments', { view: 'developments' }, guarded(<PublicDevelopmentsPage />)),
   page('developments/:slug/units/:unitId', { view: 'developments', pageParams: ['slug', 'unitId'] }, guarded(<UnitDetailPage />)),
-  page('developments/:slug', { view: 'developments', pageParams: ['slug'] }, guarded(<PublicDevelopmentPage />)),
+  page('developments/:slug/developer', { view: 'developments', detail: 'residence', pageParams: ['slug'] }, guarded(<DeveloperPage />)),
+  page('developments/:slug', { view: 'developments', detail: 'residence', pageParams: ['slug'] }, guarded(<PublicDevelopmentPage />)),
 
   // The user's own space
   page('saved-searches', { view: 'saved-searches', ...noindex }, <SavedSearchesPage />),

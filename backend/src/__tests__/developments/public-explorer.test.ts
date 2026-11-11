@@ -7,6 +7,7 @@
 import request from 'supertest';
 import DevelopmentUnit from '../../models/DevelopmentUnit';
 import DevelopmentFollow from '../../models/DevelopmentFollow';
+import DevelopmentScene from '../../models/DevelopmentScene';
 import Property from '../../models/Property';
 import { createUnit } from '../../services/developments/developmentInventoryService';
 import { attachListingToUnit } from '../../services/developments/developmentListingService';
@@ -72,6 +73,27 @@ describe('GET /:slug', () => {
     // A1 → reserved via pending listing, R1 available, H1 hidden (not counted).
     expect(res.body.buildings[0].stats).toEqual({ units: 2, available: 1, withTour: 0 });
     expect(res.body.floors).toHaveLength(2);
+  });
+
+  it('says which floors have a published picture — never a draft or deleted one', async () => {
+    const t = await setupPublic();
+    const scene = (targetId: unknown, extra: Record<string, unknown>) =>
+      DevelopmentScene.create({
+        developmentId: t.devId, targetType: 'floor', targetId, viewKey: `v-${Math.random().toString(36).slice(2, 8)}`,
+        imageUrl: 'https://cdn.test/floor.jpg', imageWidth: 1536, imageHeight: 1024, ...extra,
+      });
+    await scene(t.floor._id, { published: { hotspots: [], publishedAt: new Date(), version: 1 } });
+    await scene(t.floor2._id, {}); // draft only
+    const hasViews = async () => {
+      const res = await request(app).get(`${PUB}/${t.dev.slug}`);
+      expect(res.status).toBe(200);
+      return Object.fromEntries(res.body.floors.map((f: { label: string; hasViews: boolean }) => [f.label, f.hasViews]));
+    };
+    expect(await hasViews()).toEqual({ 'Floor 1': true, 'Floor 2': false });
+
+    // A deleted published picture no longer counts.
+    await DevelopmentScene.updateMany({ targetId: t.floor._id }, { $set: { deletedAt: new Date() } });
+    expect(await hasViews()).toEqual({ 'Floor 1': false, 'Floor 2': false });
   });
 
   it('404s a draft development', async () => {
@@ -154,6 +176,23 @@ describe('GET /:slug/units/:unitId', () => {
     expect((await request(app).get(`${PUB}/${t.dev.slug}/units/${encodeId(String(t.hidden._id))}`)).status).toBe(404);
     expect((await request(app).get(`${PUB}/${t.dev.slug}/units/${encodeId(String(other.unit._id))}`)).status).toBe(404);
     expect((await request(app).get(`${PUB}/${t.dev.slug}/units/nonsense`)).status).toBe(404);
+  });
+
+  it('labels listing photos with their room tag, passing on only known tags', async () => {
+    const t = await setupPublic();
+    // Written straight to the collection, as old or imported data could be, past the model's validation.
+    await Property.collection.updateOne(
+      { _id: t.pending._id },
+      { $set: { images: [{ url: 'https://cdn.test/a.jpg', tag: 'kitchen' }, { url: 'https://cdn.test/b.jpg', tag: '<script>alert(1)</script>' }, { url: 'https://cdn.test/c.jpg' }] } }
+    );
+    const res = await request(app).get(`${PUB}/${t.dev.slug}/units/${encodeId(String(t.unit._id))}`);
+    expect(res.status).toBe(200);
+    const listing = res.body.listings.find((l: { id: string }) => l.id === encodeId(String(t.pending._id)));
+    expect(listing.images).toEqual([
+      { url: 'https://cdn.test/a.jpg', tag: 'kitchen' },
+      { url: 'https://cdn.test/b.jpg' },
+      { url: 'https://cdn.test/c.jpg' },
+    ]);
   });
 
   it('hides the on-request price on the detail too', async () => {

@@ -5,6 +5,7 @@ import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import MagneticTiltCard from './MagneticTiltCard';
+import { categoryGradient } from '../utils/categoryStyle';
 
 interface BusinessCardProps {
   listing: BusinessListing;
@@ -12,33 +13,9 @@ interface BusinessCardProps {
   onQuoteRequest?: (listing: BusinessListing) => void;
 }
 
-// Category gradient banners
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  construction: 'from-amber-500 to-orange-600',
-  renovation: 'from-blue-500 to-cyan-600',
-  cleaning: 'from-emerald-400 to-teal-600',
-  moving: 'from-purple-500 to-indigo-600',
-  interior_design: 'from-pink-500 to-rose-600',
-  architecture: 'from-slate-500 to-zinc-700',
-  plumbing: 'from-sky-500 to-blue-600',
-  electrical: 'from-yellow-500 to-amber-600',
-  landscaping: 'from-green-500 to-emerald-700',
-  security: 'from-red-500 to-rose-700',
-  real_estate_law: 'from-indigo-500 to-violet-700',
-  insurance: 'from-cyan-500 to-blue-700',
-  home_inspection: 'from-orange-400 to-red-600',
-  pest_control: 'from-lime-500 to-green-700',
-  painting: 'from-fuchsia-500 to-purple-700',
-  roofing: 'from-stone-500 to-neutral-700',
-  hvac: 'from-blue-400 to-indigo-600',
-  furniture: 'from-amber-400 to-yellow-600',
-  appliances: 'from-gray-500 to-slate-700',
-  other: 'from-primary to-blue-600',
-};
-
 const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRequest }) => {
   const { t } = useTranslation('businessDirectory');
-  const gradient = CATEGORY_GRADIENTS[listing.category] || CATEGORY_GRADIENTS.other;
+  const gradient = categoryGradient(listing.category);
   const isIndividual = listing.listingType === 'individual';
 
   // Quick action handlers (stop propagation to prevent card click)
@@ -81,7 +58,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
       <button
         type="button"
         onClick={() => onClick(listing)}
-        className="w-full text-left bg-white rounded-2xl shadow-md shadow-neutral-200/60 hover:shadow-xl hover:shadow-neutral-300/50 overflow-hidden border border-neutral-100/80 group transition-all duration-500"
+        className="liquid-surface group w-full overflow-hidden rounded-[26px] text-left transition-transform duration-500"
       >
         {/* Category gradient banner / uploaded banner image */}
         <div className={`h-20 sm:h-22 ${listing.bannerUrl ? '' : `bg-gradient-to-r ${gradient}`} relative overflow-hidden`}>
@@ -161,10 +138,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
 
           {/* Listing type badge */}
           <div className="absolute top-3 right-3">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm ${
+            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
               isIndividual
-                ? 'bg-violet-500/30 text-white border border-violet-300/30'
-                : 'bg-white/20 text-white border border-white/20'
+                ? 'liquid-dark !bg-violet-600/40'
+                : 'liquid-dark'
             }`}>
               <SoftIcon name={isIndividual ? 'user' : 'store'} className="w-4 h-4" />
               {isIndividual ? t('types.individual') : t('types.business')}
@@ -174,7 +151,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           {/* Verified badge on banner */}
           {listing.isVerified && (
             <div className="absolute top-3 left-3">
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/30 backdrop-blur-md rounded-lg text-white text-[10px] font-bold border border-emerald-300/30 shadow-sm">
+              <span className="liquid-dark inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold !bg-emerald-600/45">
                 <SoftIcon name="shield" className="w-4 h-4" />
                 {t('verified')}
               </span>
@@ -255,7 +232,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           <button
             type="button"
             onClick={handleQuoteRequest}
-            className="w-full py-2 mt-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[11px] sm:text-xs font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 hover:scale-[1.02] active:scale-[0.98]"
+            className="liquid-tint w-full py-2 mt-1 text-[11px] sm:text-xs font-bold rounded-full transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 hover:scale-[1.02] active:scale-[0.98]"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
@@ -265,7 +242,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-t border-neutral-100/80 flex items-center justify-between bg-gradient-to-r from-neutral-50/80 to-neutral-50/30">
+        <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-t border-white/60 flex items-center justify-between bg-white/25">
           <span className="flex items-center gap-1 sm:gap-1.5 truncate min-w-0">
             <SoftIcon name="pin" className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             <span className="truncate text-[11px] sm:text-xs text-neutral-500">{listing.city}, {listing.country}</span>

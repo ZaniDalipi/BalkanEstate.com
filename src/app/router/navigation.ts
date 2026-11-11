@@ -35,6 +35,24 @@ export interface NavigateOptions {
   state?: unknown;
   /** Which way the page moves; defaults to forward. */
   direction?: NavigationDirection;
+  /**
+   * The page on screen only changes what it shows (opens a sheet, a building,
+   * a camera view) and has its own loading states, so this is not a page
+   * change: no page-loading circle (`NavigationPendingIndicator`).
+   */
+  inPage?: boolean;
+}
+
+/** History-state marker of an `inPage` navigation. */
+const IN_PAGE = 'beInPage';
+
+/** Whether a location's history state marks an in-page change (see `NavigateOptions.inPage`). */
+export const isInPageState = (state: unknown): boolean =>
+  typeof state === 'object' && state !== null && (state as Record<string, unknown>)[IN_PAGE] === true;
+
+/** Whether the location the router has moved to is an in-page change. */
+export function routerLocationIsInPage(): boolean {
+  return router ? isInPageState(router.state.location.state) : false;
 }
 
 /**
@@ -64,7 +82,10 @@ export function navigate(to: string, options: NavigateOptions = {}): void {
     window.location.assign(target);
     return;
   }
-  void router.navigate(target, { replace: options.replace, state: options.state });
+  const state = options.inPage
+    ? { ...(typeof options.state === 'object' && options.state !== null ? options.state : {}), [IN_PAGE]: true }
+    : options.state;
+  void router.navigate(target, { replace: options.replace, state });
 }
 
 /**
@@ -97,6 +118,16 @@ export function onRouteChange(listener: () => void): () => void {
     last = state.location.key;
     listener();
   });
+}
+
+/**
+ * The key of the location the router has moved to. React renders that move as
+ * a transition, so for as long as the next page is still loading this differs
+ * from `useLocation().key`, which is the page still on screen. Null before the
+ * router exists.
+ */
+export function routerLocationKey(): string | null {
+  return router ? router.state.location.key : null;
 }
 
 /**

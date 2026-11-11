@@ -162,7 +162,7 @@
     "countryRequired": "Țara este obligatorie.",
     "cityRequired": "Orașul este obligatoriu.",
     "categoryRequired": "Alegeți o categorie.",
-    "websiteInvalid": "Introduceți o adresă web completă care începe cu http:// sau https://.",
+    "websiteInvalid": "Introduceți o adresă web precum www.exemplu.com.",
     "emailInvalid": "Introduceți o adresă de email validă.",
     "latInvalid": "Latitudinea trebuie să fie un număr între -90 și 90.",
     "lngInvalid": "Longitudinea trebuie să fie un număr între -180 și 180.",
@@ -456,6 +456,37 @@
       "homes": "Locuințe: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Locuințe cu tur 360°: {{n}}"
+    },
+    "showcase": {
+      "back": "Înapoi la clădire",
+      "backPlain": "Înapoi",
+      "mode": "Vizualizarea planului",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Planul pentru {{name}}",
+      "photoAlt": "{{name}}, fotografia {{n}}",
+      "prevPhoto": "Fotografia anterioară",
+      "nextPhoto": "Fotografia următoare",
+      "photoOf": "{{n}} din {{total}}",
+      "modes": "Ce se afișează",
+      "modeFloor": "Pe etajul său",
+      "modePhotos": "Fotografii",
+      "floorAlt": "{{floor}}: {{name}} evidențiat",
+      "loading": "Se încarcă imaginea etajului…",
+      "floorFailed": "Imaginea etajului nu a putut fi încărcată.",
+      "retry": "Încearcă din nou"
+    },
+    "dive": {
+      "skip": "Omite",
+      "status": "Vă ducem la {{name}}"
+    },
+    "bathrooms_one": "{{count}} baie",
+    "bathrooms_few": "{{count}} băi",
+    "bathrooms_other": "{{count}} de băi",
+    "floors": {
+      "title": "Etaje",
+      "whole": "Toată clădirea",
+      "hasPlan": "Are plan de etaj"
     }
   },
   "feature": {
@@ -1196,8 +1227,8 @@
       "trialInProgress": "Alt ansamblu al tău este în proba gratuită. Cumpără un abonament ca să-l publici acum pe acesta.",
       "trialLimit": "Ai folosit toate probele gratuite. Cumpără un abonament ca să publici.",
       "buildingLimit": "Acest ansamblu poate avea {{limit}} clădiri. Deblochează mai multe ca să adaugi una nouă.",
-      "paymentSoonAmount": "Plata online vine în curând. Mai sunt de plată {{amount}}, așa că introdu un cod care le acoperă.",
-      "paymentSoon": "Plata online vine în curând. Introdu un cod ca să deblochezi acum.",
+      "paymentSoonAmount": "Mai sunt de plătit {{amount}}. Plata se stabilește direct cu noi; introduceți un cod care o acoperă.",
+      "paymentSoon": "Plata se stabilește direct cu noi. Introduceți codul de deblocare pe care vi l-am trimis.",
       "couponInvalid": "Acest cod nu este valabil pentru ansambluri.",
       "coupon": {
         "unknown": "Nu există un astfel de cod. Verificați ortografia.",
@@ -1213,8 +1244,10 @@
     },
     "code": {
       "label": "Cod de deblocare",
-      "required": "Introdu codul. Plata online vine în curând.",
-      "format": "Codurile au litere, cifre, - și _ (3–64 caractere)."
+      "required": "Introduceți codul de deblocare pe care vi l-am trimis după ce am stabilit plata.",
+      "format": "Codurile au litere, cifre, - și _ (3–64 caractere).",
+      "applied": "Cod aplicat: plătiți {{amount}} în loc de {{list}}.",
+      "appliedNext": "Scrieți-ne pentru rest (e-mailul conține deja codul și prețul); după plată vă trimitem un cod de deblocare de introdus aici."
     },
     "quantity": {
       "label": "Clădiri de adăugat",
@@ -1229,7 +1262,9 @@
     "summary": {
       "each": "{{n}} × preț",
       "discount": "Reducere Premium ({{pct}}%)",
-      "total": "Total"
+      "total": "Total",
+      "validity": "O singură plată, valabilă {{months}} luni — nu pe viață. Nu se reînnoiește singură.",
+      "code": "Cod {{code}}"
     },
     "done": {
       "pass": "Abonamentul de ansamblu este activ",
@@ -1265,7 +1300,19 @@
     "publishWithPass": "Cumpără abonament și publică",
     "publishTrial": "Publică · gratuit {{days}} zile",
     "createNote": "Crearea este gratuită. Publicarea pornește o probă gratuită de 15 zile; după ea, abonamentul de ansamblu îl ține online.",
-    "publishAgency": "Publică · gratuit cu planul agenției"
+    "publishAgency": "Publică · gratuit cu planul agenției",
+    "arrange": {
+      "title": "Cum plătiți",
+      "body": "Nu primim plăți online. Stabilim plata direct cu dvs.: ne scrieți, confirmăm împreună detaliile și vă trimitem un cod de deblocare pe care îl introduceți mai jos.",
+      "emailAria": "Scrieți la {{email}} despre această achiziție",
+      "mailBody": "Bună ziua,\n\nAș dori să cumpăr: {{item}} ({{price}}).\nAnsamblul: {{link}}\n\nMulțumesc.",
+      "extraItem": "Clădiri suplimentare: {{n}}",
+      "copy": "Copiază adresa",
+      "copied": "Copiat",
+      "copyFailed": "Copierea nu a reușit. Selectați {{email}} mai sus sau scrieți din aplicația dvs. de e-mail.",
+      "passItem": "Abonament ansamblu",
+      "withCode": "cu codul {{code}}"
+    }
   },
   "pricingSection": {
     "title": "Ansambluri",
@@ -1324,7 +1371,7 @@
     "FIELD_RANGE": "Introduceți un număr de la {{min}} la {{max}}.",
     "TOO_MANY_ITEMS": "Cel mult {{max}} intrări.",
     "EMAIL_INVALID": "Introduceți o adresă de email validă, de ex. name@example.com.",
-    "URL_INVALID": "Introduceți o adresă web completă care începe cu https://.",
+    "URL_INVALID": "Introduceți o adresă web precum www.exemplu.com.",
     "CURRENCY_EUR_ONLY": "Prețurile sunt în euro (EUR).",
     "FLOOR_NOT_IN_BUILDING": "Acest etaj aparține altei clădiri. Alegeți un etaj al clădirii alese.",
     "ENTRANCE_NOT_IN_BUILDING": "Această intrare aparține altei clădiri.",
@@ -1404,7 +1451,13 @@
     "PHONE_INVALID": "Introduceți un număr de telefon valid, de ex. +389 2 123 4567.",
     "SOCIAL_HOST": "Acesta trebuie să fie un link către {{network}}.",
     "ENTRANCE_NAME_TAKEN": "Această clădire are deja o intrare numită „{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} unități folosesc încă această intrare. Mutați-le mai întâi la altă intrare."
+    "ENTRANCE_IN_USE": "{{count}} unități folosesc încă această intrare. Mutați-le mai întâi la altă intrare.",
+    "RESIDENCE_GALLERY_FULL": "Un ansamblu poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
+    "GALLERY_ORDER_INVALID": "Fotografiile s-au schimbat între timp. Reîncărcați pagina și încercați din nou.",
+    "BUILDER_NOT_FOUND": "Acest ansamblu nu și-a prezentat încă constructorul.",
+    "BUSINESS_NOT_FOUND": "Această companie nu este printre înregistrările dvs. din Catalogul de firme. Alegeți una pe care o dețineți.",
+    "CODE_IN_USE": "Acest cod a fost folosit, așa că rămâne în evidență. Dezactivați-l în schimb.",
+    "CODE_NOT_FOUND": "Acest cod nu mai există. Reîncărcați pagina."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1462,7 +1515,24 @@
     "projects": "Proiecte finalizate",
     "license": "Licență",
     "office": "Birou",
-    "email": "Email"
+    "email": "Email",
+    "aboutCompany": "Despre companie",
+    "developerOf": "Constructorul {{name}}",
+    "aboutHeading": "Despre {{name}}",
+    "officeContact": "Birou și contact",
+    "openInMaps": "Deschide în Hărți",
+    "residencesHeading": "Ansambluri de la {{name}}",
+    "thisResidence": "Acest ansamblu",
+    "residencesLoading": "Se încarcă celelalte ansambluri…",
+    "residencesError": "Celelalte ansambluri nu au putut fi încărcate.",
+    "backTo": "Înapoi la {{name}}",
+    "noProfile": "Acest ansamblu nu și-a prezentat încă constructorul.",
+    "seeHomes": "Vezi locuințele din {{name}}",
+    "companyLabel": "Compania",
+    "companyBy": "De la",
+    "companyOf": "Compania din spatele {{name}}",
+    "agencyPage": "Profilul agenției",
+    "businessPage": "Pagina din Catalogul de firme"
   },
   "entrance": {
     "label": "Intrare",
@@ -1505,5 +1575,44 @@
     "inBuilding": "Intrare a clădirii",
     "newHere": "Intrare nouă",
     "homesAvailable_few": "{{count}} locuințe disponibile"
+  },
+  "sheet": {
+    "save": "Salvează"
+  },
+  "gallery": {
+    "heading": "Fotografii",
+    "hint": "Apar pe pagina ansamblului după copertă. Până la {{max}} fotografii — JPG, PNG, WebP sau AVIF, câte 10 MB.",
+    "count": "{{n}} din {{max}}",
+    "add": "Adaugă fotografii",
+    "uploading": "Se încarcă…",
+    "photoAlt": "Fotografia {{n}}",
+    "moveEarlier": "Mută fotografia {{n}} mai devreme",
+    "moveLater": "Mută fotografia {{n}} mai târziu",
+    "remove": "Elimină fotografia {{n}}",
+    "removeMessage": "Fotografia este eliminată de pe pagina ansamblului.",
+    "showAll": "Fotografii ({{n}})"
+  },
+  "immersive": {
+    "headline": "Găsiți-vă casa în {{name}}",
+    "priceFrom": "De la {{price}}",
+    "hint": "Treceți peste clădire și alegeți un apartament",
+    "back": "Toate rezidențele",
+    "nav": "Rezidență",
+    "cta": "Vedeți apartamentele"
+  },
+  "builderBusiness": {
+    "title": "Compania din Catalogul de firme",
+    "intro": "Odată legată, cumpărătorii îi văd datele și pagina; pagina ei afișează acest ansamblu. Se pot lega doar companiile pe care le dețineți.",
+    "pick": "Compania dvs.",
+    "link": "Leagă compania",
+    "none": "Nu aveți încă o companie în Catalogul de firme. Adăugați-o o dată și legați-o de toate ansamblurile dvs.",
+    "add": "Adăugați compania dvs.",
+    "loadError": "Firmele dvs. nu au putut fi încărcate.",
+    "notLinked": "Nu este legat de o companie din Catalogul de firme.",
+    "linked": "Legată: cumpărătorii îi văd datele din Catalogul de firme",
+    "linkedOther": "O companie legată",
+    "inactive": "Nu este activă în catalog, așa că deocamdată cumpărătorii văd câmpurile de mai jos.",
+    "view": "Vezi pagina ei",
+    "unlink": "Dezleagă"
   }
 }

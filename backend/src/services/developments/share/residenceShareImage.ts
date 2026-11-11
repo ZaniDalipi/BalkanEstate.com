@@ -74,8 +74,9 @@ const isLocalUrl = (url: string) => {
 /**
  * The photo's bytes through the image proxy (SSRF-guarded, cached). Outside
  * production, demo pictures served by the local dev server are read directly.
+ * Shared with the business share card.
  */
-async function loadPhoto(url: string): Promise<Buffer | null> {
+export async function loadPhoto(url: string): Promise<Buffer | null> {
   try {
     if (process.env.NODE_ENV !== 'production' && isLocalUrl(url)) {
       const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
@@ -90,7 +91,8 @@ async function loadPhoto(url: string): Promise<Buffer | null> {
 
 async function render(facts: ResidenceShareFacts, lang: SupportedLangCode): Promise<Buffer> {
   const photo = facts.photoUrl ? await loadPhoto(facts.photoUrl) : null;
-  let base: sharp.Sharp;
+  // Typed from the sharp function, so it compiles whichever sharp typings are installed.
+  let base: ReturnType<typeof sharp>;
   let size: { width: number; height: number } | undefined;
   if (photo) {
     const { data, info } = await sharp(photo, { limitInputPixels: 40_000_000 }).rotate().toBuffer({ resolveWithObject: true });

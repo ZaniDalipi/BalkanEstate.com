@@ -13,8 +13,8 @@ export interface HoverState {
   id: string;
   /** Viewport box of the region; the card points at its top centre. */
   rect: AnchorRect;
-  /** Shown by a first tap on touch. */
-  touch: boolean;
+  /** Opened by a click (an apartment) or a tap: it stays until dismissed, and hovering elsewhere doesn't replace it. */
+  pinned: boolean;
 }
 
 /** How long a card survives the pointer leaving its region (time to reach the card). */
@@ -29,7 +29,8 @@ const rectOf = (el: Element): AnchorRect => {
  * Hover / focus / tap behaviour for explorer regions:
  *  - mouse: hover shows the region's card, anchored to the region; the card
  *    stays open while the pointer travels onto it (grace delay) so its button
- *    can be clicked; clicking the region opens it directly;
+ *    can be clicked. Clicking an apartment pins its card (its button, or a
+ *    second click, opens it); clicking any other region opens it directly;
  *  - touch: first tap shows the card, a second tap (or the card's button) opens;
  *  - keyboard: focus shows the card, Enter/Space opens;
  *  - a press that turned into a pan (consumeDrag) never opens anything.
@@ -47,7 +48,7 @@ export function useHotspotInteraction(consumeDrag: () => boolean, onActivate: (h
     (id?: string) => {
       cancelClose();
       closeTimer.current = setTimeout(() => {
-        setHover((cur) => (cur && !cur.touch && (!id || cur.id === id) ? null : cur));
+        setHover((cur) => (cur && !cur.pinned && (!id || cur.id === id) ? null : cur));
       }, CARD_GRACE_MS);
     },
     [cancelClose]
@@ -84,20 +85,22 @@ export function useHotspotInteraction(consumeDrag: () => boolean, onActivate: (h
     onPointerEnter: (e: React.PointerEvent<SVGGElement>) => {
       if (e.pointerType !== 'mouse') return;
       cancelClose();
-      setHover({ id: h.id, rect: rectOf(e.currentTarget), touch: false });
+      const rect = rectOf(e.currentTarget);
+      setHover((cur) => (cur?.pinned ? cur : { id: h.id, rect, pinned: false }));
     },
     onPointerMove: (e: React.PointerEvent<SVGGElement>) => {
       if (e.pointerType !== 'mouse') return;
       cancelClose();
-      setHover((cur) => (cur?.id === h.id && !cur.touch ? cur : { id: h.id, rect: rectOf(e.currentTarget), touch: false }));
+      const el = e.currentTarget;
+      setHover((cur) => (cur?.pinned || cur?.id === h.id ? cur : { id: h.id, rect: rectOf(el), pinned: false }));
     },
     onPointerLeave: () => scheduleClose(h.id),
     onClick: (e: React.MouseEvent<SVGGElement>) => {
       e.stopPropagation();
       if (consumeDrag()) return;
-      if (pointerType.current === 'touch') {
-        if (hover?.id === h.id && hover.touch) activate(h);
-        else setHover({ id: h.id, rect: rectOf(e.currentTarget), touch: true });
+      if (pointerType.current === 'touch' || h.linkType === 'unit') {
+        if (hover?.id === h.id && hover.pinned) activate(h);
+        else setHover({ id: h.id, rect: rectOf(e.currentTarget), pinned: true });
         return;
       }
       activate(h);
@@ -105,7 +108,7 @@ export function useHotspotInteraction(consumeDrag: () => boolean, onActivate: (h
     onActivateKey: () => activate(h),
     onFocus: (e: React.FocusEvent<SVGGElement>) => {
       const rect = rectOf(e.currentTarget);
-      setHover((cur) => (cur?.id === h.id ? cur : { id: h.id, rect, touch: false }));
+      setHover((cur) => (cur?.id === h.id ? cur : { id: h.id, rect, pinned: false }));
     },
     onBlur: () => scheduleClose(h.id),
   });
@@ -119,7 +122,7 @@ export function useHotspotInteraction(consumeDrag: () => boolean, onActivate: (h
   const showFor = useCallback(
     (h: Hotspot, el: Element) => {
       cancelClose();
-      setHover({ id: h.id, rect: rectOf(el), touch: false });
+      setHover({ id: h.id, rect: rectOf(el), pinned: false });
     },
     [cancelClose]
   );

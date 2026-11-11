@@ -9,6 +9,9 @@ import {
   getAdminStats,
   getAllUsers,
   updateUserAdmin,
+  updateUserRoleAdmin,
+  getSuperAdminStatus,
+  claimSuperAdmin,
   deleteUser,
   getAllAgenciesAdmin,
   getAgencyDetailAdmin,
@@ -60,6 +63,7 @@ import {
   getUserActivityLogs,
 } from '../controllers/activityLogController';
 import { triggerDailyReportManually } from '../jobs/dailyActivityReportJob';
+import { createResidenceCodesAdmin, deleteResidenceCodeAdmin, listResidenceCodesAdmin, updateResidenceCodeAdmin } from '../controllers/adminResidenceCodeController';
 import {
   getAllSubscriptions,
   getSubscriptionById,
@@ -128,6 +132,8 @@ import {
   resetSystemSettings,
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
+import { getArchivedListingsAdmin } from '../controllers/archivedListingController';
+import { getAdminAlertSettings, testAdminAlert, updateAdminAlertSettings } from '../controllers/adminAlertSettingsController';
 import { isAllowedPhotoUrl, allowedPhotoHostsHint } from '../config/imageHosts';
 import Article from '../models/Article';
 import {
@@ -156,6 +162,9 @@ router.get('/activity-logs/user/:userId', logAdminAction('VIEW_USER_ACTIVITY'), 
 // ===== User Management =====
 router.get('/users', logAdminAction('VIEW_USERS'), getAllUsers);
 router.patch('/users/:id', logAdminAction('UPDATE_USER'), updateUserAdmin);
+router.put('/users/:id/role', logAdminAction('UPDATE_USER_ROLE'), updateUserRoleAdmin);
+router.get('/super-admin/status', getSuperAdminStatus);
+router.post('/super-admin/claim', logAdminAction('CLAIM_SUPER_ADMIN'), claimSuperAdmin);
 router.delete('/users/:id', logAdminAction('DELETE_USER'), deleteUser);
 
 // ===== Agency Management =====
@@ -170,6 +179,11 @@ router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetai
 
 // ===== Residences (no payment provider yet: limits and passes are set here) =====
 router.get('/residences', logAdminAction('VIEW_RESIDENCES'), listResidencesAdmin);
+// Unlock codes for Residence Passes and extra buildings (declared before /residences/:id/…).
+router.get('/residences/codes', logAdminAction('VIEW_RESIDENCE_CODES'), listResidenceCodesAdmin);
+router.post('/residences/codes', logAdminAction('CREATE_RESIDENCE_CODES'), createResidenceCodesAdmin);
+router.patch('/residences/codes/:id', logAdminAction('UPDATE_RESIDENCE_CODE'), updateResidenceCodeAdmin);
+router.delete('/residences/codes/:id', logAdminAction('DELETE_RESIDENCE_CODE'), deleteResidenceCodeAdmin);
 router.patch('/residences/:id/building-limit', logAdminAction('SET_RESIDENCE_BUILDING_LIMIT'), setBuildingLimitAdmin);
 router.post('/residences/:id/grant', logAdminAction('GRANT_RESIDENCE_PASS'), grantResidenceAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);
@@ -183,6 +197,7 @@ router.get('/properties-missing-coords', logAdminAction('VIEW_MISSING_COORDS'), 
 router.post('/fix-coordinates', logAdminAction('FIX_COORDINATES'), fixPropertyCoordinates);
 router.post('/fix-coordinates/:propertyId', logAdminAction('FIX_SINGLE_COORDINATES'), fixSinglePropertyCoordinates);
 router.post('/sync-property-schema', logAdminAction('SYNC_PROPERTY_SCHEMA'), syncPropertySchema);
+router.get('/archived-listings', logAdminAction('VIEW_ARCHIVED_LISTINGS'), getArchivedListingsAdmin);
 
 // ===== Business Listing Management =====
 router.get('/business-listings', logAdminAction('VIEW_BUSINESS_LISTINGS'), getAllBusinessListingsAdmin);
@@ -474,6 +489,9 @@ for (const base of ['/promo-slots', '/ad-banners']) {
 router.get('/system-settings', logAdminAction('VIEW_SYSTEM_SETTINGS'), getSystemSettings);
 router.patch('/system-settings', logAdminAction('UPDATE_SYSTEM_SETTINGS'), updateSystemSettings);
 router.post('/system-settings/reset', logAdminAction('RESET_SYSTEM_SETTINGS'), resetSystemSettings);
+router.get('/alert-settings', logAdminAction('VIEW_ALERT_SETTINGS'), getAdminAlertSettings);
+router.put('/alert-settings', logAdminAction('UPDATE_ALERT_SETTINGS'), updateAdminAlertSettings);
+router.post('/alert-settings/test', logAdminAction('TEST_ALERT_EMAIL'), testAdminAlert);
 
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);

@@ -88,6 +88,23 @@ describe('BuyResidenceDialog', () => {
     expect(await screen.findByText('billing.refusal.paymentSoonAmount')).toBeInTheDocument();
   });
 
+  it('a discount code lowers the total: the dialog shows the new price and the email carries the code', async () => {
+    const user = userEvent.setup();
+    render(<BuyResidenceDialog developmentId="d1" kind="pass" billing={billing()} onClose={vi.fn()} />);
+    await user.type(screen.getByLabelText('billing.code.label'), 'RES-AAAA-BBBB');
+    vi.mocked(api.checkoutResidence).mockRejectedValueOnce(refusal('PAYMENT_NOT_CONFIGURED', { amount: 119.2, listAmount: 149, discount: 29.8, couponCode: 'RES-AAAA-BBBB' }));
+    await user.click(screen.getByRole('button', { name: 'billing.unlock' }));
+    // Accepted, not an error: the code's line in the summary, and the next step.
+    expect(await screen.findByRole('status')).toHaveTextContent('billing.code.applied');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByText('billing.summary.code')).toBeInTheDocument();
+    const mail = screen.getByRole('link', { name: /billing.arrange.emailAria/ });
+    expect(decodeURIComponent(mail.getAttribute('href') ?? '')).toContain('billing.arrange.withCode');
+    // Another code is not the one applied any more.
+    await user.type(screen.getByLabelText('billing.code.label'), 'X');
+    expect(screen.queryByText('billing.summary.code')).not.toBeInTheDocument();
+  });
+
   it('asks how many buildings to add, and checks the number', async () => {
     const user = userEvent.setup();
     render(<BuyResidenceDialog developmentId="d1" kind="extra_building" billing={billing({ state: 'active' })} onClose={vi.fn()} />);

@@ -1,6 +1,7 @@
 import type { Development, UpdateDevelopmentPayload } from '../../../types';
 import type { DetailsFormValues } from '../../../validation/developmentValidation';
 import { formatCoordinate } from '../../../utils/format';
+import { stripScheme, toWebUrl } from '../../../utils/webAddress';
 
 /** Everything the "Residence details" form edits, as text the inputs hold. */
 export interface DetailsDraft extends DetailsFormValues {
@@ -28,14 +29,15 @@ export const toDraft = (d: Development): DetailsDraft => ({
   constructionStatus: d.constructionStatus,
   expectedCompletionDate: d.expectedCompletionDate ? d.expectedCompletionDate.slice(0, 10) : '',
   yearBuilt: str(d.yearBuilt),
-  website: str(d.website),
+  // Typed without https:// (the field shows it); added back on save.
+  website: stripScheme(str(d.website)),
   contactName: str(d.contact?.name),
   contactEmail: str(d.contact?.email),
   contactPhone: str(d.contact?.phone),
   amenities: [...(d.amenities ?? [])],
 });
 
-const TEXT_FIELDS = ['name', 'description', 'country', 'city', 'municipality', 'address', 'website', 'expectedCompletionDate'] as const;
+const TEXT_FIELDS = ['name', 'description', 'country', 'city', 'municipality', 'address', 'expectedCompletionDate'] as const;
 
 const toCoordinate = (v: string): number | null => (v.trim() ? Number(v) : null);
 
@@ -49,6 +51,8 @@ export const changedFields = (draft: DetailsDraft, d: Development): UpdateDevelo
   for (const key of TEXT_FIELDS) {
     if (draft[key].trim() !== before[key].trim()) out[key] = draft[key].trim();
   }
+  const website = toWebUrl(draft.website);
+  if (website !== toWebUrl(before.website)) out.website = website;
   if (draft.category !== before.category) out.category = draft.category as Development['category'];
   if (draft.constructionStatus !== before.constructionStatus) {
     out.constructionStatus = draft.constructionStatus as Development['constructionStatus'];

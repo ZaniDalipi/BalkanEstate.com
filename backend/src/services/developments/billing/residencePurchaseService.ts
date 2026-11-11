@@ -127,9 +127,16 @@ export async function checkout(
   if (!discount || !valid?.valid || !discount.applicablePlans?.includes(productId)) {
     throw new BillingError('COUPON_INVALID', valid?.reason ?? 'This code is not valid for residences.', discount ? couponReason(valid?.valid ? undefined : valid?.reason, discount.minPurchaseAmount) : { reason: 'unknown' }, 400);
   }
-  const remaining = Math.round((price.amount - discount.calculateDiscount(price.amount)) * 100) / 100;
+  const off = discount.calculateDiscount(price.amount);
+  const remaining = Math.round((price.amount - off) * 100) / 100;
   if (remaining > 0) {
-    throw new BillingError('PAYMENT_NOT_CONFIGURED', 'Online payment is coming soon. This code does not cover the full price.', { amount: remaining }, 503);
+    // A discount code: nothing is spent; the owner learns the lower price, paid by arrangement (or online, once on).
+    throw new BillingError(
+      'PAYMENT_NOT_CONFIGURED',
+      'Online payment is coming soon. This code lowers the price; the rest is paid by arrangement.',
+      { amount: remaining, listAmount: price.amount, discount: off, couponCode: code },
+      503
+    );
   }
   // Claim the code atomically so two requests can't spend a single-use code twice.
   const actor = new mongoose.Types.ObjectId(String(actorId));

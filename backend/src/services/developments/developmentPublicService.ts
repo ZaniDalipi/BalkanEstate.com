@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import Development, { IDevelopment } from '../../models/Development';
 import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import DevelopmentFloor from '../../models/DevelopmentFloor';
+import DevelopmentScene from '../../models/DevelopmentScene';
 import DevelopmentEntrance, { IDevelopmentEntrance } from '../../models/DevelopmentEntrance';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import Property from '../../models/Property';
@@ -23,6 +24,9 @@ import { toObjectId } from './developmentRefs';
 import { resolveEffectiveAvailability } from './unitAvailability';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
 import { effectiveTour } from './unitTour';
+import { isPropertyImageTag } from '../../config/propertyImageTags';
+import { loadOwnerAgency, resolveCompany } from './residenceCompany';
+import { loadLinkedBusiness } from './builderBusiness';
 
 const LIVE = { $exists: false } as const;
 
@@ -61,7 +65,31 @@ export const toPublicDevelopment = (development: IDevelopment): Record<string, u
   json.allowUnitInquiries = development.allowUnitInquiries !== false;
   json.builder = publicBuilder(development.builder);
   if (!json.builder) delete json.builder;
+  // Gallery photos without their storage keys.
+  json.gallery = (development.gallery ?? []).map(({ url, width, height }) => ({ url, ...(width ? { width } : {}), ...(height ? { height } : {}) }));
   return json;
+};
+
+/**
+ * A photo for each residence in a list: its cover, else its first gallery
+ * photo, else the first published picture of the whole residence (the
+ * explorer view), so cards never stay blank when the owner skipped the cover.
+ */
+export const listPreviewImages = async (developments: IDevelopment[]): Promise<Map<string, string>> => {
+  const out = new Map<string, string>();
+  const missing: mongoose.Types.ObjectId[] = [];
+  for (const d of developments) {
+    const photo = d.coverImage || d.gallery?.[0]?.url;
+    if (photo) out.set(String(d._id), photo);
+    else missing.push(d._id as mongoose.Types.ObjectId);
+  }
+  if (missing.length === 0) return out;
+  const scenes = await DevelopmentScene.find({ developmentId: { $in: missing }, targetType: 'development', deletedAt: null, published: { $exists: true } })
+    .sort({ sortOrder: 1, createdAt: 1 })
+    .select('developmentId imageUrl')
+    .lean();
+  for (const s of scenes) if (s.imageUrl && !out.has(String(s.developmentId))) out.set(String(s.developmentId), s.imageUrl);
+  return out;
 };
 
 /** The builder as buyers see it: only once it has a name, and without storage keys. */
@@ -74,6 +102,8 @@ const publicBuilder = (b: IDevelopment['builder']): Record<string, unknown> | un
     else delete plain[kind];
   }
   delete plain._id;
+  // The Business Directory link is internal (buyers get the company's page address instead).
+  delete plain.businessListingId;
   const socials = plain.socials as Record<string, unknown> | undefined;
   if (!socials || Object.values(socials).every((v) => !v)) delete plain.socials;
   return plain;
@@ -217,15 +247,30 @@ const loadStructureMaps = async (developmentId: mongoose.Types.ObjectId) => {
   };
 };
 
+/**
+ * Floors with at least one published picture: the explorer's floor picker
+ * opens those on their picture. Same rule as the public views (published,
+ * not deleted), so a draft never shows through.
+ */
+const floorsWithPublishedViews = async (developmentId: mongoose.Types.ObjectId): Promise<Set<string>> => {
+  const ids = await DevelopmentScene.distinct('targetId', { developmentId, targetType: 'floor', deletedAt: null, published: { $ne: null } });
+  return new Set(ids.map(String));
+};
+
 /** GET /:slug → { development, buildings (with stats), floors } */
 export const getPublicDevelopmentDetail = async (slug: unknown) => {
   const development = await loadPublishedDevelopment(slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
-  const [{ buildings, floors, entrances }, units] = await Promise.all([
+  // The company behind it: its linked business, else the builder typed, else the publishing agency.
+  const needsAgency = !development.builder?.name?.trim();
+  const [{ buildings, floors, entrances }, units, floorsWithViews, ownerAgency, business] = await Promise.all([
     loadStructureMaps(developmentId),
     DevelopmentUnit.find(visibleUnitFilter(developmentId)).select(
       'buildingId entranceId availability listingIds primaryListingId virtualTourUrl'
     ),
+    floorsWithPublishedViews(developmentId),
+    needsAgency ? loadOwnerAgency(development) : Promise.resolve(null),
+    loadLinkedBusiness(development),
   ]);
   const listings = await loadListingStatuses(units);
 
@@ -252,8 +297,11 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
     stats.set(key, s);
   }
 
+  const publicDevelopment = toPublicDevelopment(development);
+  const company = resolveCompany(publicDevelopment.builder as Record<string, unknown> | undefined, business, ownerAgency);
+  if (company) publicDevelopment.builder = company;
   return {
-    development: toPublicDevelopment(development),
+    development: publicDevelopment,
     buildings: buildings.map((b) => {
       const json = b.toJSON() as Record<string, unknown>;
       delete json.coverMediaId;
@@ -266,6 +314,7 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
       const json = f.toJSON() as Record<string, unknown>;
       delete json.floorplanMediaId;
       delete json.deletedAt;
+      json.hasViews = floorsWithViews.has(String(f._id));
       return json;
     }),
     entrances: entrances.map((e) => toPublicEntrance(e, entranceStats.get(String(e._id)))),
@@ -366,7 +415,8 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
       images: (Array.isArray(l.images) ? l.images : [])
         .filter((img) => img && typeof img.url === 'string')
         .slice(0, 6)
-        .map((img) => ({ url: img.url })),
+        // The room tag (living_room, kitchen…) labels the photo in the apartment showcase; only known tags go out.
+        .map((img) => ({ url: img.url, ...(isPropertyImageTag(img.tag) ? { tag: img.tag } : {}) })),
       price: l.price,
       listingType: l.listingType,
       beds: l.beds,

@@ -135,7 +135,13 @@
     "stats": {
       "services": "Usluge",
       "views": "Pregledi",
-      "memberSince": "Član od"
+      "memberSince": "Član od",
+      "offered": "u ponudi",
+      "profileViews": "pregleda profila",
+      "yearsAgo_one": "prije {{count}} godine",
+      "yearsAgo_few": "prije {{count}} godine",
+      "yearsAgo_other": "prije {{count}} godina",
+      "thisYear": "ove godine"
     },
     "cta": {
       "title": "Spremni za suradnju s {{name}}?",
@@ -143,7 +149,83 @@
       "callNow": "Nazovite {{phone}}",
       "sendEmail": "Pošalji e-mail"
     },
-    "established": "Osnovano {{year}}."
+    "established": "Osnovano {{year}}.",
+    "actions": {
+      "label": "Mogućnosti kontakta",
+      "call": "Nazovi",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "E-pošta",
+      "website": "Web stranica",
+      "directions": "Upute"
+    },
+    "atAGlance": "Ukratko",
+    "copied": "Kopirano",
+    "copy": "Kopiraj",
+    "copyAddress": "Kopiraj adresu",
+    "copyFailed": "Kopiranje nije uspjelo — označite tekst",
+    "copyValue": "Kopiraj: {{label}}",
+    "founded": "Osnovano",
+    "highlights": "Istaknuto",
+    "licenseNumber": "Broj licence",
+    "listedBy": "Objavio",
+    "loading": "Učitavanje tvrtke…",
+    "logoAlt": "Logotip: {{name}}",
+    "openSocial": "{{network}} (otvara se u novoj kartici)",
+    "priceRange": "Raspon cijena",
+    "profileViews": "Pregledi profila",
+    "readLess": "Prikaži manje",
+    "readMore": "Pročitaj više",
+    "seeAll": "Prikaži sve",
+    "similar": "Više u kategoriji {{category}}",
+    "price": {
+      "budget": "Povoljno",
+      "mid": "Srednje",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Otvoreno",
+      "closes": "Zatvara u {{time}}",
+      "allDay": "24 sata",
+      "closed": "Zatvoreno",
+      "closedToday": "Danas zatvoreno",
+      "opensAt": "Otvara u {{time}}",
+      "opensTomorrow": "Otvara sutra u {{time}}",
+      "opensOn": "Otvara: {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} godina poslovanja",
+    "yearsInBusiness_few": "{{count}} godine poslovanja",
+    "yearsInBusiness_other": "{{count}} godina poslovanja",
+    "route": {
+      "straight": "{{distance}} zračnom linijom",
+      "noRoute": "Trenutno ne možemo izračunati rutu — aplikacija za karte ispod može.",
+      "car": "Autom",
+      "foot": "Pješice",
+      "bike": "Biciklom",
+      "modeLabel": "Način putovanja",
+      "openIn": "Otvori u {{app}}",
+      "locating": "Tražimo vas…",
+      "retry": "Pokušaj ponovno s lokacijom",
+      "fromMe": "Udaljenost i ruta od moje lokacije",
+      "denied": "Lokacija je isključena za ovu stranicu. Dopustite je u postavkama preglednika — ili neka vas aplikacija za karte pronađe.",
+      "unavailable": "Nismo mogli pronaći vašu lokaciju. Aplikacija za karte vas ipak može odvesti.",
+      "privacy": "Vaša se lokacija koristi samo za izračun rute. Ne sprema se.",
+      "fromYou": "{{distance}} od vas"
+    },
+    "map": {
+      "layer": "Stil karte",
+      "standard": "Karta",
+      "satellite": "Satelit",
+      "approximate": "Približno — postavljeno prema adresi",
+      "cityOnly": "Približno — samo područje grada",
+      "finding": "Tražimo adresu na karti…",
+      "label": "Karta: {{name}}",
+      "gestureDesktop": "Koristite Ctrl + pomicanje za zumiranje",
+      "gestureMac": "Koristite ⌘ + pomicanje za zumiranje",
+      "gestureMobile": "Koristite dva prsta za pomicanje karte"
+    },
+    "residences": "Rezidencije",
+    "residencesSubtitle": "Stanovi koje {{name}} gradi na BalkanEstate"
   },
   "days": {
     "monday": "Ponedjeljak",
@@ -286,7 +368,21 @@
     "editSuccessMessage": "Oglas tvrtke je ažuriran.",
     "errorTitle": "Učitavanje tvrtki nije uspjelo",
     "errorMessage": "Nešto je pošlo po zlu. Pokušajte kasnije.",
-    "backToList": "Natrag na Moje tvrtke"
+    "backToList": "Natrag na Moje tvrtke",
+    "drafts": {
+      "title": "Skice",
+      "subtitle": "Još nije objavljeno. Spremljeno samo na ovom uređaju.",
+      "badge": "Skica",
+      "untitled": "Tvrtka bez naziva",
+      "savedAt": "Spremljeno na ovom uređaju {{date}}",
+      "keptUntil": "čuva se do {{date}}",
+      "continue": "Nastavi",
+      "discard": "Odbaci",
+      "discardTitle": "Odbaciti ovu skicu?",
+      "discardMessage": "Ono što ste unijeli bit će izbrisano s ovog uređaja. Ovo se ne može poništiti.",
+      "unsavedChanges": "Nespremljene izmjene",
+      "continueEditing": "Nastavi uređivanje"
+    }
   },
   "delete": {
     "confirmTitle": "Izbriši oglas",
@@ -309,5 +405,14 @@
       "preview": "Pregled",
       "bannerPreview": "Pregled bannera"
     }
+  },
+  "paymentMethods": {
+    "cash": "Gotovina",
+    "credit_card": "Kreditna kartica",
+    "debit_card": "Debitna kartica",
+    "bank_transfer": "Bankovni prijenos",
+    "paypal": "PayPal",
+    "crypto": "Kripto",
+    "invoice": "Račun"
   }
 }

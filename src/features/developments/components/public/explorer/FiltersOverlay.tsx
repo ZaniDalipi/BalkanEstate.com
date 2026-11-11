@@ -17,7 +17,7 @@ export const FiltersOverlay: React.FC<FiltersOverlayProps> = ({ fullscreen, onCl
       className={cn(
         'z-20 overflow-y-auto',
         fullscreen
-          ? 'absolute inset-x-2 top-3 max-h-[calc(100%-1.5rem)] sm:left-auto sm:right-3 sm:w-[420px]'
+          ? 'absolute left-[calc(var(--stage-safe-left,0px)+0.5rem)] right-[calc(var(--stage-safe-right,0px)+0.5rem)] top-[calc(var(--stage-safe-top,0px)+0.75rem)] max-h-[calc(100%-1.5rem-var(--stage-safe-top,0px)-var(--stage-safe-bottom,0px))] sm:left-auto sm:right-[calc(var(--stage-safe-right,0px)+0.75rem)] sm:w-[420px]'
           : 'relative px-2 pb-2 sm:absolute sm:right-3 sm:top-3 sm:max-h-[calc(100%-1.5rem)] sm:w-[420px] sm:p-0'
       )}
       onPointerDown={(e) => e.stopPropagation()}

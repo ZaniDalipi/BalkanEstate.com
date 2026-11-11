@@ -879,5 +879,18 @@
     "title": "Stranica se nije mogla učitati",
     "retry": "Pokušajte ponovno"
   }
-}
+},
+  "formDraft": {
+    "restoredTitle": "Vratili smo ono što ste unijeli prošli put.",
+    "restoredMessage": "Spremljeno na ovom uređaju {{date}}.",
+    "startOver": "Odbaci i počni ispočetka",
+    "leaveTitle": "Napustiti ovaj obrazac?",
+    "leaveMessage": "Još ga niste poslali. Spremite ga kao skicu na ovom uređaju da ga dovršite kasnije ili ga odbacite.",
+    "stay": "Nastavi uređivanje",
+    "keepDraft": "Spremi skicu i izađi",
+    "discard": "Odbaci i izađi"
+  },
+  "formSubmit": {
+    "shortcutPrefix": "ili pritisnite"
+  }
 }

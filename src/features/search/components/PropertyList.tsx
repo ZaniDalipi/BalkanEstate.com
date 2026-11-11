@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
+import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation } from '@/types';
+import { amenityAlternatives, amenityLabel } from '@/utils/amenityMatch';
+import { bedroomOptionLabel } from '@/utils/bedroomFilter';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { SearchIcon, XMarkIcon, BellIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
@@ -54,6 +56,10 @@ interface PropertyListProps {
   isLoadingProperties?: boolean;
   isAuthenticated?: boolean;
   onOpenAuthModal?: () => void;
+  /** Cards to page in at first: a list brought back after being released keeps its depth. */
+  initialVisibleCount?: number;
+  /** Told how many cards are paged in, so a released list can come back as deep. */
+  onVisibleCountChange?: (count: number) => void;
 }
 
 /**
@@ -101,6 +107,13 @@ const FilterButton: React.FC<{
  * Rent / Buy pictures as the sidebar.
  */
 type FilterIcon = SoftIconName | 'listingType';
+
+const ORIENTATION_OPTIONS: { value: Exclude<Orientation, 'any'>; fallback: string }[] = [
+  { value: 'north', fallback: 'North' }, { value: 'northEast', fallback: 'North-east' },
+  { value: 'east', fallback: 'East' }, { value: 'southEast', fallback: 'South-east' },
+  { value: 'south', fallback: 'South' }, { value: 'southWest', fallback: 'South-west' },
+  { value: 'west', fallback: 'West' }, { value: 'northWest', fallback: 'North-west' },
+];
 const FilterLabel: React.FC<{ icon?: FilterIcon; className?: string; children: React.ReactNode }> = ({ icon, className, children }) => (
   <label className={`flex items-center gap-1.5 text-xs font-medium text-neutral-700 ${className ?? 'mb-1'}`}>
     {icon === 'listingType' ? (
@@ -373,7 +386,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             <FilterButtonGroup
                                 label={t('search:filters.bedrooms')}
                                 icon="bed"
-                                options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, {value: 3, label: '3+'}, {value: 4, label: '4+'}, ]}
+                                options={[ {value: null, label: t('search:options.any')}, ...[1, 2, 3, 4].map(n => ({ value: n, label: bedroomOptionLabel(n, filters) })) ]}
                                 selectedValue={filters.beds}
                                 onChange={(value) => onFilterChange('beds', value)}
                             />
@@ -436,6 +449,33 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 />
                             </div>
                         </div>
+
+                        {/* Construction status */}
+                        <div>
+                            <FilterLabel icon="wrench">{t('search:filters.constructionStatus', 'Construction')}</FilterLabel>
+                            <select
+                                value={filters.constructionStatus ?? 'any'}
+                                onChange={(e) => onFilterChange('constructionStatus', e.target.value as NonNullable<Filters['constructionStatus']>)}
+                                className={inputBaseClasses}
+                            >
+                                <option value="any">{t('search:options.any')}</option>
+                                <option value="ready">{t('search:constructionOptions.ready', 'Ready to move in')}</option>
+                                <option value="under-construction">{t('search:constructionOptions.underConstruction', 'Under construction')}</option>
+                            </select>
+                        </div>
+
+                        {/* Kitchens */}
+                        <FilterButtonGroup
+                            label={t('search:filters.kitchens', 'Kitchens')}
+                            icon="kitchen"
+                            options={[
+                                {value: null, label: t('search:options.any')},
+                                {value: 1, label: '1+'},
+                                {value: 2, label: '2+'},
+                            ]}
+                            selectedValue={filters.minKitchens ?? null}
+                            onChange={(value) => onFilterChange('minKitchens', value)}
+                        />
 
                         {/* Parking */}
                         <FilterButtonGroup
@@ -538,6 +578,21 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 <option value="E">E</option>
                                 <option value="F">F</option>
                                 <option value="G">G</option>
+                            </select>
+                        </div>
+
+                        {/* Orientation */}
+                        <div>
+                            <FilterLabel icon="sun">{t('search:filters.orientation', 'Orientation')}</FilterLabel>
+                            <select
+                                value={filters.orientation ?? 'any'}
+                                onChange={(e) => onFilterChange('orientation', e.target.value as Orientation)}
+                                className={inputBaseClasses}
+                            >
+                                <option value="any">{t('search:options.any')}</option>
+                                {ORIENTATION_OPTIONS.map(o => (
+                                    <option key={o.value} value={o.value}>{t(`search:orientationOptions.${o.value}`, o.fallback)}</option>
+                                ))}
                             </select>
                         </div>
 
@@ -702,7 +757,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                                 key={amenity}
                                                 className="flex items-center gap-1 bg-primary-light text-primary-dark text-xs font-semibold px-2 py-1 rounded-full"
                                             >
-                                                <span>#{amenity}</span>
+                                                <span title={amenityAlternatives(amenity).join(' · ')}>#{amenityLabel(amenity)}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -801,9 +856,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Use props instead of useAppContext() to avoid re-rendering the
     // entire property list when unrelated context state changes (e.g. savedHomes).
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, outOfArea = null, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, outOfArea = null, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal, initialVisibleCount, onVisibleCountChange } = props;
 
-    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const [visibleCount, setVisibleCount] = useState(initialVisibleCount ?? ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
@@ -861,9 +916,19 @@ const PropertyList = memo<PropertyListProps>((props) => {
     // Memoized so JSON.stringify only runs when filters reference changes, not on every
     // internal state change (visibleCount, isLoadingMore, etc.).
     const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    // The first run is the mount itself: a list returning from the map keeps
+    // the depth it was given, and only a real change of filters starts over.
+    const isFirstFiltersKey = useRef(true);
     useEffect(() => {
+      if (isFirstFiltersKey.current) {
+        isFirstFiltersKey.current = false;
+        return;
+      }
       setVisibleCount(ITEMS_PER_PAGE);
     }, [filtersKey]);
+    useEffect(() => {
+      onVisibleCountChange?.(visibleCount);
+    }, [visibleCount, onVisibleCountChange]);
 
     // Show skeleton placeholders briefly when search filters change,
     // so users see a clear "refreshing" signal instead of an instant jump.

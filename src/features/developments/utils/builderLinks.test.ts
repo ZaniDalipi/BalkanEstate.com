@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mailHref, safeWebHref, siteLabel, telHref, yearsActive } from './builderLinks';
+import { mailHref, mapsSearchHref, safeWebHref, siteLabel, telHref, yearsActive } from './builderLinks';
 
 describe('builder links', () => {
   it('only plain http(s) web links become links', () => {
@@ -20,5 +20,11 @@ describe('builder links', () => {
     expect(siteLabel('https://www.balkanbuild.mk/x')).toBe('balkanbuild.mk');
     expect(yearsActive(2004, new Date('2026-05-01'))).toBe(22);
     expect(yearsActive(2030, new Date('2026-05-01'))).toBeUndefined();
+  });
+  it('searches the office on a map with the address encoded, and never for an empty or overlong one', () => {
+    expect(mapsSearchHref(' Bul. Partizanski 12,\n Skopje & Co ')).toBe('https://www.google.com/maps/search/?api=1&query=Bul.%20Partizanski%2012%2C%20Skopje%20%26%20Co');
+    expect(mapsSearchHref('   ')).toBeUndefined();
+    expect(mapsSearchHref(undefined)).toBeUndefined();
+    expect(mapsSearchHref('x'.repeat(301))).toBeUndefined();
   });
 });

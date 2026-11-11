@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { developmentKeys } from '../api/developmentKeys';
 import {
@@ -118,6 +119,26 @@ export function usePublishedScene(
     staleTime: 2 * 60_000,
   });
   return { scene: query.data?.scene ?? null, isLoading: query.isLoading, error: query.error };
+}
+
+/**
+ * Start loading a target's published views ahead of time (the floor the buyer
+ * points at in the floor picker), so opening it does not wait on the network.
+ * Shares `usePublicViews`' cache; a failed prefetch is simply asked again on open.
+ */
+export function usePrefetchPublicViews(slug: string | undefined) {
+  const qc = useQueryClient();
+  return useCallback(
+    (targetType: SceneTargetType, targetId: string) => {
+      if (!slug || !targetId) return;
+      void qc.prefetchQuery({
+        queryKey: developmentKeys.publicViews(slug, targetType, targetId),
+        queryFn: () => getPublicViews(slug, targetType, targetId),
+        staleTime: 2 * 60_000,
+      });
+    },
+    [qc, slug]
+  );
 }
 
 /** Every published view of a target, in display order — the explorer's perspectives. */

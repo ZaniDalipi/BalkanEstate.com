@@ -9,6 +9,9 @@ import { generateSearchName, generateSearchNameFromCoords } from '@/services/gem
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { useFeatureMatches } from '@/src/features/search/hooks/useFeatureMatches';
+import { applyFilterChange } from '@/utils/bedroomFilter';
+import { readRentHandoff } from '@/src/features/search/ai/rentHandoff';
 import { narrowToMapView } from '@/src/features/search/mapList';
 import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
@@ -52,7 +55,12 @@ export function useRentalSearch() {
     // (the home-page city gallery's Rent button, a shared URL) would otherwise
     // land on an unfiltered list. A lazy initialiser means the very first
     // render already has the filter, so no results flash unfiltered first.
+    //
+    // An AI search started on the buy page arrives with its whole filter set in
+    // the navigation state (see rentHandoff) and starts from that instead.
     const [filters, setFilters] = useState<Filters>(() => {
+        const fromAi = readRentHandoff((window.history.state as { usr?: unknown } | null)?.usr);
+        if (fromAi) return fromAi;
         const query = new URLSearchParams(window.location.search).get('q')?.trim() ?? '';
         return {
             ...RENTAL_DEFAULTS,
@@ -248,9 +256,11 @@ export function useRentalSearch() {
     // Client-side filtering + sorting (same pattern as buy page — instant, no API call).
     // Bounds are deliberately NOT applied here: the map draws every rental that
     // matches the filters, and only the list follows the viewport (below).
+    // Listings the server found to have every amenity, read from the whole listing.
+    const featureMatches = useFeatureMatches(activeFilters);
     const baseFilteredProperties = useMemo(
-        () => filterAndSortProperties(rentalProperties, activeFilters),
-        [rentalProperties, activeFilters]
+        () => filterAndSortProperties(rentalProperties, activeFilters, { featureMatches }),
+        [rentalProperties, activeFilters, featureMatches]
     );
 
     /**
@@ -266,9 +276,9 @@ export function useRentalSearch() {
     const needsRelaxedText = baseFilteredProperties.length === 0 && activeFilters.query.trim() !== '';
     const relaxedProperties = useMemo(() => {
         if (!needsRelaxedText) return null;
-        const relaxed = filterAndSortProperties(rentalProperties, { ...activeFilters, query: '' });
+        const relaxed = filterAndSortProperties(rentalProperties, { ...activeFilters, query: '' }, { featureMatches });
         return relaxed.length > 0 ? relaxed : null;
-    }, [needsRelaxedText, rentalProperties, activeFilters]);
+    }, [needsRelaxedText, rentalProperties, activeFilters, featureMatches]);
 
     /**
      * What the map draws — and the set the list is drawn from, so the two
@@ -320,7 +330,7 @@ export function useRentalSearch() {
     }, []);
 
     const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
-        const next = { ...filters, [key]: value } as Filters;
+        const next = applyFilterChange(filters, key, value);
 
         // Picking a country moves the map to it — the filter and the view
         // should never disagree about where the user is looking. The select

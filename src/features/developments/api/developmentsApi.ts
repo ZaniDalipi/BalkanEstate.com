@@ -6,6 +6,7 @@
 import { apiRequest, uploadRequest, blobRequest } from '@/src/shared/api';
 import type { ImportRowPayload } from '../utils/csvImport';
 import type {
+  PublicDeveloper,
   Development,
   DevelopmentBuilding,
   DevelopmentEntrance,
@@ -91,6 +92,10 @@ export interface PublicDevelopmentDetail {
 
 export const getPublicDevelopment = (slug: string): Promise<PublicDevelopmentDetail> =>
   apiRequest<PublicDevelopmentDetail>(`${PUBLIC}/${encodeURIComponent(slug)}`);
+
+/** The company behind a published residence (404 `BUILDER_NOT_FOUND` when it has none). */
+export const getPublicDeveloper = (slug: string): Promise<PublicDeveloper> =>
+  apiRequest<PublicDeveloper>(`${PUBLIC}/${encodeURIComponent(slug)}/developer`);
 
 export const getPublicDevelopmentUnits = (
   slug: string
@@ -178,6 +183,18 @@ export const deleteEntrance = (id: string, entranceId: string): Promise<{ succes
 export const getDevelopmentStructure = (id: string): Promise<DevelopmentStructure> =>
   apiRequest<DevelopmentStructure>(`${DASH}/${id}/structure`, { requiresAuth: true });
 
+export const uploadResidencePhotos = (id: string, files: File[]): Promise<{ development: Development }> => {
+  const formData = new FormData();
+  files.forEach((f) => formData.append('images', f));
+  return uploadRequest<{ development: Development }>(`${DASH}/${id}/gallery`, formData);
+};
+
+export const deleteResidencePhoto = (id: string, index: number): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/gallery/${index}`, { method: 'DELETE', requiresAuth: true });
+
+export const reorderResidencePhotos = (id: string, urls: string[]): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/gallery/order`, { method: 'PATCH', body: { urls }, requiresAuth: true });
+
 export const uploadDevelopmentCover = (
   id: string,
   file: File
@@ -199,6 +216,14 @@ export const uploadBuilderImage = (id: string, kind: 'logo' | 'banner', file: Fi
 
 export const deleteBuilderImage = (id: string, kind: 'logo' | 'banner'): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(`${DASH}/${id}/builder/${kind}`, { method: 'DELETE', requiresAuth: true });
+
+/** Link the builder to a Business Directory company the user owns (null unlinks). */
+export const linkBuilderBusiness = (id: string, businessId: string | null): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/builder/business`, { method: 'PUT', body: { businessId }, requiresAuth: true });
+
+/** The published residences a Business Directory company builds (its directory page). */
+export const getBusinessResidences = (business: string): Promise<{ residences: Development[] }> =>
+  apiRequest<{ residences: Development[] }>(`${PUBLIC}/by-business/${encodeURIComponent(business)}`);
 
 export const createDevelopment = (payload: CreateDevelopmentPayload): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(DASH, {

@@ -13,8 +13,9 @@ import UserManager from './UserManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import InteractionHeatmap from './InteractionHeatmap';
 import PropertyManager from './PropertyManager';
+import { ArchivedListingsManager } from './archive/ArchivedListingsManager';
 import AgencyManager from './AgencyManager';
-import { ResidenceManager } from './residences/ResidenceManager';
+import { ResidencesAdmin } from './residences/ResidencesAdmin';
 import PricingManager from './PricingManager';
 import InquiryManager from './InquiryManager';
 import AgentRequestManager from './AgentRequestManager';
@@ -48,6 +49,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'promotions': 'promotionCoupons',
   'promotion-plans': 'promotionPlans',
   'properties': 'properties',
+  'archived-listings': 'archivedListings',
   'agencies': 'agencies',
   'residences': 'residences',
   'pricing': 'pricing',
@@ -76,6 +78,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'promotionCoupons': 'promotions',
   'promotionPlans': 'promotion-plans',
   'properties': 'properties',
+  'archivedListings': 'archived-listings',
   'agencies': 'agencies',
   'residences': 'residences',
   'pricing': 'pricing',
@@ -238,10 +241,12 @@ const AdminDashboard: React.FC = () => {
         return <CityPhotosManager />;
       case 'properties':
         return <PropertyManager />;
+      case 'archivedListings':
+        return <ArchivedListingsManager />;
       case 'agencies':
         return <AgencyManager />;
       case 'residences':
-        return <ResidenceManager />;
+        return <ResidencesAdmin />;
       case 'settings':
         return <SystemSettings />;
       case 'howItWorks':

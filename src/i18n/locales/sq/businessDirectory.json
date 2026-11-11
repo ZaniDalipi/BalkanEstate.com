@@ -131,7 +131,12 @@
     "stats": {
       "services": "Shërbime",
       "views": "Shikime",
-      "memberSince": "Anëtar që nga"
+      "memberSince": "Anëtar që nga",
+      "offered": "të ofruara",
+      "profileViews": "shikime profili",
+      "yearsAgo_one": "{{count}} vit më parë",
+      "yearsAgo_other": "{{count}} vjet më parë",
+      "thisYear": "këtë vit"
     },
     "licensed": "I licensuar",
     "languages": "Gjuhët",
@@ -143,7 +148,82 @@
       "callNow": "Thirr {{phone}}",
       "sendEmail": "Dërgo Email"
     },
-    "established": "Themeluar më {{year}}"
+    "established": "Themeluar më {{year}}",
+    "actions": {
+      "label": "Mundësitë e kontaktit",
+      "call": "Telefono",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "Email",
+      "website": "Faqja",
+      "directions": "Udhëzime"
+    },
+    "atAGlance": "Me një shikim",
+    "copied": "U kopjua",
+    "copy": "Kopjo",
+    "copyAddress": "Kopjo adresën",
+    "copyFailed": "Nuk u kopjua — përzgjidhni tekstin",
+    "copyValue": "Kopjo: {{label}}",
+    "founded": "Themeluar",
+    "highlights": "Pikat kryesore",
+    "licenseNumber": "Numri i licencës",
+    "listedBy": "Publikuar nga",
+    "loading": "Po ngarkohet biznesi…",
+    "logoAlt": "Logoja e {{name}}",
+    "openSocial": "{{network}} (hapet në skedë të re)",
+    "priceRange": "Niveli i çmimeve",
+    "profileViews": "Shikime të profilit",
+    "readLess": "Më pak",
+    "readMore": "Lexo më shumë",
+    "seeAll": "Shiko të gjitha",
+    "similar": "Më shumë në {{category}}",
+    "price": {
+      "budget": "Ekonomik",
+      "mid": "Mesatar",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Hapur",
+      "closes": "Mbyllet në {{time}}",
+      "allDay": "24 orë",
+      "closed": "Mbyllur",
+      "closedToday": "Mbyllur sot",
+      "opensAt": "Hapet në {{time}}",
+      "opensTomorrow": "Hapet nesër në {{time}}",
+      "opensOn": "Hapet {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} vit në biznes",
+    "yearsInBusiness_other": "{{count}} vjet në biznes",
+    "route": {
+      "straight": "{{distance}} në vijë ajrore",
+      "noRoute": "Nuk arritëm ta llogarisim rrugën tani — aplikacioni i hartave më poshtë mundet.",
+      "car": "Me makinë",
+      "foot": "Në këmbë",
+      "bike": "Me biçikletë",
+      "modeLabel": "Mënyra e udhëtimit",
+      "openIn": "Hap në {{app}}",
+      "locating": "Po ju gjejmë…",
+      "retry": "Provo sërish vendndodhjen",
+      "fromMe": "Distanca dhe rruga nga vendndodhja ime",
+      "denied": "Vendndodhja është e çaktivizuar për këtë faqe. Lejojeni te cilësimet e shfletuesit — ose lëreni aplikacionin e hartave t’ju gjejë.",
+      "unavailable": "Nuk e gjetëm vendndodhjen tuaj. Aplikacioni i hartave mund t’ju çojë gjithsesi.",
+      "privacy": "Vendndodhja juaj përdoret vetëm për të llogaritur rrugën. Nuk ruhet.",
+      "fromYou": "{{distance}} larg jush"
+    },
+    "map": {
+      "layer": "Stili i hartës",
+      "standard": "Harta",
+      "satellite": "Satelit",
+      "approximate": "Përafërsisht — vendosur sipas adresës",
+      "cityOnly": "Përafërsisht — vetëm zona e qytetit",
+      "finding": "Po e gjejmë adresën në hartë…",
+      "label": "Harta që tregon {{name}}",
+      "gestureDesktop": "Përdorni Ctrl + rrotullim për zmadhim",
+      "gestureMac": "Përdorni ⌘ + rrotullim për zmadhim",
+      "gestureMobile": "Përdorni dy gishta për të lëvizur hartën"
+    },
+    "residences": "Rezidenca",
+    "residencesSubtitle": "Banesa që ndërton {{name}} në BalkanEstate"
   },
   "days": {
     "monday": "E hënë",
@@ -285,7 +365,21 @@
     "editSuccessMessage": "Shpallja e biznesit u përditësua.",
     "errorTitle": "Ngarkimi i bizneseve dështoi",
     "errorMessage": "Diçka shkoi keq. Provoni përsëri më vonë.",
-    "backToList": "Kthehu te Bizneset e mia"
+    "backToList": "Kthehu te Bizneset e mia",
+    "drafts": {
+      "title": "Draftet",
+      "subtitle": "Ende të papublikuara. Të ruajtura vetëm në këtë pajisje.",
+      "badge": "Draft",
+      "untitled": "Biznes pa emër",
+      "savedAt": "Ruajtur në këtë pajisje më {{date}}",
+      "keptUntil": "ruhet deri më {{date}}",
+      "continue": "Vazhdo",
+      "discard": "Hidhe",
+      "discardTitle": "Ta hedhësh këtë draft?",
+      "discardMessage": "Ajo që keni plotësuar do të fshihet nga kjo pajisje. Kjo nuk mund të zhbëhet.",
+      "unsavedChanges": "Ndryshime të paruajtura",
+      "continueEditing": "Vazhdo redaktimin"
+    }
   },
   "delete": {
     "confirmTitle": "Fshi shpalljen",
@@ -308,5 +402,14 @@
       "preview": "Pamje paraprake",
       "bannerPreview": "Pamje paraprake e banerit"
     }
+  },
+  "paymentMethods": {
+    "cash": "Para në dorë",
+    "credit_card": "Kartë krediti",
+    "debit_card": "Kartë debiti",
+    "bank_transfer": "Transfertë bankare",
+    "paypal": "PayPal",
+    "crypto": "Kriptomonedha",
+    "invoice": "Faturë"
   }
 }

@@ -259,5 +259,24 @@
     "categoriesSection": {
       "exclusive": "✦ Exclusiv"
     }
+  },
+  "residences": {
+    "title": "Ansambluri noi",
+    "subtitle": "Explorați clădiri noi etaj cu etaj și alegeți-vă apartamentul.",
+    "viewAll": "Toate ansamblurile",
+    "viewAllCount": "Toate cele {{n}} ansambluri",
+    "explore": "Explorează ansamblul",
+    "available": "{{available}} din {{total}} locuințe disponibile",
+    "builtBy": "Construit de {{name}}",
+    "loadFailed": "Ansamblurile noi nu au putut fi încărcate acum."
+  },
+  "businesses": {
+    "title": "Director de firme",
+    "subtitle": "Constructori, avocați, notari, mutări și altele — servicii locale de încredere pentru casa dvs.",
+    "viewAll": "Deschide directorul",
+    "viewAllCount": "Toate cele {{n}} firme",
+    "loadFailed": "Firmele nu au putut fi încărcate acum.",
+    "prev": "Arată firmele anterioare",
+    "next": "Arată mai multe firme"
   }
 }

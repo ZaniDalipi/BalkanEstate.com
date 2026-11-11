@@ -24,17 +24,23 @@ const renderWith = (entrances: DevelopmentEntrance[]) => {
 };
 
 describe('entrances on the picture', () => {
-  it('pins the door above the top of its outline', () => {
-    expect(entranceAnchor(rect('h', 'e'))).toEqual({ x: 0.45, y: 0.6 });
+  it('pins the door in the middle of its outline, so it covers no apartment around it', () => {
+    const at = entranceAnchor(rect('h', 'e'));
+    expect(at?.x).toBeCloseTo(0.45);
+    expect(at?.y).toBeCloseTo(0.7);
   });
 
-  it('shows a door pin with its code and step-free mark, and the card tells what it serves', () => {
+  it('shows a small door icon with a step-free badge (no label), and the card tells what it serves', () => {
     const onActivate = renderWith([entrance({ code: 'A', accessible: true, note: 'From the main street', stats: { units: 12, available: 5 } })]);
     const region = screen.getByRole('button', { name: 'Entrance A · 5 homes available' });
-    // The pin carries the short code; an unknown entrance (h2) gets no pin and is not clickable.
+    // Only an icon in the kind's colour, with the wheelchair badge; an unknown entrance (h2) gets no pin and is not clickable.
     const pins = document.querySelectorAll('[data-entrance-marker]');
     expect(pins).toHaveLength(1);
-    expect(pins[0]).toHaveTextContent('A');
+    expect(pins[0].textContent).toBe('');
+    expect(pins[0]).toHaveClass('h-6', 'w-6', 'bg-teal-700');
+    // Round on touch screens too: the page-wide 44px button minimum does not stretch it.
+    expect((pins[0] as HTMLElement).style.minHeight).toBe('0px');
+    expect(pins[0].querySelectorAll('svg')).toHaveLength(2);
     expect(document.querySelector('[data-hotspot-id="h2"]')).not.toHaveAttribute('role');
 
     fireEvent.focus(region);
@@ -56,4 +62,10 @@ describe('entrances on the picture', () => {
     expect(screen.getByRole('tooltip')).toHaveTextContent('Service entrance');
     expect(screen.queryByRole('button', { name: /Show its homes/ })).toBeNull();
   });
+
+  it('leaves out the step-free badge when the door has steps', () => {
+    renderWith([entrance({ accessible: false })]);
+    expect(document.querySelector('[data-entrance-marker]')?.querySelectorAll('svg')).toHaveLength(1);
+  });
 });
+

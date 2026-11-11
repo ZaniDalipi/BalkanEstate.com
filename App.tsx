@@ -8,6 +8,7 @@ import { MotionConfig } from 'framer-motion';
 import { MobileHomeBell } from './src/app/components/MobileHomeBell';
 import { residenceUpPath } from './src/features/developments/utils/residenceUpPath';
 import { MobileTopBarActions } from './src/app/components/MobileTopBarActions';
+import { PageStage } from './src/app/components/PageStage';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
@@ -152,9 +153,11 @@ const PageOutlet: React.FC = () => {
     );
   }
 
+  // PageStage keeps the current page up until the next one is ready (no blank
+  // flash between screens) and fades the new one in — see its doc comment.
   return (
     <ViewTransition>
-      <ErrorBoundary level="route" key={pageKey}>
+      <PageStage pageKey={pageKey}>
         <RouteNoindexContext.Provider value={!!noindex}>
           {/* Defaults for this URL (canonical, robots). Mounted before the
               page, so the page's own <SEO> takes precedence; pages without
@@ -162,11 +165,9 @@ const PageOutlet: React.FC = () => {
               merges alternate links from every instance, so defaults would
               leak onto pages that are deliberately single-language. */}
           <SEO alternates={false} />
-          <Suspense fallback={<PageLoader />}>
-            <Outlet />
-          </Suspense>
+          <Outlet />
         </RouteNoindexContext.Provider>
-      </ErrorBoundary>
+      </PageStage>
     </ViewTransition>
   );
 };
@@ -218,6 +219,8 @@ const MainLayout: React.FC = () => {
   const isAgentDetail = detail === 'agent';
   const isAgencyDetail = detail === 'agency';
   const isBusinessDetail = detail === 'business-listing';
+  // A residence opens as its own full-screen page: only the sidebar of the app stays.
+  const isResidenceDetail = detail === 'residence';
 
   // Subscription expiry modals
   const userId = state.currentUser?.id || state.currentUser?._id || state.currentUser?.email || '';
@@ -249,13 +252,13 @@ const MainLayout: React.FC = () => {
   // Back to Site / account), so the global floating header is suppressed there to avoid
   // it overlapping and covering those controls.
   const hasOwnHeader = view === 'agency-dashboard';
-  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !isBusinessDetail && !hasOwnHeader;
+  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !hasOwnHeader && !isResidenceDetail;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
   const isHomeView = view === 'home';
   const isHomePage = isSearchPage || isRentalPage || isVillaPage || isHomeView;
-  const showPWATopBar = isMobile && !isPropertyDetail && !isBusinessDetail && !isHomePage;
+  const showPWATopBar = isMobile && !isPropertyDetail && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
   const isMainTabView = !isAgentDetail && !isAgencyDetail && !isBusinessDetail && [
@@ -314,6 +317,7 @@ const MainLayout: React.FC = () => {
   const pageTitle = useMemo(() => {
     if (isAgencyDetail) return t('nav:pageTitles.agency');
     if (isAgentDetail) return t('nav:pageTitles.agent');
+    if (isBusinessDetail) return t('nav:pageTitles.businessDirectory');
     const titleKeys: Record<string, string> = {
       home: 'nav:pageTitles.home',
       search: 'nav:pageTitles.search',
@@ -342,7 +346,7 @@ const MainLayout: React.FC = () => {
     };
     const key = titleKeys[view];
     return key ? t(key) : t('nav:pageTitles.default');
-  }, [view, isAgencyDetail, isAgentDetail, t]);
+  }, [view, isAgencyDetail, isAgentDetail, isBusinessDetail, t]);
 
   const handlePWABack = useCallback(() => {
     // Step back through history whenever there is an in-app entry to step back
@@ -441,8 +445,9 @@ const MainLayout: React.FC = () => {
             details page which has its own in-content + sidebar ad slots (so the
             sticky bar doesn't overlap them), and on the full-height map/search
             pages, where a bar pinned over the map gets in the way of panning,
-            the results sheet and the map controls. */}
-        {adPage && !isFullHeightView && (
+            the results sheet and the map controls. Also hidden on a business
+            profile, whose own Call / WhatsApp bar sits in that same spot. */}
+        {adPage && !isFullHeightView && !isBusinessDetail && !(isResidenceDetail && !isMobile) && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>
@@ -620,8 +625,10 @@ const MainLayout: React.FC = () => {
 
 const FullScreenLoader: React.FC = () => {
     return (
-        <div className="w-screen h-screen flex flex-col items-center justify-center bg-neutral-50">
-            <LogoLoader size="lg" showText={true} />
+        // White and the same 40px circle as the boot screen in index.html, so
+        // the hand-off from HTML to React is invisible.
+        <div className="w-screen h-screen flex flex-col items-center justify-center bg-white">
+            <LogoLoader size="md" showText={false} />
         </div>
     );
 };

@@ -32,3 +32,7 @@ export const PROPERTY_IMAGE_TAGS = [
 ] as const;
 
 export type PropertyImageTag = (typeof PROPERTY_IMAGE_TAGS)[number];
+
+/** True for one of the known photo tags (anything else from the database is not passed on to visitors). */
+export const isPropertyImageTag = (value: unknown): value is PropertyImageTag =>
+  typeof value === 'string' && (PROPERTY_IMAGE_TAGS as readonly string[]).includes(value);

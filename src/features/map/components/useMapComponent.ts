@@ -162,6 +162,8 @@ export interface MapComponentProps {
   hoveredPropertyId?: string | null;
   /** Hide all map controls (for saved searches view) */
   hideControls?: boolean;
+  /** Called once, when the map is ready to be seen: tiles painted and first pins built. */
+  onReady?: () => void;
 }
 
 export function useMapComponent(props: MapComponentProps) {

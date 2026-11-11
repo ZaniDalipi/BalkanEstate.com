@@ -58,6 +58,8 @@ export const paths = {
   // Residences / Developments
   developments: (query?: QueryInit) => withQuery('/developments', query),
   development: (slug: string) => `/developments/${seg(slug)}`,
+  /** The company behind a residence. */
+  developmentDeveloper: (slug: string) => `/developments/${seg(slug)}/developer`,
   developmentUnit: (slug: string, unitId: string) => `/developments/${seg(slug)}/units/${seg(unitId)}`,
   developmentsDashboard: () => '/dashboard/developments',
   developmentNew: () => '/dashboard/developments/new',
@@ -69,6 +71,7 @@ export const paths = {
 
   businessDirectory: (tab?: BusinessDirectoryTab) =>
     tab ? `/business-directory/${tab}` : '/business-directory',
+  businessListingNew: () => '/business-directory/new',
   businessListing: (slugOrId: string) => `/business-directory/${seg(slugOrId)}`,
 
   savedSearches: () => '/saved-searches',

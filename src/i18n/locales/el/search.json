@@ -77,7 +77,10 @@
     "last7Days": "Τελευταίες 7 ημέρες",
     "last30Days": "Τελευταίες 30 ημέρες",
     "priceReduced": "Μειωμένη τιμή",
-    "priceIncreased": "Αυξημένη τιμή"
+    "priceIncreased": "Αυξημένη τιμή",
+    "constructionStatus": "Κατασκευή",
+    "kitchens": "Κουζίνες",
+    "orientation": "Προσανατολισμός"
   },
   "options": {
     "any": "Οποιοδήποτε",
@@ -603,7 +606,8 @@
       "openFilters": "Άνοιγμα φίλτρων",
       "myAccount": "Ο λογαριασμός μου",
       "tapMap": "Πατήστε «Χάρτης»",
-      "viewToggle": "Εναλλαγή προβολής"
+      "viewToggle": "Εναλλαγή προβολής",
+      "recoveredFromCrash": "Η σελίδα επανεκκινήθηκε για να ελευθερώσει μνήμη. Ο χάρτης φορτώνει όταν πατήσετε Χάρτης."
     },
     "aiSearch": {
       "agent": "Μεσίτης",
@@ -648,5 +652,19 @@
     "climateRiskLayer": {
       "veryHigh": "Πολύ υψηλός"
     }
+  },
+  "constructionOptions": {
+    "ready": "Έτοιμο προς κατοίκηση",
+    "underConstruction": "Υπό κατασκευή"
+  },
+  "orientationOptions": {
+    "north": "Βόρειος",
+    "south": "Νότιος",
+    "east": "Ανατολικός",
+    "west": "Δυτικός",
+    "northEast": "Βορειοανατολικός",
+    "northWest": "Βορειοδυτικός",
+    "southEast": "Νοτιοανατολικός",
+    "southWest": "Νοτιοδυτικός"
   }
 }

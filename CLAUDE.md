@@ -57,6 +57,7 @@ navigate(paths.agent(agentId));                              // add the language
 navigate(paths.property(id), { state: { property } });       // hand over data the page can show at once
 navigate(paths.search({ city }), { replace: true, direction: 'back' });
 goBack(paths.agencies());                                    // history back, or this page when there is none
+navigate(`${pathname}?unit=${id}`, { inPage: true });         // same page shows something else: no page-loading circle
 ```
 
 - Never `window.history.pushState`, never `dispatch` a view: there is no view state.

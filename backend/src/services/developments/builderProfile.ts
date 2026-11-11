@@ -6,6 +6,7 @@
  */
 import { BUILDER_SOCIAL_NETWORKS, type BuilderSocialNetwork, type IDevelopmentBuilder } from '../../models/Development';
 import { ValidationError } from './developmentService';
+import { withHttps } from './webAddress';
 
 export const BUILDER_LIMITS = {
   name: 120,
@@ -59,7 +60,8 @@ const wholeNumber = (raw: Record<string, unknown>, field: string, min: number, m
 };
 
 /** A plain http(s) address on a real site; `hosts` limits it to one network. */
-const webAddress = (value: string, field: string, hosts?: string[], network?: string): string => {
+const webAddress = (typed: string, field: string, hosts?: string[], network?: string): string => {
+  const value = withHttps(typed);
   let url: URL;
   try {
     url = new URL(value);

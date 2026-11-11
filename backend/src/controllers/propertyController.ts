@@ -20,6 +20,8 @@ import { recordPriceChange, processInstantAlertsForProperty, processInstantPrice
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 import ArchivedListing from '../models/ArchivedListing';
+import { notifyAdmins } from '../services/adminNotificationService';
+import { archiveDeletedListing, archiveThumbnailPublicId as archiveThumbnailPublicIdOf } from '../services/listingArchiveService';
 import { sanitizeProperty } from '../utils/responseSanitizer';
 import {
   emitPropertyCreated,
@@ -48,6 +50,10 @@ import {
   pricePerSqm,
   type AreaListing,
 } from '../services/areaPricesService';
+import { buildZoneDynamics } from '../services/zoneDynamicsService';
+import { getSeasonalAirQuality, AirQualityUnavailableError } from '../services/airQualityService';
+import { getSurroundingsWithin, SurroundingsUnavailableError } from '../services/surroundings/surroundingsService';
+import { hasUsableLocation } from '../utils/coordinates';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -1097,6 +1103,19 @@ export const createProperty = async (
     // Emit real-time event for instant updates across all connected clients
     emitPropertyCreated(property.toObject());
 
+    notifyAdmins({
+      kind: 'listing_created',
+      propertyId: String(property._id),
+      title: property.title,
+      price: property.price,
+      city: property.city,
+      country: property.country,
+      status: property.status,
+      listingType: property.listingType,
+      sellerName: property.createdByName || user.name,
+      sellerEmail: property.createdByEmail || user.email,
+    });
+
     // Invalidate properties cache so new listing appears immediately in search
     invalidateCache('/api/properties');
 
@@ -1550,7 +1569,7 @@ export const deleteProperty = async (
     // Delete the listing's media from storage, keeping one thumbnail for
     // the archive record below. The retention job clears that thumbnail once
     // the archive is old enough (see mediaRetentionService).
-    const archiveThumbnailPublicId = property.imagePublicId || property.images?.[0]?.publicId;
+    const archiveThumbnailPublicId = archiveThumbnailPublicIdOf(property);
     try {
       const publicIds = [
         property.imagePublicId,
@@ -1644,44 +1663,12 @@ export const deleteProperty = async (
     }
 
     // Archive the listing before deletion (keep one photo and details)
-    try {
-      const daysOnMarket = Math.floor((Date.now() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
-      await ArchivedListing.create({
-        originalPropertyId: property._id,
-        sellerId: property.sellerId,
-        sellerName: property.createdByName || 'Unknown',
-        sellerEmail: property.createdByEmail || '',
-        createdAsRole: property.createdAsRole || 'private_seller',
-        createdByAgencyName: property.createdByAgencyName,
-        createdByAgencyId: property.createdByAgencyId,
-        archiveReason: 'deleted',
-        archivedAt: new Date(),
-        title: property.title,
-        listingType: property.listingType || 'sale',
-        status: 'deleted',
-        price: property.price,
-        address: property.address,
-        city: property.city,
-        country: property.country,
-        propertyType: property.propertyType,
-        beds: property.beds,
-        baths: property.baths,
-        livingRooms: property.livingRooms,
-        sqft: property.sqft,
-        yearBuilt: property.yearBuilt,
-        description: property.description,
-        thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
-        thumbnailPublicId: archiveThumbnailPublicId,
-        totalViews: (property as any).views || 0,
-        totalSaves: (property as any).saves || 0,
-        daysOnMarket,
-        originalCreatedAt: property.createdAt,
-      });
-      propertyLogger.info(`📦 Archived deleted listing ${property._id}`);
-    } catch (archiveError: any) {
-      propertyLogger.error('⚠️  Error archiving listing:', archiveError);
-      // Continue with deletion even if archival fails
-    }
+    await archiveDeletedListing(property, {
+      kind: 'owner',
+      userId: String(currentUser._id),
+      name: currentUser.name,
+      email: currentUser.email,
+    });
 
     // Store property ID before deletion for emit
     const deletedPropertyId = String(property._id);
@@ -2543,6 +2530,87 @@ export const getPropertyPriceHistory = async (
     res.status(500).json({ message: 'Error fetching price history' });
   }
 };
+// @desc    Seasonal air quality (European AQI, PM2.5) at a property's location
+// @route   GET /api/properties/:id/air-quality
+// @access  Public
+export const getPropertyAirQuality = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id).select('lat lng').lean();
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const { lat, lng } = property as { lat?: number; lng?: number };
+    if (!hasUsableLocation(lat, lng)) {
+      res.json({ status: 'no-location' });
+      return;
+    }
+
+    const report = await getSeasonalAirQuality(lat as number, lng as number);
+    if (report.seasons.every((s) => s.aqi === null && s.pm25 === null)) {
+      res.json({ status: 'no-data' });
+      return;
+    }
+    res.json({ status: 'ok', seasons: report.seasons });
+  } catch (error: unknown) {
+    if (error instanceof AirQualityUnavailableError) {
+      res.status(503).json({ message: 'Air quality data is temporarily unavailable' });
+      return;
+    }
+    propertyLogger.error('Get air quality error:', error);
+    res.status(500).json({ message: 'Error fetching air quality' });
+  }
+};
+
+// @desc    Estimated noise (day/night) and street traffic around a property,
+//          from OpenStreetMap roads, railways, airports and nightlife
+// @route   GET /api/properties/:id/surroundings
+// @access  Public
+export const getPropertySurroundings = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const property = await Property.findById(id).select('lat lng').lean();
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const { lat, lng } = property as { lat?: number; lng?: number };
+    if (!hasUsableLocation(lat, lng)) {
+      res.json({ status: 'no-location' });
+      return;
+    }
+
+    const lookup = await getSurroundingsWithin(lat as number, lng as number);
+    if (lookup.status === 'pending') {
+      // Still being looked up; the page asks again shortly.
+      res.set('Retry-After', '2');
+      res.json({ status: 'pending' });
+      return;
+    }
+    res.json({ status: 'ok', ...lookup.report });
+  } catch (error: unknown) {
+    if (error instanceof SurroundingsUnavailableError) {
+      res.status(503).json({ message: 'Noise and traffic data is temporarily unavailable' });
+      return;
+    }
+    propertyLogger.error('Get surroundings error:', error);
+    res.status(500).json({ message: 'Error fetching surroundings' });
+  }
+};
+
 // @desc    Prices of the homes around a property: nearby listings, recent
 //          sales and the area's €/m² trend
 // @route   GET /api/properties/:id/area-prices
@@ -2642,6 +2710,7 @@ export const getAreaPrices = async (
       },
       stats: buildStats(neighbours, subjectValue),
       trend: buildTrend(listings, basis),
+      dynamics: buildZoneDynamics(neighbours),
       neighbours: neighbours.slice(0, MAX_NEIGHBOURS),
     });
   } catch (error: unknown) {

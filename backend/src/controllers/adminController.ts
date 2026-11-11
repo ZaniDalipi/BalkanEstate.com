@@ -15,6 +15,21 @@ import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 import { sendLicenseRejectionEmail } from '../services/emailService';
+import {
+  archiveDeletedListing,
+  archiveDeletedListings,
+  archiveThumbnailPublicId,
+  type ArchiveActor,
+} from '../services/listingArchiveService';
+import type { IUser } from '../models/User';
+import { changeUserRole, claimFirstSuperAdmin, superAdminStatus } from '../services/userRoleService';
+import { decideAccountDeletion } from '../utils/roleChangePolicy';
+
+/** The signed-in admin, as recorded on archived listings they remove. */
+const adminActor = (req: Request): ArchiveActor => {
+  const admin = req.user as IUser | undefined;
+  return { kind: 'admin', userId: admin ? String(admin._id) : undefined, name: admin?.name, email: admin?.email };
+};
 
 
 // @desc    Get admin dashboard statistics
@@ -158,8 +173,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
     // through dedicated endpoints (subscription management, user self-service).
     const ALLOWED_ADMIN_UPDATE_FIELDS = [
       'name', 'phone', 'city', 'country',
-      'role', 'activeRole', 'primaryRole',
-      'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
+      'status', 'isEmailVerified', 'licenseVerified',
       'licenseNumber', 'bio', 'languages', 'specializations',
       'serviceAreas', 'avatarUrl avatarOptions gender', 'avatarOptions',
       'agencyName',
@@ -172,7 +186,30 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       }
     }
 
+    // A role sent with the form goes through the same rules as the role
+    // endpoint (only super admins grant admin roles, never your own role).
+    let roleChanged = false;
+    if (req.body.role !== undefined) {
+      const current = await User.findById(id).select('role').lean<{ role: string }>();
+      if (!current) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+      if (req.body.role !== current.role) {
+        const result = await changeUserRole(req.user as IUser, id, req.body.role);
+        if (result.ok === false) {
+          res.status(result.status).json({ message: result.message, error: result.code });
+          return;
+        }
+        roleChanged = true;
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
+      if (roleChanged) {
+        res.json({ message: 'User updated successfully', user: await User.findById(id).select('-password') });
+        return;
+      }
       res.status(400).json({ message: 'No valid fields to update' });
       return;
     }
@@ -211,6 +248,58 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
   }
 };
 
+// @desc    Change a user's role (admin and super admin: super admins only)
+// @route   PUT /api/admin/users/:id/role
+// @access  Private/Admin
+export const updateUserRoleAdmin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const result = await changeUserRole(req.user as IUser, id, req.body?.role);
+    if (result.ok === false) {
+      res.status(result.status).json({ message: result.message, error: result.code });
+      return;
+    }
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/agencies');
+    res.json({ message: 'Role updated', user: result.user, previousRole: result.previousRole });
+  } catch (error) {
+    adminLogger.error('Update user role error:', error);
+    res.status(500).json({ message: 'Error updating role' });
+  }
+};
+
+// @desc    Whether the site has a super admin, and whether I may claim the first one
+// @route   GET /api/admin/super-admin/status
+// @access  Private/Admin
+export const getSuperAdminStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await superAdminStatus(req.user as IUser));
+  } catch (error) {
+    adminLogger.error('Super admin status error:', error);
+    res.status(500).json({ message: 'Error checking super admin status' });
+  }
+};
+
+// @desc    Become the site's first super admin (only while there is none)
+// @route   POST /api/admin/super-admin/claim
+// @access  Private/Admin
+export const claimSuperAdmin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await claimFirstSuperAdmin(req.user as IUser);
+    if (result.ok === false) {
+      res.status(result.status).json({ message: result.message, error: result.code });
+      return;
+    }
+    res.json({ message: 'You are now super admin', user: result.user });
+  } catch (error) {
+    adminLogger.error('Claim super admin error:', error);
+    res.status(500).json({ message: 'Error claiming super admin' });
+  }
+};
+
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
 // @access  Private/Admin + VPN
@@ -225,20 +314,36 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    const actor = req.user as IUser;
+    const allowed = decideAccountDeletion({
+      actorId: String(actor._id),
+      actorRole: actor.role,
+      targetId: String(user._id),
+      targetRole: user.role,
+      superAdminCount: user.role === 'super_admin' ? await User.countDocuments({ role: 'super_admin' }) : 0,
+    });
+    if (allowed.ok === false) {
+      res.status(allowed.status).json({ message: allowed.message, error: allowed.code });
+      return;
+    }
+
     // Delete associated data
     if (user.role === 'agent') {
       await Agent.deleteMany({ userId: id });
     }
 
-    const listingIds = (await Property.find({ sellerId: id }).select('_id').lean()).map((p) => String(p._id));
+    // Keep a copy of each listing (and its one thumbnail) in the archive.
+    const listings = await Property.find({ sellerId: id });
+    await archiveDeletedListings(listings, adminActor(req));
     await Property.deleteMany({ sellerId: id });
     await user.deleteOne();
 
     // The user and their listings are gone: remove the listings' media and the
     // user's personal files. Best-effort — logged, never blocks the delete.
     try {
-      for (const propertyId of listingIds) {
-        await deleteListingMedia(id, propertyId);
+      for (const listing of listings) {
+        const thumbnail = archiveThumbnailPublicId(listing);
+        await deleteListingMedia(id, String(listing._id), { keepPublicIds: thumbnail ? [thumbnail] : [] });
       }
       await deleteUserPersonalMedia(id);
     } catch (mediaError) {
@@ -632,11 +737,15 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    const property = await Property.findByIdAndDelete(id);
+    const property = await Property.findById(id);
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
       return;
     }
+
+    await archiveDeletedListing(property, adminActor(req));
+    await property.deleteOne();
+    invalidateCache('/api/properties');
 
     res.json({ message: 'Property deleted successfully' });
   } catch (error: any) {

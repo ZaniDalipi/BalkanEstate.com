@@ -31,6 +31,7 @@ export type AdminView =
   | 'promotionCoupons'
   | 'users'
   | 'properties'
+  | 'archivedListings'
   | 'agencies'
   | 'residences'
   | 'inquiries'

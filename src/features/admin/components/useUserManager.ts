@@ -197,9 +197,10 @@ export function useUserManager() {
           setSuccessMessage('User updated successfully');
           setTimeout(() => setSuccessMessage(null), 3000);
         },
-        onError: () => {
-          setLocalError('Failed to update user');
-          setTimeout(() => setLocalError(null), 5000);
+        onError: (err: unknown) => {
+          // Show the server's reason (e.g. "Only a super admin can …").
+          setLocalError(err instanceof Error && err.message ? err.message : 'Failed to update user');
+          setTimeout(() => setLocalError(null), 8000);
         },
       }
     );

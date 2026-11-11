@@ -131,7 +131,13 @@
     "stats": {
       "services": "Услуге",
       "views": "Прегледи",
-      "memberSince": "Члан од"
+      "memberSince": "Члан од",
+      "offered": "у понуди",
+      "profileViews": "прегледа профила",
+      "yearsAgo_one": "пре {{count}} године",
+      "yearsAgo_few": "пре {{count}} године",
+      "yearsAgo_other": "пре {{count}} година",
+      "thisYear": "ове године"
     },
     "licensed": "Лиценциран",
     "languages": "Језици",
@@ -143,7 +149,83 @@
       "callNow": "Позови {{phone}}",
       "sendEmail": "Пошаљи имејл"
     },
-    "established": "Основано {{year}}."
+    "established": "Основано {{year}}.",
+    "actions": {
+      "label": "Опције контакта",
+      "call": "Позови",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "Е-пошта",
+      "website": "Сајт",
+      "directions": "Упутства"
+    },
+    "atAGlance": "Укратко",
+    "copied": "Копирано",
+    "copy": "Копирај",
+    "copyAddress": "Копирај адресу",
+    "copyFailed": "Копирање није успело — означите текст",
+    "copyValue": "Копирај: {{label}}",
+    "founded": "Основано",
+    "highlights": "Истакнуто",
+    "licenseNumber": "Број лиценце",
+    "listedBy": "Објавио",
+    "loading": "Учитавање фирме…",
+    "logoAlt": "Лого: {{name}}",
+    "openSocial": "{{network}} (отвара се у новој картици)",
+    "priceRange": "Распон цена",
+    "profileViews": "Прегледи профила",
+    "readLess": "Прикажи мање",
+    "readMore": "Прочитај више",
+    "seeAll": "Прикажи све",
+    "similar": "Више у категорији {{category}}",
+    "price": {
+      "budget": "Повољно",
+      "mid": "Средње",
+      "premium": "Премијум"
+    },
+    "status": {
+      "open": "Отворено",
+      "closes": "Затвара у {{time}}",
+      "allDay": "24 сата",
+      "closed": "Затворено",
+      "closedToday": "Данас затворено",
+      "opensAt": "Отвара у {{time}}",
+      "opensTomorrow": "Отвара сутра у {{time}}",
+      "opensOn": "Отвара: {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} година пословања",
+    "yearsInBusiness_few": "{{count}} године пословања",
+    "yearsInBusiness_other": "{{count}} година пословања",
+    "route": {
+      "straight": "{{distance}} ваздушном линијом",
+      "noRoute": "Тренутно не можемо да израчунамо руту — апликација за мапе испод може.",
+      "car": "Колима",
+      "foot": "Пешке",
+      "bike": "Бициклом",
+      "modeLabel": "Начин путовања",
+      "openIn": "Отвори у {{app}}",
+      "locating": "Тражимо вас…",
+      "retry": "Покушај поново са локацијом",
+      "fromMe": "Удаљеност и рута од моје локације",
+      "denied": "Локација је искључена за овај сајт. Дозволите је у подешавањима прегледача — или нека вас апликација за мапе пронађе.",
+      "unavailable": "Нисмо могли да пронађемо вашу локацију. Апликација за мапе вас ипак може одвести.",
+      "privacy": "Ваша локација се користи само за израчунавање руте. Не чува се.",
+      "fromYou": "{{distance}} од вас"
+    },
+    "map": {
+      "layer": "Стил мапе",
+      "standard": "Мапа",
+      "satellite": "Сателит",
+      "approximate": "Приближно — постављено према адреси",
+      "cityOnly": "Приближно — само подручје града",
+      "finding": "Тражимо адресу на мапи…",
+      "label": "Мапа: {{name}}",
+      "gestureDesktop": "Користите Ctrl + скроловање за зумирање",
+      "gestureMac": "Користите ⌘ + скроловање за зумирање",
+      "gestureMobile": "Користите два прста за померање мапе"
+    },
+    "residences": "Резиденције",
+    "residencesSubtitle": "Станови које {{name}} гради на BalkanEstate"
   },
   "days": {
     "monday": "Понедељак",
@@ -286,7 +368,21 @@
     "editSuccessMessage": "Оглас фирме је ажуриран.",
     "errorTitle": "Учитавање фирми није успело",
     "errorMessage": "Нешто је пошло наопако. Покушајте касније.",
-    "backToList": "Назад на Моје фирме"
+    "backToList": "Назад на Моје фирме",
+    "drafts": {
+      "title": "Nacrti",
+      "subtitle": "Još nije objavljeno. Sačuvano samo na ovom uređaju.",
+      "badge": "Nacrt",
+      "untitled": "Posao bez naziva",
+      "savedAt": "Sačuvano na ovom uređaju {{date}}",
+      "keptUntil": "čuva se do {{date}}",
+      "continue": "Nastavi",
+      "discard": "Odbaci",
+      "discardTitle": "Odbaciti ovaj nacrt?",
+      "discardMessage": "Ono što ste uneli biće izbrisano sa ovog uređaja. Ovo se ne može poništiti.",
+      "unsavedChanges": "Nesačuvane izmene",
+      "continueEditing": "Nastavi uređivanje"
+    }
   },
   "delete": {
     "confirmTitle": "Обриши оглас",
@@ -309,5 +405,14 @@
       "preview": "Преглед",
       "bannerPreview": "Преглед банера"
     }
+  },
+  "paymentMethods": {
+    "cash": "Готовина",
+    "credit_card": "Кредитна картица",
+    "debit_card": "Дебитна картица",
+    "bank_transfer": "Банковни трансфер",
+    "paypal": "PayPal",
+    "crypto": "Крипто",
+    "invoice": "Фактура"
   }
 }

@@ -21,6 +21,10 @@ import RentalHistorySection from '@/src/features/rental/components/RentalHistory
 import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
 import PropertyPriceHistory from './PropertyPriceHistory';
 import NeighborhoodPrices from './area-prices/NeighborhoodPrices';
+import AirQualityCard from './area-insights/AirQualityCard';
+import ZoneDynamicsCard from './area-insights/ZoneDynamicsCard';
+import NoiseCard from './area-insights/NoiseCard';
+import TrafficCard from './area-insights/TrafficCard';
 import { QueryErrorBoundary } from '@/src/app/components';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { generatePropertySlug } from '@/utils/slug';
@@ -1098,6 +1102,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 city={property.city}
                 country={property.country}
               />
+              <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+                <QueryErrorBoundary>
+                  <AirQualityCard propertyId={property.id} />
+                </QueryErrorBoundary>
+                <QueryErrorBoundary>
+                  <NoiseCard propertyId={property.id} />
+                </QueryErrorBoundary>
+                <QueryErrorBoundary>
+                  <TrafficCard propertyId={property.id} lat={property.lat} lng={property.lng} />
+                </QueryErrorBoundary>
+              </div>
             </div>
 
             {/* Mobile Only: Quick Actions & Contact (shown after description on mobile) */}
@@ -1173,6 +1188,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 city={property.city}
                 country={property.country}
               />
+              <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+                <QueryErrorBoundary>
+                  <AirQualityCard propertyId={property.id} />
+                </QueryErrorBoundary>
+                <QueryErrorBoundary>
+                  <NoiseCard propertyId={property.id} />
+                </QueryErrorBoundary>
+                <QueryErrorBoundary>
+                  <TrafficCard propertyId={property.id} lat={property.lat} lng={property.lng} />
+                </QueryErrorBoundary>
+              </div>
             </div>
 
             {/* Rental Terms (only for rental properties) */}
@@ -1196,6 +1222,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <QueryErrorBoundary>
                 <NeighborhoodPrices property={property} />
               </QueryErrorBoundary>
+              <div className="mt-4 sm:mt-6">
+                <QueryErrorBoundary>
+                  <ZoneDynamicsCard property={property} />
+                </QueryErrorBoundary>
+              </div>
             </div>
 
             {/* Similar Properties - Internal linking for SEO */}

@@ -140,19 +140,19 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
       {!isMobile && !hideControls && (
         <div className="absolute bottom-24 landscape:bottom-6 right-4 landscape:right-2 z-[1000] flex-col items-end gap-2 landscape:gap-1.5 hidden md:flex">
           {/* Main control bar */}
-          <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1 xl:gap-1.5 transition-all duration-300">
+          <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 landscape:p-1 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
             <button
               onClick={handleRecenter}
-              className="p-1 xl:p-1.5 rounded-full transition-colors hover:bg-black/10"
+              className="p-1.5 landscape:p-1 rounded-full transition-colors hover:bg-black/10"
               aria-label={t('search:map.centerOnLocation')}
             >
-              <CrosshairsIcon className="w-4 h-4 xl:w-5 xl:h-5 text-neutral-700" />
+              <CrosshairsIcon className="w-5 h-5 text-neutral-700" />
             </button>
 
             <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label={t('common:aria.mapStyle')}>
               <button
                 onClick={() => { setMapStyle('clean'); if (drawnBounds) onDrawComplete(null); }}
-                className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
+                className={`px-2.5 py-1.5 xl:px-3 rounded-full whitespace-nowrap text-xs xl:text-[13px] landscape:px-2 landscape:py-1 font-semibold transition-all ${
                   mapStyle === 'clean' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
                 aria-label={t('common:aria.cleanMapStyle')}
@@ -162,7 +162,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               </button>
               <button
                 onClick={() => setMapStyle('color')}
-                className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
+                className={`px-2.5 py-1.5 xl:px-3 rounded-full whitespace-nowrap text-xs xl:text-[13px] landscape:px-2 landscape:py-1 font-semibold transition-all ${
                   mapStyle === 'color' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
                 aria-label={t('common:aria.colorMapStyle')}
@@ -172,7 +172,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               </button>
               <button
                 onClick={() => setMapStyle('street')}
-                className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
+                className={`px-2.5 py-1.5 xl:px-3 rounded-full whitespace-nowrap text-xs xl:text-[13px] landscape:px-2 landscape:py-1 font-semibold transition-all ${
                   mapStyle === 'street' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
                 aria-label={t('common:aria.streetMapStyle')}
@@ -182,7 +182,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               </button>
               <button
                 onClick={() => setMapStyle('satellite')}
-                className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
+                className={`px-2.5 py-1.5 xl:px-3 rounded-full whitespace-nowrap text-xs xl:text-[13px] landscape:px-2 landscape:py-1 font-semibold transition-all ${
                   mapStyle === 'satellite' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                 }`}
                 aria-label={t('common:aria.satelliteMapStyle')}
@@ -194,7 +194,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
 
             <button
               onClick={onDrawStart}
-              className={`flex items-center gap-1 xl:gap-1.5 px-2 py-1 xl:px-3 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full shadow-md transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] landscape:px-2 landscape:py-1 font-semibold rounded-full shadow-md transition-colors ${
                 isDrawing
                   ? 'bg-red-600 text-white hover:bg-red-700'
                   : 'bg-neutral-800 text-white hover:bg-neutral-900'
@@ -202,8 +202,8 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
               aria-pressed={isDrawing}
             >
-              {isDrawing ? <XCircleIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" /> : <PencilIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />}
-              <span className="hidden xl:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
+              {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+              <span className="inline landscape:hidden">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
             </button>
           </div>
 
@@ -230,11 +230,11 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 ))}
               </div>
             )}
-            <div className="flex items-center gap-1 xl:gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 max-w-[calc(100%-2rem)] overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 landscape:p-1 rounded-full shadow-xl shadow-black/10 overflow-x-auto scrollbar-hide">
               {/* Climate Risks Button */}
               <button
                 onClick={() => setIsClimateMenuOpen(!isClimateMenuOpen)}
-                className={`flex items-center gap-1 xl:gap-1.5 px-2 py-1 xl:px-3 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all flex-shrink-0 ${
+                className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-3 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all flex-shrink-0 ${
                   isClimateMenuOpen || selectedClimateRisk !== 'none'
                     ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
@@ -243,24 +243,21 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 aria-haspopup="menu"
                 aria-expanded={isClimateMenuOpen}
               >
-                <SoftIcon name="thermometer" className="w-4 h-4 xl:w-5 xl:h-5" />
-                <span className="hidden xl:inline">{t('search:map.climateRisks.title', 'Climate')}</span>
-                <svg className={`w-3 h-3 transition-transform ${isClimateMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                <SoftIcon name="thermometer" className="w-5 h-5" />
+                <span className="inline leading-none landscape:hidden">{t('search:map.climateRisks.title', 'Climate')}</span>
               </button>
 
             {/* Promoted/Premium Filter */}
             <button
               onClick={() => setShowOnlyPromoted(!showOnlyPromoted)}
-              className={`relative flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+              className={`relative flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
                 showOnlyPromoted ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
               aria-label={showOnlyPromoted ? t('common:aria.showAllListings') : t('common:aria.showOnlyPremium')}
               aria-pressed={showOnlyPromoted}
             >
-              <SoftIcon name="crown" className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span className="hidden xl:inline">{t('search:map.promoted', 'Premium')}</span>
+              <SoftIcon name="crown" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">{t('search:map.promoted', 'Premium')}</span>
               {promotedCount > 0 && !showOnlyPromoted && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold bg-amber-500 text-white rounded-full px-1">
                   {promotedCount}
@@ -273,66 +270,66 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
             {/* 3D Buildings Toggle */}
             <button
               onClick={() => setShow3DBuildings(!show3DBuildings)}
-              className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
                 show3DBuildings ? 'bg-slate-700 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
               aria-label={t('common:aria.toggle3DBuildings')}
               aria-pressed={show3DBuildings}
             >
-              <SoftIcon name="cube" className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span className="hidden xl:inline">3D</span>
+              <SoftIcon name="cube" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">3D</span>
             </button>
 
             {/* Landmarks Toggle */}
             <button
               onClick={() => setShowLandmarks(!showLandmarks)}
-              className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
                 showLandmarks ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
               aria-label={t('common:aria.togglePointsOfInterest')}
               aria-pressed={showLandmarks}
             >
-              <SoftIcon name="landmark" className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span className="hidden xl:inline">POI</span>
+              <SoftIcon name="landmark" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">POI</span>
             </button>
 
             {/* Measurement Tool Toggle */}
             <button
               onClick={() => setShowMeasurement(!showMeasurement)}
-              className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
                 showMeasurement ? 'bg-emerald-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
               aria-label={t('common:aria.toggleMeasurementTool')}
               aria-pressed={showMeasurement}
             >
-              <SoftIcon name="ruler" className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span className="hidden xl:inline">{t('search:map.measure', 'Measure')}</span>
+              <SoftIcon name="ruler" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">{t('search:map.measure', 'Measure')}</span>
             </button>
 
             {/* Cadastre Layer Toggle */}
             <button
               onClick={() => setShowCadastre(!showCadastre)}
-              className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
                 showCadastre ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
               aria-label={t('common:aria.toggleCadastreParcels')}
               aria-pressed={showCadastre}
             >
-              <SoftIcon name="mapGrid" className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span className="hidden xl:inline">{t('search:map.cadastre', 'Cadastre')}</span>
+              <SoftIcon name="mapGrid" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">{t('search:map.cadastre', 'Cadastre')}</span>
             </button>
 
             {/* Legend Toggle */}
             <button
               onClick={() => setIsLegendOpen(!isLegendOpen)}
-              className={`flex items-center gap-1 px-1.5 py-1 xl:px-2.5 xl:py-1.5 text-[10px] xl:text-xs font-semibold rounded-full transition-all ${
+              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
                 isLegendOpen ? 'bg-amber-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
               }`}
               aria-label={t('search:map.legend', 'Legend')}
               aria-pressed={isLegendOpen}
             >
-              <SoftIcon name="legend" className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span className="hidden xl:inline">{t('search:map.legend', 'Legend')}</span>
+              <SoftIcon name="legend" className="w-5 h-5" />
+              <span className="inline leading-none landscape:hidden">{t('search:map.legend', 'Legend')}</span>
             </button>
             </div>
           </div>

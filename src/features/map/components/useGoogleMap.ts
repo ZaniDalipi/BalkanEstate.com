@@ -19,6 +19,8 @@ import { Property } from '@/types';
 import L from 'leaflet';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { SmoothMarkerClusterer, ViewportClusterAlgorithm } from '../utils/smoothClusterer';
+import { runInChunks } from '../utils/chunkedWork';
+import { nextMarkerArea, isInArea, type Area } from '../utils/markerArea';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
@@ -64,6 +66,7 @@ import {
   colorMapStyles,
   latLngToWebMercator,
   formatMarkerPrice,
+  MAP_BACKDROP,
 } from './googleMapConstants';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -122,7 +125,12 @@ export interface GoogleMapComponentProps {
   hoveredPropertyId?: string | null;
   /** Hide all map controls (for saved searches view) */
   hideControls?: boolean;
+  /** Called once, when the map is ready to be seen: tiles painted and first pins built. */
+  onReady?: () => void;
 }
+
+/** Pins built per animation frame on the first load of the map. */
+const MARKER_BUILD_CHUNK = 60;
 
 export function useGoogleMap(props: GoogleMapComponentProps) {
   const {
@@ -186,6 +194,20 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Tracks when the marker library + clusterer are ready (avoids race condition)
   const [markersReady, setMarkersReady] = useState(false);
+  // True while the pins are being built a slice at a time (see createAllMarkers),
+  // so the map can say it is busy instead of looking frozen or half empty.
+  const [isBuildingMarkers, setIsBuildingMarkers] = useState(false);
+  const cancelMarkerBuildRef = useRef<(() => void) | null>(null);
+  // Pins are built only around what is on screen (see markerArea.ts); null
+  // until the map has reported its first view.
+  const [markerArea, setMarkerArea] = useState<Area | null>(null);
+  // Ready to be seen (see `onReady`): the first tiles are painted and the first
+  // pins are built, so the loading veil can fade to a whole map, not a half one.
+  const [tilesPainted, setTilesPainted] = useState(false);
+  const [pinsSettled, setPinsSettled] = useState(false);
+  const readyReportedRef = useRef(false);
+  const onReadyRef = useRef(props.onReady);
+  onReadyRef.current = props.onReady;
 
   // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
@@ -616,6 +638,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Set ref synchronously first (avoids race condition with marker creation effect)
     mapInstanceRef.current = mapInstance;
     setMap(mapInstance);
+    google.maps.event.addListenerOnce(mapInstance, 'tilesloaded', () => setTilesPainted(true));
 
     // Deliver initial bounds immediately so properties load on first render.
     // onIdle may fire before React processes setMap(), causing it to exit early.
@@ -672,6 +695,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Handle map unmount
   const onUnmount = useCallback(() => {
+    cancelMarkerBuildRef.current?.();
+    cancelMarkerBuildRef.current = null;
     clusterActivationRef.current?.reset();
     clusterActivationRef.current = null;
     if (clustererRef.current) {
@@ -710,6 +735,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         [ne.lat(), ne.lng()]
       );
       const leafletCenter = L.latLng(mapCenter.lat(), mapCenter.lng());
+
+      const view = { south: sw.lat(), west: sw.lng(), north: ne.lat(), east: ne.lng() };
+      setMarkerArea((current) => nextMarkerArea(current, view));
 
       onMapMove(leafletBounds, leafletCenter);
     }
@@ -994,6 +1022,15 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   const createAllMarkers = useCallback((props: Property[], mapToUse: google.maps.Map) => {
     if (!clustererRef.current) return;
 
+    // A first-load build still in flight is replaced by this call. What it had
+    // already added was added without drawing, so draw it before moving on.
+    if (cancelMarkerBuildRef.current) {
+      cancelMarkerBuildRef.current();
+      cancelMarkerBuildRef.current = null;
+      setIsBuildingMarkers(false);
+      clustererRef.current.render();
+    }
+
     // A spiderfied cluster holds its pins at temporary positions with their
     // `map` forced on. Fold it back before diffing, or the clusterer would
     // re-render around coordinates that aren't where those listings are.
@@ -1153,26 +1190,54 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       promotedMarkersRef.current.forEach(m => { m.map = null; });
       promotedMarkersRef.current = [];
 
-      if (props.length === 0) return;
+      if (props.length === 0) {
+        setPinsSettled(true);
+        return;
+      }
       hasAnimatedEntranceRef.current = true;
 
       const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
       const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+      const clusterer = clustererRef.current;
 
-      for (let i = 0; i < props.length; i++) {
-        const { marker, markerDiv, isActivelyPromoted } = makeMarker(props[i], true, i, props.length);
-        markersRef.current.set(props[i].id, marker);
-        markerDivsRef.current.set(props[i].id, markerDiv);
-        if (isActivelyPromoted) {
-          marker.map = mapToUse;
-          promotedMarkers.push(marker);
-        } else {
-          regularMarkers.push(marker);
-        }
-      }
-
-      clustererRef.current.addMarkers(regularMarkers);
-      promotedMarkersRef.current = promotedMarkers;
+      // One pin is a DOM node plus a Google marker. Building one for every
+      // listing in a single loop is a long task and a memory spike right as a
+      // phone switches to the map, so the pins are built a slice per frame,
+      // added to the clusterer without drawing, and drawn once at the end.
+      setIsBuildingMarkers(true);
+      const finish = () => {
+        cancelMarkerBuildRef.current = null;
+        setIsBuildingMarkers(false);
+        setPinsSettled(true);
+        // Whatever was built is shown, even when the build stopped on an error.
+        clusterer.render();
+      };
+      cancelMarkerBuildRef.current = runInChunks({
+        items: props,
+        chunkSize: MARKER_BUILD_CHUNK,
+        processChunk: (chunk, start) => {
+          const slice: google.maps.marker.AdvancedMarkerElement[] = [];
+          chunk.forEach((property, offset) => {
+            const { marker, markerDiv, isActivelyPromoted } = makeMarker(property, true, start + offset, props.length);
+            markersRef.current.set(property.id, marker);
+            markerDivsRef.current.set(property.id, markerDiv);
+            if (isActivelyPromoted) {
+              marker.map = mapToUse;
+              promotedMarkers.push(marker);
+            } else {
+              regularMarkers.push(marker);
+              slice.push(marker);
+            }
+          });
+          if (slice.length > 0) clusterer.addMarkers(slice, true);
+          promotedMarkersRef.current = promotedMarkers;
+        },
+        onDone: finish,
+        onError: (error) => {
+          console.error('Map pins stopped building; showing the ones that were ready.', error);
+          finish();
+        },
+      });
 
       if ((window as any).__balkanestateSplashDone) {
         setTimeout(() => { delete (window as any).__balkanestateSplashDone; }, 3500);
@@ -1235,11 +1300,21 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [colocatedOffsets]);
 
+  // Only the listings around the view get a pin; the rest are still listed,
+  // searched and focusable, they just have no DOM node until the map nears them.
+  const markerProperties = useMemo(
+    () => (markerArea ? validProperties.filter((p) => isInArea(markerArea, p.lat, p.lng)) : []),
+    [validProperties, markerArea],
+  );
+
   // Update markers when properties change — debounced to avoid rapid clear/recreate
   // cycles during initial load (API fetch + WebSocket updates can fire in quick succession)
   useEffect(() => {
     const mapToUse = map || mapInstanceRef.current;
     if (!mapToUse || !clustererRef.current || !isLoaded || !markersReady) return;
+    // Until the map has reported its view there is no area to build pins for;
+    // building for "nothing" first would reveal the map before its pins.
+    if (!markerArea) return;
 
     // Debounce: wait 150ms for properties to settle before creating markers
     // This prevents the scenario where rapid property updates cause markers
@@ -1249,7 +1324,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
 
     markerCreationTimerRef.current = setTimeout(() => {
-      createAllMarkers(validProperties, mapToUse);
+      createAllMarkers(markerProperties, mapToUse);
     }, 150);
 
     return () => {
@@ -1257,7 +1332,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         clearTimeout(markerCreationTimerRef.current);
       }
     };
-  }, [validProperties, map, isLoaded, markersReady, createAllMarkers]);
+  }, [markerProperties, markerArea, map, isLoaded, markersReady, createAllMarkers]);
+
+  useEffect(() => {
+    if (readyReportedRef.current || !tilesPainted || !pinsSettled) return;
+    readyReportedRef.current = true;
+    onReadyRef.current?.();
+  }, [tilesPainted, pinsSettled]);
 
   // Animated "you are here" marker — created once permission is granted and a
   // valid fix is available, removed the moment location becomes unavailable
@@ -2042,6 +2123,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (!isLoaded || typeof google === 'undefined') return undefined;
 
     const opts: google.maps.MapOptions = {
+      // Same colour as the loading veil, so its fade shows no seam.
+      backgroundColor: MAP_BACKDROP,
       restriction: {
         latLngBounds: BALKAN_BOUNDS,
         strictBounds: false,
@@ -2095,6 +2178,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     // Loading
     isLoaded,
     loadError,
+    isBuildingMarkers,
 
     // Map
     map,

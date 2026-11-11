@@ -8,6 +8,7 @@
  */
 import { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 import { DEVELOPMENT_CATEGORIES, type CreateDevelopmentPayload } from '../types';
+import { isWebUrl, toWebUrl } from '../utils/webAddress';
 
 export interface FieldResult {
   isValid: boolean;
@@ -41,7 +42,7 @@ export const validateCategory = (value: string): FieldResult =>
 
 /** Field-keyed errors for the create form; empty object means valid. */
 export type CreateDevelopmentErrors = Partial<
-  Record<'name' | 'country' | 'city' | 'category', string>
+  Record<'name' | 'country' | 'city' | 'category' | 'website', string>
 >;
 
 /**
@@ -56,6 +57,8 @@ export const validateCreateDevelopment = (
   if (!name.isValid) errors.name = name.errorKey;
   const country = validateCountry(payload.country ?? '');
   if (!country.isValid) errors.country = country.errorKey;
+  const website = validateWebsite(payload.website ?? '');
+  if (!website.isValid) errors.website = website.errorKey;
   const city = validateCity(payload.city ?? '');
   if (!city.isValid) errors.city = city.errorKey;
   const category = validateCategory(payload.category ?? '');
@@ -65,15 +68,11 @@ export const validateCreateDevelopment = (
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** A website typed with or without https:// (it is added on save): a real https site, or empty. */
 export const validateWebsite = (value: string): FieldResult => {
-  const v = (value ?? '').trim();
-  if (!v) return { isValid: true };
-  try {
-    const url = new URL(v);
-    return url.protocol === 'http:' || url.protocol === 'https:' ? { isValid: true } : { isValid: false, errorKey: 'validation.websiteInvalid' };
-  } catch {
-    return { isValid: false, errorKey: 'validation.websiteInvalid' };
-  }
+  const href = toWebUrl(value);
+  if (!href) return { isValid: true };
+  return isWebUrl(href) ? { isValid: true } : { isValid: false, errorKey: 'validation.websiteInvalid' };
 };
 
 /**

@@ -8,6 +8,8 @@ import type { Development } from '../../../types';
 const h = vi.hoisted(() => ({ update: vi.fn(), upload: vi.fn(), remove: vi.fn() }));
 vi.mock('../../../hooks/useDevelopmentMutations', () => ({ useUpdateDevelopment: () => ({ update: h.update, isLoading: false }) }));
 vi.mock('../../../hooks/useBuilderImages', () => ({ useBuilderImages: () => ({ upload: h.upload, remove: h.remove, busy: false }) }));
+// The Business Directory card has its own tests (BuilderBusinessLink.test.tsx).
+vi.mock('./BuilderBusinessLink', () => ({ BuilderBusinessLink: () => null }));
 
 const dev = (over: Partial<Development> = {}) => ({ id: 'd1', name: 'Aurora', slug: 'aurora', ...over }) as Development;
 const field = (name: string) => screen.getByLabelText(new RegExp(`^${name.replace('.', '\\.')}`)) as HTMLInputElement;

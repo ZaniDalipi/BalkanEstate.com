@@ -125,6 +125,7 @@ import aiRoutes from './routes/aiRoutes';
 import cadastreRoutes from './routes/cadastreRoutes';
 import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
 import fileRoutes from './routes/fileRoutes';
+import routingRoutes from './routes/routingRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
 import articleRoutes from './routes/articleRoutes';
@@ -148,7 +149,6 @@ import { startMonthlyResetWorker } from './workers/monthlyResetWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 import { ensureAllFeaturedCitiesExist } from './services/cityMarketDataService';
-import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 import { runScoreBackfill } from './jobs/scoreBackfillJob';
 import { initializePushService } from './services/pushNotificationService';
 
@@ -260,9 +260,7 @@ serverLogger.info('✅ Trial management job started');
 startCityMarketDataUpdateJob();
 serverLogger.info('✅ City market data update job started (biweekly)');
 
-// Start monthly coupon refresh job (1st of each month)
-startMonthlyCouponJob();
-serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
+// Monthly coupon refresh (1st of each month) is scheduled once, in startCronJobs() (src/cron/index.ts)
 
 // Start monthly listing counter reset worker (1st of each month at 00:00 UTC)
 startMonthlyResetWorker();
@@ -399,6 +397,7 @@ app.use('/api/achievements', achievementRoutes); // User and agency achievements
 app.use('/api/promotion-plans', promotionPlanRoutes); // Listing promotion and agency feature plans
 app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
 app.use('/api/cadastre', cadastreRoutes); // Cadastre WMS proxy (GetFeatureInfo)
+app.use('/api/routing', routingRoutes); // Travel routes visitor → business (OSRM proxy, IP rate limited)
 app.use('/api/map', mapProxyRoutes); // Weather tile & FIRMS WMS proxy (API keys server-side)
 app.use('/api/files', fileRoutes); // File access with storage access policy (ownership-based)
 app.use('/api/news', newsRoutes); // Public real estate news

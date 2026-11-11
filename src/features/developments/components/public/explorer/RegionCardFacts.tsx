@@ -47,7 +47,7 @@ export const UnitFacts: React.FC<{ unit: PublicUnit; companions?: { comesWith: P
   return (
     <>
       {unit.floorplan?.url && (
-        <div className="-mx-4 -mt-4 mb-3 overflow-hidden rounded-t-xl border-b border-slate-100 bg-slate-50">
+        <div className="-mx-4 -mt-4 mb-3 overflow-hidden rounded-t-2xl border-b border-slate-100 bg-slate-50">
           <img
             src={optimizeImageUrl(unit.floorplan.url, { width: 560 })}
             alt={t('explorer.drawer.floorplan', 'Floor plan')}

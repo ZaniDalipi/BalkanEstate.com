@@ -131,7 +131,13 @@
     "stats": {
       "services": "Servicii",
       "views": "Vizualizări",
-      "memberSince": "Membru din"
+      "memberSince": "Membru din",
+      "offered": "oferite",
+      "profileViews": "vizualizări profil",
+      "yearsAgo_one": "acum {{count}} an",
+      "yearsAgo_few": "acum {{count}} ani",
+      "yearsAgo_other": "acum {{count}} de ani",
+      "thisYear": "anul acesta"
     },
     "licensed": "Licențiat",
     "languages": "Limbi",
@@ -143,7 +149,83 @@
       "callNow": "Sună la {{phone}}",
       "sendEmail": "Trimite email"
     },
-    "established": "Înființat în {{year}}"
+    "established": "Înființat în {{year}}",
+    "actions": {
+      "label": "Opțiuni de contact",
+      "call": "Sună",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber",
+      "email": "E-mail",
+      "website": "Site",
+      "directions": "Indicații"
+    },
+    "atAGlance": "Pe scurt",
+    "copied": "Copiat",
+    "copy": "Copiază",
+    "copyAddress": "Copiază adresa",
+    "copyFailed": "Nu s-a putut copia — selectați textul",
+    "copyValue": "Copiază: {{label}}",
+    "founded": "Înființată",
+    "highlights": "Repere",
+    "licenseNumber": "Număr licență",
+    "listedBy": "Publicat de",
+    "loading": "Se încarcă afacerea…",
+    "logoAlt": "Sigla {{name}}",
+    "openSocial": "{{network}} (se deschide într-o filă nouă)",
+    "priceRange": "Nivel de preț",
+    "profileViews": "Vizualizări profil",
+    "readLess": "Mai puțin",
+    "readMore": "Citește mai mult",
+    "seeAll": "Vezi tot",
+    "similar": "Mai multe în {{category}}",
+    "price": {
+      "budget": "Accesibil",
+      "mid": "Mediu",
+      "premium": "Premium"
+    },
+    "status": {
+      "open": "Deschis",
+      "closes": "Se închide la {{time}}",
+      "allDay": "Non-stop",
+      "closed": "Închis",
+      "closedToday": "Închis azi",
+      "opensAt": "Se deschide la {{time}}",
+      "opensTomorrow": "Se deschide mâine la {{time}}",
+      "opensOn": "Se deschide: {{day}}, {{time}}"
+    },
+    "yearsInBusiness_one": "{{count}} an de activitate",
+    "yearsInBusiness_few": "{{count}} ani de activitate",
+    "yearsInBusiness_other": "{{count}} de ani de activitate",
+    "route": {
+      "straight": "{{distance}} în linie dreaptă",
+      "noRoute": "Nu am putut calcula un traseu acum — aplicația de hărți de mai jos poate.",
+      "car": "Cu mașina",
+      "foot": "Pe jos",
+      "bike": "Cu bicicleta",
+      "modeLabel": "Mod de deplasare",
+      "openIn": "Deschide în {{app}}",
+      "locating": "Te căutăm…",
+      "retry": "Încearcă din nou locația",
+      "fromMe": "Distanța și traseul de la locația mea",
+      "denied": "Locația este dezactivată pentru acest site. Permite-o din setările browserului — sau lasă aplicația de hărți să te găsească.",
+      "unavailable": "Nu ți-am putut găsi locația. Aplicația de hărți te poate duce totuși acolo.",
+      "privacy": "Locația ta este folosită doar pentru a calcula traseul. Nu este salvată.",
+      "fromYou": "la {{distance}} de tine"
+    },
+    "map": {
+      "layer": "Stil hartă",
+      "standard": "Hartă",
+      "satellite": "Satelit",
+      "approximate": "Aproximativ — după adresă",
+      "cityOnly": "Aproximativ — doar zona orașului",
+      "finding": "Căutăm adresa pe hartă…",
+      "label": "Hartă: {{name}}",
+      "gestureDesktop": "Folosește Ctrl + derulare pentru zoom",
+      "gestureMac": "Folosește ⌘ + derulare pentru zoom",
+      "gestureMobile": "Folosește două degete pentru a muta harta"
+    },
+    "residences": "Ansambluri",
+    "residencesSubtitle": "Locuințe construite de {{name}} pe BalkanEstate"
   },
   "days": {
     "monday": "Luni",
@@ -286,7 +368,21 @@
     "editSuccessMessage": "Anunțul afacerii a fost actualizat.",
     "errorTitle": "Încărcarea afacerilor a eșuat",
     "errorMessage": "Ceva nu a mers bine. Încearcă mai târziu.",
-    "backToList": "Înapoi la Afacerile mele"
+    "backToList": "Înapoi la Afacerile mele",
+    "drafts": {
+      "title": "Ciorne",
+      "subtitle": "Încă nepublicat. Salvat doar pe acest dispozitiv.",
+      "badge": "Ciornă",
+      "untitled": "Afacere fără nume",
+      "savedAt": "Salvat pe acest dispozitiv la {{date}}",
+      "keptUntil": "păstrat până la {{date}}",
+      "continue": "Continuă",
+      "discard": "Renunță",
+      "discardTitle": "Renunțați la această ciornă?",
+      "discardMessage": "Ce ați completat va fi șters de pe acest dispozitiv. Acțiunea nu poate fi anulată.",
+      "unsavedChanges": "Modificări nesalvate",
+      "continueEditing": "Continuă editarea"
+    }
   },
   "delete": {
     "confirmTitle": "Șterge anunțul",
@@ -309,5 +405,14 @@
       "preview": "Previzualizare",
       "bannerPreview": "Previzualizare banner"
     }
+  },
+  "paymentMethods": {
+    "cash": "Numerar",
+    "credit_card": "Card de credit",
+    "debit_card": "Card de debit",
+    "bank_transfer": "Transfer bancar",
+    "paypal": "PayPal",
+    "crypto": "Cripto",
+    "invoice": "Factură"
   }
 }

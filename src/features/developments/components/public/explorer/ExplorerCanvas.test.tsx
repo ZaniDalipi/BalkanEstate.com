@@ -119,14 +119,35 @@ describe('ExplorerCanvas', () => {
     expect(onActivate).toHaveBeenCalledWith(expect.objectContaining({ linkId: 'b9' }));
   });
 
-  it('opens with Enter/Space and with a mouse click', () => {
+  it('opens with Enter/Space; a mouse click pins the apartment’s card, whose button (or a second click) opens it', () => {
     const onActivate = renderCanvas();
     const apt = screen.getByRole('button', { name: /Apt A12/ });
     fireEvent.keyDown(apt, { key: 'Enter' });
     fireEvent.keyDown(apt, { key: ' ' });
-    fireEvent.click(apt);
-    expect(onActivate).toHaveBeenCalledTimes(3);
+    expect(onActivate).toHaveBeenCalledTimes(2);
     expect(onActivate.mock.calls[0][0].linkId).toBe('u1');
+
+    fireEvent.click(apt);
+    expect(onActivate).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Apt A12');
+    fireEvent.click(screen.getByRole('button', { name: /View apartment/ }));
+    expect(onActivate).toHaveBeenCalledTimes(3);
+
+    fireEvent.click(apt);
+    fireEvent.click(apt);
+    expect(onActivate).toHaveBeenCalledTimes(4);
+  });
+
+  it('a pinned card stays put while the pointer crosses other apartments on its way to the button', () => {
+    renderCanvas();
+    fireEvent.click(screen.getByRole('button', { name: /Apt A12/ }));
+    const other = document.querySelector('[data-hotspot-id="h2"]') as Element;
+    fireEvent.pointerEnter(other, { pointerType: 'mouse' });
+    fireEvent.pointerLeave(document.querySelector('[data-hotspot-id="h1"]') as Element);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Apt A12');
+    // A click on the picture itself lets it go.
+    fireEvent.click(screen.getByTestId('explorer-canvas').firstElementChild as Element);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
   it('shows a tooltip with the unit facts on focus', () => {

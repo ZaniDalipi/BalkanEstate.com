@@ -77,7 +77,10 @@
     "last7Days": "Последњих 7 дана",
     "last30Days": "Последњих 30 дана",
     "priceReduced": "Снижена цена",
-    "priceIncreased": "Повећана цена"
+    "priceIncreased": "Повећана цена",
+    "constructionStatus": "Изградња",
+    "kitchens": "Кухиње",
+    "orientation": "Оријентација"
   },
   "options": {
     "any": "Било који",
@@ -603,7 +606,8 @@
       "openFilters": "Отвори филтере",
       "myAccount": "Мој налог",
       "tapMap": "Додирните „Мапа“",
-      "viewToggle": "Промени приказ"
+      "viewToggle": "Промени приказ",
+      "recoveredFromCrash": "Страница је поново покренута ради ослобађања меморије. Мапа се учитава када додирнете Мапа."
     },
     "aiSearch": {
       "agent": "Агент",
@@ -648,5 +652,19 @@
     "climateRiskLayer": {
       "veryHigh": "Веома висок"
     }
+  },
+  "constructionOptions": {
+    "ready": "Усељиво одмах",
+    "underConstruction": "У изградњи"
+  },
+  "orientationOptions": {
+    "north": "Север",
+    "south": "Југ",
+    "east": "Исток",
+    "west": "Запад",
+    "northEast": "Североисток",
+    "northWest": "Северозапад",
+    "southEast": "Југоисток",
+    "southWest": "Југозапад"
   }
 }

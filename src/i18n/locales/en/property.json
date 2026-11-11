@@ -794,7 +794,11 @@
     "priceHistory": "Price History",
     "similar": "Similar Homes",
     "onThisPage": "On this page",
-    "areaPrices": "Area Prices"
+    "areaPrices": "Area Prices",
+    "airQuality": "Air Quality",
+    "noise": "Noise",
+    "traffic": "Traffic",
+    "zoneDynamics": "Zone Dynamics"
   },
   "featured": {
     "spacesLabel": "Spaces",
@@ -992,5 +996,144 @@
     "imageEditorModal": {
       "iHaveSomeQuestionsAbout": "I have some questions about this property. Please see my annotations:"
     }
+  },
+  "areaInsights": {
+    "airQuality": {
+      "title": "Air quality",
+      "subtitle": "Seasonal averages at this location",
+      "summer": "Summer {{years}}",
+      "winter": "Winter {{years}}",
+      "aqiUnit": "AQI",
+      "noSeason": "No data for this season",
+      "pm25": "PM2.5 {{value}} µg/m³",
+      "band": {
+        "good": "Good",
+        "fair": "Fair",
+        "moderate": "Moderate",
+        "poor": "Poor",
+        "veryPoor": "Very poor",
+        "extremelyPoor": "Extremely poor"
+      },
+      "loadError": "We couldn't load air quality right now.",
+      "noLocation": "This listing has no map location, so we can't show its air quality.",
+      "noData": "No air quality data is available for this location yet.",
+      "explain": "The European Air Quality Index runs from 0 (clean air) to over 100 (extremely poor). Winter values are often higher because of home heating.",
+      "source": "Source: Copernicus Atmosphere Monitoring Service, via Open-Meteo"
+    },
+    "dynamics": {
+      "title": "Zone dynamics",
+      "buyerSide": "Favours buyers",
+      "sellerSide": "Favours sellers",
+      "tenantSide": "Favours tenants",
+      "landlordSide": "Favours landlords",
+      "gaugeLabel": "{{score}} out of 100: {{left}} at 0, {{right}} at 100",
+      "insufficient": "Not enough recent sales nearby to tell whether this is a buyer's or a seller's market.",
+      "insufficientRent": "Not enough recent lets nearby to tell whether this area favours tenants or landlords.",
+      "sale": {
+        "seller": {
+          "title": "This area is a seller's market",
+          "text": "Low supply — good homes sell quickly, with little room to negotiate."
+        },
+        "balanced": {
+          "title": "This area is a balanced market",
+          "text": "Supply and demand are even — prices are usually negotiable within reason."
+        },
+        "buyer": {
+          "title": "This area is a buyer's market",
+          "text": "Plenty of choice — buyers have time to compare and room to negotiate."
+        }
+      },
+      "rent": {
+        "seller": {
+          "title": "This area is a landlord's market",
+          "text": "Few homes to let — good ones are taken quickly."
+        },
+        "balanced": {
+          "title": "This area is a balanced rental market",
+          "text": "Homes to let and tenants are in balance."
+        },
+        "buyer": {
+          "title": "This area is a tenant's market",
+          "text": "Plenty of homes to let — tenants can compare and negotiate."
+        }
+      },
+      "onMarket": "{{count}} on the market",
+      "soldLastYear": "{{count}} sold in the last 12 months",
+      "letLastYear": "{{count}} let in the last 12 months",
+      "supply": "≈ {{months}} months of supply",
+      "daysToSell": "Typically sold in {{count}} days",
+      "daysToLet": "Typically let in {{count}} days",
+      "explain": "Months of supply: the homes on the market nearby, divided by how many sold each month over the last year. Under 4 months favours sellers, over 7 favours buyers."
+    },
+    "about": "About: {{topic}}",
+    "mapSource": "Map data © OpenStreetMap contributors",
+    "sourceKind": {
+      "motorway": "Motorway",
+      "trunk": "Expressway",
+      "primary": "Main road",
+      "secondary": "Secondary road",
+      "tertiary": "Local through road",
+      "railway": "Railway",
+      "tram": "Tram line",
+      "airport": "Airport",
+      "nightclub": "Nightclub",
+      "bar": "Bar",
+      "street": "Residential street"
+    },
+    "noise": {
+      "title": "Ambient noise",
+      "subtitle": "Estimated sound level at this home",
+      "day": "Day · 07–23",
+      "night": "Night · 23–07",
+      "unit": "dB",
+      "band": {
+        "quiet": "Quiet",
+        "moderate": "Moderate",
+        "noisy": "Noisy",
+        "veryNoisy": "Very noisy"
+      },
+      "sourcesTitle": "Main sources nearby",
+      "noSources": "No busy roads, railways or nightlife close by.",
+      "explain": "An estimate, not a measurement: worked out from the roads, railways, airports and nightlife around the home and how far away they are. The WHO advises road noise below 53 dB by day and 45 dB at night.",
+      "loadError": "We couldn't load noise and traffic for this area right now.",
+      "noLocation": "This listing has no map location, so we can't estimate noise."
+    },
+    "traffic": {
+      "title": "Traffic",
+      "subtitle": "Street traffic around this home",
+      "level": {
+        "calm": "Quiet streets",
+        "moderate": "Moderate traffic",
+        "busy": "Busy street nearby"
+      },
+      "nearestRoad": "Nearest main road: {{road}} ({{kind}}), {{distance}} away",
+      "nearestRoadUnnamed": "Nearest main road: a {{kind}}, {{distance}} away",
+      "noMainRoad": "No main road within 500 m.",
+      "explain": "How busy it gets comes from the kind of roads around the home, how close they are, and the standard pattern of traffic through a weekday and a weekend day. It is a typical picture, not live or measured traffic.",
+      "noLocation": "This listing has no map location, so we can't show traffic.",
+      "nearestStreet": "Nearest street: {{street}} ({{kind}}), {{distance}} away",
+      "nearestStreetUnnamed": "Nearest street: {{distance}} away",
+      "patternTitle": "Typical traffic through the day",
+      "weekday": "Weekdays",
+      "weekend": "Weekends",
+      "dayType": "Day of the week",
+      "timeOfDay": "Time of day",
+      "legend": "Colour key",
+      "busiestAt": "Busiest around {{times}}",
+      "mapTitle": "Typical traffic around this home",
+      "closeMap": "Close map",
+      "fullScreen": "Open full-screen map",
+      "typicalNote": "A typical pattern from the kind of roads and standard daily traffic — not live or measured traffic.",
+      "shade": {
+        "flowing": "Flowing",
+        "light": "Light",
+        "moderate": "Moderate",
+        "heavy": "Heavy",
+        "veryHeavy": "Very heavy"
+      }
+    },
+    "unavailable": "This information isn't available for this listing yet.",
+    "loadingStreets": "Checking the streets around this home…",
+    "stillChecking": "The map servers are busy, so this is taking longer than usual. Try again in a minute."
   }
 }

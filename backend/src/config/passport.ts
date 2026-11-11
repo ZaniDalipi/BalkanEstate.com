@@ -4,6 +4,7 @@ import { Strategy as GoogleStrategy, Profile as GoogleProfile, VerifyCallback } 
 import AppleStrategy from 'passport-apple';
 import User from '../models/User';
 import { sendWelcomeEmail } from '../services/emailVerificationService';
+import { notifyAdmins } from '../services/adminNotificationService';
 
 // Track which strategies are enabled
 export const oauthStrategies = {
@@ -83,6 +84,15 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             }
           });
 
+          notifyAdmins({
+            kind: 'user_registered',
+            userId: String(user._id),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            provider: 'google',
+          });
+
           // Send welcome email to new Google OAuth users (non-blocking)
           try {
             await sendWelcomeEmail(user);
@@ -156,6 +166,15 @@ if (
               totalSalesValue: 0,
               lastUpdated: new Date()
             }
+          });
+
+          notifyAdmins({
+            kind: 'user_registered',
+            userId: String(user._id),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            provider: 'apple',
           });
 
           // Send welcome email to new Apple OAuth users (non-blocking)

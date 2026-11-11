@@ -761,7 +761,11 @@
     "priceHistory": "Povijest cijena",
     "similar": "Slične nekretnine",
     "onThisPage": "Na ovoj stranici",
-    "areaPrices": "Cijene u blizini"
+    "areaPrices": "Cijene u blizini",
+    "airQuality": "Kvaliteta zraka",
+    "noise": "Buka",
+    "traffic": "Promet",
+    "zoneDynamics": "Dinamika zone"
   },
   "seo": {
     "description": "{{type}} s {{beds}} spavaćih soba, {{baths}} kupaonica za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
@@ -993,5 +997,144 @@
     "imageEditorModal": {
       "iHaveSomeQuestionsAbout": "Imam nekoliko pitanja o ovoj nekretnini. Molim pogledajte moje oznake:"
     }
+  },
+  "areaInsights": {
+    "airQuality": {
+      "title": "Kvaliteta zraka",
+      "subtitle": "Sezonski prosjeci na ovoj lokaciji",
+      "summer": "Ljeto {{years}}",
+      "winter": "Zima {{years}}",
+      "aqiUnit": "AQI",
+      "noSeason": "Nema podataka za ovu sezonu",
+      "pm25": "PM2.5 {{value}} µg/m³",
+      "band": {
+        "good": "Dobra",
+        "fair": "Prihvatljiva",
+        "moderate": "Umjerena",
+        "poor": "Loša",
+        "veryPoor": "Vrlo loša",
+        "extremelyPoor": "Iznimno loša"
+      },
+      "loadError": "Trenutačno nismo mogli učitati kvalitetu zraka.",
+      "noLocation": "Ovaj oglas nema lokaciju na karti, pa ne možemo prikazati kvalitetu zraka.",
+      "noData": "Za ovu lokaciju još nema podataka o kvaliteti zraka.",
+      "explain": "Europski indeks kvalitete zraka ide od 0 (čist zrak) do preko 100 (iznimno loša). Zimi su vrijednosti često više zbog grijanja kućanstava.",
+      "source": "Izvor: Copernicusova služba za praćenje atmosfere, putem Open-Meteo"
+    },
+    "dynamics": {
+      "title": "Dinamika zone",
+      "buyerSide": "U korist kupaca",
+      "sellerSide": "U korist prodavatelja",
+      "tenantSide": "U korist najmoprimaca",
+      "landlordSide": "U korist najmodavaca",
+      "gaugeLabel": "{{score}} od 100: {{left}} na 0, {{right}} na 100",
+      "insufficient": "Nema dovoljno nedavnih prodaja u blizini da bi se reklo je li ovo tržište kupaca ili prodavatelja.",
+      "insufficientRent": "Nema dovoljno nedavnih najmova u blizini da bi se reklo ide li područje u korist najmoprimaca ili najmodavaca.",
+      "sale": {
+        "seller": {
+          "title": "Ovo područje je tržište prodavatelja",
+          "text": "Mala ponuda — dobre nekretnine brzo se prodaju, uz malo prostora za pregovore."
+        },
+        "balanced": {
+          "title": "Ovo područje je uravnoteženo tržište",
+          "text": "Ponuda i potražnja su izjednačene — o cijenama se obično može razumno pregovarati."
+        },
+        "buyer": {
+          "title": "Ovo područje je tržište kupaca",
+          "text": "Puno izbora — kupci imaju vremena za usporedbu i prostora za pregovore."
+        }
+      },
+      "rent": {
+        "seller": {
+          "title": "Ovo područje je tržište najmodavaca",
+          "text": "Malo nekretnina za najam — dobre se brzo iznajme."
+        },
+        "balanced": {
+          "title": "Ovo područje je uravnoteženo tržište najma",
+          "text": "Ponuda za najam i najmoprimci su u ravnoteži."
+        },
+        "buyer": {
+          "title": "Ovo područje je tržište najmoprimaca",
+          "text": "Puno nekretnina za najam — najmoprimci mogu uspoređivati i pregovarati."
+        }
+      },
+      "onMarket": "{{count}} na tržištu",
+      "soldLastYear": "{{count}} prodano u zadnjih 12 mjeseci",
+      "letLastYear": "{{count}} iznajmljeno u zadnjih 12 mjeseci",
+      "supply": "≈ {{months}} mjeseci ponude",
+      "daysToSell": "Obično se proda za {{count}} dana",
+      "daysToLet": "Obično se iznajmi za {{count}} dana",
+      "explain": "Mjeseci ponude: nekretnine na tržištu u blizini, podijeljene s brojem prodanih mjesečno tijekom prošle godine. Ispod 4 mjeseca u korist je prodavatelja, iznad 7 u korist kupaca."
+    },
+    "about": "O: {{topic}}",
+    "mapSource": "Podaci karte © suradnici OpenStreetMapa",
+    "sourceKind": {
+      "motorway": "Autocesta",
+      "trunk": "Brza cesta",
+      "primary": "Glavna cesta",
+      "secondary": "Sporedna cesta",
+      "tertiary": "Lokalna prolazna cesta",
+      "railway": "Željeznica",
+      "tram": "Tramvajska linija",
+      "airport": "Zračna luka",
+      "nightclub": "Noćni klub",
+      "bar": "Bar",
+      "street": "Stambena ulica"
+    },
+    "noise": {
+      "title": "Buka u okolici",
+      "subtitle": "Procijenjena razina zvuka kod ove nekretnine",
+      "day": "Dan · 07–23",
+      "night": "Noć · 23–07",
+      "unit": "dB",
+      "band": {
+        "quiet": "Tiho",
+        "moderate": "Umjereno",
+        "noisy": "Bučno",
+        "veryNoisy": "Vrlo bučno"
+      },
+      "sourcesTitle": "Glavni izvori u blizini",
+      "noSources": "Nema prometnih cesta, pruga ni noćnog života u blizini.",
+      "explain": "Procjena, ne mjerenje: izračunata iz cesta, pruga, zračnih luka i noćnog života oko nekretnine i njihove udaljenosti. SZO preporučuje buku prometa ispod 53 dB danju i 45 dB noću.",
+      "loadError": "Trenutačno nismo mogli učitati buku i promet za ovo područje.",
+      "noLocation": "Ovaj oglas nema lokaciju na karti, pa ne možemo procijeniti buku."
+    },
+    "traffic": {
+      "title": "Promet",
+      "subtitle": "Promet na ulicama oko ove nekretnine",
+      "level": {
+        "calm": "Mirne ulice",
+        "moderate": "Umjeren promet",
+        "busy": "Prometna ulica u blizini"
+      },
+      "nearestRoad": "Najbliža glavna cesta: {{road}} ({{kind}}), udaljena {{distance}}",
+      "nearestRoadUnnamed": "Najbliža glavna cesta: {{kind}}, udaljena {{distance}}",
+      "noMainRoad": "Nema glavne ceste unutar 500 m.",
+      "explain": "Gužva se procjenjuje iz vrste cesta oko nekretnine, njihove udaljenosti i uobičajenog obrasca prometa tijekom radnog dana i vikenda. To je tipična slika, a ne promet uživo ili izmjeren.",
+      "noLocation": "Ovaj oglas nema lokaciju na karti, pa ne možemo prikazati promet.",
+      "nearestStreet": "Najbliža ulica: {{street}} ({{kind}}), udaljena {{distance}}",
+      "nearestStreetUnnamed": "Najbliža ulica: udaljena {{distance}}",
+      "patternTitle": "Uobičajeni promet tijekom dana",
+      "weekday": "Radni dani",
+      "weekend": "Vikendi",
+      "dayType": "Dan u tjednu",
+      "timeOfDay": "Doba dana",
+      "legend": "Legenda boja",
+      "busiestAt": "Najveća gužva oko {{times}}",
+      "mapTitle": "Uobičajeni promet oko ove nekretnine",
+      "closeMap": "Zatvori kartu",
+      "fullScreen": "Otvori kartu preko cijelog zaslona",
+      "typicalNote": "Tipičan obrazac prema vrsti cesta i uobičajenom dnevnom prometu — ne promet uživo ili izmjeren.",
+      "shade": {
+        "flowing": "Protočno",
+        "light": "Slabo",
+        "moderate": "Umjereno",
+        "heavy": "Gusto",
+        "veryHeavy": "Vrlo gusto"
+      }
+    },
+    "unavailable": "Ova informacija još nije dostupna za ovaj oglas.",
+    "loadingStreets": "Provjeravamo ulice oko ove nekretnine…",
+    "stillChecking": "Poslužitelji karata su zauzeti, pa ovo traje dulje nego inače. Pokušajte ponovno za minutu."
   }
 }

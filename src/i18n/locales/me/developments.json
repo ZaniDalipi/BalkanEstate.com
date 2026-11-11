@@ -162,7 +162,7 @@
     "countryRequired": "Država je obavezna.",
     "cityRequired": "Grad je obavezan.",
     "categoryRequired": "Odaberite kategoriju.",
-    "websiteInvalid": "Unesite punu web adresu koja počinje sa http:// ili https://.",
+    "websiteInvalid": "Unesite web adresu poput www.primjer.com.",
     "emailInvalid": "Unesite ispravnu email adresu.",
     "latInvalid": "Geografska širina mora biti broj između -90 i 90.",
     "lngInvalid": "Geografska dužina mora biti broj između -180 i 180.",
@@ -456,6 +456,37 @@
       "homes": "Stanova: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Stanova sa 360° turom: {{n}}"
+    },
+    "showcase": {
+      "back": "Nazad na zgradu",
+      "backPlain": "Nazad",
+      "mode": "Prikaz plana sprata",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Plan sprata: {{name}}",
+      "photoAlt": "{{name}}, fotografija {{n}}",
+      "prevPhoto": "Prethodna fotografija",
+      "nextPhoto": "Sljedeća fotografija",
+      "photoOf": "{{n}} od {{total}}",
+      "modes": "Šta prikazati",
+      "modeFloor": "Na svom spratu",
+      "modePhotos": "Fotografije",
+      "floorAlt": "{{floor}}: {{name}} označen",
+      "loading": "Učitavanje slike sprata…",
+      "floorFailed": "Slika sprata nije mogla da se učita.",
+      "retry": "Pokušaj ponovo"
+    },
+    "dive": {
+      "skip": "Preskoči",
+      "status": "Vodimo vas do: {{name}}"
+    },
+    "bathrooms_one": "{{count}} kupatilo",
+    "bathrooms_few": "{{count}} kupatila",
+    "bathrooms_other": "{{count}} kupatila",
+    "floors": {
+      "title": "Spratovi",
+      "whole": "Cijela zgrada",
+      "hasPlan": "Ima plan sprata"
     }
   },
   "feature": {
@@ -1196,8 +1227,8 @@
       "trialInProgress": "Druga vaša rezidencija je na besplatnoj probi. Kupite paket da odmah objavite ovu.",
       "trialLimit": "Iskoristili ste sve besplatne probe. Kupite paket da biste objavili.",
       "buildingLimit": "Ova rezidencija može imati {{limit}} zgrada. Otključajte još da dodate novu.",
-      "paymentSoonAmount": "Online plaćanje stiže uskoro. Preostalo je {{amount}}, pa unesite kod koji to pokriva.",
-      "paymentSoon": "Online plaćanje stiže uskoro. Unesite kod da odmah otključate.",
+      "paymentSoonAmount": "Još je za plaćanje {{amount}}. Plaćanje se dogovara direktno sa nama; unesite kod koji to pokriva.",
+      "paymentSoon": "Plaćanje se dogovara direktno sa nama. Unesite kod za otključavanje koji smo vam poslali.",
       "couponInvalid": "Ovaj kod ne važi za rezidencije.",
       "coupon": {
         "unknown": "Takav kod ne postoji. Provjerite kako ste ga napisali.",
@@ -1213,8 +1244,10 @@
     },
     "code": {
       "label": "Kod za otključavanje",
-      "required": "Unesite svoj kod. Online plaćanje stiže uskoro.",
-      "format": "Kodovi imaju slova, brojeve, - i _ (3–64 znaka)."
+      "required": "Unesite kod za otključavanje koji smo vam poslali nakon dogovora o plaćanju.",
+      "format": "Kodovi imaju slova, brojeve, - i _ (3–64 znaka).",
+      "applied": "Kod primijenjen: plaćate {{amount}} umjesto {{list}}.",
+      "appliedNext": "Pišite nam za ostatak (e-mail već sadrži kod i cijenu); kad bude plaćeno, šaljemo vam kod za otključavanje koji unosite ovdje."
     },
     "quantity": {
       "label": "Zgrade za dodavanje",
@@ -1229,7 +1262,9 @@
     "summary": {
       "each": "{{n}} × cijena",
       "discount": "Premium popust ({{pct}}%)",
-      "total": "Ukupno"
+      "total": "Ukupno",
+      "validity": "Jedna uplata, važi {{months}} mjeseci — nije doživotno. Ne obnavlja se sama.",
+      "code": "Kod {{code}}"
     },
     "done": {
       "pass": "Paket rezidencije je aktivan",
@@ -1265,7 +1300,19 @@
     "publishWithPass": "Kupi paket i objavi",
     "publishTrial": "Objavi · besplatno {{days}} dana",
     "createNote": "Postavljanje je besplatno. Objavljivanje pokreće besplatnu probu od 15 dana; nakon nje paket rezidencije je drži online.",
-    "publishAgency": "Objavi · besplatno uz plan agencije"
+    "publishAgency": "Objavi · besplatno uz plan agencije",
+    "arrange": {
+      "title": "Kako platiti",
+      "body": "Ne primamo online plaćanja. Plaćanje dogovaramo direktno sa vama: pišite nam, zajedno potvrdimo detalje i pošaljemo vam kod za otključavanje koji unosite ispod.",
+      "emailAria": "Pišite na {{email}} u vezi sa ovom kupovinom",
+      "mailBody": "Zdravo,\n\nŽelim da kupim: {{item}} ({{price}}).\nRezidencija: {{link}}\n\nHvala.",
+      "extraItem": "Dodatne zgrade: {{n}}",
+      "copy": "Kopiraj adresu",
+      "copied": "Kopirano",
+      "copyFailed": "Kopiranje nije uspjelo. Označite {{email}} iznad ili pišite na nju iz svoje aplikacije za e-poštu.",
+      "passItem": "Paket rezidencije",
+      "withCode": "sa kodom {{code}}"
+    }
   },
   "pricingSection": {
     "title": "Rezidencije",
@@ -1324,7 +1371,7 @@
     "FIELD_RANGE": "Unesite broj od {{min}} do {{max}}.",
     "TOO_MANY_ITEMS": "Najviše {{max}} stavki.",
     "EMAIL_INVALID": "Unesite ispravnu e-mail adresu, npr. name@example.com.",
-    "URL_INVALID": "Unesite punu web adresu koja počinje sa https://.",
+    "URL_INVALID": "Unesite web adresu poput www.primjer.com.",
     "CURRENCY_EUR_ONLY": "Cijene su u eurima (EUR).",
     "FLOOR_NOT_IN_BUILDING": "Ovaj sprat pripada drugoj zgradi. Odaberite sprat odabrane zgrade.",
     "ENTRANCE_NOT_IN_BUILDING": "Ovaj ulaz pripada drugoj zgradi.",
@@ -1404,7 +1451,13 @@
     "PHONE_INVALID": "Unesite ispravan broj telefona, npr. +389 2 123 4567.",
     "SOCIAL_HOST": "Ovo mora biti link na {{network}}.",
     "ENTRANCE_NAME_TAKEN": "Ova zgrada već ima ulaz pod nazivom „{{name}}”.",
-    "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz."
+    "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz.",
+    "RESIDENCE_GALLERY_FULL": "Rezidencija može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
+    "GALLERY_ORDER_INVALID": "Fotografije su se u međuvremenu promijenile. Osvježite stranicu i pokušajte ponovo.",
+    "BUILDER_NOT_FOUND": "Ova rezidencija još nije predstavila investitora.",
+    "BUSINESS_NOT_FOUND": "Ova kompanija nije među vašim unosima u Imeniku firmi. Izaberite onu koju posjedujete.",
+    "CODE_IN_USE": "Ovaj kod je iskorišćen, pa ostaje u evidenciji. Umjesto toga ga isključite.",
+    "CODE_NOT_FOUND": "Ovaj kod više ne postoji. Ponovo učitajte stranicu."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1462,7 +1515,24 @@
     "projects": "Završeni projekti",
     "license": "Licenca",
     "office": "Ured",
-    "email": "E-pošta"
+    "email": "E-pošta",
+    "aboutCompany": "O kompaniji",
+    "developerOf": "Investitor projekta {{name}}",
+    "aboutHeading": "O kompaniji {{name}}",
+    "officeContact": "Kancelarija i kontakt",
+    "openInMaps": "Otvori u Mapama",
+    "residencesHeading": "Rezidencije kompanije {{name}}",
+    "thisResidence": "Ova rezidencija",
+    "residencesLoading": "Učitavanje ostalih rezidencija…",
+    "residencesError": "Ostale rezidencije nije bilo moguće učitati.",
+    "backTo": "Nazad na {{name}}",
+    "noProfile": "Ova rezidencija još nije predstavila investitora.",
+    "seeHomes": "Pogledaj stanove u {{name}}",
+    "companyLabel": "Kompanija",
+    "companyBy": "Od",
+    "companyOf": "Kompanija iza projekta {{name}}",
+    "agencyPage": "Profil agencije",
+    "businessPage": "Stranica u Imeniku firmi"
   },
   "entrance": {
     "label": "Ulaz",
@@ -1505,5 +1575,44 @@
     "inBuilding": "Ulaz zgrade",
     "newHere": "Novi ulaz",
     "homesAvailable_few": "{{count}} slobodna stana"
+  },
+  "sheet": {
+    "save": "Sačuvaj"
+  },
+  "gallery": {
+    "heading": "Fotografije",
+    "hint": "Prikazuju se na stranici rezidencije nakon naslovne. Do {{max}} fotografija — JPG, PNG, WebP ili AVIF, do 10 MB svaka.",
+    "count": "{{n}} od {{max}}",
+    "add": "Dodaj fotografije",
+    "uploading": "Otpremanje…",
+    "photoAlt": "Fotografija {{n}}",
+    "moveEarlier": "Pomjeri fotografiju {{n}} naprijed",
+    "moveLater": "Pomjeri fotografiju {{n}} nazad",
+    "remove": "Ukloni fotografiju {{n}}",
+    "removeMessage": "Fotografija se uklanja sa stranice rezidencije.",
+    "showAll": "Fotografije ({{n}})"
+  },
+  "immersive": {
+    "headline": "Pronađite svoj dom u {{name}}",
+    "priceFrom": "Od {{price}}",
+    "hint": "Pređite mišem preko zgrade i izaberite stan",
+    "back": "Sve rezidencije",
+    "nav": "Rezidencija",
+    "cta": "Pogledajte stanove"
+  },
+  "builderBusiness": {
+    "title": "Kompanija u Imeniku firmi",
+    "intro": "Kad je povezana, kupci vide njene podatke i stranicu; njena stranica prikazuje ovu rezidenciju. Mogu se povezati samo kompanije koje posjedujete.",
+    "pick": "Vaša kompanija",
+    "link": "Poveži kompaniju",
+    "none": "Još nemate kompaniju u Imeniku firmi. Dodajte je jednom i povežite sa svim svojim rezidencijama.",
+    "add": "Dodajte svoju kompaniju",
+    "loadError": "Vaše firme nije bilo moguće učitati.",
+    "notLinked": "Nije povezano sa kompanijom iz Imenika firmi.",
+    "linked": "Povezano: kupci vide njene podatke iz Imenika firmi",
+    "linkedOther": "Povezana kompanija",
+    "inactive": "Nije aktivna u imeniku, pa kupci za sada vide polja ispod.",
+    "view": "Pogledaj njenu stranicu",
+    "unlink": "Odveži"
   }
 }

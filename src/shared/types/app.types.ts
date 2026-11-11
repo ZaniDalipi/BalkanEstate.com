@@ -56,17 +56,8 @@ export interface ChatMessage {
   text: string;
 }
 
-export interface AiSearchQuery {
-  location?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  beds?: number;
-  baths?: number;
-  livingRooms?: number;
-  minSqft?: number;
-  maxSqft?: number;
-  features?: string[];
-}
+// One definition, shared with the root types: see `AiSearchQuery` there.
+export type { AiSearchQuery } from '../../../types';
 
 export interface SearchPageState {
   filters: Filters;

@@ -162,7 +162,7 @@
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
     "categoryRequired": "Please choose a category.",
-    "websiteInvalid": "Enter a full web address starting with http:// or https://.",
+    "websiteInvalid": "Enter a web address like www.example.com.",
     "emailInvalid": "Enter a valid email address.",
     "latInvalid": "Latitude must be a number between -90 and 90.",
     "lngInvalid": "Longitude must be a number between -180 and 180.",
@@ -430,6 +430,36 @@
       "homes": "Homes: {{n}}",
       "chip": "360° ×{{n}}",
       "chipLong": "Homes with a 360° tour: {{n}}"
+    },
+    "showcase": {
+      "back": "Back to building",
+      "backPlain": "Back",
+      "mode": "Floor plan view",
+      "tilted": "3D",
+      "flat": "2D",
+      "planAlt": "Floor plan of {{name}}",
+      "photoAlt": "{{name}}, photo {{n}}",
+      "prevPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "photoOf": "{{n}} of {{total}}",
+      "modes": "What to show",
+      "modeFloor": "On its floor",
+      "modePhotos": "Photos",
+      "floorAlt": "{{floor}}: {{name}} highlighted",
+      "loading": "Loading the floor picture…",
+      "floorFailed": "The floor picture could not be loaded.",
+      "retry": "Try again"
+    },
+    "dive": {
+      "skip": "Skip",
+      "status": "Taking you to {{name}}"
+    },
+    "bathrooms_one": "{{count}} bathroom",
+    "bathrooms_other": "{{count}} bathrooms",
+    "floors": {
+      "title": "Floors",
+      "whole": "Whole building",
+      "hasPlan": "Has a floor plan"
     }
   },
   "feature": {
@@ -1188,8 +1218,8 @@
       "trialInProgress": "Another of your residences is on its free trial. Buy a pass to publish this one now.",
       "trialLimit": "You have used all your free trials. Buy a pass to publish.",
       "buildingLimit": "This residence can have {{limit}} buildings. Unlock more to add another.",
-      "paymentSoonAmount": "Online payment is coming soon. {{amount}} is still due, so enter a code that covers it.",
-      "paymentSoon": "Online payment is coming soon. Enter a code to unlock it now.",
+      "paymentSoonAmount": "{{amount}} is still due. Payment is agreed with us directly; enter a code that covers it.",
+      "paymentSoon": "Payment is agreed with us directly. Enter the unlock code we sent you.",
       "couponInvalid": "This code is not valid for residences.",
       "coupon": {
         "unknown": "There is no such code. Check the spelling.",
@@ -1205,8 +1235,10 @@
     },
     "code": {
       "label": "Unlock code",
-      "required": "Enter your code. Online payment is coming soon.",
-      "format": "Codes use letters, numbers, - and _ (3–64 characters)."
+      "required": "Enter the unlock code we sent you after agreeing the payment.",
+      "format": "Codes use letters, numbers, - and _ (3–64 characters).",
+      "applied": "Code applied: you pay {{amount}} instead of {{list}}.",
+      "appliedNext": "Write to us about the rest (the email already has the code and price); once it is paid we send you an unlock code to enter here."
     },
     "quantity": {
       "label": "Buildings to add",
@@ -1221,7 +1253,9 @@
     "summary": {
       "each": "{{n}} × price",
       "discount": "Premium discount ({{pct}}%)",
-      "total": "Total"
+      "total": "Total",
+      "validity": "One payment, valid for {{months}} months — not a lifetime pass. It doesn’t renew by itself.",
+      "code": "Code {{code}}"
     },
     "done": {
       "pass": "Residence Pass active",
@@ -1255,7 +1289,19 @@
     "publishWithPass": "Buy pass and publish",
     "publishTrial": "Publish · free for {{days}} days",
     "createNote": "Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online.",
-    "publishAgency": "Publish · free with your agency plan"
+    "publishAgency": "Publish · free with your agency plan",
+    "arrange": {
+      "title": "How to pay",
+      "body": "We don’t take payments online. We agree the payment with you directly: write to us, we confirm the details together and send you an unlock code to enter below.",
+      "emailAria": "Write to {{email}} about this purchase",
+      "mailBody": "Hello,\n\nI would like to buy: {{item}} ({{price}}).\nResidence: {{link}}\n\nThank you.",
+      "extraItem": "Extra buildings: {{n}}",
+      "copy": "Copy address",
+      "copied": "Copied",
+      "copyFailed": "Couldn’t copy. Select {{email}} above, or write to it from your email app.",
+      "passItem": "Residence Pass",
+      "withCode": "with code {{code}}"
+    }
   },
   "pricingSection": {
     "title": "Residences",
@@ -1314,7 +1360,7 @@
     "FIELD_RANGE": "Enter a number from {{min}} to {{max}}.",
     "TOO_MANY_ITEMS": "At most {{max}} entries.",
     "EMAIL_INVALID": "Enter a valid email address, like name@example.com.",
-    "URL_INVALID": "Enter a full web address starting with https://.",
+    "URL_INVALID": "Enter a web address like www.example.com.",
     "CURRENCY_EUR_ONLY": "Prices are in euros (EUR).",
     "FLOOR_NOT_IN_BUILDING": "This floor belongs to another building. Pick a floor of the chosen building.",
     "ENTRANCE_NOT_IN_BUILDING": "This entrance belongs to another building.",
@@ -1394,7 +1440,13 @@
     "PHONE_INVALID": "Enter a valid phone number, like +389 2 123 4567.",
     "SOCIAL_HOST": "This must be a link to {{network}}.",
     "ENTRANCE_NAME_TAKEN": "This building already has an entrance called “{{name}}”.",
-    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first."
+    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first.",
+    "RESIDENCE_GALLERY_FULL": "A residence can have at most {{max}} photos. {{remaining}} more can be added.",
+    "GALLERY_ORDER_INVALID": "The photos changed meanwhile. Reload the page and try again.",
+    "BUILDER_NOT_FOUND": "This residence has not introduced its builder yet.",
+    "BUSINESS_NOT_FOUND": "This company is not one of your Business Directory listings. Pick one you own.",
+    "CODE_IN_USE": "This code was used, so it stays for the records. Switch it off instead.",
+    "CODE_NOT_FOUND": "This code no longer exists. Reload the page."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1452,7 +1504,24 @@
     "projects": "Completed projects",
     "license": "Licence",
     "office": "Office",
-    "email": "Email"
+    "email": "Email",
+    "aboutCompany": "About the company",
+    "developerOf": "Developer of {{name}}",
+    "aboutHeading": "About {{name}}",
+    "officeContact": "Office and contact",
+    "openInMaps": "Open in Maps",
+    "residencesHeading": "Residences by {{name}}",
+    "thisResidence": "This residence",
+    "residencesLoading": "Loading their other residences…",
+    "residencesError": "Their other residences could not be loaded.",
+    "backTo": "Back to {{name}}",
+    "noProfile": "This residence has not introduced its builder yet.",
+    "seeHomes": "See the homes in {{name}}",
+    "companyLabel": "The company",
+    "companyBy": "By",
+    "companyOf": "The company behind {{name}}",
+    "agencyPage": "Agency profile",
+    "businessPage": "Business Directory page"
   },
   "entrance": {
     "label": "Entrance",
@@ -1494,5 +1563,44 @@
     "needBuilding": "Add a building first; entrances belong to a building.",
     "inBuilding": "Entrance of building",
     "newHere": "New entrance"
+  },
+  "sheet": {
+    "save": "Save"
+  },
+  "gallery": {
+    "heading": "Photos",
+    "hint": "Shown on the residence page after the cover. Up to {{max}} photos — JPG, PNG, WebP or AVIF, 10 MB each.",
+    "count": "{{n}} of {{max}}",
+    "add": "Add photos",
+    "uploading": "Uploading…",
+    "photoAlt": "Photo {{n}}",
+    "moveEarlier": "Move photo {{n}} earlier",
+    "moveLater": "Move photo {{n}} later",
+    "remove": "Remove photo {{n}}",
+    "removeMessage": "The photo is removed from the residence page.",
+    "showAll": "Photos ({{n}})"
+  },
+  "immersive": {
+    "headline": "Find your home in {{name}}",
+    "priceFrom": "From {{price}}",
+    "hint": "Hover the building and choose an apartment",
+    "back": "All residences",
+    "nav": "Residence",
+    "cta": "View apartments"
+  },
+  "builderBusiness": {
+    "title": "Company in the Business Directory",
+    "intro": "Linked, buyers see its details and page; its page lists this residence. Only companies you own can be linked.",
+    "pick": "Your company",
+    "link": "Link company",
+    "none": "You have no company in the Business Directory yet. Add it once and link it to all your residences.",
+    "add": "Add your company",
+    "loadError": "Your businesses could not be loaded.",
+    "notLinked": "Not linked to a Business Directory company.",
+    "linked": "Linked: buyers see its Business Directory details",
+    "linkedOther": "A linked company",
+    "inactive": "It is not live in the directory, so buyers see the fields below for now.",
+    "view": "View its page",
+    "unlink": "Unlink"
   }
 }

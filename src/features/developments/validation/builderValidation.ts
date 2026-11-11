@@ -5,6 +5,7 @@
  * `apiErrors.<code>` texts, so a refusal reads the same from either side.
  */
 import { BUILDER_SOCIAL_LABELS, BUILDER_SOCIAL_NETWORKS, type BuilderPayload, type BuilderSocialNetwork, type DevelopmentBuilder } from '../types';
+import { isWebUrl, stripScheme, toWebUrl } from '../utils/webAddress';
 
 export const BUILDER_LIMITS = {
   name: 120,
@@ -46,24 +47,21 @@ export const builderToForm = (b?: DevelopmentBuilder): BuilderForm => ({
   tagline: str(b?.tagline),
   about: str(b?.about),
   licenseNumber: str(b?.licenseNumber),
-  website: str(b?.website),
+  // Web addresses are typed without https:// (the field shows it; it is added on save).
+  website: stripScheme(str(b?.website)),
   email: str(b?.email),
   phone: str(b?.phone),
   address: str(b?.address),
   foundedYear: str(b?.foundedYear),
   completedProjects: str(b?.completedProjects),
-  socials: Object.fromEntries(BUILDER_SOCIAL_NETWORKS.map((n) => [n, str(b?.socials?.[n])])) as Record<BuilderSocialNetwork, string>,
+  socials: Object.fromEntries(BUILDER_SOCIAL_NETWORKS.map((n) => [n, stripScheme(str(b?.socials?.[n]))])) as Record<BuilderSocialNetwork, string>,
 });
 
-/** A plain http(s) address on a real site, optionally on one network's site; else the error. */
-const webProblem = (value: string, network?: BuilderSocialNetwork): BuilderFieldError | null => {
-  let url: URL;
-  try {
-    url = new URL(value);
-  } catch {
-    return { code: 'URL_INVALID' };
-  }
-  if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.username || url.password || !url.hostname.includes('.')) return { code: 'URL_INVALID' };
+/** A typed address (https:// added) on a real site, optionally on one network's site; else the error. */
+const webProblem = (typed: string, network?: BuilderSocialNetwork): BuilderFieldError | null => {
+  const href = toWebUrl(typed);
+  if (!isWebUrl(href)) return { code: 'URL_INVALID' };
+  const url = new URL(href);
   if (network) {
     const host = url.hostname.toLowerCase().replace(/^www\./, '');
     if (!SOCIAL_HOSTS[network].some((h) => host === h || host.endsWith(`.${h}`))) return { code: 'SOCIAL_HOST', params: { network: BUILDER_SOCIAL_LABELS[network] } };
@@ -85,7 +83,9 @@ export function validateBuilderForm(f: BuilderForm, now = new Date()): BuilderEr
   if (isEmpty(f)) return errors;
   const L = BUILDER_LIMITS;
   const tooLong: [TextField, number][] = [['name', L.name], ['tagline', L.tagline], ['about', L.about], ['licenseNumber', L.licenseNumber], ['address', L.address], ['website', L.website], ['email', L.email], ['phone', L.phone]];
-  for (const [k, max] of tooLong) if (f[k].trim().length > max) errors[k] = { code: 'FIELD_TOO_LONG', params: { max } };
+  // The saved length counts the https:// added to an address.
+  const savedLength = (k: TextField) => (k === 'website' ? toWebUrl(f[k]).length : f[k].trim().length);
+  for (const [k, max] of tooLong) if (savedLength(k) > max) errors[k] = { code: 'FIELD_TOO_LONG', params: { max } };
   if (!f.name.trim()) errors.name = { code: 'FIELD_REQUIRED' };
 
   const whole = (k: 'foundedYear' | 'completedProjects', min: number, max: number) => {
@@ -106,7 +106,7 @@ export function validateBuilderForm(f: BuilderForm, now = new Date()): BuilderEr
   for (const n of BUILDER_SOCIAL_NETWORKS) {
     const link = f.socials[n].trim();
     if (!link) continue;
-    if (link.length > L.social) errors[`socials.${n}`] = { code: 'FIELD_TOO_LONG', params: { max: L.social } };
+    if (toWebUrl(link).length > L.social) errors[`socials.${n}`] = { code: 'FIELD_TOO_LONG', params: { max: L.social } };
     else {
       const problem = webProblem(link, n);
       if (problem) errors[`socials.${n}`] = problem;
@@ -120,13 +120,13 @@ export function builderPayload(f: BuilderForm): BuilderPayload | null {
   if (isEmpty(f)) return null;
   const t = (v: string) => v.trim() || undefined;
   const n = (v: string) => (v.trim() ? Number(v.trim()) : undefined);
-  const socials = Object.fromEntries(BUILDER_SOCIAL_NETWORKS.map((k) => [k, f.socials[k].trim()]).filter(([, v]) => v));
+  const socials = Object.fromEntries(BUILDER_SOCIAL_NETWORKS.map((k) => [k, toWebUrl(f.socials[k])]).filter(([, v]) => v));
   const out: BuilderPayload = {
     name: f.name.trim(),
     tagline: t(f.tagline),
     about: t(f.about),
     licenseNumber: t(f.licenseNumber),
-    website: t(f.website),
+    website: t(toWebUrl(f.website)),
     email: t(f.email),
     phone: t(f.phone),
     address: t(f.address),

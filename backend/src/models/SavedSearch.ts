@@ -38,6 +38,14 @@ export interface IFilters {
   maxDistanceToSchool: number | null;
   maxDistanceToHospital: number | null;
   amenities: string[];
+  /** Absent on searches saved before it existed; read as 'any'. */
+  constructionStatus?: 'any' | 'ready' | 'under-construction';
+  /** Absent on searches saved before it existed. */
+  minKitchens?: number | null;
+  /** Set by AI search: a listing with an unknown distance does not match a distance filter. */
+  requireKnownDistances?: boolean;
+  /** Most bedrooms; equal to `beds` for an exact count. Set by AI search. */
+  maxBeds?: number | null;
 }
 
 export interface ISavedSearch extends Document {

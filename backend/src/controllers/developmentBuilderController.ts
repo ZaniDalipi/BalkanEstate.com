@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { IUser } from '../models/User';
 import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import { parseBuilderImageKind, removeBuilderImage, setBuilderImage } from '../services/developments/builderMedia';
+import { linkBuilderBusiness } from '../services/developments/builderBusiness';
 import { sendServiceError } from './developmentController';
 
 /**
@@ -35,5 +36,22 @@ export const deleteBuilderImage = async (req: Request, res: Response): Promise<v
     res.json({ development });
   } catch (error) {
     sendServiceError(res, error, 'remove builder image');
+  }
+};
+
+/**
+ * PUT /api/dashboard/developments/:developmentId/builder/business  { businessId: string | null }
+ * Link the builder to a Business Directory company the signed-in user owns (null unlinks).
+ */
+export const linkBuilderBusinessHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const development = req.development!;
+    const actorId = (req.user as IUser)._id;
+    const businessId = (req.body as Record<string, unknown> | undefined)?.businessId;
+    await linkBuilderBusiness(development, actorId, businessId);
+    await DevelopmentAuditLog.create({ developmentId: development._id, action: 'development.update', actorId, metadata: { builder: 'business', linked: !!businessId } });
+    res.json({ development });
+  } catch (error) {
+    sendServiceError(res, error, 'link builder business');
   }
 };

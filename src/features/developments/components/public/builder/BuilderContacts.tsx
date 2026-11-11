@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Facebook, Globe, Instagram, Linkedin, Mail, Phone, Youtube, type LucideIcon } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Youtube, type LucideIcon } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { BUILDER_SOCIAL_LABELS, BUILDER_SOCIAL_NETWORKS, type BuilderSocialNetwork, type DevelopmentBuilder } from '../../../types';
 import { mailHref, safeWebHref, siteLabel, telHref } from '../../../utils/builderLinks';
 
@@ -20,20 +21,20 @@ export const BuilderContacts: React.FC<{ builder: DevelopmentBuilder }> = ({ bui
     <div className="flex flex-wrap items-center gap-2">
       {web && (
         <a href={web} target="_blank" rel="noopener noreferrer" className={btn}>
-          <Globe className="h-4 w-4" aria-hidden="true" />
+          <SoftIcon name="globe" className="h-5 w-5" />
           {siteLabel(web)}
           {newTab}
         </a>
       )}
       {tel && (
         <a href={tel} className={btn}>
-          <Phone className="h-4 w-4" aria-hidden="true" />
+          <SoftIcon name="phone" className="h-5 w-5" />
           {builder.phone}
         </a>
       )}
       {mail && (
         <a href={mail} className={btn}>
-          <Mail className="h-4 w-4" aria-hidden="true" />
+          <SoftIcon name="envelope" className="h-5 w-5" />
           {t('builderPublic.email', 'Email')}
         </a>
       )}

@@ -6,7 +6,7 @@
 
 import { param, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
+import { resolveId } from '../utils/idObfuscation';
 
 /** Run express-validator chains and short-circuit with 400 on failure. */
 export function handleValidationErrors(req: Request, res: Response, next: NextFunction): void {
@@ -55,8 +55,10 @@ export const validatePropertyId = [
     .trim()
     .notEmpty()
     .withMessage('Property ID is required')
+    // Property ids leave the API encoded (config/database.ts), so accept every
+    // form the controllers resolve: raw ObjectId, encoded id or slug + id.
     .custom((value: string) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
+      if (!resolveId(value)) {
         throw new Error('Invalid property ID format');
       }
       return true;

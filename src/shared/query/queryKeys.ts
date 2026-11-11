@@ -122,6 +122,16 @@ export const propertyKeys = {
 
   // What the homes around a property ask and sold for
   areaPrices: (propertyId: string) => [...propertyKeys.all, propertyId, 'area-prices'] as const,
+
+  // Seasonal air quality at a property's location
+  airQuality: (propertyId: string) => [...propertyKeys.all, propertyId, 'air-quality'] as const,
+
+  // Estimated noise and street traffic around a property
+  surroundings: (propertyId: string) => [...propertyKeys.all, propertyId, 'surroundings'] as const,
+
+  // Ids of listings whose full text has every requested feature (AI search, amenity filters)
+  featureMatches: (request: { features: string[]; flags: string[]; listingType?: string }) =>
+    [...propertyKeys.public(), 'feature-matches', request] as const,
 };
 
 // ============================================================================
@@ -203,7 +213,17 @@ export const adminKeys = {
   /** Residences admin: list per filters, and an agency's free residences. */
   residences: (params?: { search?: string; filter?: string; page?: number }) => ['admin', 'residences', params ?? {}] as const,
   residencesAll: () => ['admin', 'residences'] as const,
+  /** Unlock codes for Residence Passes and extra buildings (per filters). */
+  residenceCodes: (params?: { status?: string; search?: string; page?: number }) => ['admin', 'residence-codes', params ?? {}] as const,
+  residenceCodesAll: () => ['admin', 'residence-codes'] as const,
   agencyResidenceAllowance: (agencyId: string) => ['admin', 'agencyResidenceAllowance', agencyId] as const,
+  /** Who gets the admin alert emails. */
+  alertSettings: () => ['admin', 'alert-settings'] as const,
+  /** Whether the site has a super admin yet (for claiming the first one). */
+  superAdminStatus: () => ['admin', 'super-admin-status'] as const,
+  /** Removed, sold and rented listings (per filters). */
+  archivedListings: (params?: { reason?: string; deletedBy?: string; search?: string; page?: number }) =>
+    ['admin', 'archived-listings', params ?? {}] as const,
 };
 
 // ============================================================================

@@ -1144,6 +1144,140 @@ Key decisions:
 
 ---
 
+## Area Insights — Air, Noise, Traffic & Zone Dynamics
+
+Cards on every property page that say what living and buying in the area is
+like. All work from the listing's coordinates and never block the page.
+
+```
+Neighbourhood section (src/features/property-details/components/area-insights/)
+  ├── AirQualityCard → useAirQuality(id) → propertyKeys.airQuality(id)
+  │     └── GET /api/properties/:id/air-quality     getPropertyAirQuality
+  │           └── services/airQualityService.ts
+  │                 ├── seasonWindows: latest full summer (Jun–Aug) and winter (Dec–Feb)
+  │                 ├── Open-Meteo air-quality API (Copernicus CAMS): hourly european_aqi + pm2_5
+  │                 └── cache: ~5 km grid cell, 7 days
+  ├── NoiseCard   ┐ useSurroundings(id) → propertyKeys.surroundings(id)   (one request for both)
+  └── TrafficCard ┘   └── GET /api/properties/:id/surroundings   getPropertySurroundings
+                            └── services/surroundings/
+                                  ├── surroundingsService.ts  from the home's pin (~1 m); memory + Mongo (AreaInsightCache, TTL 30 days)
+                                  ├── vectorTileClient.ts     OpenFreeMap vector tiles (z14 roads/poi, z10 airports), ~0.2–1 s
+                                  ├── tileSources.ts · roadLines.ts · tileMath.ts   tiles → noise sources and map road lines
+                                  ├── osmSources.ts           Overpass answer → sources (fallback when tiles fail)
+                                  ├── surroundingsWarmer.ts   new listings / moved pins looked up ahead (models/hooks/surroundingsWarmup.ts)
+                                  ├── overpassClient.ts       hedged across mirrors: next joins after 3 s, first answer wins
+                                  ├── osmSources.ts           OSM roads/rail/airports/bars → sources + distance
+                                  └── noiseModel.ts           estimateNoise (day/night dB) · estimateTraffic
+        TrafficCard → traffic/TrafficExplorer: day pattern chart · weekday/weekend + hour slider
+                      · TypicalTrafficMap (lazy Leaflet, roads coloured for that hour) · TrafficMapDialog (full screen)
+Area prices section → ZoneDynamicsCard (shares useAreaPrices — no extra request)
+  └── area-prices response .dynamics = buildZoneDynamics(neighbours)   services/zoneDynamicsService.ts
+        └── months of supply = on the market ÷ (closed in last 12 months / 12)
+```
+
+Shared pieces: `InsightCard` (frame, icon, title, ⓘ), `InsightStatus` (no data
+/ failure with `role="alert"` and *Try again*), `InfoPopover` (the ⓘ: Esc via
+`useEscapeLayer`, click outside, slides back on screen), `BandBadge`;
+`backend/src/utils/promiseCache.ts` (TTL cache that shares in-flight calls and
+never caches a failure) and `utils/coordinates.ts` (`hasUsableLocation`).
+
+| Answer | Card shows |
+|---|---|
+| `status: 'ok'` | air: AQI per season · noise: dB day and night, main sources · traffic: level, nearest main road |
+| `status: 'no-location'` / `'no-data'` | a plain sentence, no retry |
+| 503 (provider down) | `role="alert"` message with *Try again* |
+| dynamics `ok` / `insufficient` | verdict, buyer → seller bar, figures in the ⓘ / a sentence |
+
+Key decisions:
+- **European AQI, not US AQI**: the EEA scale (0–20 good, 20–40 fair, 40–60
+  moderate, 60–80 poor, 80–100 very poor). **Seasonal averages**: a buyer
+  needs the typical summer and the heating-season winter.
+- **Noise is an estimate, and says so.** Roads and railways are line sources
+  (reference level at 10 m, −3 dB per doubling, −2 dB per 100 m for buildings),
+  airports and venues point sources; levels add on an energy basis over a
+  quiet-town background (42 dB day, 33 dB night). Each named road counts once,
+  however many OSM pieces it has. Bands: day 45/55/65 dB, night 35/45/55 dB.
+- **Ids**: property ids leave the API encoded (16 characters, see
+  `utils/idObfuscation.ts`). The hooks accept that form and raw ObjectIds
+  (`hooks/isPropertyId.ts`), and `validatePropertyId` lets through whatever
+  `resolveId` decodes; checking for raw ObjectIds only had left price
+  history, area prices and these cards without data on real pages.
+- **Measured from the home's own pin**, rounded to ~1 m. Main roads, rail and
+  tram within 500 m, ordinary streets (residential, unclassified, living
+  street) within 150 m: the traffic card names the street the home is on and
+  the nearest main road, and the home's own street counts towards its noise.
+- **Vector tiles first.** OpenFreeMap's OpenMapTiles vector tiles (free, no
+  key, commercial use allowed, CDN) answer in ~0.2–1 s; the same lookups on
+  public Overpass took 17–60 s. Measured live: Tirana, Korçë, Budva and the
+  Tirana airport area give the same results as Overpass did. Overpass is only
+  the fallback when tiles cannot be read. `OPENFREEMAP_TILEJSON` can point at
+  another OpenMapTiles source. Road shapes within ~600 m travel with the
+  report (5–30 KB) for the traffic map.
+- **Traffic is a typical pattern, not live.** Free per-street historical
+  traffic does not exist, so busyness = road class × the standard hourly
+  shape of urban traffic on weekdays (08:00 and 15:00–18:00 peaks) and
+  weekends (11:00–17:00) — `traffic/trafficProfile.ts`; the card says so.
+  No Google traffic layer, so no Maps billing for it.
+- **Overpass is slow, so no page waits on it.** Measured live (Nov 2026):
+  public servers took 17–19 s even for a one-node query, overpass-api.de reset
+  connections from cloud hosts, two mirrors did not answer within 30 s.
+  `getSurroundingsWithin` waits 8 s; if the lookup is not done the API answers
+  `{ status: 'pending' }` (`Retry-After: 2`) and the lookup carries on in the
+  background: hedged across four mirrors (next joins every 6 s, 45 s each,
+  first good answer cancels the rest). `useSurroundings` polls every 2 s, at
+  most 24 times, then offers *Try again*. Reports land in `AreaInsightCache`
+  (bump `MODEL_VERSION` when the model or query changes), so a home is looked
+  up once a month and every later visit is instant.
+- **Usage limits** (checked Nov 2026). Open-Meteo: free for non-commercial
+  use only (~10,000 calls/day); a commercial site needs a paid plan and
+  `OPEN_METEO_API_KEY`. Air quality is stored in `AreaInsightCache` too, so a
+  ~5 km cell costs 2 calls per week at most. Overpass public servers: no hard
+  quota, but about 10,000 queries/day for occasional use and roughly 100/day
+  for regular automated use, no uptime guarantee — self-host or pay for heavy
+  use. Google Maps: 10,000 free map loads a month (Essentials), then billed;
+  the live traffic map loads only on request.
+- **Warm-up**: a new listing or a moved pin is looked up in the background
+  (`surroundingsWarmer.ts`), one at a time, 5 s apart, at most 1,000 a day
+  (`SURROUNDINGS_WARM_DAILY_CAP`, `SURROUNDINGS_WARM_INTERVAL_MS`); lookups
+  read CDN tiles, Overpass only as a fallback. Off under tests.
+- **Hardening**: a failed lookup is remembered for 30 s (`createPromiseCache`
+  `failureTtlMs`), so a burst of visits cannot hammer a provider that is down;
+  outbound calls cap response size (`maxContentLength`) and never follow
+  redirects; the tile URL from the remote TileJSON is only used on the same
+  https host (`isTrustedTemplate`, SSRF). All `/api` routes sit behind
+  `generalRateLimiter`, and lookups exist only for real listings, each place
+  once per cache period. OSM names render as text, never HTML.
+- **Page menu order and "you are here"** come from the layout, not the list
+  (`sectionPositions.ts`): sections are ordered by where they sit, and the
+  current one is the last to reach the line under the header — sticky
+  sidebar sections (always on screen) never count, a nested section wins a
+  tie with its parent, and at the very bottom the lowest visible one wins.
+- **No secrets in logs**: outbound failures are logged through
+  `describeHttpError` (status, code, message) — never the axios error, whose
+  config carries URLs, query strings (the Open-Meteo `apikey`) and headers.
+- **What leaves the server**: only coordinates. Open-Meteo gets the pin snapped
+  to ~5 km; Overpass mirrors get the listing's public pin (~1 m). No user data.
+  `maps.mail.ru` is the last mirror; drop it with `OVERPASS_URL` if its
+  jurisdiction matters. The Google Maps key ships in the frontend by design and
+  must be restricted by HTTP referrer in Google Cloud.
+- **Page menu**: Air Quality, Noise and Traffic follow Neighborhood, Zone
+  Dynamics follows Area Prices (`PropertySectionNav`). Each card carries its
+  own `data-section`; the menu re-checks on DOM changes (batched, at most
+  every 250 ms — maps change the page on every pan), so a section that
+  appears once its data loads gets its bookmark then.
+- **Typical traffic comes from road class and distance** (a primary road
+  within 150 m is busy); **live traffic is Google's**, loaded only when asked,
+  because every map load is billed.
+- **Licensing and load**: Open-Meteo's free host is non-commercial — set
+  `OPEN_METEO_API_KEY` for the commercial one. Overpass is a shared public
+  service — set `OVERPASS_URL` for a paid or self-hosted instance. Sources are
+  credited in each card's ⓘ (Copernicus CAMS, © OpenStreetMap contributors).
+- **Zone dynamics**: under 4 months of supply → seller's market, over 7 →
+  buyer's; rentals read landlord's / tenant's market. Laid out as a plain
+  section (title + ⓘ, verdict, explanation, bar); the figures sit in the ⓘ.
+
+---
+
 ## Residences (Developments)
 
 New-build residences live in `src/features/developments` (API, hooks, types,
@@ -1332,6 +1466,64 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   only the current, previous and next slide and pauses autoplay off screen.
   Once the list has finished sliding away (`useSettledHidden`), it gets
   `content-visibility: hidden`: still mounted, scroll kept, but not rendered.
+- **One panel alive at a time (Search, phone and tablet).** The list's photos
+  and the WebGL map with its pins cannot both live on an iPhone; keeping the map
+  mounted behind the list is what crashed Map → List. `planPanels`
+  (`features/search/utils/panelHandoff.ts`, pure) hands over in three steps:
+  on the tap the slide starts and the leaving panel stays as it is (the slide
+  shows real content and nothing heavy runs during it); once the slide is over
+  (`PANEL_SLIDE_MS`, 450ms) the leaving panel is torn down; `PANEL_GAP_MS`
+  (120ms) later, once that commit has painted, the arriving panel is built.
+  Meanwhile the arriving panel shows a cheap placeholder: `ListPendingSkeleton`
+  (card-shaped, no photos) or `MapLoadingVeil`. The timers are
+  `useSettledHidden` with two delays per panel. `useListMemory` restores the
+  list's scroll offset and paged-in depth (`initialVisibleCount` /
+  `onVisibleCountChange` on `PropertyList`); the map restores its own view from
+  `mapViewMemory`. Split view keeps the idle-deferred mounts unchanged.
+- **Crash-loop guard.** Safari kills the page without running our code, so a
+  crash can only be noticed on the next load. `useViewSwitchGuard` writes a
+  `sessionStorage` marker when the switch is tapped and clears it after
+  `SWITCH_SURVIVE_MS`, on leaving the page, or on `pagehide` (a refresh, a
+  closed tab — never fired for a page the system kills, so a refresh never
+  shows the notice); a marker found on load
+  (`consumeSwitchCrash`, pure, in `features/search/utils/viewSwitchGuard.ts`)
+  means the last page died mid-switch. That load opens on the list (not the
+  map the app state defaults to), builds the map only when asked
+  (`useDeferredMount(…, { idle: false })`) and says why in a toast
+  (`search:ui.searchPage.recoveredFromCrash`). Storage that is missing or throws
+  just turns the guard off. Rentals and Villas still use the older
+  hide-only behaviour.
+- **Lazy map code, revealed in one piece.** `LazyMap`
+  (`features/map/components/LazyMap.tsx`) is what Search, Rentals and Villas
+  render: `MapComponent` is its own chunk (`lazyWithRetry`, warmed at idle by
+  `useWarmMap()`), inside a feature `ErrorBoundary`. `MapLoadingVeil` covers the
+  map in `MAP_BACKDROP` (also the Google map's `backgroundColor`, so there is no
+  seam) until the map calls `onReady` — Google: first `tilesloaded` and the first
+  pins built; Leaflet and the timeout notice: at once — or `MAP_REVEAL_TIMEOUT_MS`
+  passes, then fades it out (framer-motion, instant under reduced motion). The
+  "Loading properties" pill is debounced by `useSmoothFlag` (shown after 150ms,
+  kept at least 500ms) so short loads never flash it. Veil and pill are
+  `pointer-events-none`: the switch, search bar and menu stay usable. During the
+  list → map hand-over `SearchPage` keeps its own veil mounted (`covered=
+  {mapPending}`), so it fades out over the map's veil instead of cutting.
+  The list fades in over its skeleton (`PanelFadeIn`, opacity only).
+- **Pins only around the view.** `/search` loads up to 3000 listings, and a
+  pin is a DOM node plus a Google marker. `useGoogleMap` builds pins only for
+  listings inside `markerArea` (`features/map/utils/markerArea.ts`, pure): the
+  viewport padded by one viewport on each side, updated on idle. The area is
+  sticky (a pan inside it changes nothing) and shrinks back after a zoom in, so
+  the pins are let go. Listings outside it are still listed, searched and
+  focusable; only their pin waits until the map comes near. This is why a page
+  with a handful of listings (Rentals) never crashed while Search did.
+- **Pins are built a slice at a time, with a loading state.** The first draw
+  of the Google map used to build a DOM node and a marker for every listing in
+  one loop, a long task and memory spike at the instant of the switch.
+  `createAllMarkers` (`useGoogleMap.ts`) now hands them to `runInChunks`
+  (`features/map/utils/chunkedWork.ts`, injectable scheduler, cancellable) 60 per
+  frame, adds each slice to the clusterer without drawing, and draws once at the
+  end. A build that throws stops there and shows the pins already made; a newer
+  call cancels it. The first build happens under `MapLoadingVeil` (below). Rentals and Villas share
+  `useGoogleMap`, so they get the chunked build too.
 - **Map pins are built for the screen only.** The Google map clusters with
   `SuperClusterViewportAlgorithm` (`useGoogleMap.ts`): bubbles and pins exist
   only inside the visible area plus a margin. The whole-region algorithm put
@@ -1448,3 +1640,23 @@ layout, every upload case, setup, migration from Cloudinary and the
 - JWT stored in httpOnly cookies (not localStorage)
 - Input sanitisation on the Express layer
 - Image uploads validated by Cloudinary (type + size limits on the backend)
+
+---
+
+## Loading budget (build and service worker)
+
+- **`vendor` holds only what every page needs.** Libraries a few screens use
+  get their own chunk in `vite.config.ts → manualChunks` (`spreadsheet`,
+  `google-maps`, `gsap`, `avatars`); left to the catch-all they were in
+  `vendor`, loaded before any page renders (835KB → 384KB). Add a rule for any
+  new heavy library that is not used app-wide.
+- **The service worker precaches the shell, not the site.** `workbox.globPatterns`
+  covers js/css/html/fonts only, `globIgnores` leaves out language packs,
+  dashboards, the HEIC converter and MapLibre, and files over 1MB are never
+  precached. Everything else under `/assets/` is cached on first use
+  (`app-assets`, CacheFirst — the names are content-hashed). First-visit
+  precache went from ~33MB to ~6.6MB.
+- **No multi-megabyte images in the shell.** The logo SVGs in `public/icons`
+  embed ~1–2MB of bitmaps; pages use `logo-3d-256.webp` (10KB) and the favicon is
+  `logo-3d-64.png`. `logo-3d.svg` stays only for the backend watermark.
+

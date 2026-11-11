@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Keyboard focus outline for everything that has no focus style of its own.
+   In the base layer, so a component's utilities (e.g. a field's soft
+   `focus:outline-none focus-visible:ring-2` halo) replace it instead of
+   stacking a second, hard outline on top: unlayered CSS would beat every
+   Tailwind utility. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #0252CD;
+    outline-offset: 2px;
+  }
+}
+
 /* Custom Theme Configuration for BalkanEstate */
 @theme {
   /* Font Family */
@@ -75,8 +87,8 @@
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animate-aurora: aurora 60s linear infinite;
 
-  /* No page transition animations: a navigation swaps the view on the spot.
-     See src/components/ui/ViewTransition.tsx. */
+  /* Pages fade in once ready (`.be-page-fade`); nothing is played in front of a
+     tap. See the "Page changes and loading" section at the end of this file. */
 }
 
 /* Aurora background color variables */
@@ -1461,6 +1473,19 @@ html[data-zoom] {
   --sidebar-rail-w: calc(5rem + env(safe-area-inset-left, 0px));
 }
 
+/* Residence explorer in full screen: the stage covers the whole viewport, so
+   in the installed app its floating controls would sit under the status bar,
+   the notch and the home indicator. Its controls add these insets to their
+   offsets; off full screen the variables are unset and fall back to 0. The
+   top reuses the floating-search pad (minus its own 8px gap) so Android PWAs
+   that report a 0 inset still get the 44px floor. */
+.explorer-stage-full {
+  --stage-safe-top: calc(var(--floating-search-top-pad, 8px) - 8px);
+  --stage-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --stage-safe-left: env(safe-area-inset-left, 0px);
+  --stage-safe-right: env(safe-area-inset-right, 0px);
+}
+
 /* Top of the home hero.
    In a browser the address bar sits above this and a plain padding is enough.
    Installed as a PWA there is nothing above it at all, so the heading landed
@@ -1489,11 +1514,6 @@ html[data-zoom] {
 @media (display-mode: standalone) {
   :root {
     --floating-search-top-pad: max(calc(env(safe-area-inset-top, 0px) + 8px), 44px);
-  }
-
-  :focus-visible {
-    outline: 2px solid #0252CD;
-    outline-offset: 2px;
   }
 
   /* In standalone PWA, links should show pointer cursor */
@@ -2438,4 +2458,256 @@ html.reduce-motion .celebration-bar {
     opacity: 0;
     transition-delay: 0s, 150ms;
   }
+}
+
+/* ============================================================================
+   Liquid glass (business profile)
+   Apple-style material: a translucent, saturated frost; a light-catching rim
+   (gradient border, bright top-left, fading round the sides); a soft specular
+   sheen across the top; and layered shadows that lift it off the page.
+
+   Written with the standard `backdrop-filter` only — lightningcss adds the
+   -webkit- prefix itself (see the note in section 3 above on why writing both
+   breaks Chrome). Not named .glass-* so that section's Safari override leaves
+   these alone; Safari gets its own lighter blur at the end of this block.
+   In @layer components so Tailwind utilities (fixed, absolute, rounded…) on
+   the same element still win. The rim and sheen are pseudo-elements behind the content (z-index -1 inside
+   an isolated stacking context), so they never sit over text or taps.
+   ============================================================================ */
+
+/* The app's one spinner (CircleSpinner.tsx): a blue arc going round a grey
+   ring, the same circle as the boot screen in index.html. One turn = 0.8s
+   (SPINNER_TURN_S in spinnerPhase.ts). */
+@keyframes be-spin {
+  to { transform: rotate(360deg); }
+}
+.be-circle-spinner {
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: #e5e7eb;
+  border-top-color: #0252CD;
+  border-radius: 9999px;
+  animation: be-spin 0.8s linear infinite;
+}
+/* A spinner says "still working", so it keeps turning under reduced motion,
+   just slower. */
+@media (prefers-reduced-motion: reduce) {
+  .be-circle-spinner { animation-duration: 1.6s !important; }
+}
+
+/* Desktop page loader (FloatingLogoLoader.tsx): the official logo's buildings
+   float up and down over a breathing blue glow, and the wordmark under them
+   pulses — the old loader's motion on the real logo. One loop = 1.8s
+   (LOGO_FLOAT_S). The image is drawn twice and clipped at 69%, the gap
+   between the buildings and the wordmark in logo-3d-256.webp. */
+@keyframes be-logo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7%); }
+}
+@keyframes be-logo-glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 0.85; transform: scale(1.05); }
+}
+@keyframes be-logo-word {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+.be-logo-loader {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.be-logo-loader > img {
+  position: absolute;
+  left: 0;
+  max-width: none;
+  user-select: none;
+}
+.be-logo-loader__buildings {
+  clip-path: inset(0 0 31% 0);
+  animation: be-logo-float 1.8s ease-in-out infinite;
+}
+.be-logo-loader__word {
+  clip-path: inset(69% 0 0 0);
+  animation: be-logo-word 1.8s ease-in-out infinite;
+}
+.be-logo-loader__glow {
+  position: absolute;
+  inset: 10% 12% 20%;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(96, 165, 250, 0.55), rgba(96, 165, 250, 0));
+  animation: be-logo-glow 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Keep a sign of life without movement: the glow and wordmark still breathe. */
+  .be-logo-loader__buildings { animation: none; }
+  .be-logo-loader__glow { animation-name: be-logo-word; }
+}
+
+/* The arriving page fades in. Opacity only: a transform here would make this
+   wrapper the containing block of every `position: fixed` bar on the page and
+   shift them while it plays. `backwards` (not `both`) so nothing stays applied
+   once it ends. Short and ease-out, so the page is mostly there within ~80ms
+   and a tap never feels held up. */
+@keyframes be-page-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.be-page-fade {
+  animation: be-page-enter 180ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .be-page-fade { animation: none; }
+}
+html.reduce-motion .be-page-fade { animation: none; }
+
+/* No grey flash on tap in mobile Safari/Chrome; pressed states come from the
+   app's own press feedback instead. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Installed app: a pull past the top must not reload the whole app (Chrome on
+   Android does pull-to-refresh in standalone too) or rubber-band the shell
+   like a web page. Inner scroll areas keep their own momentum scrolling. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  .liquid-surface::before,
+  .liquid-control::before,
+  .liquid-tint::before,
+  .liquid-dark::before {
+    /* The rim: a 1px gradient border drawn with a mask. */
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.28) 38%, rgba(255, 255, 255, 0.12) 62%, rgba(255, 255, 255, 0.6));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .liquid-surface::after,
+  .liquid-control::after,
+  .liquid-tint::after,
+  .liquid-dark::after {
+    /* The sheen: light pooling at the top edge, as on curved glass. */
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.08) 38%, rgba(255, 255, 255, 0) 60%);
+    pointer-events: none;
+  }
+
+  /* Cards and floating panels. */
+  .liquid-surface {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.54));
+    backdrop-filter: blur(28px) saturate(185%);
+    box-shadow:
+      0 1px 1px rgba(15, 23, 42, 0.04),
+      0 8px 24px -12px rgba(15, 23, 42, 0.14),
+      0 28px 60px -32px rgba(15, 23, 42, 0.28);
+  }
+
+  /* Buttons, chips, segmented tracks, tiles. */
+  .liquid-control {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.4));
+    backdrop-filter: blur(18px) saturate(180%);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 16px -10px rgba(15, 23, 42, 0.22);
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  }
+  .liquid-control:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
+  }
+
+  /* Tinted glass: the primary action (Apple blue). */
+  .liquid-tint {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(41, 151, 255, 0.95), rgba(2, 82, 205, 0.95));
+    backdrop-filter: blur(18px) saturate(180%);
+    box-shadow:
+      inset 0 -1px 0 rgba(0, 30, 90, 0.25),
+      0 1px 2px rgba(2, 82, 205, 0.3),
+      0 12px 28px -12px rgba(2, 82, 205, 0.65);
+    transition: filter 0.2s ease, transform 0.2s ease;
+  }
+  .liquid-tint::before {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.18) 45%, rgba(255, 255, 255, 0.08) 65%, rgba(255, 255, 255, 0.45));
+  }
+  .liquid-tint::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.06) 45%, rgba(255, 255, 255, 0) 60%);
+  }
+  .liquid-tint:hover {
+    filter: brightness(1.06);
+  }
+
+  /* Amber tinted glass (the directory's "Surprise me"). */
+  .liquid-tint.liquid-tint--amber {
+    background: linear-gradient(180deg, rgba(255, 179, 64, 0.96), rgba(245, 115, 22, 0.96));
+    box-shadow:
+      inset 0 -1px 0 rgba(120, 50, 0, 0.25),
+      0 1px 2px rgba(245, 115, 22, 0.3),
+      0 12px 28px -12px rgba(245, 115, 22, 0.6);
+  }
+
+  /* Smoky glass over photos (the banner's Back / Customize). */
+  .liquid-dark {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.38), rgba(15, 23, 42, 0.26));
+    backdrop-filter: blur(16px) saturate(160%);
+    box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.55);
+  }
+  .liquid-dark::before {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.15) 45%, rgba(255, 255, 255, 0.05) 65%, rgba(255, 255, 255, 0.35));
+  }
+  .liquid-dark::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%);
+  }
+
+  /* The page behind the glass: soft colour for it to refract. */
+  .liquid-backdrop {
+    background-color: #f2f2f7;
+    background-image:
+      radial-gradient(55% 32% at 8% 6%, rgba(10, 132, 255, 0.13), transparent 70%),
+      radial-gradient(45% 28% at 95% 22%, rgba(175, 82, 222, 0.1), transparent 70%),
+      radial-gradient(55% 30% at 18% 58%, rgba(48, 209, 88, 0.08), transparent 70%),
+      radial-gradient(50% 30% at 92% 78%, rgba(255, 159, 10, 0.09), transparent 70%),
+      radial-gradient(60% 30% at 40% 100%, rgba(10, 132, 255, 0.08), transparent 70%);
+  }
+
+  /* MapLibre's zoom / compass buttons, in the same material. */
+  .liquid-map .maplibregl-ctrl-group {
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(18px) saturate(180%);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 8px 20px -10px rgba(15, 23, 42, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  }
+  .liquid-map .maplibregl-ctrl-group button + button {
+    border-top-color: rgba(15, 23, 42, 0.08);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .liquid-surface,
+    .liquid-control {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: none;
+    }
+  }
+
+  /* Safari re-samples every blurred backdrop per frame: same look, lighter blur. */
+  html.is-webkit .liquid-surface { backdrop-filter: blur(12px) saturate(180%); }
+  html.is-webkit .liquid-control,
+  html.is-webkit .liquid-tint,
+  html.is-webkit .liquid-dark,
+  html.is-webkit .liquid-map .maplibregl-ctrl-group { backdrop-filter: blur(8px) saturate(170%); }
 }

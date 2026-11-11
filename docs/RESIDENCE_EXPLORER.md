@@ -33,8 +33,9 @@ browser. The styling lives in `components/public/explorer/regionPaint.ts`.
 - apartments: floor-plan preview, number, floor, area, bedrooms, price, status, **View apartment**
 - buildings: available of total, floors, price from, **Explore building**
 
-The pointer can move onto the card and press its button. On touch, the first tap
-shows it.
+The pointer can move onto the card and press its button. Clicking an apartment
+pins its card beside it; the card's button flies into the apartment (see
+7b-11). On touch, the first tap shows it.
 
 **Residence picture.** Building regions on the residence (site plan) picture get
 a name tag (the building's code, else its name) and open that building. A
@@ -148,6 +149,8 @@ The server **rejects** invalid shapes and never clamps them. It rejects:
 | --- | --- |
 | Public explorer | `components/public/explorer/` (stage, canvas, tooltip, legend, view switcher, building chips) |
 | Apartment drawer | `components/public/explorer/drawer/` |
+| Residence page (desktop) | `components/public/hero/` (`ResidenceNav`, `ResidenceIntro`, `useResidenceChrome`), `components/public/explorer/immersive/` (`ImmersiveStage`, `coverBox`, `useStageControls`) |
+| Flight into an apartment + showcase | `components/public/explorer/dive/` (`useApartmentDive`, `flightPath`, `DiveVeil`, `DiveHud`, `diveTimeline`), `components/public/explorer/drawer/showcase/` (`ApartmentShowcase`, `FloorPlanModel`, `showcaseMedia`, `showcaseMotion`) |
 | Budget helper | `components/public/explorer/budget/` (button, teaser, panel, form, cards), `useFlyToUnit.ts` + `useFlyFocus.ts` (the guided trip), `utils/budgetMatch.ts`, `hooks/useLocationPrice.ts` |
 | Region editor | `components/scene/editor/` with `hooks/usePolygonEditor.ts` (reducer, undo/redo) and `hooks/useEditorViewport.ts` |
 | Dashboard | `components/dashboard/` (tabbed manage page, inventory table, unit edit dialog, linked listings, settings) |
@@ -194,9 +197,11 @@ the endpoint returns 404.
 
 | Method & path | Notes |
 | --- | --- |
-| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`. |
+| `GET /:slug` | Public projection. No `ownerId`, `agencyId` or media publicIds. Buildings include `stats{units, available}`; floors include `hasViews` (a published picture exists). A builder linked to a live Business Directory company shows that company's details (`source: 'business'`, `businessSlug`; never the link id); with no builder named, an agency-owned residence's `builder` is its agency (`source: 'agency'`, `agencySlug`, public agency-page fields only). |
 | `GET /:slug/units` | Visible units only, with effective availability. `priceOnRequest` hides price and price/m². Only non-draft listing ids, encoded. |
 | `GET /:slug/units/:unitId` | Unit + development + sanitised listings. 404 for a hidden unit. |
+| `GET /by-business/:business` | The published residences linked to a live Business Directory company (its slug or id), as list cards (at most 24). Unknown or offline: an empty list. |
+| `GET /:slug/developer` | The builder (no storage keys) and the company's residences as list cards: this one, then up to 12 other published residences of the same account naming the same builder. 404 `BUILDER_NOT_FOUND` when the residence has no builder. |
 | `GET /:slug/views?targetType&targetId` | Published views only. Hotspots are filtered to visible units, live buildings and floors, and non-draft listings. |
 | `GET /:slug/scene` | Legacy: the `main` (or lowest `sortOrder`) published view. |
 | `POST /:slug/units/:unitId/inquiries` | `{name, email, phone?, message}`, rate limited to 30/h. Returns 403 `inquiries_disabled` when the development turned inquiries off. |
@@ -595,6 +600,28 @@ before this change, from `developmentSlug`/`unitId`/`developmentId`.
   `applicablePlans`; general subscription codes do not apply. An admin grant
   also works. To switch real payment on, Paysera checkout calls `applyPurchase`
   from the webhook for `productId` values starting with `residence_`.
+- **Unlock codes (Admin › Residences › Unlock codes, `?tab=codes`).** Admins
+  create the codes owners type in "Buy Residence Pass": for a **Residence
+  Pass** or **extra buildings**, 1–50 at once, 1–100 uses each (an account uses
+  a code once), valid 1–730 days (default 90), with a note on who it is for.
+  Codes read `RES-XXXX-XXXX` (no 0/O/1/I) and name that residence product
+  (source `residence`). Each takes **the whole price** (it unlocks the purchase
+  at once), **a percentage** (1–99 %) or **an amount** (1–10 000 €) off. A
+  discount code is not spent at checkout: the owner's buy dialog shows the
+  code's line and the new total ("Code applied: you pay 119 € instead of
+  149 €"), and the email to sales carries the code and that price; once the
+  rest is paid by arrangement, an admin sends a whole-price code (or grants the
+  pass). When online payment is switched on, that lower total is what checkout
+  charges (`PAYMENT_NOT_CONFIGURED` already carries `amount`, `listAmount`,
+  `discount` and `couponCode`). The list shows each
+  code's status (ready, used, expired, switched off, not yet valid), its uses
+  and **which residences used it**; codes can be copied (one or all just
+  created), marked sent, switched off and on, and deleted while unused (a used
+  code stays for the records: `CODE_IN_USE`). Filters by status and search by
+  code. API: `GET/POST /api/admin/residences/codes`, `PATCH/DELETE
+  /api/admin/residences/codes/:id` (`residenceCodeService.ts`, rules in
+  `residenceCodes.ts`). The general Discount codes form also lists the two
+  residence products now.
 - **Daily job:** `runResidenceBillingJob` (cron 08:07) sends the day-10 and
   day-14 reminders and the offline notice, in-app and by email, once each. It
   also recomputes plan coverage. On startup, residences published before
@@ -689,7 +716,9 @@ the Zillow sheet:
   as before. With "reduce motion" the sheet jumps instead of sliding.
 - The sheet is always as tall as "full" and is moved with a transform
   (`useSheetMotion`); the rules (snap points, flick, who owns the gesture) are
-  pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer.
+  pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer
+  (beside the apartment showcase, see 7b-11), and the residence opens as a
+  full-screen page of its own.
 
 ## 7b-7. 360° virtual tours
 
@@ -836,6 +865,323 @@ unique per entrance, so "A1" can exist behind both Entrance 1 and Entrance 2.
     `unitFilters.test.ts`, `useExplorerUrlState.test.ts`;
   - components: `EntranceMarkers.test.tsx`, `BuildingEntrancesCard.test.tsx`,
     `CreateImportPicker.test.tsx`.
+
+## 7b-10. Cover and photo gallery
+
+- **Cover:**
+  - Stored whole in R2 (up to 2400px on each side; it used to be shrunk to fit
+    1920×720, which made ordinary photos soft).
+  - The hero shows it without zoom, darkened only behind the text, in a taller
+    frame (16:10 on tablets, 2:1 on desktop, at most 80% of the screen height).
+- **Gallery** (`Development.gallery`, at most `DEVELOPMENT_GALLERY_MAX` = 15
+  besides the cover):
+  - stored in R2 (`developments/<name>/gallery`, kind `development-gallery`);
+  - managed on the Overview tab → *Photos*: add several at once, move earlier or
+    later, remove (needs `media.upload`).
+
+  | Endpoint | What it does | Refusals |
+  |---|---|---|
+  | `POST /api/dashboard/developments/:id/gallery` (`images`, ≤10 per request) | Adds photos | `NO_IMAGES`, `IMAGE_TYPE`, `LIMIT_FILE_SIZE`, `LIMIT_FILE_COUNT`, `RESIDENCE_GALLERY_FULL {max, remaining}`, `STORAGE_NOT_CONFIGURED` (503) |
+  | `PATCH …/gallery/order { urls }` | The same photos in a new order | `GALLERY_ORDER_INVALID` |
+  | `DELETE …/gallery/:index` | Removes one photo and its stored file | `IMAGE_NOT_FOUND` |
+
+  - The limit is checked before uploading and again in the write, so two uploads
+    at once can't pass 15. Files uploaded for a request that then fails are
+    deleted again.
+  - The dashboard checks type, size, batch and the limit first, with the same
+    texts, and shows every refusal above the photos (`role="alert"`).
+- **Buyers see:**
+  - a *Photos (N)* button (on the hero, with small previews, or in the title
+    bar when the explorer is shown);
+  - it opens the full-screen viewer with the cover first, then the gallery in
+    the owner's order (`residencePhotos`).
+
+  The public development carries `gallery: [{ url, width, height }]`, without
+  storage keys.
+- **Tests:**
+  - backend: `__tests__/developments/residence-gallery.test.ts`;
+  - frontend: `residencePhotos.test.ts`, `ResidenceGallerySection.test.tsx`,
+    `ResidencePhotosButton.test.tsx`.
+
+## 7b-11. The residence page and the flight into an apartment
+
+**A page of its own.** On desktop a residence opens as its own full-screen
+page, like the builder's website: only the app's sidebar stays (the route has
+`detail: 'residence'`, so `App.tsx` drops the floating header and the sticky
+ad there). The rendering fills the screen edge to edge
+(`explorer/immersive/ImmersiveStage.tsx`; `coverBox.ts` never crops more than
+12 % off a side, and a blurred copy fills any band left over), with the
+residence's own bar on top (`hero/ResidenceNav.tsx`: back to all residences,
+logo and name, its sections, photos, share, **View apartments**) and the
+headline on the left (`hero/ResidenceIntro.tsx`: "Find your home in
+<name>", what is free and from what price). The rest of the page follows as
+you scroll. `hero/useResidenceChrome.tsx` decides this per device: phones keep
+the title strip above the picture and the app's back button.
+
+| Full-screen page | Click an apartment: its card | The flight: a white model |
+| --- | --- | --- |
+| ![Hero](./images/residence-explorer/43-residence-hero.jpg) | ![Card](./images/residence-explorer/44-apartment-card-pinned.jpg) | ![Model](./images/residence-explorer/40-apartment-dive.jpg) |
+
+| The plan rises (3D) | Laid flat (2D) | No plan: its photos |
+| --- | --- | --- |
+| ![Showcase](./images/residence-explorer/41-apartment-showcase.jpg) | ![Flat plan](./images/residence-explorer/42-apartment-showcase-flat.jpg) | ![Photos](./images/residence-explorer/45-apartment-showcase-photos.jpg) |
+
+**Choosing an apartment.** Hovering shows its card; **clicking an apartment
+pins the card** beside it (on the side with more room, `placeCardBeside`), and
+hovering other apartments on the way to it doesn't replace it. The card's
+**View apartment** (or a second click, or Enter on the focused apartment)
+starts the flight. Other regions (buildings, floors, listings) still open at
+once.
+
+**The flight** (`dive/`, timings in `diveTimeline.ts`):
+
+1. The page's controls fade (`data-immersed` + `HIDE_WHEN_IMMERSED`); only
+   **Back to building** and **Skip** remain (`DiveHud`), and a screen reader
+   hears "Taking you to Apt 4B".
+2. The camera climbs and pushes in towards the apartment for about 2 s along a
+   gentle arc (`flightPath.ts`: steady zoom, a lifted curve, clamped to the
+   picture), played with the Web Animations API by `usePanZoom.flyPath`.
+3. From 1.25 s the building turns into a white architectural model (a
+   bleached copy of the rendering under a paper wash, masked around the
+   apartment by `holeMask.ts`); only the apartment keeps its colour.
+4. At 2.25 s the apartment opens (`?unit=`). On desktop the paper settles and
+   what the developer posted rises out of the apartment's place on the facade
+   (`drawer/showcase/`): the floor plan as a tilted model with a 3D / 2D
+   switch, else the photos as a bouncy, labelled carousel (`showcaseMedia.ts`). The
+   details float in as a card on the right (`UnitHeader` "card": status and
+   floor, name, rooms and size, the price in a dark pill), without repeating
+   the plan or photos. With nothing posted, the page dims as before.
+5. **Back to building** (or Esc, Back, the close button) flies the camera back
+   out along the same kind of path; the page's controls return once it lands.
+
+**Around the building.** Switching camera views (the arrows, the dots, ←/→)
+moves like one camera circling one building (`explorer/orbit/`): the picture
+on show swings away round a pivot behind the building while the next swings
+in from the other side on top of it, crossfading with a touch of motion blur;
+the outgoing picture stays opaque underneath until it is covered, so the screen
+never dips dark. Next goes one way round, previous the other; a link or Back
+goes the short way round (`orbitDirection`). The next picture is downloaded
+and decoded before the swing starts, and the views either side preload in the
+background (`preloadViewPicture`, same sources as the picture itself), so it
+never arrives half loaded. A different building or the residence fades in
+instead.
+
+| Orbiting to the side view | A photo dealt in | Labelled photos |
+| --- | --- | --- |
+| ![Orbit](./images/residence-explorer/46-view-orbit.jpg) | ![Deal](./images/residence-explorer/47-photo-deal.jpg) | ![Labels](./images/residence-explorer/45-apartment-showcase-photos.jpg) |
+
+**Photos.** An apartment shown by its photos gets a carousel
+(`drawer/showcase/PhotoCarousel.tsx`): the next photo flies in tilted from the
+side you are heading to, overshoots and bounces into place while the current
+one is flung off the other way; arrows sit either side, ←/→ work, and a
+sideways drag turns the photo (it springs back if let go early). Each photo is
+labelled by its room from the listing's photo tag (`photoLabels`: "Living
+room", "Bedroom 1", "Bedroom 2", else "Photo 3"; the names come from the
+`property` namespace), on the photo with its position ("2 / 5") and under each
+thumbnail of the filmstrip (`PhotoDock`), whose highlight springs across.
+
+**No page-loading circle.** Opening an apartment or a building only changes
+what the residence page shows, and it has its own loading states, so those
+navigations pass `inPage: true` and the app's page-loading circle
+(`NavigationPendingIndicator`) stays away.
+
+**No blinking.** Every full-screen layer that fades or moves (the white model,
+the flight's buttons, the showcase and its plan, the details card, the dim
+backdrop, the picture's fade-in and the headline) spreads `FRAME_DRIVEN`
+(`components/public/motion/frameDriven.ts`), so framer-motion animates it frame
+by frame. As a native browser animation it ends by showing the old value for
+one frame, which on a layer this size is a visible flash. Use it on any new
+full-screen fade.
+
+**Skip** opens the apartment at once; **Back** or Esc during the flight turn
+around. On phones the flight ends in the half-height sheet with the apartment
+lit above it. Under "reduce motion" everything opens at once.
+
+Tests: `dive/ApartmentDive.test.tsx` (the steps, Skip, Back, Esc, the way
+back), `flightPath`, `holeMask`, `coverBox`, `placeCard`, `showcaseMedia`,
+`drawer/DesktopShowcase.test.tsx`, `ResidenceExplorer.test.tsx` (the
+full-screen hero) and `hero/ResidenceHero.test.tsx`.
+
+## 7b-12. Floors: the elevator, and the apartment on its floor
+
+Developers upload a picture per floor in the explorer editor (the floor's plan
+with its apartments drawn on it). Buyers can now go straight to a floor, and
+every apartment is shown on its floor's picture.
+
+| The elevator: pointing lights the floor | A floor opened | The apartment on its floor |
+| --- | --- | --- |
+| ![Elevator](./images/residence-explorer/48-floor-elevator.jpg) | ![Floor](./images/residence-explorer/49-floor-opened.jpg) | ![On its floor](./images/residence-explorer/50-apartment-on-its-floor.jpg) |
+
+| Tablet held upright | Phone: no photos or plan, the floor leads |
+| --- | --- |
+| ![Tablet](./images/residence-explorer/51-tablet-on-its-floor.jpg) | ![Phone](./images/residence-explorer/52-phone-floor-picture.jpg) |
+
+**The elevator** (`explorer/floors/`). Inside a building the stage lists its
+floors, top first (`floorStack.ts`: a building with fewer than two floors gets
+none). Beside the full-screen picture it is a slim column of floor numbers, a
+green dot where homes are free, that opens wide on hover or keyboard focus
+(name, "2 available", a plan icon where the floor has a picture), so it hides
+as little of the picture as possible. On the page explorer and on phones it is
+a row of chips under the building chips. Pointing at a floor (mouse or focus,
+not a touch) lights its homes up on the building (`useFloorPreview` →
+`litUnitIds`) and starts loading its picture if it has one
+(`usePrefetchPublicViews`), so choosing it opens at once. **Whole building**
+comes back out. It sits below the budget hint and beside, never over, the zoom
+buttons, on a phone held sideways too.
+
+**Moves** (`orbit/sceneMove.ts`): building → floor zooms in, floor → floor
+rides the lift up or down (by level), floor → building zooms out; another
+building or the residence fades. All frame-driven: a screen recording of
+zoom in, lift and zoom out shows no one-frame flash. On a floor the headline
+steps aside, as the picture is a plan to read.
+
+**Back.** Opening a floor from the building adds a history entry; moving
+floor to floor replaces it (`useExplorerUrlState`), so Back always returns to
+the whole building, not through every floor visited. A link to a floor that is
+not one of the building's (stale) opens without a stop lit; a floor without a
+picture opens floor by floor, as before.
+
+**The apartment on its floor** (`drawer/showcase/`). The showcase beside the
+details shows what there is, most telling first: **Floor plan** (the
+apartment's own plan, 3D / 2D), **On its floor** (the floor's picture, the rest
+of the floor washed out and the apartment outlined in teal, captioned "Floor 4 ·
+Aria"), **Photos**. A switch appears when there is more than one. An apartment
+with nothing but its floor picture (no plan, no photos) still gets the flight
+and the showcase. On phones the floor picture is a section of the sheet, or
+its first picture when the apartment has no photo or plan (`UnitFloorShot`).
+
+- **Which picture**: `pickFloorShot` takes the first view of the floor where
+  the apartment is marked, else the floor's first picture; views without an
+  image are skipped. `regionOutline` refuses marks with points that are not
+  numbers or that enclose nothing (the plain floor shows instead) and keeps
+  outlines on the picture.
+- **Only when there is one**: `GET /:slug` now says per floor whether it has a
+  published picture (`floors[].hasViews`). The details only ask for the views of
+  such a floor; others are never requested.
+- **Waiting and failing** (`floorShotState`): a picture on its way is waited
+  for, so the plan does not give way to the floor a moment later (a quiet
+  placeholder stands in). If it cannot load, the stage or the sheet says so
+  ("The floor picture could not be loaded.") with **Try again**; the details
+  beside it stay usable, and other media still show.
+- **Layout**: from 1024 px and on a phone held sideways the card sits beside
+  the showcase; on a tablet held upright it sits under it (`showcaseLayout.ts`,
+  `detailsCardMotion`: from the right beside it, from below under it). The
+  pictures size to the free area (container units), never to the whole screen.
+
+**Room tags.** Listing photos carry their room tag only when it is one of the
+platform's tags (`isPropertyImageTag` in `backend/src/config/propertyImageTags.ts`);
+anything else is dropped before it leaves the server.
+
+Tests: `floorStack`, `FloorPicker`, `useFloorPreview`, `sceneMove`,
+`useViewOrbit`, `useExplorerUrlState` (floor to floor replaces), `floorShot`,
+`floorShotState`, `showcaseMedia`, `detailsCardMotion`, `unitGallery`,
+`drawer/DesktopShowcase.test.tsx` (On its floor; leads when alone; never asks
+for a floor without a picture; Try again) and `drawer/PhoneFloorShot.test.tsx`.
+Backend: `propertyImageTags.test.ts` (run) and two new cases in
+`public-explorer.test.ts` (`hasViews`, room tags), which need MongoDB and were
+not run in the session that added them.
+
+## 7b-13. The company behind the residence (its own page)
+
+The builder named on a residence (dashboard → builder form: name, tagline,
+about, founded, completed projects, licence, office address, website, phone,
+email, socials, logo, banner) now has a page of its own:
+`/developments/<slug>/developer` (`components/public/developer/`), full screen
+like the residence page (route `detail: 'residence'`).
+
+| The company page | Office, contact, its residences | Phone |
+| --- | --- | --- |
+| ![Company](./images/residence-explorer/53-company-page.jpg) | ![Office](./images/residence-explorer/54-company-office-residences.jpg) | ![Phone](./images/residence-explorer/55-company-page-phone.jpg) |
+
+**What it shows**: the banner, logo, name and tagline ("Developer of Aria
+Residences"); the track record (`BuilderFacts`, shared with the residence
+page); "About <company>"; **Office and contact**: the office address with
+**Open in Maps** (a map search for the address, `mapsSearchHref`; nothing for
+an empty or overlong address) and the website, phone, email and socials
+(`BuilderContacts`, which only ever links plain http(s), `tel:` and `mailto:`);
+**Residences by <company>**: this residence first, marked, then the others it
+builds here; and **See the homes in <residence>**.
+
+**When there is one.** The page exists when the owner named a builder
+(dashboard → the residence → **Settings** → **The builder**), or, with no
+builder named, when an **agency** published the residence: the agency then
+stands in as **The company** ("By Vardar Homes", "The company behind <residence>",
+with an **Agency profile** button to its agency page), built from the public
+fields of its agency page only (`residenceCompany.ts`: name, description,
+logo, cover, address, phone, email, website, socials; never its registration
+number, team or billing; links only http(s)). A residence owned by a person
+with no builder named has no company page and shows no link to one.
+
+**Linked to the Business Directory.** In the builder form (dashboard →
+Settings → The builder) the owner can link the builder to one of **their own**
+Business Directory companies (`BuilderBusinessLink`; with none, **Add your
+company** opens the directory's form). Linked, buyers see the company's
+directory details everywhere the builder shows (residence page, company page),
+kept up to date there; what the owner typed fills what the business does not
+say (tagline, completed projects, YouTube). The company page gets a **Business
+Directory page** button, and the business's directory page gets a
+**Residences** section listing every published residence linked to it
+(`BusinessResidencesSection`). The company's residences also include every
+residence linked to the same business, whichever account published it.
+
+- Only the owner of a live business can link it (`PUT
+  /api/dashboard/developments/:id/builder/business { businessId | null }`,
+  `project.edit`); anyone else's, a missing or an offline one is the same 404
+  `BUSINESS_NOT_FOUND`, so a business's existence is not given away.
+- The link (`builder.businessListingId`) is never sent to buyers; they get the
+  company's directory page address (`businessSlug`). The dashboard gets it
+  encoded like every other id (`encodeRefsOnJSON` now handles nested paths).
+- A business that goes offline stops showing: the typed builder (or the
+  agency) shows again. Only the directory page's public fields are used
+  (`builderBusiness.ts`; links only http(s), years in range).
+- Saving the builder text keeps the link; Unlink removes it.
+
+**Getting there and back.** "Built by <company> ›" under the headline of the
+full-screen page (every screen size), "The builder" / "The company" in the
+residence's bar (from 1280px) and its section bar, the phone byline, and the
+builder section's **About the company** button open it
+(`hero/useResidenceSections.ts`). On the company page the same bar marks "The
+builder" as the current page (`aria-current`); its other sections, "View
+apartments" and "See the homes" go back to the residence page and open at that
+section (history state `{ section }`, read by `arrivalSection`, which ignores
+anything but `overview`, `units` and `location`). **Back to <residence>** is
+history back when the buyer came from it, so it lands where they were. The
+residence page keeps a shorter builder section (about text clamped to four
+lines) with the button to the full page.
+
+![Builder section on the residence page](./images/residence-explorer/56-residence-builder-section.jpg)
+
+**Data protection.** `GET /api/developments/:slug/developer` returns the
+builder (no storage keys) and the company's residences as list cards (no
+`ownerId`/`agencyId`): this one, then at most 12 other published residences
+of the **same account** (the same agency, or the same owner) that name the
+same builder (or, for an agency standing in, its residences with no builder named) (`sameBuilderName`: case, spacing and accent forms ignored, never
+fuzzy). Builder names are free text, so another account typing the same name
+never appears on the page. A residence without a builder answers 404
+`BUILDER_NOT_FOUND`; the page then says so and leads back, without asking.
+
+**States.** The page uses the residence's cached data, so it opens at once
+from the residence. While the other residences load, two placeholders stand in;
+if they cannot load, the page says so with **Try again** and the rest stays
+usable. A residence that is not published (or a wrong link) shows "Not found"
+with the way back to all residences.
+
+**Layout.** Phones: one column under the app's header with "Back to
+<residence>"; facts in one column, two from 640px; cards one, two, three
+across. From 1280px the residence bar lists its sections; below that they are
+in the page's own section bar (the bar no longer wraps at 1024px). Checked at
+390×664, 844×390, 768×1024, 1024×768 and 1440×900 with no sideways scrolling.
+
+Tests: `developer/DeveloperPage.test.tsx` (the page, the residences and their
+links, Try again, no builder, the bar), `hero/useResidenceSections.test.tsx`,
+`residenceSections`, `builderLinks` (map search), `companyLabel`,
+`BuilderShowcase`, `ResidenceHero` (the headline's byline), `BuilderBusinessLink`,
+`BusinessResidencesSection`. Backend:
+`builder-match.test.ts`, `residence-company.test.ts`, `builder-business.test.ts`,
+`web-address.test.ts`, `utils/encodeRefsOnJSON.test.ts` (run), and
+`builder-business-link.test.ts` and `developer-public.test.ts` (same account and builder only, no ids, 404s, the
+agency standing in), which needs MongoDB and was not run in the session that
+added it.
 
 ## 7b-3. Errors in the reader's language
 

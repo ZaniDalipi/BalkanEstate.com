@@ -54,7 +54,8 @@
     "adBanners": "Ad Banners",
     "emailTemplates": "Email Templates",
     "siteSettings": "Site Settings",
-    "residences": "Residences"
+    "residences": "Residences",
+    "archivedListings": "Archived Listings"
   },
   "properties": {
     "title": "Property Manager",
@@ -127,7 +128,8 @@
       "admin": "Admin",
       "agent": "Agent",
       "buyer": "Buyer",
-      "seller": "Seller"
+      "seller": "Seller",
+      "superAdmin": "Super admin"
     },
     "status": {
       "active": "Active",
@@ -235,7 +237,8 @@
       "sourceReferralDesc": "Use for user referral rewards",
       "description": "Description",
       "descriptionPlaceholder": "Internal note about this code...",
-      "createCode": "Create Code"
+      "createCode": "Create Code",
+      "residenceHint": "Residence unlock codes are easier to make in Residences › Unlock codes (they must name a residence product and cover its full price)."
     },
     "bulk": {
       "numberOfCodes": "Number of Codes",
@@ -1972,7 +1975,9 @@
       "enterprisePlan": "Enterprise Plan",
       "agentProMonthly": "Agent Pro (Monthly)",
       "agentProYearly": "Agent Pro (Yearly)",
-      "buyerPro": "Buyer Pro"
+      "buyerPro": "Buyer Pro",
+      "residenceExtraBuilding": "Residence extra buildings",
+      "residencePass": "Residence Pass (12 months)"
     },
     "analyticsDashboard": {
       "failedToFetchStats": "Failed to fetch stats",
@@ -2163,5 +2168,174 @@
       "range": "Use a number from 1 to {{max}}.",
       "belowUsed": "This residence already has {{used}} buildings."
     }
+  },
+  "residenceCodes": {
+    "confirmDelete": "Press again to delete",
+    "copied": "Copied",
+    "copy": "Copy",
+    "copyCode": "Copy {{code}}",
+    "copyFailed": "Copying is not allowed here: select the code and copy it by hand.",
+    "created": {
+      "copyAll": "Copy all",
+      "done": "Done",
+      "subtitle": "{{kind}} · valid until {{date}} · {{uses}} use(s) each",
+      "title": "Codes ready: {{count}}"
+    },
+    "delete": "Delete",
+    "disable": "Switch off",
+    "empty": "No codes match.",
+    "emptyAll": "No codes yet. Create the first with “New codes”.",
+    "enable": "Switch on",
+    "filter": {
+      "active": "Ready to use",
+      "all": "All",
+      "disabled": "Switched off",
+      "expired": "Expired",
+      "used": "Used"
+    },
+    "filterLabel": "Status",
+    "form": {
+      "cancel": "Cancel",
+      "count": "How many codes",
+      "countHint": "Up to {{max}} at once",
+      "create": "Create codes",
+      "creating": "Creating…",
+      "days": "Valid for (days)",
+      "daysHint": "Up to {{max}} days",
+      "kind": "What they unlock",
+      "note": "Note (who it is for)",
+      "notePlaceholder": "e.g. Vardar Homes, agreed by phone",
+      "range": "Enter a whole number from {{min}} to {{max}}.",
+      "title": "New unlock codes",
+      "tooLong": "{{max}} characters at most.",
+      "uses": "Uses per code",
+      "usesHint": "Each account can use a code once",
+      "discount": "Discount",
+      "discountFull": "Whole price (unlocks at once)",
+      "discountPercent": "Percent off",
+      "discountFixed": "Amount off (€)",
+      "percentValue": "Percent off (%)",
+      "fixedValue": "Amount off (€)",
+      "percentHint": "1 to {{max}}; the owner pays the rest",
+      "fixedHint": "Never more than the price; the owner pays the rest"
+    },
+    "intro": "Owners type a code in “Buy Residence Pass” to unlock it without paying online. Each code covers the full price of what it unlocks.",
+    "kind": {
+      "extra_building": "Extra buildings",
+      "pass": "Residence Pass"
+    },
+    "loadError": "Could not load the codes.",
+    "markSent": "Mark sent",
+    "markUnsent": "Mark not sent",
+    "new": "New codes",
+    "removedResidence": "a removed residence",
+    "search": "Find a code",
+    "searchPlaceholder": "e.g. RES-7K3P",
+    "sent": "Sent",
+    "status": {
+      "active": "Ready to use",
+      "disabled": "Switched off",
+      "expired": "Expired",
+      "scheduled": "Not yet valid",
+      "used": "Used"
+    },
+    "title": "Unlock codes",
+    "until": "until {{date}}",
+    "usedBy": "Used by",
+    "uses": "{{used}} of {{limit}} used",
+    "discount": {
+      "full": "Whole price",
+      "percent": "{{value}}% off",
+      "fixed": "{{amount}} off"
+    }
+  },
+  "archive": {
+    "title": "Archived listings",
+    "subtitle": "Listings that were removed, sold or rented: who removed them, when, and what they were.",
+    "all": "All",
+    "reasonFilter": "Reason",
+    "search": "Search title, address or seller",
+    "removedByFilter": "Removed by",
+    "removedByAnyone": "Removed by anyone",
+    "reason": {
+      "deleted": "Deleted",
+      "sold": "Sold",
+      "rented": "Rented"
+    },
+    "deleter": {
+      "owner": "The owner",
+      "admin": "An admin",
+      "agency": "The agency"
+    },
+    "removedBy": {
+      "owner": "Removed on {{date}} by the owner ({{name}})",
+      "admin": "Removed on {{date}} by admin {{name}}",
+      "agency": "Removed on {{date}} by the agency ({{name}})"
+    },
+    "archivedOn": "Archived on {{date}}",
+    "seller": "Seller: {{name}} ({{email}})",
+    "stats": "{{days}} days listed · {{views}} views · {{saves}} saves",
+    "wasStatus": "was {{status}}",
+    "status": {
+      "active": "active",
+      "pending": "pending",
+      "draft": "draft",
+      "sold": "sold",
+      "rented": "rented"
+    },
+    "untitled": "Untitled listing",
+    "loadError": "Could not load the archive.",
+    "retry": "Try again",
+    "empty": "No archived listings match.",
+    "pages": "Pages",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "You can’t change your own role. Ask another super admin.",
+    "superAdminOnlyEdit": "Only a super admin can change an admin’s role.",
+    "superAdminOnlyGrant": "Only a super admin can make someone admin or super admin.",
+    "superAdminHint": "Admins manage the site; super admins can also give and remove admin roles."
+  },
+  "superAdminClaim": {
+    "title": "This site has no super admin yet",
+    "body": "A super admin can make other people admin or super admin. Only one admin can claim this, and only once; after that, super admins give the role from “Edit user”.",
+    "claim": "Become super admin",
+    "confirm": "Yes, make me super admin",
+    "cancel": "Cancel",
+    "working": "Working…",
+    "done": "You are now super admin. You can make other people admin or super admin from “Edit user”."
+  },
+  "adminAlerts": {
+    "title": "Admin alert emails",
+    "subtitle": "Who gets an email for new users, new listings and admin role changes. Admins also see them in the notification bell.",
+    "loadError": "Could not load the alert settings.",
+    "retry": "Try again",
+    "disabled": "Admin alerts are turned off on the server (ADMIN_NOTIFICATIONS=off). Nothing is sent until that is removed.",
+    "sendingTo": "Sending to: {{list}}",
+    "sendingToNobody": "Not sending any emails yet.",
+    "source": {
+      "panel": "from the list below",
+      "env": "from the server setting (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "every admin account, because no list is set",
+      "none": "nobody: add an address below"
+    },
+    "superAdminOnly": "Only a super admin can change who gets these emails.",
+    "listLabel": "Alert email addresses",
+    "remove": "Remove {{email}}",
+    "addLabel": "Add an email address",
+    "placeholder": "name@example.com",
+    "add": "Add",
+    "invalid": "Not a valid email: {{list}}",
+    "tooMany": "At most {{max}} addresses.",
+    "save": "Save addresses",
+    "saving": "Saving…",
+    "saveError": "Could not save the addresses.",
+    "emptyHint": "Leave the list empty to use the server setting, or every admin account’s email.",
+    "test": "Send test email",
+    "testing": "Sending…",
+    "testSent": "Test email sent to {{list}}. Check the inbox (and spam).",
+    "testFailed": "Could not send to {{list}}."
   }
 }

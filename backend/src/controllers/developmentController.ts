@@ -37,8 +37,10 @@ import {
   listPublicUnits as listPublicUnitsService,
   getPublicUnitDetail,
   toPublicDevelopment,
+  listPreviewImages,
 } from '../services/developments/developmentPublicService';
 import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
+import { getPublicDeveloper, listBusinessResidences } from '../services/developments/developerPublicService';
 import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
 import { recomputeOwnerBilling, setResidenceStatus } from '../services/developments/billing/residenceBillingService';
 
@@ -235,8 +237,9 @@ export const uploadCover = async (req: Request, res: Response): Promise<void> =>
       developmentId: String(development._id),
       developmentName: development.name,
       type: 'development-cover',
-      maxWidth: 1920,
-      maxHeight: 720,
+      // The whole photo, sharp at any hero size; the page crops it with CSS.
+      maxWidth: 2400,
+      maxHeight: 2400,
     });
 
     development.coverImage = result.url;
@@ -382,7 +385,11 @@ export const listPublic = async (req: Request, res: Response): Promise<void> => 
       Development.find(query).sort({ publishedAt: -1 }).skip(skip).limit(limit),
       Development.countDocuments(query),
     ]);
-    res.json({ developments: items.map(toPublicDevelopment), total });
+    const previews = await listPreviewImages(items);
+    res.json({
+      developments: items.map((d) => ({ ...toPublicDevelopment(d), ...(previews.get(String(d._id)) ? { previewImage: previews.get(String(d._id)) } : {}) })),
+      total,
+    });
   } catch (error) {
     sendServiceError(res, error, 'list public developments');
   }
@@ -394,6 +401,24 @@ export const getPublicBySlug = async (req: Request, res: Response): Promise<void
     res.json(await getPublicDevelopmentDetail(req.params.slug));
   } catch (error) {
     sendServiceError(res, error, 'get public development');
+  }
+};
+
+/** GET /api/developments/:slug/developer — the company behind the residence and its other residences. */
+export const getPublicDeveloperProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await getPublicDeveloper(req.params.slug));
+  } catch (error) {
+    sendServiceError(res, error, 'get public developer');
+  }
+};
+
+/** GET /api/developments/by-business/:business — the published residences a Business Directory company builds. */
+export const getBusinessResidences = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await listBusinessResidences(req.params.business));
+  } catch (error) {
+    sendServiceError(res, error, 'list business residences');
   }
 };
 

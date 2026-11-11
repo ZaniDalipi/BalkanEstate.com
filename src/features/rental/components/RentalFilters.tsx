@@ -6,6 +6,7 @@ import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { bedroomOptionLabel } from '@/utils/bedroomFilter';
 
 interface RentalFiltersProps {
     filters: Filters;
@@ -77,7 +78,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                         <label className={`${labelClasses} flex items-center gap-1`}><SoftIcon name="bed" className="w-4 h-4 flex-shrink-0" />{t('rental:filters.minBeds')}</label>
                         <select value={filters.beds ?? ''} onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)} className={selectClasses}>
                             <option value="">{t('common:any')}</option>
-                            {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}+</option>)}
+                            {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{bedroomOptionLabel(n, filters)}</option>)}
                         </select>
                     </div>
                     <div>
@@ -211,7 +212,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                     <label className="flex items-center gap-1.5 text-xs font-medium text-gray-400 mb-1"><SoftIcon name="bed" className="w-5 h-5 flex-shrink-0" />{t('rental:filters.minBeds')}</label>
                     <select value={filters.beds ?? ''} onChange={(e) => onFilterChange('beds', e.target.value ? Number(e.target.value) : null)} className={selectClasses}>
                         <option value="">{t('common:any')}</option>
-                        {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}+</option>)}
+                        {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{bedroomOptionLabel(n, filters)}</option>)}
                     </select>
                 </div>
                 <div>

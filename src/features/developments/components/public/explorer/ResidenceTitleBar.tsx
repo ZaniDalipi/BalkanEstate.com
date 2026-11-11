@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { ArrowDown, MapPin } from 'lucide-react';
 import type { Development, UnitsSummary } from '../../../types';
 import { ShareResidenceButton } from '../share/ShareResidenceButton';
+import { residencePhotos } from '../../../utils/residencePhotos';
+import { ResidencePhotosButton } from '../gallery/ResidencePhotosButton';
 import { BuilderByline } from '../builder/BuilderByline';
 
 interface ResidenceTitleBarProps {
@@ -44,6 +46,7 @@ export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ developmen
           {t('hero.viewUnits', 'View available units')}
           <ArrowDown className="h-4 w-4" aria-hidden="true" />
         </button>
+        <ResidencePhotosButton photos={residencePhotos(development)} variant="outline" />
         <ShareResidenceButton
           slug={development.slug}
           name={development.name}

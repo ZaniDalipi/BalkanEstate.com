@@ -9,6 +9,13 @@ import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import PhoneInput, { parsePhoneValue } from '@/src/shared/components/ui/PhoneInput';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { useAppContext } from '@/context/AppContext';
+import { useFormDraft, useDraftAutosave } from '@/src/shared/hooks/useFormDraft';
+import { useSubmitGuard } from '@/src/shared/hooks/useSubmitGuard';
+import { businessCreateDraftKey } from '../utils/businessDrafts';
+import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
+import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
+import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
+import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -44,6 +51,53 @@ const CATEGORY_ICONS: Record<string, SoftIconName> = {
   other: 'clipboard',
 };
 
+/** What the form keeps on this device until it is sent (logo and banner files are not kept) */
+interface BusinessListingDraft {
+  listingType: ListingType;
+  formData: CreateBusinessListingData;
+  contactPhone: string;
+  whatsappPhone: string;
+  viberPhone: string;
+  lat: number;
+  lng: number;
+}
+
+const emptyFormData = (phone = '', email = ''): CreateBusinessListingData => ({
+  name: '',
+  description: '',
+  category: '' as BusinessCategory,
+  services: [],
+  contactPhone: phone,
+  contactEmail: email,
+  website: '',
+  address: '',
+  city: '',
+  country: '',
+  whatsapp: '',
+  viber: '',
+  languages: [],
+  yearEstablished: undefined,
+  licenseNumber: '',
+  serviceAreas: [],
+  priceRange: undefined,
+  paymentMethods: [],
+  socialMedia: { facebook: '', instagram: '', linkedin: '', tiktok: '' },
+  businessHours: {},
+});
+
+const emptyDraft = (phone = '', email = ''): BusinessListingDraft => ({
+  listingType: 'business',
+  formData: emptyFormData(phone, email),
+  contactPhone: phone,
+  whatsappPhone: '',
+  viberPhone: '',
+  lat: 0,
+  lng: 0,
+});
+
+const citiesOf = (countryName: string): CityData[] =>
+  BALKAN_LOCATIONS.find(c => c.name === countryName)?.cities ?? [];
+
 const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ onBack, onSuccess }) => {
   const { t } = useTranslation('businessDirectory');
   const { state } = useAppContext();
@@ -51,6 +105,10 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
   const { uploadLogo } = useUploadBusinessLogo();
   const { uploadBanner } = useUploadBusinessBanner();
   const currentUser = state.currentUser;
+  const { run: runSubmit, isSubmitting } = useSubmitGuard();
+  const draft = useFormDraft<BusinessListingDraft>(currentUser?.id ? businessCreateDraftKey(currentUser.id) : null);
+  const [blank] = useState(() => emptyDraft(currentUser?.phone || '', currentUser?.email || ''));
+  const start = draft.restored ?? blank;
 
   // Refs for scroll-to-error
   const fieldRefs = {
@@ -61,52 +119,52 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     city: useRef<HTMLSelectElement>(null),
   };
 
-  const [listingType, setListingType] = useState<ListingType>('business');
+  const [listingType, setListingType] = useState<ListingType>(start.listingType);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const [formData, setFormData] = useState<CreateBusinessListingData>({
-    name: '',
-    description: '',
-    category: '' as BusinessCategory,
-    services: [],
-    contactPhone: currentUser?.phone || '',
-    contactEmail: currentUser?.email || '',
-    website: '',
-    address: '',
-    city: '',
-    country: '',
-    whatsapp: '',
-    viber: '',
-    languages: [],
-    yearEstablished: undefined,
-    licenseNumber: '',
-    serviceAreas: [],
-    priceRange: undefined,
-    paymentMethods: [],
-    socialMedia: { facebook: '', instagram: '', linkedin: '', tiktok: '' },
-    businessHours: {},
-  });
+  const [formData, setFormData] = useState<CreateBusinessListingData>(start.formData);
 
   const [serviceInput, setServiceInput] = useState('');
   const [languageInput, setLanguageInput] = useState('');
   const [serviceAreaInput, setServiceAreaInput] = useState('');
 
   // Phone fields as E.164 strings
-  const [contactPhone, setContactPhone] = useState(currentUser?.phone || '');
-  const [whatsappPhone, setWhatsappPhone] = useState('');
-  const [viberPhone, setViberPhone] = useState('');
+  const [contactPhone, setContactPhone] = useState(start.contactPhone);
+  const [whatsappPhone, setWhatsappPhone] = useState(start.whatsappPhone);
+  const [viberPhone, setViberPhone] = useState(start.viberPhone);
 
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<FieldErrorKey | null>(null);
   const [showHours, setShowHours] = useState(false);
-  const [lat, setLat] = useState(0);
-  const [lng, setLng] = useState(0);
-  const [showMap, setShowMap] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [availableCities, setAvailableCities] = useState<CityData[]>([]);
+  const [lat, setLat] = useState(start.lat);
+  const [lng, setLng] = useState(start.lng);
+  const [showMap, setShowMap] = useState(start.lat !== 0 && start.lng !== 0);
+  const [selectedCountry, setSelectedCountry] = useState(start.formData.country);
+  const [selectedCity, setSelectedCity] = useState(start.formData.city);
+  const [availableCities, setAvailableCities] = useState<CityData[]>(() => citiesOf(start.formData.country));
+
+  const isDirty = useDraftAutosave<BusinessListingDraft>(
+    draft,
+    { listingType, formData, contactPhone, whatsappPhone, viberPhone, lat, lng },
+    blank,
+  );
+
+  const discardDraft = useCallback(() => {
+    draft.discard();
+    setListingType(blank.listingType);
+    setFormData(blank.formData);
+    setContactPhone(blank.contactPhone);
+    setWhatsappPhone('');
+    setViberPhone('');
+    setLat(0);
+    setLng(0);
+    setShowMap(false);
+    setSelectedCountry('');
+    setSelectedCity('');
+    setAvailableCities([]);
+  }, [draft, blank]);
 
   const inputClasses = (field?: FieldErrorKey) =>
     `w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
@@ -325,8 +383,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     }
   }, [addService]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitListing = async () => {
     clearErrors();
 
     // Validate with scroll-to-error
@@ -406,11 +463,18 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
         }
       }
 
+      draft.finish();
       onSuccess();
     } catch (err: any) {
       setFormError(err?.message || t('form.errors.generic'));
     }
-  }, [formData, listingType, lat, lng, logoFile, bannerFile, contactPhone, whatsappPhone, viberPhone, createListing, uploadLogo, uploadBanner, onSuccess, t, clearErrors, setValidationError]);
+  };
+
+  // One send at a time: a double click must not create the listing twice
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void runSubmit(submitListing);
+  };
 
   const displayError = formError || (error as Error)?.message;
 
@@ -466,7 +530,10 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
           </Animated>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <FormLeaveGuard dirty={isDirty} bypassRef={draft.stoppedRef} onDiscard={draft.finish} />
+        <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-6" />
+
+        <form onSubmit={handleSubmit} className="space-y-6" onKeyDown={handleFormEnterKey}>
           {/* Listing type selector */}
           <Animated variant="fadeInUp">
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
@@ -1183,12 +1250,14 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
           <Animated variant="fadeInUp" delay={300}>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting}
+              aria-busy={isSubmitting}
               className="w-full py-3.5 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99] text-base"
             >
-              {isLoading ? t('form.submitting') : t('form.submit')}
+              {isLoading || isSubmitting ? t('form.submitting') : t('form.submit')}
             </button>
           </Animated>
+          <SubmitShortcutHint className="mt-2" />
         </form>
       </div>
     </div>

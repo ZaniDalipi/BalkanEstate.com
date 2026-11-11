@@ -14,6 +14,7 @@ import { SoftIcon } from '@/src/shared/illustrations';
 import { useUserManager } from './useUserManager';
 import UserManagerDetail from './UserManagerDetail';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { ClaimSuperAdminCard } from './roles/ClaimSuperAdminCard';
 
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -113,6 +114,7 @@ const UserManager: React.FC = () => {
             <option value="private_seller">{t('admin:users.roles.seller')}</option>
             <option value="agent">{t('admin:users.roles.agent')}</option>
             <option value="admin">{t('admin:users.roles.admin')}</option>
+            <option value="super_admin">{t('admin:users.roles.superAdmin', 'Super admin')}</option>
           </select>
 
           <select
@@ -136,6 +138,8 @@ const UserManager: React.FC = () => {
           </select>
         </div>
       </div>
+
+      <ClaimSuperAdminCard />
 
       {/* Success/Error Messages */}
       {successMessage && (
@@ -343,6 +347,7 @@ const UserManager: React.FC = () => {
         formatDateTime={formatDateTime}
         getRoleBadgeColor={getRoleBadgeColor}
         onUserUpdated={refetch}
+        editError={error}
       />
     </div>
   );

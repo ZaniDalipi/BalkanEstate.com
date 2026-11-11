@@ -9,6 +9,7 @@
 import express from 'express';
 import { ogShareHandler } from '../controllers/ogController';
 import { residenceShareHandler, residenceShareImageHandler } from '../controllers/residenceOgController';
+import { businessShareImageHandler } from '../controllers/businessOgController';
 
 const router = express.Router();
 
@@ -26,5 +27,12 @@ router.get('/property/:slug', ogShareHandler);
  */
 router.get('/residence/:slug/image.jpg', residenceShareImageHandler);
 router.get('/residence/:slug', residenceShareHandler);
+
+/**
+ * GET /api/og/business/:id/image.jpg — a business's share card (1200×630):
+ * its cover photo with its logo and name, or a branded card with its logo.
+ * The og:image of /business-directory/:slug links (functions/_og-business.ts).
+ */
+router.get('/business/:id/image.jpg', businessShareImageHandler);
 
 export default router;

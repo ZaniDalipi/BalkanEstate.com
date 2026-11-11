@@ -77,7 +77,10 @@
     "last7Days": "Последните 7 дни",
     "last30Days": "Последните 30 дни",
     "priceReduced": "Намалена цена",
-    "priceIncreased": "Повишена цена"
+    "priceIncreased": "Повишена цена",
+    "constructionStatus": "Строителство",
+    "kitchens": "Кухни",
+    "orientation": "Ориентация"
   },
   "options": {
     "any": "Всички",
@@ -603,7 +606,8 @@
       "openFilters": "Отвори филтрите",
       "myAccount": "Моят профил",
       "tapMap": "Докоснете „Карта“",
-      "viewToggle": "Смяна на изгледа"
+      "viewToggle": "Смяна на изгледа",
+      "recoveredFromCrash": "Страницата се рестартира, за да освободи памет. Картата се зарежда, когато докоснете Карта."
     },
     "aiSearch": {
       "agent": "Агент",
@@ -648,5 +652,19 @@
     "climateRiskLayer": {
       "veryHigh": "Много висок"
     }
+  },
+  "constructionOptions": {
+    "ready": "Готово за нанасяне",
+    "underConstruction": "В строеж"
+  },
+  "orientationOptions": {
+    "north": "Север",
+    "south": "Юг",
+    "east": "Изток",
+    "west": "Запад",
+    "northEast": "Североизток",
+    "northWest": "Северозапад",
+    "southEast": "Югоизток",
+    "southWest": "Югозапад"
   }
 }

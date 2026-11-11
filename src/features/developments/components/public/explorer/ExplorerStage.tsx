@@ -1,71 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
-import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/src/lib/utils';
-import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit, UnitAvailability } from '../../../types';
 import { ExplorerCanvas } from './ExplorerCanvas';
 import { ViewSwitcher } from './ViewSwitcher';
-import type { Crumb } from './ExplorerBreadcrumb';
 import { FiltersOverlay } from './FiltersOverlay';
 import { StageTopBar } from './StageTopBar';
-import type { ExplorerFocus } from './useFlyFocus';
-import { BuildingChips } from './BuildingChips';
-import { ExplorerLegend } from './ExplorerLegend';
-import { usePseudoFullscreen } from './usePseudoFullscreen';
-import { useDisplayMode } from './useDisplayMode';
-import type { BuildingFacts } from './useRegionCard';
+import { useStageControls } from './immersive/useStageControls';
+import { HIDE_WHEN_IMMERSED } from './dive/diveStyle';
+import { OrbitView } from './orbit/OrbitView';
+import { ExplorerStageControls } from './ExplorerStageControls';
+import { useFloorPreview } from './floors/useFloorPreview';
+import type { ExplorerStageProps } from './explorerStageProps';
 
-export interface ExplorerStageProps {
-  views: PublicSceneView[];
-  viewIndex: number;
-  onViewIndex: (i: number) => void;
-  crumbs: Crumb[];
-  onCrumb: (i: number) => void;
-  buildings: DevelopmentBuilding[];
-  activeBuildingId?: string;
-  onBuilding: (b: DevelopmentBuilding) => void;
-  legend: Array<{ state: UnitAvailability; count: number }>;
-  selectedAvailability: readonly UnitAvailability[];
-  onToggleAvailability: (s: UnitAvailability) => void;
-  unitsById: Map<string, PublicUnit>;
-  matchedIds?: Set<string>;
-  buildingsById: Map<string, DevelopmentBuilding>;
-  entrancesById?: Map<string, DevelopmentEntrance>;
-  buildingFacts?: Map<string, BuildingFacts>;
-  onActivate: (h: Hotspot) => void;
-  /** The shared filter panel, shown over the stage on demand. */
-  filters: React.ReactNode;
-  activeFilters: boolean;
-  /** Extra buttons before the filters toggle (the budget helper); their popups anchor under the bar. */
-  actions?: React.ReactNode;
-  /** Region the explorer is gliding to; see ExplorerCanvas. */
-  focus?: ExplorerFocus;
-  onFocusArrive?: (h: Hotspot) => void;
-}
+export type { ExplorerStageProps };
 
 /**
  * Full-bleed explorer layout (East Gate B2): the rendering edge to edge with
  * the breadcrumb, building chips, legend, camera arrows and zoom laid over it.
  * On phones the chips and legend flow below the image so they don't bury it.
  * ←/→ switch camera views; the full-screen toggle portals the stage to <body>.
+ * While the buyer dives into an apartment the controls fade away (`group/stage`).
  */
 export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
-  const fs = usePseudoFullscreen<HTMLElement>();
-  const [showFilters, setShowFilters] = useState(false);
-  const [mode, setMode] = useDisplayMode();
-  const reduced = useReducedMotion();
+  const targetKey = p.crumbs.map((c) => c.key).join('/');
+  const level = p.floors?.find((f) => f.id === p.activeFloorId)?.level;
+  const { fs, showFilters, setShowFilters, mode, setMode, onKeyDown, orbit } = useStageControls(p.views, p.viewIndex, p.onViewIndex, targetKey, level);
+  const preview = useFloorPreview(p.unitsById, p.onPointFloor);
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
-  const float = full ? 'absolute' : 'relative sm:absolute';
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const tag = (e.target as HTMLElement).tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || p.views.length < 2) return;
-    if (e.key === 'ArrowRight') p.onViewIndex((p.viewIndex + 1) % p.views.length);
-    else if (e.key === 'ArrowLeft') p.onViewIndex((p.viewIndex - 1 + p.views.length) % p.views.length);
-  };
 
   const stage = (
     <section
@@ -74,22 +38,17 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
       onKeyDown={onKeyDown}
       style={full ? { zIndex: 4000 } : undefined}
       className={cn(
-        'bg-slate-900',
+        'group/stage bg-slate-900',
         // Off full screen, desktop keeps the controls in bands above/below the
         // image so they never cover the top or ground-floor apartments.
-        full ? 'fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
+        // In full screen the stage sets the safe-area insets its controls add (index.css, .explorer-stage-full).
+        full ? 'explorer-stage-full fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
       <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
         {view && (
-          // Each picture fades in, so drilling into a building after the glide reads as one move.
-          <motion.div
-            key={view.viewKey}
-            className="w-full"
-            initial={reduced ? false : { opacity: 0, scale: 1.02 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          >
+          // Views of one building orbit into each other; a new building fades in, so drilling in after the glide reads as one move.
+          <OrbitView viewKey={`${targetKey}:${view.viewKey}`} move={orbit.move}>
             <ExplorerCanvas
               view={view}
               unitsById={p.unitsById}
@@ -102,8 +61,10 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
               fullscreen={full}
               focus={p.focus}
               onFocusArrive={p.onFocusArrive}
+              openUnitId={p.openUnitId}
+              litUnitIds={preview.litUnitIds}
             />
-          </motion.div>
+          </OrbitView>
         )}
 
         <StageTopBar
@@ -117,24 +78,26 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           onToggleFullscreen={fs.toggle}
         />
 
-        <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0">
-          <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
+        <div className={cn('absolute bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)] left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-[calc(var(--stage-safe-right,0px)+0.75rem)] lg:translate-x-0', HIDE_WHEN_IMMERSED)}>
+          <ViewSwitcher views={p.views} index={p.viewIndex} onChange={orbit.switchTo} />
         </div>
       </div>
 
-      <div className={cn(float, 'z-10 px-3 pt-3 sm:left-3 sm:top-16 sm:p-0', full && 'left-3 top-16 p-0')}>
-        <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
-      </div>
-
-      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3')}>
-        <ExplorerLegend
-          counts={p.legend}
-          selected={p.selectedAvailability}
-          onToggle={p.onToggleAvailability}
-          showAvailability={mode === 'availability'}
-          onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
-        />
-      </div>
+      <ExplorerStageControls
+        fullscreen={full}
+        buildings={p.buildings}
+        activeBuildingId={p.activeBuildingId}
+        onBuilding={p.onBuilding}
+        floors={p.floors}
+        activeFloorId={p.activeFloorId}
+        onFloor={p.onFloor}
+        onPreviewFloor={preview.setPreviewFloorId}
+        legend={p.legend}
+        selectedAvailability={p.selectedAvailability}
+        onToggleAvailability={p.onToggleAvailability}
+        showAvailability={mode === 'availability'}
+        onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
+      />
 
       {showFilters && (
         <FiltersOverlay fullscreen={full} onClose={() => setShowFilters(false)}>

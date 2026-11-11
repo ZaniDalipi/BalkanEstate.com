@@ -9,7 +9,6 @@ import { useExplorerUrlState } from '../../hooks/useExplorerUrlState';
 import { useUnitDrawer } from '../../hooks/useUnitDrawer';
 import { filterUnits, hasActiveCriteria } from '../../utils/unitFilters';
 import { LoadingState, ErrorState } from '../shared/States';
-import { ResidenceHero } from './ResidenceHero';
 import { StatsBar } from './StatsBar';
 import { AvailabilityBar } from './AvailabilityBar';
 import { UnitFilters } from './UnitFilters';
@@ -17,12 +16,11 @@ import { UnitsBrowser } from './UnitsBrowser';
 import { FollowCard } from './FollowCard';
 import { ResidenceLocation } from './ResidenceLocation';
 import { ResidenceExplorer } from './explorer/ResidenceExplorer';
-import { ResidenceTitleBar } from './explorer/ResidenceTitleBar';
 import { ResidenceSections } from './explorer/ResidenceSections';
 import { ApartmentDetailsDrawer } from './explorer/drawer/ApartmentDetailsDrawer';
 import { BuilderShowcase } from './builder/BuilderShowcase';
-
-const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+import { useResidenceChrome } from './hero/useResidenceChrome';
+import { useResidenceSections } from './hero/useResidenceSections';
 
 /**
  * Public residence page. The interactive explorer is the full-bleed hero
@@ -41,12 +39,9 @@ const PublicDevelopmentPage: React.FC = () => {
   const drawer = useUnitDrawer();
   const matchedUnits = useMemo(() => filterUnits(units, criteria), [units, criteria]);
 
-  const sections = [
-    ...(development?.builder?.name ? [{ id: 'builder', label: t('builderPublic.label', 'The builder') }] : []),
-    { id: 'overview', label: t('detail.overview', 'Overview') },
-    { id: 'units', label: t('units.heading', 'Available homes') },
-    { id: 'location', label: t('detail.location', 'Location') },
-  ];
+  // "The builder" opens the company's own page; the other sections scroll.
+  const { sections, onSection, openDeveloper } = useResidenceSections(development);
+  const chrome = useResidenceChrome({ development, summary, sections, onSection });
 
   if (isLoading) {
     return (
@@ -68,13 +63,15 @@ const PublicDevelopmentPage: React.FC = () => {
   }
 
   return (
-    <main className="w-full bg-white pb-12">
-      <div className="mx-auto max-w-6xl px-4 pt-4">
-        <button type="button" onClick={() => navigate(paths.developments(), { direction: 'back' })} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          {t('public.backToList', 'Back to developments')}
-        </button>
-      </div>
+    <main className="w-full overflow-x-clip bg-white pb-12">
+      {!chrome.desktop && (
+        <div className="mx-auto max-w-6xl px-4 pt-4">
+          <button type="button" onClick={() => navigate(paths.developments(), { direction: 'back' })} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            {t('public.backToList', 'Back to developments')}
+          </button>
+        </div>
+      )}
 
       <div ref={explorerRef}>
         <ResidenceExplorer
@@ -92,12 +89,9 @@ const PublicDevelopmentPage: React.FC = () => {
           openUnitId={drawer.unitId}
           city={development.city}
           country={development.country}
-          header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} onViewBuilder={() => scrollToId('builder')} />}
-          fallback={
-            <div className="mx-auto max-w-6xl px-4">
-              <ResidenceHero development={development} onViewUnits={() => scrollToId('units')} />
-            </div>
-          }
+          header={chrome.header}
+          fallback={chrome.fallback}
+          immersive={chrome.immersive}
         />
       </div>
 
@@ -110,7 +104,7 @@ const PublicDevelopmentPage: React.FC = () => {
           <ul className="flex gap-1 py-2">
             {sections.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => scrollToId(s.id)} className="min-h-[44px] whitespace-nowrap rounded-full px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <button type="button" onClick={() => onSection(s.id)} className="min-h-[44px] whitespace-nowrap rounded-full px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">
                   {s.label}
                 </button>
               </li>
@@ -125,7 +119,7 @@ const PublicDevelopmentPage: React.FC = () => {
           </div>
         )}
 
-        <BuilderShowcase builder={development.builder} />
+        <BuilderShowcase builder={development.builder} onOpenPage={openDeveloper} />
 
         <ResidenceSections development={development} buildings={buildings} floors={floors} />
 
@@ -152,6 +146,7 @@ const PublicDevelopmentPage: React.FC = () => {
         onClose={drawer.close}
         preview={units.find((u) => u.id === drawer.unitId)}
         revealRef={explorerRef}
+        floors={floors}
       />
     </main>
   );

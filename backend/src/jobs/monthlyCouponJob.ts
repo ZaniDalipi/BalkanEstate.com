@@ -1,48 +1,13 @@
-import cron from 'node-cron';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { sendMonthlyCouponEmail } from '../services/emailService';
 import { cronLogger } from '../utils/logger';
 
 /**
- * Monthly Coupon Refresh Cron Job
+ * Monthly coupon helpers for manual/admin use.
  *
- * Schedule:
- * - Runs on the 1st of every month at 9:00 AM UTC
- * - Refreshes promotion coupons for all Pro users
- * - Refreshes promotion coupons for all Agency users
- * - Sends email notifications to all subscribers about their new coupons
- *
- * Cron expression: '0 9 1 * *'
- * - 0: minute 0
- * - 9: hour 9 (9:00 AM UTC = 10:00 AM CET)
- * - 1: day 1 (1st of month)
- * - *: every month
- * - *: every day of week
+ * The scheduled refresh (1st of each month, 09:00 UTC) lives in `src/cron/index.ts`
+ * only — it used to be scheduled here as well, which sent every coupon email twice.
  */
-
-export const startMonthlyCouponJob = (): void => {
-  // Run on the 1st of every month at 9:00 AM UTC
-  cron.schedule('0 9 1 * *', async () => {
-    cronLogger.info('[Cron Job] Starting monthly coupon refresh process...');
-
-    try {
-      const result = await processMonthlyCouponRefresh();
-
-      cronLogger.info(`[Cron Job] Monthly coupon refresh completed:`);
-      cronLogger.info(`  - Pro users refreshed: ${result.usersRefreshed}`);
-      cronLogger.info(`  - Agencies refreshed: ${result.agenciesRefreshed}`);
-      cronLogger.info(`  - Emails sent: ${result.emailsSent}`);
-
-      if (result.errors.length > 0) {
-        cronLogger.warn(`[Cron Job] ${result.errors.length} errors occurred during refresh`);
-      }
-    } catch (error) {
-      cronLogger.error('[Cron Job] Error processing monthly coupon refresh:', error);
-    }
-  });
-
-  cronLogger.info('[Cron Job] Monthly coupon refresh job scheduled (1st of each month at 9:00 AM UTC)');
-};
 
 // Export for manual execution (useful for testing)
 export const runMonthlyCouponRefreshManually = async (): Promise<void> => {

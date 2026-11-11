@@ -9,8 +9,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 
-function Probe({ defer }: { defer: boolean }) {
-  const mounted = useDeferredMount(defer);
+function Probe({ defer, idle }: { defer: boolean; idle?: boolean }) {
+  const mounted = useDeferredMount(defer, { idle });
   return <div data-testid="state">{mounted ? 'mounted' : 'waiting'}</div>;
 }
 
@@ -78,6 +78,17 @@ describe('useDeferredMount', () => {
 
     act(() => {
       rerender(<Probe defer />);
+    });
+    expect(state()).toBe('mounted');
+  });
+
+  it('with idle off, waits for the subtree to be wanted and never mounts at idle', () => {
+    const { rerender } = render(<Probe defer idle={false} />);
+    settle();
+    expect(state()).toBe('waiting');
+
+    act(() => {
+      rerender(<Probe defer={false} idle={false} />);
     });
     expect(state()).toBe('mounted');
   });

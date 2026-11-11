@@ -9,6 +9,7 @@ import { createNotificationWithPush } from '../services/engagementService';
 import PromotionCoupon from '../models/PromotionCoupon';
 import { getObjectIdParam } from '../utils/validateParams';
 import { agencyLogger } from '../utils/logger';
+import { archiveDeletedListings } from '../services/listingArchiveService';
 
 /**
  * Parse pagination query params with defaults and clamping.
@@ -545,6 +546,13 @@ export const bulkPropertyAction = async (
         break;
       }
       case 'delete': {
+        const actingUser = req.user as IUser | undefined;
+        await archiveDeletedListings(await Property.find(targetFilter), {
+          kind: 'agency',
+          userId: actingUser ? String(actingUser._id) : undefined,
+          name: actingUser?.name ?? agency.name,
+          email: actingUser?.email,
+        });
         const result = await Property.deleteMany(targetFilter);
         affected = result.deletedCount;
         break;

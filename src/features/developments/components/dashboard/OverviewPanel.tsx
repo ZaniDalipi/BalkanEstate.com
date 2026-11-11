@@ -6,6 +6,7 @@ import { AVAILABILITY_META } from '../../utils/availability';
 import { CoverImageUpload } from '../shared/CoverImageUpload';
 import { ResidencePlanCard } from './billing/ResidencePlanCard';
 import { PublishSection } from './PublishSection';
+import { ResidenceGallerySection } from './gallery/ResidenceGallerySection';
 import type { Development, UnitAvailability } from '../../types';
 
 interface OverviewPanelProps {
@@ -13,6 +14,8 @@ interface OverviewPanelProps {
   canPublish: boolean;
   /** Only the owner pays for the Residence Pass. */
   canBuy: boolean;
+  /** `media.upload`: may change the cover and the photos. */
+  canEditPhotos?: boolean;
 }
 
 const Stat: React.FC<{ label: string; value?: number; state?: UnitAvailability }> = ({ label, value, state }) => (
@@ -25,8 +28,8 @@ const Stat: React.FC<{ label: string; value?: number; state?: UnitAvailability }
   </div>
 );
 
-/** Status + publish control, the Residence Pass plan, unit totals and the cover image. */
-export const OverviewPanel: React.FC<OverviewPanelProps> = ({ development, canPublish, canBuy }) => {
+/** Status + publish control, the Residence Pass plan, unit totals, the cover image and the photo gallery. */
+export const OverviewPanel: React.FC<OverviewPanelProps> = ({ development, canPublish, canBuy, canEditPhotos = true }) => {
   const { t } = useTranslation('developments');
   const counts = useUnitCounts(development.id);
   const { billing } = useResidenceBilling(development.id);
@@ -53,6 +56,13 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({ development, canPu
           {t('cover.heading', 'Cover image')}
         </h2>
         <CoverImageUpload developmentId={development.id} coverImage={development.coverImage} />
+      </section>
+
+      <section aria-labelledby="overview-gallery">
+        <h2 id="overview-gallery" className="mb-3 text-base font-semibold text-slate-900">
+          {t('gallery.heading', 'Photos')}
+        </h2>
+        <ResidenceGallerySection developmentId={development.id} photos={development.gallery ?? []} canEdit={canEditPhotos} />
       </section>
     </div>
   );

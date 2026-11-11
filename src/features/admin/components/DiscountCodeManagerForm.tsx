@@ -154,6 +154,8 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
                 { value: 'agent_pro_monthly', label: t('admin:ui.discountCodeManagerForm.agentProMonthly', 'Agent Pro (Monthly)') },
                 { value: 'agent_pro_yearly', label: t('admin:ui.discountCodeManagerForm.agentProYearly', 'Agent Pro (Yearly)') },
                 { value: 'buyer_monthly', label: t('admin:ui.discountCodeManagerForm.buyerPro', 'Buyer Pro') },
+                { value: 'residence_pass_yearly', label: t('admin:ui.discountCodeManagerForm.residencePass', 'Residence Pass (12 months)') },
+                { value: 'residence_extra_building_yearly', label: t('admin:ui.discountCodeManagerForm.residenceExtraBuilding', 'Residence extra buildings') },
               ].map((plan) => (
                 <label key={plan.value} className="flex items-center gap-2">
                   <input
@@ -173,6 +175,7 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-1">{t('admin:discountCodes.form.leaveUncheckedAllPlans', 'Leave all unchecked to apply to all plans')}</p>
+            <p className="text-xs text-gray-500 mt-1">{t('admin:discountCodes.form.residenceHint', 'Residence unlock codes are easier to make in Residences › Unlock codes (they must name a residence product and cover its full price).')}</p>
           </div>
 
           <div>
