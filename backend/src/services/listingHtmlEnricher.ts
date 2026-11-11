@@ -19,6 +19,8 @@ import { listingJsonLdNodes } from './listingAttributes/jsonLdNodes';
 import { acceptLocationGuesses, countryFromPageSignals } from './listingAttributes/location';
 import { extractLabelledPairs, placeBesideMarkerIcon } from './listingAttributes/htmlPatterns';
 import { extractMapCoordinates } from './listingAttributes/mapCoordinates';
+import { photosOnPage } from './listingAttributes/pagePhotos';
+import { selectListingPhotos } from './listingAttributes/listingPhotos';
 
 type Mapped = Record<string, unknown>;
 
@@ -30,19 +32,11 @@ const setIfMissing = (target: Mapped, key: string, value: unknown): void => {
 
 const pushImages = (target: Mapped, urls: string[]): void => {
   if (!urls.length) return;
-  const existing = Array.isArray(target.images) ? (target.images as unknown[]) : [];
-  const existingUrls = new Set<string>(
-    existing
-      .map(i => (typeof i === 'string' ? i : (i as { url?: string })?.url))
-      .filter((u): u is string => typeof u === 'string')
-  );
-  const merged = [...existing];
-  for (const u of urls) {
-    if (!u || existingUrls.has(u)) continue;
-    if (u.startsWith('data:')) continue;
-    merged.push(u);
-    existingUrls.add(u);
-  }
+  const existing = (Array.isArray(target.images) ? (target.images as unknown[]) : [])
+    .map(i => (typeof i === 'string' ? i : (i as { url?: string })?.url))
+    .filter((u): u is string => typeof u === 'string');
+  // Each photo once (largest size), real photos only, at most a listing's worth.
+  const merged = selectListingPhotos([...existing, ...urls]);
   if (merged.length) target.images = merged;
 };
 
@@ -191,148 +185,10 @@ const extractMicrodata = ($: cheerio.CheerioAPI, base: string, target: Mapped): 
   pushImages(target, microImages);
 };
 
-/**
- * When the same image appears in multiple resolutions via query params (e.g.
- * ?w=400 and ?w=1200), keep only the largest version to maximise quality.
- */
-const deduplicateImageUrls = (urls: string[]): string[] => {
-  // Group by the URL with size-related query params stripped.
-  const groups = new Map<string, { url: string; score: number }>();
-  for (const u of urls) {
-    let base = u;
-    let score = 0;
-    try {
-      const parsed = new URL(u);
-      // Score by explicit width/height params — prefer larger
-      const w = parseInt(parsed.searchParams.get('w') ?? parsed.searchParams.get('width') ?? '0', 10);
-      const h = parseInt(parsed.searchParams.get('h') ?? parsed.searchParams.get('height') ?? '0', 10);
-      score = w || h;
-      // Key = URL without size params
-      ['w', 'width', 'h', 'height', 'size', 'thumb', 'resize', 'dim'].forEach(p => parsed.searchParams.delete(p));
-      base = parsed.toString();
-    } catch { /* keep url as-is */ }
-    const existing = groups.get(base);
-    if (!existing || score > existing.score) groups.set(base, { url: u, score });
-  }
-  return Array.from(groups.values()).map(g => g.url);
-};
 
 /** Pull every reasonable image URL from <img> tags on the page (with srcset & lazy-load support). */
 const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
-  const found: string[] = [];
-  $('img').each((_, el) => {
-    const $el = $(el);
-    // Try every common lazy-load attr in priority order
-    const candidate =
-      $el.attr('src') ??
-      $el.attr('data-src') ??
-      $el.attr('data-lazy-src') ??
-      $el.attr('data-original') ??
-      $el.attr('data-lazy') ??
-      $el.attr('data-image');
-    if (candidate) found.push(resolveUrl(base, candidate));
-
-    // srcset: pick the largest
-    const srcset = $el.attr('srcset') ?? $el.attr('data-srcset');
-    if (srcset) {
-      const parts = srcset.split(',').map(p => p.trim());
-      let best: { url: string; width: number } | null = null;
-      for (const p of parts) {
-        const [u, w] = p.split(/\s+/);
-        const width = parseInt((w ?? '0').replace(/\D/g, ''), 10) || 0;
-        if (!best || width > best.width) best = { url: u, width };
-      }
-      if (best) found.push(resolveUrl(base, best.url));
-    }
-  });
-  // <source srcset> inside <picture> — prefer the largest descriptor
-  $('picture source').each((_, el) => {
-    const srcset = $(el).attr('srcset');
-    if (!srcset) return;
-    const parts = srcset.split(',').map(p => p.trim());
-    let best: { url: string; width: number } | null = null;
-    for (const p of parts) {
-      const [u, w] = p.split(/\s+/);
-      const width = parseInt((w ?? '0').replace(/\D/g, ''), 10) || 0;
-      if (!best || width > best.width) best = { url: u, width };
-    }
-    if (best) found.push(resolveUrl(base, best.url));
-  });
-
-  // Swiper, Fancybox, Slick, Lightbox and other gallery widgets store the
-  // full-resolution URL in data attributes on slide/thumbnail wrappers.
-  const galleryAttrSelectors = [
-    '[data-image]', '[data-src]', '[data-original]', '[data-image-url]',
-    '[data-gallery-image]', '[data-photo]', '[data-full]', '[data-full-image]',
-    '[data-fancybox]', '[data-fancybox-href]', '[data-lightbox]',
-    '[data-swiper-slide-index]', // Swiper slide — pull src from inner <img> instead
-    '.swiper-slide img', '.slick-slide img', '.flexslider li img',
-    '.gallery-item img', '.gallery-image img', '.fancybox img',
-    'a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".webp"]',
-  ];
-  for (const selector of galleryAttrSelectors) {
-    $(selector).each((_, el) => {
-      const $el = $(el);
-      const tag = (el as { tagName?: string }).tagName?.toLowerCase();
-      // For anchor tags pointing to images — use href
-      if (tag === 'a') {
-        const href = $el.attr('href') ?? $el.attr('data-fancybox-href');
-        if (href) found.push(resolveUrl(base, href));
-        return;
-      }
-      // For img tags — prefer explicit data attrs, then src
-      let url = $el.attr('data-full') ?? $el.attr('data-full-image') ??
-        $el.attr('data-src') ?? $el.attr('data-original') ??
-        $el.attr('data-image') ?? $el.attr('data-image-url') ??
-        $el.attr('src');
-      if (!url) {
-        const bg = $el.attr('style');
-        if (bg) {
-          const match = bg.match(/url\(['"]?([^'")\]]+)['"]?\)/i);
-          if (match) url = match[1];
-        }
-      }
-      if (url) found.push(resolveUrl(base, url));
-    });
-  }
-
-  // Also scan for JSON gallery arrays embedded in page scripts (common in WP/custom RE sites)
-  $('script:not([src])').each((_, el) => {
-    const src = $(el).html() ?? '';
-    // Look for arrays of image URLs in JS variables
-    const urlPattern = /["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))["']/gi;
-    let m: RegExpExecArray | null;
-    while ((m = urlPattern.exec(src)) !== null) {
-      found.push(m[1]);
-    }
-  });
-
-  // Filter out tracking pixels, icons, thumbnails, and non-listing images.
-  const meaningful = found.filter((u) => {
-    const lower = u.toLowerCase();
-    // Skip tracking pixels and 1x1 spacers
-    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
-    // Skip common icon/logo/avatar paths
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
-    // Skip known tracker domains
-    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
-    // Skip very small thumbnail hints in URL parameters
-    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
-    return true;
-  });
-
-  // Deduplicate: prefer higher-resolution variant when a URL appears in multiple
-  // sizes via query params (e.g. ?w=400 vs ?w=1200 — keep ?w=1200).
-  const deduped = deduplicateImageUrls(found.filter((u) => {
-    const lower = u.toLowerCase();
-    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
-    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
-    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
-    return true;
-  }));
-  pushImages(target, deduped);
-  void meaningful; // meaningful kept for potential future use
+  pushImages(target, photosOnPage($, base));
 };
 
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {

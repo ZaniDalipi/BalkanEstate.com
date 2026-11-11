@@ -229,16 +229,62 @@ export const getMyListingSourcePreviewJob = async (id: string, jobId: string): P
   return res.job;
 };
 
+/** Progress of an import as the server reports it (the same as a socket progress event). */
+export interface ImportProgress {
+  fetched: number;
+  processed: number;
+  imported: number;
+  updated: number;
+  failed: number;
+  deferred?: number;
+  done?: boolean;
+  message?: string;
+  reviewMode?: boolean;
+  pendingReview?: number;
+  currentItem?: { id: string; title?: string; url?: string };
+  monthlyUsage?: { monthlyAllowance: number; remaining: number };
+}
+
+export interface ImportedItem {
+  id: string;
+  title?: string;
+  url?: string;
+  status: 'imported' | 'updated' | 'deferred' | 'failed';
+}
+
+interface ImportJobBase {
+  jobId: string;
+  sourceId: string;
+  startedAt: number;
+  current: ImportProgress | null;
+  /** Most recent processed listings, newest last. */
+  recentItems: ImportedItem[];
+}
+
+/** An import running on the server: poll it until it is done or failed. */
+export type ImportJob =
+  | (ImportJobBase & { status: 'running' })
+  | (ImportJobBase & { status: 'done'; stats: IngestStats })
+  | (ImportJobBase & { status: 'failed'; error: string });
+
+/**
+ * Import the approved listings. Starts a server job and returns it at once;
+ * with nothing approved the server answers with empty stats instead.
+ */
 export const confirmMyListingSourceImport = async (
   id: string,
   previewId: string,
   approvedIds: string[]
-): Promise<{ stats: IngestStats }> => {
-  return apiRequest<{ stats: IngestStats }>(`${BASE}/${id}/confirm-import`, {
+): Promise<{ job?: ImportJob; stats?: IngestStats }> =>
+  apiRequest<{ job?: ImportJob; stats?: IngestStats }>(`${BASE}/${id}/confirm-import`, {
     method: 'POST',
     body: { previewId, approvedIds },
     requiresAuth: true,
   });
+
+export const getMyListingSourceImportJob = async (id: string, jobId: string): Promise<ImportJob> => {
+  const res = await apiRequest<{ job: ImportJob }>(`${BASE}/${id}/import/${jobId}`, { requiresAuth: true });
+  return res.job;
 };
 
 export interface DetectResult {

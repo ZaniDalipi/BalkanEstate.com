@@ -23,6 +23,7 @@ vi.mock('@/src/features/listing-sources/api/listingSourceApi', () => ({
   startMyListingSourcePreview: (...args: unknown[]) => startPreview(...args),
   getMyListingSourcePreviewJob: (...args: unknown[]) => getJob(...args),
   confirmMyListingSourceImport: vi.fn(),
+  getMyListingSourceImportJob: vi.fn(),
 }));
 
 import {

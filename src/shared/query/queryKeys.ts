@@ -402,10 +402,11 @@ export const gameRewardKeys = {
 
 // ============================================================================
 // Listing Feed Query Keys
-// Used by: ListingIngestProgressContext (polling a feed fetch's progress)
+// Used by: ListingIngestProgressContext (polling a feed fetch's and an import's progress)
 // ============================================================================
 
 export const listingFeedKeys = {
   all: ['listingFeeds'] as const,
   previewJob: (sourceId: string, jobId: string) => [...listingFeedKeys.all, 'previewJob', sourceId, jobId] as const,
+  importJob: (sourceId: string, jobId: string) => [...listingFeedKeys.all, 'importJob', sourceId, jobId] as const,
 };

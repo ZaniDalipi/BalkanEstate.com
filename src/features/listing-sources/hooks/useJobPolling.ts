@@ -1,30 +1,39 @@
 import { useEffect, useRef } from 'react';
 import { useQueries } from '@tanstack/react-query';
-import { listingFeedKeys } from '@/src/shared/query/queryKeys';
-import { getMyListingSourcePreviewJob, type PreviewJob } from '../api/listingSourceApi';
 
-export interface PreviewJobWatch {
+export interface JobWatch {
   sourceId: string;
   jobId: string;
+}
+
+interface PolledJob {
+  status: 'running' | 'done' | 'failed';
+}
+
+interface JobPollingOptions<J extends PolledJob> {
+  /** Jobs to follow; a job stops being polled once it is done or failed. */
+  watches: JobWatch[];
+  queryKey: (watch: JobWatch) => readonly unknown[];
+  fetchJob: (watch: JobWatch) => Promise<J>;
+  /** Every new state of a job: counts while running, the result when done. */
+  onJob: (sourceId: string, job: J) => void;
+  /** The job could not be read (gone after a server restart, network down). */
+  onError: (sourceId: string, error: Error) => void;
 }
 
 const POLL_MS = 2000;
 
 /**
- * Polls each running feed fetch until it is done or failed, and reports
- * every new state of it: counts while running, the listings when done.
- * Keeps polling in a background tab, so the review opens when it's ready.
+ * Polls server jobs (a feed fetch, an import) every couple of seconds until
+ * they finish, and reports each new state. Keeps polling in a background tab,
+ * so the result is ready when the user comes back.
  */
-export const usePreviewJobPolling = (
-  watches: PreviewJobWatch[],
-  onJob: (sourceId: string, job: PreviewJob) => void,
-  onError: (sourceId: string, error: Error) => void
-): void => {
+export const useJobPolling = <J extends PolledJob>({ watches, queryKey, fetchJob, onJob, onError }: JobPollingOptions<J>): void => {
   const results = useQueries({
     queries: watches.map((w) => ({
-      queryKey: listingFeedKeys.previewJob(w.sourceId, w.jobId),
-      queryFn: () => getMyListingSourcePreviewJob(w.sourceId, w.jobId),
-      refetchInterval: (query: { state: { data?: PreviewJob } }) =>
+      queryKey: queryKey(w),
+      queryFn: () => fetchJob(w),
+      refetchInterval: (query: { state: { data?: J } }) =>
         !query.state.data || query.state.data.status === 'running' ? POLL_MS : false,
       refetchIntervalInBackground: true,
       retry: 2,

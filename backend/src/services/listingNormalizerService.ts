@@ -7,6 +7,7 @@ import { geocodeAddressWithRateLimit, geocodeFreeformWithRateLimit } from './geo
 import { geocodeListing } from './listingAttributes/geocodeListing';
 import { uploadFromUrl } from './mediaService';
 import { fillFromRecordAttributes } from './listingAttributes/recordAttributes';
+import { selectListingPhotos } from './listingAttributes/listingPhotos';
 import { canonicalCity, canonicalCountry } from './listingAttributes/location';
 import { resolveLocation } from './listingAttributes/resolveLocation';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
@@ -531,7 +532,8 @@ const collectImageUrls = (mapped: Record<string, unknown>): string[] => {
       }
     }
   }
-  return Array.from(new Set(urls.filter(Boolean)));
+  // Real photos only, each once in its largest size, no more than a listing may have.
+  return selectListingPhotos(urls.filter(Boolean));
 };
 
 const knownPropertyKeys = new Set<string>([

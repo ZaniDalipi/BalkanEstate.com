@@ -7,6 +7,7 @@ import { runSource } from '../services/listingIngestService';
 import { deleteDraftsForSources } from '../services/importReviewService';
 import { getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
 import { getPreviewJob, startPreviewJob } from '../services/listingPreviewJobs';
+import { getImportJob, startImportJob } from '../services/listingRunJobs';
 import {
   detectFeedForUrl,
   detectFromJsonSample,
@@ -323,7 +324,8 @@ export const previewStatus = async (req: Request, res: Response): Promise<void> 
 
 /**
  * POST /api/listing-sources/:id/confirm-import
- * Import only the listings the user approved in the review modal.
+ * Import only the listings the user approved in the review modal. Answers 202
+ * with a job to poll (or 200 with empty stats when nothing was approved).
  * Body: { previewId: string, approvedIds: string[] }
  * Only approved items are saved and counted toward the monthly limit.
  */
@@ -386,15 +388,28 @@ export const confirmImport = async (req: Request, res: Response): Promise<void> 
     return;
   }
 
-  try {
-    const stats = await runSource(source, { preFetched });
-    res.json({ stats });
-  } catch (err) {
-    res.status(500).json({
-      message: (err as Error).message || 'Import failed',
-      code: 'INGEST_FAILED',
-    });
+  // Runs in the background; the client polls GET /:id/import/:jobId for progress.
+  const job = startImportJob(source, String(userId), preFetched);
+  res.status(202).json({ job });
+};
+
+/**
+ * GET /api/listing-sources/:id/import/:jobId
+ * Progress of an import: counts and the listings processed so far, then the
+ * final stats once it is done (or the reason it failed).
+ */
+export const importStatus = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+  const jobId = String(req.params.jobId ?? '');
+  const job = /^[0-9a-f-]{36}$/i.test(jobId) ? getImportJob(jobId, String(userId), id) : undefined;
+  if (!job) {
+    res.status(404).json({ message: 'This import is no longer being tracked — check your drafts.', code: 'IMPORT_JOB_NOT_FOUND' });
+    return;
   }
+  res.json({ job });
 };
 
 /** GET /api/listing-sources/:id/stats — counters + last 20 ingested listings. */

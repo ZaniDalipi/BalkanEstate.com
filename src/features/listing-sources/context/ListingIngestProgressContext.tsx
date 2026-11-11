@@ -3,11 +3,16 @@ import { useSocket } from '@/shared/hooks/useSocket';
 import {
   type IngestStats,
   type PreviewListing,
+  type ImportJob,
   type PreviewJob,
   confirmMyListingSourceImport,
+  getMyListingSourceImportJob,
+  getMyListingSourcePreviewJob,
   startMyListingSourcePreview,
 } from '../api/listingSourceApi';
-import { usePreviewJobPolling, type PreviewJobWatch } from '../hooks/usePreviewJobPolling';
+import { useJobPolling, type JobWatch } from '../hooks/useJobPolling';
+import { sessionFromImportJob } from '../utils/importJobSession';
+import { listingFeedKeys } from '@/src/shared/query/queryKeys';
 
 export interface ListingIngestProgressEvent {
   sourceId: string;
@@ -56,6 +61,8 @@ export interface SyncSession {
   notified: boolean;
   /** Final ingest stats captured from the API response (confirm-import path). */
   finalStats?: IngestStats;
+  /** Server job running the import, polled for progress until it finishes. */
+  jobId?: string;
 }
 
 export interface PendingPreview {
@@ -281,14 +288,20 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     [stopFetching]
   );
 
-  const jobWatches = useMemo<PreviewJobWatch[]>(
+  const previewWatches = useMemo<JobWatch[]>(
     () =>
       Array.from(fetchingPreviews.values())
         .filter((f): f is FetchingPreview & { jobId: string } => Boolean(f.jobId))
         .map((f) => ({ sourceId: f.sourceId, jobId: f.jobId })),
     [fetchingPreviews]
   );
-  usePreviewJobPolling(jobWatches, applyJob, failFetch);
+  useJobPolling<PreviewJob>({
+    watches: previewWatches,
+    queryKey: (w) => listingFeedKeys.previewJob(w.sourceId, w.jobId),
+    fetchJob: (w) => getMyListingSourcePreviewJob(w.sourceId, w.jobId),
+    onJob: applyJob,
+    onError: failFetch,
+  });
 
   const startPreview = useCallback(
     (sourceId: string, sourceName: string, limit?: number): Promise<void> => {
@@ -322,6 +335,40 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     setPendingPreview(null);
   }, []);
 
+  /** Every new state of an import job, from polling. */
+  const finishedImports = useRef(new Set<string>());
+  const applyImportJob = useCallback(
+    (sourceId: string, job: ImportJob) => {
+      setSessions((prev) => {
+        const existing = prev.get(sourceId);
+        if (!existing || (existing.jobId && existing.jobId !== job.jobId)) return prev;
+        const next = new Map(prev);
+        next.set(sourceId, sessionFromImportJob(existing, job));
+        return next;
+      });
+      if (job.status === 'done' && !finishedImports.current.has(job.jobId)) {
+        finishedImports.current.add(job.jobId);
+        for (const handler of importHandlers) handler(sourceId);
+      }
+    },
+    [importHandlers]
+  );
+
+  const importWatches = useMemo<JobWatch[]>(
+    () =>
+      Array.from(sessions.values())
+        .filter((s): s is SyncSession & { jobId: string } => Boolean(s.jobId) && !s.isDone)
+        .map((s) => ({ sourceId: s.sourceId, jobId: s.jobId })),
+    [sessions]
+  );
+  useJobPolling<ImportJob>({
+    watches: importWatches,
+    queryKey: (w) => listingFeedKeys.importJob(w.sourceId, w.jobId),
+    fetchJob: (w) => getMyListingSourceImportJob(w.sourceId, w.jobId),
+    onJob: applyImportJob,
+    onError: (sourceId, err) => failSession(sourceId, err.message || 'Import failed'),
+  });
+
   const confirmPreview = useCallback(
     (approvedIds: string[]): void => {
       const preview = pendingPreview;
@@ -329,13 +376,18 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       const { sourceId, sourceName, previewId } = preview;
 
       // Register the dock session and close the modal immediately so the user
-      // isn't stuck watching a spinner. The actual import runs in the background
-      // and the dock card tracks its progress.
+      // isn't stuck watching a spinner. The import runs on the server as a job;
+      // polling it fills the dock card and progress window.
       registerSync(sourceId, sourceName);
       setPendingPreview(null);
 
       confirmMyListingSourceImport(sourceId, previewId, approvedIds)
         .then((result) => {
+          if (result.job) {
+            applyImportJob(sourceId, result.job);
+            return;
+          }
+          // Nothing was approved: the server answered with empty stats.
           setSessions((prev) => {
             const existing = prev.get(sourceId);
             if (!existing) return prev;
@@ -344,14 +396,14 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
             return next;
           });
           markDone(sourceId);
-          for (const handler of importHandlers) handler(sourceId);
         })
         .catch((err) => {
           failSession(sourceId, (err as Error).message || 'Import failed');
         });
     },
-    [pendingPreview, registerSync, markDone, failSession, importHandlers]
+    [pendingPreview, registerSync, markDone, failSession, applyImportJob]
   );
+
 
   const onImportConfirmed = useCallback(
     (handler: (sourceId: string) => void): (() => void) => {
