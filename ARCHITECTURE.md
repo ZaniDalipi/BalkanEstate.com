@@ -627,10 +627,12 @@ Key decisions:
 ## Map Terrain Tool — slope and where to build
 
 "Terrain" on the search map (next to Measure): tap corners 1, 2, 3… around a
-piece of land, press **Show slope**, and the area is coloured by how steep it
-is, with arrows pointing downhill, the headline numbers (area, height range,
-average and steepest slope), the share of each slope band and a pin on the
-best place to build.
+piece of land, press **Show slope**, and the area becomes a mosaic of raised
+tiles coloured by how steep the ground is, with range labels ("3–5%"),
+arrows pointing downhill, the headline numbers (area, height range, average
+and steepest slope), the share of each slope class and a pin on the best
+place to build. **View in 3D** opens the same area as a 3D model to turn,
+tilt and fly around.
 
 ```
 GoogleMapComponent
@@ -641,27 +643,49 @@ GoogleMapComponent
   │     │     └── GET /api/terrain/elevation-grid?south&west&north&east
   │     └── analyzeTerrain(grid, area)        pure, utils/
   │           ├── computeSlopeField   Horn's method, slope % + fall line per cell
-  │           ├── computeTerrainStats bands: flat <3, gentle <8, moderate <15, steep <25, very steep
+  │           ├── computeTerrainStats 5 classes: flat <3, gentle <8, moderate <15, steep <25, very steep
   │           ├── slopeArrows         one arrow per block, block-averaged gradient
+  │           ├── slopeLabels         range label at the heart of the biggest shades
   │           └── findBuildSpot       largest easy patch (<8 %), its deepest cell
-  ├── TerrainMapLayers   outline, numbered corners, arrows, spot pin,
+  ├── TerrainMapLayers   outline, numbered corners, arrows, labels, spot pin,
   │     └── useSlopeGroundOverlay — drawSlopeImage → canvas → GroundOverlay
   └── TerrainPanel       draw step / loading / failed / results
+        └── Terrain3DButton → Terrain3DDialog (lazy, MapLibre)
+              ├── useTerrain3DMap  'blocks' | 'surface' view, height ×1/×2/×3
+              └── useCamera3D      turn, tilt, fly around, reset
 ```
+
+The slope picture (`drawSlopeImage`) paints each cell in one of 10 shades
+(`slopeBands`, two or three per class, edges on whole percents), lit from the
+north-west (`hillshade`), bevelled like a tile, with a shadow where the
+ground steps down and a white line where the shade changes. The same picture
+is the 2D overlay and the drape on the 3D surface.
 
 Key decisions:
 - **Heights come from Terrain Tiles** (AWS Open Data, Terrarium PNGs, free, no
-  key; `TERRAIN_TILES_URL` overrides). The backend
-  (`backend/src/services/terrain/`) reads the tiles, decodes them with sharp,
-  keeps up to 64 in memory, and returns heights on a grid of near-square cells
-  (8 m at the finest, at most 10 000 cells, boxes up to 8 km a side). Rate
-  limited per IP like routing; answers are cacheable for a day.
+  key). The backend (`backend/src/services/terrain/`) reads the tiles,
+  decodes them with sharp, keeps up to 64 in memory, and returns heights on a
+  grid of near-square cells (8 m at the finest, at most 10 000 cells, boxes up
+  to 8 km a side). Rate limited per IP like routing; answers cacheable for a
+  day. `TERRAIN_TILES_URL` (backend) / `VITE_TERRAIN_TILES_URL` (3D view)
+  override the source.
 - **Server samples, client analyses.** The endpoint is a plain height grid; all
-  the judgement (bands, arrows, best spot) is pure, unit-tested code in the
-  client, so tuning it never touches the server.
+  the judgement (classes, arrows, labels, best spot) is pure, unit-tested code
+  in the client, so tuning it never touches the server.
+- **Two 3D views.** *Grid blocks* (default) raises every cell as its own tile,
+  as tall as its ground above the area's lowest point — the slope grid itself
+  in 3D. *Real surface* turns on MapLibre terrain from the same tiles, with
+  satellite imagery and the slope picture draped on it. Never both: blocks on
+  relief would count the height twice. Gentle land opens stretched ×2 or ×3
+  (by relief over width), and the footer says so.
+- **3D is optional.** MapLibre loads only when the 3D view is opened; without
+  WebGL the dialog says so and leads back to the 2D map. Camera buttons do
+  what the drag gestures do; under reduced motion moves are instant and there
+  is no fly-around. MapLibre restyles its container, so it gets its own box.
 - **Honest about precision.** The source survey is ~30 m (SRTM / EU-DEM), so
   the panel says "estimate, not a topographic survey". Finer cells are
-  interpolated, which smooths the picture but adds no detail.
+  interpolated, which smooths the picture but adds no detail; a plot only a
+  few tens of metres across will often be one or two shades.
 - **Edges don't lie.** A cell at the grid edge or beside water extends the slope
   from the neighbours it has instead of treating the gap as flat, and the
   request box has a margin of ≥20 m (1.5 % of the side) around the area.

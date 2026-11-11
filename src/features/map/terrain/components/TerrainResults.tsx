@@ -7,11 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { formatMeasureArea } from '../../hooks/useMeasurement';
 import type { TerrainAnalysis, TerrainPoint } from '../types';
 import BuildSpotCard from './BuildSpotCard';
+import Terrain3DButton from './view3d/Terrain3DButton';
 import SlopeLegend from './SlopeLegend';
 import { SECONDARY_BUTTON } from './terrainButtons';
 
 export interface TerrainResultsProps {
   analysis: TerrainAnalysis;
+  /** The drawn area the analysis is for. */
+  polygon: TerrainPoint[];
   resolutionM: number;
   onShowSpot: (spot: TerrainPoint) => void;
   onEdit: () => void;
@@ -27,7 +30,7 @@ const StatTile: React.FC<{ label: string; value: string }> = ({ label, value }) 
 
 const pct = (n: number): string => `${n.toFixed(1)}%`;
 
-const TerrainResults: React.FC<TerrainResultsProps> = ({ analysis, resolutionM, onShowSpot, onEdit, onRedraw }) => {
+const TerrainResults: React.FC<TerrainResultsProps> = ({ analysis, polygon, resolutionM, onShowSpot, onEdit, onRedraw }) => {
   const { t } = useTranslation('search');
   const { stats } = analysis;
 
@@ -42,6 +45,7 @@ const TerrainResults: React.FC<TerrainResultsProps> = ({ analysis, resolutionM, 
         <StatTile label={t('terrain.stats.meanSlope', 'Average slope')} value={pct(stats.meanSlope)} />
         <StatTile label={t('terrain.stats.maxSlope', 'Steepest slope')} value={pct(stats.maxSlope)} />
       </dl>
+      <Terrain3DButton analysis={analysis} polygon={polygon} />
 
       <p className="text-[11px] text-gray-500">
         {t('terrain.disclaimer', 'Estimate from ~{{resolution}} m elevation data. Not a topographic survey.', { resolution: resolutionM })}

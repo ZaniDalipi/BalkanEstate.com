@@ -77,6 +77,7 @@ const TerrainPanel: React.FC<TerrainPanelProps> = ({ tool, onClose }) => {
         {phase.kind === 'result' && (
           <TerrainResults
             analysis={phase.analysis}
+            polygon={tool.points}
             resolutionM={tool.resolutionM}
             onShowSpot={tool.showOnMap}
             onEdit={tool.editArea}

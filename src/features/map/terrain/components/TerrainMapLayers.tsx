@@ -1,7 +1,7 @@
 /**
  * Everything the terrain tool draws on the map: the area's outline and
- * corners while drawing, then the slope picture, downhill arrows and the
- * best place to build. Render inside <GoogleMap>.
+ * corners while drawing, then the slope picture, downhill arrows, slope
+ * labels and the best place to build. Render inside <GoogleMap>.
  */
 import React from 'react';
 import { PolygonF, PolylineF } from '@react-google-maps/api';
@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useSlopeGroundOverlay } from '../hooks/useSlopeGroundOverlay';
 import type { TerrainPoint } from '../types';
 import type { TerrainPhase } from '../utils/terrainPhase';
-import { BuildSpotMarker, CornerDot, SlopeArrowMarker } from './TerrainMarkers';
+import { BuildSpotMarker, CornerDot, SlopeArrowMarker, SlopeLabelMarker } from './TerrainMarkers';
 
 export interface TerrainMapLayersProps {
   map: google.maps.Map | null;
@@ -38,6 +38,9 @@ const TerrainMapLayers: React.FC<TerrainMapLayersProps> = ({ map, points, phase 
       ))}
       {analysis?.arrows.map((a) => (
         <SlopeArrowMarker key={`${a.lat}-${a.lng}`} arrow={a} />
+      ))}
+      {analysis?.labels.map((l) => (
+        <SlopeLabelMarker key={`${l.text}-${l.lat}-${l.lng}`} label={l} />
       ))}
       {analysis?.buildSpot && (
         <BuildSpotMarker spot={analysis.buildSpot} label={t('terrain.spot.marker', 'Best spot')} />

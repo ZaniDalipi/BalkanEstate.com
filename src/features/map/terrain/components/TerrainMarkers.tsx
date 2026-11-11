@@ -1,12 +1,12 @@
 /**
- * Small map markers for the terrain tool: numbered corners, downhill arrows
- * and the best-place-to-build pin. None of them take taps, so taps keep
+ * Small map markers for the terrain tool: numbered corners, downhill arrows,
+ * slope range labels and the best-place-to-build pin. None of them take taps, so taps keep
  * reaching the map.
  */
 import React from 'react';
 import { OverlayView, OverlayViewF } from '@react-google-maps/api';
 import { SoftIcon } from '@/src/shared/illustrations';
-import type { BuildSpot, SlopeArrow, TerrainPoint } from '../types';
+import type { BuildSpot, SlopeArrow, SlopeLabel, TerrainPoint } from '../types';
 
 const CENTRED = { transform: 'translate(-50%, -50%)' } as const;
 
@@ -21,28 +21,35 @@ export const CornerDot: React.FC<{ position: TerrainPoint; number: number }> = (
   </OverlayViewF>
 );
 
+const ARROW_PATH = 'M12 3 L12 20 M12 3 L6.5 9 M12 3 L17.5 9';
+
 export const SlopeArrowMarker: React.FC<{ arrow: SlopeArrow }> = ({ arrow }) => (
   <OverlayViewF position={arrow} mapPaneName={OverlayView.OVERLAY_LAYER}>
     <div className="pointer-events-none" style={CENTRED}>
       <svg
-        width="22"
-        height="22"
+        width="26"
+        height="26"
         viewBox="0 0 24 24"
         aria-hidden="true"
         style={{ transform: `rotate(${arrow.bearing}deg)` }}
       >
-        {/* Points up (north) before rotating to the downhill bearing. */}
-        <path
-          d="M12 3 L12 20 M12 3 L6.5 9 M12 3 L17.5 9"
-          fill="none"
-          stroke="#1e1b4b"
-          strokeOpacity="0.85"
-          strokeWidth="2.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        {/* Points up (north) before rotating to the downhill bearing; the white halo keeps it readable on any shade. */}
+        <path d={ARROW_PATH} fill="none" stroke="#ffffff" strokeOpacity="0.9" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={ARROW_PATH} fill="none" stroke="#1e1b4b" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
+  </OverlayViewF>
+);
+
+export const SlopeLabelMarker: React.FC<{ label: SlopeLabel }> = ({ label }) => (
+  <OverlayViewF position={label} mapPaneName={OverlayView.OVERLAY_LAYER}>
+    <span
+      className="pointer-events-none flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/90 shadow text-[11px] font-bold text-gray-900 tabular-nums whitespace-nowrap"
+      style={CENTRED}
+    >
+      <span aria-hidden="true" className="w-2 h-2 rounded-sm" style={{ backgroundColor: label.color }} />
+      {label.text}
+    </span>
   </OverlayViewF>
 );
 

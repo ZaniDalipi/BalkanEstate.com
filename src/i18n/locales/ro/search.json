@@ -723,6 +723,27 @@
       "none": "Nu există un loc ușor de construit: cea mai mare parte a acestui teren este abruptă. Așteaptă-te la terase și ziduri de sprijin și consultă un inginer înainte de a cumpăra.",
       "show": "Arată pe hartă",
       "marker": "Cel mai bun loc"
+    },
+    "view3d": {
+      "open": "Vezi în 3D",
+      "title": "Teren în 3D",
+      "loading": "Se încarcă terenul 3D…",
+      "noWebgl": "Acest browser nu poate afișa hărți 3D (WebGL este dezactivat sau nu este acceptat). Harta pantei funcționează în continuare.",
+      "back": "Înapoi la harta pantei",
+      "view": "Vizualizare",
+      "blocks": "Blocuri din grilă",
+      "surface": "Suprafața reală",
+      "height": "Înălțime",
+      "trueScale": "Înălțimile sunt la scară reală.",
+      "exaggerated": "Înălțimile sunt mărite ×{{n}} ca forma terenului să se vadă mai ușor.",
+      "hint": "Trage pentru a muta · clic dreapta și trage sau două degete pentru a roti și înclina · derulează sau ciupește pentru zoom.",
+      "camera": "Cameră",
+      "turnLeft": "Rotește la stânga",
+      "turnRight": "Rotește la dreapta",
+      "tiltMore": "Înclină mai mult",
+      "tiltLess": "Privește de sus",
+      "orbit": "Zboară în jur",
+      "reset": "Resetează vederea"
     }
   }
 }

@@ -733,6 +733,27 @@
       "none": "No easy spot to build: most of this land is steep. Expect terraces and retaining walls, and ask an engineer before you buy.",
       "show": "Show on map",
       "marker": "Best spot"
+    },
+    "view3d": {
+      "open": "View in 3D",
+      "title": "Terrain in 3D",
+      "loading": "Loading 3D terrain…",
+      "noWebgl": "This browser can't show 3D maps (WebGL is off or not supported). The slope map still works.",
+      "back": "Back to the slope map",
+      "view": "View",
+      "blocks": "Grid blocks",
+      "surface": "Real surface",
+      "height": "Height",
+      "trueScale": "Heights are shown true to scale.",
+      "exaggerated": "Heights are stretched ×{{n}} so the shape of the land is easier to see.",
+      "hint": "Drag to move · right-drag or two fingers to turn and tilt · scroll or pinch to zoom.",
+      "camera": "Camera",
+      "turnLeft": "Turn left",
+      "turnRight": "Turn right",
+      "tiltMore": "Tilt more",
+      "tiltLess": "Look from above",
+      "orbit": "Fly around",
+      "reset": "Reset view"
     }
   }
 }

@@ -723,6 +723,27 @@
       "none": "Nema lakog mjesta za gradnju: većina ovog zemljišta je strma. Očekujte terase i potporne zidove te se prije kupnje posavjetujte s inženjerom.",
       "show": "Prikaži na karti",
       "marker": "Najbolje mjesto"
+    },
+    "view3d": {
+      "open": "Prikaži u 3D-u",
+      "title": "Teren u 3D-u",
+      "loading": "Učitavanje 3D terena…",
+      "noWebgl": "Ovaj preglednik ne može prikazati 3D karte (WebGL je isključen ili nije podržan). Karta nagiba i dalje radi.",
+      "back": "Natrag na kartu nagiba",
+      "view": "Prikaz",
+      "blocks": "Blokovi mreže",
+      "surface": "Stvarna površina",
+      "height": "Visina",
+      "trueScale": "Visine su prikazane u stvarnom mjerilu.",
+      "exaggerated": "Visine su povećane ×{{n}} kako bi se oblik zemljišta lakše vidio.",
+      "hint": "Povucite za pomicanje · desni klik i povlačenje ili dva prsta za okretanje i naginjanje · pomičite kotačić ili raširite prste za zumiranje.",
+      "camera": "Kamera",
+      "turnLeft": "Okreni lijevo",
+      "turnRight": "Okreni desno",
+      "tiltMore": "Nagni više",
+      "tiltLess": "Pogled odozgo",
+      "orbit": "Kruži okolo",
+      "reset": "Vrati prikaz"
     }
   }
 }

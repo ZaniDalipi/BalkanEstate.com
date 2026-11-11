@@ -723,6 +723,27 @@
       "none": "Nuk ka vend të lehtë për ndërtim: pjesa më e madhe e kësaj toke është e pjerrët. Prit tarraca dhe mure mbajtëse, dhe pyet një inxhinier para se të blesh.",
       "show": "Shfaq në hartë",
       "marker": "Vendi më i mirë"
+    },
+    "view3d": {
+      "open": "Shiko në 3D",
+      "title": "Terreni në 3D",
+      "loading": "Po ngarkohet terreni 3D…",
+      "noWebgl": "Ky shfletues nuk mund të shfaqë harta 3D (WebGL është i fikur ose nuk mbështetet). Harta e pjerrësisë funksionon ende.",
+      "back": "Kthehu te harta e pjerrësisë",
+      "view": "Pamja",
+      "blocks": "Blloqe rrjete",
+      "surface": "Sipërfaqja reale",
+      "height": "Lartësia",
+      "trueScale": "Lartësitë shfaqen në shkallë reale.",
+      "exaggerated": "Lartësitë janë zmadhuar ×{{n}} që forma e tokës të shihet më lehtë.",
+      "hint": "Tërhiq për të lëvizur · tërhiq me butonin e djathtë ose me dy gishta për ta rrotulluar dhe pjerrësuar · rrotullo ose shtrëngo për zmadhim.",
+      "camera": "Kamera",
+      "turnLeft": "Rrotullo majtas",
+      "turnRight": "Rrotullo djathtas",
+      "tiltMore": "Pjerrëso më shumë",
+      "tiltLess": "Shiko nga lart",
+      "orbit": "Fluturo përreth",
+      "reset": "Rivendos pamjen"
     }
   }
 }

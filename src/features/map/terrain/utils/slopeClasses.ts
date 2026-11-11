@@ -13,16 +13,16 @@ export interface SlopeClass {
   min: number;
   /** Upper bound, percent (exclusive); Infinity for the last band. */
   max: number;
-  /** Fill colour on the map and in the legend. */
+  /** Legend colour; the map uses the finer shades in slopeBands. */
   color: string;
 }
 
 export const SLOPE_CLASSES: readonly SlopeClass[] = [
-  { id: 'flat', min: 0, max: 3, color: '#16a34a' },
-  { id: 'gentle', min: 3, max: 8, color: '#84cc16' },
-  { id: 'moderate', min: 8, max: 15, color: '#facc15' },
-  { id: 'steep', min: 15, max: 25, color: '#f97316' },
-  { id: 'verySteep', min: 25, max: Infinity, color: '#dc2626' },
+  { id: 'flat', min: 0, max: 3, color: '#2fbf71' },
+  { id: 'gentle', min: 3, max: 8, color: '#a3d638' },
+  { id: 'moderate', min: 8, max: 15, color: '#f4c22e' },
+  { id: 'steep', min: 15, max: 25, color: '#f2882f' },
+  { id: 'verySteep', min: 25, max: Infinity, color: '#d63b2c' },
 ];
 
 /** Ground up to this slope counts as easy to build on. */

@@ -59,6 +59,15 @@ export interface SlopeArrow {
   bearing: number;
 }
 
+/** A slope range written on the map, e.g. "3–5%". */
+export interface SlopeLabel {
+  lat: number;
+  lng: number;
+  text: string;
+  /** The shade it names. */
+  color: string;
+}
+
 /** The roomiest patch of easy ground in the area. */
 export interface BuildSpot {
   lat: number;
@@ -76,6 +85,7 @@ export interface TerrainAnalysis {
   field: SlopeField;
   stats: TerrainStats;
   arrows: SlopeArrow[];
+  labels: SlopeLabel[];
   buildSpot: BuildSpot | null;
 }
 
