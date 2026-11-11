@@ -2,6 +2,7 @@
 // Core HTTP client used by all feature API modules
 
 import { API_URL } from './config';
+import { ADMIN_CODE_HEADER, codeForRetry } from './adminStepUp';
 import { tokenService, hasLikelyValidSession } from './tokenService';
 import {
   generateResponseKey,
@@ -53,6 +54,8 @@ export interface RequestOptions {
   requiresAuth?: boolean;
   /** Encrypt the server response (only use for sensitive endpoints like auth, profile) */
   encryptResponse?: boolean;
+  /** Internal: how many authenticator codes this request has been retried with. */
+  stepUpTries?: number;
 }
 
 // Refresh the access token using the refresh token (sent via httpOnly cookie)
@@ -173,6 +176,16 @@ export const apiRequest = async <T>(
       if (keyInfo && rawError?.__encrypted) {
         try { error = await decryptResponse(rawError, keyInfo.rawKey); } catch { /* use raw */ }
       }
+      // A risky admin action: ask for the authenticator code and try again.
+      const tries = options.stepUpTries ?? 0;
+      const adminCode = await codeForRetry(response.status, error, tries);
+      if (adminCode) {
+        return apiRequest<T>(
+          endpoint,
+          { ...options, headers: { ...headers, [ADMIN_CODE_HEADER]: adminCode }, stepUpTries: tries + 1 },
+          retryCount
+        );
+      }
       const err: any = new Error(error.message || 'An error occurred');
       err.code = error.code || null;
       err.statusCode = response.status;
@@ -207,7 +220,8 @@ export const uploadRequest = async <T>(
   endpoint: string,
   formData: FormData,
   retryCount = 0,
-  method: 'POST' | 'PUT' = 'POST'
+  method: 'POST' | 'PUT' = 'POST',
+  stepUp: { tries: number; code?: string } = { tries: 0 }
 ): Promise<T> => {
   let token = tokenService.getAccessToken();
   if (!token) {
@@ -234,6 +248,7 @@ export const uploadRequest = async <T>(
     headers: {
       Authorization: `Bearer ${token}`,
       ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+      ...(stepUp.code ? { [ADMIN_CODE_HEADER]: stepUp.code } : {}),
     },
     body: formData,
   });
@@ -243,7 +258,7 @@ export const uploadRequest = async <T>(
     const newAccessToken = await refreshAccessToken();
 
     if (newAccessToken) {
-      return uploadRequest<T>(endpoint, formData, 1, method);
+      return uploadRequest<T>(endpoint, formData, 1, method, stepUp);
     } else {
       tokenService.clearTokens();
       // Emit custom event for session expiration
@@ -257,6 +272,8 @@ export const uploadRequest = async <T>(
     // A proxy may answer a too-large upload with HTML, so a body that isn't JSON is fine.
     const isJson = response.headers.get('content-type')?.includes('application/json');
     const errorData: { message?: string; code?: string } = isJson ? await response.json().catch(() => ({})) : {};
+    const adminCode = await codeForRetry(response.status, errorData, stepUp.tries);
+    if (adminCode) return uploadRequest<T>(endpoint, formData, retryCount, method, { tries: stepUp.tries + 1, code: adminCode });
     throw Object.assign(new Error(errorData.message || response.statusText || 'Upload failed'), {
       code: errorData.code || null,
       statusCode: response.status,

@@ -55,7 +55,8 @@
     "emailTemplates": "Predlošci e-pošte",
     "siteSettings": "Postavke stranice",
     "residences": "Rezidencije",
-    "archivedListings": "Arhivirani oglasi"
+    "archivedListings": "Arhivirani oglasi",
+    "security": "Sigurnost"
   },
   "properties": {
     "title": "Upravljanje nekretninama",
@@ -2288,7 +2289,9 @@
     "confirm": "Da, postavi me za super administratora",
     "cancel": "Odustani",
     "working": "Radi se…",
-    "done": "Sada ste super administrator. Druge možete postaviti za administratora ili super administratora preko “Uredi korisnika”."
+    "done": "Sada ste super administrator. Druge možete postaviti za administratora ili super administratora preko “Uredi korisnika”.",
+    "confirmTitle": "Postani super administrator",
+    "confirmAction": "Postavi svoj račun za prvog super administratora stranice."
   },
   "adminAlerts": {
     "title": "E-poruke s upozorenjima za administratore",
@@ -2320,5 +2323,63 @@
     "testing": "Slanje…",
     "testSent": "Probna e-poruka poslana na {{list}}. Provjerite pristiglu poštu (i neželjenu).",
     "testFailed": "Slanje nije uspjelo na {{list}}."
+  },
+  "security": {
+    "title": "Sigurnost",
+    "subtitle": "Rizične administratorske radnje traže svjež kod iz aplikacije za autentifikaciju na vašem telefonu.",
+    "authenticator": "Aplikacija za autentifikaciju",
+    "loadError": "Sigurnosne postavke nisu se mogle učitati.",
+    "retry": "Pokušaj ponovno",
+    "on": "Uključeno od {{date}}.",
+    "replace": "Prebaci na novi telefon",
+    "lostPhone": "Izgubili ste telefon? Drugi super administrator može ga poništiti preko “Uredi korisnika”.",
+    "protectedTitle": "Što traži kod",
+    "protected": {
+      "deletes": "Brisanje bilo čega: korisnika, oglasa, agencija, članaka, kodova…",
+      "roles": "Dodjela ili uklanjanje uloga (za administratora ili super administratora potreban je i kod e-poštom)",
+      "settings": "Postavke: sustav, stranica, e-poruke upozorenja, predlošci e-pošte",
+      "payments": "Pretplate i plaćanja: planovi, ograničenja oglasa, kuponi, propusnice za rezidencije"
+    },
+    "start": "Postavi aplikaciju za autentifikaciju",
+    "starting": "Pokretanje…",
+    "startError": "Postavljanje se nije moglo pokrenuti.",
+    "step1": "Otvorite Google Authenticator, Authy, 1Password ili Microsoft Authenticator i skenirajte ovaj kod.",
+    "qrLabel": "QR kod za aplikaciju za autentifikaciju",
+    "manualKey": "Ne možete skenirati? Unesite ovaj ključ u aplikaciju:",
+    "openInApp": "Otvori u aplikaciji za autentifikaciju",
+    "emailCode": "Kod koji smo poslali na {{to}}",
+    "appCode": "6-znamenkasti kod koji aplikacija sada prikazuje",
+    "confirm": "Uključi",
+    "confirming": "Provjera…",
+    "confirmError": "Uključivanje nije uspjelo.",
+    "restart": "Počni ispočetka (novi QR kod i e-pošta)",
+    "reset": "Poništi njegov autentifikator (izgubljen telefon)",
+    "resetConfirm": "Ukloniti autentifikator ovog administratora? Ponovno će ga postaviti prije sljedeće rizične radnje.",
+    "resetDone": "Gotovo. Ponovno ga postavlja preko Admin › Sigurnost.",
+    "resetError": "Poništavanje nije uspjelo."
+  },
+  "stepUp": {
+    "title": "Potvrdite autentifikatorom",
+    "setupFirst": "Brisanje, promjena uloga, postavki, pretplata i plaćanja traže kod iz aplikacije za autentifikaciju. Postavite je jednom, zatim potvrdite ovu radnju.",
+    "afterSetup": "Autentifikator je uključen. Pričekajte sljedeći kod u aplikaciji i unesite ga da završite radnju.",
+    "body": "Ova radnja traži 6-znamenkasti kod iz aplikacije za autentifikaciju.",
+    "codeLabel": "Kod autentifikatora",
+    "invalid": "Kod nije točan ili je već iskorišten. Pokušajte sljedeći.",
+    "confirm": "Potvrdi",
+    "cancel": "Odustani"
+  },
+  "emailCode": {
+    "why": "Radi sigurnosti šaljemo vam jednokratni kod e-poštom da ovo potvrdite.",
+    "send": "Pošalji mi kod e-poštom",
+    "sending": "Slanje…",
+    "sendError": "Kod se nije mogao poslati.",
+    "label": "Kod koji smo poslali na {{to}}",
+    "hint": "Vrijedi jednom i istječe za 10 minuta. Zatim se traži kod autentifikatora.",
+    "confirm": "Potvrdi",
+    "confirming": "Potvrđivanje…",
+    "confirmError": "Nije uspjelo.",
+    "resend": "Pošalji novi kod",
+    "roleTitle": "Potvrdite novu ulogu",
+    "roleAction": "Postavi {{name}} za {{role}}."
   }
 }

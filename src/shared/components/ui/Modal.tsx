@@ -19,6 +19,13 @@ interface ModalProps {
   'aria-describedby'?: string;
 }
 
+/** Modals are portalled to <body> in the order they open, so the last one is on top. */
+const isTopmostModal = (el: HTMLElement | null): boolean => {
+  if (!el) return false;
+  const open = document.querySelectorAll('[data-modal-dialog]');
+  return open[open.length - 1] === el;
+};
+
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -49,7 +56,9 @@ const Modal: React.FC<ModalProps> = ({
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
+      // With modals stacked (e.g. a code prompt over a form), only the top one
+      // answers Esc and traps Tab; the ones below wait their turn.
+      if (!isOpen || !isTopmostModal(modalRef.current)) return;
 
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -151,6 +160,7 @@ const Modal: React.FC<ModalProps> = ({
     >
       <div
         ref={modalRef}
+        data-modal-dialog
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

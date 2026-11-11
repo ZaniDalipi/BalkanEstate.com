@@ -5,10 +5,30 @@
 
 import mongoose from 'mongoose';
 import User, { IUser } from '../models/User';
-import { changeUserRole, claimFirstSuperAdmin, superAdminStatus } from '../services/userRoleService';
+import { changeUserRole, claimFirstSuperAdmin, requestClaimCode, requestRoleGrantCode, superAdminStatus } from '../services/userRoleService';
 import { decideAccountDeletion, decideRoleChange, decideSuperAdminClaim, roleFieldsFor } from '../utils/roleChangePolicy';
 
 jest.mock('../services/adminNotificationService', () => ({ notifyAdmins: jest.fn() }));
+// A mailbox: granting admin roles needs the code emailed to the acting admin.
+const mailbox = makeMailbox();
+function makeMailbox() {
+  const sent: Array<{ to: string; subject: string }> = [];
+  return { sent, codeFor: (to: string) => sent.filter((m) => m.to === to).pop()?.subject.slice(0, 6) };
+}
+jest.mock('../services/emailService', () => ({
+  __esModule: true,
+  default: {
+    isConfigured: true,
+    sendEmailDirect: jest.fn(async (m: { to: string; subject: string }) => { mailbox.sent.push(m); }),
+  },
+}));
+
+/** Ask for the emailed code and return what to send with the role change. */
+async function emailedCode(request: Promise<{ ok: boolean } & Record<string, unknown>>, to: string) {
+  const sent = await request;
+  if (!sent.ok) throw new Error(`no code: ${JSON.stringify(sent)}`);
+  return { challengeId: sent.challengeId, emailCode: mailbox.codeFor(to) };
+}
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { notifyAdmins } = require('../services/adminNotificationService') as { notifyAdmins: jest.Mock };
 
@@ -76,13 +96,36 @@ describe('changeUserRole (database)', () => {
     const boss = await makeUser('boss@example.com', 'super_admin');
     const ana = await makeUser('ana@example.com', 'buyer');
 
-    const result = await changeUserRole(boss, String(ana._id), 'admin');
+    // Without the emailed code it is refused…
+    expect(await changeUserRole(boss, String(ana._id), 'admin')).toMatchObject({ ok: false, status: 428, code: 'EMAIL_CODE_REQUIRED' });
+
+    // …with it, it goes through, and the code can't be used twice.
+    const confirmation = await emailedCode(requestRoleGrantCode(boss, String(ana._id), 'admin'), 'boss@example.com');
+    const result = await changeUserRole(boss, String(ana._id), 'admin', confirmation);
 
     expect(result.ok).toBe(true);
     const saved = await User.findById(ana._id).lean<IUser>();
     expect(saved).toMatchObject({ role: 'admin', primaryRole: 'admin', activeRole: 'admin' });
     expect(saved?.availableRoles).toEqual(['buyer', 'admin']);
     expect(notifyAdmins).toHaveBeenCalledWith(expect.objectContaining({ kind: 'role_changed', from: 'buyer', to: 'admin' }));
+
+    expect(await changeUserRole(boss, String(ana._id), 'super_admin', confirmation)).toMatchObject({ ok: false, code: 'EMAIL_CODE_INVALID' });
+  });
+
+  it('does not accept a code emailed for a different user or role', async () => {
+    const boss = await makeUser('boss3@example.com', 'super_admin');
+    const ana = await makeUser('ana3@example.com', 'buyer');
+    const ben = await makeUser('ben3@example.com', 'buyer');
+
+    const forAnaAdmin = await emailedCode(requestRoleGrantCode(boss, String(ana._id), 'admin'), 'boss3@example.com');
+    expect(await changeUserRole(boss, String(ben._id), 'admin', forAnaAdmin)).toMatchObject({ ok: false, code: 'EMAIL_CODE_INVALID' });
+    expect(await changeUserRole(boss, String(ana._id), 'super_admin', forAnaAdmin)).toMatchObject({ ok: false, code: 'EMAIL_CODE_INVALID' });
+  });
+
+  it('demoting to an ordinary role needs no emailed code', async () => {
+    const boss = await makeUser('boss4@example.com', 'super_admin');
+    const exAdmin = await makeUser('ex4@example.com', 'admin');
+    expect((await changeUserRole(boss, String(exAdmin._id), 'buyer')).ok).toBe(true);
   });
 
   it('refuses a regular admin and changes nothing', async () => {
@@ -124,13 +167,15 @@ describe('claimFirstSuperAdmin (database)', () => {
     const second = await makeUser('second@example.com', 'admin');
 
     expect(await superAdminStatus(first)).toEqual({ superAdminCount: 0, canClaim: true });
-    const result = await claimFirstSuperAdmin(first);
+    expect(await claimFirstSuperAdmin(first)).toMatchObject({ ok: false, code: 'EMAIL_CODE_REQUIRED' });
+    const result = await claimFirstSuperAdmin(first, await emailedCode(requestClaimCode(first), 'first@example.com'));
 
     expect(result.ok).toBe(true);
     expect((await User.findById(first._id).lean<IUser>())?.role).toBe('super_admin');
     expect(notifyAdmins).toHaveBeenCalledWith(expect.objectContaining({ kind: 'role_changed', to: 'super_admin' }));
 
     expect(await superAdminStatus(second)).toEqual({ superAdminCount: 1, canClaim: false });
+    expect(await requestClaimCode(second)).toMatchObject({ ok: false, code: 'SUPER_ADMIN_EXISTS' });
     expect(await claimFirstSuperAdmin(second)).toMatchObject({ ok: false, code: 'SUPER_ADMIN_EXISTS' });
     expect((await User.findById(second._id).lean<IUser>())?.role).toBe('admin');
   });
@@ -139,7 +184,9 @@ describe('claimFirstSuperAdmin (database)', () => {
     const a = await makeUser('a@example.com', 'admin');
     const b = await makeUser('b@example.com', 'admin');
 
-    const results = await Promise.all([claimFirstSuperAdmin(a), claimFirstSuperAdmin(b)]);
+    const codeA = await emailedCode(requestClaimCode(a), 'a@example.com');
+    const codeB = await emailedCode(requestClaimCode(b), 'b@example.com');
+    const results = await Promise.all([claimFirstSuperAdmin(a, codeA), claimFirstSuperAdmin(b, codeB)]);
 
     expect(results.filter((r) => r.ok).length).toBe(1);
     expect(await User.countDocuments({ role: 'super_admin' })).toBe(1);

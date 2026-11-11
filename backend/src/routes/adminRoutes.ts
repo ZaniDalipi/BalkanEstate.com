@@ -1,6 +1,15 @@
 import express, { Request, Response } from 'express';
 import { protect } from '../middleware/auth';
 import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
+import { adminStepUpGate } from '../middleware/adminStepUp';
+import {
+  confirmAuthenticator,
+  getAuthenticator,
+  requestClaimEmailCode,
+  requestRoleEmailCode,
+  resetUserAuthenticator,
+  setupAuthenticator,
+} from '../controllers/adminSecurityController';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
@@ -149,6 +158,9 @@ const router = express.Router();
 // All admin routes require: authentication + admin role
 router.use(protect);
 router.use(checkAdminRole);
+// Risky requests (deletes, roles, settings, subscriptions and payments) need
+// a fresh code from the admin's authenticator app. See adminStepUpRules.
+router.use(adminStepUpGate);
 
 // ===== Dashboard & Statistics =====
 router.get('/stats', getAdminStats);
@@ -165,6 +177,14 @@ router.patch('/users/:id', logAdminAction('UPDATE_USER'), updateUserAdmin);
 router.put('/users/:id/role', logAdminAction('UPDATE_USER_ROLE'), updateUserRoleAdmin);
 router.get('/super-admin/status', getSuperAdminStatus);
 router.post('/super-admin/claim', logAdminAction('CLAIM_SUPER_ADMIN'), claimSuperAdmin);
+router.post('/super-admin/claim/email-code', logAdminAction('REQUEST_CLAIM_EMAIL_CODE'), requestClaimEmailCode);
+router.post('/users/:id/role/email-code', logAdminAction('REQUEST_ROLE_EMAIL_CODE'), requestRoleEmailCode);
+router.delete('/users/:id/authenticator', logAdminAction('RESET_USER_AUTHENTICATOR'), resetUserAuthenticator);
+
+// ===== My security: authenticator app for confirming risky actions =====
+router.get('/security/authenticator', getAuthenticator);
+router.post('/security/authenticator/setup', logAdminAction('SETUP_AUTHENTICATOR'), setupAuthenticator);
+router.post('/security/authenticator/confirm', logAdminAction('CONFIRM_AUTHENTICATOR'), confirmAuthenticator);
 router.delete('/users/:id', logAdminAction('DELETE_USER'), deleteUser);
 
 // ===== Agency Management =====

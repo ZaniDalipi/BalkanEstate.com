@@ -32,6 +32,7 @@ export type AdminView =
   | 'users'
   | 'properties'
   | 'archivedListings'
+  | 'security'
   | 'agencies'
   | 'residences'
   | 'inquiries'

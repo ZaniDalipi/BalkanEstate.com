@@ -55,7 +55,8 @@
     "emailTemplates": "Șabloane de email",
     "siteSettings": "Setările site-ului",
     "residences": "Ansambluri",
-    "archivedListings": "Anunțuri arhivate"
+    "archivedListings": "Anunțuri arhivate",
+    "security": "Securitate"
   },
   "properties": {
     "title": "Manager proprietăți",
@@ -2281,7 +2282,9 @@
     "confirm": "Da, fă-mă super administrator",
     "cancel": "Anulează",
     "working": "Se lucrează…",
-    "done": "Acum ești super administrator. Poți face alte persoane administratori sau super administratori din „Editează utilizatorul”."
+    "done": "Acum ești super administrator. Poți face alte persoane administratori sau super administratori din „Editează utilizatorul”.",
+    "confirmTitle": "Devino super administrator",
+    "confirmAction": "Fă-ți propriul cont primul super administrator al site-ului."
   },
   "adminAlerts": {
     "title": "Emailuri de alertă pentru administratori",
@@ -2313,5 +2316,63 @@
     "testing": "Se trimite…",
     "testSent": "Emailul de test a fost trimis la {{list}}. Verifică inboxul (și spamul).",
     "testFailed": "Nu s-a putut trimite la {{list}}."
+  },
+  "security": {
+    "title": "Securitate",
+    "subtitle": "Acțiunile riscante de administrator cer un cod nou dintr-o aplicație de autentificare de pe telefon.",
+    "authenticator": "Aplicație de autentificare",
+    "loadError": "Setările de securitate nu s-au putut încărca.",
+    "retry": "Încearcă din nou",
+    "on": "Activ din {{date}}.",
+    "replace": "Mută pe un telefon nou",
+    "lostPhone": "Ai pierdut telefonul? Alt super administrator îl poate reseta din „Editează utilizatorul”.",
+    "protectedTitle": "Ce cere cod",
+    "protected": {
+      "deletes": "Ștergerea oricărui lucru: utilizatori, anunțuri, agenții, articole, coduri…",
+      "roles": "Acordarea sau retragerea rolurilor (pentru administrator sau super administrator e nevoie și de un cod pe email)",
+      "settings": "Setări: sistem, site, emailuri de alertă, șabloane de email",
+      "payments": "Abonamente și plăți: planuri, limite de anunțuri, cupoane, permise pentru rezidențe"
+    },
+    "start": "Configurează aplicația de autentificare",
+    "starting": "Se pornește…",
+    "startError": "Configurarea nu a putut porni.",
+    "step1": "Deschide Google Authenticator, Authy, 1Password sau Microsoft Authenticator și scanează acest cod.",
+    "qrLabel": "Cod QR pentru aplicația de autentificare",
+    "manualKey": "Nu poți scana? Introdu această cheie în aplicație:",
+    "openInApp": "Deschide în aplicația de autentificare",
+    "emailCode": "Codul trimis pe email la {{to}}",
+    "appCode": "Codul de 6 cifre afișat acum de aplicație",
+    "confirm": "Activează",
+    "confirming": "Se verifică…",
+    "confirmError": "Nu s-a putut activa.",
+    "restart": "Ia-o de la capăt (cod QR și email noi)",
+    "reset": "Resetează-i autentificatorul (telefon pierdut)",
+    "resetConfirm": "Elimini autentificatorul acestui administrator? Îl va configura din nou înainte de următoarea acțiune riscantă.",
+    "resetDone": "Gata. Îl configurează din nou din Admin › Securitate.",
+    "resetError": "Nu s-a putut reseta."
+  },
+  "stepUp": {
+    "title": "Confirmă cu autentificatorul",
+    "setupFirst": "Ștergerea și schimbarea rolurilor, setărilor, abonamentelor și plăților cer un cod dintr-o aplicație de autentificare. Configureaz-o o dată, apoi confirmă această acțiune.",
+    "afterSetup": "Autentificatorul este activ. Așteaptă următorul cod în aplicație și introdu-l pentru a termina acțiunea.",
+    "body": "Această acțiune cere codul de 6 cifre din aplicația de autentificare.",
+    "codeLabel": "Cod autentificator",
+    "invalid": "Codul nu este corect sau a fost deja folosit. Încearcă următorul.",
+    "confirm": "Confirmă",
+    "cancel": "Anulează"
+  },
+  "emailCode": {
+    "why": "Pentru siguranță îți trimitem pe email un cod de unică folosință ca să confirmi.",
+    "send": "Trimite-mi un cod pe email",
+    "sending": "Se trimite…",
+    "sendError": "Codul nu s-a putut trimite.",
+    "label": "Codul trimis pe email la {{to}}",
+    "hint": "Funcționează o dată și expiră în 10 minute. Apoi se cere codul din autentificator.",
+    "confirm": "Confirmă",
+    "confirming": "Se confirmă…",
+    "confirmError": "Nu a funcționat.",
+    "resend": "Trimite un cod nou",
+    "roleTitle": "Confirmă noul rol",
+    "roleAction": "Fă-l pe {{name}} {{role}}."
   }
 }

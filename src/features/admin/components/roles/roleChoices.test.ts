@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { roleChoices } from './roleChoices';
+import { needsEmailCode, roleChoices } from './roleChoices';
 
 const enabled = (c: ReturnType<typeof roleChoices>) => c.options.filter((o) => !o.disabled).map((o) => o.value);
 
@@ -22,5 +22,15 @@ describe('roleChoices', () => {
 
   it('locks your own role', () => {
     expect(roleChoices({ actorId: 'me', actorRole: 'super_admin', targetId: 'me', targetRole: 'super_admin' }).lock).toBe('own');
+  });
+});
+
+describe('needsEmailCode', () => {
+  it('only for granting an admin role', () => {
+    expect(needsEmailCode('buyer', 'admin')).toBe(true);
+    expect(needsEmailCode('admin', 'super_admin')).toBe(true);
+    expect(needsEmailCode('admin', 'admin')).toBe(false);
+    expect(needsEmailCode('admin', 'buyer')).toBe(false);
+    expect(needsEmailCode('buyer', 'agent')).toBe(false);
   });
 });

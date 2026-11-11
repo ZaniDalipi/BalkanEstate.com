@@ -69,6 +69,18 @@ export interface IUser extends Document {
   country?: string;
   address?: string;
   agencyName?: string;
+  /** Admins: authenticator app for confirming risky admin actions. */
+  adminTotp?: {
+    /** Encrypted base32 secret; set once setup is confirmed. */
+    secretEnc?: string;
+    /** Encrypted secret waiting for the first code (setup in progress). */
+    pendingSecretEnc?: string;
+    enabledAt?: Date;
+    /** Last 30-second step used: each code works once. */
+    lastUsedStep?: number;
+    failedAttempts?: number;
+    lockedUntil?: Date;
+  };
   agentId?: string;
   licenseNumber?: string;
   licenseVerified?: boolean,
@@ -426,6 +438,14 @@ const UserSchema: Schema = new Schema(
     },
     address: {
       type: String,
+    },
+    adminTotp: {
+      secretEnc: { type: String, select: false },
+      pendingSecretEnc: { type: String, select: false },
+      enabledAt: Date,
+      lastUsedStep: { type: Number, select: false },
+      failedAttempts: { type: Number, default: 0, select: false },
+      lockedUntil: { type: Date, select: false },
     },
     agencyName: {
       type: String,

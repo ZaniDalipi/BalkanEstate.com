@@ -55,7 +55,8 @@
     "emailTemplates": "Shabllonet e email-it",
     "siteSettings": "Cilësimet e faqes",
     "residences": "Rezidencat",
-    "archivedListings": "Njoftimet e arkivuara"
+    "archivedListings": "Njoftimet e arkivuara",
+    "security": "Siguria"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -2296,7 +2297,9 @@
     "confirm": "Po, më bëj super administrator",
     "cancel": "Anulo",
     "working": "Duke punuar…",
-    "done": "Tani jeni super administrator. Mund t’i bëni të tjerët administratorë ose super administratorë nga “Ndrysho përdoruesin”."
+    "done": "Tani jeni super administrator. Mund t’i bëni të tjerët administratorë ose super administratorë nga “Ndrysho përdoruesin”.",
+    "confirmTitle": "Bëhu super administrator",
+    "confirmAction": "Bëje llogarinë tënde super administratorin e parë të faqes."
   },
   "adminAlerts": {
     "title": "Email-et e njoftimeve për administratorët",
@@ -2328,5 +2331,63 @@
     "testing": "Duke dërguar…",
     "testSent": "Email-i prove u dërgua te {{list}}. Kontrolloni kutinë (dhe spam-in).",
     "testFailed": "Nuk u dërgua te {{list}}."
+  },
+  "security": {
+    "title": "Siguria",
+    "subtitle": "Veprimet e rrezikshme të administratorit kërkojnë një kod të ri nga një aplikacion autentifikimi në telefonin tuaj.",
+    "authenticator": "Aplikacioni i autentifikimit",
+    "loadError": "Cilësimet e sigurisë nuk u ngarkuan.",
+    "retry": "Provo përsëri",
+    "on": "Aktiv që nga {{date}}.",
+    "replace": "Kalo në një telefon të ri",
+    "lostPhone": "Humbët telefonin? Një super administrator tjetër mund ta rivendosë nga “Ndrysho përdoruesin”.",
+    "protectedTitle": "Çfarë kërkon kod",
+    "protected": {
+      "deletes": "Fshirja e çdo gjëje: përdorues, njoftime, agjenci, artikuj, kode…",
+      "roles": "Dhënia ose heqja e roleve (për ta bërë dikë administrator ose super administrator duhet edhe një kod me email)",
+      "settings": "Cilësimet: sistemi, faqja, email-et e njoftimeve, shabllonet e email-it",
+      "payments": "Abonimet dhe pagesat: planet, kufijtë e njoftimeve, kuponët, lejet e rezidencave"
+    },
+    "start": "Konfiguro aplikacionin e autentifikimit",
+    "starting": "Duke filluar…",
+    "startError": "Konfigurimi nuk filloi.",
+    "step1": "Hapni Google Authenticator, Authy, 1Password ose Microsoft Authenticator dhe skanoni këtë kod.",
+    "qrLabel": "Kodi QR për aplikacionin e autentifikimit",
+    "manualKey": "Nuk mund ta skanoni? Futni këtë çelës në aplikacion:",
+    "openInApp": "Hap në aplikacionin e autentifikimit",
+    "emailCode": "Kodi që ju dërguam me email te {{to}}",
+    "appCode": "Kodi 6-shifror që tregon aplikacioni tani",
+    "confirm": "Aktivizo",
+    "confirming": "Duke kontrolluar…",
+    "confirmError": "Nuk u aktivizua.",
+    "restart": "Fillo nga e para (kod QR dhe email i ri)",
+    "reset": "Rivendos autentifikuesin e tij (telefon i humbur)",
+    "resetConfirm": "Të hiqet autentifikuesi i këtij administratori? Do ta konfigurojë sërish para veprimit të ardhshëm të rrezikshëm.",
+    "resetDone": "U krye. Ai e konfiguron sërish nga Admin › Siguria.",
+    "resetError": "Nuk u rivendos."
+  },
+  "stepUp": {
+    "title": "Konfirmo me autentifikuesin",
+    "setupFirst": "Fshirja, ndryshimi i roleve, cilësimet, abonimet dhe pagesat kërkojnë një kod nga aplikacioni i autentifikimit. Konfigurojeni një herë, pastaj konfirmoni këtë veprim.",
+    "afterSetup": "Autentifikuesi është aktiv. Prisni që aplikacioni të tregojë kodin e radhës, pastaj futeni për ta përfunduar veprimin.",
+    "body": "Ky veprim kërkon kodin 6-shifror nga aplikacioni i autentifikimit.",
+    "codeLabel": "Kodi i autentifikuesit",
+    "invalid": "Ky kod nuk është i saktë ose është përdorur. Provoni kodin e radhës.",
+    "confirm": "Konfirmo",
+    "cancel": "Anulo"
+  },
+  "emailCode": {
+    "why": "Për siguri ju dërgojmë me email një kod njëpërdorimësh për ta konfirmuar.",
+    "send": "Më dërgo një kod me email",
+    "sending": "Duke dërguar…",
+    "sendError": "Kodi nuk u dërgua.",
+    "label": "Kodi që ju dërguam me email te {{to}}",
+    "hint": "Funksionon një herë dhe skadon pas 10 minutash. Më pas kërkohet kodi i autentifikuesit.",
+    "confirm": "Konfirmo",
+    "confirming": "Duke konfirmuar…",
+    "confirmError": "Nuk funksionoi.",
+    "resend": "Dërgo një kod të ri",
+    "roleTitle": "Konfirmo rolin e ri",
+    "roleAction": "Bëje {{name}} {{role}}."
   }
 }

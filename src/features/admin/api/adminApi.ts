@@ -72,6 +72,9 @@ export interface UserUpdateData {
   subscriptionStatus?: string;
   agencyName?: string;
   isEnterpriseTier?: boolean;
+  /** The emailed code, when the change makes someone admin or super admin. */
+  challengeId?: string;
+  emailCode?: string;
 }
 
 export const updateUser = async (

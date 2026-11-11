@@ -10,5 +10,6 @@ export interface SuperAdminStatus {
 export const getSuperAdminStatus = (): Promise<SuperAdminStatus> =>
   apiRequest<SuperAdminStatus>('/admin/super-admin/status', { requiresAuth: true });
 
-export const claimSuperAdmin = (): Promise<{ message: string; user: { role: string } }> =>
-  apiRequest('/admin/super-admin/claim', { method: 'POST', requiresAuth: true });
+/** Needs the code emailed by requestClaimEmailCode (and an authenticator code, asked for by the client). */
+export const claimSuperAdmin = (confirmation: { challengeId: string; emailCode: string }): Promise<{ message: string; user: { role: string } }> =>
+  apiRequest('/admin/super-admin/claim', { method: 'POST', body: confirmation, requiresAuth: true });

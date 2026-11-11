@@ -321,6 +321,7 @@ export const getCorsConfig = () => {
       'Origin',
       'X-CSRF-Token',
       'X-Response-Key',
+      'X-Admin-Code', // authenticator code confirming a risky admin action
     ],
     exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
     maxAge: 86400, // 24 hours

@@ -15,6 +15,8 @@ import { useUserManager } from './useUserManager';
 import UserManagerDetail from './UserManagerDetail';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { ClaimSuperAdminCard } from './roles/ClaimSuperAdminCard';
+import { EmailCodeDialog } from './security/EmailCodeDialog';
+import { requestRoleEmailCode } from '../api/adminSecurityApi';
 
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -41,6 +43,9 @@ const UserManager: React.FC = () => {
     isDetailModalOpen,
     setIsDetailModalOpen,
     viewingUser,
+    pendingRoleGrant,
+    setPendingRoleGrant,
+    confirmRoleGrant,
     currentPage,
     setCurrentPage,
     totalPages,
@@ -349,6 +354,20 @@ const UserManager: React.FC = () => {
         onUserUpdated={refetch}
         editError={error}
       />
+
+      {pendingRoleGrant && (
+        <EmailCodeDialog
+          title={t('admin:emailCode.roleTitle', 'Confirm the new role')}
+          action={t('admin:emailCode.roleAction', {
+            name: pendingRoleGrant.name,
+            role: t(pendingRoleGrant.role === 'super_admin' ? 'admin:users.roles.superAdmin' : 'admin:users.roles.admin', pendingRoleGrant.role === 'super_admin' ? 'Super admin' : 'Admin'),
+            defaultValue: 'Make {{name}} {{role}}.',
+          })}
+          requestCode={() => requestRoleEmailCode(pendingRoleGrant.userId, pendingRoleGrant.role)}
+          onConfirm={confirmRoleGrant}
+          onClose={() => setPendingRoleGrant(null)}
+        />
+      )}
     </div>
   );
 };

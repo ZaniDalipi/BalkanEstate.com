@@ -10,6 +10,7 @@ import {
 } from '../controllers/agencyFeaturedSubscriptionController';
 import { protect } from '../middleware/auth';
 import { checkAdminRole } from '../middleware/adminAuth';
+import { requireAdminStepUp } from '../middleware/adminStepUp';
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get('/agencies/:agencyId/featured-subscription', getFeaturedSubscription)
 router.delete('/agencies/:agencyId/featured-subscription', protect, cancelFeaturedSubscription);
 // No payment provider confirms this yet, so only an admin may mark it paid
 // (otherwise any signed-in user could feature any agency for free).
-router.post('/agencies/:agencyId/featured-subscription/confirm-payment', protect, checkAdminRole, confirmPayment);
+router.post('/agencies/:agencyId/featured-subscription/confirm-payment', protect, checkAdminRole, requireAdminStepUp, confirmPayment);
 router.post('/agencies/:agencyId/featured-subscription/apply-coupon', protect, applyCoupon);
 
 // Admin routes

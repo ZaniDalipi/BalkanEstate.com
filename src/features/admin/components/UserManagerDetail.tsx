@@ -13,6 +13,7 @@ import { approveLicense, rejectLicense } from '../api/adminApi';
 import { useUpdateUserListingCounter, useUpdateUserListingLimit } from '../hooks/useAdminData';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { RoleSelect } from './roles/RoleSelect';
+import { ResetAuthenticatorButton } from './security/ResetAuthenticatorButton';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -322,6 +323,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 value={editForm.role}
                 onChange={(role) => setEditForm({ ...editForm, role })}
               />
+              <ResetAuthenticatorButton userId={editingUser._id} userRole={editingUser.role} />
 
               {(editForm.role === 'agent' || editingUser.role === 'agent') && (
                 <>

@@ -217,6 +217,8 @@ export const adminKeys = {
   residenceCodes: (params?: { status?: string; search?: string; page?: number }) => ['admin', 'residence-codes', params ?? {}] as const,
   residenceCodesAll: () => ['admin', 'residence-codes'] as const,
   agencyResidenceAllowance: (agencyId: string) => ['admin', 'agencyResidenceAllowance', agencyId] as const,
+  /** My authenticator app (for confirming risky admin actions). */
+  authenticator: () => ['admin', 'authenticator'] as const,
   /** Who gets the admin alert emails. */
   alertSettings: () => ['admin', 'alert-settings'] as const,
   /** Whether the site has a super admin yet (for claiming the first one). */

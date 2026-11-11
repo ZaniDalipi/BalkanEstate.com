@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useUsers, useUpdateUser, useDeleteUser } from '../hooks/useAdminData';
+import type { UserUpdateData } from '../api/adminApi';
+import { needsEmailCode } from './roles/roleChoices';
 
 export interface User {
   _id: string;
@@ -70,11 +72,20 @@ export interface UserEditForm {
   isEnterpriseTier: boolean;
 }
 
+/** An edit that makes someone admin or super admin, waiting for the emailed code. */
+export interface PendingRoleGrant {
+  userId: string;
+  name: string;
+  role: string;
+  data: UserUpdateData;
+}
+
 export function useUserManager() {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [pendingRoleGrant, setPendingRoleGrant] = useState<PendingRoleGrant | null>(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -188,6 +199,12 @@ export function useUserManager() {
     // Strip sensitive fields - these are managed through dedicated endpoints
     const { email, isSubscribed, subscriptionPlan, subscriptionStatus, isEnterpriseTier, ...safeData } = editForm;
 
+    // Making someone admin or super admin: confirm with an emailed code first.
+    if (needsEmailCode(editingUser.role, safeData.role)) {
+      setPendingRoleGrant({ userId: editingUser._id, name: editingUser.name, role: safeData.role, data: safeData });
+      return;
+    }
+
     updateUserMutation.mutate(
       { userId: editingUser._id, data: safeData },
       {
@@ -204,6 +221,17 @@ export function useUserManager() {
         },
       }
     );
+  };
+
+  /** Save the edit with the emailed code; the authenticator prompt follows on its own. */
+  const confirmRoleGrant = async (confirmation: { challengeId: string; emailCode: string }) => {
+    if (!pendingRoleGrant) return;
+    await updateUserMutation.mutateAsync({ userId: pendingRoleGrant.userId, data: { ...pendingRoleGrant.data, ...confirmation } });
+    setPendingRoleGrant(null);
+    setIsEditModalOpen(false);
+    setEditingUser(null);
+    setSuccessMessage('User updated successfully');
+    setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   const handleToggleEmailVerification = async (userId: string, currentStatus: boolean) => {
@@ -324,6 +352,9 @@ export function useUserManager() {
     handleEditUser,
     handleViewUser,
     handleUpdateUser,
+    pendingRoleGrant,
+    setPendingRoleGrant,
+    confirmRoleGrant,
     handleToggleEmailVerification,
     handleToggleLicenseVerification,
     handleDeleteUser,

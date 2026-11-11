@@ -172,6 +172,7 @@ export const ADMIN_SECTIONS = [
   'promotions',
   'properties',
   'archived-listings',
+  'security',
   'agencies',
   'pricing',
   'activity',

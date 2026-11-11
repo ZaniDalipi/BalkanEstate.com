@@ -14,6 +14,8 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import InteractionHeatmap from './InteractionHeatmap';
 import PropertyManager from './PropertyManager';
 import { ArchivedListingsManager } from './archive/ArchivedListingsManager';
+import { AdminSecurityPage } from './security/AdminSecurityPage';
+import { StepUpPromptHost } from './security/StepUpPromptHost';
 import AgencyManager from './AgencyManager';
 import { ResidencesAdmin } from './residences/ResidencesAdmin';
 import PricingManager from './PricingManager';
@@ -50,6 +52,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'promotion-plans': 'promotionPlans',
   'properties': 'properties',
   'archived-listings': 'archivedListings',
+  'security': 'security',
   'agencies': 'agencies',
   'residences': 'residences',
   'pricing': 'pricing',
@@ -79,6 +82,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'promotionPlans': 'promotion-plans',
   'properties': 'properties',
   'archivedListings': 'archived-listings',
+  'security': 'security',
   'agencies': 'agencies',
   'residences': 'residences',
   'pricing': 'pricing',
@@ -243,6 +247,8 @@ const AdminDashboard: React.FC = () => {
         return <PropertyManager />;
       case 'archivedListings':
         return <ArchivedListingsManager />;
+      case 'security':
+        return <AdminSecurityPage />;
       case 'agencies':
         return <AgencyManager />;
       case 'residences':
@@ -272,6 +278,8 @@ const AdminDashboard: React.FC = () => {
       onSectionChange={handleSectionChange}
     >
       {renderContent()}
+      {/* Asks for the authenticator code when a risky admin request needs one. */}
+      <StepUpPromptHost />
     </AdminLayout>
   );
 };

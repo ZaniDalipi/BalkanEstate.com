@@ -76,7 +76,8 @@
     "test:payments:unit": "jest --testPathPattern=payment-services --detectOpenHandles --forceExit",
     "test:payments:integration": "jest --testPathPattern=payment-integration --detectOpenHandles --forceExit",
     "test:payments:api": "./test-payments.sh",
-    "test:staging": "./scripts/test-staging-payments.sh"
+    "test:staging": "./scripts/test-staging-payments.sh",
+    "reset-admin-authenticator": "ts-node src/scripts/resetAdminAuthenticator.ts"
   },
   "keywords": [
     "real-estate",

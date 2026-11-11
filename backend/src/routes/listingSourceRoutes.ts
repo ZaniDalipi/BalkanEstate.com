@@ -18,6 +18,8 @@ const router = express.Router();
 // All listing-source endpoints are admin-only.
 router.use(protect);
 router.use(checkAdminRole);
+// Deletes here are mounted under /api/admin, so adminRoutes' step-up gate
+// already asked for the authenticator code (checking again would reject it as reused).
 
 router.get('/', logAdminAction('LIST_LISTING_SOURCES'), list);
 router.get('/:id', logAdminAction('VIEW_LISTING_SOURCE'), get);

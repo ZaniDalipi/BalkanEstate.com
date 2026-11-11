@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ArticleManagerForm from './ArticleManagerForm';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { apiRequest } from '@/src/shared/api';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 
@@ -60,12 +61,8 @@ const ArticleManager: React.FC = () => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeletingId(id);
     try {
-      const token = tokenService.getAccessToken();
-      const res = await fetch(`${API_CONFIG.BASE_URL}/admin/articles/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+      // apiRequest: CSRF header, and the authenticator prompt deletes need.
+      await apiRequest(`/admin/articles/${id}`, { method: 'DELETE', requiresAuth: true });
       fetchArticles();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed');

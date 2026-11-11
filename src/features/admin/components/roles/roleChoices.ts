@@ -27,3 +27,7 @@ export function roleChoices(input: { actorId?: string; actorRole?: string; targe
   if (isAdminRole(input.targetRole) && !isSuper) return { lock: 'superAdminOnly', options, adminRolesNeedSuperAdmin: false };
   return { options, adminRolesNeedSuperAdmin: !isSuper };
 }
+
+/** Making someone admin or super admin needs a code emailed to the acting super admin. */
+export const needsEmailCode = (currentRole: string, newRole: string | undefined): boolean =>
+  !!newRole && newRole !== currentRole && isAdminRole(newRole);

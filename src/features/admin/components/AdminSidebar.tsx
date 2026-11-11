@@ -22,6 +22,7 @@ import {
   BuildingStorefrontIcon,
   PhotoIcon,
   ArchiveBoxIcon,
+  ShieldCheckIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -231,6 +232,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           id: 'settings',
           label: t('admin:sidebar.settings', 'Settings'),
           icon: <Cog6ToothIcon className="w-5 h-5" />
+        },
+        {
+          id: 'security',
+          label: t('admin:sidebar.security', 'Security'),
+          icon: <ShieldCheckIcon className="w-5 h-5" />
         },
       ]
     }

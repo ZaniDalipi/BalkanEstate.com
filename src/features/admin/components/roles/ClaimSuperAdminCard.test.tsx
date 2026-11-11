@@ -13,6 +13,16 @@ vi.mock('@/context/AppContext', () => ({
 
 const api = vi.hoisted(() => ({ getSuperAdminStatus: vi.fn(), claimSuperAdmin: vi.fn() }));
 vi.mock('../../api/superAdminApi', () => api);
+const security = vi.hoisted(() => ({ requestClaimEmailCode: vi.fn() }));
+vi.mock('../../api/adminSecurityApi', () => security);
+
+/** Open the card's dialog, ask for the emailed code and confirm with it. */
+async function claimWithEmailCode() {
+  fireEvent.click(await screen.findByRole('button', { name: 'Become super admin' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Email me a code' }));
+  fireEvent.change(await screen.findByLabelText('Code we emailed to me••@x.com'), { target: { value: '123 456' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+}
 
 const renderIt = () =>
   render(
@@ -26,19 +36,19 @@ beforeEach(() => {
   ctx.dispatch.mockReset();
   api.getSuperAdminStatus.mockReset();
   api.claimSuperAdmin.mockReset();
+  security.requestClaimEmailCode.mockReset().mockResolvedValue({ challengeId: 'c1', sentTo: 'me••@x.com', expiresAt: '' });
 });
 
 describe('ClaimSuperAdminCard', () => {
-  it('lets an admin become the first super admin after confirming', async () => {
+  it('lets an admin become the first super admin, confirmed with the emailed code', async () => {
     api.getSuperAdminStatus.mockResolvedValue({ superAdminCount: 0, canClaim: true });
     api.claimSuperAdmin.mockResolvedValue({ message: 'ok', user: { role: 'super_admin' } });
     renderIt();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Become super admin' }));
-    expect(api.claimSuperAdmin).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, make me super admin' }));
+    await claimWithEmailCode();
 
     expect(await screen.findByRole('status')).toHaveTextContent('You are now super admin');
+    expect(api.claimSuperAdmin).toHaveBeenCalledWith({ challengeId: 'c1', emailCode: '123456' });
     expect(ctx.dispatch).toHaveBeenCalledWith({ type: 'UPDATE_USER', payload: { role: 'super_admin' } });
   });
 
@@ -61,8 +71,7 @@ describe('ClaimSuperAdminCard', () => {
     api.claimSuperAdmin.mockRejectedValue(new Error('This site already has a super admin. Ask them to make you super admin.'));
     renderIt();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Become super admin' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, make me super admin' }));
+    await claimWithEmailCode();
     expect(await screen.findByRole('alert')).toHaveTextContent('already has a super admin');
   });
 });

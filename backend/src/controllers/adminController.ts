@@ -23,6 +23,7 @@ import {
 } from '../services/listingArchiveService';
 import type { IUser } from '../models/User';
 import { changeUserRole, claimFirstSuperAdmin, superAdminStatus } from '../services/userRoleService';
+import { checkAdminStepUp } from '../middleware/adminStepUp';
 import { decideAccountDeletion } from '../utils/roleChangePolicy';
 
 /** The signed-in admin, as recorded on archived listings they remove. */
@@ -196,7 +197,12 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
         return;
       }
       if (req.body.role !== current.role) {
-        const result = await changeUserRole(req.user as IUser, id, req.body.role);
+        // A role change through this form needs the same confirmations as the role endpoint.
+        if (!(await checkAdminStepUp(req, res))) return;
+        const result = await changeUserRole(req.user as IUser, id, req.body.role, {
+          challengeId: req.body.challengeId,
+          emailCode: req.body.emailCode,
+        });
         if (result.ok === false) {
           res.status(result.status).json({ message: result.message, error: result.code });
           return;
@@ -256,7 +262,10 @@ export const updateUserRoleAdmin = async (req: Request, res: Response): Promise<
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    const result = await changeUserRole(req.user as IUser, id, req.body?.role);
+    const result = await changeUserRole(req.user as IUser, id, req.body?.role, {
+      challengeId: req.body?.challengeId,
+      emailCode: req.body?.emailCode,
+    });
     if (result.ok === false) {
       res.status(result.status).json({ message: result.message, error: result.code });
       return;
@@ -288,7 +297,10 @@ export const getSuperAdminStatus = async (req: Request, res: Response): Promise<
 // @access  Private/Admin
 export const claimSuperAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await claimFirstSuperAdmin(req.user as IUser);
+    const result = await claimFirstSuperAdmin(req.user as IUser, {
+      challengeId: req.body?.challengeId,
+      emailCode: req.body?.emailCode,
+    });
     if (result.ok === false) {
       res.status(result.status).json({ message: result.message, error: result.code });
       return;

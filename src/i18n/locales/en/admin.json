@@ -55,7 +55,8 @@
     "emailTemplates": "Email Templates",
     "siteSettings": "Site Settings",
     "residences": "Residences",
-    "archivedListings": "Archived Listings"
+    "archivedListings": "Archived Listings",
+    "security": "Security"
   },
   "properties": {
     "title": "Property Manager",
@@ -2305,7 +2306,9 @@
     "confirm": "Yes, make me super admin",
     "cancel": "Cancel",
     "working": "Working…",
-    "done": "You are now super admin. You can make other people admin or super admin from “Edit user”."
+    "done": "You are now super admin. You can make other people admin or super admin from “Edit user”.",
+    "confirmTitle": "Become super admin",
+    "confirmAction": "Make your own account the site’s first super admin."
   },
   "adminAlerts": {
     "title": "Admin alert emails",
@@ -2337,5 +2340,63 @@
     "testing": "Sending…",
     "testSent": "Test email sent to {{list}}. Check the inbox (and spam).",
     "testFailed": "Could not send to {{list}}."
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Risky admin actions need a fresh code from an authenticator app on your phone.",
+    "authenticator": "Authenticator app",
+    "loadError": "Could not load your security settings.",
+    "retry": "Try again",
+    "on": "On since {{date}}.",
+    "replace": "Move to a new phone",
+    "lostPhone": "Lost your phone? Another super admin can reset it from “Edit user”.",
+    "protectedTitle": "What asks for a code",
+    "protected": {
+      "deletes": "Deleting anything: users, listings, agencies, articles, codes…",
+      "roles": "Giving or removing roles (making someone admin or super admin also needs an emailed code)",
+      "settings": "Settings: system, site, alert emails, email templates",
+      "payments": "Subscriptions and payments: plans, listing limits, coupons, residence passes"
+    },
+    "start": "Set up authenticator app",
+    "starting": "Starting…",
+    "startError": "Could not start the setup.",
+    "step1": "Open Google Authenticator, Authy, 1Password or Microsoft Authenticator and scan this code.",
+    "qrLabel": "QR code for your authenticator app",
+    "manualKey": "Can’t scan? Enter this key in the app:",
+    "openInApp": "Open in authenticator app",
+    "emailCode": "Code we emailed to {{to}}",
+    "appCode": "The 6-digit code the app shows now",
+    "confirm": "Turn on",
+    "confirming": "Checking…",
+    "confirmError": "Could not turn it on.",
+    "restart": "Start over (new QR code and email)",
+    "reset": "Reset their authenticator (lost phone)",
+    "resetConfirm": "Remove this admin’s authenticator? They will set it up again before their next risky action.",
+    "resetDone": "Done. They set it up again from Admin › Security.",
+    "resetError": "Could not reset it."
+  },
+  "stepUp": {
+    "title": "Confirm with your authenticator",
+    "setupFirst": "Deleting, changing roles, settings, subscriptions and payments need a code from an authenticator app. Set it up once, then confirm this action.",
+    "afterSetup": "Your authenticator is on. Wait for the app to show the next code, then enter it to finish this action.",
+    "body": "This action needs the 6-digit code from your authenticator app.",
+    "codeLabel": "Authenticator code",
+    "invalid": "That code is not right or was already used. Try the next one.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "emailCode": {
+    "why": "For safety we email you a one-time code to confirm this.",
+    "send": "Email me a code",
+    "sending": "Sending…",
+    "sendError": "Could not send the code.",
+    "label": "Code we emailed to {{to}}",
+    "hint": "It works once and expires in 10 minutes. Your authenticator code is asked for next.",
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "confirmError": "That did not work.",
+    "resend": "Send a new code",
+    "roleTitle": "Confirm the new role",
+    "roleAction": "Make {{name}} {{role}}."
   }
 }

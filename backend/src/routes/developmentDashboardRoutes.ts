@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth';
 import { checkAdminRole } from '../middleware/adminAuth';
+import { requireAdminStepUp } from '../middleware/adminStepUp';
 import { mutationRateLimiter, uploadRateLimiter } from '../middleware/security';
 import { withUploadErrors } from '../middleware/uploadErrors';
 import {
@@ -174,7 +175,7 @@ router.post(
   requireDevelopmentPermission('ownership.transfer'),
   checkoutBilling
 );
-router.post('/:developmentId/billing/grant', protect, checkAdminRole, developmentAuth, grantBilling);
+router.post('/:developmentId/billing/grant', protect, checkAdminRole, requireAdminStepUp, developmentAuth, grantBilling);
 // Deletion is owner-only; only `owner` holds `ownership.transfer`.
 router.delete(
   '/:developmentId',
