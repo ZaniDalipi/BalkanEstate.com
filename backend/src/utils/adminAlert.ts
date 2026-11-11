@@ -25,6 +25,16 @@ export type AdminAlertEvent =
       listingType: string;
       sellerName?: string;
       sellerEmail?: string;
+    }
+  | {
+      kind: 'role_changed';
+      userId: string;
+      name: string;
+      email: string;
+      from: string;
+      to: string;
+      /** The admin who made the change. */
+      byName: string;
     };
 
 export interface AdminAlert {
@@ -92,6 +102,27 @@ export function buildAdminAlert(event: AdminAlertEvent, siteUrl: string): AdminA
       subject: `New user: ${name} (${email})`,
       title: heading,
       message: `${name} · ${email} · ${oneLine(event.role)}`,
+      actionUrl,
+      html: render(heading, rows, `${base}${actionUrl}`, 'Open users'),
+      text: textOf(heading, rows, `${base}${actionUrl}`),
+    };
+  }
+
+  if (event.kind === 'role_changed') {
+    const name = oneLine(event.name) || 'Unnamed user';
+    const email = oneLine(event.email);
+    const roleName = (role: string) => oneLine(role).replace('_', ' ');
+    const rows: Array<[string, string]> = [
+      ['User', `${name} (${email})`],
+      ['Role', `${roleName(event.from)} → ${roleName(event.to)}`],
+      ['Changed by', oneLine(event.byName)],
+    ];
+    const actionUrl = '/admin/users';
+    const heading = 'Admin role changed';
+    return {
+      subject: `Role changed: ${name} is now ${roleName(event.to)}`,
+      title: heading,
+      message: `${name}: ${roleName(event.from)} → ${roleName(event.to)} (by ${oneLine(event.byName)})`,
       actionUrl,
       html: render(heading, rows, `${base}${actionUrl}`, 'Open users'),
       text: textOf(heading, rows, `${base}${actionUrl}`),

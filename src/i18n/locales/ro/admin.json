@@ -128,7 +128,8 @@
       "admin": "Administrator",
       "agent": "Agent",
       "buyer": "Cumpărător",
-      "seller": "Vânzător"
+      "seller": "Vânzător",
+      "superAdmin": "Super administrator"
     },
     "status": {
       "active": "Activ",
@@ -2266,5 +2267,11 @@
     "prev": "Anterioara",
     "next": "Următoarea",
     "pageOf": "Pagina {{page}} din {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "Nu vă puteți schimba propriul rol. Cereți altui super administrator.",
+    "superAdminOnlyEdit": "Doar un super administrator poate schimba rolul unui administrator.",
+    "superAdminOnlyGrant": "Doar un super administrator poate face pe cineva administrator sau super administrator.",
+    "superAdminHint": "Administratorii gestionează site-ul; super administratorii pot și acorda sau retrage rolurile de administrator."
   }
 }

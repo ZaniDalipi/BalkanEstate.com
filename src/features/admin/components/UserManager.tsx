@@ -113,6 +113,7 @@ const UserManager: React.FC = () => {
             <option value="private_seller">{t('admin:users.roles.seller')}</option>
             <option value="agent">{t('admin:users.roles.agent')}</option>
             <option value="admin">{t('admin:users.roles.admin')}</option>
+            <option value="super_admin">{t('admin:users.roles.superAdmin', 'Super admin')}</option>
           </select>
 
           <select
@@ -343,6 +344,7 @@ const UserManager: React.FC = () => {
         formatDateTime={formatDateTime}
         getRoleBadgeColor={getRoleBadgeColor}
         onUserUpdated={refetch}
+        editError={error}
       />
     </div>
   );

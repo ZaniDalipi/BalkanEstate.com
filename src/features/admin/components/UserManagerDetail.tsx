@@ -12,6 +12,7 @@ import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { approveLicense, rejectLicense } from '../api/adminApi';
 import { useUpdateUserListingCounter, useUpdateUserListingLimit } from '../hooks/useAdminData';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { RoleSelect } from './roles/RoleSelect';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -31,6 +32,8 @@ interface UserManagerDetailProps {
   getRoleBadgeColor: (role: string) => string;
   // Callback to refresh user data after updates
   onUserUpdated?: () => void;
+  /** Why the last save was refused, shown inside the edit dialog. */
+  editError?: string | null;
 }
 
 const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
@@ -48,6 +51,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
   formatDateTime,
   getRoleBadgeColor,
   onUserUpdated,
+  editError,
 }) => {
   const { t } = useTranslation('admin');
 
@@ -312,21 +316,12 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('userDetail.role')}
-                </label>
-                <select
-                  value={editForm.role}
-                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="buyer">{t('users.roles.buyer')}</option>
-                  <option value="private_seller">{t('users.roles.seller')}</option>
-                  <option value="agent">{t('users.roles.agent')}</option>
-                  <option value="admin">{t('users.roles.admin')}</option>
-                </select>
-              </div>
+              <RoleSelect
+                targetId={editingUser._id}
+                targetRole={editingUser.role}
+                value={editForm.role}
+                onChange={(role) => setEditForm({ ...editForm, role })}
+              />
 
               {(editForm.role === 'agent' || editingUser.role === 'agent') && (
                 <>
@@ -394,6 +389,12 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                 </p>
               </div>
               </div>
+
+              {editError && (
+                <p role="alert" className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                  {editError}
+                </p>
+              )}
 
               <div className="p-6 border-t border-gray-200 flex gap-3 flex-shrink-0">
                 <button

@@ -22,6 +22,8 @@ import {
   type ArchiveActor,
 } from '../services/listingArchiveService';
 import type { IUser } from '../models/User';
+import { changeUserRole } from '../services/userRoleService';
+import { decideAccountDeletion } from '../utils/roleChangePolicy';
 
 /** The signed-in admin, as recorded on archived listings they remove. */
 const adminActor = (req: Request): ArchiveActor => {
@@ -171,8 +173,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
     // through dedicated endpoints (subscription management, user self-service).
     const ALLOWED_ADMIN_UPDATE_FIELDS = [
       'name', 'phone', 'city', 'country',
-      'role', 'activeRole', 'primaryRole',
-      'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
+      'status', 'isEmailVerified', 'licenseVerified',
       'licenseNumber', 'bio', 'languages', 'specializations',
       'serviceAreas', 'avatarUrl avatarOptions gender', 'avatarOptions',
       'agencyName',
@@ -185,7 +186,30 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       }
     }
 
+    // A role sent with the form goes through the same rules as the role
+    // endpoint (only super admins grant admin roles, never your own role).
+    let roleChanged = false;
+    if (req.body.role !== undefined) {
+      const current = await User.findById(id).select('role').lean<{ role: string }>();
+      if (!current) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+      if (req.body.role !== current.role) {
+        const result = await changeUserRole(req.user as IUser, id, req.body.role);
+        if (result.ok === false) {
+          res.status(result.status).json({ message: result.message, error: result.code });
+          return;
+        }
+        roleChanged = true;
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
+      if (roleChanged) {
+        res.json({ message: 'User updated successfully', user: await User.findById(id).select('-password') });
+        return;
+      }
       res.status(400).json({ message: 'No valid fields to update' });
       return;
     }
@@ -224,6 +248,29 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
   }
 };
 
+// @desc    Change a user's role (admin and super admin: super admins only)
+// @route   PUT /api/admin/users/:id/role
+// @access  Private/Admin
+export const updateUserRoleAdmin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const result = await changeUserRole(req.user as IUser, id, req.body?.role);
+    if (result.ok === false) {
+      res.status(result.status).json({ message: result.message, error: result.code });
+      return;
+    }
+
+    invalidateCache('/api/agents');
+    invalidateCache('/api/agencies');
+    res.json({ message: 'Role updated', user: result.user, previousRole: result.previousRole });
+  } catch (error) {
+    adminLogger.error('Update user role error:', error);
+    res.status(500).json({ message: 'Error updating role' });
+  }
+};
+
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
 // @access  Private/Admin + VPN
@@ -235,6 +282,19 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     const user = await User.findById(id);
     if (!user) {
       res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const actor = req.user as IUser;
+    const allowed = decideAccountDeletion({
+      actorId: String(actor._id),
+      actorRole: actor.role,
+      targetId: String(user._id),
+      targetRole: user.role,
+      superAdminCount: user.role === 'super_admin' ? await User.countDocuments({ role: 'super_admin' }) : 0,
+    });
+    if (allowed.ok === false) {
+      res.status(allowed.status).json({ message: allowed.message, error: allowed.code });
       return;
     }
 

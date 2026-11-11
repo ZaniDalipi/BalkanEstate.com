@@ -128,7 +128,8 @@
       "admin": "Administrator",
       "agent": "Agent",
       "buyer": "Kupac",
-      "seller": "Prodavač"
+      "seller": "Prodavač",
+      "superAdmin": "Super administrator"
     },
     "status": {
       "active": "Aktivan",
@@ -2273,5 +2274,11 @@
     "prev": "Prethodna",
     "next": "Sljedeća",
     "pageOf": "Stranica {{page}} od {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "Ne možete promijeniti svoju ulogu. Zamolite drugog super administratora.",
+    "superAdminOnlyEdit": "Samo super administrator može promijeniti ulogu administratora.",
+    "superAdminOnlyGrant": "Samo super administrator može nekoga postaviti za administratora ili super administratora.",
+    "superAdminHint": "Administratori upravljaju stranicom; super administratori mogu i dodjeljivati i uklanjati administratorske uloge."
   }
 }

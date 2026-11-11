@@ -128,7 +128,8 @@
       "admin": "Admin",
       "agent": "Agent",
       "buyer": "Buyer",
-      "seller": "Seller"
+      "seller": "Seller",
+      "superAdmin": "Super admin"
     },
     "status": {
       "active": "Active",
@@ -2290,5 +2291,11 @@
     "prev": "Previous",
     "next": "Next",
     "pageOf": "Page {{page}} of {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "You can’t change your own role. Ask another super admin.",
+    "superAdminOnlyEdit": "Only a super admin can change an admin’s role.",
+    "superAdminOnlyGrant": "Only a super admin can make someone admin or super admin.",
+    "superAdminHint": "Admins manage the site; super admins can also give and remove admin roles."
   }
 }

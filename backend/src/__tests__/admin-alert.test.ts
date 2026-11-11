@@ -44,6 +44,18 @@ describe('buildAdminAlert', () => {
   });
 });
 
+describe('role change alert', () => {
+  it('says who changed whose role, from what to what', () => {
+    const alert = buildAdminAlert(
+      { kind: 'role_changed', userId: 'u1', name: 'Ana', email: 'ana@example.com', from: 'buyer', to: 'super_admin', byName: 'Zana' },
+      'https://site.test'
+    );
+    expect(alert.subject).toBe('Role changed: Ana is now super admin');
+    expect(alert.message).toBe('Ana: buyer → super admin (by Zana)');
+    expect(alert.actionUrl).toBe('/admin/users');
+  });
+});
+
 describe('parseAdminEmails', () => {
   it('splits, lower-cases, de-duplicates and drops invalid entries', () => {
     expect(parseAdminEmails(' A@x.com, a@x.com,not-an-email, b@y.org ,')).toEqual(['a@x.com', 'b@y.org']);

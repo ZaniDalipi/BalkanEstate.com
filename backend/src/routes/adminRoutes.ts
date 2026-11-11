@@ -9,6 +9,7 @@ import {
   getAdminStats,
   getAllUsers,
   updateUserAdmin,
+  updateUserRoleAdmin,
   deleteUser,
   getAllAgenciesAdmin,
   getAgencyDetailAdmin,
@@ -158,6 +159,7 @@ router.get('/activity-logs/user/:userId', logAdminAction('VIEW_USER_ACTIVITY'), 
 // ===== User Management =====
 router.get('/users', logAdminAction('VIEW_USERS'), getAllUsers);
 router.patch('/users/:id', logAdminAction('UPDATE_USER'), updateUserAdmin);
+router.put('/users/:id/role', logAdminAction('UPDATE_USER_ROLE'), updateUserRoleAdmin);
 router.delete('/users/:id', logAdminAction('DELETE_USER'), deleteUser);
 
 // ===== Agency Management =====

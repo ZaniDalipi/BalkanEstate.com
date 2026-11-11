@@ -128,7 +128,8 @@
       "admin": "Administrator",
       "agent": "Agjent",
       "buyer": "Blerës",
-      "seller": "Shitës"
+      "seller": "Shitës",
+      "superAdmin": "Super administrator"
     },
     "status": {
       "active": "Aktiv",
@@ -2281,5 +2282,11 @@
     "prev": "Mëparshmja",
     "next": "Tjetra",
     "pageOf": "Faqja {{page}} nga {{pages}}"
+  },
+  "roleEditor": {
+    "ownRole": "Nuk mund ta ndryshoni rolin tuaj. Kërkojini një super administratori tjetër.",
+    "superAdminOnlyEdit": "Vetëm një super administrator mund të ndryshojë rolin e një administratori.",
+    "superAdminOnlyGrant": "Vetëm një super administrator mund ta bëjë dikë administrator ose super administrator.",
+    "superAdminHint": "Administratorët menaxhojnë faqen; super administratorët mund edhe të japin e të heqin rolet e administratorit."
   }
 }
