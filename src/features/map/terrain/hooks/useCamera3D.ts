@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import type { TerrainPoint } from '../types';
-import { ORBIT_DEG_PER_SECOND, START_BEARING, START_PITCH, areaBounds, clampPitch } from '../utils/terrain3dScene';
+import { ORBIT_DEG_PER_SECOND, START_PITCH, areaBounds, clampPitch } from '../utils/terrain3dScene';
 
 const TURN_STEP = 45;
 const TILT_STEP = 15;
@@ -9,10 +9,10 @@ const TILT_STEP = 15;
 /**
  * Buttons for moving around the 3D view, for anyone who doesn't know the
  * drag gestures: turn, tilt, fly around (a slow orbit that stops at the first
- * touch), and back to the opening view. Moves are instant under reduced motion,
+ * touch), and back to the opening view (looking uphill, see openingBearing). Moves are instant under reduced motion,
  * and there is no fly-around then.
  */
-export function useCamera3D(map: maplibregl.Map | null, polygon: TerrainPoint[], reduceMotion: boolean) {
+export function useCamera3D(map: maplibregl.Map | null, polygon: TerrainPoint[], startBearing: number, reduceMotion: boolean) {
   const [orbiting, setOrbiting] = useState(false);
   const duration = reduceMotion ? 0 : 500;
 
@@ -28,8 +28,8 @@ export function useCamera3D(map: maplibregl.Map | null, polygon: TerrainPoint[],
 
   const reset = useCallback(() => {
     setOrbiting(false);
-    map?.fitBounds(areaBounds(polygon), { padding: 56, pitch: START_PITCH, bearing: START_BEARING, duration: reduceMotion ? 0 : 900 });
-  }, [map, polygon, reduceMotion]);
+    map?.fitBounds(areaBounds(polygon), { padding: 56, pitch: START_PITCH, bearing: startBearing, duration: reduceMotion ? 0 : 900 });
+  }, [map, polygon, startBearing, reduceMotion]);
 
   const toggleOrbit = useCallback(() => setOrbiting((on) => !on), []);
 

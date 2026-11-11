@@ -661,6 +661,15 @@ north-west (`hillshade`), bevelled like a tile, with a shadow where the
 ground steps down and a white line where the shade changes. The same picture
 is the 2D overlay and the drape on the 3D surface.
 
+**The house at the best spot** (`utils/house.ts`): a typical one-storey house
+(12 × 9 m, true size, never exaggerated) is drawn where `findBuildSpot` puts
+it — as a roof seen from above on the 2D map (`BuildSpotHouse`, with the
+"Best spot" pin on a stem above it), and as walls under a stepped gable roof
+in 3D (fill-extrusions), standing on its block in the blocks view and on the
+relief in the surface view. Its long side runs across the patch's fall line,
+as houses are sited on slopes; on level ground it faces south. Slope labels
+keep clear of it (`slopeLabels(…, avoid)`).
+
 Key decisions:
 - **Heights come from Terrain Tiles** (AWS Open Data, Terrarium PNGs, free, no
   key). The backend (`backend/src/services/terrain/`) reads the tiles,
@@ -678,6 +687,20 @@ Key decisions:
   satellite imagery and the slope picture draped on it. Never both: blocks on
   relief would count the height twice. Gentle land opens stretched ×2 or ×3
   (by relief over width), and the footer says so.
+- **Markers above the slope picture.** A Google GroundOverlay shares the
+  overlay layer with OverlayViews and is added later (its image is made
+  asynchronously), so it would cover them: corners, arrows and labels live in
+  the overlay-mouse-target pane, the pin in the float pane.
+- **The 3D camera opens looking uphill** (`openingBearing`), from the low side,
+  so the slope faces the viewer and higher ground beyond the area can't hide
+  it. When relief is switched on, the camera's centre is put on the ground
+  (`setCenterElevation`); MapLibre 5 leaves it at sea level otherwise, which
+  puts the camera inside any land higher than its own height. It is only
+  re-seated when relief changes, because it is a jump and would cut short the
+  opening tilt.
+- **Satellite capped at zoom 17.** Esri answers zooms it has no photos for with
+  a "Map data not yet available" picture (a valid image, so nothing falls
+  back); 17 exists almost everywhere in the Balkans and MapLibre enlarges it.
 - **3D is optional.** MapLibre loads only when the 3D view is opened; without
   WebGL the dialog says so and leads back to the 2D map. Camera buttons do
   what the drag gestures do; under reduced motion moves are instant and there

@@ -8,9 +8,22 @@
 import type { BuildSpot, ElevationGrid, SlopeField } from '../types';
 import { cellCenter, cellSpacingM } from './gridGeometry';
 import { EASY_BUILD_MAX_SLOPE, WORKABLE_BUILD_MAX_SLOPE } from './slopeClasses';
+import { downhillBearing } from './slopeField';
 
 /** Roughly a small house with a little space around it. */
 export const MIN_BUILD_AREA_M2 = 150;
+/** Below this average slope a patch counts as level: no way it falls. */
+const LEVEL_SLOPE = 1;
+
+/** Which way a patch falls on average, or null when it is level. */
+export function patchDownhill(patch: number[], field: SlopeField): number | null {
+  let east = 0;
+  let north = 0;
+  for (const i of patch) { east += field.gradEast[i]; north += field.gradNorth[i]; }
+  east /= patch.length;
+  north /= patch.length;
+  return 100 * Math.hypot(east, north) < LEVEL_SLOPE ? null : Math.round(downhillBearing(east, north));
+}
 
 /** Cell indices of the largest 4-connected patch where `ok(i)` holds. */
 export function largestPatch(rows: number, cols: number, ok: (i: number) => boolean): number[] {
@@ -77,8 +90,16 @@ export function findBuildSpot(grid: ElevationGrid, inside: Uint8Array, field: Sl
   for (const [quality, maxSlope] of tiers) {
     const patch = largestPatch(grid.rows, grid.cols, (i) => inside[i] === 1 && field.slope[i] < maxSlope);
     if (patch.length * cellArea < MIN_BUILD_AREA_M2) continue;
-    const { lat, lng } = cellCenter(grid, deepestCell(patch, grid.rows, grid.cols, field.slope));
-    return { lat, lng, areaM2: Math.round(patch.length * cellArea), quality };
+    const cell = deepestCell(patch, grid.rows, grid.cols, field.slope);
+    const { lat, lng } = cellCenter(grid, cell);
+    return {
+      lat,
+      lng,
+      areaM2: Math.round(patch.length * cellArea),
+      quality,
+      elevation: grid.elevations[cell] ?? 0,
+      downhill: patchDownhill(patch, field),
+    };
   }
   return null;
 }

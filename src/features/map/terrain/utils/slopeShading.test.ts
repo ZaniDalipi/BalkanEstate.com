@@ -3,7 +3,8 @@ import { shadeColor, shadeFactor } from './hillshade';
 import { SLOPE_BANDS, bandLabel, slopeBandIndex } from './slopeBands';
 import { classifySlope } from './slopeClasses';
 import { computeSlopeField } from './slopeField';
-import { MAX_LABELS, slopeLabels } from './slopeLabels';
+import { CLEAR_OF_HOUSE_M, MAX_LABELS, slopeLabels } from './slopeLabels';
+import { METERS_PER_DEG_LAT } from './gridGeometry';
 import { makeGrid } from './testGrid';
 
 describe('slope bands', () => {
@@ -70,6 +71,15 @@ describe('slopeLabels', () => {
     const grid = makeGrid(30, 30, (_r, c) => 500 + c * c * 0.35);
     const labels = slopeLabels(grid, new Uint8Array(900).fill(1), computeSlopeField(grid));
     expect(labels.length).toBeLessThanOrEqual(MAX_LABELS);
+  });
+
+  it('keeps clear of the house at the best spot', () => {
+    const grid = makeGrid(12, 12, () => 300);
+    const field = computeSlopeField(grid);
+    const all = new Uint8Array(144).fill(1);
+    const [free] = slopeLabels(grid, all, field);
+    const [moved] = slopeLabels(grid, all, field, { lat: free.lat, lng: free.lng });
+    expect(Math.abs(moved.lat - free.lat) * METERS_PER_DEG_LAT + Math.abs(moved.lng - free.lng) * 80000).toBeGreaterThanOrEqual(CLEAR_OF_HOUSE_M * 0.9);
   });
 
   it('labels nothing outside the area', () => {

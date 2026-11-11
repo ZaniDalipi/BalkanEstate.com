@@ -76,6 +76,10 @@ export interface BuildSpot {
   areaM2: number;
   /** 'easy' = flat or gentle ground; 'workable' = up to moderate slopes. */
   quality: 'easy' | 'workable';
+  /** Ground height there, metres. */
+  elevation: number;
+  /** Which way the patch falls (compass bearing), or null when it is flat. */
+  downhill: number | null;
 }
 
 export interface TerrainAnalysis {

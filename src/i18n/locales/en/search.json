@@ -753,7 +753,8 @@
       "tiltMore": "Tilt more",
       "tiltLess": "Look from above",
       "orbit": "Fly around",
-      "reset": "Reset view"
+      "reset": "Reset view",
+      "houseNote": "The house marks the best place to build, at true size (about 12 × 9 m)."
     }
   }
 }

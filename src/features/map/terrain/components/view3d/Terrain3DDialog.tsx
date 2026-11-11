@@ -5,7 +5,7 @@
  * satellite relief. Heights can be stretched so gentle land shows its shape;
  * the footer says by how much.
  */
-import React, { useId, useRef, useState } from 'react';
+import React, { useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ import { useCamera3D } from '../../hooks/useCamera3D';
 import { useTerrain3DMap } from '../../hooks/useTerrain3DMap';
 import type { TerrainAnalysis, TerrainPoint } from '../../types';
 import { SLOPE_CLASSES, slopeRangeLabel } from '../../utils/slopeClasses';
-import { EXAGGERATIONS, defaultExaggeration, type Exaggeration, type View3DMode } from '../../utils/terrain3dScene';
+import { EXAGGERATIONS, defaultExaggeration, openingBearing, type Exaggeration, type View3DMode } from '../../utils/terrain3dScene';
 import Camera3DControls from './Camera3DControls';
 import SegmentedControl from './SegmentedControl';
 
@@ -44,7 +44,8 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
     reduceMotion,
     spotLabel: t('search:terrain.spot.marker', 'Best spot'),
   });
-  const camera = useCamera3D(map, polygon, reduceMotion);
+  const startBearing = useMemo(() => openingBearing(analysis), [analysis]);
+  const camera = useCamera3D(map, polygon, startBearing, reduceMotion);
   const modes = [
     { value: 'blocks' as const, text: t('search:terrain.view3d.blocks', 'Grid blocks') },
     { value: 'surface' as const, text: t('search:terrain.view3d.surface', 'Real surface') },
@@ -123,6 +124,12 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
             {exaggeration === 1
               ? t('search:terrain.view3d.trueScale', 'Heights are shown true to scale.')
               : t('search:terrain.view3d.exaggerated', 'Heights are stretched ×{{n}} so the shape of the land is easier to see.', { n: exaggeration })}
+            {analysis.buildSpot && (
+              <>
+                {' '}
+                {t('search:terrain.view3d.houseNote', 'The house marks the best place to build, at true size (about 12 × 9 m).')}
+              </>
+            )}
             {' '}
             {t('search:terrain.view3d.hint', 'Drag to move · right-drag or two fingers to turn and tilt · scroll or pinch to zoom.')}
           </p>

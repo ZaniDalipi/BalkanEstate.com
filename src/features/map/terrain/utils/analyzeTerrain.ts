@@ -17,6 +17,7 @@ export function analyzeTerrain(grid: ElevationGrid, polygon: TerrainPoint[]): Te
   const field = computeSlopeField(grid);
   const stats = computeTerrainStats(grid, inside, field, calculatePolygonArea(polygon));
   if (!stats) return { ok: false, error: 'noData' };
+  const buildSpot = findBuildSpot(grid, inside, field);
   return {
     ok: true,
     value: {
@@ -25,8 +26,8 @@ export function analyzeTerrain(grid: ElevationGrid, polygon: TerrainPoint[]): Te
       field,
       stats,
       arrows: slopeArrows(grid, inside, field),
-      labels: slopeLabels(grid, inside, field),
-      buildSpot: findBuildSpot(grid, inside, field),
+      labels: slopeLabels(grid, inside, field, buildSpot),
+      buildSpot,
     },
   };
 }

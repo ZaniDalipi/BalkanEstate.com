@@ -36,7 +36,14 @@ const fake = vi.hoisted(() => {
     addLayer(layer: { id: string }) { this.layers.add(layer.id); }
     getLayer(id: string) { return this.layers.has(id) ? { id } : undefined; }
     setTerrain(t: unknown) { this.terrain = t; }
+    getTerrain() { return this.terrain === 'unset' ? null : this.terrain; }
     getBearing() { return this.bearing; }
+    getZoom() { return 17; }
+    getCenter() { return { lng: 20, lat: 42 }; }
+    centerElevation = 0;
+    setCenterElevation(e: number) { this.centerElevation = e; }
+    queryTerrainElevation() { return this.terrain && this.terrain !== 'unset' ? 512 : null; }
+    once(event: string, fn: () => void) { return this.on(event, fn); }
     getPitch() { return this.pitch; }
     setBearing(b: number) { this.bearing = b; }
     remove() {}
@@ -49,7 +56,7 @@ const maps = fake.state.maps as FakeMap[];
 vi.mock('maplibre-gl', () => ({
   Map: fake.FakeMap,
   NavigationControl: class {},
-  Marker: class { setLngLat() { return this; } addTo() { return this; } remove() {} },
+  Marker: class { setLngLat() { return this; } addTo() { return this; } setOffset() { return this; } remove() {} },
 }));
 vi.mock('maplibre-gl/dist/maplibre-gl.css', () => ({}));
 
@@ -93,8 +100,18 @@ describe('Terrain3DDialog', () => {
     expect(screen.getByRole('button', { name: '×3' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByText(/stretched ×3/)).toBeTruthy();
 
+    // The house stands on its block…
+    expect(maps[0].layers.has('terrain-house')).toBe(true);
+    const houseBase = () => maps[0].setPaintProperty.mock.calls.filter(([layer, prop]) => layer === 'terrain-house' && prop === 'fill-extrusion-base').at(-1)?.[2];
+    expect((houseBase() as unknown[])[2]).toBeGreaterThan(0);
+    expect(screen.getByText(/The house marks the best place to build/)).toBeTruthy();
+
     fireEvent.click(screen.getByRole('button', { name: 'Real surface' }));
     expect(maps[0].terrain).toEqual({ source: 'dem', exaggeration: 3 });
+    // The camera's centre goes onto the ground, not left at sea level inside the hill.
+    expect(maps[0].centerElevation).toBe(512);
+    // …and on the ground when the relief carries it.
+    expect((houseBase() as unknown[])[2]).toBe(0);
 
     fireEvent.click(screen.getByRole('button', { name: '×1' }));
     expect(maps[0].terrain).toEqual({ source: 'dem', exaggeration: 1 });
