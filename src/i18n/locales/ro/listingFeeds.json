@@ -104,7 +104,8 @@
     "cancelConfirmTitle": "Anulezi această verificare?",
     "cancelConfirmBody": "Selecțiile tale se vor pierde. Poți începe oricând o nouă previzualizare.",
     "cancelConfirmYes": "Da, anulează",
-    "cancelConfirmNo": "Continuă verificarea"
+    "cancelConfirmNo": "Continuă verificarea",
+    "failed": "Preluarea anunțurilor nu a reușit."
   },
   "adapter": {
     "rss": "Flux RSS / Atom",
@@ -330,5 +331,67 @@
     "myListingFeeds": {
       "alpha": "Alfa"
     }
+  },
+  "guide": {
+    "toggle": "Nu aveți încă un feed? Vedeți formatul pe care îl citim",
+    "intro": "Publicați anunțurile la o adresă web fixă ca JSON sau XML în această formă și fiecare câmp ajunge direct în anunțurile dvs. de aici.",
+    "formatLabel": "Formatul feedului",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "download": "Descarcă",
+    "copyFailed": "Copierea nu a reușit — selectați textul și copiați-l manual.",
+    "group": {
+      "needed": "Necesare",
+      "neededNote": "Un anunț nu poate fi publicat fără acestea.",
+      "recommended": "Recomandate",
+      "recommendedNote": "Cumpărătorii caută și filtrează după acestea.",
+      "alsoRead": "Citim și",
+      "alsoReadNote": "Se completează când feedul dvs. le are."
+    },
+    "tipsTitle": "Sfaturi",
+    "tipAnyShape": "Aveți deja propriul JSON? Lipiți-l — nume ca price, cena, çmimi sau kupatila sunt recunoscute automat; șablonul este doar forma care acoperă fiecare câmp.",
+    "tipOneFile": "Puneți toate anunțurile într-un singur fișier. Dacă trebuie împărțit în pagini, adăugați un link \"next\" către pagina următoare.",
+    "tipFixedUrl": "Păstrați-l la o adresă fixă (de exemplu https://agentia-dvs.com/feed.json), ca anunțurile noi și cele modificate să se sincronizeze automat.",
+    "tipPhotos": "Legați fotografii la dimensiune completă; se păstrează până la 30 de fotografii pe anunț.",
+    "tipExisting": "Exportați deja către un portal (Kyero sau XML în stil OpenImmo) ori aveți un feed RSS? Lipiți acel link — funcționează așa cum este.",
+    "developerTitle": "Site-ul dvs. e administrat de altcineva?",
+    "developerCopy": "Copiază o cerere pentru dezvoltatorul web",
+    "developerCopied": "Copiat — lipiți-l într-un e-mail",
+    "brief": "Bună ziua, am dori să afișăm anunțurile noastre imobiliare pe BalkanEstate. Ați putea publica toate anunțurile noastre actuale la o adresă web fixă (de exemplu https://site-ul-nostru.com/feed.json), actualizate când se schimbă un anunț, în formatul de mai jos? Pentru fiecare anunț sunt necesare: id, titlu, preț, oraș (sau adresă) și linkuri către fotografii. Utile sunt și: dormitoare, băi, suprafață în m², latitudine/longitudine, tipul proprietății și vânzare sau închiriere. Formatul este standardul schema.org RealEstateListing."
+  },
+  "coverage": {
+    "title": "Ce am găsit în feedul dvs.",
+    "found": "găsit",
+    "missing": "lipsește",
+    "requiredMissing": "Anunțurile fără următoarele nu pot fi publicate: {{fields}}. Adăugați-le în feed sau completați-le când verificați fiecare anunț.",
+    "seeFormat": "Vedeți formatul feedului",
+    "fields": {
+      "title": "Titlu",
+      "price": "Preț",
+      "location": "Oraș / adresă",
+      "photos": "Fotografii",
+      "bedrooms": "Dormitoare",
+      "bathrooms": "Băi",
+      "area": "Suprafață (m²)",
+      "mapPosition": "Poziție pe hartă",
+      "propertyType": "Tipul proprietății",
+      "listingType": "Vânzare sau închiriere"
+    }
+  },
+  "pasteJson": {
+    "invalidAt": "Acesta nu este JSON valid — linia {{line}}, coloana {{column}}: {{reason}}",
+    "invalid": "Acesta nu este JSON valid: {{reason}}"
+  },
+  "configError": {
+    "title": "Setările feedului trebuie corectate:",
+    "missingEndpoint": "Acest feed nu are o adresă web de la care să se preia anunțurile. Editați feedul și adăugați-o.",
+    "invalidUrl": "Aceasta nu este o adresă web — trebuie să înceapă cu https://",
+    "missingFeedUrl": "Adăugați adresa feedului RSS sau Atom.",
+    "missingSource": "Acest feed nu are nici anunțuri lipite, nici o adresă API. Lipiți din nou JSON-ul sau adăugați adresa.",
+    "invalidInlineJson": "Anunțurile lipite nu mai sunt JSON valid. Lipiți-le din nou.",
+    "missingIndexUrl": "Adăugați adresa paginii care listează proprietățile dvs.",
+    "missingSelectors": "Acest feed nu știe cum să găsească anunțurile pe pagină. Configurați-l din nou de la adresa site-ului.",
+    "missingListingUrls": "Acest feed nu are pagini de anunțuri de citit. Configurați-l din nou de la adresa site-ului.",
+    "notAnObject": "Setările feedului trebuie să fie un obiect JSON, de exemplu { \"endpoint\": \"https://…\" }."
   }
 }

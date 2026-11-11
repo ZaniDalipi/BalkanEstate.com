@@ -4,6 +4,7 @@ import type { IngestStats, ListingSource } from '../api/listingSourceApi';
 import { type FetchingPreview, useSyncSession } from '../context/ListingIngestProgressContext';
 import ListingIngestProgressModal from './ListingIngestProgressModal';
 import PreviewFetchProgress from './PreviewFetchProgress';
+import { feedErrorText } from '../utils/feedErrorText';
 
 interface Props {
   source: ListingSource;
@@ -126,7 +127,7 @@ const ListingFeedRow: React.FC<Props> = ({
 
             {source.lastErrorMessage && (
               <div className="mt-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 break-words">
-                {source.lastErrorMessage}
+                {feedErrorText(t, { message: source.lastErrorMessage, code: source.lastErrorCode })}
               </div>
             )}
 

@@ -4,6 +4,7 @@ import { isValidListingItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
 import { queryArray, queryFirst, resolveItemId } from './jsonFeed/items';
 import { XML_PARSER_OPTIONS, detectXmlFeed } from './xmlFeed/detectXmlFeed';
+import { usableAdapterConfig } from './adapterConfig';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface XmlFeedAdapterConfig {
@@ -11,8 +12,8 @@ interface XmlFeedAdapterConfig {
   /** Alias of `endpoint` used by some saved configs. */
   url?: string;
   /** JSONPath into the parsed XML object yielding the array of items. */
-  itemsPath: string;
-  idPath: string;
+  itemsPath?: string;
+  idPath?: string;
   urlPath?: string;
   publishedAtPath?: string;
   /** xml2js options, typically `{ explicitArray: false, mergeAttrs: true }`. */
@@ -32,11 +33,9 @@ export class XmlFeedAdapter implements SourceAdapter {
   readonly type = 'xmlFeed' as const;
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
-    const cfg = (source.adapterConfig ?? {}) as unknown as XmlFeedAdapterConfig;
-    const endpoint = cfg.endpoint ?? cfg.url;
-    if (!endpoint || !cfg.itemsPath || !cfg.idPath) {
-      throw new Error(`XmlFeedAdapter: endpoint, itemsPath and idPath required (source ${source.slug})`);
-    }
+    // Checked: needs an address; a missing or outdated items path is re-detected below.
+    const cfg = usableAdapterConfig('xmlFeed', source.adapterConfig ?? {}) as unknown as XmlFeedAdapterConfig;
+    const endpoint = cfg.endpoint as string;
 
     const response = await httpGet<string>(endpoint, {
       userAgent: cfg.userAgent,
@@ -47,7 +46,7 @@ export class XmlFeedAdapter implements SourceAdapter {
     const body = String(response.data);
     const parsed = await parseStringPromise(body, { ...XML_PARSER_OPTIONS, ...(cfg.parserOptions ?? {}) });
 
-    let items = queryArray(parsed, cfg.itemsPath);
+    let items = cfg.itemsPath ? queryArray(parsed, cfg.itemsPath) : [];
     if (items.length === 0) {
       // The feed's structure changed since it was set up — locate the listings again.
       const redetected = await detectXmlFeed(body);
@@ -67,7 +66,7 @@ export class XmlFeedAdapter implements SourceAdapter {
       }
       const url = cfg.urlPath ? queryFirst(item, cfg.urlPath) : undefined;
       out.push({
-        id: resolveItemId(item, cfg.idPath, i),
+        id: resolveItemId(item, cfg.idPath ?? '$.id', i),
         url: typeof url === 'string' ? url : undefined,
         raw: item as Record<string, unknown>,
       });

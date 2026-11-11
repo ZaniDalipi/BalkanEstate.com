@@ -272,7 +272,8 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
         });
         waiter.resolve();
       } else {
-        waiter.reject(new Error(job.error));
+        // The code lets the page show a known problem in the user's language.
+        waiter.reject(Object.assign(new Error(job.error), { code: job.errorCode }));
       }
     },
     [stopFetching]

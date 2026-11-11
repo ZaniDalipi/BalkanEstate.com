@@ -502,6 +502,7 @@ export const FEED_KEY_MAP: Readonly<Record<string, AttributeField>> = {
   // Listing
   category: 'propertyType', propertycategory: 'propertyType', kind: 'propertyType', vrsta: 'propertyType',
   transaction: 'listingType', offer: 'listingType', purpose: 'listingType', contracttype: 'listingType',
+  businessfunction: 'listingType', pricefreq: 'listingType',
   reference: 'propertyId', referencenumber: 'propertyId', refno: 'propertyId', externalid: 'propertyId',
 };
 

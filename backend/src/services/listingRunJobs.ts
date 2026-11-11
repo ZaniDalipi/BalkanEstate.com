@@ -35,7 +35,7 @@ interface JobBase extends RunProgress {
 export type RunJob =
   | (JobBase & { status: 'running' })
   | (JobBase & { status: 'done'; stats: IngestStats })
-  | (JobBase & { status: 'failed'; error: string });
+  | (JobBase & { status: 'failed'; error: string; errorCode?: string });
 
 const MAX_ITEMS = 100;
 
@@ -61,7 +61,7 @@ const store = createJobStore<RunProgress, IngestStats>(() => ({ current: null, r
 const toPublic = (job: JobRecord<RunProgress, IngestStats>): RunJob => {
   const base: JobBase = { jobId: job.jobId, sourceId: job.sourceId, startedAt: job.startedAt, ...job.progress };
   if (job.status === 'done') return { ...base, status: 'done', stats: job.result };
-  if (job.status === 'failed') return { ...base, status: 'failed', error: job.error };
+  if (job.status === 'failed') return { ...base, status: 'failed', error: job.error, errorCode: job.errorCode };
   return { ...base, status: 'running' };
 };
 

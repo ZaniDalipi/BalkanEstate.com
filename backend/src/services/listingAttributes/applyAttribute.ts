@@ -98,8 +98,8 @@ export const applyAttribute = (target: MappedListing, field: AttributeField, val
     if (v.length <= 50 && !/^https?:\/\//.test(v)) target.propertyId = v;
   } else if (field === 'listingType' && !target.listingType) {
     const lv = v.toLowerCase();
-    if (/\b(sale|prodaj|shitj|vanzar|πωλ|eladó|verkauf|kauf|продаж)\b/i.test(lv)) target.listingType = 'sale';
-    else if (/\b(rent|najam|qira|chirie|ενοικ|kiadó|miete|наем|кирија)\b/i.test(lv)) target.listingType = 'rent';
+    if (/\b(sale|sell|prodaj|shitj|vanzar|πωλ|eladó|verkauf|kauf|продаж)\b/i.test(lv)) target.listingType = 'sale';
+    else if (/\b(rent|lease|leaseout|month|monthly|najam|qira|chirie|ενοικ|kiadó|miete|наем|кирија)\b/i.test(lv)) target.listingType = 'rent';
   } else if (field === 'address' && !target.address) {
     target.address = v;
   } else if (field === 'country' && !target.country) {

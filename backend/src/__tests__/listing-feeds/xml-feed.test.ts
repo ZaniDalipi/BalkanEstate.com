@@ -29,7 +29,8 @@ const KYERO = `<?xml version="1.0" encoding="UTF-8"?>
 describe('detectXmlFeed', () => {
   it('finds the repeated listing element and how to identify it', async () => {
     const found = await detectXmlFeed(KYERO);
-    expect(found).toMatchObject({ kind: 'listings', itemsPath: "$['root']['property'][*]", idPath: "$['id']", urlPath: "$['url']" });
+    // Plain dot paths: nothing in them for a request filter to escape.
+    expect(found).toMatchObject({ kind: 'listings', itemsPath: '$.root.property[*]', idPath: '$.id', urlPath: '$.url' });
     expect(found?.kind === 'listings' && found.items).toHaveLength(3);
   });
 

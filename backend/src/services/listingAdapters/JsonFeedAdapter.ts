@@ -4,10 +4,11 @@ import { isValidListingItem } from '../listingNormalizerService';
 import { fetchWithBrowser } from './browserClient';
 import { extractEmbeddedSpaListings } from './embeddedState';
 import { httpGet } from './httpClient';
-import { queryArray, queryFirst, resolveItemId } from './jsonFeed/items';
+import { itemsAt, queryFirst, resolveItemId } from './jsonFeed/items';
 import { nextLinkInPayload } from './jsonFeed/nextLinkInPayload';
 import { findNextPageUrl } from './pagination/nextPageLink';
 import { walkPages, type LoadedPage } from './pagination/walkPages';
+import { usableAdapterConfig } from './adapterConfig';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface JsonFeedAdapterConfig {
@@ -18,10 +19,10 @@ interface JsonFeedAdapterConfig {
   /** Inline JSON payload (string). Used when the user pasted a JSON sample
    *  without an API URL — the import re-uses the pasted data once. */
   inlineJson?: string;
-  /** JSONPath to the array of items inside the response payload, e.g. "$.results" or "$.data.listings". */
-  itemsPath: string;
-  /** JSONPath (relative to each item) yielding the source listing id, e.g. "$.id". */
-  idPath: string;
+  /** JSONPath to the array of items, e.g. "$.results"; when unset or empty, the list is located. */
+  itemsPath?: string;
+  /** JSONPath (relative to each item) yielding the source listing id; defaults to the usual id fields. */
+  idPath?: string;
   /** Optional JSONPath (relative to each item) yielding the canonical URL, e.g. "$.url". */
   urlPath?: string;
   /** Optional JSONPath yielding ISO timestamp for since-filtering. */
@@ -63,14 +64,9 @@ export class JsonFeedAdapter implements SourceAdapter {
   readonly type = 'jsonFeed' as const;
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
-    const cfg = (source.adapterConfig ?? {}) as unknown as JsonFeedAdapterConfig;
-    const endpoint = cfg.endpoint ?? cfg.url;
-    if (!cfg.itemsPath || !cfg.idPath) {
-      throw new Error(`JsonFeedAdapter: itemsPath and idPath are required (source ${source.slug})`);
-    }
-    if (!endpoint && !cfg.inlineJson) {
-      throw new Error(`JsonFeedAdapter: either endpoint or inlineJson must be provided (source ${source.slug})`);
-    }
+    // Checked: needs an address or pasted listings; the list and ids are found anyway.
+    const cfg = usableAdapterConfig('jsonFeed', source.adapterConfig ?? {}) as unknown as JsonFeedAdapterConfig;
+    const endpoint = cfg.endpoint;
     const limit = options.limit ?? cfg.limit;
     const since = options.since?.getTime();
 
@@ -83,7 +79,7 @@ export class JsonFeedAdapter implements SourceAdapter {
           const t = ts ? new Date(String(ts)).getTime() : NaN;
           if (Number.isFinite(t) && t < since) return;
         }
-        const id = resolveItemId(item, cfg.idPath, idOffset + i);
+        const id = resolveItemId(item, cfg.idPath ?? '$.id', idOffset + i);
         const url = cfg.urlPath ? (queryFirst(item, cfg.urlPath) as string | undefined) : undefined;
         out.push({ id, url: typeof url === 'string' ? url : undefined, raw: item as Record<string, unknown> });
       });
@@ -98,7 +94,7 @@ export class JsonFeedAdapter implements SourceAdapter {
       } catch (err) {
         throw new Error(`JsonFeedAdapter: inlineJson is not valid JSON (source ${source.slug}): ${(err as Error).message}`);
       }
-      const out = toListings(queryArray(parsed, cfg.itemsPath), 0);
+      const out = toListings(itemsAt(parsed, cfg.itemsPath), 0);
       return limit ? out.slice(0, limit) : out;
     }
 
@@ -142,7 +138,7 @@ export class JsonFeedAdapter implements SourceAdapter {
     if (typeof response.data === 'string' && /<html|<script/i.test(response.data)) {
       return { items: extractEmbeddedSpaListings(response.data)?.items ?? [] };
     }
-    return { items: queryArray(response.data, cfg.itemsPath), nextUrl: nextLinkInPayload(response.data, url) };
+    return { items: itemsAt(response.data, cfg.itemsPath), nextUrl: nextLinkInPayload(response.data, url) };
   }
 
   /** Listings from a web page's embedded JS state (re-located on every page, so the path can't drift). */
@@ -165,7 +161,7 @@ export class JsonFeedAdapter implements SourceAdapter {
     for (let i = 0; i < (p?.maxPages ?? DEFAULT_MAX_PAGES); i++) {
       const url = cursor && p?.cursorParam ? withParams(endpoint, { [p.cursorParam]: cursor }) : endpoint;
       const response = await httpGet<unknown>(url, this.requestOpts(cfg));
-      const items = queryArray(response.data, cfg.itemsPath);
+      const items = itemsAt(response.data, cfg.itemsPath);
       if (!items.length) break;
       out.push(...toListings(items, out.length));
       if (limit && out.length >= limit) return out.slice(0, limit);

@@ -600,7 +600,12 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
     // as HTML). Escaping them stored "Owner's view" as "Owner&#x27;s view",
     // which React then displayed literally.
     'label', 'viewName', 'unitNumber', 'unitType', 'orientation', 'viewType', 'note',
-    'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient' // Email template fields - contain intentional HTML edited by admins
+    'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient', // Email template fields - contain intentional HTML edited by admins
+    // Listing-feed setup: machine data the server parses and never renders —
+    // a pasted JSON sample, the feed's settings (JSONPaths like $['a']['b'],
+    // selectors like a[href*="x"]) and its field map. Escaping their quotes
+    // made every pasted sample "Invalid JSON" and broke saved paths.
+    'sampleJson', 'inlineJson', 'adapterConfig', 'fieldMap',
   ]);
 
   // Recursive function to sanitize strings

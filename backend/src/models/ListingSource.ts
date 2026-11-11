@@ -24,6 +24,8 @@ export interface IListingSource extends Document {
   lastRunAt?: Date;
   lastSuccessAt?: Date;
   lastErrorMessage?: string;
+  /** Code of the last failure when it is a known one (e.g. a feed-settings problem), for the UI to translate. */
+  lastErrorCode?: string;
   listingsImported: number;
   listingsUpdated: number;
   listingsFailed: number;
@@ -58,6 +60,7 @@ const ListingSourceSchema = new Schema<IListingSource>(
     lastRunAt: { type: Date },
     lastSuccessAt: { type: Date },
     lastErrorMessage: { type: String },
+    lastErrorCode: { type: String },
     listingsImported: { type: Number, default: 0 },
     listingsUpdated: { type: Number, default: 0 },
     listingsFailed: { type: Number, default: 0 },

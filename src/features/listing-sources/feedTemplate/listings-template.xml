@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listings>
+  <listing>
+    <id>A-1024</id>
+    <url>https://your-agency.com/listings/a-1024</url>
+    <title>Sea-view apartment with terrace</title>
+    <description>Two-bedroom apartment 200 m from the beach, sold furnished.</description>
+    <listing_type>sale</listing_type>
+    <property_type>apartment</property_type>
+    <price>185000</price>
+    <currency>EUR</currency>
+    <country>Albania</country>
+    <city>Vlore</city>
+    <address>Rruga Radhime 12, Radhimë</address>
+    <lat>40.3838</lat>
+    <lng>19.4553</lng>
+    <bedrooms>2</bedrooms>
+    <bathrooms>1</bathrooms>
+    <living_rooms>1</living_rooms>
+    <area>74</area>
+    <floor>3</floor>
+    <total_floors>6</total_floors>
+    <year_built>2022</year_built>
+    <parking>1</parking>
+    <furnishing>furnished</furnishing>
+    <heating>central</heating>
+    <condition>new</condition>
+    <amenities>
+      <amenity>Sea view</amenity>
+      <amenity>Balcony</amenity>
+      <amenity>Elevator</amenity>
+    </amenities>
+    <images>
+      <image>https://your-agency.com/photos/a-1024-1.jpg</image>
+      <image>https://your-agency.com/photos/a-1024-2.jpg</image>
+    </images>
+  </listing>
+  <listing>
+    <id>B-2048</id>
+    <url>https://your-agency.com/listings/b-2048</url>
+    <title>Family house with garden</title>
+    <description>Three-bedroom house with a garden, for long-term rent.</description>
+    <listing_type>rent</listing_type>
+    <property_type>house</property_type>
+    <price>900</price>
+    <currency>EUR</currency>
+    <country>Croatia</country>
+    <city>Pula</city>
+    <address>Banjole</address>
+    <lat>44.8212</lat>
+    <lng>13.8431</lng>
+    <bedrooms>3</bedrooms>
+    <bathrooms>2</bathrooms>
+    <area>140</area>
+    <images>
+      <image>https://your-agency.com/photos/b-2048-1.jpg</image>
+    </images>
+  </listing>
+</listings>

@@ -1030,6 +1030,43 @@ Backend: `models/ImportedListingDraft.ts`, `services/importReviewService.ts`,
 keys in `importReviewKeys`; the prefill hook-in is `ListingPrefill` in
 `src/features/seller/components/useListingForm.ts`.
 
+### Feed setup and runs
+
+```
+Add-feed wizard
+  ├── FeedFormatGuide         template (schema.org RealEstateListing JSON · plain XML), copy/download,
+  │                           needed / recommended fields, tips, request for the web developer
+  ├── POST /listing-sources/detect → DetectResult (+ coverage: which important fields the sample has)
+  └── FeedCoverageList        found / missing, warns when a field needed to publish is missing
+
+Save (create / update, user and admin)
+  └── feedConfigOrRespond()   checkAdapterConfig(type, adapterConfig)        listingAdapters/adapterConfig.ts
+        ├── brings old spellings up to date (url → endpoint, params → query), fills idPath
+        └── refuses what can't run: 400 { code: FEED_CONFIG_INVALID, errors: [{ field, code, message }] }
+
+Fetch / import (minutes for a big site)
+  ├── POST …/:id/preview        → 202 job   GET …/:id/preview/:jobId   found / read counts → listings
+  ├── POST …/:id/confirm-import → 202 job   GET …/:id/import/:jobId    counts, recent items → stats
+  └── useJobPolling (2 s, TanStack Query) fills the feed row, dock card and progress window
+```
+
+- **Settings are checked where they're saved, and again before a run.** Only
+  what can't be worked out is required (where to fetch from); the listings
+  list is located in the response and ids come from the usual id fields when
+  no path is set. Adapters call `usableAdapterConfig`, so a feed saved before
+  the check fails with a `FeedConfigError` whose code the page translates
+  (`listingFeeds:configError.*`) and stores as `lastErrorCode`.
+- **Feed setup data is not HTML-escaped.** `xssSanitizer` skips `sampleJson`,
+  `inlineJson`, `adapterConfig` and `fieldMap`: machine data the server parses
+  and never renders. Escaping their quotes broke every pasted JSON sample.
+- **The templates are tested.** `feedTemplate/listings-template.json|xml` are
+  shown in the wizard and run through detection, the adapter and the field
+  mapping by `feed-template.test.ts`; every field must import.
+- **Long work runs as a job.** Fetching every page and importing hundreds of
+  listings outlive a request behind a proxy, and the socket isn't relied on:
+  `services/backgroundJobs.ts` keeps jobs in memory (per server process),
+  the page polls them.
+
 ---
 
 ## My Listings — loaded in chunks

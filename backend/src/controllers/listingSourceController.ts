@@ -4,6 +4,7 @@ import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
 import { previewSource, getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
 import type { RawListing } from '../services/listingAdapters/types';
+import { feedConfigOrRespond } from '../middleware/feedConfigValidation';
 
 /** GET /api/admin/listing-sources */
 export const list = async (_req: Request, res: Response): Promise<void> => {
@@ -23,8 +24,10 @@ export const get = async (req: Request, res: Response): Promise<void> => {
 
 /** POST /api/admin/listing-sources */
 export const create = async (req: Request, res: Response): Promise<void> => {
+  const adapterConfig = feedConfigOrRespond(res, req.body?.adapterType, req.body?.adapterConfig);
+  if (!adapterConfig) return;
   try {
-    const source = await ListingSource.create(req.body);
+    const source = await ListingSource.create({ ...req.body, adapterConfig });
     res.status(201).json({ source });
   } catch (err) {
     res.status(400).json({ message: (err as Error).message });
@@ -33,7 +36,18 @@ export const create = async (req: Request, res: Response): Promise<void> => {
 
 /** PUT /api/admin/listing-sources/:id */
 export const update = async (req: Request, res: Response): Promise<void> => {
-  const source = await ListingSource.findByIdAndUpdate(req.params.id, req.body, {
+  const body = { ...(req.body ?? {}) };
+  if (body.adapterConfig !== undefined || body.adapterType !== undefined) {
+    const existing = await ListingSource.findById(req.params.id).select('adapterType adapterConfig').lean();
+    if (!existing) {
+      res.status(404).json({ message: 'ListingSource not found' });
+      return;
+    }
+    const checked = feedConfigOrRespond(res, body.adapterType ?? existing.adapterType, body.adapterConfig ?? existing.adapterConfig);
+    if (!checked) return;
+    body.adapterConfig = checked;
+  }
+  const source = await ListingSource.findByIdAndUpdate(req.params.id, body, {
     new: true,
     runValidators: true,
   });

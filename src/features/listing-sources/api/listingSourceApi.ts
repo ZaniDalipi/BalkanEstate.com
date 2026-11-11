@@ -17,6 +17,8 @@ export interface ListingSource {
   lastRunAt?: string;
   lastSuccessAt?: string;
   lastErrorMessage?: string;
+  /** Code of the last failure when it is a known one (e.g. a settings problem), to translate. */
+  lastErrorCode?: string;
   listingsImported: number;
   listingsUpdated: number;
   listingsFailed: number;
@@ -209,7 +211,7 @@ interface PreviewJobBase {
 export type PreviewJob =
   | (PreviewJobBase & { status: 'running' })
   | (PreviewJobBase & { status: 'done'; result: PreviewResult })
-  | (PreviewJobBase & { status: 'failed'; error: string });
+  | (PreviewJobBase & { status: 'failed'; error: string; errorCode?: string });
 
 /** Start fetching a feed's listings for review. Returns at once with a job to poll. */
 export const startMyListingSourcePreview = async (
@@ -265,7 +267,7 @@ interface ImportJobBase {
 export type ImportJob =
   | (ImportJobBase & { status: 'running' })
   | (ImportJobBase & { status: 'done'; stats: IngestStats })
-  | (ImportJobBase & { status: 'failed'; error: string });
+  | (ImportJobBase & { status: 'failed'; error: string; errorCode?: string });
 
 /**
  * Import the approved listings. Starts a server job and returns it at once;
@@ -287,12 +289,26 @@ export const getMyListingSourceImportJob = async (id: string, jobId: string): Pr
   return res.job;
 };
 
+export type CoverageField =
+  | 'title' | 'price' | 'location' | 'photos'
+  | 'bedrooms' | 'bathrooms' | 'area' | 'mapPosition' | 'propertyType' | 'listingType';
+
+/** Whether the feed's sample listing has one of the fields that make a good listing. */
+export interface CoverageItem {
+  field: CoverageField;
+  /** A listing can't be published without it. */
+  required: boolean;
+  found: boolean;
+}
+
 export interface DetectResult {
   adapterType: ListingAdapterType;
   adapterConfig: Record<string, unknown>;
   fieldMap: Record<string, string>;
   sample?: Record<string, unknown>;
   hint: string;
+  /** Field checklist, for feeds whose sample is a whole listing (JSON, XML, API). */
+  coverage?: CoverageItem[];
 }
 
 export type DetectMethod = 'url' | 'rss' | 'sampleJson' | 'customApi';

@@ -2,6 +2,7 @@ import Parser from 'rss-parser';
 import type { IListingSource } from '../../models/ListingSource';
 import { isValidRssItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
+import { usableAdapterConfig } from './adapterConfig';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface RssAdapterConfig {
@@ -22,9 +23,8 @@ export class RssFeedAdapter implements SourceAdapter {
   readonly type = 'rss' as const;
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
-    const cfg = (source.adapterConfig ?? {}) as RssAdapterConfig;
-    const urls = cfg.feedUrls ?? (cfg.feedUrl ? [cfg.feedUrl] : []);
-    if (!urls.length) throw new Error(`RssFeedAdapter: missing feedUrl/feedUrls for ${source.slug}`);
+    const cfg = usableAdapterConfig('rss', source.adapterConfig ?? {}) as RssAdapterConfig;
+    const urls = cfg.feedUrls ?? [];
 
     const limit = options.limit ?? cfg.limit;
     const out: RawListing[] = [];
