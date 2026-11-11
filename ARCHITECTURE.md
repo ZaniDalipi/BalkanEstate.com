@@ -116,6 +116,18 @@ To add a page: a builder in `paths.ts`, a lazy import and a route in
 - Direct `apiService.ts` calls for mutations
 - WebSocket for real-time property updates
 
+### Realtime (Socket.IO)
+- The server accepts only handshakes that carry an access token
+  (`auth: { token }`). Each socket joins its user's room, and admins also join
+  the admin room: `backend/src/sockets/socketRooms.ts`.
+- Anything about one user (their feed sync, notifications) goes to a room:
+  `io.to(userRoom(id))`, never `io.emit`, which reaches every signed-in user.
+- Frontend: `useSocket()` shares the socket from
+  `src/shared/realtime/authenticatedSocket.ts`. It sends the in-memory access
+  token from a callback, connects while someone is signed in, follows
+  refresh-token rotation and leaves on sign-out. Chat and notifications still
+  use their own connection in `services/socketService.ts`.
+
 ---
 
 ## Property Gallery — Dynamic Aspect Ratio

@@ -12,6 +12,7 @@ import User from '../models/User';
 import emailService from './emailService';
 import { sendPushToUser } from './pushNotificationService';
 import { getSocketInstance } from '../utils/socketInstance';
+import { userRoom } from '../sockets/socketRooms';
 import { apiLogger } from '../utils/logger';
 
 // ============================================================================
@@ -456,7 +457,7 @@ export async function createNotificationWithPush(
   // Emit real-time socket event so the frontend notification center updates instantly
   const io = getSocketInstance();
   if (io) {
-    io.to(`user:${String(data.userId)}`).emit('new-notification', {
+    io.to(userRoom(String(data.userId))).emit('new-notification', {
       _id: String(notification._id),
       type: notification.type,
       title: notification.title,

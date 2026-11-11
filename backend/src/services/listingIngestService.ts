@@ -193,7 +193,7 @@ export const runSource = async (
     // Emit a kick-off event so the frontend dock/modal know the run is alive
     // and can transition out of the "discovering" placeholder state before any
     // actual work has been processed.
-    emitListingIngestProgress(String(source._id), {
+    emitListingIngestProgress(source, {
       fetched: 0,
       processed: 0,
       imported: 0,
@@ -216,7 +216,7 @@ export const runSource = async (
         since,
         limit,
         onProgress: (discovered, detailsFetched) => {
-          emitListingIngestProgress(String(source._id), {
+          emitListingIngestProgress(source, {
             fetched: discovered,
             processed: detailsFetched,
             imported: 0,
@@ -231,7 +231,7 @@ export const runSource = async (
 
     // Tell the frontend how many items we found so the progress bar can
     // show "0 of N processed" instead of indefinitely hanging at 0/0.
-    emitListingIngestProgress(String(source._id), {
+    emitListingIngestProgress(source, {
       fetched: stats.fetched,
       processed: 0,
       imported: 0,
@@ -265,7 +265,7 @@ export const runSource = async (
             source: source._id,
             sourceListingId: raw.id,
           }).catch(() => undefined);
-          emitListingIngestProgress(String(source._id), {
+          emitListingIngestProgress(source, {
             fetched: stats.fetched,
             processed: i + 1,
             imported: stats.imported,
@@ -326,7 +326,7 @@ export const runSource = async (
         log.info(`[ingest] ${source.slug}: failed listing ${raw.id} — ${msg}`);
       }
 
-      emitListingIngestProgress(String(source._id), {
+      emitListingIngestProgress(source, {
         fetched: stats.fetched,
         processed: i + 1,
         imported: stats.imported,
@@ -404,7 +404,7 @@ export const runSource = async (
 
   // Final progress event — guarantees the frontend transitions to "done" even
   // when 0 items were fetched (e.g. site blocked us, adapter raised early).
-  emitListingIngestProgress(String(source._id), {
+  emitListingIngestProgress(source, {
     fetched: stats.fetched,
     processed: stats.fetched,
     imported: stats.imported,

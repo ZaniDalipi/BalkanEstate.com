@@ -80,6 +80,16 @@ const clearSessionHint = (): void => {
  */
 let inMemoryAccessToken: string | null = null;
 
+type AccessTokenListener = (token: string | null) => void;
+const accessTokenListeners = new Set<AccessTokenListener>();
+
+/** Store the token in memory and tell the listeners when it actually changed. */
+const storeAccessToken = (token: string | null): void => {
+  if (token === inMemoryAccessToken) return;
+  inMemoryAccessToken = token;
+  accessTokenListeners.forEach((listener) => listener(token));
+};
+
 /**
  * Clear any legacy tokens from localStorage/sessionStorage.
  * Called once on init to migrate users off the old storage model.
@@ -110,6 +120,13 @@ const decodeToken = (token: string): { exp?: number; id?: string } | null => {
     return null;
   }
 };
+
+/**
+ * The user an access token was issued for, read without verifying it (only the
+ * server can). Tells a refreshed token of the same user from another account's.
+ */
+export const getTokenUserId = (token: string | null): string | null =>
+  (token ? decodeToken(token)?.id : null) ?? null;
 
 // Check if token is about to expire (within buffer time)
 const isTokenExpiringSoon = (token: string): boolean => {
@@ -211,10 +228,22 @@ export const tokenService = {
    * The token is NOT written to localStorage/sessionStorage.
    */
   setAccessToken: (token: string): void => {
-    inMemoryAccessToken = token;
     hadActiveSession = true;
     setSessionHint();
     scheduleRefresh(token);
+    storeAccessToken(token);
+  },
+
+  /**
+   * Call `listener` with the new access token each time it changes: login,
+   * refresh-token rotation, and null on logout or expiry. Returns the
+   * unsubscribe function.
+   */
+  onAccessTokenChange: (listener: AccessTokenListener): (() => void) => {
+    accessTokenListeners.add(listener);
+    return () => {
+      accessTokenListeners.delete(listener);
+    };
   },
 
   /**
@@ -239,11 +268,11 @@ export const tokenService = {
       clearTimeout(refreshTimer);
       refreshTimer = null;
     }
-    inMemoryAccessToken = null;
     // Clear any legacy tokens that may still exist from before this migration
     clearLegacyStorage();
     // Clear session hint so next visit doesn't attempt a pointless refresh
     clearSessionHint();
+    storeAccessToken(null);
   },
 
   hasValidToken: (): boolean => {

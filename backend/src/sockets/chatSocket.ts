@@ -1,7 +1,11 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Conversation from '../models/Conversation';
+import User from '../models/User';
 import { resolveId, encodeId } from '../utils/idObfuscation';
+import { isAdminRole } from '../utils/roleChangePolicy';
+import { isSecureHandshake } from './socketHandshake';
+import { ADMIN_ROOM, userRoom } from './socketRooms';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -16,6 +20,8 @@ const getJwtSecret = (): string => {
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
+  /** Admins and super admins also join ADMIN_ROOM. */
+  isAdmin?: boolean;
   // Track which conversations this socket has been authorized for
   authorizedConversations?: Set<string>;
 }
@@ -57,29 +63,43 @@ function checkSocketRateLimit(socketId: string): boolean {
 export const setupChatSocket = (io: Server) => {
   // Transport security middleware — reject unencrypted connections in production
   io.use((socket: AuthenticatedSocket, next) => {
-    if (isProduction && !socket.handshake.secure) {
+    if (isProduction && !isSecureHandshake(socket.handshake)) {
       return next(new Error('Security error: Encrypted connection (wss://) required'));
     }
     next();
   });
 
-  // Authentication middleware
+  // Authentication middleware: the same access tokens the HTTP API accepts
   io.use(async (socket: AuthenticatedSocket, next) => {
-    try {
-      const token = socket.handshake.auth.token;
-
-      if (!token) {
-        return next(new Error('Authentication error: No token provided'));
-      }
-
-      // Verify JWT token
-      const decoded = jwt.verify(token, getJwtSecret()) as { id: string };
-
-      socket.userId = decoded.id;
-      next();
-    } catch (error) {
-      next(new Error('Authentication error: Invalid token'));
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error('Authentication error: No token provided'));
     }
+
+    let userId: string;
+    try {
+      const decoded = jwt.verify(token, getJwtSecret()) as { id: string; type?: string };
+      if (decoded.type === 'refresh') throw new Error('Refresh tokens cannot open a socket');
+      userId = decoded.id;
+    } catch {
+      return next(new Error('Authentication error: Invalid token'));
+    }
+
+    // The role decides whether the socket joins the admin room, and a deleted
+    // user's token no longer connects. If the lookup itself fails, connect
+    // without the admin room: no extra privilege on doubt, and no outage.
+    try {
+      const user = await User.findById(userId).select('role').lean<{ role?: string } | null>();
+      if (!user) {
+        return next(new Error('Authentication error: Invalid token'));
+      }
+      socket.isAdmin = isAdminRole(user.role);
+    } catch {
+      socket.isAdmin = false;
+    }
+
+    socket.userId = userId;
+    next();
   });
 
   io.on('connection', (socket: AuthenticatedSocket) => {
@@ -95,7 +115,8 @@ export const setupChatSocket = (io: Server) => {
     userSockets.set(userId, socket.id);
 
     // Join a user-specific room so we can target this user from any service
-    socket.join(`user:${userId}`);
+    socket.join(userRoom(userId));
+    if (socket.isAdmin) socket.join(ADMIN_ROOM);
 
     // Initialize authorized conversations set for this socket
     socket.authorizedConversations = new Set();

@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import { socketLogger } from '../utils/logger';
 import { encodeId } from '../utils/idObfuscation';
+import { listingIngestRoom } from './socketRooms';
 
 // Store the io instance for emitting from controllers
 let ioInstance: Server | null = null;
@@ -296,11 +297,19 @@ export const emitPropertiesBulkUpdate = (action: 'created' | 'updated' | 'delete
   socketLogger.info(`📤 [Controller] property:bulkUpdate - ${action} ${count} properties`);
 };
 
+/** The feed a progress event is about, and who owns it (none for a system feed). */
+export interface IngestProgressSource {
+  _id: { toString(): string };
+  userId?: { toString(): string } | null;
+}
+
 /**
  * Emit listing ingest progress event
- * Call this during listing source sync to show real-time progress
+ * Call this during listing source sync to show real-time progress.
+ * Only the feed's owner receives it (admins, for a system feed): the payload
+ * names the listings being imported.
  */
-export const emitListingIngestProgress = (sourceId: string, progress: {
+export const emitListingIngestProgress = (source: IngestProgressSource, progress: {
   fetched: number;
   processed: number;
   imported: number;
@@ -319,9 +328,10 @@ export const emitListingIngestProgress = (sourceId: string, progress: {
   // The frontend stores sessions under the obfuscated (encoded) ID, which is
   // what the global Mongoose toJSON transform produces. Encode here so the
   // socket event's sourceId matches what the client registered.
+  const sourceId = String(source._id);
   const encodedSourceId = encodeId(sourceId);
 
-  ioInstance.emit('listing:ingestProgress', {
+  ioInstance.to(listingIngestRoom(source.userId)).emit('listing:ingestProgress', {
     sourceId: encodedSourceId,
     ...progress,
     timestamp: new Date().toISOString(),
