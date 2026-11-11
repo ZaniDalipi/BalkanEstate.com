@@ -1,7 +1,7 @@
 import Property from '../models/Property';
 import { getAdapter } from './listingAdapters';
 import type { IListingSource } from '../models/ListingSource';
-import type { RawListing } from './listingAdapters/types';
+import type { FetchOptions, RawListing } from './listingAdapters/types';
 import { extractMappedFields, parsePriceAmount } from './listingNormalizerService';
 import { resolveLocation } from './listingAttributes/location';
 
@@ -146,12 +146,15 @@ const extractPreviewItem = (raw: RawListing, source: IListingSource): Omit<Previ
   };
 };
 
+export interface PreviewResult { previewId: string; items: PreviewListing[]; fetched: number }
+
 export const previewSource = async (
   source: IListingSource,
-  limit: number
-): Promise<{ previewId: string; items: PreviewListing[]; fetched: number }> => {
+  limit: number,
+  onProgress?: FetchOptions['onProgress']
+): Promise<PreviewResult> => {
   const adapter = getAdapter(source);
-  const allRaws = await adapter.fetchListings(source, { limit });
+  const allRaws = await adapter.fetchListings(source, { limit, onProgress });
 
   // Drop items whose fetched detail page has no real-estate content signals.
   // Items without detailHtml pass through (URL-based filtering already applied

@@ -12,6 +12,7 @@ import {
 import {
   type PendingPreview,
   useListingIngestProgressContext,
+  type FetchingPreview,
 } from '../context/ListingIngestProgressContext';
 
 export type { PendingPreview };
@@ -24,6 +25,8 @@ export interface UseListingFeedsReturn {
   // Per-row operation state
   runningIds: Set<string>;
   previewingIds: Set<string>;
+  /** Running fetches by source id, with their found / read counts. */
+  fetchingPreviews: Map<string, FetchingPreview>;
   deletingIds: Set<string>;
   togglingIds: Set<string>;
   clearingIds: Set<string>;
@@ -307,6 +310,7 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     error,
     runningIds,
     previewingIds,
+    fetchingPreviews,
     deletingIds,
     togglingIds,
     clearingIds,

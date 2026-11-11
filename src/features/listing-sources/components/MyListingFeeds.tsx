@@ -49,6 +49,7 @@ const MyListingFeeds: React.FC = () => {
     error,
     runningIds,
     previewingIds,
+    fetchingPreviews,
     deletingIds,
     togglingIds,
     clearingIds,
@@ -255,6 +256,7 @@ const MyListingFeeds: React.FC = () => {
               selected={selectedIds.has(source.id)}
               isRunning={runningIds.has(source.id)}
               isPreviewing={previewingIds.has(source.id)}
+              previewFetch={fetchingPreviews.get(source.id)}
               isDeleting={deletingIds.has(source.id)}
               isToggling={togglingIds.has(source.id)}
               isClearing={clearingIds.has(source.id)}

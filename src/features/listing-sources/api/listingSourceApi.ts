@@ -195,15 +195,38 @@ export interface PreviewResult {
   fetched: number;
 }
 
-export const previewMyListingSource = async (
+interface PreviewJobBase {
+  jobId: string;
+  sourceId: string;
+  startedAt: number;
+  /** Listings found so far on the source's catalogue pages. */
+  found: number;
+  /** Listing pages read so far. */
+  detailsFetched: number;
+}
+
+/** A feed preview running on the server: poll it until it is done or failed. */
+export type PreviewJob =
+  | (PreviewJobBase & { status: 'running' })
+  | (PreviewJobBase & { status: 'done'; result: PreviewResult })
+  | (PreviewJobBase & { status: 'failed'; error: string });
+
+/** Start fetching a feed's listings for review. Returns at once with a job to poll. */
+export const startMyListingSourcePreview = async (
   id: string,
   options?: { limit?: number }
-): Promise<PreviewResult> => {
+): Promise<PreviewJob> => {
   const params = options?.limit ? `?limit=${options.limit}` : '';
-  return apiRequest<PreviewResult>(`${BASE}/${id}/preview${params}`, {
+  const res = await apiRequest<{ job: PreviewJob }>(`${BASE}/${id}/preview${params}`, {
     method: 'POST',
     requiresAuth: true,
   });
+  return res.job;
+};
+
+export const getMyListingSourcePreviewJob = async (id: string, jobId: string): Promise<PreviewJob> => {
+  const res = await apiRequest<{ job: PreviewJob }>(`${BASE}/${id}/preview/${jobId}`, { requiresAuth: true });
+  return res.job;
 };
 
 export const confirmMyListingSourceImport = async (

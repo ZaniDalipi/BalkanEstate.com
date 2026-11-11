@@ -1,11 +1,13 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSocket } from '@/shared/hooks/useSocket';
 import {
   type IngestStats,
   type PreviewListing,
+  type PreviewJob,
   confirmMyListingSourceImport,
-  previewMyListingSource,
+  startMyListingSourcePreview,
 } from '../api/listingSourceApi';
+import { usePreviewJobPolling, type PreviewJobWatch } from '../hooks/usePreviewJobPolling';
 
 export interface ListingIngestProgressEvent {
   sourceId: string;
@@ -67,6 +69,18 @@ export interface FetchingPreview {
   sourceId: string;
   sourceName: string;
   startedAt: number;
+  /** Server job running the fetch; unset until the server has accepted it. */
+  jobId?: string;
+  /** Listings found so far on the source's catalogue pages. */
+  found: number;
+  /** Listing pages read so far. */
+  detailsFetched: number;
+}
+
+interface PreviewWaiter {
+  sourceName: string;
+  resolve: () => void;
+  reject: (err: Error) => void;
 }
 
 interface ContextValue {
@@ -210,31 +224,98 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     };
   }, [socket]);
 
-  const startPreview = useCallback(
-    async (sourceId: string, sourceName: string, limit?: number): Promise<void> => {
-      setFetchingPreviews((prev) => {
-        const next = new Map(prev);
-        next.set(sourceId, { sourceId, sourceName, startedAt: Date.now() });
-        return next;
-      });
-      try {
-        const result = await previewMyListingSource(sourceId, { limit });
-        setPendingPreview({
-          sourceId,
-          sourceName,
-          previewId: result.previewId,
-          items: result.items,
-        });
-      } finally {
+  // One pending promise per fetch: startPreview resolves once the review is
+  // ready, or rejects with the reason, however long the server takes.
+  const waiters = useRef(new Map<string, PreviewWaiter>());
+
+  const stopFetching = useCallback((sourceId: string) => {
+    setFetchingPreviews((prev) => {
+      if (!prev.has(sourceId)) return prev;
+      const next = new Map(prev);
+      next.delete(sourceId);
+      return next;
+    });
+  }, []);
+
+  const applyJob = useCallback(
+    (sourceId: string, job: PreviewJob) => {
+      if (job.status === 'running') {
         setFetchingPreviews((prev) => {
-          if (!prev.has(sourceId)) return prev;
+          const existing = prev.get(sourceId);
+          if (!existing) return prev;
+          if (existing.jobId === job.jobId && existing.found === job.found && existing.detailsFetched === job.detailsFetched) {
+            return prev;
+          }
           const next = new Map(prev);
-          next.delete(sourceId);
+          next.set(sourceId, { ...existing, jobId: job.jobId, found: job.found, detailsFetched: job.detailsFetched });
           return next;
         });
+        return;
+      }
+      const waiter = waiters.current.get(sourceId);
+      if (!waiter) return; // already settled
+      waiters.current.delete(sourceId);
+      stopFetching(sourceId);
+      if (job.status === 'done') {
+        setPendingPreview({
+          sourceId,
+          sourceName: waiter.sourceName,
+          previewId: job.result.previewId,
+          items: job.result.items,
+        });
+        waiter.resolve();
+      } else {
+        waiter.reject(new Error(job.error));
       }
     },
-    []
+    [stopFetching]
+  );
+
+  const failFetch = useCallback(
+    (sourceId: string, error: Error) => {
+      const waiter = waiters.current.get(sourceId);
+      waiters.current.delete(sourceId);
+      stopFetching(sourceId);
+      waiter?.reject(error);
+    },
+    [stopFetching]
+  );
+
+  const jobWatches = useMemo<PreviewJobWatch[]>(
+    () =>
+      Array.from(fetchingPreviews.values())
+        .filter((f): f is FetchingPreview & { jobId: string } => Boolean(f.jobId))
+        .map((f) => ({ sourceId: f.sourceId, jobId: f.jobId })),
+    [fetchingPreviews]
+  );
+  usePreviewJobPolling(jobWatches, applyJob, failFetch);
+
+  const startPreview = useCallback(
+    (sourceId: string, sourceName: string, limit?: number): Promise<void> => {
+      if (waiters.current.has(sourceId)) return Promise.resolve(); // already fetching
+      setFetchingPreviews((prev) => {
+        const next = new Map(prev);
+        next.set(sourceId, { sourceId, sourceName, startedAt: Date.now(), found: 0, detailsFetched: 0 });
+        return next;
+      });
+      const done = new Promise<void>((resolve, reject) => {
+        waiters.current.set(sourceId, { sourceName, resolve, reject });
+      });
+      startMyListingSourcePreview(sourceId, { limit })
+        .then((job) => {
+          setFetchingPreviews((prev) => {
+            const existing = prev.get(sourceId);
+            if (!existing) return prev;
+            const next = new Map(prev);
+            next.set(sourceId, { ...existing, jobId: job.jobId });
+            return next;
+          });
+          applyJob(sourceId, job);
+        })
+        .catch((err: unknown) => failFetch(sourceId, err instanceof Error ? err : new Error('Failed to fetch listings')));
+      return done;
+    },
+    [applyJob, failFetch]
   );
 
   const cancelPreview = useCallback(() => {

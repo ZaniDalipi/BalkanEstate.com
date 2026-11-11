@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
-import { useSyncSession } from '../context/ListingIngestProgressContext';
+import { type FetchingPreview, useSyncSession } from '../context/ListingIngestProgressContext';
 import ListingIngestProgressModal from './ListingIngestProgressModal';
+import PreviewFetchProgress from './PreviewFetchProgress';
 
 interface Props {
   source: ListingSource;
   selected: boolean;
   isRunning: boolean;
   isPreviewing?: boolean;
+  /** Counts of the running fetch, shown while it runs. */
+  previewFetch?: FetchingPreview;
   isDeleting: boolean;
   isToggling: boolean;
   isClearing: boolean;
@@ -44,6 +47,7 @@ const ListingFeedRow: React.FC<Props> = ({
   selected,
   isRunning,
   isPreviewing = false,
+  previewFetch,
   isDeleting,
   isToggling,
   isClearing,
@@ -130,7 +134,7 @@ const ListingFeedRow: React.FC<Props> = ({
             {fetchingPreview && (
               <div className="mt-2 w-full bg-violet-50 border border-violet-200 rounded-lg px-3 py-2 flex items-center gap-2">
                 <Spinner />
-                <span className="text-xs text-violet-900 font-medium">{t('listingFeeds:preview.fetching')}</span>
+                <PreviewFetchProgress fetching={previewFetch} />
               </div>
             )}
 

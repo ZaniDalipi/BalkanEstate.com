@@ -5,7 +5,8 @@ import ListingSourceTermsAcceptance from '../models/ListingSourceTermsAcceptance
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
 import { deleteDraftsForSources } from '../services/importReviewService';
-import { previewSource, getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
+import { getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
+import { getPreviewJob, startPreviewJob } from '../services/listingPreviewJobs';
 import {
   detectFeedForUrl,
   detectFromJsonSample,
@@ -265,8 +266,9 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
 
 /**
  * POST /api/listing-sources/:id/preview
- * Fetch listings from the adapter without saving anything. Returns a previewId
- * and array of display items so the user can review/select before importing.
+ * Start fetching listings from the adapter, without saving anything. Answers
+ * 202 with a job to poll; once done the job carries a previewId and the
+ * display items so the user can review/select before importing.
  * Fetches the whole feed (every page) by default, up to FEED_PREVIEW_MAX.
  */
 export const preview = async (req: Request, res: Response): Promise<void> => {
@@ -295,15 +297,28 @@ export const preview = async (req: Request, res: Response): Promise<void> => {
   }
   const limit = parsedLimit.value;
 
-  try {
-    const result = await previewSource(source, limit);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({
-      message: (err as Error).message || 'Preview failed',
-      code: 'PREVIEW_FAILED',
-    });
+  // Runs in the background; the client polls GET /:id/preview/:jobId for progress.
+  const job = startPreviewJob(source, String(userId), limit);
+  res.status(202).json({ job });
+};
+
+/**
+ * GET /api/listing-sources/:id/preview/:jobId
+ * Progress of a preview: listings found and listing pages read so far, then
+ * the listings to review once it is done (or the reason it failed).
+ */
+export const previewStatus = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+  const jobId = String(req.params.jobId ?? '');
+  const job = /^[0-9a-f-]{36}$/i.test(jobId) ? getPreviewJob(jobId, String(userId), id) : undefined;
+  if (!job) {
+    res.status(404).json({ message: 'This fetch is no longer available — start it again.', code: 'PREVIEW_JOB_NOT_FOUND' });
+    return;
   }
+  res.json({ job });
 };
 
 /**
