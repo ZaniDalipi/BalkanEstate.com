@@ -15,6 +15,10 @@
 import * as cheerio from 'cheerio';
 import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import { applyLabelValue } from './listingAttributes/applyAttribute';
+import { listingJsonLdNodes } from './listingAttributes/jsonLdNodes';
+import { acceptLocationGuesses, countryFromPageSignals } from './listingAttributes/location';
+import { extractLabelledPairs, placeBesideMarkerIcon } from './listingAttributes/htmlPatterns';
+import { extractMapCoordinates } from './listingAttributes/mapCoordinates';
 
 type Mapped = Record<string, unknown>;
 
@@ -79,6 +83,7 @@ const extractFromJsonLdNode = (node: Record<string, unknown>, base: string, targ
     setIfMissing(target, 'city', a.addressLocality);
     setIfMissing(target, 'country', a.addressCountry);
     setIfMissing(target, 'postalCode', a.postalCode);
+    setIfMissing(target, 'region', a.addressRegion);
   } else if (typeof address === 'string') {
     setIfMissing(target, 'address', address);
   }
@@ -95,10 +100,14 @@ const extractFromJsonLdNode = (node: Record<string, unknown>, base: string, targ
     setIfMissing(target, 'sqft', (floorSize as Record<string, unknown>).value);
   }
 
-  setIfMissing(target, 'beds', node.numberOfRooms ?? node.numberOfBedrooms);
+  // numberOfRooms counts every room; prefer the bedroom count when given.
+  setIfMissing(target, 'beds', node.numberOfBedrooms ?? node.numberOfRooms);
+  setIfMissing(target, 'floor', node.floorLevel);
   setIfMissing(target, 'baths', node.numberOfBathroomsTotal ?? node.numberOfFullBathrooms);
   setIfMissing(target, 'yearBuilt', node.yearBuilt);
-  setIfMissing(target, 'propertyType', node['@type']);
+  // RealEstateListing / Product / Place say nothing about the kind of property.
+  const kind = [node['@type']].flat().find((t) => typeof t === 'string' && !/^(RealEstateListing|Product|Offer|Place|Residence|Accommodation)$/.test(t));
+  setIfMissing(target, 'propertyType', kind);
 
   // Images can be a string, an array of strings, or array of ImageObject.
   const images = node.image;
@@ -118,19 +127,18 @@ const extractFromJsonLdNode = (node: Record<string, unknown>, base: string, targ
 };
 
 const extractJsonLd = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
+  const blocks: unknown[] = [];
   $('script[type="application/ld+json"]').each((_, el) => {
     const txt = $(el).contents().text();
     if (!txt) return;
     try {
-      const data = JSON.parse(txt) as unknown;
-      const items = Array.isArray(data) ? data : [data];
-      for (const item of items) {
-        if (item && typeof item === 'object') extractFromJsonLdNode(item as Record<string, unknown>, base, target);
-      }
+      blocks.push(JSON.parse(txt) as unknown);
     } catch {
       // ignore malformed JSON-LD
     }
   });
+  // Only the listing's own nodes — never the agency, website or breadcrumbs.
+  for (const node of listingJsonLdNodes(blocks)) extractFromJsonLdNode(node, base, target);
 };
 
 const extractOpenGraph = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
@@ -462,8 +470,23 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
     if (el.length) target.lng = el.attr('data-lng') ?? el.attr('data-lon');
   }
 
+  // Steps 3–4d guess the location from page layout. Their guesses are only
+  // kept when they hold up (see acceptLocationGuesses): layout guessing
+  // otherwise turns a "Load more" button into city "Load", country "More".
+  const seed = (): Mapped => ({ city: target.city, country: target.country, address: target.address });
+  /** Text next to a location label or in a location-named element. */
+  const labelled = seed();
+  /** Any short text in an element whose class mentions location / place / geo, or the page title. */
+  const chips = seed();
+  // The place shown beside a map-marker icon — `<i class="la la-map-marker"></i>Banjole`.
+  const marker = placeBesideMarkerIcon($);
+  if (marker && !labelled.city) {
+    labelled.city = marker.split(',')[0].trim();
+    if (marker.includes(',') && !labelled.address) labelled.address = marker;
+  }
+
   // 3. CSS class selectors for location chips/headers common on Balkan RE sites
-  if (!target.city) {
+  if (!labelled.city) {
     const locationSelectors = [
       '[class*="location-city"]', '[class*="city-name"]', '[class*="property-city"]',
       '[class*="listing-city"]', '[class*="grad"]', '[class*="lokacija"]',
@@ -476,7 +499,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
       if (text && text.length < 80 && text.length > 1) {
         const candidate = text.split(/[,/]/)[0].trim();
         if (!isNoisyLocationText(candidate)) {
-          target.city = candidate;
+          labelled.city = candidate;
           break;
         }
       }
@@ -487,7 +510,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
   //    Deliberately excludes h1/h2/title — those are almost always the property
   //    title, not the address, and including them caused the title to be stored
   //    in the address field on sites like Century 21 Albania.
-  if (!target.city || !target.country) {
+  if (!chips.city || !chips.country) {
     const chipSelectors = [
       '[class*="location"]', '[class*="address"]', '[class*="adresa"]',
       '[class*="property-address"]', '[class*="listing-address"]',
@@ -499,7 +522,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
     outer: for (const sel of chipSelectors) {
       const elements = $(sel).toArray();
       for (const el of elements) {
-        if (target.city && target.country) break outer;
+        if (chips.city && chips.country) break outer;
         const $el = $(el);
         // For headers/titles, include up to 5 children; for other selectors, keep tight
         const tagName = ((el as any).tagName || '').toLowerCase();
@@ -518,9 +541,9 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         if (commaIdx > 0 && commaIdx < text.length - 1) {
           const part1 = text.slice(0, commaIdx).trim();
           const part2 = text.slice(commaIdx + 1).trim();
-          if (!target.city && !isNoisyLocationText(part1)) target.city = part1;
-          if (!target.country && !isNoisyLocationText(part2)) target.country = part2;
-          if (target.city && target.country) break outer;
+          if (!chips.city && !isNoisyLocationText(part1)) chips.city = part1;
+          if (!chips.country && !isNoisyLocationText(part2)) chips.country = part2;
+          if (chips.city && chips.country) break outer;
           continue;
         }
 
@@ -529,12 +552,12 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
           const parts = text.split(/\s*(?:\/|>|»|·)\s+/)
             .map(p => p.trim()).filter(p => p.length > 0 && !isNoisyLocationText(p));
           if (parts.length >= 2) {
-            if (!target.city) target.city = parts[parts.length - 2] ?? parts[0];
-            if (!target.country) target.country = parts[parts.length - 1];
-            if (target.city && target.country) break outer;
+            if (!chips.city) chips.city = parts[parts.length - 2] ?? parts[0];
+            if (!chips.country) chips.country = parts[parts.length - 1];
+            if (chips.city && chips.country) break outer;
             continue;
           } else if (parts.length === 1) {
-            if (!target.city) target.city = parts[0];
+            if (!chips.city) chips.city = parts[0];
             continue;
           }
         }
@@ -542,44 +565,68 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         // Try space-separated (last word likely country, rest is city)
         const words = text.split(/\s+/);
         if (words.length === 2) {
-          if (!target.city && !isNoisyLocationText(words[0])) target.city = words[0];
-          if (!target.country && !isNoisyLocationText(words[1])) target.country = words[1];
-          if (target.city && target.country) break outer;
+          if (!chips.city && !isNoisyLocationText(words[0])) chips.city = words[0];
+          if (!chips.country && !isNoisyLocationText(words[1])) chips.country = words[1];
+          if (chips.city && chips.country) break outer;
         } else if (words.length > 2) {
           // For "8700 m² Land in Xhafzotaj, Durres" → last two words as city/country
           const lastWord = words[words.length - 1];
           const secondLast = words[words.length - 2];
-          if (!target.address) target.address = text;
-          if (!target.city && !isNoisyLocationText(secondLast)) target.city = secondLast;
-          if (!target.country && !isNoisyLocationText(lastWord)) target.country = lastWord;
+          if (!chips.address) chips.address = text;
+          if (!chips.city && !isNoisyLocationText(secondLast)) chips.city = secondLast;
+          if (!chips.country && !isNoisyLocationText(lastWord)) chips.country = lastWord;
         }
       }
-      if (target.city) break;
+      if (chips.city) break;
     }
   }
 
   // 4b. Page <title> — often contains "City, Country" or "in City" patterns
-  if (!target.city || !target.country) {
+  if (!chips.city || !chips.country) {
     const titleText = $('title').first().text().replace(/\s+/g, ' ').trim();
     if (titleText) {
       // "Apartment in Tirana, Albania — Agency" or "Villa Tirana Albania"
       const inMatch = titleText.match(/\bin\s+([A-ZČŠŽĆĐ][a-zA-ZčšžćđÀ-ÿ\s]{1,30}?)(?:\s*,\s*([A-ZČŠŽĆĐ][a-zA-ZčšžćđÀ-ÿ\s]{1,30}))?(?:\s*[-|·–—|]|$)/);
       if (inMatch) {
-        if (!target.city && inMatch[1]?.trim()) target.city = inMatch[1].trim();
-        if (!target.country && inMatch[2]?.trim()) target.country = inMatch[2].trim();
+        if (!chips.city && inMatch[1]?.trim()) chips.city = inMatch[1].trim();
+        if (!chips.country && inMatch[2]?.trim()) chips.country = inMatch[2].trim();
       }
       // "Apartment, Tirana, Albania" — last two comma-separated segments before separator
-      if (!target.city || !target.country) {
+      if (!chips.city || !chips.country) {
         const segments = titleText.split(/\s*[-–—|·]\s*/)[0].split(',').map(s => s.trim()).filter(Boolean);
         if (segments.length >= 3) {
           const last = segments[segments.length - 1];
           const secondLast = segments[segments.length - 2];
-          if (!target.country && last.length < 40 && /^[A-ZČŠŽĆĐ]/.test(last)) target.country = last;
-          if (!target.city && secondLast.length < 40 && /^[A-ZČŠŽĆĐ]/.test(secondLast)) target.city = secondLast;
+          if (!chips.country && last.length < 40 && /^[A-ZČŠŽĆĐ]/.test(last)) chips.country = last;
+          if (!chips.city && secondLast.length < 40 && /^[A-ZČŠŽĆĐ]/.test(secondLast)) chips.city = secondLast;
         }
       }
     }
   }
+
+  // 4d. Keyword-prefixed location in visible text:
+  //     "Location: Tirana, Albania", "Lokacija: Zagreb", "Grad: Beograd"
+  if (!labelled.city) {
+    const LOC_LABEL_RE = /(?:location|lokacija|ciudad|lage|emplacement|posizione|τοποθεσία|vendndodhja|locatie|helyszín|адреса|адрес|lokacija|grad|city|address)\s*[:–-]\s*([^,\n\r<]{2,60}?)(?:\s*,\s*([^,\n\r<]{2,40}?))?(?:\s*$|\s*[<\n])/i;
+    const visibleEls = $('p, li, span, div, td, th').toArray();
+    for (const el of visibleEls) {
+      const $el = $(el);
+      if ($el.children('p, div, ul, ol, table').length) continue;
+      const text = $el.text().replace(/\s+/g, ' ').trim();
+      if (text.length < 5 || text.length > 300) continue;
+      const m = text.match(LOC_LABEL_RE);
+      if (m?.[1]) {
+        const city = m[1].trim().replace(/[.,;]$/, '');
+        if (city.length < 60 && city.length > 1) {
+          if (!labelled.city) labelled.city = city;
+          if (!labelled.country && m[2]?.trim()) labelled.country = m[2].trim().replace(/[.,;]$/, '');
+          break;
+        }
+      }
+    }
+  }
+
+  acceptLocationGuesses(target, labelled, chips);
 
   // 4c. URL path — extract city/country from slug segments like /albania/tirana/
   if ((!target.city || !target.country) && baseUrl) {
@@ -600,28 +647,6 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         if (target.city && target.country) break;
       }
     } catch { /* ignore invalid URLs */ }
-  }
-
-  // 4d. Keyword-prefixed location in visible text:
-  //     "Location: Tirana, Albania", "Lokacija: Zagreb", "Grad: Beograd"
-  if (!target.city) {
-    const LOC_LABEL_RE = /(?:location|lokacija|ciudad|lage|emplacement|posizione|τοποθεσία|vendndodhja|locatie|helyszín|адреса|адрес|lokacija|grad|city|address)\s*[:–-]\s*([^,\n\r<]{2,60}?)(?:\s*,\s*([^,\n\r<]{2,40}?))?(?:\s*$|\s*[<\n])/i;
-    const visibleEls = $('p, li, span, div, td, th').toArray();
-    for (const el of visibleEls) {
-      const $el = $(el);
-      if ($el.children('p, div, ul, ol, table').length) continue;
-      const text = $el.text().replace(/\s+/g, ' ').trim();
-      if (text.length < 5 || text.length > 300) continue;
-      const m = text.match(LOC_LABEL_RE);
-      if (m?.[1]) {
-        const city = m[1].trim().replace(/[.,;]$/, '');
-        if (city.length < 60 && city.length > 1) {
-          if (!target.city) target.city = city;
-          if (!target.country && m[2]?.trim()) target.country = m[2].trim().replace(/[.,;]$/, '');
-          break;
-        }
-      }
-    }
   }
 
   // 5. Property ID — aggressive scanning of all possible sources
@@ -663,7 +688,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
 
   // 5c. Text pattern search: "Property ID: Eon140479", "Ref #123", etc.
   if (!target.propertyId) {
-    const idPattern = /(?:property\s*id|listing\s*id|ref(?:erence)?|reference\s*no|ref\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude|imobil|proneese)|objektnummer|sifra\s*oglasa|number|code|sku)[:\s#]*([A-Za-z0-9\-_]+)/i;
+    const idPattern = /\b(?:property\s*id|listing\s*id|ref(?:erence)?|reference\s*no|ref\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude|imobil|proneese)|objektnummer|sifra\s*oglasa|number|code|sku)\b[:\s#]*([A-Za-z0-9\-_]+)/i;
     const leafElements = $('*').toArray();
     for (const el of leafElements) {
       if (target.propertyId) break;
@@ -672,7 +697,8 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
       const text = $el.text().trim();
       if (text.length < 3 || text.length > 200) continue;
       const m = text.match(idPattern);
-      if (m && m[1] && m[1].length >= 2 && m[1].length <= 50) {
+      // A reference always has a digit ("ALVS1455", "4471") — not "of" from "Number of rooms".
+      if (m && m[1] && m[1].length >= 2 && m[1].length <= 50 && /\d/.test(m[1])) {
         target.propertyId = m[1];
       }
     }
@@ -961,11 +987,22 @@ export const enrichFromDetailHtml = (
   extractJsonLd($, baseUrl, target);
   extractOpenGraph($, baseUrl, target);
   extractMicrodata($, baseUrl, target);
+  // The map on the page: meta tags, map embeds and links, map scripts…
+  if (target.lat == null || target.lng == null) {
+    const coords = extractMapCoordinates($);
+    if (coords) {
+      target.lat = coords.lat;
+      target.lng = coords.lng;
+    }
+  }
   extractBalkanLabelValues($, baseUrl, target);
+  extractLabelledPairs($, target);
   extractStructuredBedsAndBaths($, target);
   extractGalleryImages($, baseUrl, target);
   extractStructuredPriceFromHtml($, target);
   extractStructuredLocationFromHtml($, target, baseUrl);
   extractSmartFieldsFromText($, target);
+  // Fallback for the country: the site's own (language, domain, phone prefix).
+  setIfMissing(target, 'pageCountry', countryFromPageSignals(html, baseUrl));
   return target;
 };

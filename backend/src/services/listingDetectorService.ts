@@ -10,6 +10,8 @@ import { findSiteProfile } from './listingDetectorProfiles';
 import { fetchWithBrowser } from './listingAdapters/browserClient';
 import { extractEmbeddedSpaListings } from './listingAdapters/embeddedState';
 import { detectXmlFeed } from './listingAdapters/xmlFeed/detectXmlFeed';
+import { discoverSitemapUrls } from './listingAdapters/sitemap';
+import { planCatalogue } from './listingAdapters/htmlScrape/detectCatalogue';
 import { fieldForFeedKey } from './listingAttributes/labelMap';
 
 const TIMEOUT = 12_000;
@@ -207,7 +209,7 @@ const tryUrl = async (url: string, responseType: 'text' | 'json' = 'text') => {
  */
 const fetchPageStrict = async (
   url: string
-): Promise<{ html: string; status: number } | { html: null; status: number; reason: string }> => {
+): Promise<{ html: string; status: number; finalUrl: string } | { html: null; status: number; reason: string }> => {
   try {
     const r = await axios.get<string>(url, {
       timeout: TIMEOUT,
@@ -218,7 +220,8 @@ const fetchPageStrict = async (
       validateStatus: () => true,
     });
     if (r.status >= 200 && r.status < 400) {
-      return { html: typeof r.data === 'string' ? r.data : '', status: r.status };
+      const finalUrl = (r.request as { res?: { responseUrl?: string } } | undefined)?.res?.responseUrl ?? url;
+      return { html: typeof r.data === 'string' ? r.data : '', status: r.status, finalUrl };
     }
     let reason = `HTTP ${r.status}`;
     if (r.status === 403) reason = 'HTTP 403 — the site is blocking automated access (likely Cloudflare or anti-bot).';
@@ -235,144 +238,6 @@ const fetchPageStrict = async (
     }
     return { html: null, status: 0, reason: (err as Error).message };
   }
-};
-
-/**
- * Discover listing detail-page URLs by parsing sitemap.xml.
- *
- * Most real-estate portals expose a sitemap (often listed in /robots.txt)
- * that enumerates every listing URL — this is the single most reliable way
- * to ingest a site's catalogue without HTML scraping.
- *
- * If `scopedToPath` is provided, only URLs whose pathname starts with it are
- * kept (useful when the user pastes an agency-specific URL).
- */
-const SITEMAP_TIMEOUT = 8_000;
-const SITEMAP_MAX_TOTAL_URLS = 5_000;
-const SITEMAP_MAX_INDEX_CHILDREN = 30;
-const SITEMAP_RETURN_LIMIT = 500;
-
-const fetchTextWithBrowserUa = async (url: string): Promise<string | null> => {
-  try {
-    const r = await axios.get<string>(url, {
-      timeout: SITEMAP_TIMEOUT,
-      headers: {
-        'User-Agent': BROWSER_UA,
-        Accept: 'text/xml,application/xml,text/plain,*/*',
-        'Accept-Encoding': 'gzip, deflate, br',
-      },
-      responseType: 'text',
-      maxRedirects: 5,
-      decompress: true,
-      validateStatus: (s) => s < 400,
-    });
-    return typeof r.data === 'string' ? r.data : null;
-  } catch {
-    return null;
-  }
-};
-
-const parseSitemapXml = (xml: string): { kind: 'index' | 'urlset'; locs: string[] } => {
-  // Cheap regex parse — sitemap files are simple XML and we only need <loc> values.
-  const isIndex = /<sitemapindex\b/i.test(xml);
-  const locs: string[] = [];
-  const re = /<loc>\s*([^<\s]+)\s*<\/loc>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(xml)) !== null) {
-    if (locs.length >= SITEMAP_MAX_TOTAL_URLS) break;
-    locs.push(match[1].trim());
-  }
-  return { kind: isIndex ? 'index' : 'urlset', locs };
-};
-
-const discoverSitemapUrls = async (pageUrl: string): Promise<{
-  urls: string[];
-  source: string;
-} | null> => {
-  let origin: string;
-  let scopedPath: string;
-  try {
-    const u = new URL(pageUrl);
-    origin = u.origin;
-    scopedPath = u.pathname;
-  } catch {
-    return null;
-  }
-
-  // Build candidate sitemap URLs from robots.txt + standard locations.
-  const candidates = new Set<string>([
-    `${origin}/sitemap.xml`,
-    `${origin}/sitemap_index.xml`,
-    `${origin}/sitemap-index.xml`,
-    `${origin}/sitemap/sitemap.xml`,
-  ]);
-  const robotsTxt = await fetchTextWithBrowserUa(`${origin}/robots.txt`);
-  if (robotsTxt) {
-    const matches = robotsTxt.match(/Sitemap:\s*(\S+)/gi);
-    if (matches) {
-      for (const m of matches) {
-        const line = m.replace(/Sitemap:\s*/i, '').trim();
-        if (line) candidates.add(line);
-      }
-    }
-  }
-
-  const allListingUrls: string[] = [];
-  let usedSitemap = '';
-
-  for (const sitemapUrl of candidates) {
-    if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-    const xml = await fetchTextWithBrowserUa(sitemapUrl);
-    if (!xml || (!xml.includes('<urlset') && !xml.includes('<sitemapindex'))) continue;
-    usedSitemap ||= sitemapUrl;
-
-    const parsed = parseSitemapXml(xml);
-    if (parsed.kind === 'index') {
-      // Visit child sitemaps. Prefer ones whose URL hints at listings/properties.
-      const ranked = parsed.locs
-        .slice(0, SITEMAP_MAX_INDEX_CHILDREN)
-        .sort((a, b) => {
-          const score = (s: string) =>
-            /(oglas|nekretnin|listing|propert|imovin|agency|agencij|stan|kuca|apartman|advert)/i.test(s) ? -1 : 0;
-          return score(a) - score(b);
-        });
-      for (const childUrl of ranked) {
-        if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-        const childXml = await fetchTextWithBrowserUa(childUrl);
-        if (!childXml) continue;
-        const child = parseSitemapXml(childXml);
-        for (const loc of child.locs) {
-          try {
-            if (looksLikeListingPath(new URL(loc).pathname)) allListingUrls.push(loc);
-          } catch {/* ignore */}
-          if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-        }
-      }
-    } else {
-      // Direct urlset
-      for (const loc of parsed.locs) {
-        try {
-          if (looksLikeListingPath(new URL(loc).pathname)) allListingUrls.push(loc);
-        } catch {/* ignore */}
-        if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-      }
-    }
-  }
-
-  if (allListingUrls.length < 3) return null;
-
-  // De-duplicate and (when the user pasted a scoped URL like /agencije/123/) try
-  // to filter to URLs that share a meaningful path/id segment with the source URL.
-  const unique = Array.from(new Set(allListingUrls));
-  const idLike = scopedPath.match(/\/(\d{3,})(?:\/|$)/)?.[1];
-  let filtered: string[];
-  if (idLike && unique.some(u => u.includes(`/${idLike}/`) || u.includes(`-${idLike}/`) || u.includes(`/${idLike}.`))) {
-    filtered = unique.filter(u => u.includes(`/${idLike}/`) || u.includes(`-${idLike}/`) || u.includes(`/${idLike}.`));
-  } else {
-    filtered = unique;
-  }
-
-  return { urls: filtered.slice(0, SITEMAP_RETURN_LIMIT), source: usedSitemap };
 };
 
 /** Check if page has JSON-LD with real-estate types. */
@@ -424,7 +289,7 @@ const probeWordPress = async (baseUrl: string): Promise<{ items: Record<string, 
  *
  * Returns null when fewer than 2 listing-link anchors are found.
  */
-const detectHtmlScrape = (
+export const detectHtmlScrape = (
   html: string,
   pageUrl: string
 ): {
@@ -594,9 +459,16 @@ const detectHtmlScrape = (
     return looksLikeListingPath(pn);
   }).first();
   const linkHref = linkAnchorInCard.attr('href') || '';
-  const linkSelector = linkAnchorInCard.is('a') ? `a[href*="${(() => {
-    try { return new URL(linkHref, pageUrl).pathname.split('/').filter(Boolean)[0] ?? ''; } catch { return ''; }
-  })()}"]|attr:href` : 'a|attr:href';
+  // Match the listing links by their first meaningful path segment — skipping a
+  // language prefix, which every link on a multilingual site shares.
+  const linkSegment = (() => {
+    try {
+      const segs = new URL(linkHref, pageUrl).pathname.split('/').filter(Boolean);
+      const seg = segs.length > 1 && LOCALE_SEGMENT_RE.test(segs[0]) ? segs[1] : segs[0];
+      return seg ? `/${seg}` : '';
+    } catch { return ''; }
+  })();
+  const linkSelector = linkAnchorInCard.is('a') && linkSegment ? `a[href*="${linkSegment}"]|attr:href` : 'a|attr:href';
 
   const sample: Record<string, unknown> = {
     title: titleSel ? probeText(titleSel) : undefined,
@@ -1116,6 +988,57 @@ export const detectFeedForUrlWithAuth = async (
   };
 };
 
+/**
+ * htmlScrape config for a site's catalogue pages (for sale, for rent…),
+ * with the card selectors read from the first one. Every page of every
+ * catalogue is crawled, and each listing's detail page is read.
+ */
+const catalogueScrapeResult = (html: string, indexUrls: string[], total?: number): DetectResult | null => {
+  const [indexUrl, ...more] = indexUrls;
+  const scrape = detectHtmlScrape(html, indexUrl);
+  if (!scrape) return null;
+  const pagination = detectPagination(html, indexUrl);
+  const names = indexUrls.map((u) => new URL(u).pathname).join(', ');
+  return {
+    adapterType: 'htmlScrape',
+    adapterConfig: {
+      indexUrl,
+      ...(more.length && { indexUrls: more }),
+      selectors: scrape.selectors,
+      ...(pagination?.type === 'nextSelector' ? { nextPageSelector: pagination.selector } : {}),
+      ...(pagination?.type === 'pageParam' ? { pageParam: pagination.param } : {}),
+      followDetails: true,
+      requestDelayMs: 2000,
+      respectRobotsTxt: true,
+      maxPages: 500,
+    },
+    fieldMap: { title: 'title', price: 'price', description: 'description', imageUrl: 'image', sourceUrl: 'url' },
+    sample: scrape.sample,
+    hint: `Listing catalogue found (${names})${total ? ` — the site says ${total} listings` : ''}; every page and every listing's details will be fetched`,
+  };
+};
+
+/**
+ * The site answers with a bot check instead of its listings. We don't try to
+ * get past it; the sitemap it publishes for crawlers lists the listings, and
+ * each listing page is read on every sync.
+ */
+const detectFromSitemapBehindBotCheck = async (pageUrl: string): Promise<DetectResult> => {
+  const sitemap = await discoverSitemapUrls(pageUrl);
+  if (!sitemap || sitemap.urls.length < 3) {
+    throw new Error(
+      `${new URL(pageUrl).hostname} shows a bot check instead of its listings, and publishes no sitemap of them. ` +
+      'Ask the agency for an XML or JSON export of its listings and paste that link instead.'
+    );
+  }
+  return {
+    adapterType: 'jsonLd',
+    adapterConfig: { sitemapOf: pageUrl, requestDelayMs: 2000, respectRobotsTxt: true },
+    fieldMap: jsonLdFieldMap(),
+    hint: `The listing pages are behind a bot check, so the site's sitemap is used — ${sitemap.urls.length} listing(s) found; each is read in full on every sync`,
+  };
+};
+
 export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> => {
   const url = rawUrl.trim();
 
@@ -1123,6 +1046,8 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
   const fetched = await fetchPageStrict(url);
   const html = fetched.html;
   const fetchFailureReason = html === null ? (fetched as { reason: string }).reason : null;
+  /** "the site says N in total" — shown in the hint for a listings page. */
+  let totalNote = '';
 
   if (html && typeof html === 'string') {
     // 1-. The URL is an XML feed: RSS/Atom, or an agency XML export.
@@ -1144,6 +1069,20 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
         hint: `XML listings feed detected — ${xml.items.length} listing(s); every attribute is mapped`,
       };
     }
+
+    // 1-b. Where the whole catalogue is: a homepage only shows featured cards,
+    //      and a catalogue behind a bot check is read from the sitemap instead.
+    const landedOn = 'finalUrl' in fetched && fetched.finalUrl ? fetched.finalUrl : url;
+    const plan = await planCatalogue(html, landedOn, {
+      fetchPage: async (u) => (await fetchPageStrict(u)).html,
+      countCards: (h, u) => detectHtmlScrape(h, u)?.count ?? 0,
+    });
+    if (plan.kind === 'sitemap') return detectFromSitemapBehindBotCheck(landedOn);
+    if (plan.kind === 'indexPages') {
+      const catalogue = catalogueScrapeResult(plan.html, plan.indexUrls, plan.total);
+      if (catalogue) return catalogue;
+    }
+    totalNote = plan.kind === 'asPasted' && plan.total ? ` — the site says ${plan.total} in total, all pages will be fetched` : '';
 
     // A page listing many properties (an agency's index) must be crawled page
     // by page, not read as one listing — even when it carries JSON-LD.
@@ -1328,7 +1267,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           sourceUrl: 'url',
         },
         sample: scrape.sample,
-        hint: `HTML listing page — found ${scrape.count} listing card(s) on the page${pagination ? ` (pagination: ${pagination.type === 'pageParam' ? `?${pagination.param}=N` : pagination.selector})` : ''}`,
+        hint: `HTML listing page — found ${scrape.count} listing card(s) on the first page${totalNote}${pagination ? ` (pagination: ${pagination.type === 'pageParam' ? `?${pagination.param}=N` : pagination.selector})` : ''}`,
       };
     }
   }

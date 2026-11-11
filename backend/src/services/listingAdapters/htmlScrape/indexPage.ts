@@ -4,6 +4,8 @@ import { looksLikeListingPath } from '../../listingDetectorService';
 import { isValidListingItem } from '../../listingNormalizerService';
 import { isUsableHref, resolveUrl } from '../pagination/nextPageLink';
 import type { RawListing } from '../types';
+import { placeBesideMarkerIcon } from '../../listingAttributes/htmlPatterns';
+import { looksLikeIndexPath } from './indexPages';
 import { pick, pickAll, type SelectorMap } from './selectors';
 import { smartExtract } from './smartExtract';
 
@@ -30,7 +32,7 @@ const cardToStub = (
   if (!isUsableHref(linkVal)) return null;
   const detailUrl = resolveUrl(pageUrl, linkVal);
   const pathname = pathnameOf(detailUrl);
-  if (!pathname || !looksLikeListingPath(pathname)) return null;
+  if (!pathname || !looksLikeListingPath(pathname) || looksLikeIndexPath(pathname)) return null;
 
   // Text nodes joined with spaces — `.text()` glues "2 sobe" and "51 m²" into "2 sobe51 m²".
   const cardText = root.find('*').addBack().contents().toArray()
@@ -41,7 +43,7 @@ const cardToStub = (
     title: pick($, root, selectors.title),
     price: pick($, root, selectors.price) || smartExtract(cardText, 'price'),
     description: pick($, root, selectors.description),
-    city: pick($, root, selectors.city) || pick($, root, selectors.location),
+    city: pick($, root, selectors.city) || pick($, root, selectors.location) || placeBesideMarkerIcon($, root),
     address: pick($, root, selectors.address),
     beds: pick($, root, selectors.beds) || smartExtract(cardText, 'beds'),
     baths: pick($, root, selectors.baths) || smartExtract(cardText, 'baths'),
@@ -68,7 +70,7 @@ const anchorStubs = ($: cheerio.CheerioAPI, pageUrl: string): RawListing[] => {
     if (!isUsableHref(href) || PAGINATION_HREF_RE.test(href) || PAGINATION_PATH_RE.test(href)) continue;
     const detailUrl = resolveUrl(pageUrl, href);
     const pathname = pathnameOf(detailUrl);
-    if (!pathname || !looksLikeListingPath(pathname)) continue;
+    if (!pathname || !looksLikeListingPath(pathname) || looksLikeIndexPath(pathname)) continue;
     if (pathname.split('/').filter(Boolean).length < 2 && !/\d{3,}/.test(pathname)) continue;
     const anchorText = $(a).text().trim();
     if (/^\d{1,4}$/.test(anchorText)) continue;

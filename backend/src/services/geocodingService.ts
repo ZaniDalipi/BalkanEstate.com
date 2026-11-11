@@ -114,6 +114,14 @@ export async function geocodeAddressWithRateLimit(
   return geocodeAddress(address, city, country);
 }
 
+/** Free-text geocoding under the same 1 request / second limit. */
+export async function geocodeFreeformWithRateLimit(location: string): Promise<GeocodeResult | null> {
+  const wait = GEOCODING_DELAY - (Date.now() - lastGeocodingTime);
+  if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));
+  lastGeocodingTime = Date.now();
+  return geocodeFreeformLocation(location);
+}
+
 /**
  * Geocode agency address
  */

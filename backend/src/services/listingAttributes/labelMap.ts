@@ -124,9 +124,28 @@ export const LABEL_MAP: Readonly<Record<string, AttributeField>> = {
   // EN
   'bedrooms': 'beds', 'bedroom': 'beds', 'beds': 'beds', 'numberofbedrooms': 'beds',
 
+  // Common "Broj …" / category phrasings (HR/BA/SR/ME, AL, MK, BG)
+  'brojspavaćihsoba': 'beds', 'brojspavacihsoba': 'beds', 'spavaćihsoba': 'beds', 'spavacihsoba': 'beds',
+  'brojdhomave': 'beds', 'дхомагјуми': 'beds', 'бројнаспални': 'beds',
+  'brojkupaonica': 'baths', 'brojkupatila': 'baths', 'kupaonice': 'baths', 'kupatila': 'baths',
+  'brojtoaleta': 'baths', 'numribanjove': 'baths', 'tualete': 'baths', 'бројнабањи': 'baths',
+  'kvadratura': 'sqft', 'kvadraturastana': 'sqft', 'stambenapovršina': 'sqft', 'stambenapovrsina': 'sqft',
+  'netopovršina': 'sqft', 'netopovrsina': 'sqft', 'korisnapovršina': 'sqft', 'korisnapovrsina': 'sqft',
+  'veličina': 'sqft', 'velicina': 'sqft', 'kvm': 'sqft', 'm2': 'sqft', 'sipërfaqjaneto': 'sqft',
+  'površinazemljišta': 'plotSqm', 'povrsinazemljista': 'plotSqm', 'okućnicam2': 'plotSqm',
+  'kategorija': 'propertyType', 'kategorije': 'propertyType', 'kategorijanekretnine': 'propertyType',
+  'vrsta': 'propertyType', 'tip': 'propertyType', 'tipobjekta': 'propertyType', 'vrstaobjekta': 'propertyType',
+  'llojiprones': 'propertyType', 'llojipronës': 'propertyType', 'kategoria': 'propertyType', 'category': 'propertyType',
+  'plaža': 'distanceToSea', 'plaza': 'distanceToSea', 'udaljenostodplaže': 'distanceToSea',
+  'udaljenostodplaze': 'distanceToSea', 'more': 'distanceToSea', 'domora': 'distanceToSea', 'odmora': 'distanceToSea',
+  'beach': 'distanceToSea', 'distancetobeach': 'distanceToSea', 'deti': 'distanceToSea', 'plazhi': 'distanceToSea',
+  'centar': 'distanceToCenter', 'docentra': 'distanceToCenter', 'center': 'distanceToCenter', 'qendra': 'distanceToCenter',
+  'naselje': 'city', 'mesto': 'city', 'grad/mjesto': 'city', 'županija': 'address',
+  'ulica': 'address', 'adresanekretnine': 'address', 'rruga': 'address', 
+
   // ── Bathrooms ─────────────────────────────────────────────────────────
   // HR/BA/SR
-  'kupatilo': 'baths', 'kupatila': 'baths', 'kupaonica': 'baths', 'toalet': 'baths',
+  'kupatilo': 'baths', 'kupaonica': 'baths', 'toalet': 'baths',
   // SR Cyrillic
   'купатило': 'baths', 'тоалет': 'baths',
   // BG
@@ -150,13 +169,13 @@ export const LABEL_MAP: Readonly<Record<string, AttributeField>> = {
 
   // ── Location / City ───────────────────────────────────────────────────
   // HR/BA/SR Latin
-  'lokacija': 'city', 'mjesto': 'city', 'grad': 'city', 'adresa': 'city', 'općina': 'city', 'opcina': 'city',
+  'lokacija': 'city', 'mjesto': 'city', 'grad': 'city', 'adresa': 'address', 'općina': 'city', 'opcina': 'city',
   // SR Cyrillic
-  'локација': 'city', 'место': 'city', 'град': 'city', 'адреса': 'city', 'општина': 'city',
+  'локација': 'city', 'место': 'city', 'град': 'city', 'адреса': 'address', 'општина': 'city',
   // MK Cyrillic
   'локациjа': 'city',
   // BG Cyrillic
-  'местоположение': 'city', 'населеноместо': 'city', 'квартал': 'city', 'адрес': 'city',
+  'местоположение': 'city', 'населеноместо': 'city', 'квартал': 'city', 'адрес': 'address',
   // SL
   'kraj': 'city',
   // RO
@@ -166,15 +185,15 @@ export const LABEL_MAP: Readonly<Record<string, AttributeField>> = {
   // GR
   'τοποθεσία': 'city', 'τοποθεσια': 'city', 'πόλη': 'city', 'πολη': 'city', 'περιοχή': 'city',
   // HU
-  'helyszín': 'city', 'helyszin': 'city', 'város': 'city', 'varos': 'city', 'cím': 'city',
+  'helyszín': 'city', 'helyszin': 'city', 'város': 'city', 'varos': 'city', 'cím': 'address',
   // DE
   'lage': 'city', 'ort': 'city', 'stadt': 'city', 'standort': 'city', 'lageort': 'city',
   // FR
-  'emplacement': 'city', 'ville': 'city', 'adresse': 'city',
+  'emplacement': 'city', 'ville': 'city', 'adresse': 'address',
   // IT
-  'posizione': 'city', 'città': 'city', 'citta': 'city', 'indirizzo': 'city',
+  'posizione': 'city', 'città': 'city', 'citta': 'city', 'indirizzo': 'address',
   // EN
-  'location': 'city', 'city': 'city', 'address': 'city', 'town': 'city', 'district': 'city',
+  'location': 'city', 'city': 'city', 'address': 'address', 'town': 'city', 'district': 'city',
 
   // ── Property type ─────────────────────────────────────────────────────
   'vrstanekretnine': 'propertyType', 'vrstaponude': 'propertyType', 'tipnekretnine': 'propertyType',

@@ -4,6 +4,15 @@ import { walkPages } from '../pagination/walkPages';
 import type { RawListing } from '../types';
 import type { SelectorMap } from './selectors';
 import { parseIndexPage } from './indexPage';
+import { isBotChallengePage } from './indexPages';
+
+/** The site answered with a bot-check page instead of its listings. */
+export class BotChallengeError extends Error {
+  constructor(readonly url: string) {
+    super(`${new URL(url).hostname} shows a bot check ("one moment, please") instead of its listings page`);
+    this.name = 'BotChallengeError';
+  }
+}
 
 export interface CrawlConfig {
   indexUrl: string;
@@ -42,7 +51,9 @@ export const crawlIndexPages = (cfg: CrawlConfig, deps: CrawlDeps): Promise<RawL
     keyOf: (stub) => stub.url ?? stub.id,
     onPage: deps.onPage,
     load: async (url, pageNo) => {
-      const $ = cheerio.load(await deps.fetchHtml(url));
+      const html = await deps.fetchHtml(url);
+      if (isBotChallengePage(html)) throw new BotChallengeError(url);
+      const $ = cheerio.load(html);
       const items = parseIndexPage($, url, cfg.selectors, cfg.followDetails);
       const viaSelector = cfg.nextPageSelector ? $(cfg.nextPageSelector).first().attr('href') : undefined;
       const nextUrl = viaSelector ? resolveUrl(url, viaSelector) : findNextPageUrl($, url, pageNo);

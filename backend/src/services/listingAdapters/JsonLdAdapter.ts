@@ -2,12 +2,20 @@ import * as cheerio from 'cheerio';
 import type { IListingSource } from '../../models/ListingSource';
 import { isValidListingItem } from '../listingNormalizerService';
 import { looksLikeListingPath } from '../listingDetectorService';
+import { listingJsonLdNodes } from '../listingAttributes/jsonLdNodes';
+import { isBotChallengePage } from './htmlScrape/indexPages';
 import { httpGet } from './httpClient';
+import { discoverSitemapUrls } from './sitemap';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface JsonLdAdapterConfig {
   /** Listing-page URLs to crawl, OR an `indexUrl` + `linkSelector` to discover them. */
   listingUrls?: string[];
+  /**
+   * A page of the site whose sitemap lists the listings. Re-read on every
+   * run, so listings added since the feed was set up are picked up too.
+   */
+  sitemapOf?: string;
   indexUrl?: string;
   /** CSS selector for anchor tags pointing at listing detail pages. */
   linkSelector?: string;
@@ -33,19 +41,6 @@ const DEFAULT_TYPES = new Set([
   'Product',
 ]);
 
-const flattenJsonLd = (node: unknown, out: Record<string, unknown>[]): void => {
-  if (!node) return;
-  if (Array.isArray(node)) {
-    for (const n of node) flattenJsonLd(n, out);
-    return;
-  }
-  if (typeof node === 'object') {
-    const obj = node as Record<string, unknown>;
-    if ('@graph' in obj && Array.isArray(obj['@graph'])) flattenJsonLd(obj['@graph'], out);
-    else out.push(obj);
-  }
-};
-
 const matchesType = (node: Record<string, unknown>, accepted: Set<string>): boolean => {
   const t = node['@type'];
   if (!t) return false;
@@ -67,22 +62,25 @@ export class JsonLdAdapter implements SourceAdapter {
 
   private async parsePage(
     url: string,
-    accepted: Set<string>
+    accepted: Set<string>,
+    requestOpts: { userAgent?: string; requestDelayMs?: number; respectRobotsTxt?: boolean }
   ): Promise<{ jsonLd: Record<string, unknown> | null; detailHtml: string } | null> {
-    const response = await httpGet<string>(url, { responseType: 'text' });
+    const response = await httpGet<string>(url, { ...requestOpts, responseType: 'text' });
     const html = String(response.data);
+    if (isBotChallengePage(html)) return null;
     const $ = cheerio.load(html);
-    const candidates: Record<string, unknown>[] = [];
+    const blocks: unknown[] = [];
     $('script[type="application/ld+json"]').each((_, el) => {
       const txt = $(el).contents().text();
       if (!txt) return;
       try {
-        flattenJsonLd(JSON.parse(txt), candidates);
+        blocks.push(JSON.parse(txt));
       } catch {
         // ignore malformed JSON-LD
       }
     });
-    const jsonLd = candidates.find((c) => matchesType(c, accepted)) ?? null;
+    // The listing's own node — not the agency's or the website's on the same page.
+    const jsonLd = listingJsonLdNodes(blocks).find((n) => matchesType(n, accepted)) ?? null;
     return { jsonLd, detailHtml: html };
   }
 
@@ -99,7 +97,11 @@ export class JsonLdAdapter implements SourceAdapter {
     };
 
     let urls: string[] = [];
-    if (cfg.listingUrls?.length) {
+    if (cfg.sitemapOf) {
+      const fromSitemap = await discoverSitemapUrls(cfg.sitemapOf);
+      urls = fromSitemap?.urls ?? cfg.listingUrls ?? [];
+      if (!urls.length) throw new Error(`JsonLdAdapter: no listing URLs in the sitemap of ${cfg.sitemapOf} (source ${source.slug})`);
+    } else if (cfg.listingUrls?.length) {
       urls = cfg.listingUrls;
     } else if (cfg.indexUrl && cfg.linkSelector) {
       let current: string | undefined = cfg.indexUrl;
@@ -141,7 +143,7 @@ export class JsonLdAdapter implements SourceAdapter {
     let fetched = 0;
     for (const url of urls) {
       try {
-        const result = await this.parsePage(url, accepted);
+        const result = await this.parsePage(url, accepted, requestOpts);
         options.onProgress?.(urls.length, ++fetched);
         if (!result) continue;
         const { jsonLd, detailHtml } = result;

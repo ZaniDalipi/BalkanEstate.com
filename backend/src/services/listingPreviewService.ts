@@ -3,6 +3,7 @@ import { getAdapter } from './listingAdapters';
 import type { IListingSource } from '../models/ListingSource';
 import type { RawListing } from './listingAdapters/types';
 import { extractMappedFields, parsePriceAmount } from './listingNormalizerService';
+import { resolveLocation } from './listingAttributes/location';
 
 export interface PreviewListing {
   rawId: string;
@@ -120,6 +121,7 @@ const firstImage = (mapped: Record<string, unknown>): string | undefined => {
 const extractPreviewItem = (raw: RawListing, source: IListingSource): Omit<PreviewListing, 'isNew'> => {
   const r = raw.raw;
   const mapped = extractMappedFields(raw, source);
+  const location = resolveLocation(mapped, raw.url);
 
   let imageUrl = firstImage(mapped);
   // For HTML-scraped items the raw fields may be absent; fall back to the
@@ -133,8 +135,8 @@ const extractPreviewItem = (raw: RawListing, source: IListingSource): Omit<Previ
     rawId: raw.id,
     title: str(mapped.title),
     price: parsePriceAmount(mapped.price),
-    city: str(mapped.city),
-    country: str(mapped.country),
+    city: location.city,
+    country: location.country,
     propertyType: str(mapped.propertyType),
     beds: num(parseFloat(String(mapped.beds ?? ''))),
     baths: num(parseFloat(String(mapped.baths ?? ''))),

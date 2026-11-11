@@ -2,6 +2,7 @@ process.env.SKIP_TEST_DB = 'true';
 
 import { fieldForFeedKey, fieldForLabel } from '../../services/listingAttributes/labelMap';
 import { enrichFromDetailHtml } from '../../services/listingHtmlEnricher';
+import { propertyTypeFromText } from '../../services/listingNormalizerService';
 import { extractRecordAttributes, fillFromRecordAttributes } from '../../services/listingAttributes/recordAttributes';
 
 /**
@@ -97,5 +98,21 @@ describe('detail page attribute tables', () => {
     expect(enrichFromDetailHtml(html, 'https://agency.example/oglas/1', {})).toMatchObject({
       price: '245.000 €', beds: 3, baths: 2, livingRooms: 1, furnishing: 'furnished', yearBuilt: 2019,
     });
+  });
+});
+
+describe('propertyTypeFromText', () => {
+  it.each([
+    ['VILA S BAZENOM I GRAĐEVINSKIM ZEMLJIŠTEM', 'villa'],
+    ['STAN U PRIZEMLJU S DVORIŠTEM', 'apartment'],
+    ['BANJOLE KUĆA', 'house'],
+    ['Apartments For Sale In Lalzit Bay', 'apartment'],
+    ['Shtëpi në shitje në Durrës', 'house'],
+  ])('%s → %s', (title, type) => {
+    expect(propertyTypeFromText(title)).toBe(type);
+  });
+
+  it('matches whole words only', () => {
+    expect(propertyTypeFromText('Odlično stanje, Istanbul')).toBeUndefined();
   });
 });

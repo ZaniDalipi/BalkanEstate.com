@@ -2,13 +2,17 @@ import type { IListingSource } from '../../models/ListingSource';
 import { httpGet } from './httpClient';
 import { fetchWithBrowser } from './browserClient';
 import { isValidListingItem } from '../listingNormalizerService';
-import { crawlIndexPages } from './htmlScrape/crawlIndexPages';
+import { BotChallengeError, crawlIndexPages } from './htmlScrape/crawlIndexPages';
+import { isBotChallengePage } from './htmlScrape/indexPages';
+import { discoverSitemapUrls } from './sitemap';
 import type { SelectorMap } from './htmlScrape/selectors';
 import { pMap } from './pMap';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface HtmlScrapeAdapterConfig {
   indexUrl: string;
+  /** Further catalogue pages crawled after `indexUrl` (e.g. for sale, for rent, another country). */
+  indexUrls?: string[];
   selectors: SelectorMap;
   /** Selector for "next page" anchor; absent ⇒ detected from each page, or guessed. */
   nextPageSelector?: string;
@@ -61,21 +65,8 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     const followDetails = cfg.followDetails === true;
     const fetchHtml = this.htmlFetcher(cfg, usePlaywright);
 
-    const stubs = await crawlIndexPages(
-      {
-        indexUrl: cfg.indexUrl,
-        selectors: cfg.selectors,
-        followDetails,
-        nextPageSelector: cfg.nextPageSelector,
-        pageParam: cfg.pageParam,
-        pageStart: cfg.pageStart,
-        maxPages: cfg.maxPages ?? DEFAULT_MAX_PAGES,
-        limit,
-        deadline: Date.now() + (cfg.maxDurationMs ?? DEFAULT_MAX_DURATION_MS),
-      },
-      // Per-page progress so the UI shows "N listings found" while pages load.
-      { fetchHtml, onPage: (found) => options.onProgress?.(found, 0) }
-    );
+    const deadline = Date.now() + (cfg.maxDurationMs ?? DEFAULT_MAX_DURATION_MS);
+    const stubs = await this.crawlAllIndexes(cfg, followDetails, limit, deadline, fetchHtml, options);
     options.onProgress?.(stubs.length, 0);
 
     if (!followDetails) return stubs;
@@ -97,7 +88,7 @@ export class HtmlScrapeAdapter implements SourceAdapter {
     const out: RawListing[] = [];
     stubs.forEach((stub, i) => {
       const html = detailHtmls[i];
-      if (typeof html === 'string' && html.length > 0) {
+      if (typeof html === 'string' && html.length > 0 && !isBotChallengePage(html)) {
         stub.raw.detailHtml = html;
         out.push(stub);
       } else if (isValidListingItem(stub.raw)) {
@@ -106,6 +97,64 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       }
     });
     return out;
+  }
+
+  /**
+   * Every listing on every catalogue page. When the site hides its catalogue
+   * behind a bot check, its sitemap (offered to crawlers in robots.txt) is
+   * used instead; the detail pages then supply all the fields.
+   */
+  private async crawlAllIndexes(
+    cfg: HtmlScrapeAdapterConfig,
+    followDetails: boolean,
+    limit: number | undefined,
+    deadline: number,
+    fetchHtml: (url: string) => Promise<string>,
+    options: FetchOptions
+  ): Promise<RawListing[]> {
+    const indexUrls = Array.from(new Set([cfg.indexUrl, ...(cfg.indexUrls ?? [])]));
+    const all: RawListing[] = [];
+    const seen = new Set<string>();
+    let blocked: BotChallengeError | null = null;
+    for (const indexUrl of indexUrls) {
+      if (limit && all.length >= limit) break;
+      try {
+        const stubs = await crawlIndexPages(
+          {
+            indexUrl,
+            selectors: cfg.selectors,
+            followDetails,
+            // The configured paging belongs to the first catalogue; others are detected.
+            nextPageSelector: indexUrl === cfg.indexUrl ? cfg.nextPageSelector : undefined,
+            pageParam: indexUrl === cfg.indexUrl ? cfg.pageParam : undefined,
+            pageStart: indexUrl === cfg.indexUrl ? cfg.pageStart : undefined,
+            maxPages: cfg.maxPages ?? DEFAULT_MAX_PAGES,
+            limit: limit ? limit - all.length : undefined,
+            deadline,
+          },
+          // Per-page progress so the UI shows "N listings found" while pages load.
+          { fetchHtml, onPage: (found) => options.onProgress?.(all.length + found, 0) }
+        );
+        for (const stub of stubs) {
+          const key = stub.url ?? stub.id;
+          if (!seen.has(key)) {
+            seen.add(key);
+            all.push(stub);
+          }
+        }
+      } catch (err) {
+        if (!(err instanceof BotChallengeError)) throw err;
+        blocked = err;
+      }
+    }
+    if (all.length > 0 || !blocked) return all;
+
+    const sitemap = await discoverSitemapUrls(cfg.indexUrl);
+    if (!sitemap?.urls.length) {
+      throw new Error(`${blocked.message}, and it has no sitemap listing its properties.`);
+    }
+    const urls = limit ? sitemap.urls.slice(0, limit) : sitemap.urls;
+    return urls.map((url) => ({ id: url, url, raw: { url } }));
   }
 
   /** Fetch a page's HTML with up to 3 attempts; 4xx answers are final. */
