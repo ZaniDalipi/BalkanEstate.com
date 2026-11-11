@@ -2297,5 +2297,36 @@
     "cancel": "Anulo",
     "working": "Duke punuar…",
     "done": "Tani jeni super administrator. Mund t’i bëni të tjerët administratorë ose super administratorë nga “Ndrysho përdoruesin”."
+  },
+  "adminAlerts": {
+    "title": "Email-et e njoftimeve për administratorët",
+    "subtitle": "Kush merr email për përdorues të rinj, njoftime të reja dhe ndryshime të roleve të administratorëve. Administratorët i shohin edhe te zilja e njoftimeve.",
+    "loadError": "Cilësimet e njoftimeve nuk u ngarkuan.",
+    "retry": "Provo përsëri",
+    "disabled": "Njoftimet për administratorët janë fikur në server (ADMIN_NOTIFICATIONS=off). Asgjë nuk dërgohet derisa të hiqet.",
+    "sendingTo": "Po dërgohet te: {{list}}",
+    "sendingToNobody": "Ende nuk po dërgohet asnjë email.",
+    "source": {
+      "panel": "nga lista më poshtë",
+      "env": "nga cilësimi i serverit (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "çdo llogari administratori, sepse nuk është vendosur listë",
+      "none": "askush: shtoni një adresë më poshtë"
+    },
+    "superAdminOnly": "Vetëm një super administrator mund të ndryshojë se kush i merr këto email-e.",
+    "listLabel": "Adresat e email-it për njoftime",
+    "remove": "Hiq {{email}}",
+    "addLabel": "Shto një adresë email-i",
+    "placeholder": "emri@shembull.com",
+    "add": "Shto",
+    "invalid": "Email i pavlefshëm: {{list}}",
+    "tooMany": "Maksimumi {{max}} adresa.",
+    "save": "Ruaj adresat",
+    "saving": "Duke ruajtur…",
+    "saveError": "Adresat nuk u ruajtën.",
+    "emptyHint": "Lëreni listën bosh për të përdorur cilësimin e serverit ose email-in e çdo administratori.",
+    "test": "Dërgo email prove",
+    "testing": "Duke dërguar…",
+    "testSent": "Email-i prove u dërgua te {{list}}. Kontrolloni kutinë (dhe spam-in).",
+    "testFailed": "Nuk u dërgua te {{list}}."
   }
 }

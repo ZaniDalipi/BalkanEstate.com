@@ -15,7 +15,7 @@ export function useSuperAdminClaim(enabled: boolean) {
     staleTime: 60_000,
   });
   const claim = useMutation({
-    mutationFn: claimSuperAdmin,
+    mutationFn: () => claimSuperAdmin(),
     onSuccess: () => {
       dispatch({ type: 'UPDATE_USER', payload: { role: UserRole.SUPER_ADMIN } });
       void qc.invalidateQueries({ queryKey: adminKeys.superAdminStatus() });

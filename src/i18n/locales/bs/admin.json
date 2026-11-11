@@ -2290,5 +2290,36 @@
     "cancel": "Otkaži",
     "working": "Radi se…",
     "done": "Sada ste super administrator. Druge možete postaviti za administratora ili super administratora preko “Uredi korisnika”."
+  },
+  "adminAlerts": {
+    "title": "E-mailovi s upozorenjima za administratore",
+    "subtitle": "Ko dobija e-mail za nove korisnike, nove oglase i promjene administratorskih uloga. Administratori ih vide i u zvoncu za obavijesti.",
+    "loadError": "Postavke upozorenja se nisu mogle učitati.",
+    "retry": "Pokušaj ponovo",
+    "disabled": "Upozorenja za administratore su isključena na serveru (ADMIN_NOTIFICATIONS=off). Ništa se ne šalje dok se to ne ukloni.",
+    "sendingTo": "Šalje se na: {{list}}",
+    "sendingToNobody": "Još se ne šalju e-mailovi.",
+    "source": {
+      "panel": "s liste ispod",
+      "env": "iz postavke servera (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "svim administratorskim računima, jer lista nije postavljena",
+      "none": "nikome: dodajte adresu ispod"
+    },
+    "superAdminOnly": "Samo super administrator može promijeniti ko dobija ove e-mailove.",
+    "listLabel": "E-mail adrese za upozorenja",
+    "remove": "Ukloni {{email}}",
+    "addLabel": "Dodaj e-mail adresu",
+    "placeholder": "ime@primjer.com",
+    "add": "Dodaj",
+    "invalid": "Nije ispravan e-mail: {{list}}",
+    "tooMany": "Najviše {{max}} adresa.",
+    "save": "Spremi adrese",
+    "saving": "Spremanje…",
+    "saveError": "Adrese se nisu mogle spremiti.",
+    "emptyHint": "Ostavite listu praznom da se koristi postavka servera ili e-mail svakog administratora.",
+    "test": "Pošalji probni e-mail",
+    "testing": "Slanje…",
+    "testSent": "Probni e-mail poslan na {{list}}. Provjerite inbox (i spam).",
+    "testFailed": "Slanje nije uspjelo na {{list}}."
   }
 }

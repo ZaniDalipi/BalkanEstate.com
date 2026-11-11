@@ -161,3 +161,53 @@ export function parseAdminEmails(value: string | undefined): string[] {
   }
   return [...seen];
 }
+
+export const MAX_ADMIN_ALERT_EMAILS = 10;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Check a list of alert addresses typed in the admin panel. */
+export function validateAdminEmailList(
+  input: unknown
+): { ok: true; emails: string[] } | { ok: false; error: string; invalid: string[] } {
+  if (!Array.isArray(input) || input.some((e) => typeof e !== 'string')) {
+    return { ok: false, error: 'emails must be a list of email addresses', invalid: [] };
+  }
+  const cleaned = (input as string[]).map((e) => e.trim().toLowerCase()).filter(Boolean);
+  const invalid = cleaned.filter((e) => e.length > 254 || !EMAIL_RE.test(e));
+  if (invalid.length > 0) return { ok: false, error: 'Some addresses are not valid emails', invalid };
+  const emails = [...new Set(cleaned)];
+  if (emails.length > MAX_ADMIN_ALERT_EMAILS) {
+    return { ok: false, error: `At most ${MAX_ADMIN_ALERT_EMAILS} addresses`, invalid: [] };
+  }
+  return { ok: true, emails };
+}
+
+export type AlertRecipientSource = 'panel' | 'env' | 'admins' | 'none';
+
+/**
+ * Where the alert emails go: the list set in the admin panel, else the server
+ * setting (ADMIN_NOTIFICATION_EMAILS / ADMIN_REPORT_EMAILS), else every admin
+ * account.
+ */
+export function resolveAlertRecipients(sources: {
+  panel: readonly string[] | undefined;
+  env: string | undefined;
+  adminAccountEmails: readonly string[];
+}): { recipients: string[]; source: AlertRecipientSource } {
+  const panel = parseAdminEmails((sources.panel ?? []).join(','));
+  if (panel.length > 0) return { recipients: panel, source: 'panel' };
+  const env = parseAdminEmails(sources.env);
+  if (env.length > 0) return { recipients: env, source: 'env' };
+  const admins = parseAdminEmails(sources.adminAccountEmails.join(','));
+  return admins.length > 0 ? { recipients: admins, source: 'admins' } : { recipients: [], source: 'none' };
+}
+
+/** New-user and new-listing alerts follow their switches; role changes always go out. */
+export function isAlertEnabled(
+  kind: AdminAlertEvent['kind'],
+  switches: { notifyNewUser?: boolean; notifyNewProperty?: boolean }
+): boolean {
+  if (kind === 'user_registered') return switches.notifyNewUser !== false;
+  if (kind === 'listing_created') return switches.notifyNewProperty !== false;
+  return true;
+}

@@ -2282,5 +2282,36 @@
     "cancel": "Anulează",
     "working": "Se lucrează…",
     "done": "Acum ești super administrator. Poți face alte persoane administratori sau super administratori din „Editează utilizatorul”."
+  },
+  "adminAlerts": {
+    "title": "Emailuri de alertă pentru administratori",
+    "subtitle": "Cine primește un email pentru utilizatori noi, anunțuri noi și schimbări de roluri de administrator. Administratorii le văd și în clopoțelul de notificări.",
+    "loadError": "Setările de alertă nu s-au putut încărca.",
+    "retry": "Încearcă din nou",
+    "disabled": "Alertele pentru administratori sunt dezactivate pe server (ADMIN_NOTIFICATIONS=off). Nu se trimite nimic până nu este eliminat.",
+    "sendingTo": "Se trimite la: {{list}}",
+    "sendingToNobody": "Încă nu se trimit emailuri.",
+    "source": {
+      "panel": "din lista de mai jos",
+      "env": "din setarea serverului (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "fiecărui cont de administrator, pentru că nu este setată nicio listă",
+      "none": "nimănui: adaugă o adresă mai jos"
+    },
+    "superAdminOnly": "Doar un super administrator poate schimba cine primește aceste emailuri.",
+    "listLabel": "Adrese de email pentru alerte",
+    "remove": "Elimină {{email}}",
+    "addLabel": "Adaugă o adresă de email",
+    "placeholder": "nume@exemplu.com",
+    "add": "Adaugă",
+    "invalid": "Email invalid: {{list}}",
+    "tooMany": "Cel mult {{max}} adrese.",
+    "save": "Salvează adresele",
+    "saving": "Se salvează…",
+    "saveError": "Adresele nu s-au putut salva.",
+    "emptyHint": "Lasă lista goală pentru a folosi setarea serverului sau emailul fiecărui administrator.",
+    "test": "Trimite email de test",
+    "testing": "Se trimite…",
+    "testSent": "Emailul de test a fost trimis la {{list}}. Verifică inboxul (și spamul).",
+    "testFailed": "Nu s-a putut trimite la {{list}}."
   }
 }

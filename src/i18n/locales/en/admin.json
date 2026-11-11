@@ -2306,5 +2306,36 @@
     "cancel": "Cancel",
     "working": "Working…",
     "done": "You are now super admin. You can make other people admin or super admin from “Edit user”."
+  },
+  "adminAlerts": {
+    "title": "Admin alert emails",
+    "subtitle": "Who gets an email for new users, new listings and admin role changes. Admins also see them in the notification bell.",
+    "loadError": "Could not load the alert settings.",
+    "retry": "Try again",
+    "disabled": "Admin alerts are turned off on the server (ADMIN_NOTIFICATIONS=off). Nothing is sent until that is removed.",
+    "sendingTo": "Sending to: {{list}}",
+    "sendingToNobody": "Not sending any emails yet.",
+    "source": {
+      "panel": "from the list below",
+      "env": "from the server setting (ADMIN_NOTIFICATION_EMAILS)",
+      "admins": "every admin account, because no list is set",
+      "none": "nobody: add an address below"
+    },
+    "superAdminOnly": "Only a super admin can change who gets these emails.",
+    "listLabel": "Alert email addresses",
+    "remove": "Remove {{email}}",
+    "addLabel": "Add an email address",
+    "placeholder": "name@example.com",
+    "add": "Add",
+    "invalid": "Not a valid email: {{list}}",
+    "tooMany": "At most {{max}} addresses.",
+    "save": "Save addresses",
+    "saving": "Saving…",
+    "saveError": "Could not save the addresses.",
+    "emptyHint": "Leave the list empty to use the server setting, or every admin account’s email.",
+    "test": "Send test email",
+    "testing": "Sending…",
+    "testSent": "Test email sent to {{list}}. Check the inbox (and spam).",
+    "testFailed": "Could not send to {{list}}."
   }
 }

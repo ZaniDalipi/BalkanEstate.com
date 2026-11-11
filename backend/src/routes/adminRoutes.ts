@@ -133,6 +133,7 @@ import {
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
 import { getArchivedListingsAdmin } from '../controllers/archivedListingController';
+import { getAdminAlertSettings, testAdminAlert, updateAdminAlertSettings } from '../controllers/adminAlertSettingsController';
 import { isAllowedPhotoUrl, allowedPhotoHostsHint } from '../config/imageHosts';
 import Article from '../models/Article';
 import {
@@ -488,6 +489,9 @@ for (const base of ['/promo-slots', '/ad-banners']) {
 router.get('/system-settings', logAdminAction('VIEW_SYSTEM_SETTINGS'), getSystemSettings);
 router.patch('/system-settings', logAdminAction('UPDATE_SYSTEM_SETTINGS'), updateSystemSettings);
 router.post('/system-settings/reset', logAdminAction('RESET_SYSTEM_SETTINGS'), resetSystemSettings);
+router.get('/alert-settings', logAdminAction('VIEW_ALERT_SETTINGS'), getAdminAlertSettings);
+router.put('/alert-settings', logAdminAction('UPDATE_ALERT_SETTINGS'), updateAdminAlertSettings);
+router.post('/alert-settings/test', logAdminAction('TEST_ALERT_EMAIL'), testAdminAlert);
 
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);

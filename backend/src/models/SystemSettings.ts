@@ -32,6 +32,8 @@ export interface ISystemSettings extends Document {
   notifyAgentVerification: boolean;
   dailyDigest: boolean;
   weeklyReport: boolean;
+  /** Who gets the admin alert emails (new users, new listings, admin role changes). */
+  adminNotificationEmails: string[];
 
   // Pricing
   defaultCurrency: string;
@@ -84,6 +86,7 @@ const systemSettingsSchema = new Schema<ISystemSettings, ISystemSettingsModel>(
     notifyAgentVerification: { type: Boolean, default: true },
     dailyDigest: { type: Boolean, default: false },
     weeklyReport: { type: Boolean, default: true },
+    adminNotificationEmails: { type: [String], default: [] },
 
     // Pricing
     defaultCurrency: { type: String, default: 'EUR' },
