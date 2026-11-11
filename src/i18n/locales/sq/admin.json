@@ -54,7 +54,8 @@
     "adBanners": "Banerët reklamues",
     "emailTemplates": "Shabllonet e email-it",
     "siteSettings": "Cilësimet e faqes",
-    "residences": "Rezidencat"
+    "residences": "Rezidencat",
+    "archivedListings": "Njoftimet e arkivuara"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -2237,5 +2238,48 @@
       "percent": "{{value}}% zbritje",
       "fixed": "{{amount}} zbritje"
     }
+  },
+  "archive": {
+    "title": "Njoftimet e arkivuara",
+    "subtitle": "Njoftimet që u fshinë, u shitën ose u dhanë me qira: kush i hoqi, kur dhe çfarë ishin.",
+    "all": "Të gjitha",
+    "reasonFilter": "Arsyeja",
+    "search": "Kërko titull, adresë ose shitës",
+    "removedByFilter": "Hequr nga",
+    "removedByAnyone": "Hequr nga kushdo",
+    "reason": {
+      "deleted": "Fshirë",
+      "sold": "Shitur",
+      "rented": "Dhënë me qira"
+    },
+    "deleter": {
+      "owner": "Pronari",
+      "admin": "Një administrator",
+      "agency": "Agjencia"
+    },
+    "removedBy": {
+      "owner": "Hequr më {{date}} nga pronari ({{name}})",
+      "admin": "Hequr më {{date}} nga administratori {{name}}",
+      "agency": "Hequr më {{date}} nga agjencia ({{name}})"
+    },
+    "archivedOn": "Arkivuar më {{date}}",
+    "seller": "Shitësi: {{name}} ({{email}})",
+    "stats": "{{days}} ditë në treg · {{views}} shikime · {{saves}} ruajtje",
+    "wasStatus": "ishte {{status}}",
+    "status": {
+      "active": "aktiv",
+      "pending": "në pritje",
+      "draft": "draft",
+      "sold": "shitur",
+      "rented": "dhënë me qira"
+    },
+    "untitled": "Njoftim pa titull",
+    "loadError": "Arkivi nuk u ngarkua.",
+    "retry": "Provo përsëri",
+    "empty": "Asnjë njoftim i arkivuar nuk përputhet.",
+    "pages": "Faqet",
+    "prev": "Mëparshmja",
+    "next": "Tjetra",
+    "pageOf": "Faqja {{page}} nga {{pages}}"
   }
 }

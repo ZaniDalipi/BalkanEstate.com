@@ -1,5 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export type ArchiveDeletedByKind = 'owner' | 'admin' | 'agency';
+
 export interface IArchivedListing extends Document {
   // Original property reference
   originalPropertyId: mongoose.Types.ObjectId;
@@ -13,6 +15,15 @@ export interface IArchivedListing extends Document {
   // Archive reason
   archiveReason: 'deleted' | 'sold' | 'rented';
   archivedAt: Date;
+  /** Who removed the listing: its owner, an admin, or the agency (bulk action). */
+  deletedBy?: {
+    kind: ArchiveDeletedByKind;
+    userId?: mongoose.Types.ObjectId;
+    name?: string;
+    email?: string;
+  };
+  /** The listing's status just before it was removed (active, draft, …). */
+  previousStatus?: string;
 
   // Property details (snapshot at time of archival)
   title?: string;
@@ -96,6 +107,13 @@ const ArchivedListingSchema: Schema = new Schema(
       required: true,
     },
     mediaPurgedAt: { type: Date },
+    deletedBy: {
+      kind: { type: String, enum: ['owner', 'admin', 'agency'] },
+      userId: { type: Schema.Types.ObjectId, ref: 'User' },
+      name: String,
+      email: String,
+    },
+    previousStatus: String,
 
     title: String,
     listingType: {
@@ -171,5 +189,6 @@ const ArchivedListingSchema: Schema = new Schema(
 ArchivedListingSchema.index({ sellerId: 1, archivedAt: -1 });
 ArchivedListingSchema.index({ archiveReason: 1, archivedAt: -1 });
 ArchivedListingSchema.index({ city: 1, country: 1 });
+ArchivedListingSchema.index({ archivedAt: -1 });
 
 export default mongoose.model<IArchivedListing>('ArchivedListing', ArchivedListingSchema);

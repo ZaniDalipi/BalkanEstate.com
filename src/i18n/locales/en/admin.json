@@ -54,7 +54,8 @@
     "adBanners": "Ad Banners",
     "emailTemplates": "Email Templates",
     "siteSettings": "Site Settings",
-    "residences": "Residences"
+    "residences": "Residences",
+    "archivedListings": "Archived Listings"
   },
   "properties": {
     "title": "Property Manager",
@@ -2246,5 +2247,48 @@
       "percent": "{{value}}% off",
       "fixed": "{{amount}} off"
     }
+  },
+  "archive": {
+    "title": "Archived listings",
+    "subtitle": "Listings that were removed, sold or rented: who removed them, when, and what they were.",
+    "all": "All",
+    "reasonFilter": "Reason",
+    "search": "Search title, address or seller",
+    "removedByFilter": "Removed by",
+    "removedByAnyone": "Removed by anyone",
+    "reason": {
+      "deleted": "Deleted",
+      "sold": "Sold",
+      "rented": "Rented"
+    },
+    "deleter": {
+      "owner": "The owner",
+      "admin": "An admin",
+      "agency": "The agency"
+    },
+    "removedBy": {
+      "owner": "Removed on {{date}} by the owner ({{name}})",
+      "admin": "Removed on {{date}} by admin {{name}}",
+      "agency": "Removed on {{date}} by the agency ({{name}})"
+    },
+    "archivedOn": "Archived on {{date}}",
+    "seller": "Seller: {{name}} ({{email}})",
+    "stats": "{{days}} days listed · {{views}} views · {{saves}} saves",
+    "wasStatus": "was {{status}}",
+    "status": {
+      "active": "active",
+      "pending": "pending",
+      "draft": "draft",
+      "sold": "sold",
+      "rented": "rented"
+    },
+    "untitled": "Untitled listing",
+    "loadError": "Could not load the archive.",
+    "retry": "Try again",
+    "empty": "No archived listings match.",
+    "pages": "Pages",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}"
   }
 }

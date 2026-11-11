@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AlertCircle, Building2, Calendar, CheckCircle, Clock, Home, MessageSquare, Star, Ticket, TrendingDown, TrendingUp, UserMinus, UserPlus, XCircle,
+  AlertCircle, Building2, Calendar, CheckCircle, Clock, Home, MessageSquare, ShieldCheck, Star, Ticket, TrendingDown, TrendingUp, UserMinus, UserPlus, XCircle,
 } from 'lucide-react';
 
 const ICONS: Record<string, React.ReactElement> = {
@@ -28,6 +28,8 @@ const ICONS: Record<string, React.ReactElement> = {
   residence_trial_reminder: <Clock className="w-4 h-4 text-amber-500" />,
   residence_agency_grace: <Clock className="w-4 h-4 text-amber-500" />,
   residence_offline: <Building2 className="w-4 h-4 text-red-500" />,
+  // Admins: a new user or listing on the site
+  admin_alert: <ShieldCheck className="w-4 h-4 text-indigo-600" />,
 };
 
 /** The small icon next to a notification, by type. */

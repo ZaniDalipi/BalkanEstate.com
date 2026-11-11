@@ -54,7 +54,8 @@
     "adBanners": "Reklamni banneri",
     "emailTemplates": "Predlošci e-pošte",
     "siteSettings": "Postavke stranice",
-    "residences": "Rezidencije"
+    "residences": "Rezidencije",
+    "archivedListings": "Arhivirani oglasi"
   },
   "properties": {
     "title": "Upravljanje nekretninama",
@@ -2229,5 +2230,48 @@
       "percent": "{{value}}% popusta",
       "fixed": "{{amount}} popusta"
     }
+  },
+  "archive": {
+    "title": "Arhivirani oglasi",
+    "subtitle": "Oglasi koji su uklonjeni, prodani ili iznajmljeni: tko ih je uklonio, kada i što su bili.",
+    "all": "Svi",
+    "reasonFilter": "Razlog",
+    "search": "Traži naslov, adresu ili prodavatelja",
+    "removedByFilter": "Uklonio",
+    "removedByAnyone": "Uklonio bilo tko",
+    "reason": {
+      "deleted": "Obrisan",
+      "sold": "Prodan",
+      "rented": "Iznajmljen"
+    },
+    "deleter": {
+      "owner": "Vlasnik",
+      "admin": "Administrator",
+      "agency": "Agencija"
+    },
+    "removedBy": {
+      "owner": "Uklonjen {{date}} – vlasnik ({{name}})",
+      "admin": "Uklonjen {{date}} – administrator {{name}}",
+      "agency": "Uklonjen {{date}} – agencija ({{name}})"
+    },
+    "archivedOn": "Arhiviran {{date}}",
+    "seller": "Prodavatelj: {{name}} ({{email}})",
+    "stats": "{{days}} dana u oglasu · {{views}} pregleda · {{saves}} spremanja",
+    "wasStatus": "bio je: {{status}}",
+    "status": {
+      "active": "aktivan",
+      "pending": "na čekanju",
+      "draft": "skica",
+      "sold": "prodan",
+      "rented": "iznajmljen"
+    },
+    "untitled": "Oglas bez naslova",
+    "loadError": "Arhiva se nije mogla učitati.",
+    "retry": "Pokušaj ponovno",
+    "empty": "Nema arhiviranih oglasa koji odgovaraju.",
+    "pages": "Stranice",
+    "prev": "Prethodna",
+    "next": "Sljedeća",
+    "pageOf": "Stranica {{page}} od {{pages}}"
   }
 }

@@ -20,6 +20,8 @@ import { recordPriceChange, processInstantAlertsForProperty, processInstantPrice
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 import ArchivedListing from '../models/ArchivedListing';
+import { notifyAdmins } from '../services/adminNotificationService';
+import { archiveDeletedListing, archiveThumbnailPublicId as archiveThumbnailPublicIdOf } from '../services/listingArchiveService';
 import { sanitizeProperty } from '../utils/responseSanitizer';
 import {
   emitPropertyCreated,
@@ -1101,6 +1103,19 @@ export const createProperty = async (
     // Emit real-time event for instant updates across all connected clients
     emitPropertyCreated(property.toObject());
 
+    notifyAdmins({
+      kind: 'listing_created',
+      propertyId: String(property._id),
+      title: property.title,
+      price: property.price,
+      city: property.city,
+      country: property.country,
+      status: property.status,
+      listingType: property.listingType,
+      sellerName: property.createdByName || user.name,
+      sellerEmail: property.createdByEmail || user.email,
+    });
+
     // Invalidate properties cache so new listing appears immediately in search
     invalidateCache('/api/properties');
 
@@ -1554,7 +1569,7 @@ export const deleteProperty = async (
     // Delete the listing's media from storage, keeping one thumbnail for
     // the archive record below. The retention job clears that thumbnail once
     // the archive is old enough (see mediaRetentionService).
-    const archiveThumbnailPublicId = property.imagePublicId || property.images?.[0]?.publicId;
+    const archiveThumbnailPublicId = archiveThumbnailPublicIdOf(property);
     try {
       const publicIds = [
         property.imagePublicId,
@@ -1648,44 +1663,12 @@ export const deleteProperty = async (
     }
 
     // Archive the listing before deletion (keep one photo and details)
-    try {
-      const daysOnMarket = Math.floor((Date.now() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
-      await ArchivedListing.create({
-        originalPropertyId: property._id,
-        sellerId: property.sellerId,
-        sellerName: property.createdByName || 'Unknown',
-        sellerEmail: property.createdByEmail || '',
-        createdAsRole: property.createdAsRole || 'private_seller',
-        createdByAgencyName: property.createdByAgencyName,
-        createdByAgencyId: property.createdByAgencyId,
-        archiveReason: 'deleted',
-        archivedAt: new Date(),
-        title: property.title,
-        listingType: property.listingType || 'sale',
-        status: 'deleted',
-        price: property.price,
-        address: property.address,
-        city: property.city,
-        country: property.country,
-        propertyType: property.propertyType,
-        beds: property.beds,
-        baths: property.baths,
-        livingRooms: property.livingRooms,
-        sqft: property.sqft,
-        yearBuilt: property.yearBuilt,
-        description: property.description,
-        thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
-        thumbnailPublicId: archiveThumbnailPublicId,
-        totalViews: (property as any).views || 0,
-        totalSaves: (property as any).saves || 0,
-        daysOnMarket,
-        originalCreatedAt: property.createdAt,
-      });
-      propertyLogger.info(`📦 Archived deleted listing ${property._id}`);
-    } catch (archiveError: any) {
-      propertyLogger.error('⚠️  Error archiving listing:', archiveError);
-      // Continue with deletion even if archival fails
-    }
+    await archiveDeletedListing(property, {
+      kind: 'owner',
+      userId: String(currentUser._id),
+      name: currentUser.name,
+      email: currentUser.email,
+    });
 
     // Store property ID before deletion for emit
     const deletedPropertyId = String(property._id);

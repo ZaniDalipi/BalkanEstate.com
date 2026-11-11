@@ -54,7 +54,8 @@
     "adBanners": "Bannere publicitare",
     "emailTemplates": "Șabloane de email",
     "siteSettings": "Setările site-ului",
-    "residences": "Ansambluri"
+    "residences": "Ansambluri",
+    "archivedListings": "Anunțuri arhivate"
   },
   "properties": {
     "title": "Manager proprietăți",
@@ -2222,5 +2223,48 @@
       "percent": "{{value}}% reducere",
       "fixed": "{{amount}} reducere"
     }
+  },
+  "archive": {
+    "title": "Anunțuri arhivate",
+    "subtitle": "Anunțuri șterse, vândute sau închiriate: cine le-a șters, când și ce erau.",
+    "all": "Toate",
+    "reasonFilter": "Motiv",
+    "search": "Caută titlu, adresă sau vânzător",
+    "removedByFilter": "Șters de",
+    "removedByAnyone": "Șters de oricine",
+    "reason": {
+      "deleted": "Șters",
+      "sold": "Vândut",
+      "rented": "Închiriat"
+    },
+    "deleter": {
+      "owner": "Proprietarul",
+      "admin": "Un administrator",
+      "agency": "Agenția"
+    },
+    "removedBy": {
+      "owner": "Șters pe {{date}} de proprietar ({{name}})",
+      "admin": "Șters pe {{date}} de administratorul {{name}}",
+      "agency": "Șters pe {{date}} de agenție ({{name}})"
+    },
+    "archivedOn": "Arhivat pe {{date}}",
+    "seller": "Vânzător: {{name}} ({{email}})",
+    "stats": "{{days}} zile listat · {{views}} vizualizări · {{saves}} salvări",
+    "wasStatus": "era {{status}}",
+    "status": {
+      "active": "activ",
+      "pending": "în așteptare",
+      "draft": "ciornă",
+      "sold": "vândut",
+      "rented": "închiriat"
+    },
+    "untitled": "Anunț fără titlu",
+    "loadError": "Arhiva nu s-a putut încărca.",
+    "retry": "Încearcă din nou",
+    "empty": "Niciun anunț arhivat nu corespunde.",
+    "pages": "Pagini",
+    "prev": "Anterioara",
+    "next": "Următoarea",
+    "pageOf": "Pagina {{page}} din {{pages}}"
   }
 }

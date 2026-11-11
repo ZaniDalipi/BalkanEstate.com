@@ -129,6 +129,7 @@ import {
   resetSystemSettings,
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
+import { getArchivedListingsAdmin } from '../controllers/archivedListingController';
 import { isAllowedPhotoUrl, allowedPhotoHostsHint } from '../config/imageHosts';
 import Article from '../models/Article';
 import {
@@ -189,6 +190,7 @@ router.get('/properties-missing-coords', logAdminAction('VIEW_MISSING_COORDS'), 
 router.post('/fix-coordinates', logAdminAction('FIX_COORDINATES'), fixPropertyCoordinates);
 router.post('/fix-coordinates/:propertyId', logAdminAction('FIX_SINGLE_COORDINATES'), fixSinglePropertyCoordinates);
 router.post('/sync-property-schema', logAdminAction('SYNC_PROPERTY_SCHEMA'), syncPropertySchema);
+router.get('/archived-listings', logAdminAction('VIEW_ARCHIVED_LISTINGS'), getArchivedListingsAdmin);
 
 // ===== Business Listing Management =====
 router.get('/business-listings', logAdminAction('VIEW_BUSINESS_LISTINGS'), getAllBusinessListingsAdmin);

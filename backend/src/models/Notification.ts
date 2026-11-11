@@ -26,6 +26,7 @@ export type NotificationType =
   | 'residence_trial_reminder'   // Owner: a residence's free trial ends soon
   | 'residence_offline'          // Owner: a residence went offline (trial ended, no pass)
   | 'residence_agency_grace'     // Agency: subscription ended; free residences go offline after the grace
+  | 'admin_alert'                // Admin: a new user or listing on the site
   | 'system';               // System notifications
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -91,6 +92,7 @@ const NotificationSchema: Schema = new Schema(
         'residence_trial_reminder',
         'residence_offline',
         'residence_agency_grace',
+        'admin_alert',
         'system',
       ],
       required: true,

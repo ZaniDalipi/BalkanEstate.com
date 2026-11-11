@@ -15,6 +15,19 @@ import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 import { sendLicenseRejectionEmail } from '../services/emailService';
+import {
+  archiveDeletedListing,
+  archiveDeletedListings,
+  archiveThumbnailPublicId,
+  type ArchiveActor,
+} from '../services/listingArchiveService';
+import type { IUser } from '../models/User';
+
+/** The signed-in admin, as recorded on archived listings they remove. */
+const adminActor = (req: Request): ArchiveActor => {
+  const admin = req.user as IUser | undefined;
+  return { kind: 'admin', userId: admin ? String(admin._id) : undefined, name: admin?.name, email: admin?.email };
+};
 
 
 // @desc    Get admin dashboard statistics
@@ -230,15 +243,18 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
       await Agent.deleteMany({ userId: id });
     }
 
-    const listingIds = (await Property.find({ sellerId: id }).select('_id').lean()).map((p) => String(p._id));
+    // Keep a copy of each listing (and its one thumbnail) in the archive.
+    const listings = await Property.find({ sellerId: id });
+    await archiveDeletedListings(listings, adminActor(req));
     await Property.deleteMany({ sellerId: id });
     await user.deleteOne();
 
     // The user and their listings are gone: remove the listings' media and the
     // user's personal files. Best-effort — logged, never blocks the delete.
     try {
-      for (const propertyId of listingIds) {
-        await deleteListingMedia(id, propertyId);
+      for (const listing of listings) {
+        const thumbnail = archiveThumbnailPublicId(listing);
+        await deleteListingMedia(id, String(listing._id), { keepPublicIds: thumbnail ? [thumbnail] : [] });
       }
       await deleteUserPersonalMedia(id);
     } catch (mediaError) {
@@ -632,11 +648,15 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    const property = await Property.findByIdAndDelete(id);
+    const property = await Property.findById(id);
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
       return;
     }
+
+    await archiveDeletedListing(property, adminActor(req));
+    await property.deleteOne();
+    invalidateCache('/api/properties');
 
     res.json({ message: 'Property deleted successfully' });
   } catch (error: any) {

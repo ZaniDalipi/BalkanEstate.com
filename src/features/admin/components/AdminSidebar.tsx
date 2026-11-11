@@ -21,6 +21,7 @@ import {
   RocketLaunchIcon,
   BuildingStorefrontIcon,
   PhotoIcon,
+  ArchiveBoxIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -125,6 +126,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: t('admin:sidebar.properties'),
           icon: <HomeIcon className="w-5 h-5" />,
           badge: stats?.totalProperties
+        },
+        {
+          id: 'archivedListings',
+          label: t('admin:sidebar.archivedListings', 'Archived Listings'),
+          icon: <ArchiveBoxIcon className="w-5 h-5" />
         },
         {
           id: 'villaApprovals',

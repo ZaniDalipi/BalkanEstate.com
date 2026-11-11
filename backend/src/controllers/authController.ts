@@ -18,6 +18,7 @@ import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
 import { activityLogger } from '../services/activityLogger';
+import { notifyAdmins } from '../services/adminNotificationService';
 import { authLogger } from '../utils/logger';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { setRefreshTokenCookie, clearRefreshTokenCookie, getRefreshTokenFromRequest } from '../utils/cookieUtils';
@@ -360,6 +361,14 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     // Log successful signup
     activityLogger.logSignup(String(user._id), user.email, sanitizedRole, req);
+    notifyAdmins({
+      kind: 'user_registered',
+      userId: String(user._id),
+      name: user.name,
+      email: user.email,
+      role: sanitizedRole,
+      provider: 'email',
+    });
 
     // Set refresh token as httpOnly cookie (not accessible to JS)
     setRefreshTokenCookie(res, tokens.refreshToken);
