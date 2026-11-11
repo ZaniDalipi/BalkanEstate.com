@@ -7,7 +7,8 @@ import { geocodeAddressWithRateLimit, geocodeFreeformWithRateLimit } from './geo
 import { geocodeListing } from './listingAttributes/geocodeListing';
 import { uploadFromUrl } from './mediaService';
 import { fillFromRecordAttributes } from './listingAttributes/recordAttributes';
-import { canonicalCity, canonicalCountry, resolveLocation } from './listingAttributes/location';
+import { canonicalCity, canonicalCountry } from './listingAttributes/location';
+import { resolveLocation } from './listingAttributes/resolveLocation';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
@@ -842,6 +843,10 @@ export const normalize = async (
     if (geo) {
       lat = lat ?? geo.lat;
       lng = lng ?? geo.lng;
+    } else if (location.approxLat !== undefined && location.approxLng !== undefined) {
+      // Last resort: the centre of the village / city the listing is in.
+      lat = location.approxLat;
+      lng = location.approxLng;
     } else {
       cronLogger.info(`[normalizer] no map position for ${source.slug}/${raw.id}`);
     }

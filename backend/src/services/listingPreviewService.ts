@@ -3,7 +3,7 @@ import { getAdapter } from './listingAdapters';
 import type { IListingSource } from '../models/ListingSource';
 import type { FetchOptions, RawListing } from './listingAdapters/types';
 import { extractMappedFields, parsePriceAmount } from './listingNormalizerService';
-import { resolveLocation } from './listingAttributes/location';
+import { resolveLocation } from './listingAttributes/resolveLocation';
 
 export interface PreviewListing {
   rawId: string;

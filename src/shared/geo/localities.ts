@@ -80,6 +80,8 @@ export const BALKAN_LOCALITIES: Locality[] = [
   { name: 'Sukth', city: 'Durres', country: 'Albania', lat: 41.4028, lng: 19.5253, kind: 'town' },
   { name: 'Shijak', city: 'Durres', country: 'Albania', lat: 41.3453, lng: 19.5675, kind: 'town' },
   { name: 'Manëz', aliases: ['Maneza'], city: 'Durres', country: 'Albania', lat: 41.4333, lng: 19.5333, kind: 'village' },
+  { name: 'Gjiri i Lalzit', aliases: ['Lalzit Bay', 'Lalzi Bay', 'Lalzit', 'Lalzi', 'Gjiri i Lalzi'], city: 'Durres', country: 'Albania', lat: 41.5100, lng: 19.5250, kind: 'resort' },
+  { name: 'Kepi i Rodonit', aliases: ['Cape of Rodon', 'Cape Rodon', 'Rodon'], city: 'Durres', country: 'Albania', lat: 41.5833, lng: 19.4500, kind: 'beach' },
   { name: 'Spille', city: 'Kavaje', country: 'Albania', lat: 41.1000, lng: 19.4667, kind: 'beach' },
 
   // Shkodër
@@ -188,6 +190,11 @@ export const BALKAN_LOCALITIES: Locality[] = [
   { name: 'Omišalj', aliases: ['Omisalj'], city: 'Krk', country: 'Croatia', lat: 45.2100, lng: 14.5600, kind: 'village' },
   { name: 'Banjole', city: 'Pula', country: 'Croatia', lat: 44.8200, lng: 13.8400, kind: 'village' },
   { name: 'Premantura', city: 'Pula', country: 'Croatia', lat: 44.7900, lng: 13.9200, kind: 'village' },
+  { name: 'Štinjan', aliases: ['Stinjan'], city: 'Pula', country: 'Croatia', lat: 44.9047, lng: 13.8125, kind: 'neighbourhood' },
+  { name: 'Vodnjan', aliases: ['Dignano'], city: 'Pula', country: 'Croatia', lat: 44.9614, lng: 13.8508, kind: 'town' },
+  { name: 'Marčana', aliases: ['Marcana'], city: 'Pula', country: 'Croatia', lat: 44.9553, lng: 13.9547, kind: 'village' },
+  { name: 'Pomer', city: 'Medulin', country: 'Croatia', lat: 44.8211, lng: 13.8967, kind: 'village' },
+  { name: 'Ližnjan', aliases: ['Liznjan', 'Lisignano'], city: 'Medulin', country: 'Croatia', lat: 44.8250, lng: 13.9600, kind: 'village' },
   { name: 'Rogoznica', city: 'Sibenik', country: 'Croatia', lat: 43.5300, lng: 15.9700, kind: 'town' },
   { name: 'Brodarica', city: 'Sibenik', country: 'Croatia', lat: 43.7000, lng: 15.9000, kind: 'village' },
   { name: 'Grebaštica', aliases: ['Grebastica'], city: 'Sibenik', country: 'Croatia', lat: 43.6500, lng: 15.9200, kind: 'village' },

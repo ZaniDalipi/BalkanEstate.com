@@ -4,7 +4,7 @@ import * as cheerio from 'cheerio';
 import { enrichFromDetailHtml } from '../../services/listingHtmlEnricher';
 import { listingJsonLdNodes } from '../../services/listingAttributes/jsonLdNodes';
 import { coordinatesFromMapUrl, extractMapCoordinates } from '../../services/listingAttributes/mapCoordinates';
-import { resolveLocation } from '../../services/listingAttributes/location';
+import { resolveLocation } from '../../services/listingAttributes/resolveLocation';
 
 /** Shaped like a WordPress real-estate theme page (agency in Istria). */
 const WP_THEME_PAGE = `<html lang="en"><body>
@@ -48,7 +48,8 @@ describe('detail page: WordPress theme layout', () => {
   });
 
   it('knows the country from the phone prefix', () => {
-    expect(resolveLocation(out)).toMatchObject({ city: 'Banjole', country: 'Croatia' });
+    // Banjole is a village of Pula in the app's catalogue.
+    expect(resolveLocation(out)).toMatchObject({ city: 'Pula', country: 'Croatia', address: 'Banjole' });
   });
 });
 
@@ -62,8 +63,8 @@ describe('detail page: schema.org blocks', () => {
   });
 
   it('resolves to a known city with the coordinates the right way round', () => {
-    expect(resolveLocation(out)).toEqual({
-      city: 'Vlorë', country: 'Albania', address: 'Rruga Radhime, Vlore 9426', lat: 40.357529, lng: 19.486741,
+    expect(resolveLocation(out)).toMatchObject({
+      city: 'Vlore', country: 'Albania', address: 'Rruga Radhime, Vlore 9426', lat: 40.357529, lng: 19.486741,
     });
   });
 

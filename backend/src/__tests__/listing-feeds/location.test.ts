@@ -2,8 +2,9 @@ process.env.SKIP_TEST_DB = 'true';
 
 import {
   acceptLocationGuesses, canonicalCity, countryFromPageSignals, findPlaceInText,
-  fixSwappedCoordinates, isPlausiblePlaceName, resolveLocation,
+  fixSwappedCoordinates, isPlausiblePlaceName,
 } from '../../services/listingAttributes/location';
+import { resolveLocation } from '../../services/listingAttributes/resolveLocation';
 import { geocodeListing, placeAtStartOfTitle } from '../../services/listingAttributes/geocodeListing';
 
 describe('place names', () => {
@@ -38,9 +39,9 @@ describe('coordinates', () => {
 });
 
 describe('resolveLocation', () => {
-  it('prefers a city the app knows and keeps the village in the address', () => {
+  it("files a village under its city from the app's catalogue and keeps the village in the address", () => {
     const out = resolveLocation({ city: 'Radhime', country: 'AL', address: 'Rruga e Plazhit', title: 'Flat in Radhime, Vlore', lat: 19.48, lng: 40.35 });
-    expect(out).toEqual({ city: 'Vlorë', country: 'Albania', address: 'Rruga e Plazhit, Radhime', lat: 40.35, lng: 19.48 });
+    expect(out).toMatchObject({ city: 'Vlore', country: 'Albania', address: 'Rruga e Plazhit, Radhimë', lat: 40.35, lng: 19.48 });
   });
 
   it('keeps an unknown village as the city rather than losing it', () => {
@@ -52,7 +53,7 @@ describe('resolveLocation', () => {
   });
 
   it('reads the city from the URL when nothing else names it', () => {
-    expect(resolveLocation({ title: 'Studio' }, 'https://x.example/en/properties/Sarande-ALSS945/')).toMatchObject({ city: 'Sarandë' });
+    expect(resolveLocation({ title: 'Studio' }, 'https://x.example/en/properties/Sarande-ALSS945/')).toMatchObject({ city: 'Sarande' });
   });
 });
 
