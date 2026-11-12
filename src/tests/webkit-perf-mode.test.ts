@@ -162,3 +162,38 @@ describe('the pre-paint copy of the detection in index.html', () => {
     expect(inlineScriptSays(ua, vendor)).toBe(await bootAs(ua, vendor));
   });
 });
+
+/**
+ * The stylesheet half. jsdom does not apply these rules, so this pins the
+ * selectors that carry the WebKit budget past the class-based sections: blurs
+ * written as inline styles, blurs that are animated, and the pulsing orbs.
+ */
+describe('the WebKit rules in index.css', () => {
+  const css = readFileSync(resolve(__dirname, '../index.css'), 'utf8');
+
+  it('caps blurs written as inline styles, leaving small ones and non-blurs alone', () => {
+    expect(css).toContain(
+      'html.is-webkit [style*="backdrop-filter: blur"]:not([style*="blur(3px)"]):not([style*="blur(4px)"]) {\n  backdrop-filter: blur(8px) !important;',
+    );
+  });
+
+  it('keeps the saturation of an inline blur that had one', () => {
+    expect(css).toMatch(/\[style\*="backdrop-filter: blur"\]\[style\*="saturate"\][^{]*\{\s*backdrop-filter: blur\(8px\) saturate\(170%\) !important;/);
+  });
+
+  it('writes only the standard property, which is the form that survives the build', () => {
+    const section = css.slice(css.indexOf('--- 4. Blurs written as inline styles'), css.indexOf('--- 5. Blur as an animated value'));
+    expect(section).not.toMatch(/^\s*-webkit-backdrop-filter:/m);
+  });
+
+  it('drops the animated blur but keeps the motion', () => {
+    expect(css).toMatch(/@keyframes submitCardInNoBlur \{[^@]*transform: translateY\(24px\) scale\(0\.9\)/);
+    expect(css).not.toMatch(/@keyframes submitCardInNoBlur \{[^@]*filter:/);
+    expect(css).toContain('html.is-webkit .be-motion-blur {\n  filter: none !important;');
+  });
+
+  it('stops the pulsing orbs by whole class name, so a blurred-backdrop skeleton keeps pulsing', () => {
+    expect(css).toContain('html.is-webkit [class~="blur-3xl"][class~="animate-pulse"]');
+    expect(css).not.toContain('html.is-webkit [class*="blur-3xl"]');
+  });
+});
