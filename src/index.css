@@ -1732,6 +1732,7 @@ html.is-webkit .backdrop-blur {
      grep -rIoh 'className="[^"]*backdrop-blur[^"]*"' --include=*.tsx . \
        | grep -oE 'bg-[a-z0-9-]+/(8[0-9]|9[0-9]|100)' | sort -u
    ------------------------------------------------------------------------- */
+html.is-webkit .bg-amber-400\/90,
 html.is-webkit .bg-amber-50\/80,
 html.is-webkit .bg-amber-500\/90,
 html.is-webkit .bg-black\/80,
@@ -1747,6 +1748,7 @@ html.is-webkit .bg-green-500\/80,
 html.is-webkit .bg-green-500\/90,
 html.is-webkit .bg-neutral-800\/80,
 html.is-webkit .bg-neutral-900\/80,
+html.is-webkit .bg-neutral-900\/85,
 html.is-webkit .bg-orange-500\/85,
 html.is-webkit .bg-primary\/80,
 html.is-webkit .bg-primary\/90,
@@ -1763,6 +1765,7 @@ html.is-webkit .bg-white\/80,
 html.is-webkit .bg-white\/85,
 html.is-webkit .bg-white\/90,
 html.is-webkit .bg-white\/95,
+html.is-webkit .bg-white\/97,
 html.is-webkit .bg-yellow-600\/80 {
   --tw-backdrop-blur: initial;
 }
@@ -1812,6 +1815,58 @@ html.is-webkit .glass-input,
 html.is-webkit .glass-select,
 html.is-webkit .glass-badge {
   backdrop-filter: none;
+}
+
+/* --- 4. Blurs written as inline styles: the same cap. ----------------------
+   Sections 1–3 match classes, so a blur set through `style={{ backdropFilter:
+   'blur(20px) saturate(180%)' }}` (map controls, the AI search sheet, sticky
+   bars, modal backdrops — about sixty places) went straight past them at its
+   full 12–40px radius. The style attribute is the only handle on those, and
+   `!important` is what lets a stylesheet rule win over an inline one.
+
+   React writes the style through the CSSOM, so the attribute always reads
+   `backdrop-filter: blur(…)` (or `-webkit-backdrop-filter: blur(…)`, which
+   the same substring matches). Blurs of 3–4px are already under the cap and
+   are left alone, as is anything that is not a blur (`none`, an SVG `url()`).
+   Only the standard property is written, for the lightningcss reason in
+   section 3. */
+html.is-webkit [style*="backdrop-filter: blur"]:not([style*="blur(3px)"]):not([style*="blur(4px)"]) {
+  backdrop-filter: blur(8px) !important;
+}
+
+html.is-webkit [style*="backdrop-filter: blur"][style*="saturate"]:not([style*="blur(3px)"]):not([style*="blur(4px)"]) {
+  backdrop-filter: blur(8px) saturate(170%) !important;
+}
+
+/* --- 5. Blur as an animated value: animate everything but the blur. --------
+   A `filter: blur()` that changes every frame cannot be handed to the
+   compositor: WebKit re-rasterises the element and re-runs the blur on each
+   frame, on the main thread, for the length of the animation. Blink does the
+   same blur on the GPU. The motion (slide, scale, fade) stays; only the blur
+   that rode along with it goes.
+
+   `.be-motion-blur` marks an element whose blur is animated from JS
+   (framer-motion writes it inline, hence `!important`). */
+@keyframes submitCardInNoBlur {
+  0%   { opacity: 0; transform: translateY(24px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes blurInNoBlur {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+html.is-webkit .submit-overlay-card {
+  animation-name: submitCardInNoBlur;
+}
+
+html.is-webkit .animate-blur-in {
+  animation-name: blurInNoBlur;
+}
+
+html.is-webkit .be-motion-blur {
+  filter: none !important;
 }
 
 /* ============================================================================
@@ -1908,6 +1963,18 @@ html.is-webkit .animate-glow-pulse,
 html.is-webkit .animate-twinkle,
 html.is-webkit .animate-window,
 html.is-webkit .animate-float-sparkle {
+  animation: none !important;
+}
+
+/* The hero "orbs": a 300–500px disc under a 40–64px `filter: blur`, pulsing
+   its opacity forever (`blur-3xl animate-pulse`). The orbs using
+   `animate-pulse-glow` are already stopped above; these use Tailwind's plain
+   `animate-pulse` and were not. The orb stays, as a still wash of colour.
+   `~=` matches the whole class name, so `backdrop-blur-xl` is not caught and a
+   pulsing loading skeleton keeps pulsing. */
+html.is-webkit [class~="blur-3xl"][class~="animate-pulse"],
+html.is-webkit [class~="blur-2xl"][class~="animate-pulse"],
+html.is-webkit [class~="blur-xl"][class~="animate-pulse"] {
   animation: none !important;
 }
 
