@@ -1,37 +1,58 @@
 /**
- * The 3D model's scene: the block of land (plotModel) on a pale table, lit
- * softly from the north-west with real shadows, and the house at the best
- * spot. Built once; `setStretch` and `setSurface` change it in place.
+ * The 3D view's scene: the ground around the plot (plotModel) with its
+ * picture draped over it, fading into haze towards its edges; the plot's own
+ * sharp sheet just above the ground; light from the north-west with real
+ * shadows over the plot; the house at the best spot. Built once;
+ * `setStretch` and `setSurface` change it in place.
  */
 import * as THREE from 'three';
-import type { TerrainAnalysis } from '../types';
+import type { ElevationGrid, TerrainAnalysis } from '../types';
 import { houseAxis } from './house';
 import { createHouseModel, houseRotationY } from './houseModel3d';
-import { MODEL_SIZE, plotTerrain, sideMesh, surfaceAt, surfaceMesh, toModel, type PlotTerrain } from './plotModel';
+import { drapeMesh, MODEL_SIZE, plotTerrain, surfaceAt, surfaceMesh, toModel, type MeshData, type PlotTerrain } from './plotModel';
+import { boxSizeM } from './surroundings';
+import { HAZE } from './terrain3dScene';
 
-const TOPSOIL = new THREE.Color('#3e3127');
-const EARTH = new THREE.Color('#9a7656');
-const EARTH_DEEP = new THREE.Color('#6b5141');
+/** Squares across the plot's sheet: enough for it to hug the ground. */
+const SHEET_SEGMENTS = 96;
+
+export interface SceneLayers {
+  ground: HTMLCanvasElement;
+  plot: HTMLCanvasElement;
+}
+
+/** The sun's direction: high in the north-west, as on printed maps. */
+const SUN = new THREE.Vector3(-9, 16, -7).normalize();
 
 export interface PlotScene {
   scene: THREE.Scene;
   terrain: PlotTerrain;
-  /** Where the camera looks: the middle of the block, half-way up. */
+  /** Where the camera looks: the middle of the plot, on the ground. */
   target: THREE.Vector3;
+  /** Half the diagonal of the plot's box, scene units: what the opening view frames. */
+  plotRadius: number;
   /** The top of the house's roof, for the label (null without a best spot). */
   labelAnchor: THREE.Vector3 | null;
   setStretch: (exaggeration: number) => void;
-  setSurface: (picture: HTMLCanvasElement) => void;
+  setSurface: (layers: SceneLayers) => void;
+  /** Thicken the haze with distance from the camera to what it looks at. */
+  setHaze: (distance: number) => void;
   dispose: () => void;
 }
 
-function geometry(positions: Float32Array, indices: Uint32Array, uvs?: Float32Array): THREE.BufferGeometry {
+function geometry(m: MeshData): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  if (uvs) g.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-  g.setIndex(new THREE.BufferAttribute(indices, 1));
+  g.setAttribute('position', new THREE.BufferAttribute(m.positions, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(m.uvs, 2));
+  g.setIndex(new THREE.BufferAttribute(m.indices, 1));
   g.computeVertexNormals();
   return g;
+}
+
+function reshape(mesh: THREE.Mesh, m: MeshData): void {
+  (mesh.geometry.getAttribute('position') as THREE.BufferAttribute).copyArray(m.positions).needsUpdate = true;
+  mesh.geometry.computeVertexNormals();
+  mesh.geometry.computeBoundingSphere();
 }
 
 function texture(picture: HTMLCanvasElement, anisotropy: number): THREE.CanvasTexture {
@@ -41,49 +62,64 @@ function texture(picture: HTMLCanvasElement, anisotropy: number): THREE.CanvasTe
   return t;
 }
 
-export function createPlotScene(analysis: TerrainAnalysis, picture: HTMLCanvasElement, exaggeration: number, anisotropy: number): PlotScene {
-  const { grid, buildSpot } = analysis;
-  const terrain = plotTerrain(grid);
+export function createPlotScene(
+  ground: ElevationGrid,
+  analysis: TerrainAnalysis,
+  layers: SceneLayers,
+  exaggeration: number,
+  anisotropy: number,
+): PlotScene {
+  const { grid: plotGrid, buildSpot } = analysis;
+  const terrain = plotTerrain(ground);
   const scene = new THREE.Scene();
+  const fog = new THREE.Fog(HAZE, MODEL_SIZE, MODEL_SIZE * 3);
+  scene.fog = fog;
 
-  scene.add(new THREE.HemisphereLight('#ffffff', '#d9d3c7', 1.25));
-  const sun = new THREE.DirectionalLight('#ffffff', 2.4);
-  sun.position.set(-9, 16, -7); // high in the north-west, as on printed maps
+  const centre = toModel(terrain, ground, { lat: (plotGrid.north + plotGrid.south) / 2, lng: (plotGrid.west + plotGrid.east) / 2 });
+  const plotSize = boxSizeM(plotGrid);
+  const plotRadius = (Math.hypot(plotSize.widthM, plotSize.depthM) / 2) * terrain.scale;
+
+  scene.add(new THREE.HemisphereLight('#ffffff', '#d9d3c7', 1.3));
+  const sun = new THREE.DirectionalLight('#ffffff', 2.3);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  const reach = MODEL_SIZE * 0.85;
-  Object.assign(sun.shadow.camera, { left: -reach, right: reach, top: reach, bottom: -reach, near: 1, far: 60 });
+  // Shadows where they matter: over the plot and a little round it.
+  const reach = plotRadius * 1.4;
+  Object.assign(sun.shadow.camera, { left: -reach, right: reach, top: reach, bottom: -reach, near: 0.01, far: reach * 8 + MODEL_SIZE });
   sun.shadow.bias = -0.0004;
-  sun.shadow.normalBias = 0.02;
-  scene.add(sun);
+  sun.shadow.normalBias = 0.02 * (reach / MODEL_SIZE);
+  scene.add(sun, sun.target);
 
-  const table = new THREE.Mesh(new THREE.PlaneGeometry(MODEL_SIZE * 8, MODEL_SIZE * 8), new THREE.ShadowMaterial({ opacity: 0.16 }));
-  table.rotation.x = -Math.PI / 2;
-  table.receiveShadow = true;
-  scene.add(table);
-
-  const top = surfaceMesh(terrain, exaggeration);
-  const surfaceMaterial = new THREE.MeshStandardMaterial({ map: texture(picture, anisotropy), roughness: 0.92 });
-  const surface = new THREE.Mesh(geometry(top.positions, top.indices, top.uvs), surfaceMaterial);
+  const groundMaterial = new THREE.MeshStandardMaterial({ map: texture(layers.ground, anisotropy), roughness: 0.95 });
+  const surface = new THREE.Mesh(geometry(surfaceMesh(terrain, exaggeration)), groundMaterial);
   surface.castShadow = true;
   surface.receiveShadow = true;
   scene.add(surface);
 
-  const sides = sideMesh(terrain, exaggeration);
-  const colours = new Float32Array(sides.depth.length * 3);
-  sides.depth.forEach((d, i) => colours.set((d === 2 ? TOPSOIL : d === 1 ? EARTH : EARTH_DEEP).toArray(), i * 3));
-  const sideGeometry = geometry(sides.positions, sides.indices);
-  sideGeometry.setAttribute('color', new THREE.BufferAttribute(colours, 3));
-  const side = new THREE.Mesh(sideGeometry, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
-  side.castShadow = true;
-  side.receiveShadow = true;
-  scene.add(side);
+  // The plot's sheet, over its grid's box, drawn on top of the ground it hugs.
+  const nw = toModel(terrain, ground, { lat: plotGrid.north, lng: plotGrid.west });
+  const se = toModel(terrain, ground, { lat: plotGrid.south, lng: plotGrid.east });
+  const sheetBox = { x0: nw.x, z0: nw.z, x1: se.x, z1: se.z };
+  const lift = plotRadius * 0.003;
+  const sheetMaterial = new THREE.MeshStandardMaterial({
+    map: texture(layers.plot, anisotropy),
+    roughness: 0.95,
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  });
+  const sheet = new THREE.Mesh(geometry(drapeMesh(terrain, sheetBox, SHEET_SEGMENTS, exaggeration, lift)), sheetMaterial);
+  sheet.receiveShadow = true;
+  sheet.renderOrder = 1;
+  scene.add(sheet);
 
   let house: THREE.Group | null = null;
   let at = { x: 0, z: 0 };
   if (buildSpot) {
     house = createHouseModel();
-    at = toModel(terrain, grid, buildSpot);
+    at = toModel(terrain, ground, buildSpot);
     house.scale.setScalar(terrain.scale);
     // Front door downhill; on level ground, facing south for the sun.
     house.rotation.y = houseRotationY(houseAxis(buildSpot)) + (buildSpot.downhill === null ? Math.PI : 0);
@@ -93,21 +129,15 @@ export function createPlotScene(analysis: TerrainAnalysis, picture: HTMLCanvasEl
   const target = new THREE.Vector3();
 
   const setStretch = (stretch: number) => {
-    const t = surfaceMesh(terrain, stretch);
-    (surface.geometry.getAttribute('position') as THREE.BufferAttribute).copyArray(t.positions).needsUpdate = true;
-    surface.geometry.computeVertexNormals();
-    surface.geometry.computeBoundingSphere();
-    const s = sideMesh(terrain, stretch);
-    (side.geometry.getAttribute('position') as THREE.BufferAttribute).copyArray(s.positions).needsUpdate = true;
-    side.geometry.computeVertexNormals();
-    side.geometry.computeBoundingSphere();
-    let highest = 0;
-    for (let i = 1; i < t.positions.length; i += 3) highest = Math.max(highest, t.positions[i]);
-    target.set(0, highest / 2, 0);
+    reshape(surface, surfaceMesh(terrain, stretch));
+    reshape(sheet, drapeMesh(terrain, sheetBox, SHEET_SEGMENTS, stretch, lift));
+    target.set(centre.x, surfaceAt(terrain, centre.x, centre.z, stretch), centre.z);
+    sun.target.position.copy(target);
+    sun.position.copy(target).addScaledVector(SUN, reach * 4);
     if (house && labelAnchor) {
-      const ground = surfaceAt(terrain, at.x, at.z, stretch);
-      house.position.set(at.x, ground, at.z);
-      labelAnchor.set(at.x, ground + 6.2 * terrain.scale, at.z);
+      const y = surfaceAt(terrain, at.x, at.z, stretch);
+      house.position.set(at.x, y, at.z);
+      labelAnchor.set(at.x, y + 6.2 * terrain.scale, at.z);
     }
   };
   setStretch(exaggeration);
@@ -116,12 +146,20 @@ export function createPlotScene(analysis: TerrainAnalysis, picture: HTMLCanvasEl
     scene,
     terrain,
     target,
+    plotRadius,
     labelAnchor,
     setStretch,
     setSurface: (next) => {
-      surfaceMaterial.map?.dispose();
-      surfaceMaterial.map = texture(next, anisotropy);
-      surfaceMaterial.needsUpdate = true;
+      for (const [material, picture] of [[groundMaterial, next.ground], [sheetMaterial, next.plot]] as const) {
+        if (material.map?.image === picture) continue;
+        material.map?.dispose();
+        material.map = texture(picture, anisotropy);
+        material.needsUpdate = true;
+      }
+    },
+    setHaze: (distance) => {
+      fog.near = distance + MODEL_SIZE * 0.15;
+      fog.far = distance + MODEL_SIZE * 0.75;
     },
     dispose: () => {
       scene.traverse((o) => {

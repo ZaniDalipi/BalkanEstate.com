@@ -631,9 +631,9 @@ piece of land, press **Show slope**, and the area is painted as a smooth
 surface coloured by steepness (green → red) with white contour lines, range
 labels ("3–5%"), slim arrows pointing downhill, a frosted-glass panel with the
 headline numbers and the split across five slope classes, and a house drawn
-at the best place to build. **View in 3D** opens a model of the plot — a
-block of land on a table, like an architect's model — with a house, to turn,
-tilt and fly around.
+at the best place to build. **View in 3D** opens the plot in 3D with the
+land round it — real relief and the satellite photo for a few times the
+plot's size — and a house, to turn, tilt and fly around.
 
 ```
 GoogleMapComponent
@@ -653,9 +653,11 @@ GoogleMapComponent
   └── TerrainPanel       draw step / loading / failed / results (glass, lucide icons)
         └── Terrain3DButton → Terrain3DDialog (lazy)
               ├── PlotModelScene   three.js canvas, "Best spot" label, loading / no-WebGL states
-              │     └── usePlotModel — renderer, OrbitControls, camera tweens, stretch, satellite
-              │           └── createPlotScene  plotModel (surface + earth sides), plotTexture,
-              │                                houseModel3d, lights, table shadow
+              │     ├── useSurroundings — heights of the box round the plot (surroundingsBounds)
+              │     ├── useSurfacePictures — satellite photo (TanStack), grey relief, plot layers
+              │     └── usePlotModel — renderer, OrbitControls, stretch, haze; useCameraButtons
+              │           └── createPlotScene  ground surface, the plot's sheet (drapeMesh),
+              │                                houseModel3d, lights, fog
               ├── Scene3DControls  Slope / Satellite, height 1–5×, Camera3DControls
               └── Terrain3DInfo    size, height range, colour scale, stretch note
 ```
@@ -687,21 +689,23 @@ Key decisions:
   overlay layer with OverlayViews and is added later, so it would cover them:
   corners, arrows and labels live in the overlay-mouse-target pane, the pin in
   the float pane.
-- **A model of the plot, not a map.** Map-based 3D (MapLibre relief, then
-  Google photorealistic 3D) looked flat at plot scale whatever the stretch, so
-  the 3D window draws its own scene with three.js: the grid becomes a block
-  10 units on its longer side (`plotModel`), with cut earth sides and a
-  topsoil band, on a table that takes its shadow. The top shows the slope
-  colours and contour lines inside the drawn area and the surroundings in
-  grey (`plotTexture`); once the satellite photo has loaded (Esri tiles,
-  stitched at zoom ≤ 17 — past that Esri answers "Map data not yet
-  available") it can be shown instead. Side faces are wound outwards, which a
-  test checks: inward faces are culled and the walls vanish.
+- **The plot in its surroundings.** Map-based 3D (MapLibre relief, then
+  Google photorealistic 3D) looked flat at plot scale, so the 3D window draws
+  its own scene with three.js. A second height grid covers a square four
+  plot widths across (1.2–7 km, `surroundingsBounds`); if it can't be had the
+  view falls back to the plot's own grid. Over that ground goes the satellite
+  photo (Esri tiles stitched at zoom ≤ 17 — past that Esri answers "Map data
+  not yet available"), or the relief in soft grey until it arrives; its edges
+  fade into a haze that the fog and the sky share (`HAZE`), so there is no
+  hard end to the land. The plot has its own sheet just above the ground
+  (`drapeMesh`, drawn with a polygon offset), carrying its slope colours and
+  outline at full sharpness — in one picture with kilometres of land a small
+  plot was a blur. "Satellite" leaves only the outline on that sheet.
 - **Heights can be stretched 1, 2, 3 or 5×**, opening at what the relief
   needs (`defaultExaggeration`); changes animate the mesh's vertical scale.
-- **The camera opens framing the whole model** (`fitRadius`: the model's
-  half-diagonal against the narrower field of view, so an upright phone
-  stands further back), looking uphill (`openingBearing`), and, on wide
+- **The camera opens framing the plot with room round it** (`fitRadius`: the
+  plot's half-diagonal against the narrower field of view, so an upright
+  phone stands further back), looking uphill (`openingBearing`), and, on wide
   screens, lifted clear of the controls with a view offset. OrbitControls with
   damping move it by hand; the buttons tween along the orbit the short way
   round (`orbitCamera`).

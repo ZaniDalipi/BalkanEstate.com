@@ -15,6 +15,9 @@ export const SATELLITE_TILES = 'https://server.arcgisonline.com/ArcGIS/rest/serv
  */
 export const SATELLITE_MAX_ZOOM = 17;
 
+/** The haze the surroundings fade into at their edges (the picture, the fog and the backdrop share it). */
+export const HAZE = '#e6ebf1';
+
 export const EXAGGERATIONS = [1, 2, 3, 5] as const;
 export type Exaggeration = (typeof EXAGGERATIONS)[number];
 

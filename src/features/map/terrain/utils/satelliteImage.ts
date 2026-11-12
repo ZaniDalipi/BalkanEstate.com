@@ -8,7 +8,7 @@ import type { GridBounds } from '../types';
 import { SATELLITE_MAX_ZOOM, SATELLITE_TILES } from './terrain3dScene';
 
 const TILE = 256;
-const MAX_PX = 1536;
+const MAX_PX = 2048;
 const TIMEOUT_MS = 12000;
 
 const worldX = (lng: number, z: number) => ((lng + 180) / 360) * TILE * 2 ** z;

@@ -1,10 +1,9 @@
 /**
- * The plot as a table model: the land inside the grid's box, cut out as a
- * solid block — a smooth top surface following the ground (heights stretched
- * so its shape shows), earth sides, a flat base. Pure geometry (plain arrays,
- * three.js `y` up): the scene puts it on screen.
+ * The ground of a heights grid as a smooth 3D surface (heights stretched so
+ * its shape shows). Pure geometry (plain arrays, three.js `y` up): the scene
+ * puts it on screen.
  *
- * Model space: x runs east, z runs south, y up; the block is centred on the
+ * Model space: x runs east, z runs south, y up; the ground is centred on the
  * origin and its longer side is MODEL_SIZE units long.
  */
 import type { ElevationGrid, TerrainPoint } from '../types';
@@ -13,26 +12,20 @@ import { fillGaps, resampleSmooth, soften } from './resample';
 
 /** Length of the model's longer side, in scene units. */
 export const MODEL_SIZE = 10;
-/** Thickness of the block under its lowest ground, as a share of MODEL_SIZE. */
-const BASE_SHARE = 0.07;
-/** Most vertices along the longer side of the top surface. */
-const MAX_SEGMENTS = 160;
-/** Depth of the dark topsoil band along the top of the sides, scene units. */
-export const TOPSOIL = 0.14;
+/** Most vertices along the longer side of the surface. */
+const MAX_SEGMENTS = 256;
 
 export interface PlotTerrain {
-  /** Ground size of the block, metres. */
+  /** Ground size, metres. */
   widthM: number;
   depthM: number;
   /** Scene units per metre (the same across and up, before stretching). */
   scale: number;
-  /** Vertices across (east) and down (south) the top surface. */
+  /** Vertices across (east) and down (south) the surface. */
   cols: number;
   rows: number;
-  /** Height above the lowest point of the block, metres, at each vertex (row-major, row 0 north). */
+  /** Height above the lowest point, metres, at each vertex (row-major, row 0 north). */
   heights: Float32Array;
-  /** Height of the block's base under its lowest ground, scene units. */
-  base: number;
 }
 
 /** The ground of a heights grid as a smooth surface fine enough to look continuous. */
@@ -51,12 +44,12 @@ export function plotTerrain(grid: ElevationGrid): PlotTerrain {
   let min = Infinity;
   for (const h of heights) if (h < min) min = h;
   for (let i = 0; i < heights.length; i++) heights[i] -= min;
-  return { widthM, depthM, scale: MODEL_SIZE / longest, cols, rows, heights, base: MODEL_SIZE * BASE_SHARE };
+  return { widthM, depthM, scale: MODEL_SIZE / longest, cols, rows, heights };
 }
 
 /** Scene `y` of the surface at a vertex, for a stretch. */
 export const surfaceY = (t: PlotTerrain, i: number, exaggeration: number): number =>
-  t.base + t.heights[i] * t.scale * exaggeration;
+  t.heights[i] * t.scale * exaggeration;
 
 /** Where a point on the ground sits in model space (x east, z south), from the grid's box. */
 export function toModel(t: PlotTerrain, grid: ElevationGrid, p: TerrainPoint): { x: number; z: number } {
@@ -75,7 +68,7 @@ export function surfaceAt(t: PlotTerrain, x: number, z: number, exaggeration: nu
   const fr = r - r0;
   const at = (rr: number, cc: number) => t.heights[rr * t.cols + cc];
   const h = (at(r0, c0) * (1 - fc) + at(r0, c0 + 1) * fc) * (1 - fr) + (at(r0 + 1, c0) * (1 - fc) + at(r0 + 1, c0 + 1) * fc) * fr;
-  return t.base + h * t.scale * exaggeration;
+  return h * t.scale * exaggeration;
 }
 
 export interface MeshData {
@@ -84,7 +77,7 @@ export interface MeshData {
   indices: Uint32Array;
 }
 
-/** The top surface: one vertex per height, two triangles per square, texture laid across the whole box. */
+/** The surface: one vertex per height, two triangles per square, texture laid across the whole box. */
 export function surfaceMesh(t: PlotTerrain, exaggeration: number): MeshData {
   const { cols, rows } = t;
   const w = t.widthM * t.scale;
@@ -113,53 +106,38 @@ export function surfaceMesh(t: PlotTerrain, exaggeration: number): MeshData {
   return { positions, uvs, indices };
 }
 
-/** Vertex indices round the edge of the top surface, clockwise from the north-west corner seen from above. */
-export function rimIndices(t: PlotTerrain): number[] {
-  const { cols, rows } = t;
-  const rim: number[] = [];
-  for (let c = 0; c < cols; c++) rim.push(c); // north edge, west → east
-  for (let r = 1; r < rows; r++) rim.push(r * cols + cols - 1); // east edge, north → south
-  for (let c = cols - 2; c >= 0; c--) rim.push((rows - 1) * cols + c); // south edge, east → west
-  for (let r = rows - 2; r > 0; r--) rim.push(r * cols); // west edge, south → north
-  return rim;
-}
-
-export interface SideData {
-  positions: Float32Array;
-  /** 1 at the top of the topsoil band and below, 0 at the base: how the side is coloured. */
-  depth: Float32Array;
-  indices: Uint32Array;
-}
-
 /**
- * The block's sides: from the ground's edge down to the base, with a band of
- * topsoil along the top, as on a cut-away model. Facing outward.
+ * A sheet laid over part of the surface (a box in model space), following the
+ * ground just above it: carries the plot's own sharp picture. `lift` is in
+ * scene units.
  */
-export function sideMesh(t: PlotTerrain, exaggeration: number): SideData {
-  const rim = rimIndices(t);
-  const w = t.widthM * t.scale;
-  const d = t.depthM * t.scale;
-  const n = rim.length;
-  // Three rows per rim point: the ground edge, the bottom of the topsoil, the base.
-  const positions = new Float32Array(n * 3 * 3);
-  const depth = new Float32Array(n * 3);
-  rim.forEach((i, k) => {
-    const x = ((i % t.cols) / (t.cols - 1) - 0.5) * w;
-    const z = (Math.floor(i / t.cols) / (t.rows - 1) - 0.5) * d;
-    const top = surfaceY(t, i, exaggeration);
-    const soil = Math.max(0, top - TOPSOIL);
-    positions.set([x, top, z, x, soil, z, x, 0, z], k * 9);
-    depth.set([2, 1, 0], k * 3);
-  });
-  const indices = new Uint32Array(n * 12);
-  for (let k = 0; k < n; k++) {
-    const next = (k + 1) % n;
-    for (let band = 0; band < 2; band++) {
-      const a = k * 3 + band;
-      const b = next * 3 + band;
-      // Rim runs clockwise seen from above, so (a, b, a↓) faces outward.
-      indices.set([a, b, a + 1, b, b + 1, a + 1], k * 12 + band * 6);
+export function drapeMesh(
+  t: PlotTerrain,
+  box: { x0: number; z0: number; x1: number; z1: number },
+  segments: number,
+  exaggeration: number,
+  lift: number,
+): MeshData {
+  const n = segments + 1;
+  const positions = new Float32Array(n * n * 3);
+  const uvs = new Float32Array(n * n * 2);
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const i = r * n + c;
+      const x = box.x0 + ((box.x1 - box.x0) * c) / segments;
+      const z = box.z0 + ((box.z1 - box.z0) * r) / segments;
+      positions.set([x, surfaceAt(t, x, z, exaggeration) + lift, z], i * 3);
+      uvs.set([c / segments, 1 - r / segments], i * 2);
     }
   }
-  return { positions, depth, indices };
+  const indices = new Uint32Array(segments * segments * 6);
+  let k = 0;
+  for (let r = 0; r < segments; r++) {
+    for (let c = 0; c < segments; c++) {
+      const a = r * n + c;
+      indices.set([a, a + n, a + 1, a + 1, a + n, a + n + 1], k);
+      k += 6;
+    }
+  }
+  return { positions, uvs, indices };
 }

@@ -21,6 +21,8 @@ const model = vi.hoisted(() => ({
     tilted: true, toggleTilt: vi.fn(), reset: vi.fn(), orbiting: false, toggleOrbit: vi.fn(), canOrbit: true,
   },
 }));
+vi.mock('../../hooks/useSurroundings', () => ({ useSurroundings: () => null }));
+vi.mock('../../hooks/useSurfacePictures', () => ({ useSurfacePictures: () => ({ slope: null, satellite: null }) }));
 vi.mock('../../hooks/usePlotModel', () => ({
   usePlotModel: (_host: unknown, _label: unknown, options: { surface: string; exaggeration: number }) => {
     model.options = options;

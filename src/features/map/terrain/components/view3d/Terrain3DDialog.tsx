@@ -1,7 +1,8 @@
 /**
- * The drawn area as a 3D table model: the land cut out as a solid block, its
- * slope colours (or the satellite photo) on top, the house at the best place
- * to build — to turn, tilt and fly around. Heights can be stretched so even
+ * The drawn area in 3D with the land round it: real relief a few times the
+ * plot's size, the satellite photo of the surroundings, the plot's slope
+ * colours (or the photo) inside its outline, the house at the best place to
+ * build — to turn, tilt and fly around. Heights can be stretched so even
  * gentle land shows its shape; the info card says by how much.
  */
 import React, { useEffect, useId, useRef, useState } from 'react';
@@ -42,7 +43,7 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
         aria-labelledby={titleId}
         // Focus lands on the dialog itself: inside it for the keyboard, with no ring drawn on a button nobody chose.
         tabIndex={-1}
-        className="relative h-full w-full overflow-hidden bg-[#eef0f3] shadow-2xl outline-none sm:h-[min(86dvh,820px)] sm:max-w-6xl sm:rounded-[28px] sm:ring-1 sm:ring-black/10"
+        className="relative h-full w-full overflow-hidden bg-[#e6ebf1] shadow-2xl outline-none sm:h-[min(86dvh,820px)] sm:max-w-6xl sm:rounded-[28px] sm:ring-1 sm:ring-black/10"
       >
         <PlotModelScene
           analysis={analysis}

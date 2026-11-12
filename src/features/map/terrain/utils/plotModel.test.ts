@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MODEL_SIZE, TOPSOIL, plotTerrain, rimIndices, sideMesh, surfaceAt, surfaceMesh, surfaceY, toModel } from './plotModel';
+import { MODEL_SIZE, drapeMesh, plotTerrain, surfaceAt, surfaceMesh, surfaceY, toModel } from './plotModel';
 import { makeGrid } from './testGrid';
 
 // 20 × 10 cells of 10 m: 200 m east–west, 100 m north–south, rising 1 m per cell to the east.
@@ -35,13 +35,13 @@ describe('model space', () => {
     const west = surfaceAt(t, -4.9, 0, 1);
     const east = surfaceAt(t, 4.9, 0, 1);
     expect(east).toBeGreaterThan(west);
-    expect(surfaceAt(t, 4.9, 0, 3) - t.base).toBeCloseTo(3 * (east - t.base), 5);
+    expect(surfaceAt(t, 4.9, 0, 3)).toBeCloseTo(3 * east, 5);
     expect(surfaceAt(t, -99, 99, 1)).toBeCloseTo(surfaceY(t, (t.rows - 1) * t.cols, 1), 5); // clamped to the corner
   });
 });
 
 describe('meshes', () => {
-  it('builds a top surface of two triangles per square, with texture across the whole box', () => {
+  it('builds a surface of two triangles per square, with texture across the whole box', () => {
     const m = surfaceMesh(t, 2);
     expect(m.positions.length).toBe(t.cols * t.rows * 3);
     expect(m.indices.length).toBe((t.cols - 1) * (t.rows - 1) * 6);
@@ -50,32 +50,15 @@ describe('meshes', () => {
     expect(Math.max(...m.indices)).toBe(t.cols * t.rows - 1);
   });
 
-  it('walks the rim once round the edge', () => {
-    const rim = rimIndices(t);
-    expect(rim.length).toBe(2 * (t.cols + t.rows) - 4);
-    expect(new Set(rim).size).toBe(rim.length);
-  });
-
-  it('drops the sides from the ground to the base, with a topsoil band', () => {
-    const s = sideMesh(t, 1);
-    const n = rimIndices(t).length;
-    expect(s.positions.length).toBe(n * 9);
-    const [, top, , , soil, , , base] = s.positions;
-    expect(top - soil).toBeCloseTo(TOPSOIL, 6);
-    expect(base).toBe(0);
-    expect(s.indices.length).toBe(n * 12);
-  });
-
-  it('turns every side face outward', () => {
-    const s = sideMesh(t, 1);
-    const p = (i: number) => [s.positions[i * 3], s.positions[i * 3 + 1], s.positions[i * 3 + 2]];
-    for (let k = 0; k < s.indices.length; k += 3) {
-      const [a, b, c] = [p(s.indices[k]), p(s.indices[k + 1]), p(s.indices[k + 2])];
-      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
-      const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
-      const normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
-      const outward = normal[0] * (a[0] + b[0] + c[0]) + normal[2] * (a[2] + b[2] + c[2]);
-      if (Math.hypot(normal[0], normal[1], normal[2]) > 1e-9) expect(outward).toBeGreaterThan(0);
-    }
+  it('drapes a sheet over part of the ground, just above it', () => {
+    const box = { x0: -2, z0: -1, x1: 2, z1: 1 };
+    const m = drapeMesh(t, box, 8, 2, 0.01);
+    expect(m.positions.length).toBe(9 * 9 * 3);
+    expect(m.indices.length).toBe(8 * 8 * 6);
+    expect(Array.from(m.positions.slice(0, 3))).toEqual([-2, expect.closeTo(surfaceAt(t, -2, -1, 2) + 0.01, 5), -1]);
+    const last = m.positions.length - 3;
+    expect(m.positions[last]).toBeCloseTo(2, 6);
+    expect(m.positions[last + 1]).toBeCloseTo(surfaceAt(t, 2, 1, 2) + 0.01, 5);
+    expect(Array.from(m.uvs.slice(0, 2))).toEqual([0, 1]);
   });
 });
