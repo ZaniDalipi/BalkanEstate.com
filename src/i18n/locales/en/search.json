@@ -681,6 +681,7 @@
     "hide": "Hide list",
     "hideHint": "Hide the list to see the whole map",
     "show": "Show list",
+    "mapSearch": "Search on the map",
     "showCount_one": "Show list, {{count}} result",
     "showCount_other": "Show list, {{count}} results"
   }

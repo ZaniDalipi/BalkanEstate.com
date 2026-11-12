@@ -47,6 +47,13 @@ for (const path of PAGES) {
       await expect.poll(async () => (await box(page, mapPanel)).width).toBeGreaterThan(before.width + 300);
       await expect.poll(async () => (await box(page, mapPanel)).x).toBeLessThan(before.x);
 
+      // The list's search box is folded away too: the map offers its own, and it works.
+      const dock = page.getByRole('search', { name: 'Search on the map' });
+      await expect(dock).toBeVisible();
+      const input = dock.getByRole('combobox');
+      await input.fill('Zagreb');
+      await expect(input).toHaveValue('Zagreb');
+
       // Remembered on this device.
       await page.reload();
       await page.waitForSelector('#search-list-panel', { state: 'attached', timeout: 20000 });
@@ -55,6 +62,7 @@ for (const path of PAGES) {
       await page.getByRole('button', { name: /^Show list/ }).click();
       await expect(page.getByRole('button', { name: 'Hide list' })).toHaveAttribute('aria-expanded', 'true');
       await expect(list).toBeVisible();
+      await expect(dock).toHaveCount(0);
       await expect.poll(async () => Math.round((await box(page, mapPanel)).x)).toBe(Math.round(before.x));
     });
   });

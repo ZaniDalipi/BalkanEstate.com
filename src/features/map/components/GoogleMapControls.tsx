@@ -129,9 +129,9 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
 
   return (
     <>
-      {/* Climate Risk Legend */}
+      {/* Climate Risk Legend. Moves below the search dock when there is one (`--map-dock-h`). */}
       {selectedClimateRisk !== 'none' && (
-        <div className="absolute top-14 left-4 z-[1000]">
+        <div className="absolute top-[calc(var(--map-dock-h,0px)+3.5rem)] left-4 z-[1000] transition-[top] duration-300 motion-reduce:transition-none">
           <ClimateRiskLegend riskType={selectedClimateRisk} />
         </div>
       )}

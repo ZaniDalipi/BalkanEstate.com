@@ -60,12 +60,20 @@ export function splitListPanelClass(isSplitView: boolean, collapsed: boolean): s
         : `${base} ${LIST_OPEN}`;
 }
 
-/** The map panel's split-view classes: beside the list, or the whole row. Same springs as the list, so their edges stay together. */
+/**
+ * The map panel's split-view classes: beside the list, or the whole row. Same
+ * springs as the list, so their edges stay together.
+ *
+ * Folded, the panel also sets `--map-dock-h`: the room the search dock takes
+ * at the top of the map (`MapSearchDock`: 12px gap + 48px bar). The map's own
+ * top-left overlays (the coordinates chip, the climate legend) add it to
+ * their `top`, so they slide below the dock instead of sitting under it.
+ */
 export function splitMapPanelClass(isSplitView: boolean, collapsed: boolean): string {
     if (!isSplitView) return '';
     const base = 'lg:ml-auto lg:transition-[width] lg:motion-reduce:transition-none';
     return collapsed
-        ? `${base} lg:duration-500 lg:ease-split-close lg:w-full`
+        ? `${base} lg:duration-500 lg:ease-split-close lg:w-full lg:[--map-dock-h:3.75rem]`
         : `${base} lg:duration-700 lg:ease-split-open lg:w-[55%] xl:w-[45%]`;
 }
 

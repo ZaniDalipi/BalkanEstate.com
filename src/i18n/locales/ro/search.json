@@ -671,6 +671,7 @@
     "hide": "Ascunde lista",
     "hideHint": "Ascunde lista pentru a vedea toată harta",
     "show": "Afișează lista",
+    "mapSearch": "Caută pe hartă",
     "showCount_one": "Afișează lista, {{count}} rezultat",
     "showCount_few": "Afișează lista, {{count}} rezultate",
     "showCount_other": "Afișează lista, {{count}} de rezultate"

@@ -70,6 +70,11 @@ describe('split panel classes', () => {
         }
     });
 
+    it('makes room for the search dock at the top of the map only while the list is folded', () => {
+        expect(classes(splitMapPanelClass(true, true))).toContain('lg:[--map-dock-h:3.75rem]');
+        expect(splitMapPanelClass(true, false)).not.toContain('--map-dock-h');
+    });
+
     it('never applies the split classes below lg', () => {
         for (const collapsed of [false, true]) {
             const all = [...classes(splitListPanelClass(true, collapsed)), ...classes(splitMapPanelClass(true, collapsed))];

@@ -41,3 +41,23 @@ export function seamShadeTransition(collapsed: boolean): Transition {
         ease: 'easeOut',
     };
 }
+
+/**
+ * The search dock on the map (see MapSearchDock): it drops in from the top as
+ * the list docks, and leaves at once when the list comes back, before the
+ * list slides over where it was. Under reduced motion it just appears.
+ */
+export function searchDockMotion(reduceMotion: boolean) {
+    if (reduceMotion) {
+        return {
+            initial: { opacity: 1, y: 0, scale: 1 },
+            animate: { opacity: 1, y: 0, scale: 1, transition: INSTANT },
+            exit: { opacity: 0, transition: INSTANT },
+        };
+    }
+    return {
+        initial: { opacity: 0, y: -16, scale: 0.97 },
+        animate: { opacity: 1, y: 0, scale: 1, transition: { ...SPRING, delay: DOCK_DELAY_S } },
+        exit: { opacity: 0, y: -10, transition: { duration: 0.14, ease: 'easeIn' as const } },
+    };
+}

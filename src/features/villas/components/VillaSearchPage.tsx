@@ -30,6 +30,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon, NavPicture } from '@/src/shared/illustrations';
 import ListCollapseTab from '@/src/features/search/splitView/ListCollapseTab';
+import MapSearchDock from '@/src/features/search/splitView/MapSearchDock';
 import { useListCollapse } from '@/src/features/search/splitView/useListCollapse';
 import { SEARCH_LIST_PANEL_ID, splitListPanelClass, splitMapPanelClass } from '@/src/features/search/splitView/listCollapse';
 
@@ -1081,11 +1082,26 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     </div>
 
                     {!showViewToggle && (
-                        <ListCollapseTab
-                            collapsed={listCollapse.collapsed}
-                            onToggle={listCollapse.toggle}
-                            count={isLoading ? null : listProperties.length}
-                        />
+                        <>
+                            {/* The search box is in the list's header: folded away, the map gets its own. */}
+                            <MapSearchDock shown={listCollapse.collapsed}>
+                                <div className="flex-1 min-w-0">
+                                    <VillaLocationBar
+                                        query={filters.query}
+                                        properties={villaProperties}
+                                        onQueryChange={(value) => handleFilterChange('query', value)}
+                                        onSelectSuggestion={handleSuggestionClick}
+                                        onSearch={handleSearch}
+                                        variant="mobile"
+                                    />
+                                </div>
+                            </MapSearchDock>
+                            <ListCollapseTab
+                                collapsed={listCollapse.collapsed}
+                                onToggle={listCollapse.toggle}
+                                count={isLoading ? null : listProperties.length}
+                            />
+                        </>
                     )}
                     {/* Pin colour key — gold = for rent, emerald = for sale */}
                     {listProperties.length > 0 && (

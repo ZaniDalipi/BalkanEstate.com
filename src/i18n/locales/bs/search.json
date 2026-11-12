@@ -671,6 +671,7 @@
     "hide": "Sakrij listu",
     "hideHint": "Sakrij listu da vidiš cijelu mapu",
     "show": "Prikaži listu",
+    "mapSearch": "Pretraži na mapi",
     "showCount_one": "Prikaži listu, {{count}} rezultat",
     "showCount_few": "Prikaži listu, {{count}} rezultata",
     "showCount_other": "Prikaži listu, {{count}} rezultata"

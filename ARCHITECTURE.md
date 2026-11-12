@@ -1547,7 +1547,8 @@ src/features/search/splitView/
   ├── useListCollapse.ts   uiStore preference → { collapsed, toggle } (split view only)
   ├── ListCollapseTab.tsx  the edge tab: "‹" (hover: "Hide list ‹") ⟷ "Show list · N ›"
   ├── TabReveal.tsx        a part of the tab whose width springs between 0 and its content
-  └── SeamShade.tsx        the shadow the list casts on the map while it moves
+  ├── SeamShade.tsx        the shadow the list casts on the map while it moves
+  └── MapSearchDock.tsx    the page's own search box, floating on the map while the list is folded
 src/app/store/uiStore.ts   isSearchListCollapsed — persisted (safeLocalStorage, partialize)
 src/index.css @theme       --ease-split-open / --ease-split-close (springs as linear())
 ```
@@ -1578,6 +1579,19 @@ src/index.css @theme       --ease-split-open / --ease-split-close (springs as li
   folds back at once. Hover or keyboard focus slides a "Hide list" label out
   of the open tab; a click resets the hover, so the label never appears
   under the pointer mid-animation. A press squeezes it (`whileTap`).
+- **Search stays on screen.** The search box lives in the list's header, so
+  folding the list used to take search with it. `MapSearchDock` floats the
+  page's own box (Search: `SearchLocationBar`, Rentals: `UniversalSearchBox`,
+  Villas: `VillaLocationBar`, each in the pill form its phone bar uses) at the
+  map's top left while the list is folded. It edits the same `filters.query`,
+  so what is typed on the map is in the header when the list returns. It
+  drops in as the list docks and leaves at once when the list comes back
+  (`searchDockMotion`), stops short of the floating header
+  (`--floating-header-w`), and sits above the map's controls (z 1004) so its
+  suggestions drop over them. Folded, the map panel publishes
+  `--map-dock-h` (3.75rem); the map's top-left overlays (coordinates chip,
+  climate legend, sun control, draw hint) add it to their `top`, so they
+  slide below the dock. Unset everywhere else, so other maps are unchanged.
 - **Reduced motion** turns every part off: the panels jump (no CSS
   transitions), the tab changes instantly, and the shade and pulse are not
   drawn.
@@ -1598,7 +1612,8 @@ src/index.css @theme       --ease-split-open / --ease-split-close (springs as li
   tablets and sideways phones keep the List / Map switch and never show the
   tab; widening the window again brings the folded state back.
 - Tests: `listCollapse.test.ts` (pure rules and classes), `tabMotion.test.ts`
-  (dock timing, reduced motion), `ListCollapseTab.test.tsx` (the user flow,
+  (dock timing, reduced motion), `MapSearchDock.test.tsx` (search while
+  folded, same query both ways), `ListCollapseTab.test.tsx` (the user flow,
   hover label, persistence, storage failure), `e2e/list-collapse.spec.ts`
   (all three pages, desktop and tablet).
 

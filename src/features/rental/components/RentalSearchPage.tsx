@@ -28,6 +28,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import ListCollapseTab from '@/src/features/search/splitView/ListCollapseTab';
+import MapSearchDock from '@/src/features/search/splitView/MapSearchDock';
 import { useListCollapse } from '@/src/features/search/splitView/useListCollapse';
 import { SEARCH_LIST_PANEL_ID, splitListPanelClass, splitMapPanelClass } from '@/src/features/search/splitView/listCollapse';
 
@@ -589,11 +590,29 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     </div>
 
                     {showSplitView && (
-                        <ListCollapseTab
-                            collapsed={listCollapse.collapsed}
-                            onToggle={listCollapse.toggle}
-                            count={isLoading ? null : listProperties.length}
-                        />
+                        <>
+                            {/* The search box is in the list's header: folded away, the map gets its own. */}
+                            <MapSearchDock shown={listCollapse.collapsed}>
+                                <UniversalSearchBox
+                                    value={filters.query}
+                                    onValueChange={(value) => handleFilterChange('query', value)}
+                                    onSelect={handleSelectSuggestion}
+                                    onSubmit={handleSearch}
+                                    properties={rentalProperties}
+                                    country={filters.country !== 'any' ? filters.country : undefined}
+                                    near={mapCentre}
+                                    variant="bare"
+                                    className="flex-1 min-w-0"
+                                    placeholder={t('rental:filters.searchCity', 'Search city...')}
+                                    aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
+                                />
+                            </MapSearchDock>
+                            <ListCollapseTab
+                                collapsed={listCollapse.collapsed}
+                                onToggle={listCollapse.toggle}
+                                count={isLoading ? null : listProperties.length}
+                            />
+                        </>
                     )}
                 </div>
 

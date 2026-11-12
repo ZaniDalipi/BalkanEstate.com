@@ -181,8 +181,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           ))}
         </GoogleMap>
 
-        {/* Debug info overlay — desktop only */}
-        <div className="hidden sm:block absolute top-4 left-4 z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
+        {/* Debug info overlay — desktop only. Moves below the search dock when a
+            search page shows one (`--map-dock-h`, see MapSearchDock). */}
+        <div className="hidden sm:block absolute top-[calc(var(--map-dock-h,0px)+1rem)] left-4 z-[1001] transition-[top] duration-300 motion-reduce:transition-none bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
           <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{hook.zoom.toFixed(1)}/21 <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} <SoftIcon name="home" className="w-3.5 h-3.5 ml-1" />{hook.validProperties.length}</span>
         </div>
 

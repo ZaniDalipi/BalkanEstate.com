@@ -671,6 +671,7 @@
     "hide": "Fshih listën",
     "hideHint": "Fshih listën për të parë gjithë hartën",
     "show": "Shfaq listën",
+    "mapSearch": "Kërko në hartë",
     "showCount_one": "Shfaq listën, {{count}} rezultat",
     "showCount_other": "Shfaq listën, {{count}} rezultate"
   }

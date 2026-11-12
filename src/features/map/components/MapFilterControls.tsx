@@ -127,14 +127,15 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
         />
       )}
 
-      {/* Debug Info Display - shows zoom level and coordinates */}
-      <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
+      {/* Debug Info Display - shows zoom level and coordinates. On the left it
+          moves below the search dock when a search page shows one (`--map-dock-h`). */}
+      <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-[calc(var(--map-dock-h,0px)+1rem)] left-4 transition-[top] duration-300 motion-reduce:transition-none'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
         <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
       </div>
 
       {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}
       {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
-        <div className={`absolute ${show3DBuildings ? 'top-14 right-4' : 'top-14 left-4'} z-[1000]`}>
+        <div className={`absolute ${show3DBuildings ? 'top-14 right-4' : 'top-[calc(var(--map-dock-h,0px)+3.5rem)] left-4 transition-[top] duration-300 motion-reduce:transition-none'} z-[1000]`}>
           <ClimateRiskLegend riskType={selectedClimateRisk} />
         </div>
       )}
@@ -372,7 +373,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
 
           {/* Sun Position Control - for shadow simulation when 3D buildings are enabled */}
           {show3DBuildings && (
-            <div className="absolute top-4 left-4 z-[1000]">
+            <div className="absolute top-[calc(var(--map-dock-h,0px)+1rem)] left-4 z-[1000] transition-[top] duration-300 motion-reduce:transition-none">
               <SunPositionControl
                 onDateTimeChange={handleShadowTimeChange}
                 onSeasonChange={handleSeasonChange}

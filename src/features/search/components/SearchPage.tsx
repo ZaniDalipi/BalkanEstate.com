@@ -29,6 +29,7 @@ import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
 import MapLoadingVeil from '@/src/features/map/components/MapLoadingVeil';
 import ListCollapseTab from '../splitView/ListCollapseTab';
+import MapSearchDock from '../splitView/MapSearchDock';
 import { useListCollapse } from '../splitView/useListCollapse';
 import { SEARCH_LIST_PANEL_ID, splitListPanelClass, splitMapPanelClass } from '../splitView/listCollapse';
 
@@ -394,16 +395,30 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     </div>
 
                     {showSplitView && (
-                        <ListCollapseTab
-                            collapsed={listCollapse.collapsed}
-                            onToggle={listCollapse.toggle}
-                            count={isLoadingProperties ? null : listProperties.length}
-                        />
+                        <>
+                            {/* The search box is in the list's header: folded away, the map gets its own. */}
+                            <MapSearchDock shown={listCollapse.collapsed}>
+                                <SearchLocationBar
+                                    filters={filters}
+                                    properties={properties}
+                                    near={mapCentre}
+                                    onFilterChange={handleFilterChange}
+                                    onSearch={handleSearch}
+                                    onSelectSuggestion={handleSelectSuggestion}
+                                    variant="mobile"
+                                />
+                            </MapSearchDock>
+                            <ListCollapseTab
+                                collapsed={listCollapse.collapsed}
+                                onToggle={listCollapse.toggle}
+                                count={isLoadingProperties ? null : listProperties.length}
+                            />
+                        </>
                     )}
 
                     {/* Draw hint banner - shown when navigating from explore cities */}
                     {showDrawHint && !isDrawing && !drawnBounds && (
-                        <div className="absolute top-20 lg:top-4 left-4 right-4 lg:left-auto lg:right-auto lg:left-1/2 lg:-translate-x-1/2 z-[1002] animate-fade-in">
+                        <div className="absolute top-20 lg:top-[calc(var(--map-dock-h,0px)+1rem)] left-4 right-4 lg:left-auto lg:right-auto lg:left-1/2 lg:-translate-x-1/2 z-[1002] animate-fade-in">
                             <div
                                 className="bg-gradient-to-r from-primary to-blue-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3"
                                 style={{
