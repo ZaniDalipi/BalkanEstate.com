@@ -730,9 +730,6 @@
       "loading": "Po ngarkohet terreni 3D…",
       "noWebgl": "Ky shfletues nuk mund të shfaqë harta 3D (WebGL është i fikur ose nuk mbështetet). Harta e pjerrësisë funksionon ende.",
       "back": "Kthehu te harta e pjerrësisë",
-      "view": "Pamja",
-      "blocks": "Blloqe rrjete",
-      "surface": "Sipërfaqja reale",
       "height": "Lartësia",
       "trueScale": "Lartësitë shfaqen në shkallë reale.",
       "exaggerated": "Lartësitë janë zmadhuar ×{{n}} që forma e tokës të shihet më lehtë.",
@@ -740,11 +737,17 @@
       "camera": "Kamera",
       "turnLeft": "Rrotullo majtas",
       "turnRight": "Rrotullo djathtas",
-      "tiltMore": "Pjerrëso më shumë",
-      "tiltLess": "Shiko nga lart",
       "orbit": "Fluturo përreth",
       "reset": "Rivendos pamjen",
-      "houseNote": "Shtëpia tregon vendin më të mirë për ndërtim, në madhësi reale (rreth 12 × 9 m)."
-    }
+      "houseNote": "Shtëpia tregon vendin më të mirë për ndërtim, në madhësi reale (rreth 12 × 9 m).",
+      "layer": "Shfaq",
+      "slope": "Pjerrësia",
+      "satellite": "Satelit",
+      "zoomIn": "Zmadho",
+      "zoomOut": "Zvogëlo",
+      "topView": "Shiko drejt nga lart",
+      "tiltedView": "Pjerrëso pamjen"
+    },
+    "contours": "Vija niveli çdo {{n}} m"
   }
 }

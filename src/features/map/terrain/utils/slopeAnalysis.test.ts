@@ -116,7 +116,7 @@ describe('computeTerrainStats', () => {
 describe('slopeArrows', () => {
   it('points every arrow downhill, and keeps their number near the target', () => {
     const grid = makeGrid(40, 40, (_r, c) => 500 + c);
-    const arrows = slopeArrows(grid, new Uint8Array(1600).fill(1), computeSlopeField(grid), 30);
+    const arrows = slopeArrows(grid, new Uint8Array(1600).fill(1), computeSlopeField(grid), null, 30);
     expect(arrows.length).toBeGreaterThan(10);
     expect(arrows.length).toBeLessThanOrEqual(40);
     expect(new Set(arrows.map((a) => a.bearing))).toEqual(new Set([270]));

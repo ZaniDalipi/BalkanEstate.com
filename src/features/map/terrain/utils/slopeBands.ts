@@ -1,11 +1,11 @@
 /**
- * The finer shades the slope map is painted in: two or three per slope class,
- * so the ground reads as a relief from green to red instead of five flat
- * blocks, and slopes that differ by a couple of percent still show apart.
- * Edges are whole percents and line up with the class edges, so every band
- * belongs to exactly one class.
+ * Finer slope ranges than the five classes, two or three per class, used to
+ * label the map ("3–5%", "30–40%"). Edges are whole percents and line up with
+ * the class edges, so every band belongs to exactly one class. Each band's
+ * colour is the colour scale at the middle of its range.
  */
 import type { SlopeClassId } from '../types';
+import { rampHex } from './slopeRamp';
 
 export interface SlopeBand {
   /** Lower bound, percent (inclusive). */
@@ -16,17 +16,24 @@ export interface SlopeBand {
   classId: SlopeClassId;
 }
 
+const band = (min: number, max: number, classId: SlopeClassId): SlopeBand => ({
+  min,
+  max,
+  classId,
+  color: rampHex(Number.isFinite(max) ? (min + max) / 2 : min + 10),
+});
+
 export const SLOPE_BANDS: readonly SlopeBand[] = [
-  { min: 0, max: 3, color: '#2fbf71', classId: 'flat' },
-  { min: 3, max: 5, color: '#86d33b', classId: 'gentle' },
-  { min: 5, max: 8, color: '#bcd935', classId: 'gentle' },
-  { min: 8, max: 11, color: '#f2d02f', classId: 'moderate' },
-  { min: 11, max: 15, color: '#f5b52c', classId: 'moderate' },
-  { min: 15, max: 20, color: '#f59532', classId: 'steep' },
-  { min: 20, max: 25, color: '#ef7a2d', classId: 'steep' },
-  { min: 25, max: 30, color: '#e8562f', classId: 'verySteep' },
-  { min: 30, max: 40, color: '#d63b2c', classId: 'verySteep' },
-  { min: 40, max: Infinity, color: '#ad2329', classId: 'verySteep' },
+  band(0, 3, 'flat'),
+  band(3, 5, 'gentle'),
+  band(5, 8, 'gentle'),
+  band(8, 11, 'moderate'),
+  band(11, 15, 'moderate'),
+  band(15, 20, 'steep'),
+  band(20, 25, 'steep'),
+  band(25, 30, 'verySteep'),
+  band(30, 40, 'verySteep'),
+  band(40, Infinity, 'verySteep'),
 ];
 
 /** Index into SLOPE_BANDS for a slope in percent. */

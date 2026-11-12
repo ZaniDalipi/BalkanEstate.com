@@ -6,6 +6,7 @@
 import { calculatePolygonArea } from '../../hooks/useMeasurement';
 import type { ElevationGrid, TerrainAnalysisResult, TerrainPoint } from '../types';
 import { findBuildSpot } from './buildSpot';
+import { contourInterval } from './contours';
 import { insideMask } from './gridGeometry';
 import { slopeArrows } from './slopeArrows';
 import { slopeLabels } from './slopeLabels';
@@ -25,9 +26,10 @@ export function analyzeTerrain(grid: ElevationGrid, polygon: TerrainPoint[]): Te
       inside,
       field,
       stats,
-      arrows: slopeArrows(grid, inside, field),
+      arrows: slopeArrows(grid, inside, field, buildSpot),
       labels: slopeLabels(grid, inside, field, buildSpot),
       buildSpot,
+      contourIntervalM: contourInterval(stats.minElevation, stats.maxElevation),
     },
   };
 }

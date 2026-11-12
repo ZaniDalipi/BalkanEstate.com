@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { drawSlopeImage, planSlopeImage, type SlopeCanvas } from './drawSlopeImage';
 import { parseElevationGridResponse } from './parseElevationGrid';
-import { shadeColor } from './hillshade';
-import { SLOPE_BANDS } from './slopeBands';
 import { computeSlopeField } from './slopeField';
 import { shouldRetryTerrain, terrainFailure, terrainPhase } from './terrainPhase';
 import { makeGrid, wholeGrid } from './testGrid';
@@ -44,49 +42,27 @@ describe('terrainPhase', () => {
 
 describe('drawSlopeImage', () => {
   it('sizes the picture to the grid within the pixel budget', () => {
-    expect(planSlopeImage(100, 50)).toEqual({ width: 50 * 20, height: 100 * 20, pxPerCell: 20 });
-    expect(planSlopeImage(10, 8).pxPerCell).toBe(64);
+    expect(planSlopeImage(100, 50)).toEqual({ width: 50 * 10, height: 100 * 10, pxPerCell: 10 });
+    expect(planSlopeImage(10, 8).pxPerCell).toBe(96);
     expect(planSlopeImage(4000, 10).pxPerCell).toBe(1);
   });
 
-  const recorder = () => {
-    const fills: string[] = [];
-    const strokes: string[] = [];
-    let clipped = false;
+  it('paints the picture, then keeps only what lies inside the drawn shape', () => {
+    const grid = makeGrid(4, 4, (_r, c) => 100 + c * 2);
+    const calls: string[] = [];
+    let painted: Uint8ClampedArray | null = null;
     const ctx = {
-      fillStyle: '', strokeStyle: '', lineWidth: 1, globalAlpha: 1,
-      save() {}, restore() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {},
-      stroke() { strokes.push(String(this.strokeStyle)); },
-      clip() { clipped = true; },
-      fillRect() { fills.push(String(this.fillStyle)); },
+      globalCompositeOperation: 'source-over',
+      createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4), width: w, height: h }),
+      putImageData(image: { data: Uint8ClampedArray }) { painted = image.data; calls.push('put'); },
+      beginPath() {}, closePath() {},
+      moveTo() { calls.push('move'); },
+      lineTo() { calls.push('line'); },
+      fill() { calls.push(`fill:${this.globalCompositeOperation}`); },
     } as unknown as SlopeCanvas;
-    return { ctx, fills, strokes, wasClipped: () => clipped };
-  };
-
-  it('paints each cell in its shade, cut to the drawn shape, as bevelled tiles with band lines', () => {
-    // West half flat; east half climbs 4 m per 10 m cell (40 %).
-    const grid = makeGrid(4, 4, (_r, c) => (c < 2 ? 100 : 100 + (c - 1) * 4));
-    const { ctx, fills, strokes, wasClipped } = recorder();
-    drawSlopeImage(ctx, grid, computeSlopeField(grid), wholeGrid(grid), planSlopeImage(4, 4));
-    expect(wasClipped()).toBe(true);
-    const cellFills = fills.filter((f) => f.startsWith('rgb('));
-    expect(cellFills).toHaveLength(16);
-    // Flat cells are unlit-neutral; the steep side is a different shade.
-    expect(cellFills[0]).toBe(shadeColor(SLOPE_BANDS[0].color, 1));
-    expect(cellFills[3]).not.toBe(cellFills[0]);
-    // Light bevel, dark bevel, band edges.
-    expect(strokes).toEqual(['rgba(255, 255, 255, 0.45)', 'rgba(0, 0, 0, 0.22)', 'rgba(255, 255, 255, 0.95)']);
-  });
-
-  it('casts a shadow where the ground steps down from the north, and none on level ground', () => {
-    const level = recorder();
-    const flat = makeGrid(4, 4, () => 100);
-    drawSlopeImage(level.ctx, flat, computeSlopeField(flat), wholeGrid(flat), planSlopeImage(4, 4));
-    expect(level.fills.filter((f) => f.startsWith('rgba('))).toHaveLength(0);
-
-    const stepped = recorder();
-    const falling = makeGrid(4, 4, (r) => 100 - r * 2); // 2 m lower each row southwards
-    drawSlopeImage(stepped.ctx, falling, computeSlopeField(falling), wholeGrid(falling), planSlopeImage(4, 4));
-    expect(stepped.fills.filter((f) => f.startsWith('rgba(')).length).toBe(12); // rows 1–3 sit below their northern neighbour
+    drawSlopeImage(ctx, grid, computeSlopeField(grid), wholeGrid(grid), { width: 8, height: 8, pxPerCell: 2 }, null);
+    expect(calls).toEqual(['put', 'move', 'line', 'line', 'line', 'fill:destination-in']);
+    expect(painted![3]).toBeGreaterThan(0);
+    expect(ctx.globalCompositeOperation).toBe('source-over');
   });
 });

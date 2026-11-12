@@ -730,9 +730,6 @@
       "loading": "Učitavanje 3D terena…",
       "noWebgl": "Ovaj preglednik ne može prikazati 3D mape (WebGL je isključen ili nije podržan). Mapa nagiba i dalje radi.",
       "back": "Nazad na mapu nagiba",
-      "view": "Prikaz",
-      "blocks": "Blokovi mreže",
-      "surface": "Stvarna površina",
       "height": "Visina",
       "trueScale": "Visine su prikazane u stvarnoj razmjeri.",
       "exaggerated": "Visine su uvećane ×{{n}} da bi se oblik zemljišta lakše vidio.",
@@ -740,11 +737,17 @@
       "camera": "Kamera",
       "turnLeft": "Okreni lijevo",
       "turnRight": "Okreni desno",
-      "tiltMore": "Nagni više",
-      "tiltLess": "Pogled odozgo",
       "orbit": "Kruži okolo",
       "reset": "Vrati prikaz",
-      "houseNote": "Kuća označava najbolje mjesto za gradnju, u stvarnoj veličini (oko 12 × 9 m)."
-    }
+      "houseNote": "Kuća označava najbolje mjesto za gradnju, u stvarnoj veličini (oko 12 × 9 m).",
+      "layer": "Prikaži",
+      "slope": "Nagib",
+      "satellite": "Satelit",
+      "zoomIn": "Uvećaj",
+      "zoomOut": "Umanji",
+      "topView": "Pogled ravno odozgo",
+      "tiltedView": "Nagni prikaz"
+    },
+    "contours": "Izohipse na svakih {{n}} m"
   }
 }

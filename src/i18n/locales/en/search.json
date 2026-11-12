@@ -740,9 +740,6 @@
       "loading": "Loading 3D terrain…",
       "noWebgl": "This browser can't show 3D maps (WebGL is off or not supported). The slope map still works.",
       "back": "Back to the slope map",
-      "view": "View",
-      "blocks": "Grid blocks",
-      "surface": "Real surface",
       "height": "Height",
       "trueScale": "Heights are shown true to scale.",
       "exaggerated": "Heights are stretched ×{{n}} so the shape of the land is easier to see.",
@@ -750,11 +747,17 @@
       "camera": "Camera",
       "turnLeft": "Turn left",
       "turnRight": "Turn right",
-      "tiltMore": "Tilt more",
-      "tiltLess": "Look from above",
       "orbit": "Fly around",
       "reset": "Reset view",
-      "houseNote": "The house marks the best place to build, at true size (about 12 × 9 m)."
-    }
+      "houseNote": "The house marks the best place to build, at true size (about 12 × 9 m).",
+      "layer": "Show",
+      "slope": "Slope",
+      "satellite": "Satellite",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "topView": "Look straight down",
+      "tiltedView": "Tilt the view"
+    },
+    "contours": "Contour lines every {{n}} m"
   }
 }

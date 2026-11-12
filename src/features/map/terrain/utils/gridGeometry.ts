@@ -30,6 +30,11 @@ export function cellCenter(grid: ElevationGrid, index: number): TerrainPoint {
   };
 }
 
+/** Ground distance between two points, metres (flat-earth: fine across one area). */
+export function metresBetween(a: TerrainPoint, b: TerrainPoint): number {
+  return Math.hypot((a.lat - b.lat) * METERS_PER_DEG_LAT, (a.lng - b.lng) * METERS_PER_DEG_LNG * Math.cos(toRad(a.lat)));
+}
+
 /** Bounding box of the points. */
 export function pointsBounds(points: TerrainPoint[]): GridBounds {
   const lats = points.map((p) => p.lat);

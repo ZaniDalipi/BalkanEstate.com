@@ -1,120 +1,141 @@
 /**
- * The terrain layers on a 3D MapLibre map, and switching between the two
- * views. Thin wrappers over MapLibre calls; what they draw comes from
- * terrain3dScene.
+ * The terrain layers on the 3D MapLibre map, and the few things that change
+ * them. Thin wrappers over MapLibre calls; what they draw comes from
+ * terrain3dScene, slopeImageUrl and house.
  */
 import type * as maplibregl from 'maplibre-gl';
-import type { TerrainAnalysis, TerrainPoint } from '../types';
-import { houseFeatures } from './house';
+import type { BuildSpot, TerrainAnalysis, TerrainPoint } from '../types';
+import { createHouseLayer } from './houseLayer3d';
+import { houseShadowCorners } from './houseShadow';
 import {
   AREA_SOURCE,
-  BLOCKS_SOURCE,
-  HOUSE_SOURCE,
+  DEM_SOURCE,
+  SHADOW_SOURCE,
   SLOPE_SOURCE,
   areaFeature,
-  blockHeight,
-  blockTop,
-  cellBlocks,
   imageCorners,
-  type Exaggeration,
-  type View3DMode,
+  type Overlay3D,
 } from './terrain3dScene';
 
+const AREA_CASING = 'terrain-area-casing';
 const AREA_LINE = 'terrain-area-line';
 const SLOPE_LAYER = 'terrain-slope';
-const BLOCKS_LAYER = 'terrain-blocks';
-const HOUSE_LAYER = 'terrain-house';
+const SHADOW_LAYER = 'terrain-house-shadow';
+const SLOPE_OPACITY = 0.95;
 
-/** The area outline, the raised-tile grid and the house at the best spot. Call once the style has loaded. */
+/** The area's outline (white, on a soft dark edge so it reads on any ground) and the house. Call once the style has loaded. */
 export function addTerrainLayers(map: maplibregl.Map, analysis: TerrainAnalysis, polygon: TerrainPoint[]): void {
   map.addSource(AREA_SOURCE, { type: 'geojson', data: areaFeature(polygon) });
-  map.addLayer({ id: AREA_LINE, type: 'line', source: AREA_SOURCE, paint: { 'line-color': '#ffffff', 'line-width': 3 } });
-  map.addSource(BLOCKS_SOURCE, { type: 'geojson', data: cellBlocks(analysis) });
-  map.addLayer({
-    id: BLOCKS_LAYER,
-    type: 'fill-extrusion',
-    source: BLOCKS_SOURCE,
-    paint: {
-      'fill-extrusion-color': ['get', 'color'],
-      'fill-extrusion-height': blockHeight(1),
-      'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.95,
-      'fill-extrusion-vertical-gradient': true,
-    },
-  });
-  if (!analysis.buildSpot) return;
-  map.addSource(HOUSE_SOURCE, { type: 'geojson', data: houseFeatures(analysis.buildSpot) });
-  map.addLayer({
-    id: HOUSE_LAYER,
-    type: 'fill-extrusion',
-    source: HOUSE_SOURCE,
-    paint: {
-      'fill-extrusion-color': ['get', 'color'],
-      'fill-extrusion-base': ['get', 'base'],
-      'fill-extrusion-height': ['get', 'height'],
-      'fill-extrusion-opacity': 1,
-      'fill-extrusion-vertical-gradient': true,
-    },
-  });
+  const round = { 'line-join': 'round', 'line-cap': 'round' } as const;
+  map.addLayer({ id: AREA_CASING, type: 'line', source: AREA_SOURCE, layout: round, paint: { 'line-color': '#000000', 'line-opacity': 0.25, 'line-width': 6, 'line-blur': 2 } });
+  map.addLayer({ id: AREA_LINE, type: 'line', source: AREA_SOURCE, layout: round, paint: { 'line-color': '#ffffff', 'line-width': 2.5 } });
+  if (analysis.buildSpot) map.addLayer(createHouseLayer(analysis.buildSpot));
 }
 
-/** How high the house stands above the map's ground: on its block in the blocks view, on the ground (the relief) otherwise. */
-export function houseLift(analysis: TerrainAnalysis, mode: View3DMode, exaggeration: Exaggeration): number {
-  const spot = analysis.buildSpot;
-  if (!spot || mode !== 'blocks') return 0;
-  return blockTop(spot.elevation, analysis.stats.minElevation, exaggeration);
-}
-
-/** The slope picture, draped over the relief in the surface view. */
-export function addSlopeImage(map: maplibregl.Map, url: string, analysis: TerrainAnalysis): void {
+/** The slope picture, laid on the relief under the outline. */
+export function addSlopeImage(map: maplibregl.Map, url: string, analysis: TerrainAnalysis, overlay: Overlay3D): void {
   map.addSource(SLOPE_SOURCE, { type: 'image', url, coordinates: imageCorners(analysis.grid) });
   map.addLayer(
-    { id: SLOPE_LAYER, type: 'raster', source: SLOPE_SOURCE, paint: { 'raster-opacity': 0.9, 'raster-fade-duration': 0 } },
-    AREA_LINE,
+    {
+      id: SLOPE_LAYER,
+      type: 'raster',
+      source: SLOPE_SOURCE,
+      paint: { 'raster-opacity': overlay === 'slope' ? SLOPE_OPACITY : 0, 'raster-fade-duration': 0, 'raster-opacity-transition': { duration: 350 } },
+    },
+    AREA_CASING,
   );
 }
 
-const show = (map: maplibregl.Map, layer: string, visible: boolean): void => {
-  if (map.getLayer(layer)) map.setLayoutProperty(layer, 'visibility', visible ? 'visible' : 'none');
-};
-
-/**
- * Blocks: flat ground, every cell raised by its height × exaggeration, the
- * house standing on its block.
- * Surface: the real relief × exaggeration, with the slope picture on it and
- * the house on the ground (MapLibre stands extrusions on the relief).
- * (Blocks on top of relief would count the height twice.)
- */
-/**
- * Put the camera's centre on the ground under it. MapLibre leaves it at sea
- * level when relief is switched on, which puts the camera inside any land
- * higher than its own height; checked again once the elevation tiles are in.
- */
-function centreOnGround(map: maplibregl.Map, relief: boolean): void {
-  if (!relief) {
-    map.setCenterElevation(0);
-    return;
-  }
-  const sync = () => {
-    const ground = map.queryTerrainElevation(map.getCenter());
-    if (ground !== null) map.setCenterElevation(ground);
-  };
-  sync();
-  map.once('idle', sync);
+/** The soft shadow under the house, on top of the slope colours. */
+export function addHouseShadow(map: maplibregl.Map, url: string, spot: BuildSpot): void {
+  map.addSource(SHADOW_SOURCE, { type: 'image', url, coordinates: houseShadowCorners(spot) });
+  map.addLayer({ id: SHADOW_LAYER, type: 'raster', source: SHADOW_SOURCE, paint: { 'raster-fade-duration': 0 } }, AREA_CASING);
 }
 
-export function applyView(map: maplibregl.Map, analysis: TerrainAnalysis, mode: View3DMode, exaggeration: Exaggeration): void {
-  const blocks = mode === 'blocks';
-  const hadRelief = Boolean(map.getTerrain());
-  map.setTerrain(blocks ? null : { source: 'dem', exaggeration });
-  // Re-seat the camera only while there is relief or as it goes: it is a jump, and would cut short a camera move under way.
-  if (!blocks || hadRelief) centreOnGround(map, !blocks);
-  show(map, BLOCKS_LAYER, blocks);
-  show(map, SLOPE_LAYER, !blocks);
-  if (map.getLayer(BLOCKS_LAYER)) map.setPaintProperty(BLOCKS_LAYER, 'fill-extrusion-height', blockHeight(exaggeration));
-  if (map.getLayer(HOUSE_LAYER)) {
-    const lift = houseLift(analysis, mode, exaggeration);
-    map.setPaintProperty(HOUSE_LAYER, 'fill-extrusion-base', ['+', ['get', 'base'], lift]);
-    map.setPaintProperty(HOUSE_LAYER, 'fill-extrusion-height', ['+', ['get', 'height'], lift]);
+/** Show the slope colours or the bare satellite photo; the change fades. */
+export function setOverlay(map: maplibregl.Map, overlay: Overlay3D): void {
+  if (map.getLayer(SLOPE_LAYER)) map.setPaintProperty(SLOPE_LAYER, 'raster-opacity', overlay === 'slope' ? SLOPE_OPACITY : 0);
+}
+
+/**
+ * Put the camera's centre on the ground under it, so the camera can't end up
+ * inside land higher than where it thinks the ground is. False (and the camera
+ * left alone) while the heights for that spot haven't arrived: MapLibre answers
+ * 0 until then, and so does real ground at sea level — which is why
+ * `whenGroundKnown` also accepts "every height tile is in".
+ */
+export function centreOnGround(map: maplibregl.Map): boolean {
+  const ground = map.queryTerrainElevation(map.getCenter());
+  if (ground === null || ground === 0) return false;
+  // Only when it would move: every call is a camera move, and those restart tile loading.
+  if (Math.abs(map.getCenterElevation() - ground) > 0.05) map.setCenterElevation(ground);
+  return true;
+}
+
+/** Stretch the relief ×`exaggeration` and keep the camera on the ground. Rebuilds the relief: for a change that should stay. */
+export function setExaggeration(map: maplibregl.Map, exaggeration: number): void {
+  map.setTerrain({ source: DEM_SOURCE, exaggeration });
+  centreOnGround(map);
+}
+
+/**
+ * One frame of the relief moving between heights: only the stretch factor
+ * changes, nothing is rebuilt, so it is as light as a camera move. False when
+ * this MapLibre has no such factor to change (the caller then just sets the
+ * final height).
+ */
+export function stretchRelief(map: maplibregl.Map, exaggeration: number): boolean {
+  const relief = (map as { terrain?: { exaggeration?: unknown } | null }).terrain;
+  if (!relief || typeof relief.exaggeration !== 'number') return false;
+  relief.exaggeration = exaggeration;
+  centreOnGround(map);
+  map.triggerRepaint();
+  return true;
+}
+
+/** Fold the map credits down to their ⓘ button, so they open on a tap instead of lying over the controls. */
+export function foldCredits(map: maplibregl.Map): void {
+  const credits = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+  credits?.classList.remove('maplibregl-compact-show');
+  credits?.removeAttribute('open');
+}
+
+/**
+ * Wait for the ground under the camera, then stand the camera on it.
+ * `onReady` runs once: when the ground is known, or after `timeoutMs` on a
+ * slow connection (the view then opens without it). If the ground only turns
+ * up after that, the camera is put on it and `onLateGround` runs, so the
+ * caller can settle the view. Returns a function that stops watching.
+ */
+export function watchGround(map: maplibregl.Map, onReady: () => void, onLateGround: () => void, timeoutMs = 8000): () => void {
+  let ready = false;
+  let stopped = false;
+  /** Whether any height tile has come in: before that, "all tiles loaded" is true of an empty list. */
+  let sawTile = false;
+  const stop = () => {
+    stopped = true;
+    map.off('idle', check);
+    map.off('sourcedata', onData);
+    window.clearTimeout(timer);
+  };
+  function check(): void {
+    if (stopped) return;
+    // Known: a real height under the camera, or every tile in and the ground really is at sea level.
+    if (!centreOnGround(map) && !(sawTile && map.isSourceLoaded(DEM_SOURCE))) return;
+    stop();
+    if (ready) onLateGround(); else { ready = true; onReady(); }
   }
+  function onData(e: { sourceId?: string; tile?: unknown }): void {
+    if (e.sourceId === DEM_SOURCE && e.tile) sawTile = true;
+    check();
+  }
+  const timer = window.setTimeout(() => {
+    if (ready || stopped) return;
+    ready = true;
+    onReady();
+  }, timeoutMs);
+  map.on('idle', check);
+  map.on('sourcedata', onData);
+  check();
+  return stop;
 }

@@ -6,6 +6,7 @@
  * 25 % retaining walls and special foundations dominate the cost.
  */
 import type { SlopeClassId } from '../types';
+import { rampHex } from './slopeRamp';
 
 export interface SlopeClass {
   id: SlopeClassId;
@@ -13,16 +14,16 @@ export interface SlopeClass {
   min: number;
   /** Upper bound, percent (exclusive); Infinity for the last band. */
   max: number;
-  /** Legend colour; the map uses the finer shades in slopeBands. */
+  /** The class's colour in the legend: the colour scale at a typical slope of the class. */
   color: string;
 }
 
 export const SLOPE_CLASSES: readonly SlopeClass[] = [
-  { id: 'flat', min: 0, max: 3, color: '#2fbf71' },
-  { id: 'gentle', min: 3, max: 8, color: '#a3d638' },
-  { id: 'moderate', min: 8, max: 15, color: '#f4c22e' },
-  { id: 'steep', min: 15, max: 25, color: '#f2882f' },
-  { id: 'verySteep', min: 25, max: Infinity, color: '#d63b2c' },
+  { id: 'flat', min: 0, max: 3, color: rampHex(1.5) },
+  { id: 'gentle', min: 3, max: 8, color: rampHex(5.5) },
+  { id: 'moderate', min: 8, max: 15, color: rampHex(11.5) },
+  { id: 'steep', min: 15, max: 25, color: rampHex(20) },
+  { id: 'verySteep', min: 25, max: Infinity, color: rampHex(33) },
 ];
 
 /** Ground up to this slope counts as easy to build on. */

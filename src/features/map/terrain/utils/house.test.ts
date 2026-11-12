@@ -1,19 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { findBuildSpot, patchDownhill } from './buildSpot';
-import { METERS_PER_DEG_LAT, METERS_PER_DEG_LNG } from './gridGeometry';
-import { HOUSE, HOUSE_HEIGHT_M, houseAxis, houseFeatures, houseFootprint, rectangleAround } from './house';
-import { computeSlopeField } from './slopeField';
 import { analyzeTerrain } from './analyzeTerrain';
-import { SATELLITE_MAX_ZOOM, START_BEARING, blockTop, openingBearing, terrain3dStyle, verticalPx } from './terrain3dScene';
-import { wholeGrid } from './testGrid';
-import { makeGrid } from './testGrid';
-import type { BuildSpot, TerrainPoint } from '../types';
-
-/** Ground distance between two points, metres (flat-earth, fine at house scale). */
-const metres = (a: TerrainPoint, b: TerrainPoint): number =>
-  Math.hypot((b.lat - a.lat) * METERS_PER_DEG_LAT, (b.lng - a.lng) * METERS_PER_DEG_LNG * Math.cos((a.lat * Math.PI) / 180));
+import { findBuildSpot, patchDownhill } from './buildSpot';
+import { metresBetween } from './gridGeometry';
+import {
+  HOUSE,
+  HOUSE_CLEARANCE_M,
+  HOUSE_HEIGHT_M,
+  HOUSE_VERTEX_SIZE,
+  houseAxis,
+  houseFootprint,
+  houseMesh,
+  placeOnMap,
+  rectangleAround,
+  roofHalves,
+} from './house';
+import { houseShadowCorners } from './houseShadow';
+import { computeSlopeField } from './slopeField';
+import { makeGrid, wholeGrid } from './testGrid';
+import type { BuildSpot } from '../types';
 
 const spot = (downhill: number | null): BuildSpot => ({ lat: 41, lng: 20, areaM2: 500, quality: 'easy', elevation: 600, downhill });
+
+/** The mesh as vertices: position and colour. */
+const vertices = (mesh: Float32Array) =>
+  Array.from({ length: mesh.length / HOUSE_VERTEX_SIZE }, (_, i) => {
+    const [x, y, z, r, g, b] = mesh.slice(i * HOUSE_VERTEX_SIZE, (i + 1) * HOUSE_VERTEX_SIZE);
+    return { x, y, z, r, g, b };
+  });
 
 describe('best spot', () => {
   it('knows its ground height and which way the patch falls', () => {
@@ -29,9 +42,18 @@ describe('best spot', () => {
     const grid = makeGrid(6, 6, () => 400);
     expect(patchDownhill([0, 1, 2, 7], computeSlopeField(grid))).toBeNull();
   });
+
+  it('keeps downhill arrows off the house', () => {
+    const grid = makeGrid(14, 14, (_r, c) => 400 + c * 0.5);
+    const result = analyzeTerrain(grid, wholeGrid(grid));
+    if (result.ok === false) throw new Error(result.error);
+    const { arrows, buildSpot } = result.value;
+    expect(arrows.length).toBeGreaterThan(0);
+    expect(arrows.every((a) => metresBetween(a, buildSpot!) >= HOUSE_CLEARANCE_M)).toBe(true);
+  });
 });
 
-describe('house', () => {
+describe('house on the 2D map', () => {
   it('runs its long side across the fall line, or east–west on level ground', () => {
     expect(houseAxis(spot(270))).toBe(0); // falls west → long side north–south
     expect(houseAxis(spot(180))).toBe(270); // falls south → long side east–west
@@ -40,9 +62,8 @@ describe('house', () => {
 
   it('is about 12 × 9 m on the ground, centred on the spot', () => {
     const [a, b, c, d] = houseFootprint(spot(null));
-    expect(metres(a, b)).toBeCloseTo(HOUSE.lengthM, 1);
-    expect(metres(b, c)).toBeCloseTo(HOUSE.widthM, 1);
-    expect(metres(a, c)).toBeCloseTo(Math.hypot(12, 9), 1);
+    expect(metresBetween(a, b)).toBeCloseTo(HOUSE.lengthM, 1);
+    expect(metresBetween(b, c)).toBeCloseTo(HOUSE.widthM, 1);
     expect((a.lat + c.lat) / 2).toBeCloseTo(41, 9);
     expect((b.lng + d.lng) / 2).toBeCloseTo(20, 9);
   });
@@ -51,54 +72,70 @@ describe('house', () => {
     // Long side north–south: the first two corners differ in latitude only.
     const [a, b] = rectangleAround({ lat: 41, lng: 20 }, 0, 12, 9);
     expect(a.lng).toBeCloseTo(b.lng, 9);
-    expect(metres(a, b)).toBeCloseTo(12, 1);
+    expect(metresBetween(a, b)).toBeCloseTo(12, 1);
   });
 
-  it('is walls under a roof that narrows to a ridge', () => {
-    const { features } = houseFeatures(spot(180));
-    const [walls, ...roof] = features;
-    expect(walls.properties).toMatchObject({ base: 0, height: HOUSE.wallM, color: HOUSE.wallColor });
-    expect(roof.every((f) => f.properties?.color === HOUSE.roofColor)).toBe(true);
-    expect(roof[0].properties?.base).toBe(HOUSE.wallM);
-    expect(roof.at(-1)?.properties?.height).toBeCloseTo(HOUSE_HEIGHT_M, 6);
-    const width = (f: GeoJSON.Feature<GeoJSON.Polygon>) => {
-      const [p, , q] = f.geometry.coordinates[0];
-      return Math.hypot(q[0] - p[0], q[1] - p[1]);
-    };
-    expect(width(roof.at(-1)!)).toBeLessThan(width(roof[0]));
+  it('splits the roof along the ridge, with the slope facing the north-west light lit', () => {
+    // Long side east–west: one slope faces north, the other south.
+    const halves = roofHalves(spot(null));
+    expect(halves).toHaveLength(2);
+    expect(halves.filter((h) => h.lit)).toHaveLength(1);
+    const northernmost = (pts: Array<{ lat: number }>) => Math.max(...pts.map((p) => p.lat));
+    const lit = halves.find((h) => h.lit)!;
+    const shaded = halves.find((h) => !h.lit)!;
+    expect(northernmost(lit.points)).toBeGreaterThan(northernmost(shaded.points));
+    // Each half is half the footprint: 12 × 4.5 m.
+    expect(metresBetween(lit.points[1], lit.points[2])).toBeCloseTo(HOUSE.widthM / 2, 1);
   });
 });
 
-describe('3D placement', () => {
-  const analysed = (height: (r: number, c: number) => number) => {
-    const grid = makeGrid(10, 10, height);
-    const result = analyzeTerrain(grid, wholeGrid(grid));
-    if (result.ok === false) throw new Error(result.error);
-    return result.value;
-  };
+describe('house model', () => {
+  const mesh = vertices(houseMesh(spot(null)));
 
-  it('opens looking uphill from the low side, so higher ground beyond cannot hide the area', () => {
-    expect(openingBearing(analysed((_r, c) => 400 + c * 2))).toBe(90); // rises to the east → look east
-    expect(openingBearing(analysed((r) => 400 + r * 2))).toBe(180); // rises to the south → look south
+  it('is whole triangles, with a roof that rises to a ridge', () => {
+    expect(mesh.length % 3).toBe(0);
+    const top = Math.max(...mesh.map((v) => v.z));
+    expect(top).toBeGreaterThan(HOUSE_HEIGHT_M);
+    expect(top).toBeLessThan(HOUSE_HEIGHT_M + 0.3);
+    // The ridge runs along the long (east–west) side, over the middle of the house.
+    const ridge = mesh.filter((v) => v.z === top);
+    expect(ridge.every((v) => Math.abs(v.y) < 0.01)).toBe(true);
+    expect(Math.max(...ridge.map((v) => v.x))).toBeCloseTo(HOUSE.lengthM / 2 + HOUSE.overhangM, 3);
   });
 
-  it('opens on the default view over level ground', () => {
-    expect(openingBearing(analysed(() => 400))).toBe(START_BEARING);
+  it('reaches below ground, so no corner hangs in the air on a slope', () => {
+    expect(Math.min(...mesh.map((v) => v.z))).toBe(-HOUSE.footingM);
   });
 
-  it('stands the house on its block, raised by the exaggeration', () => {
-    expect(blockTop(610, 600, 1)).toBeCloseTo(10.6, 6);
-    expect(blockTop(610, 600, 3)).toBeCloseTo(30.6, 6);
+  it('has light walls under a dark roof', () => {
+    const brightness = (v: { r: number; g: number; b: number }) => (v.r + v.g + v.b) / 3;
+    const wall = mesh.filter((v) => v.z === -HOUSE.footingM).map(brightness);
+    const roof = mesh.filter((v) => v.z > HOUSE.wallM + 1).filter((v) => Math.abs(v.x) > HOUSE.lengthM / 2).map(brightness);
+    expect(Math.min(...wall)).toBeGreaterThan(0.7);
+    expect(Math.max(...roof)).toBeLessThan(0.45);
   });
 
-  it('lifts a label by what stands under it, more when tilted, none from straight above', () => {
-    expect(verticalPx(10, 18, 41, 0)).toBe(0);
-    expect(verticalPx(10, 18, 41, 60)).toBeGreaterThan(verticalPx(10, 18, 41, 30));
-    expect(verticalPx(10, 19, 41, 60)).toBeCloseTo(2 * verticalPx(10, 18, 41, 60), 6);
+  it('turns with the slope like the footprint does', () => {
+    // Falls west → long side north–south: the model is longer north–south than east–west.
+    const turned = vertices(houseMesh(spot(270)));
+    const span = (pick: (v: { x: number; y: number }) => number) => Math.max(...turned.map(pick)) - Math.min(...turned.map(pick));
+    expect(span((v) => v.y)).toBeGreaterThan(span((v) => v.x));
   });
 
-  it('never asks for satellite zooms that show "Map data not yet available"', () => {
-    expect(SATELLITE_MAX_ZOOM).toBe(17);
-    expect(terrain3dStyle().sources.satellite).toMatchObject({ maxzoom: 17 });
+  it('places its metres on the map: east is +x, north is −y (mercator runs south), up is +z', () => {
+    const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    const m = placeOnMap(identity, { x: 0.5, y: 0.25, z: 0.001 }, 2);
+    const apply = ([x, y, z]: number[]) => [m[0] * x + m[4] * y + m[8] * z + m[12], m[1] * x + m[5] * y + m[9] * z + m[13], m[2] * x + m[6] * y + m[10] * z + m[14]];
+    expect(apply([0, 0, 0])).toEqual([0.5, 0.25, expect.closeTo(0.001, 6)]);
+    expect(apply([1, 0, 0])[0]).toBeCloseTo(2.5, 6);
+    expect(apply([0, 1, 0])[1]).toBeCloseTo(-1.75, 6);
+    expect(apply([0, 0, 1])[2]).toBeCloseTo(2.001, 6);
+  });
+
+  it('lays its shadow around the footprint', () => {
+    const corners = houseShadowCorners(spot(null));
+    const [a, b] = corners.map(([lng, lat]) => ({ lat, lng }));
+    expect(metresBetween(a, b)).toBeGreaterThan(HOUSE.lengthM + 5);
+    expect(corners).toHaveLength(4);
   });
 });

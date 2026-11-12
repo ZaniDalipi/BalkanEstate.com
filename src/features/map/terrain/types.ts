@@ -91,6 +91,8 @@ export interface TerrainAnalysis {
   arrows: SlopeArrow[];
   labels: SlopeLabel[];
   buildSpot: BuildSpot | null;
+  /** Metres of height between the contour lines on the map, or null when the ground is too level for any. */
+  contourIntervalM: number | null;
 }
 
 export type TerrainAnalysisResult =

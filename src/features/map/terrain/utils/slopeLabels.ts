@@ -7,7 +7,7 @@
  */
 import type { ElevationGrid, SlopeField, SlopeLabel, TerrainPoint } from '../types';
 import { deepestCell, largestPatch } from './buildSpot';
-import { METERS_PER_DEG_LAT, METERS_PER_DEG_LNG, cellCenter, cellSpacingM } from './gridGeometry';
+import { cellCenter, cellSpacingM, metresBetween } from './gridGeometry';
 import { SLOPE_BANDS, bandLabel, slopeBandIndex } from './slopeBands';
 
 export const MAX_LABELS = 4;
@@ -17,9 +17,6 @@ const MIN_SHARE = 0.04;
 export const CLEAR_OF_HOUSE_M = 18;
 /** …and further on big areas, where the map is zoomed out and metres are fewer pixels: this share of the area's width. */
 const CLEAR_SHARE = 0.08;
-
-const metresBetween = (a: TerrainPoint, b: TerrainPoint): number =>
-  Math.hypot((a.lat - b.lat) * METERS_PER_DEG_LAT, (a.lng - b.lng) * METERS_PER_DEG_LNG * Math.cos((a.lat * Math.PI) / 180));
 
 export function slopeLabels(
   grid: ElevationGrid,

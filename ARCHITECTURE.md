@@ -627,12 +627,12 @@ Key decisions:
 ## Map Terrain Tool — slope and where to build
 
 "Terrain" on the search map (next to Measure): tap corners 1, 2, 3… around a
-piece of land, press **Show slope**, and the area becomes a mosaic of raised
-tiles coloured by how steep the ground is, with range labels ("3–5%"),
-arrows pointing downhill, the headline numbers (area, height range, average
-and steepest slope), the share of each slope class and a pin on the best
-place to build. **View in 3D** opens the same area as a 3D model to turn,
-tilt and fly around.
+piece of land, press **Show slope**, and the area is painted as a smooth
+surface coloured by steepness (green → red) with white contour lines, range
+labels ("3–5%"), slim arrows pointing downhill, a frosted-glass panel with the
+headline numbers and the split across five slope classes, and a house drawn
+at the best place to build. **View in 3D** opens the same area on the real
+relief, with a modelled house, to turn, tilt and fly around.
 
 ```
 GoogleMapComponent
@@ -644,77 +644,62 @@ GoogleMapComponent
   │     └── analyzeTerrain(grid, area)        pure, utils/
   │           ├── computeSlopeField   Horn's method, slope % + fall line per cell
   │           ├── computeTerrainStats 5 classes: flat <3, gentle <8, moderate <15, steep <25, very steep
-  │           ├── slopeArrows         one arrow per block, block-averaged gradient
-  │           ├── slopeLabels         range label at the heart of the biggest shades
-  │           └── findBuildSpot       largest easy patch (<8 %), its deepest cell
-  ├── TerrainMapLayers   outline, numbered corners, arrows, labels, spot pin,
-  │     └── useSlopeGroundOverlay — drawSlopeImage → canvas → GroundOverlay
-  └── TerrainPanel       draw step / loading / failed / results
+  │           ├── findBuildSpot       largest easy patch (<8 %), its deepest cell
+  │           ├── slopeArrows / slopeLabels   both keep clear of the house
+  │           └── contourInterval     1–100 m, a dozen lines at most
+  ├── TerrainMapLayers   outline, corners, arrows, labels, house roof, pin
+  │     └── useSlopeGroundOverlay — slopeImageUrl → GroundOverlay (fades in)
+  └── TerrainPanel       draw step / loading / failed / results (glass, lucide icons)
         └── Terrain3DButton → Terrain3DDialog (lazy, MapLibre)
-              ├── useTerrain3DMap  'blocks' | 'surface' view, height ×1/×2/×3
-              └── useCamera3D      turn, tilt, fly around, reset
+              ├── useTerrain3DMap  relief + slope picture + house layer, Slope/Satellite, height 1–3×
+              └── useCamera3D      zoom, turn, 2D/3D, fly around, reset
 ```
 
-The slope picture (`drawSlopeImage`) paints each cell in one of 10 shades
-(`slopeBands`, two or three per class, edges on whole percents), lit from the
-north-west (`hillshade`), bevelled like a tile, with a shadow where the
-ground steps down and a white line where the shade changes. The same picture
-is the 2D overlay and the drape on the 3D surface.
+**The slope picture** (`slopePixels`, painted once per analysis and cached in
+`slopeImageUrl`): the ~8 m grid is softened (the ~30 m survey leaves a grid
+pattern), resampled with Catmull-Rom splines to up to 1024 px, coloured from
+one continuous scale (`slopeRamp` — the legend, labels and 3D view use it
+too), lit softly from the north-west (`hillshade`), and crossed by antialiased
+contour lines, every fifth stronger. The canvas then keeps only what lies in
+the drawn shape.
 
-**The house at the best spot** (`utils/house.ts`): a typical one-storey house
-(12 × 9 m, true size, never exaggerated) is drawn where `findBuildSpot` puts
-it — as a roof seen from above on the 2D map (`BuildSpotHouse`, with the
-"Best spot" pin on a stem above it), and as walls under a stepped gable roof
-in 3D (fill-extrusions), standing on its block in the blocks view and on the
-relief in the surface view. Its long side runs across the patch's fall line,
-as houses are sited on slopes; on level ground it faces south. Slope labels
-keep clear of it (`slopeLabels(…, avoid)`).
+**The house** (`house.ts`): a 12 × 9 m one-storey house, true size, long side
+across the fall line (east–west on level ground). In 2D it is a roof seen from
+above, one slope lit and one shaded. In 3D it is a real model — walls, gable
+roof, windows, door — drawn by a small WebGL custom layer (`houseLayer3d`)
+standing on the relief, with a soft contact shadow (`houseShadow`). The
+mesh's metres are placed with a matrix worked out in full precision on the CPU
+(`placeOnMap`): in the shader the mercator numbers are too close together.
 
 Key decisions:
 - **Heights come from Terrain Tiles** (AWS Open Data, Terrarium PNGs, free, no
-  key). The backend (`backend/src/services/terrain/`) reads the tiles,
-  decodes them with sharp, keeps up to 64 in memory, and returns heights on a
-  grid of near-square cells (8 m at the finest, at most 10 000 cells, boxes up
-  to 8 km a side). Rate limited per IP like routing; answers cacheable for a
-  day. `TERRAIN_TILES_URL` (backend) / `VITE_TERRAIN_TILES_URL` (3D view)
+  key). The backend (`backend/src/services/terrain/`) reads them, decodes with
+  sharp, caches 64 in memory, and returns a height grid (8 m at the finest, at
+  most 10 000 cells, boxes up to 8 km a side). Rate limited per IP. The 3D view
+  reads the same tiles directly. `TERRAIN_TILES_URL` / `VITE_TERRAIN_TILES_URL`
   override the source.
 - **Server samples, client analyses.** The endpoint is a plain height grid; all
-  the judgement (classes, arrows, labels, best spot) is pure, unit-tested code
-  in the client, so tuning it never touches the server.
-- **Two 3D views.** *Grid blocks* (default) raises every cell as its own tile,
-  as tall as its ground above the area's lowest point — the slope grid itself
-  in 3D. *Real surface* turns on MapLibre terrain from the same tiles, with
-  satellite imagery and the slope picture draped on it. Never both: blocks on
-  relief would count the height twice. Gentle land opens stretched ×2 or ×3
-  (by relief over width), and the footer says so.
+  the judgement is pure, unit-tested code in the client.
 - **Markers above the slope picture.** A Google GroundOverlay shares the
-  overlay layer with OverlayViews and is added later (its image is made
-  asynchronously), so it would cover them: corners, arrows and labels live in
-  the overlay-mouse-target pane, the pin in the float pane.
-- **The 3D camera opens looking uphill** (`openingBearing`), from the low side,
-  so the slope faces the viewer and higher ground beyond the area can't hide
-  it. When relief is switched on, the camera's centre is put on the ground
-  (`setCenterElevation`); MapLibre 5 leaves it at sea level otherwise, which
-  puts the camera inside any land higher than its own height. It is only
-  re-seated when relief changes, because it is a jump and would cut short the
-  opening tilt.
+  overlay layer with OverlayViews and is added later, so it would cover them:
+  corners, arrows and labels live in the overlay-mouse-target pane, the pin in
+  the float pane.
+- **The 3D view opens standing on the ground.** Layers go in on `style.load`
+  (MapLibre's `load` waits for every far tile). `watchGround` holds the view
+  until the height under the camera is known, puts the camera's centre on it
+  (MapLibre leaves it at sea level, i.e. inside any higher land), then tilts
+  in. On a slow connection it opens after 8 s and settles when the heights
+  arrive. The camera opens looking uphill (`openingBearing`) so higher ground
+  beyond can't hide the area.
+- **Height changes are animated cheaply**: in-between frames change only the
+  relief's stretch factor (`stretchRelief`); the last one rebuilds it.
 - **Satellite capped at zoom 17.** Esri answers zooms it has no photos for with
-  a "Map data not yet available" picture (a valid image, so nothing falls
-  back); 17 exists almost everywhere in the Balkans and MapLibre enlarges it.
-- **3D is optional.** MapLibre loads only when the 3D view is opened; without
-  WebGL the dialog says so and leads back to the 2D map. Camera buttons do
-  what the drag gestures do; under reduced motion moves are instant and there
-  is no fly-around. MapLibre restyles its container, so it gets its own box.
-- **Honest about precision.** The source survey is ~30 m (SRTM / EU-DEM), so
-  the panel says "estimate, not a topographic survey". Finer cells are
-  interpolated, which smooths the picture but adds no detail; a plot only a
-  few tens of metres across will often be one or two shades.
-- **Edges don't lie.** A cell at the grid edge or beside water extends the slope
-  from the neighbours it has instead of treating the gap as flat, and the
-  request box has a margin of ≥20 m (1.5 % of the side) around the area.
-- **One tool takes taps at a time.** Opening Terrain closes Measure and the
-  other way round; while either is open a tap places a corner instead of
-  opening the cadastre parcel popup.
+  a "Map data not yet available" picture; MapLibre enlarges 17 instead.
+- **3D is optional.** MapLibre loads only when the view is opened; without
+  WebGL the dialog says so and leads back. Under reduced motion moves are
+  instant and there is no fly-around.
+- **Honest about precision.** ~30 m survey: the panel says "estimate, not a
+  topographic survey"; the 3D card says how much heights are stretched.
 
 ## 3D Property Map — Sun & Shadows
 

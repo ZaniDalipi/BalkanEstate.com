@@ -730,9 +730,6 @@
       "loading": "Se încarcă terenul 3D…",
       "noWebgl": "Acest browser nu poate afișa hărți 3D (WebGL este dezactivat sau nu este acceptat). Harta pantei funcționează în continuare.",
       "back": "Înapoi la harta pantei",
-      "view": "Vizualizare",
-      "blocks": "Blocuri din grilă",
-      "surface": "Suprafața reală",
       "height": "Înălțime",
       "trueScale": "Înălțimile sunt la scară reală.",
       "exaggerated": "Înălțimile sunt mărite ×{{n}} ca forma terenului să se vadă mai ușor.",
@@ -740,11 +737,17 @@
       "camera": "Cameră",
       "turnLeft": "Rotește la stânga",
       "turnRight": "Rotește la dreapta",
-      "tiltMore": "Înclină mai mult",
-      "tiltLess": "Privește de sus",
       "orbit": "Zboară în jur",
       "reset": "Resetează vederea",
-      "houseNote": "Casa marchează cel mai bun loc de construit, la dimensiune reală (aproximativ 12 × 9 m)."
-    }
+      "houseNote": "Casa marchează cel mai bun loc de construit, la dimensiune reală (aproximativ 12 × 9 m).",
+      "layer": "Afișează",
+      "slope": "Pantă",
+      "satellite": "Satelit",
+      "zoomIn": "Mărește",
+      "zoomOut": "Micșorează",
+      "topView": "Privește drept de sus",
+      "tiltedView": "Înclină vederea"
+    },
+    "contours": "Curbe de nivel la fiecare {{n}} m"
   }
 }

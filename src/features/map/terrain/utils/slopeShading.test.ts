@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shadeColor, shadeFactor } from './hillshade';
+import { shadeChannel, shadeFactor } from './hillshade';
 import { SLOPE_BANDS, bandLabel, slopeBandIndex } from './slopeBands';
 import { classifySlope } from './slopeClasses';
 import { computeSlopeField } from './slopeField';
@@ -37,19 +37,19 @@ describe('hillshade', () => {
 
   it('lights slopes facing the north-west and darkens those facing the south-east', () => {
     // Rising to the south-east = facing north-west.
-    expect(shadeFactor(0.1, -0.1)).toBeGreaterThan(1.03);
-    expect(shadeFactor(-0.1, 0.1)).toBeLessThan(0.95);
+    expect(shadeFactor(0.1, -0.1)).toBeGreaterThan(1.02);
+    expect(shadeFactor(-0.1, 0.1)).toBeLessThan(0.97);
   });
 
-  it('stays within bounds on a cliff', () => {
-    expect(shadeFactor(5, -5)).toBeLessThanOrEqual(1.12);
-    expect(shadeFactor(-5, 5)).toBeGreaterThanOrEqual(0.7);
+  it('stays soft even on a cliff, so colours remain readable', () => {
+    expect(shadeFactor(5, -5)).toBeLessThanOrEqual(1.1);
+    expect(shadeFactor(-5, 5)).toBeGreaterThanOrEqual(0.86);
   });
 
   it('darkens towards black and lightens towards white', () => {
-    expect(shadeColor('#808080', 1)).toBe('rgb(128, 128, 128)');
-    expect(shadeColor('#808080', 0.5)).toBe('rgb(64, 64, 64)');
-    expect(shadeColor('#808080', 1.5)).toBe('rgb(192, 192, 192)');
+    expect(shadeChannel(128, 1)).toBe(128);
+    expect(shadeChannel(128, 0.5)).toBe(64);
+    expect(shadeChannel(128, 1.5)).toBeCloseTo(191.5, 5);
   });
 });
 
