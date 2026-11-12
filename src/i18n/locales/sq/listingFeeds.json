@@ -104,7 +104,8 @@
     "cancelConfirmTitle": "Të anulohet ky rishikim?",
     "cancelConfirmBody": "Zgjedhjet tuaja do të humbasin. Mund të nisni një pamje të re në çdo kohë.",
     "cancelConfirmYes": "Po, anulo",
-    "cancelConfirmNo": "Vazhdo rishikimin"
+    "cancelConfirmNo": "Vazhdo rishikimin",
+    "failed": "Marrja e shpalljeve dështoi."
   },
   "adapter": {
     "rss": "Burim RSS / Atom",
@@ -330,5 +331,67 @@
     "myListingFeeds": {
       "alpha": "Alfa"
     }
+  },
+  "guide": {
+    "toggle": "Nuk keni ende një feed? Shihni formatin që lexojmë",
+    "intro": "Publikoni shpalljet tuaja në një adresë interneti të përhershme si JSON ose XML në këtë formë dhe çdo fushë kalon drejtpërdrejt te shpalljet tuaja këtu.",
+    "formatLabel": "Formati i feed-it",
+    "copy": "Kopjo",
+    "copied": "U kopjua",
+    "download": "Shkarko",
+    "copyFailed": "Kopjimi nuk u krye — zgjidhni tekstin dhe kopjojeni me dorë.",
+    "group": {
+      "needed": "Të domosdoshme",
+      "neededNote": "Një shpallje nuk mund të publikohet pa to.",
+      "recommended": "Të rekomanduara",
+      "recommendedNote": "Blerësit kërkojnë dhe filtrojnë sipas tyre.",
+      "alsoRead": "Lexojmë edhe",
+      "alsoReadNote": "Plotësohen kur feed-i juaj i ka."
+    },
+    "tipsTitle": "Këshilla",
+    "tipAnyShape": "Keni tashmë JSON-in tuaj? Ngjiteni — emra si price, cena, çmimi ose kupatila njihen automatikisht; shablloni është thjesht forma që mbulon çdo fushë.",
+    "tipOneFile": "Vendosni të gjitha shpalljet në një skedar. Nëse duhet ndarë në faqe, shtoni një lidhje \"next\" për te faqja tjetër.",
+    "tipFixedUrl": "Mbajeni në një adresë të përhershme (p.sh. https://agjencia-juaj.com/feed.json), që shpalljet e reja dhe të ndryshuara të sinkronizohen vetë.",
+    "tipPhotos": "Lidhni foto me madhësi të plotë; ruhen deri në 30 foto për shpallje.",
+    "tipExisting": "Eksportoni tashmë te një portal (Kyero ose XML në stilin OpenImmo) apo keni një feed RSS? Ngjitni atë lidhje — funksionon ashtu siç është.",
+    "developerTitle": "Faqen tuaj të internetit e menaxhon dikush tjetër?",
+    "developerCopy": "Kopjo një kërkesë për zhvilluesin tuaj të uebit",
+    "developerCopied": "U kopjua — ngjiteni në një email",
+    "brief": "Përshëndetje, do të donim t'i shfaqnim shpalljet tona të pronave në BalkanEstate. A mund t'i publikoni të gjitha shpalljet tona aktuale në një adresë të përhershme (p.sh. https://faqja-jone.com/feed.json), të përditësuara kur ndryshon një shpallje, në formatin më poshtë? Për çdo shpallje nevojiten: id, titulli, çmimi, qyteti (ose adresa) dhe lidhjet e fotove. Ndihmojnë gjithashtu: dhomat e gjumit, banjot, sipërfaqja në m², gjerësia/gjatësia gjeografike, lloji i pronës dhe shitje apo qira. Formati është standardi schema.org RealEstateListing."
+  },
+  "coverage": {
+    "title": "Çfarë gjetëm në feed-in tuaj",
+    "found": "u gjet",
+    "missing": "mungon",
+    "requiredMissing": "Shpalljet pa sa vijon nuk mund të publikohen: {{fields}}. Shtojini në feed ose plotësojini kur rishikoni secilën shpallje.",
+    "seeFormat": "Shihni formatin e feed-it",
+    "fields": {
+      "title": "Titulli",
+      "price": "Çmimi",
+      "location": "Qyteti / adresa",
+      "photos": "Fotot",
+      "bedrooms": "Dhoma gjumi",
+      "bathrooms": "Banjo",
+      "area": "Sipërfaqja (m²)",
+      "mapPosition": "Vendndodhja në hartë",
+      "propertyType": "Lloji i pronës",
+      "listingType": "Shitje ose qira"
+    }
+  },
+  "pasteJson": {
+    "invalidAt": "Ky nuk është JSON i vlefshëm — rreshti {{line}}, kolona {{column}}: {{reason}}",
+    "invalid": "Ky nuk është JSON i vlefshëm: {{reason}}"
+  },
+  "configError": {
+    "title": "Cilësimet e feed-it duhen rregulluar:",
+    "missingEndpoint": "Ky feed nuk ka adresë interneti nga ku merren shpalljet. Redaktoni feed-in dhe shtojeni.",
+    "invalidUrl": "Kjo nuk është adresë interneti — duhet të fillojë me https://",
+    "missingFeedUrl": "Shtoni adresën e feed-it RSS ose Atom.",
+    "missingSource": "Ky feed nuk ka as shpallje të ngjitura, as adresë API. Ngjitni sërish JSON-in ose shtoni adresën.",
+    "invalidInlineJson": "Shpalljet e ngjitura nuk janë më JSON i vlefshëm. Ngjitini sërish.",
+    "missingIndexUrl": "Shtoni adresën e faqes që liston pronat tuaja.",
+    "missingSelectors": "Ky feed nuk di si t'i gjejë shpalljet në faqe. Konfigurojeni sërish nga adresa e faqes.",
+    "missingListingUrls": "Ky feed nuk ka faqe shpalljesh për të lexuar. Konfigurojeni sërish nga adresa e faqes.",
+    "notAnObject": "Cilësimet e feed-it duhet të jenë objekt JSON, p.sh. { \"endpoint\": \"https://…\" }."
   }
 }

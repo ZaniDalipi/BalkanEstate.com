@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SoftIcon } from '@/src/shared/illustrations';
 import type { CreatedResidenceCodes } from '../../../api/residenceCodeAdminApi';
-import { useCopyText } from './useCopyText';
+import { useCopyText } from '@/src/shared/hooks/useCopyText';
 import { useResidenceCodeText } from './useResidenceCodeText';
 
 interface CreatedCodesProps {

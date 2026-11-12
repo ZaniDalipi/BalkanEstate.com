@@ -376,6 +376,7 @@ export const runSource = async (
         `Reached monthly limit — ${stats.deferred} listing(s) deferred to ${deferUntil.toISOString().slice(0, 10)}.`;
     } else if (processedOk) {
       source.lastErrorMessage = undefined;
+      source.lastErrorCode = undefined;
     }
     await source.save();
 
@@ -401,8 +402,10 @@ export const runSource = async (
     }
   } catch (err) {
     const msg = (err as Error).message;
+    const code = (err as { code?: unknown }).code;
     stats.errors.push(`source: ${msg}`);
     source.lastErrorMessage = msg;
+    source.lastErrorCode = typeof code === 'string' ? code : undefined;
     await source.save();
     log.info(`[ingest] ${source.slug}: source-level failure — ${msg}`);
   }

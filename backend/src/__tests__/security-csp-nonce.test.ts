@@ -189,6 +189,26 @@ describe('XSS Sanitizer Middleware', () => {
     expect(req.body.input).toBe('&lt;img onerror=alert(1)&gt;');
   });
 
+  it('leaves listing-feed setup data intact, and still escapes the fields around it', () => {
+    const { req, res, next } = createMocks();
+    const sampleJson = '{"listings":[{"title":"Villa","price":1}]}';
+    req.body = {
+      method: 'sampleJson',
+      sampleJson,
+      adapterConfig: { itemsPath: "$['root']['listing'][*]", inlineJson: sampleJson, selectors: { link: 'a[href*="x"]|attr:href' } },
+      fieldMap: { city: "$['address']['city']" },
+      note2: '<b>"x"</b>',
+    };
+
+    xssSanitizer(req, res, next);
+
+    expect(req.body.sampleJson).toBe(sampleJson);
+    expect(req.body.adapterConfig.itemsPath).toBe("$['root']['listing'][*]");
+    expect(req.body.adapterConfig.selectors.link).toBe('a[href*="x"]|attr:href');
+    expect(req.body.fieldMap.city).toBe("$['address']['city']");
+    expect(req.body.note2).toBe('&lt;b&gt;&quot;x&quot;&lt;/b&gt;');
+  });
+
   it('should not modify URLs', () => {
     const { req, res, next } = createMocks();
     req.body = { url: 'https://example.com/path?q=1' };

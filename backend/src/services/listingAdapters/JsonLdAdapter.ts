@@ -6,6 +6,7 @@ import { listingJsonLdNodes } from '../listingAttributes/jsonLdNodes';
 import { isBotChallengePage } from './htmlScrape/indexPages';
 import { httpGet } from './httpClient';
 import { discoverSitemapUrls } from './sitemap';
+import { usableAdapterConfig } from './adapterConfig';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface JsonLdAdapterConfig {
@@ -85,7 +86,7 @@ export class JsonLdAdapter implements SourceAdapter {
   }
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
-    const cfg = (source.adapterConfig ?? {}) as unknown as JsonLdAdapterConfig;
+    const cfg = usableAdapterConfig('jsonLd', source.adapterConfig ?? {}) as unknown as JsonLdAdapterConfig;
     const accepted = new Set(cfg.acceptedTypes ?? Array.from(DEFAULT_TYPES));
     const limit = options.limit ?? cfg.limit;
     const out: RawListing[] = [];

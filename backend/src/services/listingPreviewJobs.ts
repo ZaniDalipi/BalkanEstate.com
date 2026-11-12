@@ -26,14 +26,14 @@ interface JobBase extends PreviewCounts {
 export type PreviewJob =
   | (JobBase & { status: 'running' })
   | (JobBase & { status: 'done'; result: PreviewResult })
-  | (JobBase & { status: 'failed'; error: string });
+  | (JobBase & { status: 'failed'; error: string; errorCode?: string });
 
 const store = createJobStore<PreviewCounts, PreviewResult>(() => ({ found: 0, detailsFetched: 0 }));
 
 const toPublic = (job: JobRecord<PreviewCounts, PreviewResult>): PreviewJob => {
   const base: JobBase = { jobId: job.jobId, sourceId: job.sourceId, startedAt: job.startedAt, ...job.progress };
   if (job.status === 'done') return { ...base, status: 'done', result: job.result, found: Math.max(base.found, job.result.fetched) };
-  if (job.status === 'failed') return { ...base, status: 'failed', error: job.error };
+  if (job.status === 'failed') return { ...base, status: 'failed', error: job.error, errorCode: job.errorCode };
   return { ...base, status: 'running' };
 };
 

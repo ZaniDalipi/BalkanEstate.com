@@ -11,7 +11,7 @@ export const queryFirst = (data: unknown, path: string): unknown => {
  * and ad-hoc samples without any id field all need to land on a stable
  * identifier so upserts stay idempotent across runs.
  */
-const ID_FALLBACK_KEYS = ['id', '_id', 'uid', 'uuid', 'listing_id', 'property_id', 'listingId', 'propertyId', 'sku', 'reference'];
+const ID_FALLBACK_KEYS = ['id', '_id', 'uid', 'uuid', 'identifier', 'listing_id', 'property_id', 'listingId', 'propertyId', 'sku', 'reference'];
 
 const extractIdFromObject = (item: Record<string, unknown>): string | null => {
   for (const key of ID_FALLBACK_KEYS) {
@@ -62,3 +62,36 @@ export const queryArray = (data: unknown, path: string): unknown[] => {
   return Array.isArray(result) ? result : [];
 };
 
+
+/** Keys that conventionally hold the listings in an API response. */
+const LIST_KEYS = ['listings', 'items', 'results', 'data', 'records', 'rows', 'properties', 'hits', 'docs', 'nekretnine', 'oglasi', 'anunturi', 'ofertas'];
+
+const isRecordList = (v: unknown): v is Record<string, unknown>[] =>
+  Array.isArray(v) && v.length > 0 && v.every((x) => x && typeof x === 'object' && !Array.isArray(x));
+
+/**
+ * The list of listings in a response when no path is configured (or the
+ * configured one finds nothing): the response itself, a conventional key
+ * ("listings", "data", …), or the first list of records found below.
+ */
+export const locateItems = (data: unknown, depth = 0): unknown[] => {
+  if (depth > 4 || data == null || typeof data !== 'object') return [];
+  if (isRecordList(data)) return data;
+  if (Array.isArray(data)) return [];
+  const obj = data as Record<string, unknown>;
+  for (const key of LIST_KEYS) {
+    const found = locateItems(obj[key], depth + 1);
+    if (found.length) return found;
+  }
+  for (const value of Object.values(obj)) {
+    const found = locateItems(value, depth + 1);
+    if (found.length) return found;
+  }
+  return [];
+};
+
+/** Items at the configured path, falling back to locating them when the path finds nothing. */
+export const itemsAt = (data: unknown, itemsPath?: string): unknown[] => {
+  const configured = itemsPath ? queryArray(data, itemsPath) : [];
+  return configured.length ? configured : locateItems(data);
+};

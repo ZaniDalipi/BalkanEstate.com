@@ -7,6 +7,8 @@ import {
   createMyListingSource,
   updateMyListingSource,
 } from '../api/listingSourceApi';
+import { feedConfigProblems } from '../utils/feedConfigProblems';
+import { feedErrorText } from '../utils/feedErrorText';
 
 interface Props {
   initial?: ListingSource;
@@ -54,6 +56,8 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** What's wrong with the feed settings, shown under them. */
+  const [configProblems, setConfigProblems] = useState<string[]>([]);
 
   const adapterDesc = useMemo(
     () => ADAPTER_OPTIONS.find((o) => o.value === adapterType)?.descKey ?? '',
@@ -63,9 +67,15 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setConfigProblems([]);
     setSubmitting(true);
     try {
       const adapterConfig = tryParseJson(adapterConfigText, 'Adapter config');
+      const problems = feedConfigProblems(adapterType, adapterConfig);
+      if (problems.length) {
+        setConfigProblems(problems.map((p) => feedErrorText(t, { code: p.code })));
+        return;
+      }
       const fieldMapParsed = tryParseJson(fieldMapText, 'Field map');
       const fieldMap: Record<string, string> = {};
       for (const [k, v] of Object.entries(fieldMapParsed)) {
@@ -85,7 +95,13 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
         : await createMyListingSource(input);
       onSaved(saved);
     } catch (err) {
-      setError((err as Error).message);
+      // The server checks the settings too, and names each problem.
+      const details = (err as { code?: string; details?: { errors?: { code?: string; message?: string }[] } });
+      if (details.code === 'FEED_CONFIG_INVALID' && details.details?.errors?.length) {
+        setConfigProblems(details.details.errors.map((e) => feedErrorText(t, e)));
+      } else {
+        setError((err as Error).message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -161,8 +177,18 @@ const ListingFeedForm: React.FC<Props> = ({ initial, onCancel, onSaved }) => {
           value={adapterConfigText}
           onChange={(e) => setAdapterConfigText(e.target.value)}
           spellCheck={false}
-          className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg font-mono text-xs focus:ring-2 focus:ring-primary/30"
+          aria-invalid={configProblems.length > 0}
+          aria-describedby={configProblems.length > 0 ? 'feed-config-problems' : undefined}
+          className={`mt-1 w-full px-3 py-2 border rounded-lg font-mono text-xs focus:ring-2 focus:ring-primary/30 ${configProblems.length ? 'border-red-300' : 'border-gray-200'}`}
         />
+        {configProblems.length > 0 && (
+          <div id="feed-config-problems" role="alert" className="mt-1 text-xs text-red-700">
+            <p className="font-semibold">{t('listingFeeds:configError.title', { defaultValue: 'The feed settings need fixing:' })}</p>
+            <ul className="list-disc pl-4">
+              {configProblems.map((p) => <li key={p}>{p}</li>)}
+            </ul>
+          </div>
+        )}
         <p className="mt-1 text-xs text-gray-500">{t('listingFeeds:fields.adapterConfigHint')}</p>
       </label>
 

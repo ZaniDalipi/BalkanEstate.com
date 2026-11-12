@@ -18,7 +18,8 @@ export const looksLikeXml = (body: string): boolean => {
   return head.startsWith('<?xml') || /^<[a-z_][\w:.-]*[\s>]/.test(head);
 };
 
-const seg = (key: string): string => `['${key.replace(/'/g, "\\'")}']`;
+/** A JSONPath step: `.key` for plain names, `['key']` only when the name needs quoting. */
+const seg = (key: string): string => (/^[A-Za-z_$][\w$]*$/.test(key) ? `.${key}` : `['${key.replace(/'/g, "\\'")}']`);
 
 interface Found { path: string; items: Record<string, unknown>[]; valid: number }
 

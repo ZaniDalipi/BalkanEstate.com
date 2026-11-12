@@ -7,6 +7,7 @@ import { isBotChallengePage } from './htmlScrape/indexPages';
 import { discoverSitemapUrls } from './sitemap';
 import type { SelectorMap } from './htmlScrape/selectors';
 import { pMap } from './pMap';
+import { usableAdapterConfig } from './adapterConfig';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface HtmlScrapeAdapterConfig {
@@ -55,10 +56,7 @@ export class HtmlScrapeAdapter implements SourceAdapter {
       );
     }
 
-    const cfg = (source.adapterConfig ?? {}) as unknown as HtmlScrapeAdapterConfig;
-    if (!cfg.indexUrl || !cfg.selectors?.listingItem || !cfg.selectors?.link) {
-      throw new Error(`HtmlScrapeAdapter: indexUrl, selectors.listingItem, selectors.link required (source ${source.slug})`);
-    }
+    const cfg = usableAdapterConfig('htmlScrape', source.adapterConfig ?? {}) as unknown as HtmlScrapeAdapterConfig;
 
     const limit = options.limit ?? cfg.limit;
     const usePlaywright = cfg.usePlaywright === true;

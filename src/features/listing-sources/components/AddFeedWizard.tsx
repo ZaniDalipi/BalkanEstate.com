@@ -9,6 +9,9 @@ import {
   createMyListingSource,
 } from '../api/listingSourceApi';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+import { cleanPastedJson, parsePastedJson } from '../utils/pastedJson';
+import FeedCoverageList from './feedGuide/FeedCoverageList';
+import FeedFormatGuide from './feedGuide/FeedFormatGuide';
 
 /**
  * Normalize MongoDB Extended JSON ({ "$oid": "..." }, { "$date": ... }, etc.)
@@ -43,16 +46,6 @@ const normalizeMongoExtendedJson = (input: unknown): unknown => {
     return out;
   }
   return input;
-};
-
-const sanitizeJsonInput = (raw: string): string => {
-  // Strip BOM, smart quotes, trailing commas — common copy-paste corruption.
-  return raw
-    .replace(/^﻿/, '')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/,(\s*[}\]])/g, '$1')
-    .trim();
 };
 
 interface Props {
@@ -181,6 +174,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
 
   const [step, setStep] = useState<Step>('input');
   const [method, setMethod] = useState<DetectMethod>('url');
+  const [guideOpen, setGuideOpen] = useState(false);
 
   // Shared
   const [name, setName] = useState('');
@@ -231,21 +225,25 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     try {
       let result: DetectResult;
       if (method === 'sampleJson') {
-        const sanitized = sanitizeJsonInput(sampleJson);
-        if (!sanitized) {
+        const pasted = parsePastedJson(sampleJson);
+        if (pasted.ok === false && pasted.empty === true) {
           setError(t('listingFeeds:ui.addFeedWizard.pleasePasteAJsonSample', 'Please paste a JSON sample to analyze.'));
           return;
         }
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(sanitized);
-        } catch (parseErr) {
-          setError(`Invalid JSON — ${(parseErr as Error).message.split('\n')[0]}`);
+        if (pasted.ok === false && pasted.empty === false) {
+          setError(
+            pasted.line
+              ? t('listingFeeds:pasteJson.invalidAt', {
+                  line: pasted.line, column: pasted.column, reason: pasted.reason,
+                  defaultValue: "That isn't valid JSON — line {{line}}, column {{column}}: {{reason}}",
+                })
+              : t('listingFeeds:pasteJson.invalid', { reason: pasted.reason, defaultValue: "That isn't valid JSON: {{reason}}" })
+          );
           return;
         }
         // Strip MongoDB Extended JSON wrappers ($oid/$date/etc.) so users can
         // paste raw exports from Compass/mongoexport without manual cleanup.
-        const normalized = normalizeMongoExtendedJson(parsed);
+        const normalized = normalizeMongoExtendedJson(pasted.value);
         result = await detectFeed('sampleJson', { sampleJson: JSON.stringify(normalized) });
       } else if (method === 'customApi') {
         inferName(apiUrl);
@@ -287,7 +285,8 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
           adapterConfig.endpoint = trimmedApiUrl;
           delete adapterConfig.inlineJson;
         } else {
-          adapterConfig.inlineJson = sampleJson.trim();
+          // Stored cleaned, so the import parses exactly what was analysed.
+          adapterConfig.inlineJson = cleanPastedJson(sampleJson);
           delete adapterConfig.endpoint;
         }
       }
@@ -359,6 +358,8 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
               </button>
             ))}
           </div>
+
+          <FeedFormatGuide open={guideOpen} onToggle={() => setGuideOpen((o) => !o)} />
 
           <div className="border-t border-gray-100 pt-4 space-y-4">
             {/* URL auto-detect */}
@@ -567,6 +568,13 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
             </p>
             <p className="text-sm text-emerald-700">{detected.hint}</p>
           </div>
+
+          {detected.coverage && (
+            <FeedCoverageList coverage={detected.coverage} onShowFormat={() => setGuideOpen(true)} />
+          )}
+          {detected.coverage && guideOpen && (
+            <FeedFormatGuide open={guideOpen} onToggle={() => setGuideOpen((o) => !o)} />
+          )}
 
           {detected.sample && (
             <div>

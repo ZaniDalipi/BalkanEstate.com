@@ -152,7 +152,8 @@
     "cancelConfirmTitle": "Cancel this review?",
     "cancelConfirmBody": "Your selections will be lost. You can start a new preview anytime.",
     "cancelConfirmYes": "Yes, cancel",
-    "cancelConfirmNo": "Keep reviewing"
+    "cancelConfirmNo": "Keep reviewing",
+    "failed": "Fetching the listings failed."
   },
   "adapter": {
     "rss": "RSS / Atom feed",
@@ -331,5 +332,67 @@
     "myListingFeeds": {
       "alpha": "Alpha"
     }
+  },
+  "guide": {
+    "toggle": "Don't have a feed yet? See the format we read",
+    "intro": "Publish your listings at a fixed web address as JSON or XML in this shape, and every field goes straight into your listings here.",
+    "formatLabel": "Feed format",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "copyFailed": "Couldn't copy — select the text and copy it by hand.",
+    "group": {
+      "needed": "Needed",
+      "neededNote": "A listing can't be published without these.",
+      "recommended": "Recommended",
+      "recommendedNote": "Buyers search and filter by these.",
+      "alsoRead": "Also read",
+      "alsoReadNote": "Filled in when your feed has them."
+    },
+    "tipsTitle": "Tips",
+    "tipAnyShape": "Already have your own JSON? Paste it — names like price, cijena, çmimi or kupatila are matched automatically; the template is just the shape that maps every field.",
+    "tipOneFile": "Put every listing in one file. If it has to be split into pages, add a \"next\" link to the following page.",
+    "tipFixedUrl": "Keep it at a fixed address (for example https://your-agency.com/feed.json), so new and changed listings sync automatically.",
+    "tipPhotos": "Link full-size photos; up to 30 photos per listing are kept.",
+    "tipExisting": "Already export to a portal (Kyero or OpenImmo-style XML) or have an RSS feed? Paste that link — it works as it is.",
+    "developerTitle": "Someone else runs your website?",
+    "developerCopy": "Copy a request for your web developer",
+    "developerCopied": "Copied — paste it in an email",
+    "brief": "Hi, we'd like to show our property listings on BalkanEstate. Could you publish all our current listings at a fixed web address (for example https://our-site.com/feed.json), kept up to date when a listing changes, in the format below? Needed for each listing: id, title, price, city (or address) and photo links. Also helpful: bedrooms, bathrooms, area in m², latitude/longitude, property type, and sale or rent. The format is the standard schema.org RealEstateListing."
+  },
+  "coverage": {
+    "title": "What we found in your feed",
+    "found": "found",
+    "missing": "missing",
+    "requiredMissing": "Listings without {{fields}} can't be published. Add them to your feed, or fill them in when you review each listing.",
+    "seeFormat": "See the feed format",
+    "fields": {
+      "title": "Title",
+      "price": "Price",
+      "location": "City / address",
+      "photos": "Photos",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "area": "Area (m²)",
+      "mapPosition": "Map position",
+      "propertyType": "Property type",
+      "listingType": "Sale or rent"
+    }
+  },
+  "pasteJson": {
+    "invalidAt": "That isn't valid JSON — line {{line}}, column {{column}}: {{reason}}",
+    "invalid": "That isn't valid JSON: {{reason}}"
+  },
+  "configError": {
+    "title": "The feed settings need fixing:",
+    "missingEndpoint": "This feed has no web address to fetch listings from. Edit the feed and add it.",
+    "invalidUrl": "This isn't a web address — it should start with https://",
+    "missingFeedUrl": "Add the address of the RSS or Atom feed.",
+    "missingSource": "This feed has neither pasted listings nor an API address. Paste your JSON again or add the address.",
+    "invalidInlineJson": "The pasted listings aren't valid JSON any more. Paste them again.",
+    "missingIndexUrl": "Add the address of the page that lists your properties.",
+    "missingSelectors": "This feed doesn't know how to find listings on the page. Set it up again from the website's address.",
+    "missingListingUrls": "This feed has no listing pages to read. Set it up again from the website's address.",
+    "notAnObject": "Feed settings must be a JSON object, like { \"endpoint\": \"https://…\" }."
   }
 }

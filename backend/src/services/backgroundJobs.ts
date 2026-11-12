@@ -17,7 +17,7 @@ export type JobRecord<P, R> = {
   startedAt: number;
   finishedAt?: number;
   progress: P;
-} & ({ status: 'running' } | { status: 'done'; result: R } | { status: 'failed'; error: string });
+} & ({ status: 'running' } | { status: 'done'; result: R } | { status: 'failed'; error: string; errorCode?: string });
 
 const FINISHED_TTL_MS = 30 * 60 * 1000;
 
@@ -76,7 +76,10 @@ export const createJobStore = <P, R>(initialProgress: () => P): JobStore<P, R> =
       .catch((err: unknown) => {
         const current = jobs.get(jobId) ?? job;
         const error = (err as Error)?.message || 'The job failed';
-        jobs.set(jobId, { ...current, status: 'failed', error, finishedAt: Date.now() });
+        // A known failure (e.g. FeedConfigError) carries a code the page can translate.
+        const code = (err as { code?: unknown })?.code;
+        const errorCode = typeof code === 'string' ? code : undefined;
+        jobs.set(jobId, { ...current, status: 'failed', error, errorCode, finishedAt: Date.now() });
       });
     return job;
   };

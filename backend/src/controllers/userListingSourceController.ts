@@ -12,9 +12,12 @@ import {
   detectFeedForUrl,
   detectFromJsonSample,
   detectFeedForUrlWithAuth,
+  type DetectResult,
 } from '../services/listingDetectorService';
+import { feedCoverage } from '../services/listingAttributes/feedCoverage';
 import { resolveId } from '../utils/idObfuscation';
 import { FEED_PREVIEW_MAX, FEED_SYNC_MAX, parseListingLimit } from '../utils/listingFetchLimit';
+import { feedConfigOrRespond } from '../middleware/feedConfigValidation';
 import type { RawListing } from '../services/listingAdapters/types';
 
 /**
@@ -97,6 +100,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-');
 
+  const adapterConfig = feedConfigOrRespond(res, adapterType, req.body.adapterConfig);
+  if (!adapterConfig) return;
+
   // For HTML scraping, the user is explicitly opting in by adding the source,
   // so stamp acceptedTermsAt automatically. The HtmlScrapeAdapter checks this.
   const acceptedTermsAt = adapterType === 'htmlScrape' ? new Date() : undefined;
@@ -104,6 +110,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const source = await ListingSource.create({
       ...req.body,
+      adapterConfig,
       slug: safeSlug,
       userId,
       acceptedTermsAt,
@@ -126,7 +133,17 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   if (name !== undefined) patch.name = name;
   if (baseUrl !== undefined) patch.baseUrl = baseUrl;
   if (enabled !== undefined) patch.enabled = Boolean(enabled);
-  if (adapterConfig !== undefined) patch.adapterConfig = adapterConfig;
+  if (adapterConfig !== undefined) {
+    // The settings are checked against the feed's own type (not changed here).
+    const existing = await ListingSource.findOne({ _id: id, userId }).select('adapterType').lean();
+    if (!existing) {
+      res.status(404).json({ message: 'ListingSource not found' });
+      return;
+    }
+    const checked = feedConfigOrRespond(res, existing.adapterType, adapterConfig);
+    if (!checked) return;
+    patch.adapterConfig = checked;
+  }
   if (fieldMap !== undefined) patch.fieldMap = fieldMap;
   if (schedule !== undefined) patch.schedule = schedule;
   if (rateLimitRpm !== undefined) patch.rateLimitRpm = rateLimitRpm;
@@ -457,6 +474,17 @@ export const stats = async (req: Request, res: Response): Promise<void> => {
  *   { method: 'sampleJson', sampleJson: string }  — analyze pasted JSON
  *   { method: 'customApi', url: string, authHeaders?: Record<string,string> }
  */
+/**
+ * Add the field checklist for feeds whose sample is a whole listing (JSON,
+ * XML, API). A web page's sample is only its first card — the rest is read
+ * from each listing's page on import — so a checklist would mislead there.
+ */
+const STRUCTURED = new Set(['jsonFeed', 'xmlFeed', 'customApi']);
+const withCoverage = (result: DetectResult): DetectResult =>
+  result.sample && STRUCTURED.has(result.adapterType)
+    ? { ...result, coverage: feedCoverage(result.sample, result.fieldMap) }
+    : result;
+
 export const detect = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
   if (!userId) return;
@@ -469,8 +497,7 @@ export const detect = async (req: Request, res: Response): Promise<void> => {
         res.status(400).json({ message: 'sampleJson is required' });
         return;
       }
-      const result = detectFromJsonSample(sampleJson);
-      res.json(result);
+      res.json(withCoverage(detectFromJsonSample(sampleJson)));
       return;
     }
 
@@ -486,14 +513,12 @@ export const detect = async (req: Request, res: Response): Promise<void> => {
           if (typeof k === 'string' && typeof v === 'string') safeHeaders[k] = v;
         }
       }
-      const result = await detectFeedForUrlWithAuth(url.trim(), safeHeaders);
-      res.json(result);
+      res.json(withCoverage(await detectFeedForUrlWithAuth(url.trim(), safeHeaders)));
       return;
     }
 
     // 'url' or 'rss' — auto-detect
-    const result = await detectFeedForUrl(url.trim());
-    res.json(result);
+    res.json(withCoverage(await detectFeedForUrl(url.trim())));
   } catch (err) {
     res.status(422).json({ message: (err as Error).message });
   }

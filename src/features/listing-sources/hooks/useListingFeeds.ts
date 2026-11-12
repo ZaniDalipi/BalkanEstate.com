@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { feedErrorText } from '../utils/feedErrorText';
 import {
   type IngestStats,
   type ListingSource,
@@ -59,6 +61,7 @@ export interface UseListingFeedsReturn {
 }
 
 export const useListingFeeds = (): UseListingFeedsReturn => {
+  const { t } = useTranslation(['listingFeeds']);
   const [sources, setSources] = useState<ListingSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -199,10 +202,10 @@ export const useListingFeeds = (): UseListingFeedsReturn => {
     const source = sources.find((s) => s.id === id);
     if (!source) return;
     setError(null);
-    void startPreview(id, source.name).catch((e) => {
-      setError((e as Error).message || 'Failed to fetch listings');
+    void startPreview(id, source.name).catch((e: Error & { code?: unknown }) => {
+      setError(feedErrorText(t, { message: e.message || t('listingFeeds:preview.failed', { defaultValue: 'Fetching the listings failed.' }), code: e.code }));
     });
-  }, [sources, startPreview]);
+  }, [sources, startPreview, t]);
 
   /**
    * Import the listings the user approved. Delegates to the context so the

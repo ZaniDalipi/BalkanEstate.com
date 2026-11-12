@@ -75,6 +75,8 @@ const LISTING_TYPE_MAP: Record<string, IProperty['listingType']> = {
   продажба: 'sale', продажа: 'sale',
   // Rent / English
   rent: 'rent', rental: 'rent', rentals: 'rent', forrent: 'rent', for_rent: 'rent', lease: 'rent',
+  // schema.org / GoodRelations businessFunction: …#Sell, …#LeaseOut
+  sell: 'sale',
   // Croatian / Bosnian / Serbian
   najam: 'rent', iznajmljivanje: 'rent', zakup: 'rent',
   // Romanian
@@ -404,6 +406,18 @@ const mapListingType = (raw: unknown): IProperty['listingType'] | undefined => {
   return undefined;
 };
 
+/** Amenities as names: plain strings, or schema.org amenityFeature objects ({ name, value }). */
+const amenityNames = (value: unknown): string[] =>
+  (Array.isArray(value) ? value : []).flatMap((a): string[] => {
+    if (typeof a === 'string') return [a];
+    if (a && typeof a === 'object') {
+      const o = a as { name?: unknown; value?: unknown };
+      if (o.value === false) return [];
+      return typeof o.name === 'string' ? [o.name] : [];
+    }
+    return [];
+  });
+
 const categorizeAmenities = (amenities: unknown[]): string[] => {
   if (!Array.isArray(amenities)) return [];
 
@@ -466,7 +480,12 @@ const queryPath = (data: unknown, path: string): unknown => {
   if (!path.startsWith('$') && !path.includes('.')) {
     return (data as Record<string, unknown>)?.[path];
   }
-  return JSONPath({ path, json: data as object, wrap: false }) as unknown;
+  try {
+    return JSONPath({ path, json: data as object, wrap: false }) as unknown;
+  } catch {
+    // A path this record can't answer (e.g. a saved path with "@" in it) is no value, not a failed import.
+    return undefined;
+  }
 };
 
 /**
@@ -474,10 +493,42 @@ const queryPath = (data: unknown, path: string): unknown => {
  * Keys of fieldMap are IProperty paths; values are JSONPath expressions
  * (or bare keys) into `raw.raw`.
  */
+/**
+ * XML lists arrive wrapped in their element: `<images><image>a</image>
+ * <image>b</image></images>` parses to `{ image: ['a', 'b'] }` (or to
+ * `{ image: 'a' }` with one item). Unwrap them to the list.
+ */
+const LIST_FIELDS = new Set(['images', 'amenities']);
+const unwrapXmlList = (propKey: string, v: unknown): unknown => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return v;
+  const values = Object.values(v as Record<string, unknown>);
+  if (values.length !== 1) return v;
+  const [inner] = values;
+  if (Array.isArray(inner)) return inner;
+  return LIST_FIELDS.has(propKey) && (typeof inner === 'string' || (inner && typeof inner === 'object')) ? [inner] : v;
+};
+
+/**
+ * A value of a single-valued field that is an object: an XML text node
+ * (`{ _: '185000', currency: 'EUR' }`) or a wrapper (`{ value: 74 }`) gives
+ * its text; a structure (`address: { streetAddress, addressLocality }`)
+ * gives nothing, so its parts are read one by one instead.
+ */
+const scalarOfObject = (v: Record<string, unknown>): unknown => {
+  for (const k of ['_', '#text', 'value', 'text', 'name', '@value']) {
+    const inner = v[k];
+    if (typeof inner === 'string' || typeof inner === 'number') return inner;
+  }
+  return undefined;
+};
+
 const applyFieldMap = (raw: RawListing, source: IListingSource): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
   for (const [propKey, rawPath] of Object.entries(source.fieldMap ?? {})) {
-    const v = queryPath(raw.raw, rawPath);
+    let v = unwrapXmlList(propKey, queryPath(raw.raw, rawPath));
+    if (v && typeof v === 'object' && !Array.isArray(v) && !LIST_FIELDS.has(propKey) && propKey !== 'imageUrl') {
+      v = scalarOfObject(v as Record<string, unknown>);
+    }
     if (v !== undefined && v !== null && v !== '') out[propKey] = v;
   }
   return out;
@@ -515,23 +566,35 @@ export const extractMappedFields = (raw: RawListing, source: IListingSource): Re
 /** Numeric price of a raw price value ("150.000 €", 150000, "EUR 1,2M"), or undefined. */
 export const parsePriceAmount = (input: unknown): number | undefined => parsePrice(input)?.price;
 
+/** The kind of property: the source's own type, else a type word in the title or description. */
+export const resolvePropertyType = (mapped: Record<string, unknown>): IProperty['propertyType'] | undefined =>
+  // schema.org may give several types: ["RealEstateListing", "Apartment"].
+  [mapped.propertyType].flat().map(mapPropertyType).find(Boolean)
+  ?? propertyTypeFromText(mapped.title)
+  ?? propertyTypeFromText(typeof mapped.description === 'string' ? mapped.description.slice(0, 300) : undefined);
+
+/** Sale or rent when the source says so (not the default the import falls back on). */
+export const explicitListingType = (mapped: Record<string, unknown>): IProperty['listingType'] | undefined =>
+  mapListingType(mapped.listingType);
+
 interface NormalizeOptions {
   rehostImages?: boolean;
 }
 
-const collectImageUrls = (mapped: Record<string, unknown>): string[] => {
-  const urls: string[] = [];
-  const main = mapped.imageUrl;
-  if (typeof main === 'string') urls.push(main);
-  const list = mapped.images;
-  if (Array.isArray(list)) {
-    for (const i of list) {
-      if (typeof i === 'string') urls.push(i);
-      else if (i && typeof i === 'object' && typeof (i as { url?: unknown }).url === 'string') {
-        urls.push((i as { url: string }).url);
-      }
-    }
+/** Photo URLs in a value: a URL, an { url | src | href } object, or a list of either. */
+const photoUrlsIn = (value: unknown): string[] => {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(photoUrlsIn);
+  if (value && typeof value === 'object') {
+    const o = value as { url?: unknown; src?: unknown; href?: unknown; _?: unknown };
+    const u = [o.url, o.src, o.href, o._].find((x): x is string => typeof x === 'string');
+    return u ? [u] : [];
   }
+  return [];
+};
+
+export const collectImageUrls = (mapped: Record<string, unknown>): string[] => {
+  const urls = [...photoUrlsIn(mapped.imageUrl), ...photoUrlsIn(mapped.images)];
   // Real photos only, each once in its largest size, no more than a listing may have.
   return selectListingPhotos(urls.filter(Boolean));
 };
@@ -810,10 +873,7 @@ export const normalize = async (
   const listingType: IProperty['listingType'] =
     explicitListing ?? (parsedPrice?.isRent ? 'rent' : 'sale');
 
-  const propertyType = mapPropertyType(mapped.propertyType)
-    ?? propertyTypeFromText(mapped.title)
-    ?? propertyTypeFromText(typeof mapped.description === 'string' ? mapped.description.slice(0, 300) : undefined)
-    ?? 'other';
+  const propertyType = resolvePropertyType(mapped) ?? 'other';
 
   // City / country / street / coordinates, matched to the places our app knows.
   const location = resolveLocation(mapped, raw.url);
@@ -1020,7 +1080,7 @@ export const normalize = async (
     description,
     specialFeatures: Array.isArray(mapped.specialFeatures) ? (mapped.specialFeatures as string[]) : [],
     materials: Array.isArray(mapped.materials) ? (mapped.materials as string[]) : [],
-    amenities: categorizeAmenities(Array.isArray(mapped.amenities) ? (mapped.amenities as unknown[]) : []),
+    amenities: categorizeAmenities(amenityNames(mapped.amenities)),
     imageUrl,
     images,
     lat: lat ?? 0,

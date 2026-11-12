@@ -9,7 +9,7 @@ import { CreateCodesForm } from './CreateCodesForm';
 import { CreatedCodes } from './CreatedCodes';
 import { ResidenceCodeFilters } from './ResidenceCodeFilters';
 import { ResidenceCodeRow } from './ResidenceCodeRow';
-import { useCopyText } from './useCopyText';
+import { useCopyText } from '@/src/shared/hooks/useCopyText';
 
 /**
  * Admin › Residences › Unlock codes. While online payment is off, owners

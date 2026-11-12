@@ -1,0 +1,67 @@
+[
+  {
+    "@context": "https://schema.org",
+    "@type": ["RealEstateListing", "Apartment"],
+    "identifier": "A-1024",
+    "url": "https://your-agency.com/listings/a-1024",
+    "name": "Sea-view apartment with terrace",
+    "description": "Two-bedroom apartment 200 m from the beach, sold furnished.",
+    "datePosted": "2026-11-01",
+    "image": [
+      "https://your-agency.com/photos/a-1024-1.jpg",
+      "https://your-agency.com/photos/a-1024-2.jpg"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": 185000,
+      "priceCurrency": "EUR",
+      "businessFunction": "http://purl.org/goodrelations/v1#Sell"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Rruga Radhime 12",
+      "addressLocality": "Vlore",
+      "addressCountry": "AL"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 40.3838,
+      "longitude": 19.4553
+    },
+    "numberOfBedrooms": 2,
+    "numberOfBathroomsTotal": 1,
+    "floorSize": { "@type": "QuantitativeValue", "value": 74, "unitCode": "MTK" },
+    "floorLevel": 3,
+    "yearBuilt": 2022,
+    "amenityFeature": [
+      { "@type": "LocationFeatureSpecification", "name": "Sea view", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Balcony", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Elevator", "value": true }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": ["RealEstateListing", "House"],
+    "identifier": "B-2048",
+    "url": "https://your-agency.com/listings/b-2048",
+    "name": "Family house with garden",
+    "description": "Three-bedroom house with a garden, for long-term rent.",
+    "image": ["https://your-agency.com/photos/b-2048-1.jpg"],
+    "offers": {
+      "@type": "Offer",
+      "price": 900,
+      "priceCurrency": "EUR",
+      "businessFunction": "http://purl.org/goodrelations/v1#LeaseOut"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Banjole",
+      "addressLocality": "Pula",
+      "addressCountry": "HR"
+    },
+    "geo": { "@type": "GeoCoordinates", "latitude": 44.8212, "longitude": 13.8431 },
+    "numberOfBedrooms": 3,
+    "numberOfBathroomsTotal": 2,
+    "floorSize": { "@type": "QuantitativeValue", "value": 140, "unitCode": "MTK" }
+  }
+]

@@ -13,6 +13,7 @@ import { detectXmlFeed } from './listingAdapters/xmlFeed/detectXmlFeed';
 import { discoverSitemapUrls } from './listingAdapters/sitemap';
 import { planCatalogue } from './listingAdapters/htmlScrape/detectCatalogue';
 import { fieldForFeedKey } from './listingAttributes/labelMap';
+import type { CoverageItem } from './listingAttributes/feedCoverage';
 
 const TIMEOUT = 12_000;
 
@@ -24,6 +25,8 @@ export interface DetectResult {
   sample?: Record<string, unknown>;
   /** Human-readable description of what was found. */
   hint: string;
+  /** Which important fields the sample listing has (structured feeds only). */
+  coverage?: CoverageItem[];
 }
 
 /**
@@ -643,7 +646,12 @@ const flattenSamplePaths = (
   }
   for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
     const childPath = path ? `${path}.${key}` : key;
-    if (val != null && (typeof val !== 'object' || Array.isArray(val))) {
+    // An XML list arrives as its wrapper with one repeated child —
+    // <amenities><amenity>…</amenity></amenities> → { amenity: [...] } — so
+    // the wrapper is a field in its own right.
+    const isXmlList = val != null && typeof val === 'object' && !Array.isArray(val)
+      && Object.keys(val).length === 1 && Array.isArray(Object.values(val)[0]);
+    if (val != null && (typeof val !== 'object' || Array.isArray(val) || isXmlList)) {
       out.push({ path: childPath, key, value: val });
     }
     if (val !== null && typeof val === 'object') {
@@ -685,9 +693,9 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
     [/^(total_floors|num_floors|ukupno_spratova|stockwerke)$/i, 'totalFloors'],
 
     // Property details
-    [/^(property_type|type|kategorija|kategorie|propertytype)$/i, 'propertyType'],
+    [/^(property_type|@?type|kategorija|kategorie|propertytype)$/i, 'propertyType'],
     [/^(listing_type|transaction_type|tip_oglasa)$/i, 'listingType'],
-    [/^(amenities|features|specijalne_karakteristike|ausstattung|facility)$/i, 'amenities'],
+    [/^(amenities|features|amenityfeature|specijalne_karakteristike|ausstattung|facility)$/i, 'amenities'],
     [/^(furnishing|furnish|namesten|moebel|furnished_status)$/i, 'furnishing'],
     [/^(heating|heating_type|grijanje|heizung)$/i, 'heatingType'],
     [/^(condition|stanje|zustand|quality)$/i, 'condition'],
@@ -698,7 +706,7 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
     [/^(virtual_tour|tour_url|3d_tour|video_url|video)$/i, 'virtualTour360Url'],
 
     // Identifiers
-    [/^(id|_id|uid|listing_id|property_id)$/i, 'id'],
+    [/^(id|_id|uid|identifier|listing_id|property_id)$/i, 'id'],
   ];
 
   // Walk top-level keys first (so they win over nested ones), then nested.
@@ -708,7 +716,8 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
 
   for (const { path, key } of paths) {
     for (const [re, prop] of keyHints) {
-      if (re.test(key) && !Object.values(map).includes(prop)) {
+      // First (shallowest) match wins: `name` beats `amenityFeature[0].name`.
+      if (re.test(key) && !(prop in map)) {
         map[prop] = path;
         break;
       }
@@ -805,12 +814,20 @@ const unwrapMongoExtendedJson = (input: unknown): unknown => {
   return input;
 };
 
+/**
+ * Pasted JSON often carries characters JSON doesn't allow: non-breaking
+ * spaces as indentation, zero-width spaces, "smart" quotes, Unicode line
+ * separators, trailing commas. (Same cleanup as the wizard's.)
+ */
 const sanitizePastedJson = (raw: string): string => {
   return raw
-    .replace(/^﻿/, '')          // Strip BOM
-    .replace(/[“”]/g, '"')  // Smart double quotes → "
-    .replace(/[‘’]/g, "'")  // Smart single quotes → '
-    .replace(/,(\s*[}\]])/g, '$1')    // Trailing commas before }/]
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '')
+    .replace(/[\u2028\u2029]/g, '\n')
+    .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
+    .replace(/,(\s*[}\]])/g, '$1')
     .trim();
 };
 
@@ -888,7 +905,7 @@ export const detectFromJsonSample = (jsonString: string): DetectResult => {
  * synthetic id if the path resolves to null).
  */
 const detectIdPath = (sample: Record<string, unknown>): string => {
-  const candidates = ['id', '_id', 'uid', 'uuid', 'listing_id', 'property_id', 'listingId', 'propertyId'];
+  const candidates = ['id', '_id', 'uid', 'uuid', 'identifier', 'listing_id', 'property_id', 'listingId', 'propertyId', 'sku', 'reference'];
   for (const key of candidates) {
     if (key in sample) {
       const val = sample[key];

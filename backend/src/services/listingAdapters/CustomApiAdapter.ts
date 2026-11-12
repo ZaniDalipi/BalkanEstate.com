@@ -1,9 +1,10 @@
-import { JSONPath } from 'jsonpath-plus';
 import type { IListingSource } from '../../models/ListingSource';
 import { isValidListingItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
 import { nextLinkInPayload } from './jsonFeed/nextLinkInPayload';
 import { walkPages } from './pagination/walkPages';
+import { usableAdapterConfig } from './adapterConfig';
+import { itemsAt, queryFirst, resolveItemId } from './jsonFeed/items';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 const DEFAULT_MAX_PAGES = 200;
@@ -11,8 +12,10 @@ const DEFAULT_MAX_PAGES = 200;
 interface CustomApiAdapterConfig {
   endpoint?: string;
   url?: string;
-  itemsPath: string;
-  idPath: string;
+  /** JSONPath to the listings; when unset or empty, the list is located in the response. */
+  itemsPath?: string;
+  /** JSONPath to each listing's id; defaults to the usual id fields. */
+  idPath?: string;
   urlPath?: string;
   publishedAtPath?: string;
   /** Authentication injected as a request header. */
@@ -37,15 +40,6 @@ interface CustomApiAdapterConfig {
   limit?: number;
 }
 
-const queryFirst = (data: unknown, path: string): unknown =>
-  JSONPath({ path, json: data as object, wrap: false }) as unknown;
-
-const queryArray = (data: unknown, path: string): unknown[] => {
-  const result = JSONPath({ path, json: data as object }) as unknown[];
-  if (Array.isArray(result) && result.length === 1 && Array.isArray(result[0])) return result[0] as unknown[];
-  return Array.isArray(result) ? result : [];
-};
-
 const buildAuthHeaders = (cfg: CustomApiAdapterConfig): Record<string, string> => {
   const auth = cfg.auth;
   if (!auth) return {};
@@ -68,12 +62,10 @@ export class CustomApiAdapter implements SourceAdapter {
   readonly type = 'customApi' as const;
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
-    const cfg = (source.adapterConfig ?? {}) as unknown as CustomApiAdapterConfig;
-    // Older detector configs saved `url` / `params` instead of `endpoint` / `query`.
-    const endpoint = cfg.endpoint ?? cfg.url;
-    if (!endpoint || !cfg.itemsPath || !cfg.idPath) {
-      throw new Error(`CustomApiAdapter: endpoint, itemsPath and idPath required (source ${source.slug})`);
-    }
+    // Brought up to date (old `url`/`params` spellings) and checked: only a
+    // missing address stops the feed; the list and the ids are found anyway.
+    const cfg = usableAdapterConfig('customApi', source.adapterConfig ?? {}) as unknown as CustomApiAdapterConfig;
+    const endpoint = cfg.endpoint as string;
 
     const limit = options.limit ?? cfg.limit;
     const since = options.since?.getTime();
@@ -88,19 +80,23 @@ export class CustomApiAdapter implements SourceAdapter {
         ? { kind: 'offset' as const, param: p.pageParam, perPage: p.pageSize }
         : undefined;
 
+    let seen = 0;
     const toListings = (items: unknown[]): RawListing[] => {
       const out: RawListing[] = [];
       for (const item of items) {
-        const id = queryFirst(item, cfg.idPath);
-        if (id == null) continue;
-        if (!isValidListingItem(item as Record<string, unknown>)) continue;
+        const index = seen++;
+        if (!item || typeof item !== 'object' || !isValidListingItem(item as Record<string, unknown>)) continue;
         if (since && cfg.publishedAtPath) {
           const ts = queryFirst(item, cfg.publishedAtPath);
           const t = ts ? new Date(String(ts)).getTime() : NaN;
           if (Number.isFinite(t) && t < since) continue;
         }
-        const url = cfg.urlPath ? (queryFirst(item, cfg.urlPath) as string | undefined) : undefined;
-        out.push({ id: String(id), url, raw: item as Record<string, unknown> });
+        const url = cfg.urlPath ? queryFirst(item, cfg.urlPath) : undefined;
+        out.push({
+          id: resolveItemId(item, cfg.idPath ?? '$.id', index),
+          url: typeof url === 'string' ? url : undefined,
+          raw: item as Record<string, unknown>,
+        });
       }
       return out;
     };
@@ -120,7 +116,7 @@ export class CustomApiAdapter implements SourceAdapter {
           headers,
         });
         return {
-          items: toListings(queryArray(response.data, cfg.itemsPath)),
+          items: toListings(itemsAt(response.data, cfg.itemsPath)),
           nextUrl: nextLinkInPayload(response.data, url),
         };
       },

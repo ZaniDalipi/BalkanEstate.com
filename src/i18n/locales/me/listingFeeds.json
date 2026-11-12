@@ -104,7 +104,8 @@
     "cancelConfirmTitle": "Otkazati pregled?",
     "cancelConfirmBody": "Vaši izbori će biti izgubljeni. Novi pregled možete pokrenuti bilo kada.",
     "cancelConfirmYes": "Da, otkaži",
-    "cancelConfirmNo": "Nastavi pregled"
+    "cancelConfirmNo": "Nastavi pregled",
+    "failed": "Preuzimanje oglasa nije uspjelo."
   },
   "adapter": {
     "rss": "RSS / Atom izvor",
@@ -330,5 +331,67 @@
     "myListingFeeds": {
       "alpha": "Alfa"
     }
+  },
+  "guide": {
+    "toggle": "Još nemate feed? Pogledajte format koji čitamo",
+    "intro": "Objavite svoje oglase na stalnoj web adresi kao JSON ili XML u ovom obliku i svako polje ide izravno u vaše oglase ovdje.",
+    "formatLabel": "Format feeda",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "download": "Preuzmi",
+    "copyFailed": "Kopiranje nije uspjelo — označite tekst i kopirajte ga ručno.",
+    "group": {
+      "needed": "Obavezno",
+      "neededNote": "Oglas se bez ovoga ne može objaviti.",
+      "recommended": "Preporučeno",
+      "recommendedNote": "Kupci po ovome pretražuju i filtriraju.",
+      "alsoRead": "Čitamo i",
+      "alsoReadNote": "Popunjava se kad ih vaš feed ima."
+    },
+    "tipsTitle": "Savjeti",
+    "tipAnyShape": "Već imate svoj JSON? Zalijepite ga — nazivi poput price, cijena, çmimi ili kupatila prepoznaju se automatski; predložak je samo oblik koji pokriva svako polje.",
+    "tipOneFile": "Stavite sve oglase u jednu datoteku. Ako je morate podijeliti na stranice, dodajte link \"next\" na sljedeću stranicu.",
+    "tipFixedUrl": "Držite je na stalnoj adresi (npr. https://vasa-agencija.com/feed.json) kako bi se novi i izmijenjeni oglasi sami sinkronizirali.",
+    "tipPhotos": "Povežite fotografije pune veličine; zadržava se do 30 fotografija po oglasu.",
+    "tipExisting": "Već izvozite na portal (Kyero ili XML u stilu OpenImmo) ili imate RSS feed? Zalijepite tu link — radi takva kakva jest.",
+    "developerTitle": "Web stranicu vam vodi netko drugi?",
+    "developerCopy": "Kopiraj zahtjev za web developera",
+    "developerCopied": "Kopirano — zalijepite u e-mail",
+    "brief": "Zdravo, željeli bismo prikazati naše oglase nekretnina na BalkanEstateu. Možete li objaviti sve naše aktualne oglase na stalnoj web adresi (npr. https://nasa-stranica.com/feed.json), ažurirane kad se oglas promijeni, u formatu ispod? Za svaki oglas potrebno je: id, naslov, cijena, grad (ili adresa) i linkove na fotografije. Korisno je i: spavaće sobe, kupatila, površina u m², geografska širina/dužina, vrsta nekretnine te prodaja ili najam. Format je standardni schema.org RealEstateListing."
+  },
+  "coverage": {
+    "title": "Što smo pronašli u vašem feedu",
+    "found": "pronađeno",
+    "missing": "nedostaje",
+    "requiredMissing": "Oglasi bez sljedećeg ne mogu se objaviti: {{fields}}. Dodajte to u feed ili popunite pri pregledu svakog oglasa.",
+    "seeFormat": "Pogledajte format feeda",
+    "fields": {
+      "title": "Naslov",
+      "price": "Cijena",
+      "location": "Grad / adresa",
+      "photos": "Fotografije",
+      "bedrooms": "Spavaće sobe",
+      "bathrooms": "Kupatila",
+      "area": "Površina (m²)",
+      "mapPosition": "Položaj na mapi",
+      "propertyType": "Vrsta nekretnine",
+      "listingType": "Prodaja ili najam"
+    }
+  },
+  "pasteJson": {
+    "invalidAt": "To nije ispravan JSON — red {{line}}, kolona {{column}}: {{reason}}",
+    "invalid": "To nije ispravan JSON: {{reason}}"
+  },
+  "configError": {
+    "title": "Postavke feeda treba popraviti:",
+    "missingEndpoint": "Ovaj feed nema web adresu s koje se preuzimaju oglasi. Uredite feed i dodajte je.",
+    "invalidUrl": "Ovo nije web adresa — treba počinjati s https://",
+    "missingFeedUrl": "Dodajte adresu RSS ili Atom feeda.",
+    "missingSource": "Ovaj feed nema ni zalijepljene oglase ni adresu API-ja. Ponovno zalijepite JSON ili dodajte adresu.",
+    "invalidInlineJson": "Zalijepljeni oglasi više nisu ispravan JSON. Zalijepite ih ponovno.",
+    "missingIndexUrl": "Dodajte adresu stranice na kojoj su navedene vaše nekretnine.",
+    "missingSelectors": "Ovaj feed ne zna kako pronaći oglase na stranici. Ponovno ga postavite s adrese web stranice.",
+    "missingListingUrls": "Ovaj feed nema stranica oglasa za čitanje. Ponovno ga postavite s adrese web stranice.",
+    "notAnObject": "Postavke feeda moraju biti JSON objekt, npr. { \"endpoint\": \"https://…\" }."
   }
 }
