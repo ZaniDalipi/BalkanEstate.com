@@ -29,6 +29,8 @@ import { useGoogleMap, type GoogleMapComponentProps } from './useGoogleMap';
 import MapPopupOverlay from './MapPopupOverlay';
 import GoogleMapControls from './GoogleMapControls';
 import GoogleMapMeasurement from './GoogleMapMeasurement';
+import DrawAreaTip from './DrawAreaTip';
+import PoiStatusPill from '../poi/PoiStatusPill';
 import { mapContainerStyle } from './googleMapConstants';
 import { SoftIcon } from '@/src/shared/illustrations';
 
@@ -186,6 +188,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
         <div className="hidden sm:block absolute top-[calc(var(--map-dock-h,0px)+1rem)] left-4 z-[1001] transition-[top] duration-300 motion-reduce:transition-none bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
           <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{hook.zoom.toFixed(1)}/21 <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} <SoftIcon name="home" className="w-3.5 h-3.5 ml-1" />{hook.validProperties.length}</span>
         </div>
+
+        <DrawAreaTip isDrawing={isDrawing} onCancel={onDrawStart} />
+        <PoiStatusPill status={hook.poiStatus} />
 
         {/* Measurement Tool Panel + Save Modal */}
         <GoogleMapMeasurement

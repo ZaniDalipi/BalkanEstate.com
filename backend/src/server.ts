@@ -100,6 +100,7 @@ import agencyJoinRequestRoutes from './routes/agencyJoinRequestRoutes';
 import agentRoutes from './routes/agentRoutes';
 import agentRequestRoutes from './routes/agentRequestRoutes';
 import geocodingRoutes from './routes/geocodingRoutes';
+import poiRoutes from './routes/poiRoutes';
 import neighborhoodInsightsRoutes from './routes/neighborhoodInsightsRoutes';
 import salesHistoryRoutes from './routes/salesHistoryRoutes';
 import discountCodeRoutes from './routes/discountCodeRoutes';
@@ -376,6 +377,7 @@ app.use('/api/agency-join-requests', agencyJoinRequestRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/agent-requests', agentRequestRoutes);
 app.use('/api/geocoding', geocodingRoutes);
+app.use('/api/pois', poiRoutes); // Places of interest for the search map
 app.use('/api/neighborhood-insights', aiRateLimiter, neighborhoodInsightsRoutes); // AI-powered - rate limited
 app.use('/api/ai', aiRateLimiter, aiRoutes); // AI-powered endpoints (description, distances, chat, search names)
 app.use('/api/sales-history', salesHistoryRoutes);

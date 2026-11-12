@@ -314,7 +314,20 @@
       "zoomIn": "Ovdje ima nekretnina: {{count}} — aktivirajte da uvećate i vidite sve"
     },
     "resetView": "Resetuj prikaz",
-    "loading": "Učitava se mapa..."
+    "loading": "Učitava se mapa...",
+    "drawTip": {
+      "title": "Nacrtajte područje pretrage",
+      "touch": "Dodirnite kartu i povucite prst preko željenog područja, pa ga podignite.",
+      "mouse": "Pritisnite i držite taster miša na karti, povucite preko željenog područja, pa pustite.",
+      "oneDrag": "To je jedno povlačenje, a ne dva dodira: područje je pravougaonik između početka i kraja.",
+      "cancel": "Pritisnite Esc ili Otkaži da prestanete crtati."
+    },
+    "poiStatus": {
+      "zoomIn": "Zumirajte da vidite zanimljiva mjesta",
+      "loading": "Učitavanje zanimljivih mjesta…",
+      "empty": "Nema zanimljivih mjesta u ovom prikazu. Probajte drugo područje.",
+      "error": "Zanimljiva mjesta nisu učitana. Pokušajte ponovo za trenutak."
+    }
   },
   "newsletter": {
     "title": "Budite ažurirani sa novim nekretninama",

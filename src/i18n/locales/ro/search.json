@@ -314,7 +314,20 @@
       "zoomIn": "{{count}} proprietăți aici — activează pentru a mări și a le vedea pe toate"
     },
     "resetView": "Resetează vizualizarea",
-    "loading": "Se încarcă harta..."
+    "loading": "Se încarcă harta...",
+    "drawTip": {
+      "title": "Desenați zona de căutare",
+      "touch": "Atingeți harta și trageți degetul peste zona dorită, apoi ridicați-l.",
+      "mouse": "Apăsați și țineți apăsat butonul mouse-ului pe hartă, trageți peste zona dorită, apoi eliberați.",
+      "oneDrag": "Este o singură tragere, nu două atingeri: zona este dreptunghiul dintre punctul de start și cel de final.",
+      "cancel": "Apăsați Esc sau Anulare pentru a opri desenarea."
+    },
+    "poiStatus": {
+      "zoomIn": "Măriți harta pentru a vedea locurile de interes",
+      "loading": "Se încarcă locurile de interes…",
+      "empty": "Niciun loc de interes în această vizualizare. Încercați altă zonă.",
+      "error": "Locurile de interes nu au putut fi încărcate. Încercați din nou imediat."
+    }
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

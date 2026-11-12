@@ -330,7 +330,20 @@
       "zoomIn": "{{count}} properties here — activate to zoom in and see them all"
     },
     "resetView": "Reset view",
-    "loading": "Loading map..."
+    "loading": "Loading map...",
+    "drawTip": {
+      "title": "Draw your search area",
+      "touch": "Touch the map and drag your finger across the area you want, then lift it.",
+      "mouse": "Press and hold the mouse button on the map, drag across the area you want, then let go.",
+      "oneDrag": "It is one drag, not two taps: the area is the rectangle between where you start and where you stop.",
+      "cancel": "Press Esc or Cancel to stop drawing."
+    },
+    "poiStatus": {
+      "zoomIn": "Zoom in to see places of interest",
+      "loading": "Loading places of interest…",
+      "empty": "No places of interest in this view. Try another area.",
+      "error": "Places of interest could not be loaded. Please try again in a moment."
+    }
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

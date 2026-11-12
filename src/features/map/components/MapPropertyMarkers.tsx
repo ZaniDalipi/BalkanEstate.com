@@ -3,7 +3,7 @@ import { Property } from '@/types';
 import { SelectableCadastreLayer } from './SelectableCadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import Buildings3DLayer from './Buildings3DLayer';
-import LandmarksLayer from './LandmarksLayer';
+import PoiLeafletLayer from '../poi/PoiLeafletLayer';
 import PropertyAddressLabels from './PropertyAddressLabels';
 import MeasurementTool from './MeasurementTool';
 import ClimateRiskLayer from './ClimateRiskLayer';
@@ -62,10 +62,7 @@ const MapPropertyMarkers: React.FC<MapPropertyMarkersProps> = ({
         minZoom={19}
       />
       {/* Famous landmarks and POIs */}
-      <LandmarksLayer
-        enabled={showLandmarks}
-        isNightMode={false}
-      />
+      <PoiLeafletLayer enabled={showLandmarks} />
       <SelectableCadastreLayer enabled={showCadastre} opacity={0.7} />
       <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
       {/* Render markers - zoom-based limit applied in propertiesInView */}
