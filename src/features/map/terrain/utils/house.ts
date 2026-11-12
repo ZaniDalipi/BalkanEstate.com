@@ -177,3 +177,31 @@ export function placeOnMap(projection: ArrayLike<number>, origin: { x: number; y
   }
   return out;
 }
+
+/** One flat face of the house for the photorealistic 3D view: corners with heights above the ground under them. */
+export interface HouseShape {
+  points: Array<{ lat: number; lng: number; altitude: number }>;
+  color: string;
+  /** Walls: the outline at wall height, extruded down to the ground. */
+  extruded: boolean;
+}
+
+export const HOUSE_WALL_CSS = '#f4f4f6';
+export const HOUSE_ROOF_CSS = '#434349';
+
+/** The house as faces for Google's 3D map: walls, two roof slopes meeting at the ridge, and the two gable ends. */
+export function houseShapes(spot: BuildSpot): HouseShape[] {
+  const [a, b, c, d] = houseFootprint(spot);
+  const ridgeA = midpoint(a, d);
+  const ridgeB = midpoint(b, c);
+  const eaves = HOUSE.wallM;
+  const top = HOUSE.wallM + HOUSE.roofM;
+  const at = (p: TerrainPoint, altitude: number) => ({ lat: p.lat, lng: p.lng, altitude });
+  return [
+    { points: [a, b, c, d].map((p) => at(p, eaves)), color: HOUSE_WALL_CSS, extruded: true },
+    { points: [at(a, eaves), at(d, eaves), at(ridgeA, top)], color: HOUSE_WALL_CSS, extruded: false },
+    { points: [at(b, eaves), at(c, eaves), at(ridgeB, top)], color: HOUSE_WALL_CSS, extruded: false },
+    { points: [at(a, eaves), at(b, eaves), at(ridgeB, top), at(ridgeA, top)], color: HOUSE_ROOF_CSS, extruded: false },
+    { points: [at(ridgeA, top), at(ridgeB, top), at(c, eaves), at(d, eaves)], color: HOUSE_ROOF_CSS, extruded: false },
+  ];
+}

@@ -27,16 +27,19 @@ export interface SpotMarker3D {
   remove: () => void;
 }
 
-export function createSpotMarker3D(map: maplibregl.Map, spot: BuildSpot, text: string): SpotMarker3D {
+/** `lift` is how far above the map's ground the house stands (its block, in the blocks view), metres. */
+export function createSpotMarker3D(map: maplibregl.Map, spot: BuildSpot, text: string, lift: () => number): SpotMarker3D {
   const marker = new maplibregl.Marker({ element: labelElement(text), anchor: 'bottom' }).setLngLat([spot.lng, spot.lat]).addTo(map);
   const update = () => {
-    marker.setOffset([0, -verticalPx(HOUSE_HEIGHT_M + CLEARANCE_M, map.getZoom(), spot.lat, map.getPitch())]);
+    marker.setOffset([0, -verticalPx(lift() + HOUSE_HEIGHT_M + CLEARANCE_M, map.getZoom(), spot.lat, map.getPitch())]);
   };
   update();
   map.on('move', update);
+  map.on('render', update);
   return {
     remove: () => {
       map.off('move', update);
+      map.off('render', update);
       marker.remove();
     },
   };

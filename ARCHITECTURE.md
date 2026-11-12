@@ -650,9 +650,12 @@ GoogleMapComponent
   ├── TerrainMapLayers   outline, corners, arrows, labels, house roof, pin
   │     └── useSlopeGroundOverlay — slopeImageUrl → GroundOverlay (fades in)
   └── TerrainPanel       draw step / loading / failed / results (glass, lucide icons)
-        └── Terrain3DButton → Terrain3DDialog (lazy, MapLibre)
-              ├── useTerrain3DMap  relief + slope picture + house layer, Slope/Satellite, height 1–3×
-              └── useCamera3D      zoom, turn, 2D/3D, fly around, reset
+        └── Terrain3DButton → Terrain3DDialog (lazy)
+              ├── RealisticScene   Google photorealistic 3D (maps3d): slope zones, outline, house, label
+              │     └── useGoogle3DMap — loadMaps3d, slopeZones, houseShapes, camera via flyCameraTo
+              └── BlocksScene      MapLibre grid of raised blocks, height 1–3×, house on its block
+                    ├── useTerrain3DMap
+                    └── useCamera3D   zoom, turn, 2D/3D, fly around, reset
 ```
 
 **The slope picture** (`slopePixels`, painted once per analysis and cached in
@@ -684,6 +687,17 @@ Key decisions:
   overlay layer with OverlayViews and is added later, so it would cover them:
   corners, arrows and labels live in the overlay-mouse-target pane, the pin in
   the float pane.
+- **Realistic first, blocks as the fallback.** The 3D window opens on Google's
+  photorealistic 3D (real buildings, trees and hills, real heights) with the
+  slope classes as soft zones on the ground (`slopeZones`: per-class outlines
+  traced from the grid, holes kept, Chaikin-smoothed) and the house as five
+  3D faces (`houseShapes`). It needs the **Map Tiles API** enabled for the
+  Google key; when `loadMaps3d` can't load the library the window switches to
+  the blocks and the info card says why. The installed `@types/google.maps`
+  predate parts of the 3D API, so `google3d.ts` types just what is used.
+- **The blocks view opens standing on flat ground** (relief under the blocks
+  would count the height twice); the old MapLibre relief views were dropped as
+  too flat next to the realistic one.
 - **The 3D view opens standing on the ground.** Layers go in on `style.load`
   (MapLibre's `load` waits for every far tile). `watchGround` holds the view
   until the height under the camera is known, puts the camera's centre on it

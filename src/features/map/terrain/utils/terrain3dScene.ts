@@ -1,12 +1,17 @@
 /**
- * What the 3D terrain view is made of: satellite imagery on the real relief
- * (from the same Terrain Tiles the slope analysis reads), softly shaded, with
- * the slope picture laid over the drawn area. Pure data and maths for MapLibre.
+ * What the 3D terrain view is made of. Three ways to look at the area:
+ *  - 'blocks' (the default): the slope grid itself in 3D — every cell raised
+ *    as its own tile, as tall as the ground under it, coloured by its slope;
+ *  - 'slope': the real relief (from the same Terrain Tiles the analysis
+ *    reads) with the smooth slope picture laid over it;
+ *  - 'satellite': the real relief with just the satellite photo.
+ * Pure data and maths for MapLibre.
  */
 import type { StyleSpecification } from 'maplibre-gl';
 import type { ElevationGrid, TerrainAnalysis, TerrainPoint, TerrainStats } from '../types';
 import { patchDownhill } from './buildSpot';
 import { pointsBounds } from './gridGeometry';
+import { rampHex } from './slopeRamp';
 
 const readEnv = (name: string): string => {
   const value = (import.meta.env as Record<string, string | undefined>)[name];
@@ -29,14 +34,69 @@ export const SATELLITE_MAX_ZOOM = 17;
 export const EXAGGERATIONS = [1, 2, 3] as const;
 export type Exaggeration = (typeof EXAGGERATIONS)[number];
 
-/** What is laid over the land: the slope colours, or nothing (the satellite photo alone). */
-export const OVERLAYS = ['slope', 'satellite'] as const;
-export type Overlay3D = (typeof OVERLAYS)[number];
+/**
+ * What the 3D window shows: Google's photorealistic 3D with the slope zones
+ * on it ('slope') or without ('photo'), or the grid of raised blocks.
+ */
+export const SCENES = ['slope', 'photo', 'blocks'] as const;
+export type Scene3D = (typeof SCENES)[number];
+
+export const VIEWS = ['blocks', 'slope', 'satellite'] as const;
+export type View3D = (typeof VIEWS)[number];
+
+/** Whether a view stands on the real relief (the blocks stand on flat ground: relief under them would count the height twice). */
+export const usesRelief = (view: View3D): boolean => view !== 'blocks';
 
 export const DEM_SOURCE = 'dem';
 export const SLOPE_SOURCE = 'terrain-slope';
 export const AREA_SOURCE = 'terrain-area';
 export const SHADOW_SOURCE = 'terrain-house-shadow';
+export const BLOCKS_SOURCE = 'terrain-blocks';
+
+/** Every block stands at least this tall, so the lowest ground still reads as a tile. */
+export const BLOCK_BASE_M = 0.6;
+/** Gap between neighbouring blocks, as a share of the cell: enough to read as a grid, not as holes. */
+const BLOCK_GAP = 0.08;
+
+/**
+ * One raised tile per measured cell inside the area, a little smaller than
+ * the cell so the grid shows. `rise` is the height above the area's lowest
+ * point; `color` the colour scale at the cell's own slope, so neighbouring
+ * tiles shade smoothly into each other.
+ */
+export function cellBlocks(analysis: TerrainAnalysis): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+  const { grid, inside, field, stats } = analysis;
+  const latStep = (grid.north - grid.south) / grid.rows;
+  const lngStep = (grid.east - grid.west) / grid.cols;
+  const pad = BLOCK_GAP / 2;
+  const features: Array<GeoJSON.Feature<GeoJSON.Polygon>> = [];
+  for (let i = 0; i < inside.length; i++) {
+    const h = grid.elevations[i];
+    if (!inside[i] || h === null || Number.isNaN(field.slope[i])) continue;
+    const r = Math.floor(i / grid.cols);
+    const c = i % grid.cols;
+    const n = grid.north - (r + pad) * latStep;
+    const s = grid.north - (r + 1 - pad) * latStep;
+    const w = grid.west + (c + pad) * lngStep;
+    const e = grid.west + (c + 1 - pad) * lngStep;
+    features.push({
+      type: 'Feature',
+      properties: { rise: Math.round((h - stats.minElevation) * 10) / 10, color: rampHex(field.slope[i]) },
+      geometry: { type: 'Polygon', coordinates: [[[w, n], [e, n], [e, s], [w, s], [w, n]]] },
+    });
+  }
+  return { type: 'FeatureCollection', features };
+}
+
+/** MapLibre expression for a block's height at an exaggeration. */
+export function blockHeight(exaggeration: number): ['+', number, ['*', ['get', 'rise'], number]] {
+  return ['+', BLOCK_BASE_M, ['*', ['get', 'rise'], exaggeration]];
+}
+
+/** Top of the block a point's ground is raised to, metres above the flat ground of the blocks view. */
+export function blockTop(elevation: number, minElevation: number, exaggeration: number): number {
+  return BLOCK_BASE_M + (elevation - minElevation) * exaggeration;
+}
 
 /** The camera the view opens with (and returns to on reset). */
 export const START_PITCH = 58;
@@ -97,8 +157,8 @@ const dem = (attribution?: string) => ({
   ...(attribution ? { attribution } : {}),
 });
 
-/** The base map: satellite imagery with soft relief shading, standing on the relief, under a pale sky. */
-export function terrain3dStyle(exaggeration: Exaggeration): StyleSpecification {
+/** The base map: satellite imagery with soft relief shading under a pale sky, standing on the relief unless the view is the blocks. */
+export function terrain3dStyle(view: View3D, exaggeration: Exaggeration): StyleSpecification {
   return {
     version: 8,
     sources: {
@@ -128,7 +188,9 @@ export function terrain3dStyle(exaggeration: Exaggeration): StyleSpecification {
         },
       },
     ],
-    terrain: { source: DEM_SOURCE, exaggeration },
+    ...(usesRelief(view) ? { terrain: { source: DEM_SOURCE, exaggeration } } : {}),
+    // Soft light from the north-west, high: the blocks' sides read without going dark.
+    light: { anchor: 'map', position: [1.4, 315, 40], color: '#ffffff', intensity: 0.32 },
     sky: {
       'sky-color': '#a8cdf0',
       'horizon-color': '#f2f6fa',

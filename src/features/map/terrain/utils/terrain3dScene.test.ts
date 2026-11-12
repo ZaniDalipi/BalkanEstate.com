@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { analyzeTerrain } from './analyzeTerrain';
+import { rampHex } from './slopeRamp';
 import {
+  BLOCK_BASE_M,
   DEM_SOURCE,
+  blockHeight,
+  blockTop,
+  cellBlocks,
   MAX_PITCH,
   SATELLITE_MAX_ZOOM,
   START_BEARING,
@@ -32,11 +37,12 @@ const analysed = (height: (r: number, c: number) => number) => {
 };
 
 describe('3D base map', () => {
-  const style = terrain3dStyle(2);
+  const style = terrain3dStyle('slope', 2);
 
-  it('stands satellite imagery on the real relief, stretched as asked', () => {
+  it('stands satellite imagery on the real relief, stretched as asked — but not under the blocks', () => {
     expect(style.sources[DEM_SOURCE]).toMatchObject({ type: 'raster-dem', encoding: 'terrarium', maxzoom: 14 });
     expect(style.terrain).toEqual({ source: DEM_SOURCE, exaggeration: 2 });
+    expect(terrain3dStyle('blocks', 2).terrain).toBeUndefined();
     expect(style.layers.map((l) => l.type)).toEqual(['background', 'raster', 'hillshade']);
   });
 
@@ -88,6 +94,31 @@ describe('3D camera', () => {
     expect(easeInOut(1)).toBe(1);
     expect(easeInOut(0.25)).toBeLessThan(0.25);
     expect(easeInOut(0.75)).toBeGreaterThan(0.75);
+  });
+});
+
+describe('cellBlocks', () => {
+  // West half flat at 300 m, east half climbing 3 m per cell.
+  const result = analyzeTerrain(makeGrid(6, 6, (_r, c) => (c < 3 ? 300 : 300 + (c - 2) * 3)), wholeGrid(makeGrid(6, 6, () => 0)));
+  if (result.ok === false) throw new Error(result.error);
+  const blocks = cellBlocks(result.value);
+
+  it('raises one tile per measured cell, as tall as its ground above the lowest point', () => {
+    expect(blocks.features).toHaveLength(36);
+    const rises = blocks.features.map((f) => f.properties?.rise as number);
+    expect(Math.min(...rises)).toBe(0);
+    expect(Math.max(...rises)).toBe(9);
+  });
+
+  it('colours each tile from the colour scale at its own slope, with a gap to its neighbours', () => {
+    const first = blocks.features[0];
+    expect(first.properties?.color).toBe(rampHex(result.value.field.slope[0]));
+    expect(first.geometry.coordinates[0][0][0]).toBeGreaterThan(result.value.grid.west);
+  });
+
+  it('builds heights with a minimum thickness, and knows where the top of a block is', () => {
+    expect(blockHeight(2)).toEqual(['+', BLOCK_BASE_M, ['*', ['get', 'rise'], 2]]);
+    expect(blockTop(610, 600, 3)).toBeCloseTo(30.6, 6);
   });
 });
 

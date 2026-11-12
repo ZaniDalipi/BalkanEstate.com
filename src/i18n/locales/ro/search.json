@@ -746,7 +746,9 @@
       "zoomIn": "Mărește",
       "zoomOut": "Micșorează",
       "topView": "Privește drept de sus",
-      "tiltedView": "Înclină vederea"
+      "tiltedView": "Înclină vederea",
+      "blocks": "Blocuri din grilă",
+      "realisticUnavailable": "3D-ul realist nu este disponibil aici, așa că terenul este afișat ca blocuri din grilă."
     },
     "contours": "Curbe de nivel la fiecare {{n}} m"
   },

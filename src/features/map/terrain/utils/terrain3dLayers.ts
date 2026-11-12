@@ -1,6 +1,6 @@
 /**
- * The terrain layers on the 3D MapLibre map, and the few things that change
- * them. Thin wrappers over MapLibre calls; what they draw comes from
+ * The terrain layers on the 3D MapLibre map (outline, block grid, slope
+ * picture, house and its shadow), and the few things that change them. Thin wrappers over MapLibre calls; what they draw comes from
  * terrain3dScene, slopeImageUrl and house.
  */
 import type * as maplibregl from 'maplibre-gl';
@@ -9,52 +9,126 @@ import { createHouseLayer } from './houseLayer3d';
 import { houseShadowCorners } from './houseShadow';
 import {
   AREA_SOURCE,
+  BLOCKS_SOURCE,
   DEM_SOURCE,
   SHADOW_SOURCE,
   SLOPE_SOURCE,
   areaFeature,
+  blockHeight,
+  blockTop,
+  cellBlocks,
   imageCorners,
-  type Overlay3D,
+  usesRelief,
+  type View3D,
 } from './terrain3dScene';
 
 const AREA_CASING = 'terrain-area-casing';
 const AREA_LINE = 'terrain-area-line';
 const SLOPE_LAYER = 'terrain-slope';
 const SHADOW_LAYER = 'terrain-house-shadow';
+const BLOCKS_LAYER = 'terrain-blocks';
 const SLOPE_OPACITY = 0.95;
+/** How long the blocks take to grow or shrink to a new height. */
+export const STRETCH_MS = 450;
 
-/** The area's outline (white, on a soft dark edge so it reads on any ground) and the house. Call once the style has loaded. */
-export function addTerrainLayers(map: maplibregl.Map, analysis: TerrainAnalysis, polygon: TerrainPoint[]): void {
+/** Where the house stands for a view: on its block (metres above flat ground), or on the relief. */
+export function houseStandsAt(map: maplibregl.Map, analysis: TerrainAnalysis, view: View3D, exaggeration: number): number | null {
+  const spot = analysis.buildSpot;
+  if (!spot) return null;
+  return usesRelief(view)
+    ? map.queryTerrainElevation([spot.lng, spot.lat])
+    : blockTop(spot.elevation, analysis.stats.minElevation, exaggeration);
+}
+
+/**
+ * The area's outline (white, on a soft dark edge so it reads on any ground),
+ * the grid of raised blocks, and the house — which stands where `houseAt`
+ * says. Call once the style has loaded.
+ */
+export function addTerrainLayers(
+  map: maplibregl.Map,
+  analysis: TerrainAnalysis,
+  polygon: TerrainPoint[],
+  view: View3D,
+  exaggeration: number,
+  houseAt: (map: maplibregl.Map) => number | null,
+): void {
   map.addSource(AREA_SOURCE, { type: 'geojson', data: areaFeature(polygon) });
   const round = { 'line-join': 'round', 'line-cap': 'round' } as const;
   map.addLayer({ id: AREA_CASING, type: 'line', source: AREA_SOURCE, layout: round, paint: { 'line-color': '#000000', 'line-opacity': 0.25, 'line-width': 6, 'line-blur': 2 } });
   map.addLayer({ id: AREA_LINE, type: 'line', source: AREA_SOURCE, layout: round, paint: { 'line-color': '#ffffff', 'line-width': 2.5 } });
-  if (analysis.buildSpot) map.addLayer(createHouseLayer(analysis.buildSpot));
+  map.addSource(BLOCKS_SOURCE, { type: 'geojson', data: cellBlocks(analysis) });
+  map.addLayer({
+    id: BLOCKS_LAYER,
+    type: 'fill-extrusion',
+    source: BLOCKS_SOURCE,
+    layout: { visibility: usesRelief(view) ? 'none' : 'visible' },
+    paint: {
+      'fill-extrusion-color': ['get', 'color'],
+      'fill-extrusion-height': blockHeight(exaggeration),
+      'fill-extrusion-height-transition': { duration: STRETCH_MS, delay: 0 },
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 1,
+      'fill-extrusion-vertical-gradient': true,
+    },
+  });
+  if (analysis.buildSpot) map.addLayer(createHouseLayer(analysis.buildSpot, houseAt));
 }
 
 /** The slope picture, laid on the relief under the outline. */
-export function addSlopeImage(map: maplibregl.Map, url: string, analysis: TerrainAnalysis, overlay: Overlay3D): void {
+export function addSlopeImage(map: maplibregl.Map, url: string, analysis: TerrainAnalysis, view: View3D): void {
   map.addSource(SLOPE_SOURCE, { type: 'image', url, coordinates: imageCorners(analysis.grid) });
   map.addLayer(
     {
       id: SLOPE_LAYER,
       type: 'raster',
       source: SLOPE_SOURCE,
-      paint: { 'raster-opacity': overlay === 'slope' ? SLOPE_OPACITY : 0, 'raster-fade-duration': 0, 'raster-opacity-transition': { duration: 350 } },
+      paint: { 'raster-opacity': view === 'slope' ? SLOPE_OPACITY : 0, 'raster-fade-duration': 0, 'raster-opacity-transition': { duration: 350 } },
     },
     AREA_CASING,
   );
 }
 
 /** The soft shadow under the house, on top of the slope colours. */
-export function addHouseShadow(map: maplibregl.Map, url: string, spot: BuildSpot): void {
+export function addHouseShadow(map: maplibregl.Map, url: string, spot: BuildSpot, view: View3D): void {
   map.addSource(SHADOW_SOURCE, { type: 'image', url, coordinates: houseShadowCorners(spot) });
-  map.addLayer({ id: SHADOW_LAYER, type: 'raster', source: SHADOW_SOURCE, paint: { 'raster-fade-duration': 0 } }, AREA_CASING);
+  map.addLayer(
+    { id: SHADOW_LAYER, type: 'raster', source: SHADOW_SOURCE, layout: { visibility: usesRelief(view) ? 'visible' : 'none' }, paint: { 'raster-fade-duration': 0 } },
+    AREA_CASING,
+  );
 }
 
-/** Show the slope colours or the bare satellite photo; the change fades. */
-export function setOverlay(map: maplibregl.Map, overlay: Overlay3D): void {
-  if (map.getLayer(SLOPE_LAYER)) map.setPaintProperty(SLOPE_LAYER, 'raster-opacity', overlay === 'slope' ? SLOPE_OPACITY : 0);
+const show = (map: maplibregl.Map, layer: string, visible: boolean): void => {
+  if (map.getLayer(layer)) map.setLayoutProperty(layer, 'visibility', visible ? 'visible' : 'none');
+};
+
+/**
+ * Switch to a view: the blocks on flat ground, or the relief with the slope
+ * colours (they fade) or the bare photo. Returns true when the relief has just
+ * come in, so the caller can stand the camera on it once the heights arrive.
+ */
+export function applyView(map: maplibregl.Map, view: View3D, exaggeration: number): boolean {
+  const relief = usesRelief(view);
+  const hadRelief = Boolean(map.getTerrain());
+  show(map, BLOCKS_LAYER, !relief);
+  show(map, SHADOW_LAYER, relief);
+  if (map.getLayer(SLOPE_LAYER)) map.setPaintProperty(SLOPE_LAYER, 'raster-opacity', view === 'slope' ? SLOPE_OPACITY : 0);
+  if (relief && !hadRelief) {
+    setExaggeration(map, exaggeration);
+    return true;
+  }
+  if (!relief && hadRelief) {
+    map.setTerrain(null);
+    if (map.getCenterElevation() !== 0) map.setCenterElevation(0);
+  }
+  return false;
+}
+
+/** Raise the blocks to an exaggeration; they grow over STRETCH_MS (at once when `instant`). */
+export function setBlockHeight(map: maplibregl.Map, exaggeration: number, instant: boolean): void {
+  if (!map.getLayer(BLOCKS_LAYER)) return;
+  map.setPaintProperty(BLOCKS_LAYER, 'fill-extrusion-height-transition', { duration: instant ? 0 : STRETCH_MS, delay: 0 });
+  map.setPaintProperty(BLOCKS_LAYER, 'fill-extrusion-height', blockHeight(exaggeration));
 }
 
 /**

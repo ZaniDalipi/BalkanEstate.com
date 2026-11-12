@@ -746,7 +746,9 @@
       "zoomIn": "Zmadho",
       "zoomOut": "Zvogëlo",
       "topView": "Shiko drejt nga lart",
-      "tiltedView": "Pjerrëso pamjen"
+      "tiltedView": "Pjerrëso pamjen",
+      "blocks": "Blloqe rrjete",
+      "realisticUnavailable": "3D realiste nuk është e disponueshme këtu, ndaj toka shfaqet si blloqe rrjete."
     },
     "contours": "Vija niveli çdo {{n}} m"
   },

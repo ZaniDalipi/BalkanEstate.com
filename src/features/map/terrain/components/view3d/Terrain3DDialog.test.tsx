@@ -37,9 +37,9 @@ const fake = vi.hoisted(() => {
     easeTo = vi.fn((o: { bearing?: number; pitch?: number; zoom?: number }) => this.move(o));
     jumpTo = vi.fn((o: { bearing?: number; pitch?: number }) => this.move(o));
     fitBounds = vi.fn();
-    constructor(options: { style: { terrain: { source: string; exaggeration: number } } }) {
+    constructor(options: { style: { terrain?: { source: string; exaggeration: number } } }) {
       if (state.failToCreate) throw new Error('Failed to initialize WebGL');
-      this.terrain = { ...options.style.terrain };
+      this.terrain = options.style.terrain ? { ...options.style.terrain } : null;
       state.maps.push(this);
     }
     move(o: { bearing?: number; pitch?: number; zoom?: number }) {
@@ -56,7 +56,8 @@ const fake = vi.hoisted(() => {
     addLayer(layer: { id: string }) { this.layers.push(layer.id); }
     getLayer(id: string) { return this.layers.includes(id) ? { id } : undefined; }
     setPaintProperty(layer: string, name: string, value: unknown) { this.paint[`${layer}.${name}`] = value; }
-    setTerrain(t: { source: string; exaggeration: number }) { this.terrain = t; }
+    setLayoutProperty(layer: string, name: string, value: unknown) { this.paint[`${layer}.${name}`] = value; }
+    setTerrain(t: { source: string; exaggeration: number } | null) { this.terrain = t; }
     getTerrain() { return this.terrain; }
     queryTerrainElevation() { return state.ground; }
     isSourceLoaded() { return state.demLoaded; }
@@ -104,9 +105,15 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+/** Open the dialog; with no Google 3D on the page it falls back to the blocks (MapLibre). */
 const open = () => {
   const onClose = vi.fn();
   render(<Terrain3DDialog analysis={analysis} polygon={polygon} onClose={onClose} />);
+  return onClose;
+};
+const openBlocks = async () => {
+  const onClose = open();
+  await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   return onClose;
 };
 /** Let the map's style arrive, and the pictures the view makes for it. */
@@ -120,49 +127,41 @@ const styleLoads = async () => {
 const pressed = (name: string) => screen.getByRole('button', { name }).getAttribute('aria-pressed');
 
 describe('Terrain3DDialog', () => {
-  it('says plainly when the browser cannot draw 3D, with a way back', () => {
+  it('says plainly when the browser cannot draw 3D, with a way back', async () => {
     fake.state.failToCreate = true;
-    const onClose = open();
+    const onClose = await openBlocks();
     expect(screen.getByRole('alert').textContent).toContain("can't show 3D");
     fireEvent.click(screen.getByRole('button', { name: 'Back to the slope map' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('opens on the slope colours over the stretched relief, standing on the ground and looking uphill', async () => {
-    open();
+  it('without realistic 3D here, shows the grid of raised blocks on flat ground, stretched for gentle land, looking uphill', async () => {
+    await openBlocks();
+    expect(screen.getByText(/Realistic 3D isn't available here/)).toBeTruthy();
     expect(screen.getByRole('status').textContent).toContain('Loading 3D terrain');
-    expect(maps[0].terrain).toEqual({ source: 'dem', exaggeration: 3 });
+    expect(maps[0].terrain).toBeNull(); // relief under the blocks would count the height twice
     await styleLoads();
 
     expect(screen.queryByRole('status')).toBeNull();
-    expect(maps[0].layers).toEqual(expect.arrayContaining(['terrain-area-line', 'terrain-house', 'terrain-slope', 'terrain-house-shadow']));
-    expect(maps[0].centerElevation).toBe(2880);
+    expect(maps[0].layers).toEqual(expect.arrayContaining(['terrain-area-line', 'terrain-blocks', 'terrain-house', 'terrain-slope']));
+    expect(maps[0].paint['terrain-blocks.fill-extrusion-height']).toBeUndefined(); // set when added
     expect(maps[0].jumpTo).toHaveBeenCalledWith({ pitch: 58, bearing: 90 });
-    expect(pressed('Slope')).toBe('true');
+    expect(screen.queryByRole('button', { name: 'Grid blocks' })).toBeNull(); // nothing else to choose
     expect(pressed('3×')).toBe('true');
     expect(screen.getByText(/stretched ×3/)).toBeTruthy();
     expect(screen.getByText(/The house marks the best place to build/)).toBeTruthy();
     expect(screen.getByRole('dialog').getAttribute('aria-labelledby')).toBe(screen.getByRole('heading', { name: 'Terrain in 3D' }).id);
   });
 
-  it('switches to the bare satellite photo and back, and to true height', async () => {
-    open();
+  it('raises the blocks when the height changes', async () => {
+    await openBlocks();
     await styleLoads();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Satellite' }));
-    expect(maps[0].paint['terrain-slope.raster-opacity']).toBe(0);
-    fireEvent.click(screen.getByRole('button', { name: 'Slope' }));
-    expect(maps[0].paint['terrain-slope.raster-opacity']).toBeGreaterThan(0.9);
-
-    fake.state.ground = 960;
-    fireEvent.click(screen.getByRole('button', { name: '1×' }));
-    expect(maps[0].terrain).toEqual({ source: 'dem', exaggeration: 1 });
-    expect(maps[0].centerElevation).toBe(960); // the camera follows the ground down
-    expect(screen.getByText(/true to scale/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '2×' }));
+    expect(maps[0].paint['terrain-blocks.fill-extrusion-height']).toEqual(['+', 0.6, ['*', ['get', 'rise'], 2]]);
   });
 
   it('moves the camera from its buttons, and closes on Esc', async () => {
-    const onClose = open();
+    const onClose = await openBlocks();
     await styleLoads();
     const map = maps[0];
 
@@ -186,32 +185,4 @@ describe('Terrain3DDialog', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('on a slow connection opens without the heights, then settles when they arrive', async () => {
-    vi.useFakeTimers();
-    fake.state.ground = 0; // heights not in yet
-    open();
-    await styleLoads();
-    expect(screen.getByRole('status')).toBeTruthy();
-
-    act(() => { vi.advanceTimersByTime(8000); });
-    expect(screen.queryByRole('status')).toBeNull();
-    expect(maps[0].centerElevation).toBe(0);
-    maps[0].jumpTo.mockClear();
-
-    fake.state.ground = 512;
-    act(() => maps[0].fire('sourcedata', { sourceId: 'dem', tile: {} }));
-    expect(maps[0].centerElevation).toBe(512);
-    expect(maps[0].jumpTo).toHaveBeenCalledWith({ pitch: 58, bearing: 90 });
-  });
-
-  it('accepts ground that really is at sea level once every height tile is in', async () => {
-    fake.state.ground = 0;
-    open();
-    await styleLoads();
-    expect(screen.getByRole('status')).toBeTruthy();
-
-    fake.state.demLoaded = true;
-    act(() => maps[0].fire('sourcedata', { sourceId: 'dem', tile: {} }));
-    expect(screen.queryByRole('status')).toBeNull();
-  });
 });

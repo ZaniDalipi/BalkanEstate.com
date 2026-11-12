@@ -1,6 +1,7 @@
 /**
  * Draws the house (see house.ts) into the 3D map as a real model — flat
- * walls, two roof slopes — standing on the ground at the best place to build.
+ * walls, two roof slopes — at the best place to build: on the relief, or on
+ * top of its block in the blocks view.
  * A MapLibre custom layer: a few lines of WebGL, no 3D library.
  */
 import * as maplibregl from 'maplibre-gl';
@@ -47,8 +48,12 @@ function link(gl: GL): WebGLProgram | null {
 
 export const HOUSE_LAYER = 'terrain-house';
 
-/** A layer that draws the house on the ground at `spot`. If the model can't be set up it draws nothing. */
-export function createHouseLayer(spot: BuildSpot): maplibregl.CustomLayerInterface {
+/**
+ * A layer that draws the house at `spot`, standing at the height `standsAt`
+ * gives (metres; null while unknown, and nothing is drawn). If the model
+ * can't be set up it draws nothing.
+ */
+export function createHouseLayer(spot: BuildSpot, standsAt: (map: maplibregl.Map) => number | null): maplibregl.CustomLayerInterface {
   const mesh = houseMesh(spot);
   const at: [number, number] = [spot.lng, spot.lat];
   let map: maplibregl.Map | null = null;
@@ -68,8 +73,7 @@ export function createHouseLayer(spot: BuildSpot): maplibregl.CustomLayerInterfa
     },
     render(gl, args) {
       if (!map || !program || !buffer) return;
-      // The ground under the house, stretched like the rest of the relief; unknown until the heights arrive.
-      const ground = map.queryTerrainElevation(at);
+      const ground = standsAt(map);
       if (ground === null) return;
       const origin = maplibregl.MercatorCoordinate.fromLngLat(at, ground);
       const matrix = placeOnMap(args.defaultProjectionData.mainMatrix, origin, origin.meterInMercatorCoordinateUnits());
