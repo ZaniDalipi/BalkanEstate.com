@@ -314,7 +314,20 @@
       "zoomIn": "{{count}} prona këtu — aktivizoni për t'u zmadhuar dhe për t'i parë të gjitha"
     },
     "resetView": "Rivendos pamjen",
-    "loading": "Po ngarkohet harta..."
+    "loading": "Po ngarkohet harta...",
+    "drawTip": {
+      "title": "Vizato zonën e kërkimit",
+      "touch": "Prek hartën dhe zvarrit gishtin mbi zonën që dëshiron, pastaj ngrije.",
+      "mouse": "Mbaj shtypur butonin e miut mbi hartë, zvarrit mbi zonën që dëshiron, pastaj lëshoje.",
+      "oneDrag": "Është një zvarritje, jo dy prekje: zona është drejtkëndëshi mes fillimit dhe fundit.",
+      "cancel": "Shtyp Esc ose Anulo për të ndaluar vizatimin."
+    },
+    "poiStatus": {
+      "zoomIn": "Zmadho për të parë vendet me interes",
+      "loading": "Po ngarkohen vendet me interes…",
+      "empty": "Nuk ka vende me interes në këtë pamje. Provo një zonë tjetër.",
+      "error": "Vendet me interes nuk u ngarkuan. Provo përsëri pas pak."
+    }
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

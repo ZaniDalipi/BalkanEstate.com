@@ -20,6 +20,7 @@ import { HighlightedPropertiesProvider } from '@/src/context/HighlightedProperti
 import { useMapComponent, USE_GOOGLE_MAPS, TILE_LAYERS, type MapComponentProps } from './useMapComponent';
 import MapPropertyMarkers from './MapPropertyMarkers';
 import MapFilterControls from './MapFilterControls';
+import DrawAreaTip from './DrawAreaTip';
 
 import i18n from '@/src/i18n';
 import { SoftIcon } from '@/src/shared/illustrations';
@@ -376,6 +377,8 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
             userLocation={hook.userLocation}
           />
         </MapContainer>
+
+        <DrawAreaTip isDrawing={isDrawing} onCancel={onDrawStart} />
 
         <MapFilterControls
           isMobile={isMobile}

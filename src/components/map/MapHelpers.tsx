@@ -377,14 +377,10 @@ export const MapDrawEvents: React.FC<{
         map.removeLayer(tempRectRef.current); // Cleanup temp rectangle
         tempRectRef.current = null;
 
-        // Use the ref'd prop to call the latest callback
+        // A tap (no drag) is not an area: stay in drawing mode, the tip says how.
         if (!bounds.getSouthWest().equals(bounds.getNorthEast())) {
           propsRef.current.onDrawComplete(bounds);
-        } else {
-          propsRef.current.onDrawComplete(null);
         }
-      } else {
-        propsRef.current.onDrawComplete(null);
       }
     };
 

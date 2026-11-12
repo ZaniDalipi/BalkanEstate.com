@@ -80,11 +80,11 @@ const fetchTile = (template: string, t: TileId): Promise<Buffer> => {
 };
 
 /** The features of the wanted layers in one tile, as GeoJSON (lon/lat). */
-export const decodeTile = (buffer: Buffer, t: TileId): TileFeature[] => {
+export const decodeTile = (buffer: Buffer, t: TileId, layers: readonly string[] = LAYERS_AT[t.z] ?? []): TileFeature[] => {
   if (buffer.length === 0) return []; // an empty tile (open sea) has nothing
   const tile = new VectorTile(new Pbf(buffer));
   const out: TileFeature[] = [];
-  for (const layerName of LAYERS_AT[t.z] ?? []) {
+  for (const layerName of layers) {
     const layer = tile.layers[layerName];
     if (!layer) continue;
     for (let i = 0; i < layer.length; i++) {
@@ -111,6 +111,16 @@ export const featuresAround = async (lat: number, lng: number): Promise<TileFeat
     return decoded.flat();
   } catch (err) {
     apiLogger.warn(`Vector tiles failed for ${lat},${lng}: ${describeHttpError(err)}`);
+    throw err instanceof TilesUnavailableError ? err : new TilesUnavailableError('Map tiles unavailable');
+  }
+};
+
+/** The features of the given layers in one tile; rejects with TilesUnavailableError when it cannot be read. */
+export const featuresInTile = async (t: TileId, layers: readonly string[]): Promise<TileFeature[]> => {
+  try {
+    return decodeTile(await fetchTile(await tileTemplate(), t), t, layers);
+  } catch (err) {
+    apiLogger.warn(`Vector tile ${t.z}/${t.x}/${t.y} failed: ${describeHttpError(err)}`);
     throw err instanceof TilesUnavailableError ? err : new TilesUnavailableError('Map tiles unavailable');
   }
 };

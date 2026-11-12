@@ -410,3 +410,13 @@ export const listingFeedKeys = {
   previewJob: (sourceId: string, jobId: string) => [...listingFeedKeys.all, 'previewJob', sourceId, jobId] as const,
   importJob: (sourceId: string, jobId: string) => [...listingFeedKeys.all, 'importJob', sourceId, jobId] as const,
 };
+
+// ============================================================================
+// Places of interest on the search map
+// Used by: features/map/poi/usePoiTiles
+// ============================================================================
+
+export const poiKeys = {
+  all: ['pois'] as const,
+  tile: (x: number, y: number) => [...poiKeys.all, 'tile', x, y] as const,
+};

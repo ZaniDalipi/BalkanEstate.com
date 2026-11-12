@@ -17,6 +17,9 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import L from 'leaflet';
+import { isDrawnArea } from '../utils/drawTip';
+import { usePoiTiles } from '../poi/usePoiTiles';
+import { usePoiGoogleMarkers } from '../poi/usePoiGoogleMarkers';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { SmoothMarkerClusterer, ViewportClusterAlgorithm } from '../utils/smoothClusterer';
 import { runInChunks } from '../utils/chunkedWork';
@@ -456,16 +459,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       drawingRectRef.current = null;
       setDrawingRect(null);
 
+      // A tap (no drag) is not an area: stay in drawing mode, the tip says how.
+      if (!isDrawnArea(rect)) return;
+
       // Convert to Leaflet LatLngBounds format for compatibility
-      if (rect && Math.abs(rect.north - rect.south) > 0.0001 && Math.abs(rect.east - rect.west) > 0.0001) {
-        const bounds = L.latLngBounds(
-          L.latLng(rect.south, rect.west),
-          L.latLng(rect.north, rect.east)
-        );
-        drawingPropsRef.current.onDrawComplete(bounds);
-      } else {
-        drawingPropsRef.current.onDrawComplete(null);
-      }
+      drawingPropsRef.current.onDrawComplete(
+        L.latLngBounds(L.latLng(rect.south, rect.west), L.latLng(rect.north, rect.east))
+      );
     };
 
     // Attach event listeners
@@ -512,12 +512,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       case 'color':
         return colorMapStyles;
       default:
-        return showLandmarks ? [] : [
+        // Google's own place labels stay hidden: the POI toggle draws our own pins instead.
+        return [
           { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
           { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
         ];
     }
-  }, [mapStyle, showLandmarks]);
+  }, [mapStyle]);
 
   // Inject CSS keyframes for promoted marker glow animation
   useEffect(() => {
@@ -784,7 +785,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       opts.styles = isSatellite ? [] : getMapStyles();
     }
     map.setOptions(opts);
-  }, [map, mapStyle, isLoaded, getMapStyles, showLandmarks]);
+  }, [map, mapStyle, isLoaded, getMapStyles]);
 
   // Handle 3D buildings toggle - tilt the map for 3D view
   useEffect(() => {
@@ -2174,6 +2175,10 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [drawnBounds]);
 
+  // Places of interest (the POI toggle): pins from the backend, one map tile at a time.
+  const { pois, status: poiStatus } = usePoiTiles(showLandmarks, gmapBounds, zoom);
+  usePoiGoogleMarkers(map, pois);
+
   return {
     // Loading
     isLoaded,
@@ -2202,6 +2207,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     setSelectedProperty,
     handleViewDetails,
     selectedPropertyDistanceLabel,
+
+    poiStatus,
 
     // Drawing
     drawingRect,
