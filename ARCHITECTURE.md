@@ -1624,6 +1624,78 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
 
 ---
 
+## Split View — hiding the list (whole-page map)
+
+On a desktop (split view) Search, Rentals and Villas show the list and the map
+side by side. A tab on the map's left edge folds the list away so the map takes
+the whole page; folded, the tab reads **Show list** with the number of results
+waiting. One implementation for the three pages:
+
+```
+src/features/search/splitView/
+  ├── listCollapse.ts      pure: isListCollapsed · splitListPanelClass · splitMapPanelClass
+  │                              readCollapsedPreference · listCountBadge · SEARCH_LIST_PANEL_ID
+  ├── tabMotion.ts         pure: the tab's springs and dock timing · the seam shade's timing
+  ├── useListCollapse.ts   uiStore preference → { collapsed, toggle } (split view only)
+  ├── ListCollapseTab.tsx  the edge tab: "‹" (hover: "Hide list ‹") ⟷ "Show list · N ›"
+  ├── TabReveal.tsx        a part of the tab whose width springs between 0 and its content
+  └── SeamShade.tsx        the shadow the list casts on the map while it moves
+src/app/store/uiStore.ts   isSearchListCollapsed — persisted (safeLocalStorage, partialize)
+src/index.css @theme       --ease-split-open / --ease-split-close (springs as linear())
+```
+
+- **How it moves.** In split view the list panel is `absolute` on the left of
+  the row (same 45% / 55% width as before) and the map is pushed right with
+  `ml-auto`. Folding slides the list out with `translate` (its cards keep
+  their width, so nothing re-lays out) while the map's `width` grows to the
+  full row. The map resizes itself as it grows (Google Maps on its own;
+  Leaflet through the `ResizeObserver` in `MapEvents`). With the list open the
+  layout is identical to before at every size.
+- **Springs, one curve for both edges.** The timing is a real spring from
+  rest, sampled into CSS `linear()` (`--ease-split-*` in `src/index.css`):
+  closing is critically damped (500ms, no bounce), opening lands with a ~1%
+  overshoot (700ms). The transition takes the timing of the state it moves
+  *to*, so the open classes time the opening and the collapsed classes the
+  closing. List and map share the curve, so their edges stay within a pixel
+  of each other on every frame, bounce included. Browsers without `linear()`
+  get plain `ease`.
+- **Depth.** The list's direct children slide 8% further than the panel and,
+  coming back, start 60ms late (parallax: the content leads on the way out
+  and settles a beat after the panel lands). `SeamShade` darkens the map's
+  edge beside the moving list, peaking early and gone when it lands; it plays
+  only on a toggle (`AnimatePresence initial={false}`), never on page load.
+- **The tab docks.** Closing, the slim tab rides the seam; when the seam is
+  ~85% of the way (`DOCK_DELAY_S`) it grows into "Show list" (`TabReveal`),
+  its chevron flips, the count pops in, and a ring pulses once. Opening, it
+  folds back at once. Hover or keyboard focus slides a "Hide list" label out
+  of the open tab; a click resets the hover, so the label never appears
+  under the pointer mid-animation. A press squeezes it (`whileTap`).
+- **Reduced motion** turns every part off: the panels jump (no CSS
+  transitions), the tab changes instantly, and the shade and pulse are not
+  drawn.
+- **Folded means gone, not just moved.** After the slide the list is
+  `invisible` (visibility transitions discretely, so it stays visible until
+  the slide ends): out of the tab order and the accessibility tree, but still
+  mounted, so its scroll and paged-in depth survive. The tab carries
+  `aria-expanded` / `aria-controls` and stays the same button in both states,
+  so keyboard focus never jumps.
+- **The tab rides the seam.** It lives inside the map panel at `left-0`,
+  vertically centred, so it moves with the map's edge during the slide. Its
+  touch target is widened to 44px with a `before:` hit area.
+- **Remembered, safely.** The choice is a per-device preference in `uiStore`
+  (persisted, only this key). Storage is untrusted: `readCollapsedPreference`
+  accepts only a real `true`, and `safeLocalStorage` swallows blocked or full
+  storage so the toggle still works and simply isn't remembered.
+- **Split view only.** `isListCollapsed(isSplitView, preference)`: phones,
+  tablets and sideways phones keep the List / Map switch and never show the
+  tab; widening the window again brings the folded state back.
+- Tests: `listCollapse.test.ts` (pure rules and classes), `tabMotion.test.ts`
+  (dock timing, reduced motion), `ListCollapseTab.test.tsx` (the user flow,
+  hover label, persistence, storage failure), `e2e/list-collapse.spec.ts`
+  (all three pages, desktop and tablet).
+
+---
+
 ## Responsive Layout — any device, either orientation
 
 Breakpoints are width-based, so a phone held sideways (≥768px wide, ~360–460px

@@ -2,8 +2,10 @@
 // Manages modals, sidebars, and UI preferences
 
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
+import { safeLocalStorage } from './safeLocalStorage';
+import { readCollapsedPreference } from '@/src/features/search/splitView/listCollapse';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
 export type AppView = 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'not-found';
@@ -29,6 +31,10 @@ interface UIState {
   // UI flags
   isFirstLoginOffer: boolean;
   isAgencyCreationMode: boolean;
+
+  // Preferences (remembered on this device)
+  /** Search, Rentals and Villas: the list is folded away so the map fills the page (split view only). */
+  isSearchListCollapsed: boolean;
 
   // Actions - Modals
   openAuthModal: (view?: AuthModalView) => void;
@@ -56,66 +62,84 @@ interface UIState {
   // Actions - Flags
   setFirstLoginOffer: (value: boolean) => void;
   setAgencyCreationMode: (value: boolean) => void;
+
+  // Actions - Preferences
+  setSearchListCollapsed: (value: boolean) => void;
 }
 
 export const useUIStore = create<UIState>()(
   devtools(
-    (set) => ({
-      // Initial state
-      isAuthModalOpen: false,
-      authModalView: 'login',
-      isPricingModalOpen: false,
-      isSubscriptionModalOpen: false,
-      isEnterpriseModalOpen: false,
-      isFiltersOpen: false,
-      isListingLimitWarningOpen: false,
-      isDiscountGameOpen: false,
-      selectedPropertyId: null,
-      selectedAgentId: null,
-      selectedAgencyId: null,
-      activeView: 'search',
-      activeConversationId: null,
-      isFirstLoginOffer: false,
-      isAgencyCreationMode: false,
+    persist(
+      (set) => ({
+        // Initial state
+        isAuthModalOpen: false,
+        authModalView: 'login',
+        isPricingModalOpen: false,
+        isSubscriptionModalOpen: false,
+        isEnterpriseModalOpen: false,
+        isFiltersOpen: false,
+        isListingLimitWarningOpen: false,
+        isDiscountGameOpen: false,
+        selectedPropertyId: null,
+        selectedAgentId: null,
+        selectedAgencyId: null,
+        activeView: 'search',
+        activeConversationId: null,
+        isFirstLoginOffer: false,
+        isAgencyCreationMode: false,
+        isSearchListCollapsed: false,
 
-      // Modal actions
-      openAuthModal: (view = 'login') => set({ isAuthModalOpen: true, authModalView: view }),
-      closeAuthModal: () => set({ isAuthModalOpen: false }),
-      setAuthModalView: (view) => set({ authModalView: view }),
+        // Modal actions
+        openAuthModal: (view = 'login') => set({ isAuthModalOpen: true, authModalView: view }),
+        closeAuthModal: () => set({ isAuthModalOpen: false }),
+        setAuthModalView: (view) => set({ authModalView: view }),
 
-      openPricingModal: (isOffer = false, isAgencyMode = false) =>
-        set({
-          isPricingModalOpen: true,
-          isFirstLoginOffer: isOffer,
-          isAgencyCreationMode: isAgencyMode
-        }),
-      closePricingModal: () => set({ isPricingModalOpen: false }),
+        openPricingModal: (isOffer = false, isAgencyMode = false) =>
+          set({
+            isPricingModalOpen: true,
+            isFirstLoginOffer: isOffer,
+            isAgencyCreationMode: isAgencyMode
+          }),
+        closePricingModal: () => set({ isPricingModalOpen: false }),
 
-      openSubscriptionModal: () => set({ isSubscriptionModalOpen: true }),
-      closeSubscriptionModal: () => set({ isSubscriptionModalOpen: false }),
+        openSubscriptionModal: () => set({ isSubscriptionModalOpen: true }),
+        closeSubscriptionModal: () => set({ isSubscriptionModalOpen: false }),
 
-      openEnterpriseModal: () => set({ isEnterpriseModalOpen: true }),
-      closeEnterpriseModal: () => set({ isEnterpriseModalOpen: false }),
+        openEnterpriseModal: () => set({ isEnterpriseModalOpen: true }),
+        closeEnterpriseModal: () => set({ isEnterpriseModalOpen: false }),
 
-      toggleFilters: () => set((state) => ({ isFiltersOpen: !state.isFiltersOpen })),
+        toggleFilters: () => set((state) => ({ isFiltersOpen: !state.isFiltersOpen })),
 
-      openListingLimitWarning: () => set({ isListingLimitWarningOpen: true }),
-      closeListingLimitWarning: () => set({ isListingLimitWarningOpen: false }),
+        openListingLimitWarning: () => set({ isListingLimitWarningOpen: true }),
+        closeListingLimitWarning: () => set({ isListingLimitWarningOpen: false }),
 
-      openDiscountGame: () => set({ isDiscountGameOpen: true }),
-      closeDiscountGame: () => set({ isDiscountGameOpen: false }),
+        openDiscountGame: () => set({ isDiscountGameOpen: true }),
+        closeDiscountGame: () => set({ isDiscountGameOpen: false }),
 
-      // Selection actions
-      setSelectedProperty: (id) => set({ selectedPropertyId: id }),
-      setSelectedAgent: (id) => set({ selectedAgentId: id }),
-      setSelectedAgency: (id) => set({ selectedAgencyId: id }),
-      setActiveView: (view) => set({ activeView: view }),
-      setActiveConversation: (id) => set({ activeConversationId: id }),
+        // Selection actions
+        setSelectedProperty: (id) => set({ selectedPropertyId: id }),
+        setSelectedAgent: (id) => set({ selectedAgentId: id }),
+        setSelectedAgency: (id) => set({ selectedAgencyId: id }),
+        setActiveView: (view) => set({ activeView: view }),
+        setActiveConversation: (id) => set({ activeConversationId: id }),
 
-      // Flag actions
-      setFirstLoginOffer: (value) => set({ isFirstLoginOffer: value }),
-      setAgencyCreationMode: (value) => set({ isAgencyCreationMode: value }),
-    }),
+        // Flag actions
+        setFirstLoginOffer: (value) => set({ isFirstLoginOffer: value }),
+        setAgencyCreationMode: (value) => set({ isAgencyCreationMode: value }),
+
+        // Preference actions
+        setSearchListCollapsed: (value) => set({ isSearchListCollapsed: value }),
+      }),
+      {
+        name: 'ui-store',
+        version: 1,
+        storage: createJSONStorage(() => safeLocalStorage),
+        // Only preferences are remembered: modals and selections start fresh.
+        partialize: (state) => ({ isSearchListCollapsed: state.isSearchListCollapsed }),
+        // Whatever is in storage is untrusted: keep only a real boolean.
+        merge: (persisted, current) => ({ ...current, isSearchListCollapsed: readCollapsedPreference(persisted) }),
+      }
+    ),
     { name: 'ui-store' }
   )
 );

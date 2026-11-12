@@ -8,6 +8,11 @@ import type { AnyNode } from 'domhandler';
 import { isValidListingItem, isValidRssItem } from './listingNormalizerService';
 import { findSiteProfile } from './listingDetectorProfiles';
 import { fetchWithBrowser } from './listingAdapters/browserClient';
+import { extractEmbeddedSpaListings } from './listingAdapters/embeddedState';
+import { detectXmlFeed } from './listingAdapters/xmlFeed/detectXmlFeed';
+import { discoverSitemapUrls } from './listingAdapters/sitemap';
+import { planCatalogue } from './listingAdapters/htmlScrape/detectCatalogue';
+import { fieldForFeedKey } from './listingAttributes/labelMap';
 
 const TIMEOUT = 12_000;
 
@@ -204,7 +209,7 @@ const tryUrl = async (url: string, responseType: 'text' | 'json' = 'text') => {
  */
 const fetchPageStrict = async (
   url: string
-): Promise<{ html: string; status: number } | { html: null; status: number; reason: string }> => {
+): Promise<{ html: string; status: number; finalUrl: string } | { html: null; status: number; reason: string }> => {
   try {
     const r = await axios.get<string>(url, {
       timeout: TIMEOUT,
@@ -215,7 +220,8 @@ const fetchPageStrict = async (
       validateStatus: () => true,
     });
     if (r.status >= 200 && r.status < 400) {
-      return { html: typeof r.data === 'string' ? r.data : '', status: r.status };
+      const finalUrl = (r.request as { res?: { responseUrl?: string } } | undefined)?.res?.responseUrl ?? url;
+      return { html: typeof r.data === 'string' ? r.data : '', status: r.status, finalUrl };
     }
     let reason = `HTTP ${r.status}`;
     if (r.status === 403) reason = 'HTTP 403 — the site is blocking automated access (likely Cloudflare or anti-bot).';
@@ -232,228 +238,6 @@ const fetchPageStrict = async (
     }
     return { html: null, status: 0, reason: (err as Error).message };
   }
-};
-
-/**
- * Walk a deeply-nested object/array and return the first array that:
- * - has at least 2 items
- * - items are objects that look like real estate listings
- * Returns the array and a dot-path to it (for itemsPath).
- */
-const findListingsInState = (
-  obj: unknown,
-  depth = 0,
-  path = '$'
-): { items: Record<string, unknown>[]; itemsPath: string } | null => {
-  if (depth > 6 || obj == null || typeof obj !== 'object') return null;
-  if (Array.isArray(obj)) {
-    if (obj.length >= 2) {
-      const records = obj as Record<string, unknown>[];
-      const validCount = records.filter(i => typeof i === 'object' && i !== null && isValidListingItem(i as Record<string, unknown>)).length;
-      if (validCount >= 2) return { items: records, itemsPath: `${path}[*]` };
-    }
-    return null;
-  }
-  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
-    const result = findListingsInState(val, depth + 1, `${path}.${key}`);
-    if (result) return result;
-  }
-  return null;
-};
-
-/**
- * Try to extract listing data embedded in the page's JavaScript state.
- * Handles Next.js (__NEXT_DATA__), Nuxt (window.__NUXT__), generic
- * window.__INITIAL_STATE__, and any <script type="application/json"> blocks.
- */
-const extractEmbeddedSpaListings = (
-  html: string
-): { items: Record<string, unknown>[]; itemsPath: string; source: string } | null => {
-  // 1. Next.js: <script id="__NEXT_DATA__" type="application/json">
-  const nextMatch = html.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
-  if (nextMatch?.[1]) {
-    try {
-      const data = JSON.parse(nextMatch[1]) as Record<string, unknown>;
-      const props = (data.props as Record<string, unknown>)?.pageProps ?? data.props ?? data;
-      const result = findListingsInState(props);
-      if (result) return { ...result, source: '__NEXT_DATA__' };
-    } catch {/* ignore */}
-  }
-
-  // 2. Nuxt: window.__NUXT__ = {...}  or  <script>window.__NUXT__={...}</script>
-  const nuxtMatch = html.match(/window\.__NUXT__\s*=\s*(\{[\s\S]{20,8000}?\})\s*[;<]/);
-  if (nuxtMatch?.[1]) {
-    try {
-      const data = JSON.parse(nuxtMatch[1]) as Record<string, unknown>;
-      const state = (data.data as unknown[]) ?? data;
-      const result = findListingsInState(state);
-      if (result) return { ...result, source: '__NUXT__' };
-    } catch {/* ignore */}
-  }
-
-  // 3. Generic window.__INITIAL_STATE__ or window.initialState
-  const stateMatch = html.match(/window\.__(?:INITIAL_)?STATE__\s*=\s*(\{[\s\S]{20,8000}?\})\s*[;<]/i);
-  if (stateMatch?.[1]) {
-    try {
-      const data = JSON.parse(stateMatch[1]) as Record<string, unknown>;
-      const result = findListingsInState(data);
-      if (result) return { ...result, source: '__INITIAL_STATE__' };
-    } catch {/* ignore */}
-  }
-
-  // 4. Any standalone <script type="application/json"> with listing arrays
-  const $ = cheerio.load(html);
-  let spaResult: { items: Record<string, unknown>[]; itemsPath: string; source: string } | null = null;
-  $('script[type="application/json"]').each((_, el) => {
-    if (spaResult) return;
-    const text = $(el).contents().text();
-    if (!text || text.length < 50) return;
-    try {
-      const data = JSON.parse(text) as unknown;
-      const result = findListingsInState(data);
-      if (result) spaResult = { ...result, source: 'application/json script' };
-    } catch {/* ignore */}
-  });
-
-  return spaResult;
-};
-
-/**
- * Discover listing detail-page URLs by parsing sitemap.xml.
- *
- * Most real-estate portals expose a sitemap (often listed in /robots.txt)
- * that enumerates every listing URL — this is the single most reliable way
- * to ingest a site's catalogue without HTML scraping.
- *
- * If `scopedToPath` is provided, only URLs whose pathname starts with it are
- * kept (useful when the user pastes an agency-specific URL).
- */
-const SITEMAP_TIMEOUT = 8_000;
-const SITEMAP_MAX_TOTAL_URLS = 5_000;
-const SITEMAP_MAX_INDEX_CHILDREN = 30;
-const SITEMAP_RETURN_LIMIT = 500;
-
-const fetchTextWithBrowserUa = async (url: string): Promise<string | null> => {
-  try {
-    const r = await axios.get<string>(url, {
-      timeout: SITEMAP_TIMEOUT,
-      headers: {
-        'User-Agent': BROWSER_UA,
-        Accept: 'text/xml,application/xml,text/plain,*/*',
-        'Accept-Encoding': 'gzip, deflate, br',
-      },
-      responseType: 'text',
-      maxRedirects: 5,
-      decompress: true,
-      validateStatus: (s) => s < 400,
-    });
-    return typeof r.data === 'string' ? r.data : null;
-  } catch {
-    return null;
-  }
-};
-
-const parseSitemapXml = (xml: string): { kind: 'index' | 'urlset'; locs: string[] } => {
-  // Cheap regex parse — sitemap files are simple XML and we only need <loc> values.
-  const isIndex = /<sitemapindex\b/i.test(xml);
-  const locs: string[] = [];
-  const re = /<loc>\s*([^<\s]+)\s*<\/loc>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(xml)) !== null) {
-    if (locs.length >= SITEMAP_MAX_TOTAL_URLS) break;
-    locs.push(match[1].trim());
-  }
-  return { kind: isIndex ? 'index' : 'urlset', locs };
-};
-
-const discoverSitemapUrls = async (pageUrl: string): Promise<{
-  urls: string[];
-  source: string;
-} | null> => {
-  let origin: string;
-  let scopedPath: string;
-  try {
-    const u = new URL(pageUrl);
-    origin = u.origin;
-    scopedPath = u.pathname;
-  } catch {
-    return null;
-  }
-
-  // Build candidate sitemap URLs from robots.txt + standard locations.
-  const candidates = new Set<string>([
-    `${origin}/sitemap.xml`,
-    `${origin}/sitemap_index.xml`,
-    `${origin}/sitemap-index.xml`,
-    `${origin}/sitemap/sitemap.xml`,
-  ]);
-  const robotsTxt = await fetchTextWithBrowserUa(`${origin}/robots.txt`);
-  if (robotsTxt) {
-    const matches = robotsTxt.match(/Sitemap:\s*(\S+)/gi);
-    if (matches) {
-      for (const m of matches) {
-        const line = m.replace(/Sitemap:\s*/i, '').trim();
-        if (line) candidates.add(line);
-      }
-    }
-  }
-
-  const allListingUrls: string[] = [];
-  let usedSitemap = '';
-
-  for (const sitemapUrl of candidates) {
-    if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-    const xml = await fetchTextWithBrowserUa(sitemapUrl);
-    if (!xml || (!xml.includes('<urlset') && !xml.includes('<sitemapindex'))) continue;
-    usedSitemap ||= sitemapUrl;
-
-    const parsed = parseSitemapXml(xml);
-    if (parsed.kind === 'index') {
-      // Visit child sitemaps. Prefer ones whose URL hints at listings/properties.
-      const ranked = parsed.locs
-        .slice(0, SITEMAP_MAX_INDEX_CHILDREN)
-        .sort((a, b) => {
-          const score = (s: string) =>
-            /(oglas|nekretnin|listing|propert|imovin|agency|agencij|stan|kuca|apartman|advert)/i.test(s) ? -1 : 0;
-          return score(a) - score(b);
-        });
-      for (const childUrl of ranked) {
-        if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-        const childXml = await fetchTextWithBrowserUa(childUrl);
-        if (!childXml) continue;
-        const child = parseSitemapXml(childXml);
-        for (const loc of child.locs) {
-          try {
-            if (looksLikeListingPath(new URL(loc).pathname)) allListingUrls.push(loc);
-          } catch {/* ignore */}
-          if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-        }
-      }
-    } else {
-      // Direct urlset
-      for (const loc of parsed.locs) {
-        try {
-          if (looksLikeListingPath(new URL(loc).pathname)) allListingUrls.push(loc);
-        } catch {/* ignore */}
-        if (allListingUrls.length >= SITEMAP_RETURN_LIMIT) break;
-      }
-    }
-  }
-
-  if (allListingUrls.length < 3) return null;
-
-  // De-duplicate and (when the user pasted a scoped URL like /agencije/123/) try
-  // to filter to URLs that share a meaningful path/id segment with the source URL.
-  const unique = Array.from(new Set(allListingUrls));
-  const idLike = scopedPath.match(/\/(\d{3,})(?:\/|$)/)?.[1];
-  let filtered: string[];
-  if (idLike && unique.some(u => u.includes(`/${idLike}/`) || u.includes(`-${idLike}/`) || u.includes(`/${idLike}.`))) {
-    filtered = unique.filter(u => u.includes(`/${idLike}/`) || u.includes(`-${idLike}/`) || u.includes(`/${idLike}.`));
-  } else {
-    filtered = unique;
-  }
-
-  return { urls: filtered.slice(0, SITEMAP_RETURN_LIMIT), source: usedSitemap };
 };
 
 /** Check if page has JSON-LD with real-estate types. */
@@ -473,7 +257,7 @@ const findJsonLdInHtml = (html: string): boolean => {
 };
 
 /** Try WordPress REST API — first via property CPT, then generic posts. */
-const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[] | null> => {
+const probeWordPress = async (baseUrl: string): Promise<{ items: Record<string, unknown>[]; endpoint: string } | null> => {
   const origin = new URL(baseUrl).origin;
 
   // Try dedicated property CPTs first (WP Property, Easy Property Listings, etc.)
@@ -482,7 +266,7 @@ const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[
     const data = await tryUrl(`${origin}/wp-json/wp/v2/${cpt}?per_page=5&_embed`, 'json');
     if (Array.isArray(data) && data.length > 0) {
       const validItems = (data as Record<string, unknown>[]).filter(item => isValidRssItem(item));
-      if (validItems.length > 0) return validItems;
+      if (validItems.length > 0) return { items: validItems, endpoint: `${origin}/wp-json/wp/v2/${cpt}` };
     }
   }
 
@@ -491,7 +275,9 @@ const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[
   if (Array.isArray(data) && data.length > 0) {
     const validItems = (data as Record<string, unknown>[]).filter(item => isValidRssItem(item));
     // Only accept if most posts look like listings (not a mixed news/listing site)
-    if (validItems.length > 0 && validItems.length / data.length >= 0.4) return validItems;
+    if (validItems.length > 0 && validItems.length / data.length >= 0.4) {
+      return { items: validItems, endpoint: `${origin}/wp-json/wp/v2/posts` };
+    }
   }
   return null;
 };
@@ -503,7 +289,7 @@ const probeWordPress = async (baseUrl: string): Promise<Record<string, unknown>[
  *
  * Returns null when fewer than 2 listing-link anchors are found.
  */
-const detectHtmlScrape = (
+export const detectHtmlScrape = (
   html: string,
   pageUrl: string
 ): {
@@ -673,9 +459,16 @@ const detectHtmlScrape = (
     return looksLikeListingPath(pn);
   }).first();
   const linkHref = linkAnchorInCard.attr('href') || '';
-  const linkSelector = linkAnchorInCard.is('a') ? `a[href*="${(() => {
-    try { return new URL(linkHref, pageUrl).pathname.split('/').filter(Boolean)[0] ?? ''; } catch { return ''; }
-  })()}"]|attr:href` : 'a|attr:href';
+  // Match the listing links by their first meaningful path segment — skipping a
+  // language prefix, which every link on a multilingual site shares.
+  const linkSegment = (() => {
+    try {
+      const segs = new URL(linkHref, pageUrl).pathname.split('/').filter(Boolean);
+      const seg = segs.length > 1 && LOCALE_SEGMENT_RE.test(segs[0]) ? segs[1] : segs[0];
+      return seg ? `/${seg}` : '';
+    } catch { return ''; }
+  })();
+  const linkSelector = linkAnchorInCard.is('a') && linkSegment ? `a[href*="${linkSegment}"]|attr:href` : 'a|attr:href';
 
   const sample: Record<string, unknown> = {
     title: titleSel ? probeText(titleSel) : undefined,
@@ -920,6 +713,14 @@ const buildJsonFieldMap = (sample: Record<string, unknown>): Record<string, stri
         break;
       }
     }
+  }
+  // Second pass: anything the hints missed, recognised by the multilingual
+  // attribute dictionary (kupatila, broj_soba, bathroomsCount, surface_area.built…).
+  for (const { path, key, value } of paths) {
+    if (Object.values(map).includes(path) || value == null || typeof value === 'object') continue;
+    const parent = path.split('.').slice(-2, -1)[0]?.replace(/\[\d+\]$/, '');
+    const field = (parent && fieldForFeedKey(`${parent}_${key}`)) || fieldForFeedKey(key);
+    if (field && field !== 'propertyId' && !(field in map)) map[field] = path;
   }
   return map;
 };
@@ -1175,7 +976,7 @@ export const detectFeedForUrlWithAuth = async (
   return {
     adapterType: 'customApi',
     adapterConfig: {
-      url,
+      endpoint: url,
       ...authConfig,
       itemsPath,
       idPath: '$.id',
@@ -1187,6 +988,57 @@ export const detectFeedForUrlWithAuth = async (
   };
 };
 
+/**
+ * htmlScrape config for a site's catalogue pages (for sale, for rent…),
+ * with the card selectors read from the first one. Every page of every
+ * catalogue is crawled, and each listing's detail page is read.
+ */
+const catalogueScrapeResult = (html: string, indexUrls: string[], total?: number): DetectResult | null => {
+  const [indexUrl, ...more] = indexUrls;
+  const scrape = detectHtmlScrape(html, indexUrl);
+  if (!scrape) return null;
+  const pagination = detectPagination(html, indexUrl);
+  const names = indexUrls.map((u) => new URL(u).pathname).join(', ');
+  return {
+    adapterType: 'htmlScrape',
+    adapterConfig: {
+      indexUrl,
+      ...(more.length && { indexUrls: more }),
+      selectors: scrape.selectors,
+      ...(pagination?.type === 'nextSelector' ? { nextPageSelector: pagination.selector } : {}),
+      ...(pagination?.type === 'pageParam' ? { pageParam: pagination.param } : {}),
+      followDetails: true,
+      requestDelayMs: 2000,
+      respectRobotsTxt: true,
+      maxPages: 500,
+    },
+    fieldMap: { title: 'title', price: 'price', description: 'description', imageUrl: 'image', sourceUrl: 'url' },
+    sample: scrape.sample,
+    hint: `Listing catalogue found (${names})${total ? ` — the site says ${total} listings` : ''}; every page and every listing's details will be fetched`,
+  };
+};
+
+/**
+ * The site answers with a bot check instead of its listings. We don't try to
+ * get past it; the sitemap it publishes for crawlers lists the listings, and
+ * each listing page is read on every sync.
+ */
+const detectFromSitemapBehindBotCheck = async (pageUrl: string): Promise<DetectResult> => {
+  const sitemap = await discoverSitemapUrls(pageUrl);
+  if (!sitemap || sitemap.urls.length < 3) {
+    throw new Error(
+      `${new URL(pageUrl).hostname} shows a bot check instead of its listings, and publishes no sitemap of them. ` +
+      'Ask the agency for an XML or JSON export of its listings and paste that link instead.'
+    );
+  }
+  return {
+    adapterType: 'jsonLd',
+    adapterConfig: { sitemapOf: pageUrl, requestDelayMs: 2000, respectRobotsTxt: true },
+    fieldMap: jsonLdFieldMap(),
+    hint: `The listing pages are behind a bot check, so the site's sitemap is used — ${sitemap.urls.length} listing(s) found; each is read in full on every sync`,
+  };
+};
+
 export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> => {
   const url = rawUrl.trim();
 
@@ -1194,10 +1046,50 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
   const fetched = await fetchPageStrict(url);
   const html = fetched.html;
   const fetchFailureReason = html === null ? (fetched as { reason: string }).reason : null;
+  /** "the site says N in total" — shown in the hint for a listings page. */
+  let totalNote = '';
 
   if (html && typeof html === 'string') {
-    // 1a. JSON-LD embedded in page (Schema.org RealEstateListing etc.)
-    if (findJsonLdInHtml(html)) {
+    // 1-. The URL is an XML feed: RSS/Atom, or an agency XML export.
+    const xml = await detectXmlFeed(html);
+    if (xml?.kind === 'rss') {
+      return {
+        adapterType: 'rss',
+        adapterConfig: { feedUrl: url },
+        fieldMap: { title: 'title', description: 'contentSnippet', sourceUrl: 'link', imageUrl: 'enclosure.url' },
+        hint: 'RSS / Atom feed detected',
+      };
+    }
+    if (xml?.kind === 'listings' && xml.items.length > 0) {
+      return {
+        adapterType: 'xmlFeed',
+        adapterConfig: { endpoint: url, itemsPath: xml.itemsPath, idPath: xml.idPath, ...(xml.urlPath && { urlPath: xml.urlPath }) },
+        fieldMap: buildJsonFieldMap(xml.items[0]),
+        sample: xml.items[0],
+        hint: `XML listings feed detected — ${xml.items.length} listing(s); every attribute is mapped`,
+      };
+    }
+
+    // 1-b. Where the whole catalogue is: a homepage only shows featured cards,
+    //      and a catalogue behind a bot check is read from the sitemap instead.
+    const landedOn = 'finalUrl' in fetched && fetched.finalUrl ? fetched.finalUrl : url;
+    const plan = await planCatalogue(html, landedOn, {
+      fetchPage: async (u) => (await fetchPageStrict(u)).html,
+      countCards: (h, u) => detectHtmlScrape(h, u)?.count ?? 0,
+    });
+    if (plan.kind === 'sitemap') return detectFromSitemapBehindBotCheck(landedOn);
+    if (plan.kind === 'indexPages') {
+      const catalogue = catalogueScrapeResult(plan.html, plan.indexUrls, plan.total);
+      if (catalogue) return catalogue;
+    }
+    totalNote = plan.kind === 'asPasted' && plan.total ? ` — the site says ${plan.total} in total, all pages will be fetched` : '';
+
+    // A page listing many properties (an agency's index) must be crawled page
+    // by page, not read as one listing — even when it carries JSON-LD.
+    const isIndexPage = (detectHtmlScrape(html, url)?.count ?? 0) >= 2;
+
+    // 1a. JSON-LD embedded in a single listing page (Schema.org RealEstateListing etc.)
+    if (!isIndexPage && findJsonLdInHtml(html)) {
       return {
         adapterType: 'jsonLd',
         adapterConfig: { listingUrls: [url] },
@@ -1218,6 +1110,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           adapterType: 'jsonFeed',
           adapterConfig: {
             endpoint: url,
+            embeddedState: true,
             itemsPath: spaData.itemsPath,
             idPath: '$.id',
             urlPath: '$.url',
@@ -1232,20 +1125,20 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     // 1c. WordPress site — probe structured REST API endpoints (property CPTs first,
     //     then generic posts). This gives real JSON with all fields, no news mixing.
     if (html.includes('/wp-content/') || html.includes('wp-json')) {
-      const wpItems = await probeWordPress(url);
-      if (wpItems) {
-        const origin = new URL(url).origin;
+      const wp = await probeWordPress(url);
+      if (wp) {
         return {
           adapterType: 'customApi',
           adapterConfig: {
-            url: `${origin}/wp-json/wp/v2/posts`,
-            params: { per_page: 20, _embed: true },
+            endpoint: wp.endpoint,
+            query: { per_page: 100, _embed: 'true' },
+            pagination: { type: 'page', pageParam: 'page', maxPages: 100 },
             itemsPath: '$[*]',
             idPath: '$.id',
             urlPath: '$.link',
           },
           fieldMap: wpFieldMap(),
-          sample: wpItems[0],
+          sample: wp.items[0],
           hint: 'WordPress REST API detected — structured JSON listing data',
         };
       }
@@ -1258,7 +1151,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     const sample = jsonResult.items[0];
     return {
       adapterType: 'jsonFeed',
-      adapterConfig: { url, itemsPath: jsonResult.itemsPath, idPath: '$.id', urlPath: '$.url' },
+      adapterConfig: { endpoint: url, itemsPath: jsonResult.itemsPath, idPath: '$.id', urlPath: '$.url' },
       fieldMap: buildJsonFieldMap(sample),
       sample,
       hint: `JSON feed detected — ${jsonResult.items.length} item(s) in response`,
@@ -1268,19 +1161,20 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
   // ── 3. WordPress REST on origin (when HTML fetch failed or WP wasn't detectable) ──
   const origin = (() => { try { return new URL(url).origin; } catch { return ''; } })();
   if (origin) {
-    const wpItems = await probeWordPress(url);
-    if (wpItems) {
+    const wp = await probeWordPress(url);
+    if (wp) {
       return {
         adapterType: 'customApi',
         adapterConfig: {
-          url: `${origin}/wp-json/wp/v2/posts`,
-          params: { per_page: 20, _embed: true },
+          endpoint: wp.endpoint,
+          query: { per_page: 100, _embed: 'true' },
+          pagination: { type: 'page', pageParam: 'page', maxPages: 100 },
           itemsPath: '$[*]',
           idPath: '$.id',
           urlPath: '$.link',
         },
         fieldMap: wpFieldMap(),
-        sample: wpItems[0],
+        sample: wp.items[0],
         hint: 'WordPress REST API detected — structured JSON listing data',
       };
     }
@@ -1373,7 +1267,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           sourceUrl: 'url',
         },
         sample: scrape.sample,
-        hint: `HTML listing page — found ${scrape.count} listing card(s) on the page${pagination ? ` (pagination: ${pagination.type === 'pageParam' ? `?${pagination.param}=N` : pagination.selector})` : ''}`,
+        hint: `HTML listing page — found ${scrape.count} listing card(s) on the first page${totalNote}${pagination ? ` (pagination: ${pagination.type === 'pageParam' ? `?${pagination.param}=N` : pagination.selector})` : ''}`,
       };
     }
   }
@@ -1408,7 +1302,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
 
   if (browserHtml && browserHtml.length > 500) {
     // Re-run JSON-LD check on browser-rendered HTML
-    if (findJsonLdInHtml(browserHtml)) {
+    if ((detectHtmlScrape(browserHtml, url)?.count ?? 0) < 2 && findJsonLdInHtml(browserHtml)) {
       return {
         adapterType: 'jsonLd',
         adapterConfig: { listingUrls: [url], usePlaywright: true },
@@ -1427,6 +1321,7 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
           adapterType: 'jsonFeed',
           adapterConfig: {
             endpoint: url,
+            embeddedState: true,
             itemsPath: spaData.itemsPath,
             idPath: '$.id',
             urlPath: '$.url',

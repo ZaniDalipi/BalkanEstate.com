@@ -410,3 +410,14 @@ export const terrainKeys = {
   grid: (bounds: { south: number; west: number; north: number; east: number }) =>
     [...terrainKeys.all, 'grid', bounds.south, bounds.west, bounds.north, bounds.east] as const,
 };
+
+// ============================================================================
+// Listing Feed Query Keys
+// Used by: ListingIngestProgressContext (polling a feed fetch's and an import's progress)
+// ============================================================================
+
+export const listingFeedKeys = {
+  all: ['listingFeeds'] as const,
+  previewJob: (sourceId: string, jobId: string) => [...listingFeedKeys.all, 'previewJob', sourceId, jobId] as const,
+  importJob: (sourceId: string, jobId: string) => [...listingFeedKeys.all, 'importJob', sourceId, jobId] as const,
+};

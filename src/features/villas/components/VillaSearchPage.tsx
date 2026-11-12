@@ -29,6 +29,9 @@ import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon, NavPicture } from '@/src/shared/illustrations';
+import ListCollapseTab from '@/src/features/search/splitView/ListCollapseTab';
+import { useListCollapse } from '@/src/features/search/splitView/useListCollapse';
+import { SEARCH_LIST_PANEL_ID, splitListPanelClass, splitMapPanelClass } from '@/src/features/search/splitView/listCollapse';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -626,6 +629,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     }, [villaProperties]);
 
     const showViewToggle = isMobile || isTablet;
+    // Split view only: the visitor can fold the list away and give the map the whole page.
+    const listCollapse = useListCollapse(!showViewToggle);
 
     // Off-screen behind the list panel, the map waits for idle rather than being
     // built inside the commit a navigation lands in — see `useDeferredMount`.
@@ -700,7 +705,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                 {/* Left Panel: Search + Filters + Property List */}
                 <div
-                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                    id={SEARCH_LIST_PANEL_ID}
+                    className={`absolute inset-0 z-10 h-full w-full flex flex-col ${splitListPanelClass(!showViewToggle, listCollapse.collapsed)} search-list-panel lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || mobileView === 'list'}
                     data-settled={listSettledHidden}
                     style={{ background: '#F8F9FC' }}
@@ -1066,13 +1072,21 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
+                <div className={`h-full w-full ${splitMapPanelClass(!showViewToggle, listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || mobileView === 'map'}
                     >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
+
+                    {!showViewToggle && (
+                        <ListCollapseTab
+                            collapsed={listCollapse.collapsed}
+                            onToggle={listCollapse.toggle}
+                            count={isLoading ? null : listProperties.length}
+                        />
+                    )}
                     {/* Pin colour key — gold = for rent, emerald = for sale */}
                     {listProperties.length > 0 && (
                         <div className="absolute bottom-4 left-4 z-[500] pointer-events-none">

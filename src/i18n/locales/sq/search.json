@@ -745,6 +745,13 @@
       "orbit": "Fluturo përreth",
       "reset": "Rivendos pamjen",
       "houseNote": "Shtëpia tregon vendin më të mirë për ndërtim, në madhësi reale (rreth 12 × 9 m)."
-    }
+     }
+  },
+  "listPanel": {
+    "hide": "Fshih listën",
+    "hideHint": "Fshih listën për të parë gjithë hartën",
+    "show": "Shfaq listën",
+    "showCount_one": "Shfaq listën, {{count}} rezultat",
+    "showCount_other": "Shfaq listën, {{count}} rezultate"
   }
 }

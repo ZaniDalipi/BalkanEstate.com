@@ -82,7 +82,8 @@ export const OrbitView: React.FC<OrbitViewProps> = ({ viewKey, move, fill, child
           exit="exit"
           transition={reduced ? { duration: 0.25 } : undefined}
           style={{ transformOrigin: PIVOT, backfaceVisibility: 'hidden' }}
-          className={fill ? 'absolute inset-0' : 'w-full'}
+          // `be-motion-blur`: WebKit skips the blur (index.css → WebKit compositing budget, 5).
+          className={cn('be-motion-blur', fill ? 'absolute inset-0' : 'w-full')}
           data-testid="orbit-view"
           data-view={viewKey}
         >

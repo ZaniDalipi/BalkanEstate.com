@@ -1,11 +1,18 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSocket } from '@/shared/hooks/useSocket';
 import {
   type IngestStats,
   type PreviewListing,
+  type ImportJob,
+  type PreviewJob,
   confirmMyListingSourceImport,
-  previewMyListingSource,
+  getMyListingSourceImportJob,
+  getMyListingSourcePreviewJob,
+  startMyListingSourcePreview,
 } from '../api/listingSourceApi';
+import { useJobPolling, type JobWatch } from '../hooks/useJobPolling';
+import { sessionFromImportJob } from '../utils/importJobSession';
+import { listingFeedKeys } from '@/src/shared/query/queryKeys';
 
 export interface ListingIngestProgressEvent {
   sourceId: string;
@@ -54,6 +61,8 @@ export interface SyncSession {
   notified: boolean;
   /** Final ingest stats captured from the API response (confirm-import path). */
   finalStats?: IngestStats;
+  /** Server job running the import, polled for progress until it finishes. */
+  jobId?: string;
 }
 
 export interface PendingPreview {
@@ -67,6 +76,18 @@ export interface FetchingPreview {
   sourceId: string;
   sourceName: string;
   startedAt: number;
+  /** Server job running the fetch; unset until the server has accepted it. */
+  jobId?: string;
+  /** Listings found so far on the source's catalogue pages. */
+  found: number;
+  /** Listing pages read so far. */
+  detailsFetched: number;
+}
+
+interface PreviewWaiter {
+  sourceName: string;
+  resolve: () => void;
+  reject: (err: Error) => void;
 }
 
 interface ContextValue {
@@ -210,36 +231,143 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
     };
   }, [socket]);
 
-  const startPreview = useCallback(
-    async (sourceId: string, sourceName: string, limit = 100): Promise<void> => {
-      setFetchingPreviews((prev) => {
-        const next = new Map(prev);
-        next.set(sourceId, { sourceId, sourceName, startedAt: Date.now() });
-        return next;
-      });
-      try {
-        const result = await previewMyListingSource(sourceId, { limit });
-        setPendingPreview({
-          sourceId,
-          sourceName,
-          previewId: result.previewId,
-          items: result.items,
-        });
-      } finally {
+  // One pending promise per fetch: startPreview resolves once the review is
+  // ready, or rejects with the reason, however long the server takes.
+  const waiters = useRef(new Map<string, PreviewWaiter>());
+
+  const stopFetching = useCallback((sourceId: string) => {
+    setFetchingPreviews((prev) => {
+      if (!prev.has(sourceId)) return prev;
+      const next = new Map(prev);
+      next.delete(sourceId);
+      return next;
+    });
+  }, []);
+
+  const applyJob = useCallback(
+    (sourceId: string, job: PreviewJob) => {
+      if (job.status === 'running') {
         setFetchingPreviews((prev) => {
-          if (!prev.has(sourceId)) return prev;
+          const existing = prev.get(sourceId);
+          if (!existing) return prev;
+          if (existing.jobId === job.jobId && existing.found === job.found && existing.detailsFetched === job.detailsFetched) {
+            return prev;
+          }
           const next = new Map(prev);
-          next.delete(sourceId);
+          next.set(sourceId, { ...existing, jobId: job.jobId, found: job.found, detailsFetched: job.detailsFetched });
           return next;
         });
+        return;
+      }
+      const waiter = waiters.current.get(sourceId);
+      if (!waiter) return; // already settled
+      waiters.current.delete(sourceId);
+      stopFetching(sourceId);
+      if (job.status === 'done') {
+        setPendingPreview({
+          sourceId,
+          sourceName: waiter.sourceName,
+          previewId: job.result.previewId,
+          items: job.result.items,
+        });
+        waiter.resolve();
+      } else {
+        waiter.reject(new Error(job.error));
       }
     },
-    []
+    [stopFetching]
+  );
+
+  const failFetch = useCallback(
+    (sourceId: string, error: Error) => {
+      const waiter = waiters.current.get(sourceId);
+      waiters.current.delete(sourceId);
+      stopFetching(sourceId);
+      waiter?.reject(error);
+    },
+    [stopFetching]
+  );
+
+  const previewWatches = useMemo<JobWatch[]>(
+    () =>
+      Array.from(fetchingPreviews.values())
+        .filter((f): f is FetchingPreview & { jobId: string } => Boolean(f.jobId))
+        .map((f) => ({ sourceId: f.sourceId, jobId: f.jobId })),
+    [fetchingPreviews]
+  );
+  useJobPolling<PreviewJob>({
+    watches: previewWatches,
+    queryKey: (w) => listingFeedKeys.previewJob(w.sourceId, w.jobId),
+    fetchJob: (w) => getMyListingSourcePreviewJob(w.sourceId, w.jobId),
+    onJob: applyJob,
+    onError: failFetch,
+  });
+
+  const startPreview = useCallback(
+    (sourceId: string, sourceName: string, limit?: number): Promise<void> => {
+      if (waiters.current.has(sourceId)) return Promise.resolve(); // already fetching
+      setFetchingPreviews((prev) => {
+        const next = new Map(prev);
+        next.set(sourceId, { sourceId, sourceName, startedAt: Date.now(), found: 0, detailsFetched: 0 });
+        return next;
+      });
+      const done = new Promise<void>((resolve, reject) => {
+        waiters.current.set(sourceId, { sourceName, resolve, reject });
+      });
+      startMyListingSourcePreview(sourceId, { limit })
+        .then((job) => {
+          setFetchingPreviews((prev) => {
+            const existing = prev.get(sourceId);
+            if (!existing) return prev;
+            const next = new Map(prev);
+            next.set(sourceId, { ...existing, jobId: job.jobId });
+            return next;
+          });
+          applyJob(sourceId, job);
+        })
+        .catch((err: unknown) => failFetch(sourceId, err instanceof Error ? err : new Error('Failed to fetch listings')));
+      return done;
+    },
+    [applyJob, failFetch]
   );
 
   const cancelPreview = useCallback(() => {
     setPendingPreview(null);
   }, []);
+
+  /** Every new state of an import job, from polling. */
+  const finishedImports = useRef(new Set<string>());
+  const applyImportJob = useCallback(
+    (sourceId: string, job: ImportJob) => {
+      setSessions((prev) => {
+        const existing = prev.get(sourceId);
+        if (!existing || (existing.jobId && existing.jobId !== job.jobId)) return prev;
+        const next = new Map(prev);
+        next.set(sourceId, sessionFromImportJob(existing, job));
+        return next;
+      });
+      if (job.status === 'done' && !finishedImports.current.has(job.jobId)) {
+        finishedImports.current.add(job.jobId);
+        for (const handler of importHandlers) handler(sourceId);
+      }
+    },
+    [importHandlers]
+  );
+
+  const importWatches = useMemo<JobWatch[]>(
+    () =>
+      Array.from(sessions.values())
+        .filter((s): s is SyncSession & { jobId: string } => Boolean(s.jobId) && !s.isDone)
+        .map((s) => ({ sourceId: s.sourceId, jobId: s.jobId })),
+    [sessions]
+  );
+  useJobPolling<ImportJob>({
+    watches: importWatches,
+    queryKey: (w) => listingFeedKeys.importJob(w.sourceId, w.jobId),
+    fetchJob: (w) => getMyListingSourceImportJob(w.sourceId, w.jobId),
+    onJob: applyImportJob,
+    onError: (sourceId, err) => failSession(sourceId, err.message || 'Import failed'),
+  });
 
   const confirmPreview = useCallback(
     (approvedIds: string[]): void => {
@@ -248,13 +376,18 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
       const { sourceId, sourceName, previewId } = preview;
 
       // Register the dock session and close the modal immediately so the user
-      // isn't stuck watching a spinner. The actual import runs in the background
-      // and the dock card tracks its progress.
+      // isn't stuck watching a spinner. The import runs on the server as a job;
+      // polling it fills the dock card and progress window.
       registerSync(sourceId, sourceName);
       setPendingPreview(null);
 
       confirmMyListingSourceImport(sourceId, previewId, approvedIds)
         .then((result) => {
+          if (result.job) {
+            applyImportJob(sourceId, result.job);
+            return;
+          }
+          // Nothing was approved: the server answered with empty stats.
           setSessions((prev) => {
             const existing = prev.get(sourceId);
             if (!existing) return prev;
@@ -263,14 +396,14 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
             return next;
           });
           markDone(sourceId);
-          for (const handler of importHandlers) handler(sourceId);
         })
         .catch((err) => {
           failSession(sourceId, (err as Error).message || 'Import failed');
         });
     },
-    [pendingPreview, registerSync, markDone, failSession, importHandlers]
+    [pendingPreview, registerSync, markDone, failSession, applyImportJob]
   );
+
 
   const onImportConfirmed = useCallback(
     (handler: (sourceId: string) => void): (() => void) => {

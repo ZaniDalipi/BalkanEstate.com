@@ -195,27 +195,96 @@ export interface PreviewResult {
   fetched: number;
 }
 
-export const previewMyListingSource = async (
+interface PreviewJobBase {
+  jobId: string;
+  sourceId: string;
+  startedAt: number;
+  /** Listings found so far on the source's catalogue pages. */
+  found: number;
+  /** Listing pages read so far. */
+  detailsFetched: number;
+}
+
+/** A feed preview running on the server: poll it until it is done or failed. */
+export type PreviewJob =
+  | (PreviewJobBase & { status: 'running' })
+  | (PreviewJobBase & { status: 'done'; result: PreviewResult })
+  | (PreviewJobBase & { status: 'failed'; error: string });
+
+/** Start fetching a feed's listings for review. Returns at once with a job to poll. */
+export const startMyListingSourcePreview = async (
   id: string,
   options?: { limit?: number }
-): Promise<PreviewResult> => {
+): Promise<PreviewJob> => {
   const params = options?.limit ? `?limit=${options.limit}` : '';
-  return apiRequest<PreviewResult>(`${BASE}/${id}/preview${params}`, {
+  const res = await apiRequest<{ job: PreviewJob }>(`${BASE}/${id}/preview${params}`, {
     method: 'POST',
     requiresAuth: true,
   });
+  return res.job;
 };
 
+export const getMyListingSourcePreviewJob = async (id: string, jobId: string): Promise<PreviewJob> => {
+  const res = await apiRequest<{ job: PreviewJob }>(`${BASE}/${id}/preview/${jobId}`, { requiresAuth: true });
+  return res.job;
+};
+
+/** Progress of an import as the server reports it (the same as a socket progress event). */
+export interface ImportProgress {
+  fetched: number;
+  processed: number;
+  imported: number;
+  updated: number;
+  failed: number;
+  deferred?: number;
+  done?: boolean;
+  message?: string;
+  reviewMode?: boolean;
+  pendingReview?: number;
+  currentItem?: { id: string; title?: string; url?: string };
+  monthlyUsage?: { monthlyAllowance: number; remaining: number };
+}
+
+export interface ImportedItem {
+  id: string;
+  title?: string;
+  url?: string;
+  status: 'imported' | 'updated' | 'deferred' | 'failed';
+}
+
+interface ImportJobBase {
+  jobId: string;
+  sourceId: string;
+  startedAt: number;
+  current: ImportProgress | null;
+  /** Most recent processed listings, newest last. */
+  recentItems: ImportedItem[];
+}
+
+/** An import running on the server: poll it until it is done or failed. */
+export type ImportJob =
+  | (ImportJobBase & { status: 'running' })
+  | (ImportJobBase & { status: 'done'; stats: IngestStats })
+  | (ImportJobBase & { status: 'failed'; error: string });
+
+/**
+ * Import the approved listings. Starts a server job and returns it at once;
+ * with nothing approved the server answers with empty stats instead.
+ */
 export const confirmMyListingSourceImport = async (
   id: string,
   previewId: string,
   approvedIds: string[]
-): Promise<{ stats: IngestStats }> => {
-  return apiRequest<{ stats: IngestStats }>(`${BASE}/${id}/confirm-import`, {
+): Promise<{ job?: ImportJob; stats?: IngestStats }> =>
+  apiRequest<{ job?: ImportJob; stats?: IngestStats }>(`${BASE}/${id}/confirm-import`, {
     method: 'POST',
     body: { previewId, approvedIds },
     requiresAuth: true,
   });
+
+export const getMyListingSourceImportJob = async (id: string, jobId: string): Promise<ImportJob> => {
+  const res = await apiRequest<{ job: ImportJob }>(`${BASE}/${id}/import/${jobId}`, { requiresAuth: true });
+  return res.job;
 };
 
 export interface DetectResult {

@@ -667,84 +667,12 @@
     "southEast": "Jugoistok",
     "southWest": "Jugozapad"
   },
-  "terrain": {
-    "toggle": "Teren",
-    "toggleAria": "Alat za teren i nagib",
-    "title": "Teren i nagib",
-    "expand": "Proširi panel",
-    "collapse": "Skupi panel",
-    "instructions": "Dodirnite mapu da postavite uglove 1, 2, 3… oko zemljišta. Dodajte najmanje 3.",
-    "corners": "Uglovi: {{n}}",
-    "undo": "Poništi",
-    "clear": "Očisti",
-    "analyze": "Prikaži nagib",
-    "errors": {
-      "edgesCross": "Ivice se sijeku. Poništite zadnji ugao i postavite ga negdje drugo.",
-      "tooSmall": "Ovo područje je premalo. Nacrtajte najmanje 10 × 10 m.",
-      "tooLarge": "Ovo područje je preveliko. Neka svaka strana bude kraća od 7,5 km."
-    },
-    "loading": "Čitanje terena…",
-    "failed": {
-      "unavailable": "Podaci o nadmorskoj visini se trenutno ne mogu učitati.",
-      "busy": "Previše zahtjeva. Sačekajte nekoliko minuta i pokušajte ponovo.",
-      "rejected": "Ovo područje se ne može analizirati. Pokušajte s manjim područjem.",
-      "noData": "Ovdje nema podataka o visini. Područje je možda voda."
-    },
-    "retry": "Pokušaj ponovo",
-    "editArea": "Uredi područje",
-    "redraw": "Nacrtaj drugo područje",
-    "stats": {
-      "area": "Površina",
-      "elevation": "Raspon visine",
-      "meanSlope": "Prosječni nagib",
-      "maxSlope": "Najveći nagib"
-    },
-    "disclaimer": "Procjena iz podataka o visini rezolucije ~{{resolution}} m. Nije geodetsko mjerenje.",
-    "arrowsHint": "Strelice pokazuju nizbrdo",
-    "legendTitle": "Ocjena · zeleno je najlakše za gradnju",
-    "classes": {
-      "flat": "Ravno",
-      "gentle": "Blago",
-      "moderate": "Umjereno",
-      "steep": "Strmo",
-      "verySteep": "Vrlo strmo"
-    },
-    "advice": {
-      "flat": "Idealno za gradnju",
-      "gentle": "Lako za gradnju, malo ravnanja",
-      "moderate": "Moguća gradnja s poluetažama ili terasama",
-      "steep": "Potrebni potporni zidovi i skuplji temelji",
-      "verySteep": "Problematično za većinu objekata"
-    },
-    "spot": {
-      "title": "Najbolje mjesto za gradnju",
-      "easy": "Oko {{area}} ravnog do blago nagnutog zemljišta u jednom komadu.",
-      "workable": "Ovdje nema ravnog zemljišta. Najblaži dio ima oko {{area}}, moguće graditi uz zemljane radove.",
-      "none": "Nema lakog mjesta za gradnju: većina ovog zemljišta je strma. Očekujte terase i potporne zidove i posavjetujte se s inženjerom prije kupovine.",
-      "show": "Prikaži na mapi",
-      "marker": "Najbolje mjesto"
-    },
-    "view3d": {
-      "open": "Prikaži u 3D",
-      "title": "Teren u 3D",
-      "loading": "Učitavanje 3D terena…",
-      "noWebgl": "Ovaj preglednik ne može prikazati 3D mape (WebGL je isključen ili nije podržan). Mapa nagiba i dalje radi.",
-      "back": "Nazad na mapu nagiba",
-      "view": "Prikaz",
-      "blocks": "Blokovi mreže",
-      "surface": "Stvarna površina",
-      "height": "Visina",
-      "trueScale": "Visine su prikazane u stvarnoj razmjeri.",
-      "exaggerated": "Visine su uvećane ×{{n}} da bi se oblik zemljišta lakše vidio.",
-      "hint": "Povucite za pomjeranje · desni klik i povlačenje ili dva prsta za okretanje i naginjanje · skrolajte ili raširite prste za zumiranje.",
-      "camera": "Kamera",
-      "turnLeft": "Okreni lijevo",
-      "turnRight": "Okreni desno",
-      "tiltMore": "Nagni više",
-      "tiltLess": "Pogled odozgo",
-      "orbit": "Kruži okolo",
-      "reset": "Vrati prikaz",
-      "houseNote": "Kuća označava najbolje mjesto za gradnju, u stvarnoj veličini (oko 12 × 9 m)."
-    }
+  "listPanel": {
+    "hide": "Sakrij listu",
+    "hideHint": "Sakrij listu da vidiš cijelu mapu",
+    "show": "Prikaži listu",
+    "showCount_one": "Prikaži listu, {{count}} rezultat",
+    "showCount_few": "Prikaži listu, {{count}} rezultata",
+    "showCount_other": "Prikaži listu, {{count}} rezultata"
   }
 }

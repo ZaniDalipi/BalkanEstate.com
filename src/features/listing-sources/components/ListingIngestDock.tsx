@@ -7,6 +7,7 @@ import {
   type SyncSession,
 } from '../context/ListingIngestProgressContext';
 import ListingIngestProgressModal from './ListingIngestProgressModal';
+import PreviewFetchProgress, { usePreviewFetchLabel } from './PreviewFetchProgress';
 import ListingPreviewModal from './ListingPreviewModal';
 import type { ListingSource } from '../api/listingSourceApi';
 import { SoftIcon } from '@/src/shared/illustrations';
@@ -98,7 +99,7 @@ const ListingIngestDock: React.FC = () => {
         aria-atomic="false"
       >
         {fetchingArr.map((fetching) => (
-          <FetchingCard key={`fetching-${fetching.sourceId}`} fetching={fetching} t={t} />
+          <FetchingCard key={`fetching-${fetching.sourceId}`} fetching={fetching} />
         ))}
         {sessionsArr.map((session) => (
           <DockCard
@@ -143,7 +144,6 @@ const ListingIngestDock: React.FC = () => {
 
 interface FetchingCardProps {
   fetching: FetchingPreview;
-  t: (key: string, opts?: Record<string, unknown>) => string;
 }
 
 /**
@@ -151,39 +151,39 @@ interface FetchingCardProps {
  * confidence the fetch is alive even when they navigate away from the feeds
  * page — the actual review modal pops up at the same place once items arrive.
  */
-const FetchingCard: React.FC<FetchingCardProps> = ({ fetching, t }) => (
-  <div className="bg-white rounded-2xl shadow-2xl shadow-black/15 border border-gray-200 overflow-hidden animate-slide-up">
-    <div className="px-3 sm:px-4 py-3 flex items-center gap-3">
-      <div className="relative flex-shrink-0 w-9 h-9">
-        <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
-          <circle cx="18" cy="18" r="15" fill="none" className="stroke-gray-200" strokeWidth="3" />
-          <circle
-            cx="18" cy="18" r="15" fill="none"
-            className="stroke-blue-500 origin-center"
-            strokeWidth="3" strokeLinecap="round"
-            strokeDasharray="24 94.25"
-            style={{ animation: 'dock-spin 1.1s linear infinite', transformOrigin: '18px 18px' }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[9px] font-bold uppercase text-blue-600">…</span>
+const FetchingCard: React.FC<FetchingCardProps> = ({ fetching }) => {
+  const label = usePreviewFetchLabel(fetching, 'dock');
+  return (
+    <div className="bg-white rounded-2xl shadow-2xl shadow-black/15 border border-gray-200 overflow-hidden animate-slide-up">
+      <div className="px-3 sm:px-4 py-3 flex items-center gap-3">
+        <div className="relative flex-shrink-0 w-9 h-9">
+          <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15" fill="none" className="stroke-gray-200" strokeWidth="3" />
+            <circle
+              cx="18" cy="18" r="15" fill="none"
+              className="stroke-blue-500 origin-center"
+              strokeWidth="3" strokeLinecap="round"
+              strokeDasharray="24 94.25"
+              style={{ animation: 'dock-spin 1.1s linear infinite', transformOrigin: '18px 18px' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[9px] font-bold text-blue-600 tabular-nums">
+              {fetching.found > 0 ? (fetching.found > 999 ? '999+' : fetching.found) : '…'}
+            </span>
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-bold text-gray-900 truncate">{fetching.sourceName}</div>
+          <div className="text-xs text-gray-500 truncate tabular-nums">
+            {label}
+          </div>
         </div>
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-sm font-bold text-gray-900 truncate">{fetching.sourceName}</div>
-        <div className="text-xs text-gray-500 truncate">
-          {t('listingFeeds:dockFetchingPreview')}
-        </div>
-      </div>
+      <PreviewFetchProgress fetching={fetching} variant="edge" />
     </div>
-    <div className="h-0.5 bg-gray-100 overflow-hidden relative">
-      <div
-        className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-blue-500 to-transparent"
-        style={{ animation: 'dock-indet 1.4s ease-in-out infinite' }}
-      />
-    </div>
-  </div>
-);
+  );
+};
 
 interface DockCardProps {
   session: SyncSession;
