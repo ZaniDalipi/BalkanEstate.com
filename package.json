@@ -71,6 +71,7 @@
     "socket.io-client": "^4.8.1",
     "stripe": "^20.4.0",
     "tailwind-merge": "^3.4.0",
+    "three": "^0.186.1",
     "web-push": "^3.6.7",
     "wrangler": "^4.100.0",
     "zustand": "^5.0.8"
@@ -90,6 +91,7 @@
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "@types/react-window": "^1.8.8",
+    "@types/three": "^0.186.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/coverage-v8": "^4.0.18",

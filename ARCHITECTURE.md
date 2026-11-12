@@ -631,8 +631,9 @@ piece of land, press **Show slope**, and the area is painted as a smooth
 surface coloured by steepness (green → red) with white contour lines, range
 labels ("3–5%"), slim arrows pointing downhill, a frosted-glass panel with the
 headline numbers and the split across five slope classes, and a house drawn
-at the best place to build. **View in 3D** opens the same area on the real
-relief, with a modelled house, to turn, tilt and fly around.
+at the best place to build. **View in 3D** opens a model of the plot — a
+block of land on a table, like an architect's model — with a house, to turn,
+tilt and fly around.
 
 ```
 GoogleMapComponent
@@ -651,11 +652,12 @@ GoogleMapComponent
   │     └── useSlopeGroundOverlay — slopeImageUrl → GroundOverlay (fades in)
   └── TerrainPanel       draw step / loading / failed / results (glass, lucide icons)
         └── Terrain3DButton → Terrain3DDialog (lazy)
-              ├── RealisticScene   Google photorealistic 3D (maps3d): slope zones, outline, house, label
-              │     └── useGoogle3DMap — loadMaps3d, slopeZones, houseShapes, camera via flyCameraTo
-              └── BlocksScene      MapLibre grid of raised blocks, height 1–3×, house on its block
-                    ├── useTerrain3DMap
-                    └── useCamera3D   zoom, turn, 2D/3D, fly around, reset
+              ├── PlotModelScene   three.js canvas, "Best spot" label, loading / no-WebGL states
+              │     └── usePlotModel — renderer, OrbitControls, camera tweens, stretch, satellite
+              │           └── createPlotScene  plotModel (surface + earth sides), plotTexture,
+              │                                houseModel3d, lights, table shadow
+              ├── Scene3DControls  Slope / Satellite, height 1–5×, Camera3DControls
+              └── Terrain3DInfo    size, height range, colour scale, stretch note
 ```
 
 **The slope picture** (`slopePixels`, painted once per analysis and cached in
@@ -668,48 +670,42 @@ the drawn shape.
 
 **The house** (`house.ts`): a 12 × 9 m one-storey house, true size, long side
 across the fall line (east–west on level ground). In 2D it is a roof seen from
-above, one slope lit and one shaded. In 3D it is a real model — walls, gable
-roof, windows, door — drawn by a small WebGL custom layer (`houseLayer3d`)
-standing on the relief, with a soft contact shadow (`houseShadow`). The
-mesh's metres are placed with a matrix worked out in full precision on the CPU
-(`placeOnMap`): in the shader the mercator numbers are too close together.
+above, one slope lit and one shaded. In 3D it is a three.js model
+(`houseModel3d`) — walls on a footing, gable roof, windows, a door facing
+downhill — that casts a real shadow on the land.
 
 Key decisions:
 - **Heights come from Terrain Tiles** (AWS Open Data, Terrarium PNGs, free, no
   key). The backend (`backend/src/services/terrain/`) reads them, decodes with
   sharp, caches 64 in memory, and returns a height grid (8 m at the finest, at
-  most 10 000 cells, boxes up to 8 km a side). Rate limited per IP. The 3D view
-  reads the same tiles directly. `TERRAIN_TILES_URL` / `VITE_TERRAIN_TILES_URL`
-  override the source.
+  most 10 000 cells, boxes up to 8 km a side). Rate limited per IP. The 3D model
+  is built from that same grid. `TERRAIN_TILES_URL`
+  overrides the source.
 - **Server samples, client analyses.** The endpoint is a plain height grid; all
   the judgement is pure, unit-tested code in the client.
 - **Markers above the slope picture.** A Google GroundOverlay shares the
   overlay layer with OverlayViews and is added later, so it would cover them:
   corners, arrows and labels live in the overlay-mouse-target pane, the pin in
   the float pane.
-- **Realistic first, blocks as the fallback.** The 3D window opens on Google's
-  photorealistic 3D (real buildings, trees and hills, real heights) with the
-  slope classes as soft zones on the ground (`slopeZones`: per-class outlines
-  traced from the grid, holes kept, Chaikin-smoothed) and the house as five
-  3D faces (`houseShapes`). It needs the **Map Tiles API** enabled for the
-  Google key; when `loadMaps3d` can't load the library the window switches to
-  the blocks and the info card says why. The installed `@types/google.maps`
-  predate parts of the 3D API, so `google3d.ts` types just what is used.
-- **The blocks view opens standing on flat ground** (relief under the blocks
-  would count the height twice); the old MapLibre relief views were dropped as
-  too flat next to the realistic one.
-- **The 3D view opens standing on the ground.** Layers go in on `style.load`
-  (MapLibre's `load` waits for every far tile). `watchGround` holds the view
-  until the height under the camera is known, puts the camera's centre on it
-  (MapLibre leaves it at sea level, i.e. inside any higher land), then tilts
-  in. On a slow connection it opens after 8 s and settles when the heights
-  arrive. The camera opens looking uphill (`openingBearing`) so higher ground
-  beyond can't hide the area.
-- **Height changes are animated cheaply**: in-between frames change only the
-  relief's stretch factor (`stretchRelief`); the last one rebuilds it.
-- **Satellite capped at zoom 17.** Esri answers zooms it has no photos for with
-  a "Map data not yet available" picture; MapLibre enlarges 17 instead.
-- **3D is optional.** MapLibre loads only when the view is opened; without
+- **A model of the plot, not a map.** Map-based 3D (MapLibre relief, then
+  Google photorealistic 3D) looked flat at plot scale whatever the stretch, so
+  the 3D window draws its own scene with three.js: the grid becomes a block
+  10 units on its longer side (`plotModel`), with cut earth sides and a
+  topsoil band, on a table that takes its shadow. The top shows the slope
+  colours and contour lines inside the drawn area and the surroundings in
+  grey (`plotTexture`); once the satellite photo has loaded (Esri tiles,
+  stitched at zoom ≤ 17 — past that Esri answers "Map data not yet
+  available") it can be shown instead. Side faces are wound outwards, which a
+  test checks: inward faces are culled and the walls vanish.
+- **Heights can be stretched 1, 2, 3 or 5×**, opening at what the relief
+  needs (`defaultExaggeration`); changes animate the mesh's vertical scale.
+- **The camera opens framing the whole model** (`fitRadius`: the model's
+  half-diagonal against the narrower field of view, so an upright phone
+  stands further back), looking uphill (`openingBearing`), and, on wide
+  screens, lifted clear of the controls with a view offset. OrbitControls with
+  damping move it by hand; the buttons tween along the orbit the short way
+  round (`orbitCamera`).
+- **3D is optional.** three.js loads only when the view is opened; without
   WebGL the dialog says so and leads back. Under reduced motion moves are
   instant and there is no fly-around.
 - **Honest about precision.** ~30 m survey: the panel says "estimate, not a

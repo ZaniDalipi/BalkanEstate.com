@@ -756,9 +756,7 @@
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
       "topView": "Look straight down",
-      "tiltedView": "Tilt the view",
-      "blocks": "Grid blocks",
-      "realisticUnavailable": "Realistic 3D isn't available here, so the land is shown as grid blocks."
+      "tiltedView": "Tilt the view"
     },
     "contours": "Contour lines every {{n}} m"
   },

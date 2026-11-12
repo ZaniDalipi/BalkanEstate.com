@@ -6,7 +6,7 @@
 import React from 'react';
 import { LocateFixed, Minus, Plus, Rotate3d, RotateCcw, RotateCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Camera3D } from '../../hooks/useCamera3D';
+import type { Camera3D } from '../../hooks/camera3d';
 import { GLASS } from '../terrainStyles';
 
 const BUTTON = 'flex h-11 w-11 items-center justify-center rounded-full text-gray-800 transition hover:bg-black/[0.06] active:bg-black/10';

@@ -746,9 +746,7 @@
       "zoomIn": "Uvećaj",
       "zoomOut": "Umanji",
       "topView": "Pogled pravo odozgo",
-      "tiltedView": "Nagni prikaz",
-      "blocks": "Blokovi mreže",
-      "realisticUnavailable": "Realistični 3D ovdje nije dostupan, pa je zemljište prikazano kao blokovi mreže."
+      "tiltedView": "Nagni prikaz"
     },
     "contours": "Izohipse na svakih {{n}} m"
   },

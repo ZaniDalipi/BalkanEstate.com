@@ -2,31 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { analyzeTerrain } from './analyzeTerrain';
 import { findBuildSpot, patchDownhill } from './buildSpot';
 import { metresBetween } from './gridGeometry';
+import * as THREE from 'three';
 import {
   HOUSE,
   HOUSE_CLEARANCE_M,
   HOUSE_HEIGHT_M,
-  HOUSE_VERTEX_SIZE,
   houseAxis,
   houseFootprint,
-  houseMesh,
-  placeOnMap,
   rectangleAround,
   roofHalves,
 } from './house';
-import { houseShadowCorners } from './houseShadow';
+import { createHouseModel, houseRotationY } from './houseModel3d';
 import { computeSlopeField } from './slopeField';
 import { makeGrid, wholeGrid } from './testGrid';
 import type { BuildSpot } from '../types';
 
 const spot = (downhill: number | null): BuildSpot => ({ lat: 41, lng: 20, areaM2: 500, quality: 'easy', elevation: 600, downhill });
-
-/** The mesh as vertices: position and colour. */
-const vertices = (mesh: Float32Array) =>
-  Array.from({ length: mesh.length / HOUSE_VERTEX_SIZE }, (_, i) => {
-    const [x, y, z, r, g, b] = mesh.slice(i * HOUSE_VERTEX_SIZE, (i + 1) * HOUSE_VERTEX_SIZE);
-    return { x, y, z, r, g, b };
-  });
 
 describe('best spot', () => {
   it('knows its ground height and which way the patch falls', () => {
@@ -90,52 +81,30 @@ describe('house on the 2D map', () => {
 });
 
 describe('house model', () => {
-  const mesh = vertices(houseMesh(spot(null)));
+  const house = createHouseModel();
+  const box = new THREE.Box3().setFromObject(house);
 
-  it('is whole triangles, with a roof that rises to a ridge', () => {
-    expect(mesh.length % 3).toBe(0);
-    const top = Math.max(...mesh.map((v) => v.z));
-    expect(top).toBeGreaterThan(HOUSE_HEIGHT_M);
-    expect(top).toBeLessThan(HOUSE_HEIGHT_M + 0.3);
-    // The ridge runs along the long (east–west) side, over the middle of the house.
-    const ridge = mesh.filter((v) => v.z === top);
-    expect(ridge.every((v) => Math.abs(v.y) < 0.01)).toBe(true);
-    expect(Math.max(...ridge.map((v) => v.x))).toBeCloseTo(HOUSE.lengthM / 2 + HOUSE.overhangM, 3);
+  it('is about 12 × 9 m, rising to the ridge, with footings below the ground', () => {
+    const size = box.getSize(new THREE.Vector3());
+    expect(size.x).toBeGreaterThan(HOUSE.lengthM);
+    expect(size.x).toBeLessThan(HOUSE.lengthM + 2 * HOUSE.overhangM + 0.2);
+    expect(size.z).toBeGreaterThan(HOUSE.widthM);
+    expect(box.max.y).toBeCloseTo(HOUSE_HEIGHT_M, 1);
+    expect(box.min.y).toBeCloseTo(-HOUSE.footingM, 6);
   });
 
-  it('reaches below ground, so no corner hangs in the air on a slope', () => {
-    expect(Math.min(...mesh.map((v) => v.z))).toBe(-HOUSE.footingM);
+  it('casts and catches shadows', () => {
+    const meshes: THREE.Mesh[] = [];
+    house.traverse((o) => { if (o instanceof THREE.Mesh) meshes.push(o); });
+    expect(meshes.length).toBeGreaterThan(8);
+    expect(meshes.every((m) => m.castShadow && m.receiveShadow)).toBe(true);
   });
 
-  it('has light walls under a dark roof', () => {
-    const brightness = (v: { r: number; g: number; b: number }) => (v.r + v.g + v.b) / 3;
-    const wall = mesh.filter((v) => v.z === -HOUSE.footingM).map(brightness);
-    const roof = mesh.filter((v) => v.z > HOUSE.wallM + 1).filter((v) => Math.abs(v.x) > HOUSE.lengthM / 2).map(brightness);
-    expect(Math.min(...wall)).toBeGreaterThan(0.7);
-    expect(Math.max(...roof)).toBeLessThan(0.45);
-  });
-
-  it('turns with the slope like the footprint does', () => {
-    // Falls west → long side north–south: the model is longer north–south than east–west.
-    const turned = vertices(houseMesh(spot(270)));
-    const span = (pick: (v: { x: number; y: number }) => number) => Math.max(...turned.map(pick)) - Math.min(...turned.map(pick));
-    expect(span((v) => v.y)).toBeGreaterThan(span((v) => v.x));
-  });
-
-  it('places its metres on the map: east is +x, north is −y (mercator runs south), up is +z', () => {
-    const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    const m = placeOnMap(identity, { x: 0.5, y: 0.25, z: 0.001 }, 2);
-    const apply = ([x, y, z]: number[]) => [m[0] * x + m[4] * y + m[8] * z + m[12], m[1] * x + m[5] * y + m[9] * z + m[13], m[2] * x + m[6] * y + m[10] * z + m[14]];
-    expect(apply([0, 0, 0])).toEqual([0.5, 0.25, expect.closeTo(0.001, 6)]);
-    expect(apply([1, 0, 0])[0]).toBeCloseTo(2.5, 6);
-    expect(apply([0, 1, 0])[1]).toBeCloseTo(-1.75, 6);
-    expect(apply([0, 0, 1])[2]).toBeCloseTo(2.001, 6);
-  });
-
-  it('lays its shadow around the footprint', () => {
-    const corners = houseShadowCorners(spot(null));
-    const [a, b] = corners.map(([lng, lat]) => ({ lat, lng }));
-    expect(metresBetween(a, b)).toBeGreaterThan(HOUSE.lengthM + 5);
-    expect(corners).toHaveLength(4);
+  it('turns its long side to the compass bearing it is given', () => {
+    // Long side along +x (east) before turning; north is −z.
+    const along = (bearing: number) => new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), houseRotationY(bearing));
+    expect(along(90).x).toBeCloseTo(1, 6); // east
+    expect(along(0).z).toBeCloseTo(-1, 6); // north
+    expect(along(180).z).toBeCloseTo(1, 6); // south
   });
 });
