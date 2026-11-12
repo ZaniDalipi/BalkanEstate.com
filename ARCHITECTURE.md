@@ -1543,20 +1543,44 @@ waiting. One implementation for the three pages:
 src/features/search/splitView/
   ├── listCollapse.ts      pure: isListCollapsed · splitListPanelClass · splitMapPanelClass
   │                              readCollapsedPreference · listCountBadge · SEARCH_LIST_PANEL_ID
+  ├── tabMotion.ts         pure: the tab's springs and dock timing · the seam shade's timing
   ├── useListCollapse.ts   uiStore preference → { collapsed, toggle } (split view only)
-  └── ListCollapseTab.tsx  the edge tab: "Hide list" ⟷ "Show list · N"
+  ├── ListCollapseTab.tsx  the edge tab: "‹" (hover: "Hide list ‹") ⟷ "Show list · N ›"
+  ├── TabReveal.tsx        a part of the tab whose width springs between 0 and its content
+  └── SeamShade.tsx        the shadow the list casts on the map while it moves
 src/app/store/uiStore.ts   isSearchListCollapsed — persisted (safeLocalStorage, partialize)
+src/index.css @theme       --ease-split-open / --ease-split-close (springs as linear())
 ```
 
 - **How it moves.** In split view the list panel is `absolute` on the left of
   the row (same 45% / 55% width as before) and the map is pushed right with
   `ml-auto`. Folding slides the list out with `translate` (its cards keep
   their width, so nothing re-lays out) while the map's `width` grows to the
-  full row. Both use one duration and easing (300ms, the switch's
-  `cubic-bezier(0.32,0.72,0,1)`), so the list's edge and the map's edge stay
-  together; reduced motion jumps. The map resizes itself as it grows (Google
-  Maps on its own; Leaflet through the `ResizeObserver` in `MapEvents`). With
-  the list open the layout is identical to before at every size.
+  full row. The map resizes itself as it grows (Google Maps on its own;
+  Leaflet through the `ResizeObserver` in `MapEvents`). With the list open the
+  layout is identical to before at every size.
+- **Springs, one curve for both edges.** The timing is a real spring from
+  rest, sampled into CSS `linear()` (`--ease-split-*` in `src/index.css`):
+  closing is critically damped (500ms, no bounce), opening lands with a ~1%
+  overshoot (700ms). The transition takes the timing of the state it moves
+  *to*, so the open classes time the opening and the collapsed classes the
+  closing. List and map share the curve, so their edges stay within a pixel
+  of each other on every frame, bounce included. Browsers without `linear()`
+  get plain `ease`.
+- **Depth.** The list's direct children slide 8% further than the panel and,
+  coming back, start 60ms late (parallax: the content leads on the way out
+  and settles a beat after the panel lands). `SeamShade` darkens the map's
+  edge beside the moving list, peaking early and gone when it lands; it plays
+  only on a toggle (`AnimatePresence initial={false}`), never on page load.
+- **The tab docks.** Closing, the slim tab rides the seam; when the seam is
+  ~85% of the way (`DOCK_DELAY_S`) it grows into "Show list" (`TabReveal`),
+  its chevron flips, the count pops in, and a ring pulses once. Opening, it
+  folds back at once. Hover or keyboard focus slides a "Hide list" label out
+  of the open tab; a click resets the hover, so the label never appears
+  under the pointer mid-animation. A press squeezes it (`whileTap`).
+- **Reduced motion** turns every part off: the panels jump (no CSS
+  transitions), the tab changes instantly, and the shade and pulse are not
+  drawn.
 - **Folded means gone, not just moved.** After the slide the list is
   `invisible` (visibility transitions discretely, so it stays visible until
   the slide ends): out of the tab order and the accessibility tree, but still
@@ -1573,8 +1597,9 @@ src/app/store/uiStore.ts   isSearchListCollapsed — persisted (safeLocalStorage
 - **Split view only.** `isListCollapsed(isSplitView, preference)`: phones,
   tablets and sideways phones keep the List / Map switch and never show the
   tab; widening the window again brings the folded state back.
-- Tests: `listCollapse.test.ts` (pure rules), `ListCollapseTab.test.tsx` (the
-  user flow, persistence, storage failure), `e2e/list-collapse.spec.ts`
+- Tests: `listCollapse.test.ts` (pure rules and classes), `tabMotion.test.ts`
+  (dock timing, reduced motion), `ListCollapseTab.test.tsx` (the user flow,
+  hover label, persistence, storage failure), `e2e/list-collapse.spec.ts`
   (all three pages, desktop and tablet).
 
 ---

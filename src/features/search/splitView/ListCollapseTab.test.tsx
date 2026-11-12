@@ -13,8 +13,8 @@ function Page({ split = true, count = 12 }: { split?: boolean; count?: number | 
     const { collapsed, toggle } = useListCollapse(split);
     return (
         <div>
-            <div id={SEARCH_LIST_PANEL_ID} data-testid="list" className={splitListPanelClass(collapsed)} />
-            <div data-testid="map" className={splitMapPanelClass(collapsed)}>
+            <div id={SEARCH_LIST_PANEL_ID} data-testid="list" className={splitListPanelClass(split, collapsed)} />
+            <div data-testid="map" className={splitMapPanelClass(split, collapsed)}>
                 {split && <ListCollapseTab collapsed={collapsed} onToggle={toggle} count={count} />}
             </div>
         </div>
@@ -98,6 +98,45 @@ describe('ListCollapseTab — hiding the list in split view', () => {
         render(<Page />);
         expect(() => fireEvent.click(tab())).not.toThrow();
         expect(tab()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('slides out a "Hide list" label while the pointer is over the open tab', () => {
+        render(<Page />);
+        const hideReveal = () => screen.getByText('Hide list').closest('[data-shown]');
+        expect(hideReveal()).toHaveAttribute('data-shown', 'false');
+        fireEvent.pointerEnter(tab());
+        expect(hideReveal()).toHaveAttribute('data-shown', 'true');
+        fireEvent.pointerLeave(tab());
+        expect(hideReveal()).toHaveAttribute('data-shown', 'false');
+    });
+
+    it('does not slide out "Hide list" under a pointer that just clicked "Show list"', () => {
+        useUIStore.setState({ isSearchListCollapsed: true });
+        render(<Page />);
+        fireEvent.pointerEnter(tab());
+        fireEvent.click(tab());
+        expect(screen.getByText('Hide list').closest('[data-shown]')).toHaveAttribute('data-shown', 'false');
+        // A fresh hover still reveals it.
+        fireEvent.pointerLeave(tab());
+        fireEvent.pointerEnter(tab());
+        expect(screen.getByText('Hide list').closest('[data-shown]')).toHaveAttribute('data-shown', 'true');
+    });
+
+    it('grows into the "Show list" pill when folded, and never shows the hover label then', () => {
+        render(<Page />);
+        const showReveal = () => screen.getByText('Show list').closest('[data-shown]');
+        expect(showReveal()).toHaveAttribute('data-shown', 'false');
+        fireEvent.pointerEnter(tab());
+        fireEvent.click(tab());
+        expect(showReveal()).toHaveAttribute('data-shown', 'true');
+        expect(screen.getByText('Hide list').closest('[data-shown]')).toHaveAttribute('data-shown', 'false');
+    });
+
+    it('draws no list shadow on a page that opens folded: it plays only when the list moves', () => {
+        useUIStore.setState({ isSearchListCollapsed: true });
+        render(<Page />);
+        // First render: settled at the last keyframe, so nothing is drawn.
+        expect(screen.getByTestId('seam-shade').style.opacity).toBe('0');
     });
 
     it('leaves phones and tablets to the List / Map switch, even with the list remembered as hidden', () => {

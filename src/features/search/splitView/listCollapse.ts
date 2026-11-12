@@ -8,8 +8,9 @@
  * How it moves: in split view the list is positioned over the left of the row
  * and the map is pushed to the right (`ml-auto`). Collapsing slides the list
  * out (`translate`, compositor only, so its cards never re-lay out) while the
- * map's width grows to the full row. Both share one duration and easing, so the
- * list's right edge and the map's left edge stay together the whole way. The
+ * map's width grows to the full row. Both move on the same spring (opening
+ * lands with a small overshoot, closing settles without one), so the list's
+ * right edge and the map's left edge stay together the whole way. The
  * list turns `invisible` once the slide is over (visibility transitions
  * discretely and stays visible until the end), which also takes it out of the
  * tab order and the accessibility tree while it is folded away.
@@ -21,10 +22,17 @@
 /** The `id` of the list panel, for the toggle's `aria-controls`. One search page is on screen at a time. */
 export const SEARCH_LIST_PANEL_ID = 'search-list-panel';
 
-/** The slide's length; keep in step with `duration-300` below. */
-export const LIST_COLLAPSE_MS = 300;
+/** Opening: a spring that lands with a ~1% overshoot (`--ease-split-open` in src/index.css). */
+export const LIST_OPEN_MS = 700;
+/** Closing: a critically damped spring, no bounce (`--ease-split-close`). */
+export const LIST_CLOSE_MS = 500;
 
-const SLIDE = 'lg:duration-300 lg:ease-[cubic-bezier(0.32,0.72,0,1)] lg:motion-reduce:transition-none';
+// Tailwind only sees whole class names, so each string is written out in full.
+// The duration a transition uses is the one on the state it moves *to*:
+// open classes time the opening, collapsed classes time the closing.
+const REDUCED = 'lg:motion-reduce:transition-none lg:motion-reduce:*:transition-none';
+const LIST_OPEN = 'lg:duration-700 lg:ease-split-open lg:*:duration-700 lg:*:ease-split-open lg:*:delay-[60ms]';
+const LIST_CLOSED = 'lg:duration-500 lg:ease-split-close lg:*:duration-500 lg:*:ease-split-close';
 
 /**
  * Whether the list is folded away right now. The stored preference only
@@ -36,20 +44,29 @@ export function isListCollapsed(isSplitView: boolean, preferCollapsed: boolean):
 }
 
 /**
- * The list panel's split-view classes. Below `lg` the panel stays
- * `absolute inset-0` (the page's own classes); in split view it keeps that
- * position and is pinned to the left instead of joining the flex row, so it
- * can slide away without moving the map.
+ * The list panel's split-view classes (none outside split view, so phones,
+ * tablets and sideways phones keep exactly their own classes).
+ *
+ * In split view the panel stays `absolute`, pinned left at its usual width, so
+ * it can slide away without moving the map. Its direct children slide 8%
+ * further and, coming back, start 60ms late: the content moves at a slightly
+ * different pace from the panel, which reads as depth (parallax).
  */
-export function splitListPanelClass(collapsed: boolean): string {
-    const base = `lg:inset-y-0 lg:left-0 lg:right-auto lg:w-[45%] xl:w-[55%] lg:transition-[translate,visibility] ${SLIDE}`;
-    return collapsed ? `${base} lg:-translate-x-full lg:invisible` : base;
+export function splitListPanelClass(isSplitView: boolean, collapsed: boolean): string {
+    if (!isSplitView) return '';
+    const base = `lg:inset-y-0 lg:left-0 lg:right-auto lg:w-[45%] xl:w-[55%] lg:transition-[translate,visibility] lg:*:transition-[translate] ${REDUCED}`;
+    return collapsed
+        ? `${base} ${LIST_CLOSED} lg:-translate-x-full lg:invisible lg:*:-translate-x-[8%]`
+        : `${base} ${LIST_OPEN}`;
 }
 
-/** The map panel's split-view classes: beside the list, or the whole row. */
-export function splitMapPanelClass(collapsed: boolean): string {
-    const base = `lg:ml-auto lg:transition-[width] ${SLIDE}`;
-    return collapsed ? `${base} lg:w-full` : `${base} lg:w-[55%] xl:w-[45%]`;
+/** The map panel's split-view classes: beside the list, or the whole row. Same springs as the list, so their edges stay together. */
+export function splitMapPanelClass(isSplitView: boolean, collapsed: boolean): string {
+    if (!isSplitView) return '';
+    const base = 'lg:ml-auto lg:transition-[width] lg:motion-reduce:transition-none';
+    return collapsed
+        ? `${base} lg:duration-500 lg:ease-split-close lg:w-full`
+        : `${base} lg:duration-700 lg:ease-split-open lg:w-[55%] xl:w-[45%]`;
 }
 
 /**

@@ -355,7 +355,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${(isMobile || isTablet) && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
-                 <div ref={listMemory.panelRef} id={SEARCH_LIST_PANEL_ID} className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col ${splitListPanelClass(listCollapse.collapsed)} search-list-panel lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                 <div ref={listMemory.panelRef} id={SEARCH_LIST_PANEL_ID} className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col ${splitListPanelClass(showSplitView, listCollapse.collapsed)} search-list-panel lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || shownView === 'list'}
                     data-settled={listReleased}>
                     {mountList && (
@@ -381,7 +381,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
                 {/* --- Right Panel: Map --- */}
                 {/* On mobile/tablet: full-width behind list panel. On lg: 55% map, on xl+: 45% map, or all of it with the list folded away */}
-                <div className={`h-full w-full ${splitMapPanelClass(listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
+                <div className={`h-full w-full ${splitMapPanelClass(showSplitView, listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || shownView === 'map'}

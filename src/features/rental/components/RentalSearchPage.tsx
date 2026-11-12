@@ -277,7 +277,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
-                <div id={SEARCH_LIST_PANEL_ID} className={`absolute inset-0 z-10 h-full w-full flex flex-col ${splitListPanelClass(listCollapse.collapsed)} search-list-panel lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                <div id={SEARCH_LIST_PANEL_ID} className={`absolute inset-0 z-10 h-full w-full flex flex-col ${splitListPanelClass(showSplitView, listCollapse.collapsed)} search-list-panel lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || mobileView === 'list'}
                     data-settled={listSettledHidden} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
                     {/* Spacer for floating mobile header */}
@@ -580,7 +580,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className={`h-full w-full ${splitMapPanelClass(listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
+                <div className={`h-full w-full ${splitMapPanelClass(showSplitView, listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || mobileView === 'map'}

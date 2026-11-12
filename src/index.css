@@ -87,6 +87,15 @@
   --animate-bounce-soft: bounceSoft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animate-aurora: aurora 60s linear infinite;
 
+  /* Split view: folding the list away (src/features/search/splitView). Real
+     springs from rest, sampled as linear(), so the list and the map's edge
+     move on one physical curve. Open: lands with a ~1% overshoot over 700ms
+     (ζ 0.82). Close: critically damped, no bounce, 500ms. Browsers without
+     linear() fall back to plain `ease`. Generated, not hand-tuned: keep the
+     durations in listCollapse.ts in step if these change. */
+  --ease-split-open: linear(0, 0.0212, 0.0752, 0.15, 0.2363, 0.3271, 0.4176, 0.504, 0.5843, 0.657, 0.7216, 0.7778, 0.826, 0.8666, 0.9003, 0.9279, 0.95, 0.9675, 0.981, 0.9912, 0.9986, 1.0039, 1.0074, 1.0096, 1.0107, 1.0111, 1.0109, 1.0103, 1.0095, 1.0086, 1.0076, 1.0066, 1.0056, 1.0047, 1.0039, 1.0032, 1.0025, 1.002, 1.0015, 1.0011, 1);
+  --ease-split-close: linear(0, 0.0241, 0.0827, 0.1602, 0.2459, 0.3329, 0.4168, 0.495, 0.5663, 0.6299, 0.6861, 0.735, 0.7773, 0.8135, 0.8444, 0.8706, 0.8926, 0.9111, 0.9266, 0.9395, 0.9503, 0.9591, 0.9665, 0.9726, 0.9776, 0.9817, 0.9851, 0.9878, 0.9901, 0.992, 0.9935, 0.9947, 0.9957, 0.9965, 0.9972, 0.9977, 0.9982, 0.9985, 0.9988, 0.999, 1);
+
   /* Pages fade in once ready (`.be-page-fade`); nothing is played in front of a
      tap. See the "Page changes and loading" section at the end of this file. */
 }

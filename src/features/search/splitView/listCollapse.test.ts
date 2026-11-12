@@ -20,11 +20,11 @@ describe('isListCollapsed', () => {
 });
 
 describe('split panel classes', () => {
-    const classes = (s: string) => s.split(/\s+/);
+    const classes = (s: string) => s.split(/\s+/).filter(Boolean);
 
     it('puts the list beside the map when open', () => {
-        const list = classes(splitListPanelClass(false));
-        const map = classes(splitMapPanelClass(false));
+        const list = classes(splitListPanelClass(true, false));
+        const map = classes(splitMapPanelClass(true, false));
         expect(list).toEqual(expect.arrayContaining(['lg:w-[45%]', 'xl:w-[55%]', 'lg:left-0']));
         expect(list).not.toContain('lg:-translate-x-full');
         expect(list).not.toContain('lg:invisible');
@@ -33,8 +33,8 @@ describe('split panel classes', () => {
     });
 
     it('slides the list out and gives the map the whole row when folded', () => {
-        const list = classes(splitListPanelClass(true));
-        const map = classes(splitMapPanelClass(true));
+        const list = classes(splitListPanelClass(true, true));
+        const map = classes(splitMapPanelClass(true, true));
         expect(list).toEqual(expect.arrayContaining(['lg:-translate-x-full', 'lg:invisible']));
         // The list keeps its width while it slides, so its cards never re-lay out.
         expect(list).toEqual(expect.arrayContaining(['lg:w-[45%]', 'xl:w-[55%]']));
@@ -43,22 +43,44 @@ describe('split panel classes', () => {
         expect(map).not.toContain('xl:w-[45%]');
     });
 
-    it('moves both panels with one duration and easing, and not at all under reduced motion', () => {
-        for (const collapsed of [false, true]) {
-            for (const panel of [splitListPanelClass(collapsed), splitMapPanelClass(collapsed)]) {
-                expect(classes(panel)).toEqual(expect.arrayContaining([
-                    'lg:duration-300',
-                    'lg:ease-[cubic-bezier(0.32,0.72,0,1)]',
-                    'lg:motion-reduce:transition-none',
-                ]));
+    it('moves list and map on the same spring: the opening one when opening, the closing one when closing', () => {
+        for (const [collapsed, ease, duration] of [[false, 'lg:ease-split-open', 'lg:duration-700'], [true, 'lg:ease-split-close', 'lg:duration-500']] as const) {
+            for (const panel of [splitListPanelClass(true, collapsed), splitMapPanelClass(true, collapsed)]) {
+                expect(classes(panel)).toEqual(expect.arrayContaining([ease, duration]));
             }
+        }
+    });
+
+    it('moves the list content a little further than the panel, and lets it trail on the way back in', () => {
+        const open = classes(splitListPanelClass(true, false));
+        const folded = classes(splitListPanelClass(true, true));
+        expect(folded).toContain('lg:*:-translate-x-[8%]');
+        expect(open).not.toContain('lg:*:-translate-x-[8%]');
+        expect(open).toContain('lg:*:delay-[60ms]');
+        expect(folded.some((c) => c.startsWith('lg:*:delay'))).toBe(false);
+    });
+
+    it('does not move at all under reduced motion', () => {
+        for (const collapsed of [false, true]) {
+            expect(classes(splitListPanelClass(true, collapsed))).toEqual(expect.arrayContaining([
+                'lg:motion-reduce:transition-none',
+                'lg:motion-reduce:*:transition-none',
+            ]));
+            expect(classes(splitMapPanelClass(true, collapsed))).toContain('lg:motion-reduce:transition-none');
         }
     });
 
     it('never applies the split classes below lg', () => {
         for (const collapsed of [false, true]) {
-            const all = [...classes(splitListPanelClass(collapsed)), ...classes(splitMapPanelClass(collapsed))];
+            const all = [...classes(splitListPanelClass(true, collapsed)), ...classes(splitMapPanelClass(true, collapsed))];
             expect(all.every((c) => c.startsWith('lg:') || c.startsWith('xl:'))).toBe(true);
+        }
+    });
+
+    it('leaves the panels to their own classes outside split view', () => {
+        for (const collapsed of [false, true]) {
+            expect(splitListPanelClass(false, collapsed)).toBe('');
+            expect(splitMapPanelClass(false, collapsed)).toBe('');
         }
     });
 });
