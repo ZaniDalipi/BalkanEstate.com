@@ -1,0 +1,6266 @@
+{
+ "countries": [
+  {
+   "name": "Kosovo",
+   "code": "XK",
+   "cities": [
+    {
+     "name": "Prishtina",
+     "lat": 42.6629,
+     "lng": 21.1655
+    },
+    {
+     "name": "Prizren",
+     "lat": 42.2139,
+     "lng": 20.7397
+    },
+    {
+     "name": "Peja",
+     "lat": 42.6589,
+     "lng": 20.2881
+    },
+    {
+     "name": "Gjakova",
+     "lat": 42.3803,
+     "lng": 20.4308
+    },
+    {
+     "name": "Ferizaj",
+     "lat": 42.37,
+     "lng": 21.1483
+    },
+    {
+     "name": "Gjilan",
+     "lat": 42.4636,
+     "lng": 21.4694
+    },
+    {
+     "name": "Mitrovica",
+     "lat": 42.8914,
+     "lng": 20.8661
+    },
+    {
+     "name": "Podujeva",
+     "lat": 42.9111,
+     "lng": 21.1936
+    },
+    {
+     "name": "Vushtrri",
+     "lat": 42.8225,
+     "lng": 20.9678
+    },
+    {
+     "name": "Suhareka",
+     "lat": 42.3606,
+     "lng": 20.8308
+    },
+    {
+     "name": "Rahovec",
+     "lat": 42.3997,
+     "lng": 20.6542
+    },
+    {
+     "name": "Dragash",
+     "lat": 42.0617,
+     "lng": 20.6531
+    },
+    {
+     "name": "Istog",
+     "lat": 42.7808,
+     "lng": 20.4881
+    },
+    {
+     "name": "Kamenica",
+     "lat": 42.5786,
+     "lng": 21.5797
+    },
+    {
+     "name": "Klina",
+     "lat": 42.6228,
+     "lng": 20.5783
+    },
+    {
+     "name": "Lipjan",
+     "lat": 42.5208,
+     "lng": 21.1247
+    },
+    {
+     "name": "Malisheva",
+     "lat": 42.4814,
+     "lng": 20.7419
+    },
+    {
+     "name": "Skenderaj",
+     "lat": 42.7486,
+     "lng": 20.7886
+    },
+    {
+     "name": "Shtime",
+     "lat": 42.4331,
+     "lng": 21.0392
+    },
+    {
+     "name": "Viti",
+     "lat": 42.3211,
+     "lng": 21.3597
+    },
+    {
+     "name": "Decan",
+     "lat": 42.5436,
+     "lng": 20.2872
+    },
+    {
+     "name": "Brezovice",
+     "lat": 42.2,
+     "lng": 21
+    },
+    {
+     "name": "Drenas",
+     "lat": 42.625,
+     "lng": 20.8931
+    },
+    {
+     "name": "Fushe Kosove",
+     "lat": 42.63,
+     "lng": 21.09
+    },
+    {
+     "name": "Gracanice",
+     "lat": 42.6,
+     "lng": 21.19
+    },
+    {
+     "name": "Hani i Elezit",
+     "lat": 42.1508,
+     "lng": 21.2967
+    },
+    {
+     "name": "Junik",
+     "lat": 42.4761,
+     "lng": 20.2775
+    },
+    {
+     "name": "Kacanik",
+     "lat": 42.2306,
+     "lng": 21.2569
+    },
+    {
+     "name": "Kllokot",
+     "lat": 42.3672,
+     "lng": 21.3803
+    },
+    {
+     "name": "Leposaviq",
+     "lat": 43.1017,
+     "lng": 20.8028
+    },
+    {
+     "name": "Mamushe",
+     "lat": 42.3167,
+     "lng": 20.725
+    },
+    {
+     "name": "Novoberde",
+     "lat": 42.6019,
+     "lng": 21.4358
+    },
+    {
+     "name": "Obiliq",
+     "lat": 42.69,
+     "lng": 21.07
+    },
+    {
+     "name": "Shterpce",
+     "lat": 42.24,
+     "lng": 21.0272
+    },
+    {
+     "name": "Zubin Potok",
+     "lat": 42.9147,
+     "lng": 20.6892
+    },
+    {
+     "name": "Zvecan",
+     "lat": 42.9128,
+     "lng": 20.8408
+    }
+   ]
+  },
+  {
+   "name": "Albania",
+   "code": "AL",
+   "cities": [
+    {
+     "name": "Tirana",
+     "lat": 41.3275,
+     "lng": 19.8187
+    },
+    {
+     "name": "Durres",
+     "lat": 41.3245,
+     "lng": 19.4564
+    },
+    {
+     "name": "Vlore",
+     "lat": 40.4686,
+     "lng": 19.4914
+    },
+    {
+     "name": "Shkoder",
+     "lat": 42.0687,
+     "lng": 19.5126
+    },
+    {
+     "name": "Elbasan",
+     "lat": 41.1125,
+     "lng": 20.0822
+    },
+    {
+     "name": "Korce",
+     "lat": 40.6186,
+     "lng": 20.7808
+    },
+    {
+     "name": "Fier",
+     "lat": 40.7239,
+     "lng": 19.5564
+    },
+    {
+     "name": "Berat",
+     "lat": 40.7058,
+     "lng": 19.9522
+    },
+    {
+     "name": "Lushnje",
+     "lat": 40.9417,
+     "lng": 19.7053
+    },
+    {
+     "name": "Kavaje",
+     "lat": 41.1853,
+     "lng": 19.5569
+    },
+    {
+     "name": "Pogradec",
+     "lat": 40.9022,
+     "lng": 20.6522
+    },
+    {
+     "name": "Gjirokaster",
+     "lat": 40.0756,
+     "lng": 20.1386
+    },
+    {
+     "name": "Sarande",
+     "lat": 39.8594,
+     "lng": 20.0069
+    },
+    {
+     "name": "Kukes",
+     "lat": 42.0769,
+     "lng": 20.4211
+    },
+    {
+     "name": "Lezhe",
+     "lat": 41.7836,
+     "lng": 19.6436
+    },
+    {
+     "name": "Peshkopi",
+     "lat": 41.685,
+     "lng": 20.4289
+    },
+    {
+     "name": "Permet",
+     "lat": 40.2361,
+     "lng": 20.3508
+    },
+    {
+     "name": "Kruje",
+     "lat": 41.5092,
+     "lng": 19.7928
+    },
+    {
+     "name": "Burrel",
+     "lat": 41.6106,
+     "lng": 20.0089
+    },
+    {
+     "name": "Corovode",
+     "lat": 40.5047,
+     "lng": 20.2272
+    },
+    {
+     "name": "Erseke",
+     "lat": 40.3381,
+     "lng": 20.6792
+    },
+    {
+     "name": "Librazhd",
+     "lat": 41.1828,
+     "lng": 20.3189
+    },
+    {
+     "name": "Gramsh",
+     "lat": 40.87,
+     "lng": 20.185
+    },
+    {
+     "name": "Kelcyre",
+     "lat": 40.3122,
+     "lng": 20.19
+    },
+    {
+     "name": "Bajram Curri",
+     "lat": 42.3578,
+     "lng": 20.0742
+    },
+    {
+     "name": "Ballsh",
+     "lat": 40.5972,
+     "lng": 19.7361
+    },
+    {
+     "name": "Belsh",
+     "lat": 40.9833,
+     "lng": 19.8833
+    },
+    {
+     "name": "Bilisht",
+     "lat": 40.6272,
+     "lng": 20.9917
+    },
+    {
+     "name": "Borsh",
+     "lat": 40.05,
+     "lng": 19.85
+    },
+    {
+     "name": "Bulqize",
+     "lat": 41.4939,
+     "lng": 20.2211
+    },
+    {
+     "name": "Cerrik",
+     "lat": 41.0333,
+     "lng": 19.9833
+    },
+    {
+     "name": "Dardhe",
+     "lat": 40.5667,
+     "lng": 20.75
+    },
+    {
+     "name": "Delvine",
+     "lat": 39.9481,
+     "lng": 20.0967
+    },
+    {
+     "name": "Dhermi",
+     "lat": 40.15,
+     "lng": 19.6417
+    },
+    {
+     "name": "Divjake",
+     "lat": 40.995,
+     "lng": 19.5333
+    },
+    {
+     "name": "Fushe-Arrez",
+     "lat": 42.0667,
+     "lng": 20.0333
+    },
+    {
+     "name": "Fushe-Kruje",
+     "lat": 41.4783,
+     "lng": 19.7167
+    },
+    {
+     "name": "Golem",
+     "lat": 41.25,
+     "lng": 19.5
+    },
+    {
+     "name": "Himare",
+     "lat": 40.1017,
+     "lng": 19.7442
+    },
+    {
+     "name": "Kamez",
+     "lat": 41.3833,
+     "lng": 19.7667
+    },
+    {
+     "name": "Klos",
+     "lat": 41.5069,
+     "lng": 20.0872
+    },
+    {
+     "name": "Konispol",
+     "lat": 39.6592,
+     "lng": 20.1794
+    },
+    {
+     "name": "Koplik",
+     "lat": 42.2064,
+     "lng": 19.4364
+    },
+    {
+     "name": "Krume",
+     "lat": 42.19,
+     "lng": 20.415
+    },
+    {
+     "name": "Ksamil",
+     "lat": 39.7683,
+     "lng": 20.0028
+    },
+    {
+     "name": "Kucove",
+     "lat": 40.8,
+     "lng": 19.9167
+    },
+    {
+     "name": "Lac",
+     "lat": 41.6353,
+     "lng": 19.7136
+    },
+    {
+     "name": "Leskovik",
+     "lat": 40.15,
+     "lng": 20.5833
+    },
+    {
+     "name": "Libohove",
+     "lat": 40.0333,
+     "lng": 20.2667
+    },
+    {
+     "name": "Lin",
+     "lat": 41.0333,
+     "lng": 20.6333
+    },
+    {
+     "name": "Lukove",
+     "lat": 39.9667,
+     "lng": 19.9333
+    },
+    {
+     "name": "Maliq",
+     "lat": 40.7167,
+     "lng": 20.7
+    },
+    {
+     "name": "Mamurras",
+     "lat": 41.5772,
+     "lng": 19.6942
+    },
+    {
+     "name": "Memaliaj",
+     "lat": 40.3453,
+     "lng": 19.9917
+    },
+    {
+     "name": "Orikum",
+     "lat": 40.3253,
+     "lng": 19.4711
+    },
+    {
+     "name": "Palase",
+     "lat": 40.2033,
+     "lng": 19.5967
+    },
+    {
+     "name": "Patos",
+     "lat": 40.6833,
+     "lng": 19.6167
+    },
+    {
+     "name": "Peqin",
+     "lat": 41.0472,
+     "lng": 19.75
+    },
+    {
+     "name": "Perrenjas",
+     "lat": 41.0667,
+     "lng": 20.55
+    },
+    {
+     "name": "Piqeras",
+     "lat": 39.9917,
+     "lng": 19.9
+    },
+    {
+     "name": "Puke",
+     "lat": 42.0472,
+     "lng": 19.8964
+    },
+    {
+     "name": "Qeparo",
+     "lat": 40.0561,
+     "lng": 19.8017
+    },
+    {
+     "name": "Qerret",
+     "lat": 41.2333,
+     "lng": 19.5167
+    },
+    {
+     "name": "Roskovec",
+     "lat": 40.7367,
+     "lng": 19.7
+    },
+    {
+     "name": "Rreshen",
+     "lat": 41.7667,
+     "lng": 19.8833
+    },
+    {
+     "name": "Rrogozhine",
+     "lat": 41.0778,
+     "lng": 19.6667
+    },
+    {
+     "name": "Rubik",
+     "lat": 41.7739,
+     "lng": 19.81
+    },
+    {
+     "name": "Selenice",
+     "lat": 40.5333,
+     "lng": 19.6333
+    },
+    {
+     "name": "Shengjin",
+     "lat": 41.8139,
+     "lng": 19.5942
+    },
+    {
+     "name": "Shijak",
+     "lat": 41.3453,
+     "lng": 19.5675
+    },
+    {
+     "name": "Shkembi i Kavajes",
+     "lat": 41.28,
+     "lng": 19.465
+    },
+    {
+     "name": "Sukth",
+     "lat": 41.4028,
+     "lng": 19.5253
+    },
+    {
+     "name": "Tepelene",
+     "lat": 40.2969,
+     "lng": 20.0189
+    },
+    {
+     "name": "Theth",
+     "lat": 42.3947,
+     "lng": 19.7869
+    },
+    {
+     "name": "Tushemisht",
+     "lat": 40.8833,
+     "lng": 20.6833
+    },
+    {
+     "name": "Ura Vajgurore",
+     "lat": 40.7667,
+     "lng": 19.8833
+    },
+    {
+     "name": "Vau i Dejes",
+     "lat": 42.0122,
+     "lng": 19.6408
+    },
+    {
+     "name": "Velipoje",
+     "lat": 41.8667,
+     "lng": 19.4167
+    },
+    {
+     "name": "Vore",
+     "lat": 41.3931,
+     "lng": 19.6553
+    },
+    {
+     "name": "Voskopoje",
+     "lat": 40.6333,
+     "lng": 20.5833
+    },
+    {
+     "name": "Vuno",
+     "lat": 40.1244,
+     "lng": 19.67
+    },
+    {
+     "name": "Zvernec",
+     "lat": 40.53,
+     "lng": 19.42
+    }
+   ]
+  },
+  {
+   "name": "North Macedonia",
+   "code": "MK",
+   "cities": [
+    {
+     "name": "Skopje",
+     "lat": 41.9973,
+     "lng": 21.428
+    },
+    {
+     "name": "Bitola",
+     "lat": 41.0311,
+     "lng": 21.3347
+    },
+    {
+     "name": "Kumanovo",
+     "lat": 42.1322,
+     "lng": 21.7144
+    },
+    {
+     "name": "Prilep",
+     "lat": 41.3453,
+     "lng": 21.5547
+    },
+    {
+     "name": "Tetovo",
+     "lat": 42.0103,
+     "lng": 20.9714
+    },
+    {
+     "name": "Ohrid",
+     "lat": 41.1172,
+     "lng": 20.8017
+    },
+    {
+     "name": "Veles",
+     "lat": 41.7153,
+     "lng": 21.7756
+    },
+    {
+     "name": "Stip",
+     "lat": 41.7369,
+     "lng": 22.195
+    },
+    {
+     "name": "Strumica",
+     "lat": 41.4378,
+     "lng": 22.6431
+    },
+    {
+     "name": "Gostivar",
+     "lat": 41.7964,
+     "lng": 20.9083
+    },
+    {
+     "name": "Kavadarci",
+     "lat": 41.4333,
+     "lng": 22.0117
+    },
+    {
+     "name": "Kicevo",
+     "lat": 41.5142,
+     "lng": 20.9589
+    },
+    {
+     "name": "Struga",
+     "lat": 41.1778,
+     "lng": 20.6778
+    },
+    {
+     "name": "Negotino",
+     "lat": 41.4836,
+     "lng": 22.09
+    },
+    {
+     "name": "Gevgelija",
+     "lat": 41.1414,
+     "lng": 22.5033
+    },
+    {
+     "name": "Debar",
+     "lat": 41.5239,
+     "lng": 20.5242
+    },
+    {
+     "name": "Kocani",
+     "lat": 41.9158,
+     "lng": 22.4128
+    },
+    {
+     "name": "Sveti Nikole",
+     "lat": 41.8653,
+     "lng": 21.9539
+    },
+    {
+     "name": "Resen",
+     "lat": 41.0897,
+     "lng": 21.0097
+    },
+    {
+     "name": "Radovis",
+     "lat": 41.6383,
+     "lng": 22.4647
+    },
+    {
+     "name": "Berovo",
+     "lat": 41.7031,
+     "lng": 22.8586
+    },
+    {
+     "name": "Kratovo",
+     "lat": 42.0794,
+     "lng": 22.1783
+    },
+    {
+     "name": "Delcevo",
+     "lat": 41.9678,
+     "lng": 22.7703
+    },
+    {
+     "name": "Makedonski Brod",
+     "lat": 41.5133,
+     "lng": 21.2178
+    },
+    {
+     "name": "Bogdanci",
+     "lat": 41.2033,
+     "lng": 22.5758
+    },
+    {
+     "name": "Demir Hisar",
+     "lat": 41.22,
+     "lng": 21.2033
+    },
+    {
+     "name": "Demir Kapija",
+     "lat": 41.4092,
+     "lng": 22.2456
+    },
+    {
+     "name": "Dojran",
+     "lat": 41.19,
+     "lng": 22.72
+    },
+    {
+     "name": "Kriva Palanka",
+     "lat": 42.2011,
+     "lng": 22.3339
+    },
+    {
+     "name": "Krushevo",
+     "lat": 41.37,
+     "lng": 21.25
+    },
+    {
+     "name": "Makedonska Kamenica",
+     "lat": 42.0222,
+     "lng": 22.5867
+    },
+    {
+     "name": "Mavrovo",
+     "lat": 41.63,
+     "lng": 20.77
+    },
+    {
+     "name": "Pehcevo",
+     "lat": 41.7625,
+     "lng": 22.8892
+    },
+    {
+     "name": "Pestani",
+     "lat": 40.98,
+     "lng": 20.81
+    },
+    {
+     "name": "Probistip",
+     "lat": 41.9922,
+     "lng": 22.1783
+    },
+    {
+     "name": "Sveti Naum",
+     "lat": 40.914,
+     "lng": 20.743
+    },
+    {
+     "name": "Trpejca",
+     "lat": 40.93,
+     "lng": 20.79
+    },
+    {
+     "name": "Valandovo",
+     "lat": 41.3172,
+     "lng": 22.5606
+    },
+    {
+     "name": "Vinica",
+     "lat": 41.8828,
+     "lng": 22.5092
+    }
+   ]
+  },
+  {
+   "name": "Serbia",
+   "code": "RS",
+   "cities": [
+    {
+     "name": "Belgrade",
+     "lat": 44.7866,
+     "lng": 20.4489
+    },
+    {
+     "name": "Novi Sad",
+     "lat": 45.2671,
+     "lng": 19.8335
+    },
+    {
+     "name": "Nis",
+     "lat": 43.3209,
+     "lng": 21.8958
+    },
+    {
+     "name": "Kragujevac",
+     "lat": 44.0125,
+     "lng": 20.9114
+    },
+    {
+     "name": "Subotica",
+     "lat": 46.1005,
+     "lng": 19.667
+    },
+    {
+     "name": "Leskovac",
+     "lat": 42.9981,
+     "lng": 21.9461
+    },
+    {
+     "name": "Pancevo",
+     "lat": 44.8708,
+     "lng": 20.6406
+    },
+    {
+     "name": "Cacak",
+     "lat": 43.8914,
+     "lng": 20.3497
+    },
+    {
+     "name": "Novi Pazar",
+     "lat": 43.1367,
+     "lng": 20.5122
+    },
+    {
+     "name": "Kraljevo",
+     "lat": 43.725,
+     "lng": 20.6889
+    },
+    {
+     "name": "Smederevo",
+     "lat": 44.6631,
+     "lng": 20.93
+    },
+    {
+     "name": "Valjevo",
+     "lat": 44.2722,
+     "lng": 19.8903
+    },
+    {
+     "name": "Uzice",
+     "lat": 43.8586,
+     "lng": 19.8481
+    },
+    {
+     "name": "Vranje",
+     "lat": 42.5511,
+     "lng": 21.8969
+    },
+    {
+     "name": "Sabac",
+     "lat": 44.7467,
+     "lng": 19.6914
+    },
+    {
+     "name": "Zrenjanin",
+     "lat": 45.3833,
+     "lng": 20.3833
+    },
+    {
+     "name": "Sombor",
+     "lat": 45.7742,
+     "lng": 19.1122
+    },
+    {
+     "name": "Pozarevac",
+     "lat": 44.6219,
+     "lng": 21.1858
+    },
+    {
+     "name": "Pirot",
+     "lat": 43.1531,
+     "lng": 22.5881
+    },
+    {
+     "name": "Zajecar",
+     "lat": 43.9044,
+     "lng": 22.2906
+    },
+    {
+     "name": "Kikinda",
+     "lat": 45.8308,
+     "lng": 20.4639
+    },
+    {
+     "name": "Sremska Mitrovica",
+     "lat": 44.9764,
+     "lng": 19.6111
+    },
+    {
+     "name": "Jagodina",
+     "lat": 43.9778,
+     "lng": 21.2558
+    },
+    {
+     "name": "Vrsac",
+     "lat": 45.12,
+     "lng": 21.3031
+    },
+    {
+     "name": "Bor",
+     "lat": 44.0728,
+     "lng": 22.0956
+    },
+    {
+     "name": "Prokuplje",
+     "lat": 43.2361,
+     "lng": 21.5864
+    },
+    {
+     "name": "Krusevac",
+     "lat": 43.5797,
+     "lng": 21.3289
+    },
+    {
+     "name": "Loznica",
+     "lat": 44.5333,
+     "lng": 19.2264
+    },
+    {
+     "name": "Arandelovac",
+     "lat": 44.3064,
+     "lng": 20.5606
+    },
+    {
+     "name": "Backa Palanka",
+     "lat": 45.2506,
+     "lng": 19.3928
+    },
+    {
+     "name": "Cuprija",
+     "lat": 43.9275,
+     "lng": 21.3708
+    },
+    {
+     "name": "Gornji Milanovac",
+     "lat": 44.025,
+     "lng": 20.4589
+    },
+    {
+     "name": "Indjija",
+     "lat": 45.0483,
+     "lng": 20.0817
+    },
+    {
+     "name": "Ivanjica",
+     "lat": 43.5806,
+     "lng": 20.2306
+    },
+    {
+     "name": "Kladovo",
+     "lat": 44.6069,
+     "lng": 22.6108
+    },
+    {
+     "name": "Knjazevac",
+     "lat": 43.5675,
+     "lng": 22.2556
+    },
+    {
+     "name": "Kopaonik",
+     "lat": 43.28,
+     "lng": 20.8
+    },
+    {
+     "name": "Lazarevac",
+     "lat": 44.3831,
+     "lng": 20.2569
+    },
+    {
+     "name": "Mladenovac",
+     "lat": 44.4322,
+     "lng": 20.6981
+    },
+    {
+     "name": "Negotin",
+     "lat": 44.2264,
+     "lng": 22.5306
+    },
+    {
+     "name": "Nova Varos",
+     "lat": 43.4633,
+     "lng": 19.8125
+    },
+    {
+     "name": "Obrenovac",
+     "lat": 44.655,
+     "lng": 20.2
+    },
+    {
+     "name": "Paracin",
+     "lat": 43.86,
+     "lng": 21.4083
+    },
+    {
+     "name": "Prijepolje",
+     "lat": 43.3897,
+     "lng": 19.6486
+    },
+    {
+     "name": "Raska",
+     "lat": 43.2872,
+     "lng": 20.6142
+    },
+    {
+     "name": "Ruma",
+     "lat": 45.0075,
+     "lng": 19.8225
+    },
+    {
+     "name": "Sjenica",
+     "lat": 43.2703,
+     "lng": 20
+    },
+    {
+     "name": "Sokobanja",
+     "lat": 43.6431,
+     "lng": 21.8717
+    },
+    {
+     "name": "Sremski Karlovci",
+     "lat": 45.2,
+     "lng": 19.9333
+    },
+    {
+     "name": "Stara Pazova",
+     "lat": 44.9856,
+     "lng": 20.1622
+    },
+    {
+     "name": "Surcin",
+     "lat": 44.79,
+     "lng": 20.28
+    },
+    {
+     "name": "Topola",
+     "lat": 44.2531,
+     "lng": 20.6803
+    },
+    {
+     "name": "Trstenik",
+     "lat": 43.6208,
+     "lng": 21.0028
+    },
+    {
+     "name": "Tutin",
+     "lat": 42.9903,
+     "lng": 20.3325
+    },
+    {
+     "name": "Vrnjacka Banja",
+     "lat": 43.6222,
+     "lng": 20.8961
+    },
+    {
+     "name": "Zlatibor",
+     "lat": 43.73,
+     "lng": 19.7
+    }
+   ]
+  },
+  {
+   "name": "Bosnia and Herzegovina",
+   "code": "BA",
+   "cities": [
+    {
+     "name": "Sarajevo",
+     "lat": 43.8563,
+     "lng": 18.4131
+    },
+    {
+     "name": "Banja Luka",
+     "lat": 44.7722,
+     "lng": 17.191
+    },
+    {
+     "name": "Mostar",
+     "lat": 43.3438,
+     "lng": 17.8078
+    },
+    {
+     "name": "Tuzla",
+     "lat": 44.5385,
+     "lng": 18.6708
+    },
+    {
+     "name": "Zenica",
+     "lat": 44.2019,
+     "lng": 17.9061
+    },
+    {
+     "name": "Bijeljina",
+     "lat": 44.7586,
+     "lng": 19.2144
+    },
+    {
+     "name": "Brcko",
+     "lat": 44.8708,
+     "lng": 18.8103
+    },
+    {
+     "name": "Prijedor",
+     "lat": 44.98,
+     "lng": 16.7142
+    },
+    {
+     "name": "Trebinje",
+     "lat": 42.7125,
+     "lng": 18.3436
+    },
+    {
+     "name": "Doboj",
+     "lat": 44.7333,
+     "lng": 18.0872
+    },
+    {
+     "name": "Cazin",
+     "lat": 44.9667,
+     "lng": 15.9431
+    },
+    {
+     "name": "Velika Kladusa",
+     "lat": 45.1847,
+     "lng": 15.8064
+    },
+    {
+     "name": "Visoko",
+     "lat": 43.9864,
+     "lng": 18.1794
+    },
+    {
+     "name": "Gorazde",
+     "lat": 43.6675,
+     "lng": 18.9753
+    },
+    {
+     "name": "Konjic",
+     "lat": 43.65,
+     "lng": 17.9614
+    },
+    {
+     "name": "Gradacac",
+     "lat": 44.8783,
+     "lng": 18.4278
+    },
+    {
+     "name": "Zavidovici",
+     "lat": 44.4458,
+     "lng": 18.1497
+    },
+    {
+     "name": "Travnik",
+     "lat": 44.2261,
+     "lng": 17.6656
+    },
+    {
+     "name": "Bugojno",
+     "lat": 44.0575,
+     "lng": 17.4508
+    },
+    {
+     "name": "Srebrenica",
+     "lat": 44.1072,
+     "lng": 19.2972
+    },
+    {
+     "name": "Foca",
+     "lat": 43.5061,
+     "lng": 18.7758
+    },
+    {
+     "name": "Livno",
+     "lat": 43.8269,
+     "lng": 17.0078
+    },
+    {
+     "name": "Jajce",
+     "lat": 44.3422,
+     "lng": 17.2708
+    },
+    {
+     "name": "Siroki Brijeg",
+     "lat": 43.3833,
+     "lng": 17.5972
+    },
+    {
+     "name": "Bihac",
+     "lat": 44.8169,
+     "lng": 15.8708
+    },
+    {
+     "name": "Bileca",
+     "lat": 42.8722,
+     "lng": 18.4283
+    },
+    {
+     "name": "Bjelasnica",
+     "lat": 43.71,
+     "lng": 18.27
+    },
+    {
+     "name": "Blagaj",
+     "lat": 43.257,
+     "lng": 17.889
+    },
+    {
+     "name": "Bosanska Krupa",
+     "lat": 44.8828,
+     "lng": 16.1508
+    },
+    {
+     "name": "Bratunac",
+     "lat": 44.1889,
+     "lng": 19.3306
+    },
+    {
+     "name": "Capljina",
+     "lat": 43.12,
+     "lng": 17.6839
+    },
+    {
+     "name": "Citluk",
+     "lat": 43.2231,
+     "lng": 17.7
+    },
+    {
+     "name": "Derventa",
+     "lat": 44.9781,
+     "lng": 17.9089
+    },
+    {
+     "name": "Gornji Vakuf",
+     "lat": 43.9375,
+     "lng": 17.5828
+    },
+    {
+     "name": "Gracanica",
+     "lat": 44.7028,
+     "lng": 18.3078
+    },
+    {
+     "name": "Gradiska",
+     "lat": 45.1439,
+     "lng": 17.25
+    },
+    {
+     "name": "Grude",
+     "lat": 43.3719,
+     "lng": 17.4106
+    },
+    {
+     "name": "Hadzici",
+     "lat": 43.8225,
+     "lng": 18.2072
+    },
+    {
+     "name": "Ilidza",
+     "lat": 43.83,
+     "lng": 18.31
+    },
+    {
+     "name": "Ilijas",
+     "lat": 43.9628,
+     "lng": 18.2694
+    },
+    {
+     "name": "Jablanica",
+     "lat": 43.6603,
+     "lng": 17.7597
+    },
+    {
+     "name": "Jahorina",
+     "lat": 43.73,
+     "lng": 18.57
+    },
+    {
+     "name": "Kakanj",
+     "lat": 44.1319,
+     "lng": 18.125
+    },
+    {
+     "name": "Kiseljak",
+     "lat": 43.9439,
+     "lng": 18.0794
+    },
+    {
+     "name": "Kljuc",
+     "lat": 44.5342,
+     "lng": 16.7767
+    },
+    {
+     "name": "Laktasi",
+     "lat": 44.9086,
+     "lng": 17.3011
+    },
+    {
+     "name": "Ljubuski",
+     "lat": 43.1958,
+     "lng": 17.5497
+    },
+    {
+     "name": "Lukavac",
+     "lat": 44.5386,
+     "lng": 18.5297
+    },
+    {
+     "name": "Maglaj",
+     "lat": 44.5464,
+     "lng": 18.1006
+    },
+    {
+     "name": "Medugorje",
+     "lat": 43.19,
+     "lng": 17.68
+    },
+    {
+     "name": "Modrica",
+     "lat": 44.9569,
+     "lng": 18.3061
+    },
+    {
+     "name": "Mrkonjic Grad",
+     "lat": 44.4161,
+     "lng": 17.0847
+    },
+    {
+     "name": "Neum",
+     "lat": 42.92,
+     "lng": 17.6
+    },
+    {
+     "name": "Nevesinje",
+     "lat": 43.2578,
+     "lng": 18.1122
+    },
+    {
+     "name": "Novi Travnik",
+     "lat": 44.1697,
+     "lng": 17.6553
+    },
+    {
+     "name": "Pale",
+     "lat": 43.82,
+     "lng": 18.57
+    },
+    {
+     "name": "Posusje",
+     "lat": 43.4728,
+     "lng": 17.33
+    },
+    {
+     "name": "Prozor",
+     "lat": 43.8214,
+     "lng": 17.6114
+    },
+    {
+     "name": "Rogatica",
+     "lat": 43.7972,
+     "lng": 19
+    },
+    {
+     "name": "Sanski Most",
+     "lat": 44.7667,
+     "lng": 16.6667
+    },
+    {
+     "name": "Sokolac",
+     "lat": 43.9394,
+     "lng": 18.8
+    },
+    {
+     "name": "Srebrenik",
+     "lat": 44.7069,
+     "lng": 18.4903
+    },
+    {
+     "name": "Stolac",
+     "lat": 43.0844,
+     "lng": 17.9569
+    },
+    {
+     "name": "Tesanj",
+     "lat": 44.6122,
+     "lng": 17.9856
+    },
+    {
+     "name": "Teslic",
+     "lat": 44.6078,
+     "lng": 17.8583
+    },
+    {
+     "name": "Tomislavgrad",
+     "lat": 43.7167,
+     "lng": 17.2264
+    },
+    {
+     "name": "Visegrad",
+     "lat": 43.7833,
+     "lng": 19.2917
+    },
+    {
+     "name": "Vitez",
+     "lat": 44.1553,
+     "lng": 17.7908
+    },
+    {
+     "name": "Vlasenica",
+     "lat": 44.1822,
+     "lng": 18.9414
+    },
+    {
+     "name": "Vogosca",
+     "lat": 43.9,
+     "lng": 18.34
+    },
+    {
+     "name": "Zepce",
+     "lat": 44.4283,
+     "lng": 18.035
+    },
+    {
+     "name": "Zivinice",
+     "lat": 44.4478,
+     "lng": 18.6494
+    },
+    {
+     "name": "Zvornik",
+     "lat": 44.3861,
+     "lng": 19.1017
+    }
+   ]
+  },
+  {
+   "name": "Croatia",
+   "code": "HR",
+   "cities": [
+    {
+     "name": "Zagreb",
+     "lat": 45.815,
+     "lng": 15.9819
+    },
+    {
+     "name": "Split",
+     "lat": 43.5081,
+     "lng": 16.4402
+    },
+    {
+     "name": "Rijeka",
+     "lat": 45.3271,
+     "lng": 14.4422
+    },
+    {
+     "name": "Osijek",
+     "lat": 45.555,
+     "lng": 18.6955
+    },
+    {
+     "name": "Zadar",
+     "lat": 44.1194,
+     "lng": 15.2314
+    },
+    {
+     "name": "Pula",
+     "lat": 44.8683,
+     "lng": 13.8481
+    },
+    {
+     "name": "Slavonski Brod",
+     "lat": 45.16,
+     "lng": 18.0158
+    },
+    {
+     "name": "Karlovac",
+     "lat": 45.4872,
+     "lng": 15.5478
+    },
+    {
+     "name": "Varazdin",
+     "lat": 46.3044,
+     "lng": 16.3367
+    },
+    {
+     "name": "Sisak",
+     "lat": 45.4867,
+     "lng": 16.3711
+    },
+    {
+     "name": "Sibenik",
+     "lat": 43.7272,
+     "lng": 15.8953
+    },
+    {
+     "name": "Vinkovci",
+     "lat": 45.2886,
+     "lng": 18.8047
+    },
+    {
+     "name": "Dubrovnik",
+     "lat": 42.6507,
+     "lng": 18.0944
+    },
+    {
+     "name": "Bjelovar",
+     "lat": 45.8986,
+     "lng": 16.8422
+    },
+    {
+     "name": "Koprivnica",
+     "lat": 46.1628,
+     "lng": 16.8272
+    },
+    {
+     "name": "Pozega",
+     "lat": 45.3403,
+     "lng": 17.6856
+    },
+    {
+     "name": "Virovitica",
+     "lat": 45.8317,
+     "lng": 17.3839
+    },
+    {
+     "name": "Vukovar",
+     "lat": 45.3517,
+     "lng": 19.0014
+    },
+    {
+     "name": "Gospic",
+     "lat": 44.5461,
+     "lng": 15.375
+    },
+    {
+     "name": "Cakovec",
+     "lat": 46.385,
+     "lng": 16.4339
+    },
+    {
+     "name": "Samobor",
+     "lat": 45.8028,
+     "lng": 15.7172
+    },
+    {
+     "name": "Kutina",
+     "lat": 45.4758,
+     "lng": 16.7828
+    },
+    {
+     "name": "Biograd na Moru",
+     "lat": 43.9383,
+     "lng": 15.4497
+    },
+    {
+     "name": "Makarska",
+     "lat": 43.2972,
+     "lng": 17.0175
+    },
+    {
+     "name": "Trogir",
+     "lat": 43.5153,
+     "lng": 16.2519
+    },
+    {
+     "name": "Opatija",
+     "lat": 45.3378,
+     "lng": 14.3053
+    },
+    {
+     "name": "Rovinj",
+     "lat": 45.0811,
+     "lng": 13.6387
+    },
+    {
+     "name": "Porec",
+     "lat": 45.2269,
+     "lng": 13.5933
+    },
+    {
+     "name": "Umag",
+     "lat": 45.4361,
+     "lng": 13.5236
+    },
+    {
+     "name": "Vodice",
+     "lat": 43.7608,
+     "lng": 15.7786
+    },
+    {
+     "name": "Primosten",
+     "lat": 43.5853,
+     "lng": 15.9239
+    },
+    {
+     "name": "Omis",
+     "lat": 43.4447,
+     "lng": 16.6889
+    },
+    {
+     "name": "Bol",
+     "lat": 43.2617,
+     "lng": 16.655
+    },
+    {
+     "name": "Cavtat",
+     "lat": 42.5803,
+     "lng": 18.2183
+    },
+    {
+     "name": "Hvar",
+     "lat": 43.1728,
+     "lng": 16.4411
+    },
+    {
+     "name": "Brac",
+     "lat": 43.3069,
+     "lng": 16.6547
+    },
+    {
+     "name": "Korcula",
+     "lat": 42.9597,
+     "lng": 17.1358
+    },
+    {
+     "name": "Vis",
+     "lat": 43.0614,
+     "lng": 16.1839
+    },
+    {
+     "name": "Mljet",
+     "lat": 42.7456,
+     "lng": 17.5375
+    },
+    {
+     "name": "Krk",
+     "lat": 45.0269,
+     "lng": 14.5753
+    },
+    {
+     "name": "Rab",
+     "lat": 44.7567,
+     "lng": 14.7603
+    },
+    {
+     "name": "Losinj",
+     "lat": 44.5308,
+     "lng": 14.4672
+    },
+    {
+     "name": "Cres",
+     "lat": 44.9603,
+     "lng": 14.4097
+    },
+    {
+     "name": "Pag",
+     "lat": 44.4431,
+     "lng": 15.0536
+    },
+    {
+     "name": "Murter",
+     "lat": 43.8167,
+     "lng": 15.5833
+    },
+    {
+     "name": "Ugljan",
+     "lat": 44.1333,
+     "lng": 15.1167
+    },
+    {
+     "name": "Pasman",
+     "lat": 43.9667,
+     "lng": 15.3833
+    },
+    {
+     "name": "Dugi Otok",
+     "lat": 43.9833,
+     "lng": 15.05
+    },
+    {
+     "name": "Solta",
+     "lat": 43.3833,
+     "lng": 16.3
+    },
+    {
+     "name": "Lastovo",
+     "lat": 42.7667,
+     "lng": 16.8833
+    },
+    {
+     "name": "Ciovo",
+     "lat": 43.4833,
+     "lng": 16.3167
+    },
+    {
+     "name": "Novigrad",
+     "lat": 45.3172,
+     "lng": 13.5667
+    },
+    {
+     "name": "Vrsar",
+     "lat": 45.1556,
+     "lng": 13.5989
+    },
+    {
+     "name": "Fazana",
+     "lat": 44.9303,
+     "lng": 13.8044
+    },
+    {
+     "name": "Medulin",
+     "lat": 44.8167,
+     "lng": 13.9333
+    },
+    {
+     "name": "Rabac",
+     "lat": 45.0803,
+     "lng": 14.155
+    },
+    {
+     "name": "Labin",
+     "lat": 45.0889,
+     "lng": 14.1194
+    },
+    {
+     "name": "Baska",
+     "lat": 44.97,
+     "lng": 14.75
+    },
+    {
+     "name": "Baska Voda",
+     "lat": 43.3567,
+     "lng": 16.95
+    },
+    {
+     "name": "Brela",
+     "lat": 43.3722,
+     "lng": 16.925
+    },
+    {
+     "name": "Crikvenica",
+     "lat": 45.1767,
+     "lng": 14.6928
+    },
+    {
+     "name": "Delnice",
+     "lat": 45.4014,
+     "lng": 14.8017
+    },
+    {
+     "name": "Drnis",
+     "lat": 43.8681,
+     "lng": 16.1553
+    },
+    {
+     "name": "Drvenik",
+     "lat": 43.175,
+     "lng": 17.25
+    },
+    {
+     "name": "Duga Resa",
+     "lat": 45.4478,
+     "lng": 15.5011
+    },
+    {
+     "name": "Gradac",
+     "lat": 43.15,
+     "lng": 17.25
+    },
+    {
+     "name": "Imotski",
+     "lat": 43.4469,
+     "lng": 17.2189
+    },
+    {
+     "name": "Jelsa",
+     "lat": 43.1622,
+     "lng": 16.6944
+    },
+    {
+     "name": "Kastela",
+     "lat": 43.55,
+     "lng": 16.38
+    },
+    {
+     "name": "Knin",
+     "lat": 44.0406,
+     "lng": 16.1997
+    },
+    {
+     "name": "Komiza",
+     "lat": 43.045,
+     "lng": 16.0906
+    },
+    {
+     "name": "Kraljevica",
+     "lat": 45.27,
+     "lng": 14.57
+    },
+    {
+     "name": "Lovran",
+     "lat": 45.29,
+     "lng": 14.275
+    },
+    {
+     "name": "Mali Losinj",
+     "lat": 44.5322,
+     "lng": 14.4694
+    },
+    {
+     "name": "Malinska",
+     "lat": 45.12,
+     "lng": 14.53
+    },
+    {
+     "name": "Metkovic",
+     "lat": 43.0542,
+     "lng": 17.6486
+    },
+    {
+     "name": "Moscenicka Draga",
+     "lat": 45.2367,
+     "lng": 14.2467
+    },
+    {
+     "name": "Nin",
+     "lat": 44.24,
+     "lng": 15.18
+    },
+    {
+     "name": "Njivice",
+     "lat": 45.1667,
+     "lng": 14.55
+    },
+    {
+     "name": "Nova Gradiska",
+     "lat": 45.2569,
+     "lng": 17.3789
+    },
+    {
+     "name": "Novalja",
+     "lat": 44.5561,
+     "lng": 14.8853
+    },
+    {
+     "name": "Novi Vinodolski",
+     "lat": 45.1283,
+     "lng": 14.7883
+    },
+    {
+     "name": "Ogulin",
+     "lat": 45.2653,
+     "lng": 15.2278
+    },
+    {
+     "name": "Omisalj",
+     "lat": 45.21,
+     "lng": 14.56
+    },
+    {
+     "name": "Orebic",
+     "lat": 42.9769,
+     "lng": 17.175
+    },
+    {
+     "name": "Otocac",
+     "lat": 44.8697,
+     "lng": 15.2381
+    },
+    {
+     "name": "Petrcane",
+     "lat": 44.17,
+     "lng": 15.16
+    },
+    {
+     "name": "Pirovac",
+     "lat": 43.82,
+     "lng": 15.68
+    },
+    {
+     "name": "Ploce",
+     "lat": 43.0561,
+     "lng": 17.4353
+    },
+    {
+     "name": "Podgora",
+     "lat": 43.2436,
+     "lng": 17.0678
+    },
+    {
+     "name": "Podstrana",
+     "lat": 43.49,
+     "lng": 16.54
+    },
+    {
+     "name": "Premantura",
+     "lat": 44.79,
+     "lng": 13.92
+    },
+    {
+     "name": "Punat",
+     "lat": 45.02,
+     "lng": 14.63
+    },
+    {
+     "name": "Rogoznica",
+     "lat": 43.53,
+     "lng": 15.97
+    },
+    {
+     "name": "Senj",
+     "lat": 44.9894,
+     "lng": 14.9058
+    },
+    {
+     "name": "Sinj",
+     "lat": 43.7033,
+     "lng": 16.6394
+    },
+    {
+     "name": "Skradin",
+     "lat": 43.8181,
+     "lng": 15.9231
+    },
+    {
+     "name": "Slunj",
+     "lat": 45.1122,
+     "lng": 15.5842
+    },
+    {
+     "name": "Solin",
+     "lat": 43.54,
+     "lng": 16.49
+    },
+    {
+     "name": "Stari Grad",
+     "lat": 43.1856,
+     "lng": 16.5989
+    },
+    {
+     "name": "Ston",
+     "lat": 42.84,
+     "lng": 17.69
+    },
+    {
+     "name": "Sukosan",
+     "lat": 43.97,
+     "lng": 15.31
+    },
+    {
+     "name": "Supetar",
+     "lat": 43.3853,
+     "lng": 16.5522
+    },
+    {
+     "name": "Tucepi",
+     "lat": 43.2761,
+     "lng": 17.0561
+    },
+    {
+     "name": "Vrbnik",
+     "lat": 45.08,
+     "lng": 14.67
+    },
+    {
+     "name": "Vrgorac",
+     "lat": 43.2011,
+     "lng": 17.3706
+    },
+    {
+     "name": "Zivogosce",
+     "lat": 43.2,
+     "lng": 17.1667
+    }
+   ]
+  },
+  {
+   "name": "Montenegro",
+   "code": "ME",
+   "cities": [
+    {
+     "name": "Podgorica",
+     "lat": 42.4304,
+     "lng": 19.2594
+    },
+    {
+     "name": "Niksic",
+     "lat": 42.7731,
+     "lng": 18.9497
+    },
+    {
+     "name": "Pljevlja",
+     "lat": 43.3569,
+     "lng": 19.3578
+    },
+    {
+     "name": "Bijelo Polje",
+     "lat": 43.032,
+     "lng": 19.747
+    },
+    {
+     "name": "Kotor",
+     "lat": 42.4247,
+     "lng": 18.7712
+    },
+    {
+     "name": "Cetinje",
+     "lat": 42.3931,
+     "lng": 18.9111
+    },
+    {
+     "name": "Bar",
+     "lat": 42.0947,
+     "lng": 19.0886
+    },
+    {
+     "name": "Herceg Novi",
+     "lat": 42.4531,
+     "lng": 18.5369
+    },
+    {
+     "name": "Berane",
+     "lat": 42.8456,
+     "lng": 19.8708
+    },
+    {
+     "name": "Budva",
+     "lat": 42.2864,
+     "lng": 18.84
+    },
+    {
+     "name": "Ulcinj",
+     "lat": 41.9297,
+     "lng": 19.2119
+    },
+    {
+     "name": "Tivat",
+     "lat": 42.4367,
+     "lng": 18.6947
+    },
+    {
+     "name": "Rozaje",
+     "lat": 42.8406,
+     "lng": 20.1667
+    },
+    {
+     "name": "Danilovgrad",
+     "lat": 42.5578,
+     "lng": 19.0992
+    },
+    {
+     "name": "Mojkovac",
+     "lat": 42.9603,
+     "lng": 19.5836
+    },
+    {
+     "name": "Zabljak",
+     "lat": 43.1556,
+     "lng": 19.1236
+    },
+    {
+     "name": "Andrijevica",
+     "lat": 42.7364,
+     "lng": 19.7856
+    },
+    {
+     "name": "Kolasin",
+     "lat": 42.8225,
+     "lng": 19.5183
+    },
+    {
+     "name": "Plav",
+     "lat": 42.5989,
+     "lng": 19.9411
+    },
+    {
+     "name": "Pluzine",
+     "lat": 43.1528,
+     "lng": 18.8442
+    },
+    {
+     "name": "Becici",
+     "lat": 42.2833,
+     "lng": 18.8667
+    },
+    {
+     "name": "Bijela",
+     "lat": 42.45,
+     "lng": 18.6167
+    },
+    {
+     "name": "Dobra Voda",
+     "lat": 42.0167,
+     "lng": 19.15
+    },
+    {
+     "name": "Golubovci",
+     "lat": 42.33,
+     "lng": 19.22
+    },
+    {
+     "name": "Gusinje",
+     "lat": 42.5619,
+     "lng": 19.8339
+    },
+    {
+     "name": "Igalo",
+     "lat": 42.4569,
+     "lng": 18.5167
+    },
+    {
+     "name": "Krasici",
+     "lat": 42.4,
+     "lng": 18.6667
+    },
+    {
+     "name": "Lustica",
+     "lat": 42.3833,
+     "lng": 18.6333
+    },
+    {
+     "name": "Milocer",
+     "lat": 42.265,
+     "lng": 18.885
+    },
+    {
+     "name": "Perast",
+     "lat": 42.4869,
+     "lng": 18.6994
+    },
+    {
+     "name": "Petnjica",
+     "lat": 42.9078,
+     "lng": 19.9569
+    },
+    {
+     "name": "Petrovac",
+     "lat": 42.2058,
+     "lng": 18.9439
+    },
+    {
+     "name": "Radovici",
+     "lat": 42.3833,
+     "lng": 18.6833
+    },
+    {
+     "name": "Rafailovici",
+     "lat": 42.2794,
+     "lng": 18.8619
+    },
+    {
+     "name": "Risan",
+     "lat": 42.5158,
+     "lng": 18.6961
+    },
+    {
+     "name": "Savnik",
+     "lat": 42.9603,
+     "lng": 19.0958
+    },
+    {
+     "name": "Sutomore",
+     "lat": 42.1403,
+     "lng": 19.0453
+    },
+    {
+     "name": "Sveti Stefan",
+     "lat": 42.2564,
+     "lng": 18.8917
+    },
+    {
+     "name": "Tuzi",
+     "lat": 42.3653,
+     "lng": 19.3319
+    },
+    {
+     "name": "Utjeha",
+     "lat": 42.0333,
+     "lng": 19.1333
+    },
+    {
+     "name": "Virpazar",
+     "lat": 42.2419,
+     "lng": 19.0906
+    }
+   ]
+  },
+  {
+   "name": "Greece",
+   "code": "GR",
+   "cities": [
+    {
+     "name": "Athens",
+     "lat": 37.9838,
+     "lng": 23.7275
+    },
+    {
+     "name": "Thessaloniki",
+     "lat": 40.6401,
+     "lng": 22.9444
+    },
+    {
+     "name": "Patras",
+     "lat": 38.2466,
+     "lng": 21.7346
+    },
+    {
+     "name": "Heraklion",
+     "lat": 35.3387,
+     "lng": 25.1442
+    },
+    {
+     "name": "Larissa",
+     "lat": 39.639,
+     "lng": 22.419
+    },
+    {
+     "name": "Volos",
+     "lat": 39.3617,
+     "lng": 22.9444
+    },
+    {
+     "name": "Ioannina",
+     "lat": 39.665,
+     "lng": 20.8537
+    },
+    {
+     "name": "Kavala",
+     "lat": 40.9397,
+     "lng": 24.4019
+    },
+    {
+     "name": "Chania",
+     "lat": 35.5138,
+     "lng": 24.018
+    },
+    {
+     "name": "Agrinio",
+     "lat": 38.6214,
+     "lng": 21.4078
+    },
+    {
+     "name": "Kalamata",
+     "lat": 37.0386,
+     "lng": 22.1142
+    },
+    {
+     "name": "Serres",
+     "lat": 41.0856,
+     "lng": 23.5475
+    },
+    {
+     "name": "Katerini",
+     "lat": 40.2692,
+     "lng": 22.5047
+    },
+    {
+     "name": "Xanthi",
+     "lat": 41.135,
+     "lng": 24.8883
+    },
+    {
+     "name": "Drama",
+     "lat": 41.1533,
+     "lng": 24.1475
+    },
+    {
+     "name": "Komotini",
+     "lat": 41.1186,
+     "lng": 25.4053
+    },
+    {
+     "name": "Alexandroupoli",
+     "lat": 40.8472,
+     "lng": 25.8744
+    },
+    {
+     "name": "Corinth",
+     "lat": 37.9386,
+     "lng": 22.9319
+    },
+    {
+     "name": "Kozani",
+     "lat": 40.3008,
+     "lng": 21.7886
+    },
+    {
+     "name": "Lamia",
+     "lat": 38.8997,
+     "lng": 22.4339
+    },
+    {
+     "name": "Tripoli",
+     "lat": 37.5086,
+     "lng": 22.3794
+    },
+    {
+     "name": "Veria",
+     "lat": 40.5208,
+     "lng": 22.2017
+    },
+    {
+     "name": "Kilkis",
+     "lat": 40.9939,
+     "lng": 22.8753
+    },
+    {
+     "name": "Florina",
+     "lat": 40.7839,
+     "lng": 21.4097
+    },
+    {
+     "name": "Mykonos",
+     "lat": 37.4467,
+     "lng": 25.3289
+    },
+    {
+     "name": "Santorini",
+     "lat": 36.3932,
+     "lng": 25.4615
+    },
+    {
+     "name": "Paros",
+     "lat": 37.0853,
+     "lng": 25.1522
+    },
+    {
+     "name": "Naxos",
+     "lat": 37.1036,
+     "lng": 25.3761
+    },
+    {
+     "name": "Ios",
+     "lat": 36.7231,
+     "lng": 25.2817
+    },
+    {
+     "name": "Milos",
+     "lat": 36.7453,
+     "lng": 24.4269
+    },
+    {
+     "name": "Syros",
+     "lat": 37.45,
+     "lng": 24.9
+    },
+    {
+     "name": "Tinos",
+     "lat": 37.5406,
+     "lng": 25.1631
+    },
+    {
+     "name": "Andros",
+     "lat": 37.8333,
+     "lng": 24.9333
+    },
+    {
+     "name": "Antiparos",
+     "lat": 37.0333,
+     "lng": 25.0833
+    },
+    {
+     "name": "Corfu",
+     "lat": 39.6243,
+     "lng": 19.9217
+    },
+    {
+     "name": "Lefkada",
+     "lat": 38.8336,
+     "lng": 20.7064
+    },
+    {
+     "name": "Zakynthos",
+     "lat": 37.7872,
+     "lng": 20.8979
+    },
+    {
+     "name": "Kefalonia",
+     "lat": 38.1794,
+     "lng": 20.4892
+    },
+    {
+     "name": "Ithaca",
+     "lat": 38.3667,
+     "lng": 20.7167
+    },
+    {
+     "name": "Paxos",
+     "lat": 39.2,
+     "lng": 20.1667
+    },
+    {
+     "name": "Rhodes",
+     "lat": 36.4341,
+     "lng": 28.2176
+    },
+    {
+     "name": "Kos",
+     "lat": 36.8935,
+     "lng": 26.9861
+    },
+    {
+     "name": "Patmos",
+     "lat": 37.3097,
+     "lng": 26.5464
+    },
+    {
+     "name": "Leros",
+     "lat": 37.15,
+     "lng": 26.85
+    },
+    {
+     "name": "Kalymnos",
+     "lat": 36.95,
+     "lng": 26.9833
+    },
+    {
+     "name": "Symi",
+     "lat": 36.6167,
+     "lng": 27.8333
+    },
+    {
+     "name": "Karpathos",
+     "lat": 35.5078,
+     "lng": 27.1319
+    },
+    {
+     "name": "Lesvos",
+     "lat": 39.1072,
+     "lng": 26.5539
+    },
+    {
+     "name": "Chios",
+     "lat": 38.3678,
+     "lng": 26.1361
+    },
+    {
+     "name": "Samos",
+     "lat": 37.7578,
+     "lng": 26.9761
+    },
+    {
+     "name": "Limnos",
+     "lat": 39.9167,
+     "lng": 25.2333
+    },
+    {
+     "name": "Ikaria",
+     "lat": 37.5833,
+     "lng": 26.1667
+    },
+    {
+     "name": "Aegina",
+     "lat": 37.75,
+     "lng": 23.4333
+    },
+    {
+     "name": "Hydra",
+     "lat": 37.35,
+     "lng": 23.4667
+    },
+    {
+     "name": "Spetses",
+     "lat": 37.2667,
+     "lng": 23.15
+    },
+    {
+     "name": "Poros",
+     "lat": 37.5,
+     "lng": 23.45
+    },
+    {
+     "name": "Skiathos",
+     "lat": 39.1622,
+     "lng": 23.49
+    },
+    {
+     "name": "Skopelos",
+     "lat": 39.1167,
+     "lng": 23.7333
+    },
+    {
+     "name": "Alonissos",
+     "lat": 39.15,
+     "lng": 23.8667
+    },
+    {
+     "name": "Rethymno",
+     "lat": 35.3692,
+     "lng": 24.4731
+    },
+    {
+     "name": "Agios Nikolaos",
+     "lat": 35.19,
+     "lng": 25.715
+    },
+    {
+     "name": "Sitia",
+     "lat": 35.205,
+     "lng": 26.0972
+    },
+    {
+     "name": "Ierapetra",
+     "lat": 35.0106,
+     "lng": 25.7369
+    },
+    {
+     "name": "Elounda",
+     "lat": 35.2519,
+     "lng": 25.7297
+    },
+    {
+     "name": "Kassandra",
+     "lat": 39.95,
+     "lng": 23.5
+    },
+    {
+     "name": "Sithonia",
+     "lat": 40.05,
+     "lng": 23.85
+    },
+    {
+     "name": "Nea Moudania",
+     "lat": 40.2406,
+     "lng": 23.2836
+    },
+    {
+     "name": "Nafplio",
+     "lat": 37.5675,
+     "lng": 22.8011
+    },
+    {
+     "name": "Monemvasia",
+     "lat": 36.6861,
+     "lng": 23.0547
+    },
+    {
+     "name": "Epidaurus",
+     "lat": 37.6167,
+     "lng": 23.15
+    },
+    {
+     "name": "Olympia",
+     "lat": 37.6386,
+     "lng": 21.6297
+    },
+    {
+     "name": "Afytos",
+     "lat": 40.0867,
+     "lng": 23.4381
+    },
+    {
+     "name": "Agios Nikitas",
+     "lat": 38.79,
+     "lng": 20.61
+    },
+    {
+     "name": "Agios Prokopios",
+     "lat": 37.08,
+     "lng": 25.36
+    },
+    {
+     "name": "Ano Mera",
+     "lat": 37.44,
+     "lng": 25.39
+    },
+    {
+     "name": "Arachova",
+     "lat": 38.4794,
+     "lng": 22.5878
+    },
+    {
+     "name": "Arta",
+     "lat": 39.16,
+     "lng": 20.9853
+    },
+    {
+     "name": "Assos",
+     "lat": 38.38,
+     "lng": 20.54
+    },
+    {
+     "name": "Benitses",
+     "lat": 39.54,
+     "lng": 19.91
+    },
+    {
+     "name": "Ermioni",
+     "lat": 37.3878,
+     "lng": 23.2489
+    },
+    {
+     "name": "Faliraki",
+     "lat": 36.34,
+     "lng": 28.2
+    },
+    {
+     "name": "Fira",
+     "lat": 36.4167,
+     "lng": 25.4333
+    },
+    {
+     "name": "Fiskardo",
+     "lat": 38.46,
+     "lng": 20.575
+    },
+    {
+     "name": "Galaxidi",
+     "lat": 38.3775,
+     "lng": 22.3792
+    },
+    {
+     "name": "Georgioupoli",
+     "lat": 35.36,
+     "lng": 24.26
+    },
+    {
+     "name": "Gythio",
+     "lat": 36.7561,
+     "lng": 22.5658
+    },
+    {
+     "name": "Hersonissos",
+     "lat": 35.32,
+     "lng": 25.39
+    },
+    {
+     "name": "Ialysos",
+     "lat": 36.42,
+     "lng": 28.16
+    },
+    {
+     "name": "Igoumenitsa",
+     "lat": 39.5039,
+     "lng": 20.265
+    },
+    {
+     "name": "Kalambaka",
+     "lat": 39.7047,
+     "lng": 21.6289
+    },
+    {
+     "name": "Kamari",
+     "lat": 36.37,
+     "lng": 25.48
+    },
+    {
+     "name": "Kardamyli",
+     "lat": 36.8908,
+     "lng": 22.2333
+    },
+    {
+     "name": "Kassiopi",
+     "lat": 39.79,
+     "lng": 19.92
+    },
+    {
+     "name": "Kissamos",
+     "lat": 35.495,
+     "lng": 23.655
+    },
+    {
+     "name": "Koroni",
+     "lat": 36.7956,
+     "lng": 21.9569
+    },
+    {
+     "name": "Laganas",
+     "lat": 37.72,
+     "lng": 20.86
+    },
+    {
+     "name": "Lassi",
+     "lat": 38.17,
+     "lng": 20.47
+    },
+    {
+     "name": "Lindos",
+     "lat": 36.0917,
+     "lng": 28.0872
+    },
+    {
+     "name": "Loutraki",
+     "lat": 37.975,
+     "lng": 22.9772
+    },
+    {
+     "name": "Malia",
+     "lat": 35.29,
+     "lng": 25.46
+    },
+    {
+     "name": "Methoni",
+     "lat": 36.8194,
+     "lng": 21.705
+    },
+    {
+     "name": "Nafpaktos",
+     "lat": 38.3931,
+     "lng": 21.8286
+    },
+    {
+     "name": "Naoussa",
+     "lat": 37.125,
+     "lng": 25.24
+    },
+    {
+     "name": "Neos Marmaras",
+     "lat": 40.0975,
+     "lng": 23.7856
+    },
+    {
+     "name": "Nidri",
+     "lat": 38.7,
+     "lng": 20.71
+    },
+    {
+     "name": "Nikiti",
+     "lat": 40.2189,
+     "lng": 23.665
+    },
+    {
+     "name": "Oia",
+     "lat": 36.46,
+     "lng": 25.376
+    },
+    {
+     "name": "Ornos",
+     "lat": 37.42,
+     "lng": 25.32
+    },
+    {
+     "name": "Ouranoupoli",
+     "lat": 40.3253,
+     "lng": 23.9822
+    },
+    {
+     "name": "Paleokastritsa",
+     "lat": 39.675,
+     "lng": 19.71
+    },
+    {
+     "name": "Parga",
+     "lat": 39.2839,
+     "lng": 20.3986
+    },
+    {
+     "name": "Pefkos",
+     "lat": 36.07,
+     "lng": 28.07
+    },
+    {
+     "name": "Peraia",
+     "lat": 40.5,
+     "lng": 22.92
+    },
+    {
+     "name": "Perissa",
+     "lat": 36.355,
+     "lng": 25.47
+    },
+    {
+     "name": "Piraeus",
+     "lat": 37.9475,
+     "lng": 23.6425
+    },
+    {
+     "name": "Platanias",
+     "lat": 35.51,
+     "lng": 23.89
+    },
+    {
+     "name": "Platis Gialos",
+     "lat": 37.41,
+     "lng": 25.34
+    },
+    {
+     "name": "Portaria",
+     "lat": 39.3892,
+     "lng": 23.0217
+    },
+    {
+     "name": "Porto Heli",
+     "lat": 37.3239,
+     "lng": 23.1483
+    },
+    {
+     "name": "Preveza",
+     "lat": 38.9564,
+     "lng": 20.7514
+    },
+    {
+     "name": "Pylos",
+     "lat": 36.9139,
+     "lng": 21.6967
+    },
+    {
+     "name": "Rafina",
+     "lat": 38.025,
+     "lng": 24.0056
+    },
+    {
+     "name": "Sarti",
+     "lat": 40.0958,
+     "lng": 23.9767
+    },
+    {
+     "name": "Sidari",
+     "lat": 39.79,
+     "lng": 19.7
+    },
+    {
+     "name": "Sivota",
+     "lat": 39.4083,
+     "lng": 20.2417
+    },
+    {
+     "name": "Stoupa",
+     "lat": 36.8511,
+     "lng": 22.2578
+    },
+    {
+     "name": "Tsilivi",
+     "lat": 37.81,
+     "lng": 20.85
+    },
+    {
+     "name": "Varkiza",
+     "lat": 37.82,
+     "lng": 23.8
+    },
+    {
+     "name": "Vasiliki",
+     "lat": 38.63,
+     "lng": 20.61
+    }
+   ]
+  },
+  {
+   "name": "Bulgaria",
+   "code": "BG",
+   "cities": [
+    {
+     "name": "Sofia",
+     "lat": 42.6977,
+     "lng": 23.3219
+    },
+    {
+     "name": "Plovdiv",
+     "lat": 42.1354,
+     "lng": 24.7453
+    },
+    {
+     "name": "Varna",
+     "lat": 43.2141,
+     "lng": 27.9147
+    },
+    {
+     "name": "Burgas",
+     "lat": 42.5048,
+     "lng": 27.4626
+    },
+    {
+     "name": "Ruse",
+     "lat": 43.835,
+     "lng": 25.9653
+    },
+    {
+     "name": "Stara Zagora",
+     "lat": 42.4258,
+     "lng": 25.6342
+    },
+    {
+     "name": "Pleven",
+     "lat": 43.417,
+     "lng": 24.6067
+    },
+    {
+     "name": "Sliven",
+     "lat": 42.6858,
+     "lng": 26.3228
+    },
+    {
+     "name": "Dobrich",
+     "lat": 43.5725,
+     "lng": 27.8272
+    },
+    {
+     "name": "Shumen",
+     "lat": 43.2706,
+     "lng": 26.9353
+    },
+    {
+     "name": "Pernik",
+     "lat": 42.6069,
+     "lng": 23.0339
+    },
+    {
+     "name": "Haskovo",
+     "lat": 41.9344,
+     "lng": 25.5553
+    },
+    {
+     "name": "Yambol",
+     "lat": 42.4842,
+     "lng": 26.5036
+    },
+    {
+     "name": "Pazardzhik",
+     "lat": 42.1897,
+     "lng": 24.3339
+    },
+    {
+     "name": "Blagoevgrad",
+     "lat": 42.0197,
+     "lng": 23.095
+    },
+    {
+     "name": "Veliko Tarnovo",
+     "lat": 43.0757,
+     "lng": 25.6172
+    },
+    {
+     "name": "Vratsa",
+     "lat": 43.2103,
+     "lng": 23.5628
+    },
+    {
+     "name": "Gabrovo",
+     "lat": 42.8747,
+     "lng": 25.3189
+    },
+    {
+     "name": "Vidin",
+     "lat": 43.9903,
+     "lng": 22.8708
+    },
+    {
+     "name": "Kazanlak",
+     "lat": 42.6197,
+     "lng": 25.3978
+    },
+    {
+     "name": "Kyustendil",
+     "lat": 42.2867,
+     "lng": 22.6914
+    },
+    {
+     "name": "Kardzhali",
+     "lat": 41.6386,
+     "lng": 25.3783
+    },
+    {
+     "name": "Asenovgrad",
+     "lat": 42.0167,
+     "lng": 24.8667
+    },
+    {
+     "name": "Montana",
+     "lat": 43.4114,
+     "lng": 23.2264
+    },
+    {
+     "name": "Dimitrovgrad",
+     "lat": 42.05,
+     "lng": 25.5972
+    },
+    {
+     "name": "Lovech",
+     "lat": 43.1367,
+     "lng": 24.7142
+    },
+    {
+     "name": "Silistra",
+     "lat": 44.1167,
+     "lng": 27.2667
+    },
+    {
+     "name": "Ahtopol",
+     "lat": 42.1,
+     "lng": 27.94
+    },
+    {
+     "name": "Albena",
+     "lat": 43.37,
+     "lng": 28.08
+    },
+    {
+     "name": "Balchik",
+     "lat": 43.405,
+     "lng": 28.16
+    },
+    {
+     "name": "Bankya",
+     "lat": 42.71,
+     "lng": 23.15
+    },
+    {
+     "name": "Bansko",
+     "lat": 41.8383,
+     "lng": 23.4881
+    },
+    {
+     "name": "Borovets",
+     "lat": 42.2683,
+     "lng": 23.6033
+    },
+    {
+     "name": "Botevgrad",
+     "lat": 42.905,
+     "lng": 23.7911
+    },
+    {
+     "name": "Byala",
+     "lat": 42.8767,
+     "lng": 27.8867
+    },
+    {
+     "name": "Chepelare",
+     "lat": 41.7275,
+     "lng": 24.6853
+    },
+    {
+     "name": "Chernomorets",
+     "lat": 42.445,
+     "lng": 27.645
+    },
+    {
+     "name": "Devin",
+     "lat": 41.7439,
+     "lng": 24.4008
+    },
+    {
+     "name": "Etropole",
+     "lat": 42.8339,
+     "lng": 23.9992
+    },
+    {
+     "name": "Golden Sands",
+     "lat": 43.2833,
+     "lng": 28.0417
+    },
+    {
+     "name": "Gorna Oryahovitsa",
+     "lat": 43.1264,
+     "lng": 25.7
+    },
+    {
+     "name": "Hisarya",
+     "lat": 42.5064,
+     "lng": 24.7028
+    },
+    {
+     "name": "Karlovo",
+     "lat": 42.6394,
+     "lng": 24.8022
+    },
+    {
+     "name": "Kavarna",
+     "lat": 43.43,
+     "lng": 28.34
+    },
+    {
+     "name": "Kiten",
+     "lat": 42.235,
+     "lng": 27.78
+    },
+    {
+     "name": "Melnik",
+     "lat": 41.525,
+     "lng": 23.395
+    },
+    {
+     "name": "Nesebar",
+     "lat": 42.6592,
+     "lng": 27.7364
+    },
+    {
+     "name": "Nova Zagora",
+     "lat": 42.4922,
+     "lng": 26.0158
+    },
+    {
+     "name": "Obzor",
+     "lat": 42.8167,
+     "lng": 27.8833
+    },
+    {
+     "name": "Pamporovo",
+     "lat": 41.6533,
+     "lng": 24.6875
+    },
+    {
+     "name": "Panagyurishte",
+     "lat": 42.4939,
+     "lng": 24.1839
+    },
+    {
+     "name": "Pomorie",
+     "lat": 42.5589,
+     "lng": 27.6417
+    },
+    {
+     "name": "Primorsko",
+     "lat": 42.2653,
+     "lng": 27.7583
+    },
+    {
+     "name": "Razlog",
+     "lat": 41.885,
+     "lng": 23.47
+    },
+    {
+     "name": "Samokov",
+     "lat": 42.3378,
+     "lng": 23.5556
+    },
+    {
+     "name": "Sandanski",
+     "lat": 41.5667,
+     "lng": 23.2833
+    },
+    {
+     "name": "Sevlievo",
+     "lat": 43.025,
+     "lng": 25.1128
+    },
+    {
+     "name": "Smolyan",
+     "lat": 41.5775,
+     "lng": 24.71
+    },
+    {
+     "name": "Sozopol",
+     "lat": 42.4181,
+     "lng": 27.695
+    },
+    {
+     "name": "Sunny Beach",
+     "lat": 42.69,
+     "lng": 27.71
+    },
+    {
+     "name": "Sveti Konstantin",
+     "lat": 43.23,
+     "lng": 28.01
+    },
+    {
+     "name": "Sveti Vlas",
+     "lat": 42.71,
+     "lng": 27.75
+    },
+    {
+     "name": "Svishtov",
+     "lat": 43.6206,
+     "lng": 25.3494
+    },
+    {
+     "name": "Troyan",
+     "lat": 42.8878,
+     "lng": 24.7147
+    },
+    {
+     "name": "Tryavna",
+     "lat": 42.8672,
+     "lng": 25.4967
+    },
+    {
+     "name": "Tsarevo",
+     "lat": 42.1697,
+     "lng": 27.8489
+    },
+    {
+     "name": "Velingrad",
+     "lat": 42.0261,
+     "lng": 23.9917
+    }
+   ]
+  },
+  {
+   "name": "Romania",
+   "code": "RO",
+   "cities": [
+    {
+     "name": "Bucharest",
+     "lat": 44.4268,
+     "lng": 26.1025
+    },
+    {
+     "name": "Cluj-Napoca",
+     "lat": 46.7712,
+     "lng": 23.6236
+    },
+    {
+     "name": "Timisoara",
+     "lat": 45.7489,
+     "lng": 21.2087
+    },
+    {
+     "name": "Iasi",
+     "lat": 47.1585,
+     "lng": 27.6014
+    },
+    {
+     "name": "Constanta",
+     "lat": 44.1598,
+     "lng": 28.6348
+    },
+    {
+     "name": "Craiova",
+     "lat": 44.3302,
+     "lng": 23.7949
+    },
+    {
+     "name": "Brasov",
+     "lat": 45.658,
+     "lng": 25.6012
+    },
+    {
+     "name": "Galati",
+     "lat": 45.4353,
+     "lng": 28.008
+    },
+    {
+     "name": "Ploiesti",
+     "lat": 44.9403,
+     "lng": 26.0231
+    },
+    {
+     "name": "Oradea",
+     "lat": 47.0465,
+     "lng": 21.9189
+    },
+    {
+     "name": "Braila",
+     "lat": 45.2692,
+     "lng": 27.9575
+    },
+    {
+     "name": "Arad",
+     "lat": 46.1866,
+     "lng": 21.3123
+    },
+    {
+     "name": "Pitesti",
+     "lat": 44.8565,
+     "lng": 24.8692
+    },
+    {
+     "name": "Sibiu",
+     "lat": 45.7983,
+     "lng": 24.1256
+    },
+    {
+     "name": "Bacau",
+     "lat": 46.567,
+     "lng": 26.9146
+    },
+    {
+     "name": "Targu Mures",
+     "lat": 46.5425,
+     "lng": 24.5575
+    },
+    {
+     "name": "Baia Mare",
+     "lat": 47.6567,
+     "lng": 23.5814
+    },
+    {
+     "name": "Buzau",
+     "lat": 45.15,
+     "lng": 26.8203
+    },
+    {
+     "name": "Satu Mare",
+     "lat": 47.7914,
+     "lng": 22.885
+    },
+    {
+     "name": "Botosani",
+     "lat": 47.7464,
+     "lng": 26.6586
+    },
+    {
+     "name": "Piatra Neamt",
+     "lat": 46.9283,
+     "lng": 26.3722
+    },
+    {
+     "name": "Ramnicu Valcea",
+     "lat": 45.1,
+     "lng": 24.3667
+    },
+    {
+     "name": "Suceava",
+     "lat": 47.6514,
+     "lng": 26.2556
+    },
+    {
+     "name": "Drobeta-Turnu Severin",
+     "lat": 44.6319,
+     "lng": 22.6564
+    },
+    {
+     "name": "Focsani",
+     "lat": 45.6972,
+     "lng": 27.1825
+    },
+    {
+     "name": "Targu Jiu",
+     "lat": 45.0333,
+     "lng": 23.2667
+    },
+    {
+     "name": "Tulcea",
+     "lat": 45.1786,
+     "lng": 28.8039
+    },
+    {
+     "name": "Resita",
+     "lat": 45.3,
+     "lng": 21.89
+    },
+    {
+     "name": "Targoviste",
+     "lat": 44.925,
+     "lng": 25.4561
+    },
+    {
+     "name": "Deva",
+     "lat": 45.8833,
+     "lng": 22.9
+    },
+    {
+     "name": "Alba Iulia",
+     "lat": 46.0667,
+     "lng": 23.58
+    },
+    {
+     "name": "Alexandria",
+     "lat": 43.9808,
+     "lng": 25.3336
+    },
+    {
+     "name": "Azuga",
+     "lat": 45.4467,
+     "lng": 25.5528
+    },
+    {
+     "name": "Barlad",
+     "lat": 46.2278,
+     "lng": 27.6706
+    },
+    {
+     "name": "Bistrita",
+     "lat": 47.1333,
+     "lng": 24.5
+    },
+    {
+     "name": "Bran",
+     "lat": 45.515,
+     "lng": 25.367
+    },
+    {
+     "name": "Busteni",
+     "lat": 45.4111,
+     "lng": 25.5361
+    },
+    {
+     "name": "Calarasi",
+     "lat": 44.2058,
+     "lng": 27.3306
+    },
+    {
+     "name": "Campina",
+     "lat": 45.1264,
+     "lng": 25.735
+    },
+    {
+     "name": "Campulung",
+     "lat": 45.2681,
+     "lng": 25.0472
+    },
+    {
+     "name": "Costinesti",
+     "lat": 43.95,
+     "lng": 28.63
+    },
+    {
+     "name": "Curtea de Arges",
+     "lat": 45.14,
+     "lng": 24.6767
+    },
+    {
+     "name": "Dej",
+     "lat": 47.14,
+     "lng": 23.8756
+    },
+    {
+     "name": "Eforie",
+     "lat": 44.05,
+     "lng": 28.64
+    },
+    {
+     "name": "Fagaras",
+     "lat": 45.8419,
+     "lng": 24.9731
+    },
+    {
+     "name": "Falticeni",
+     "lat": 47.46,
+     "lng": 26.3006
+    },
+    {
+     "name": "Giurgiu",
+     "lat": 43.9037,
+     "lng": 25.9699
+    },
+    {
+     "name": "Gura Humorului",
+     "lat": 47.5533,
+     "lng": 25.8919
+    },
+    {
+     "name": "Husi",
+     "lat": 46.6742,
+     "lng": 28.0578
+    },
+    {
+     "name": "Jupiter",
+     "lat": 43.835,
+     "lng": 28.59
+    },
+    {
+     "name": "Mamaia",
+     "lat": 44.25,
+     "lng": 28.6167
+    },
+    {
+     "name": "Mangalia",
+     "lat": 43.8167,
+     "lng": 28.5833
+    },
+    {
+     "name": "Medias",
+     "lat": 46.1667,
+     "lng": 24.35
+    },
+    {
+     "name": "Miercurea Ciuc",
+     "lat": 46.3597,
+     "lng": 25.8017
+    },
+    {
+     "name": "Navodari",
+     "lat": 44.3167,
+     "lng": 28.6
+    },
+    {
+     "name": "Neptun",
+     "lat": 43.83,
+     "lng": 28.59
+    },
+    {
+     "name": "Olimp",
+     "lat": 43.84,
+     "lng": 28.59
+    },
+    {
+     "name": "Onesti",
+     "lat": 46.25,
+     "lng": 26.7667
+    },
+    {
+     "name": "Otopeni",
+     "lat": 44.55,
+     "lng": 26.07
+    },
+    {
+     "name": "Poiana Brasov",
+     "lat": 45.59,
+     "lng": 25.55
+    },
+    {
+     "name": "Popesti-Leordeni",
+     "lat": 44.38,
+     "lng": 26.17
+    },
+    {
+     "name": "Predeal",
+     "lat": 45.5,
+     "lng": 25.575
+    },
+    {
+     "name": "Radauti",
+     "lat": 47.8425,
+     "lng": 25.9169
+    },
+    {
+     "name": "Rasnov",
+     "lat": 45.59,
+     "lng": 25.46
+    },
+    {
+     "name": "Reghin",
+     "lat": 46.7756,
+     "lng": 24.705
+    },
+    {
+     "name": "Roman",
+     "lat": 46.9236,
+     "lng": 26.9269
+    },
+    {
+     "name": "Saturn",
+     "lat": 43.82,
+     "lng": 28.58
+    },
+    {
+     "name": "Sfantu Gheorghe",
+     "lat": 45.8636,
+     "lng": 25.7875
+    },
+    {
+     "name": "Sighetu Marmatiei",
+     "lat": 47.9294,
+     "lng": 23.8869
+    },
+    {
+     "name": "Sighisoara",
+     "lat": 46.2197,
+     "lng": 24.7925
+    },
+    {
+     "name": "Sinaia",
+     "lat": 45.35,
+     "lng": 25.55
+    },
+    {
+     "name": "Slatina",
+     "lat": 44.4292,
+     "lng": 24.3611
+    },
+    {
+     "name": "Slobozia",
+     "lat": 44.5639,
+     "lng": 27.3661
+    },
+    {
+     "name": "Snagov",
+     "lat": 44.71,
+     "lng": 26.18
+    },
+    {
+     "name": "Tecuci",
+     "lat": 45.8467,
+     "lng": 27.4292
+    },
+    {
+     "name": "Turda",
+     "lat": 46.5667,
+     "lng": 23.7833
+    },
+    {
+     "name": "Vama Veche",
+     "lat": 43.75,
+     "lng": 28.575
+    },
+    {
+     "name": "Vaslui",
+     "lat": 46.6407,
+     "lng": 27.7276
+    },
+    {
+     "name": "Vatra Dornei",
+     "lat": 47.3475,
+     "lng": 25.3572
+    },
+    {
+     "name": "Venus",
+     "lat": 43.825,
+     "lng": 28.585
+    },
+    {
+     "name": "Voluntari",
+     "lat": 44.49,
+     "lng": 26.14
+    },
+    {
+     "name": "Zalau",
+     "lat": 47.1911,
+     "lng": 23.0572
+    }
+   ]
+  }
+ ],
+ "localities": [
+  {
+   "name": "Radhimë",
+   "aliases": [
+    "Radhima"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.3838,
+   "lng": 19.4553,
+   "kind": "village"
+  },
+  {
+   "name": "Orikum",
+   "aliases": [
+    "Orikumi"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.3253,
+   "lng": 19.4711,
+   "kind": "town"
+  },
+  {
+   "name": "Tragjas",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.3167,
+   "lng": 19.5417,
+   "kind": "village"
+  },
+  {
+   "name": "Dukat",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.2833,
+   "lng": 19.5333,
+   "kind": "village"
+  },
+  {
+   "name": "Llogara",
+   "aliases": [
+    "Llogara Pass",
+    "Qafa e Llogarase"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.2,
+   "lng": 19.5833,
+   "kind": "village"
+  },
+  {
+   "name": "Palasë",
+   "aliases": [
+    "Palasa"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.2033,
+   "lng": 19.5967,
+   "kind": "village"
+  },
+  {
+   "name": "Dhërmi",
+   "aliases": [
+    "Drymades",
+    "Drimadhes"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.15,
+   "lng": 19.6417,
+   "kind": "village"
+  },
+  {
+   "name": "Jalë",
+   "aliases": [
+    "Jala",
+    "Jale Beach"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.135,
+   "lng": 19.66,
+   "kind": "beach"
+  },
+  {
+   "name": "Vuno",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.1244,
+   "lng": 19.67,
+   "kind": "village"
+  },
+  {
+   "name": "Himarë",
+   "aliases": [
+    "Himara"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.1017,
+   "lng": 19.7442,
+   "kind": "town"
+  },
+  {
+   "name": "Livadh",
+   "aliases": [
+    "Livadhi"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.115,
+   "lng": 19.73,
+   "kind": "beach"
+  },
+  {
+   "name": "Potam",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.095,
+   "lng": 19.7522,
+   "kind": "beach"
+  },
+  {
+   "name": "Qeparo",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.0561,
+   "lng": 19.8017,
+   "kind": "village"
+  },
+  {
+   "name": "Borsh",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.05,
+   "lng": 19.85,
+   "kind": "village"
+  },
+  {
+   "name": "Piqeras",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 39.9917,
+   "lng": 19.9,
+   "kind": "village"
+  },
+  {
+   "name": "Lukovë",
+   "aliases": [
+    "Lukova"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 39.9667,
+   "lng": 19.9333,
+   "kind": "village"
+  },
+  {
+   "name": "Kanina",
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.4333,
+   "lng": 19.5167,
+   "kind": "village"
+  },
+  {
+   "name": "Selenicë",
+   "aliases": [
+    "Selenica"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.5333,
+   "lng": 19.6333,
+   "kind": "town"
+  },
+  {
+   "name": "Novoselë",
+   "aliases": [
+    "Novosela"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.5667,
+   "lng": 19.4333,
+   "kind": "village"
+  },
+  {
+   "name": "Zvërnec",
+   "aliases": [
+    "Zvernec"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.53,
+   "lng": 19.42,
+   "kind": "village"
+  },
+  {
+   "name": "Nartë",
+   "aliases": [
+    "Narta"
+   ],
+   "city": "Vlore",
+   "country": "Albania",
+   "lat": 40.5333,
+   "lng": 19.45,
+   "kind": "village"
+  },
+  {
+   "name": "Ksamil",
+   "city": "Sarande",
+   "country": "Albania",
+   "lat": 39.7683,
+   "lng": 20.0028,
+   "kind": "town"
+  },
+  {
+   "name": "Butrint",
+   "aliases": [
+    "Butrinti"
+   ],
+   "city": "Sarande",
+   "country": "Albania",
+   "lat": 39.7456,
+   "lng": 20.0206,
+   "kind": "village"
+  },
+  {
+   "name": "Çukë",
+   "aliases": [
+    "Cuka"
+   ],
+   "city": "Sarande",
+   "country": "Albania",
+   "lat": 39.7833,
+   "lng": 20.05,
+   "kind": "village"
+  },
+  {
+   "name": "Xarrë",
+   "aliases": [
+    "Xarra"
+   ],
+   "city": "Sarande",
+   "country": "Albania",
+   "lat": 39.7333,
+   "lng": 20.1,
+   "kind": "village"
+  },
+  {
+   "name": "Delvinë",
+   "aliases": [
+    "Delvina"
+   ],
+   "city": "Sarande",
+   "country": "Albania",
+   "lat": 39.9481,
+   "lng": 20.0967,
+   "kind": "town"
+  },
+  {
+   "name": "Konispol",
+   "city": "Sarande",
+   "country": "Albania",
+   "lat": 39.6592,
+   "lng": 20.1794,
+   "kind": "town"
+  },
+  {
+   "name": "Kamëz",
+   "aliases": [
+    "Kamza"
+   ],
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.3833,
+   "lng": 19.7667,
+   "kind": "town"
+  },
+  {
+   "name": "Vorë",
+   "aliases": [
+    "Vora"
+   ],
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.3931,
+   "lng": 19.6553,
+   "kind": "town"
+  },
+  {
+   "name": "Kashar",
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.3489,
+   "lng": 19.7311,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Sauk",
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.2947,
+   "lng": 19.8306,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Farkë",
+   "aliases": [
+    "Farka"
+   ],
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.3,
+   "lng": 19.8667,
+   "kind": "village"
+  },
+  {
+   "name": "Petrelë",
+   "aliases": [
+    "Petrela"
+   ],
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.2597,
+   "lng": 19.8353,
+   "kind": "village"
+  },
+  {
+   "name": "Dajt",
+   "aliases": [
+    "Dajti"
+   ],
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.3667,
+   "lng": 19.9333,
+   "kind": "village"
+  },
+  {
+   "name": "Ndroq",
+   "city": "Tirana",
+   "country": "Albania",
+   "lat": 41.27,
+   "lng": 19.65,
+   "kind": "village"
+  },
+  {
+   "name": "Golem",
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.25,
+   "lng": 19.5,
+   "kind": "resort"
+  },
+  {
+   "name": "Qerret",
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.2333,
+   "lng": 19.5167,
+   "kind": "resort"
+  },
+  {
+   "name": "Shkëmbi i Kavajës",
+   "aliases": [
+    "Shkembi i Kavajes"
+   ],
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.28,
+   "lng": 19.465,
+   "kind": "resort"
+  },
+  {
+   "name": "Sukth",
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.4028,
+   "lng": 19.5253,
+   "kind": "town"
+  },
+  {
+   "name": "Shijak",
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.3453,
+   "lng": 19.5675,
+   "kind": "town"
+  },
+  {
+   "name": "Manëz",
+   "aliases": [
+    "Maneza"
+   ],
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.4333,
+   "lng": 19.5333,
+   "kind": "village"
+  },
+  {
+   "name": "Gjiri i Lalzit",
+   "aliases": [
+    "Lalzit Bay",
+    "Lalzi Bay",
+    "Lalzit",
+    "Lalzi",
+    "Gjiri i Lalzi"
+   ],
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.51,
+   "lng": 19.525,
+   "kind": "resort"
+  },
+  {
+   "name": "Kepi i Rodonit",
+   "aliases": [
+    "Cape of Rodon",
+    "Cape Rodon",
+    "Rodon"
+   ],
+   "city": "Durres",
+   "country": "Albania",
+   "lat": 41.5833,
+   "lng": 19.45,
+   "kind": "beach"
+  },
+  {
+   "name": "Spille",
+   "city": "Kavaje",
+   "country": "Albania",
+   "lat": 41.1,
+   "lng": 19.4667,
+   "kind": "beach"
+  },
+  {
+   "name": "Velipojë",
+   "aliases": [
+    "Velipoja"
+   ],
+   "city": "Shkoder",
+   "country": "Albania",
+   "lat": 41.8667,
+   "lng": 19.4167,
+   "kind": "resort"
+  },
+  {
+   "name": "Shirokë",
+   "aliases": [
+    "Shiroka"
+   ],
+   "city": "Shkoder",
+   "country": "Albania",
+   "lat": 42.05,
+   "lng": 19.4667,
+   "kind": "village"
+  },
+  {
+   "name": "Zogaj",
+   "city": "Shkoder",
+   "country": "Albania",
+   "lat": 42.0667,
+   "lng": 19.4167,
+   "kind": "village"
+  },
+  {
+   "name": "Koplik",
+   "city": "Shkoder",
+   "country": "Albania",
+   "lat": 42.2064,
+   "lng": 19.4364,
+   "kind": "town"
+  },
+  {
+   "name": "Razëm",
+   "aliases": [
+    "Razma"
+   ],
+   "city": "Shkoder",
+   "country": "Albania",
+   "lat": 42.2833,
+   "lng": 19.55,
+   "kind": "village"
+  },
+  {
+   "name": "Theth",
+   "aliases": [
+    "Thethi"
+   ],
+   "city": "Shkoder",
+   "country": "Albania",
+   "lat": 42.3947,
+   "lng": 19.7869,
+   "kind": "village"
+  },
+  {
+   "name": "Shëngjin",
+   "aliases": [
+    "Shengjini"
+   ],
+   "city": "Lezhe",
+   "country": "Albania",
+   "lat": 41.8139,
+   "lng": 19.5942,
+   "kind": "resort"
+  },
+  {
+   "name": "Tale",
+   "aliases": [
+    "Tale Beach"
+   ],
+   "city": "Lezhe",
+   "country": "Albania",
+   "lat": 41.7833,
+   "lng": 19.5833,
+   "kind": "beach"
+  },
+  {
+   "name": "Fushë-Krujë",
+   "aliases": [
+    "Fushe Kruje"
+   ],
+   "city": "Kruje",
+   "country": "Albania",
+   "lat": 41.4783,
+   "lng": 19.7167,
+   "kind": "town"
+  },
+  {
+   "name": "Lazarat",
+   "city": "Gjirokaster",
+   "country": "Albania",
+   "lat": 40.0333,
+   "lng": 20.1333,
+   "kind": "village"
+  },
+  {
+   "name": "Libohovë",
+   "aliases": [
+    "Libohova"
+   ],
+   "city": "Gjirokaster",
+   "country": "Albania",
+   "lat": 40.0333,
+   "lng": 20.2667,
+   "kind": "town"
+  },
+  {
+   "name": "Tepelenë",
+   "aliases": [
+    "Tepelena"
+   ],
+   "city": "Gjirokaster",
+   "country": "Albania",
+   "lat": 40.2969,
+   "lng": 20.0189,
+   "kind": "town"
+  },
+  {
+   "name": "Voskopojë",
+   "aliases": [
+    "Voskopoja"
+   ],
+   "city": "Korce",
+   "country": "Albania",
+   "lat": 40.6333,
+   "lng": 20.5833,
+   "kind": "village"
+  },
+  {
+   "name": "Dardhë",
+   "aliases": [
+    "Dardha"
+   ],
+   "city": "Korce",
+   "country": "Albania",
+   "lat": 40.5667,
+   "lng": 20.75,
+   "kind": "village"
+  },
+  {
+   "name": "Maliq",
+   "city": "Korce",
+   "country": "Albania",
+   "lat": 40.7167,
+   "lng": 20.7,
+   "kind": "town"
+  },
+  {
+   "name": "Lin",
+   "city": "Pogradec",
+   "country": "Albania",
+   "lat": 41.0333,
+   "lng": 20.6333,
+   "kind": "village"
+  },
+  {
+   "name": "Tushemisht",
+   "city": "Pogradec",
+   "country": "Albania",
+   "lat": 40.8833,
+   "lng": 20.6833,
+   "kind": "village"
+  },
+  {
+   "name": "Drilon",
+   "city": "Pogradec",
+   "country": "Albania",
+   "lat": 40.8917,
+   "lng": 20.675,
+   "kind": "village"
+  },
+  {
+   "name": "Kuçovë",
+   "aliases": [
+    "Kucova"
+   ],
+   "city": "Berat",
+   "country": "Albania",
+   "lat": 40.8,
+   "lng": 19.9167,
+   "kind": "town"
+  },
+  {
+   "name": "Ura Vajgurore",
+   "city": "Berat",
+   "country": "Albania",
+   "lat": 40.7667,
+   "lng": 19.8833,
+   "kind": "town"
+  },
+  {
+   "name": "Patos",
+   "city": "Fier",
+   "country": "Albania",
+   "lat": 40.6833,
+   "lng": 19.6167,
+   "kind": "town"
+  },
+  {
+   "name": "Apollonia",
+   "aliases": [
+    "Apoloni",
+    "Pojan"
+   ],
+   "city": "Fier",
+   "country": "Albania",
+   "lat": 40.7167,
+   "lng": 19.4667,
+   "kind": "village"
+  },
+  {
+   "name": "Seman",
+   "city": "Fier",
+   "country": "Albania",
+   "lat": 40.8333,
+   "lng": 19.4333,
+   "kind": "beach"
+  },
+  {
+   "name": "Bečići",
+   "aliases": [
+    "Becici"
+   ],
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.2833,
+   "lng": 18.8667,
+   "kind": "resort"
+  },
+  {
+   "name": "Rafailovići",
+   "aliases": [
+    "Rafailovici"
+   ],
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.2794,
+   "lng": 18.8619,
+   "kind": "resort"
+  },
+  {
+   "name": "Pržno",
+   "aliases": [
+    "Przno"
+   ],
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.2667,
+   "lng": 18.8917,
+   "kind": "village"
+  },
+  {
+   "name": "Miločer",
+   "aliases": [
+    "Milocer"
+   ],
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.265,
+   "lng": 18.885,
+   "kind": "resort"
+  },
+  {
+   "name": "Sveti Stefan",
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.2564,
+   "lng": 18.8917,
+   "kind": "resort"
+  },
+  {
+   "name": "Petrovac",
+   "aliases": [
+    "Petrovac na Moru"
+   ],
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.2058,
+   "lng": 18.9439,
+   "kind": "town"
+  },
+  {
+   "name": "Buljarica",
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.19,
+   "lng": 18.96,
+   "kind": "beach"
+  },
+  {
+   "name": "Jaz",
+   "aliases": [
+    "Jaz Beach"
+   ],
+   "city": "Budva",
+   "country": "Montenegro",
+   "lat": 42.29,
+   "lng": 18.81,
+   "kind": "beach"
+  },
+  {
+   "name": "Dobrota",
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.4519,
+   "lng": 18.7639,
+   "kind": "village"
+  },
+  {
+   "name": "Perast",
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.4869,
+   "lng": 18.6994,
+   "kind": "town"
+  },
+  {
+   "name": "Prčanj",
+   "aliases": [
+    "Prcanj"
+   ],
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.4553,
+   "lng": 18.7328,
+   "kind": "village"
+  },
+  {
+   "name": "Risan",
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.5158,
+   "lng": 18.6961,
+   "kind": "town"
+  },
+  {
+   "name": "Muo",
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.4283,
+   "lng": 18.755,
+   "kind": "village"
+  },
+  {
+   "name": "Stoliv",
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.4667,
+   "lng": 18.7167,
+   "kind": "village"
+  },
+  {
+   "name": "Orahovac",
+   "city": "Kotor",
+   "country": "Montenegro",
+   "lat": 42.475,
+   "lng": 18.725,
+   "kind": "village"
+  },
+  {
+   "name": "Igalo",
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.4569,
+   "lng": 18.5167,
+   "kind": "town"
+  },
+  {
+   "name": "Meljine",
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.4506,
+   "lng": 18.5583,
+   "kind": "village"
+  },
+  {
+   "name": "Kumbor",
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.4544,
+   "lng": 18.5844,
+   "kind": "village"
+  },
+  {
+   "name": "Đenovići",
+   "aliases": [
+    "Djenovici",
+    "Denovici"
+   ],
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.4636,
+   "lng": 18.5806,
+   "kind": "village"
+  },
+  {
+   "name": "Baošići",
+   "aliases": [
+    "Baosici"
+   ],
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.4592,
+   "lng": 18.5972,
+   "kind": "village"
+  },
+  {
+   "name": "Bijela",
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.45,
+   "lng": 18.6167,
+   "kind": "village"
+  },
+  {
+   "name": "Rose",
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.42,
+   "lng": 18.55,
+   "kind": "village"
+  },
+  {
+   "name": "Žanjice",
+   "aliases": [
+    "Zanjice"
+   ],
+   "city": "Herceg Novi",
+   "country": "Montenegro",
+   "lat": 42.4144,
+   "lng": 18.5589,
+   "kind": "beach"
+  },
+  {
+   "name": "Sutomore",
+   "city": "Bar",
+   "country": "Montenegro",
+   "lat": 42.1403,
+   "lng": 19.0453,
+   "kind": "town"
+  },
+  {
+   "name": "Čanj",
+   "aliases": [
+    "Canj"
+   ],
+   "city": "Bar",
+   "country": "Montenegro",
+   "lat": 42.1667,
+   "lng": 18.9833,
+   "kind": "beach"
+  },
+  {
+   "name": "Utjeha",
+   "city": "Bar",
+   "country": "Montenegro",
+   "lat": 42.0333,
+   "lng": 19.1333,
+   "kind": "village"
+  },
+  {
+   "name": "Dobra Voda",
+   "city": "Bar",
+   "country": "Montenegro",
+   "lat": 42.0167,
+   "lng": 19.15,
+   "kind": "village"
+  },
+  {
+   "name": "Virpazar",
+   "city": "Bar",
+   "country": "Montenegro",
+   "lat": 42.2419,
+   "lng": 19.0906,
+   "kind": "village"
+  },
+  {
+   "name": "Velika Plaža",
+   "aliases": [
+    "Velika Plaza",
+    "Long Beach"
+   ],
+   "city": "Ulcinj",
+   "country": "Montenegro",
+   "lat": 41.9,
+   "lng": 19.2833,
+   "kind": "beach"
+  },
+  {
+   "name": "Ada Bojana",
+   "city": "Ulcinj",
+   "country": "Montenegro",
+   "lat": 41.85,
+   "lng": 19.3333,
+   "kind": "beach"
+  },
+  {
+   "name": "Valdanos",
+   "city": "Ulcinj",
+   "country": "Montenegro",
+   "lat": 41.94,
+   "lng": 19.1667,
+   "kind": "beach"
+  },
+  {
+   "name": "Donja Lastva",
+   "city": "Tivat",
+   "country": "Montenegro",
+   "lat": 42.44,
+   "lng": 18.69,
+   "kind": "village"
+  },
+  {
+   "name": "Porto Montenegro",
+   "city": "Tivat",
+   "country": "Montenegro",
+   "lat": 42.434,
+   "lng": 18.687,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Krašići",
+   "aliases": [
+    "Krasici"
+   ],
+   "city": "Tivat",
+   "country": "Montenegro",
+   "lat": 42.4,
+   "lng": 18.6667,
+   "kind": "village"
+  },
+  {
+   "name": "Radovići",
+   "aliases": [
+    "Radovici"
+   ],
+   "city": "Tivat",
+   "country": "Montenegro",
+   "lat": 42.3833,
+   "lng": 18.6833,
+   "kind": "village"
+  },
+  {
+   "name": "Tuzi",
+   "city": "Podgorica",
+   "country": "Montenegro",
+   "lat": 42.3653,
+   "lng": 19.3319,
+   "kind": "town"
+  },
+  {
+   "name": "Golubovci",
+   "city": "Podgorica",
+   "country": "Montenegro",
+   "lat": 42.33,
+   "lng": 19.22,
+   "kind": "town"
+  },
+  {
+   "name": "Kaštela",
+   "aliases": [
+    "Kastela"
+   ],
+   "city": "Split",
+   "country": "Croatia",
+   "lat": 43.55,
+   "lng": 16.38,
+   "kind": "town"
+  },
+  {
+   "name": "Podstrana",
+   "city": "Split",
+   "country": "Croatia",
+   "lat": 43.49,
+   "lng": 16.54,
+   "kind": "town"
+  },
+  {
+   "name": "Stobreč",
+   "aliases": [
+    "Stobrec"
+   ],
+   "city": "Split",
+   "country": "Croatia",
+   "lat": 43.505,
+   "lng": 16.525,
+   "kind": "village"
+  },
+  {
+   "name": "Solin",
+   "city": "Split",
+   "country": "Croatia",
+   "lat": 43.54,
+   "lng": 16.49,
+   "kind": "town"
+  },
+  {
+   "name": "Seget",
+   "aliases": [
+    "Seget Donji"
+   ],
+   "city": "Trogir",
+   "country": "Croatia",
+   "lat": 43.52,
+   "lng": 16.23,
+   "kind": "village"
+  },
+  {
+   "name": "Baška Voda",
+   "aliases": [
+    "Baska Voda"
+   ],
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.3567,
+   "lng": 16.95,
+   "kind": "town"
+  },
+  {
+   "name": "Brela",
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.3722,
+   "lng": 16.925,
+   "kind": "town"
+  },
+  {
+   "name": "Tučepi",
+   "aliases": [
+    "Tucepi"
+   ],
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.2761,
+   "lng": 17.0561,
+   "kind": "town"
+  },
+  {
+   "name": "Podgora",
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.2436,
+   "lng": 17.0678,
+   "kind": "town"
+  },
+  {
+   "name": "Živogošće",
+   "aliases": [
+    "Zivogosce"
+   ],
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.2,
+   "lng": 17.1667,
+   "kind": "village"
+  },
+  {
+   "name": "Drvenik",
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.175,
+   "lng": 17.25,
+   "kind": "village"
+  },
+  {
+   "name": "Gradac",
+   "city": "Makarska",
+   "country": "Croatia",
+   "lat": 43.15,
+   "lng": 17.25,
+   "kind": "town"
+  },
+  {
+   "name": "Mlini",
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.63,
+   "lng": 18.17,
+   "kind": "village"
+  },
+  {
+   "name": "Srebreno",
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.635,
+   "lng": 18.18,
+   "kind": "village"
+  },
+  {
+   "name": "Orašac",
+   "aliases": [
+    "Orasac"
+   ],
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.71,
+   "lng": 18.01,
+   "kind": "village"
+  },
+  {
+   "name": "Zaton",
+   "aliases": [
+    "Zaton Mali"
+   ],
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.69,
+   "lng": 18.04,
+   "kind": "village"
+  },
+  {
+   "name": "Trsteno",
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.73,
+   "lng": 17.98,
+   "kind": "village"
+  },
+  {
+   "name": "Slano",
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.7833,
+   "lng": 17.8833,
+   "kind": "village"
+  },
+  {
+   "name": "Ston",
+   "city": "Dubrovnik",
+   "country": "Croatia",
+   "lat": 42.84,
+   "lng": 17.69,
+   "kind": "town"
+  },
+  {
+   "name": "Sukošan",
+   "aliases": [
+    "Sukosan"
+   ],
+   "city": "Zadar",
+   "country": "Croatia",
+   "lat": 43.97,
+   "lng": 15.31,
+   "kind": "town"
+  },
+  {
+   "name": "Bibinje",
+   "city": "Zadar",
+   "country": "Croatia",
+   "lat": 44.06,
+   "lng": 15.31,
+   "kind": "village"
+  },
+  {
+   "name": "Petrčane",
+   "aliases": [
+    "Petrcane"
+   ],
+   "city": "Zadar",
+   "country": "Croatia",
+   "lat": 44.17,
+   "lng": 15.16,
+   "kind": "village"
+  },
+  {
+   "name": "Nin",
+   "city": "Zadar",
+   "country": "Croatia",
+   "lat": 44.24,
+   "lng": 15.18,
+   "kind": "town"
+  },
+  {
+   "name": "Privlaka",
+   "city": "Zadar",
+   "country": "Croatia",
+   "lat": 44.265,
+   "lng": 15.14,
+   "kind": "village"
+  },
+  {
+   "name": "Lovran",
+   "city": "Opatija",
+   "country": "Croatia",
+   "lat": 45.29,
+   "lng": 14.275,
+   "kind": "town"
+  },
+  {
+   "name": "Ičići",
+   "aliases": [
+    "Icici"
+   ],
+   "city": "Opatija",
+   "country": "Croatia",
+   "lat": 45.33,
+   "lng": 14.28,
+   "kind": "village"
+  },
+  {
+   "name": "Mošćenička Draga",
+   "aliases": [
+    "Moscenicka Draga"
+   ],
+   "city": "Opatija",
+   "country": "Croatia",
+   "lat": 45.2367,
+   "lng": 14.2467,
+   "kind": "village"
+  },
+  {
+   "name": "Crikvenica",
+   "city": "Rijeka",
+   "country": "Croatia",
+   "lat": 45.1767,
+   "lng": 14.6928,
+   "kind": "town"
+  },
+  {
+   "name": "Novi Vinodolski",
+   "city": "Rijeka",
+   "country": "Croatia",
+   "lat": 45.1283,
+   "lng": 14.7883,
+   "kind": "town"
+  },
+  {
+   "name": "Kraljevica",
+   "city": "Rijeka",
+   "country": "Croatia",
+   "lat": 45.27,
+   "lng": 14.57,
+   "kind": "town"
+  },
+  {
+   "name": "Kostrena",
+   "city": "Rijeka",
+   "country": "Croatia",
+   "lat": 45.29,
+   "lng": 14.53,
+   "kind": "village"
+  },
+  {
+   "name": "Baška",
+   "aliases": [
+    "Baska"
+   ],
+   "city": "Krk",
+   "country": "Croatia",
+   "lat": 44.97,
+   "lng": 14.75,
+   "kind": "town"
+  },
+  {
+   "name": "Malinska",
+   "city": "Krk",
+   "country": "Croatia",
+   "lat": 45.12,
+   "lng": 14.53,
+   "kind": "town"
+  },
+  {
+   "name": "Njivice",
+   "city": "Krk",
+   "country": "Croatia",
+   "lat": 45.1667,
+   "lng": 14.55,
+   "kind": "village"
+  },
+  {
+   "name": "Punat",
+   "city": "Krk",
+   "country": "Croatia",
+   "lat": 45.02,
+   "lng": 14.63,
+   "kind": "town"
+  },
+  {
+   "name": "Vrbnik",
+   "city": "Krk",
+   "country": "Croatia",
+   "lat": 45.08,
+   "lng": 14.67,
+   "kind": "village"
+  },
+  {
+   "name": "Omišalj",
+   "aliases": [
+    "Omisalj"
+   ],
+   "city": "Krk",
+   "country": "Croatia",
+   "lat": 45.21,
+   "lng": 14.56,
+   "kind": "village"
+  },
+  {
+   "name": "Banjole",
+   "city": "Pula",
+   "country": "Croatia",
+   "lat": 44.82,
+   "lng": 13.84,
+   "kind": "village"
+  },
+  {
+   "name": "Premantura",
+   "city": "Pula",
+   "country": "Croatia",
+   "lat": 44.79,
+   "lng": 13.92,
+   "kind": "village"
+  },
+  {
+   "name": "Štinjan",
+   "aliases": [
+    "Stinjan"
+   ],
+   "city": "Pula",
+   "country": "Croatia",
+   "lat": 44.9047,
+   "lng": 13.8125,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Vodnjan",
+   "aliases": [
+    "Dignano"
+   ],
+   "city": "Pula",
+   "country": "Croatia",
+   "lat": 44.9614,
+   "lng": 13.8508,
+   "kind": "town"
+  },
+  {
+   "name": "Marčana",
+   "aliases": [
+    "Marcana"
+   ],
+   "city": "Pula",
+   "country": "Croatia",
+   "lat": 44.9553,
+   "lng": 13.9547,
+   "kind": "village"
+  },
+  {
+   "name": "Pomer",
+   "city": "Medulin",
+   "country": "Croatia",
+   "lat": 44.8211,
+   "lng": 13.8967,
+   "kind": "village"
+  },
+  {
+   "name": "Ližnjan",
+   "aliases": [
+    "Liznjan",
+    "Lisignano"
+   ],
+   "city": "Medulin",
+   "country": "Croatia",
+   "lat": 44.825,
+   "lng": 13.96,
+   "kind": "village"
+  },
+  {
+   "name": "Rogoznica",
+   "city": "Sibenik",
+   "country": "Croatia",
+   "lat": 43.53,
+   "lng": 15.97,
+   "kind": "town"
+  },
+  {
+   "name": "Brodarica",
+   "city": "Sibenik",
+   "country": "Croatia",
+   "lat": 43.7,
+   "lng": 15.9,
+   "kind": "village"
+  },
+  {
+   "name": "Grebaštica",
+   "aliases": [
+    "Grebastica"
+   ],
+   "city": "Sibenik",
+   "country": "Croatia",
+   "lat": 43.65,
+   "lng": 15.92,
+   "kind": "village"
+  },
+  {
+   "name": "Tribunj",
+   "city": "Sibenik",
+   "country": "Croatia",
+   "lat": 43.75,
+   "lng": 15.75,
+   "kind": "village"
+  },
+  {
+   "name": "Pirovac",
+   "city": "Sibenik",
+   "country": "Croatia",
+   "lat": 43.82,
+   "lng": 15.68,
+   "kind": "town"
+  },
+  {
+   "name": "Glyfada",
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 37.8667,
+   "lng": 23.75,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Voula",
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 37.8467,
+   "lng": 23.7667,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Vouliagmeni",
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 37.81,
+   "lng": 23.78,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Varkiza",
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 37.82,
+   "lng": 23.8,
+   "kind": "resort"
+  },
+  {
+   "name": "Piraeus",
+   "aliases": [
+    "Pireas"
+   ],
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 37.9475,
+   "lng": 23.6425,
+   "kind": "town"
+  },
+  {
+   "name": "Kifissia",
+   "aliases": [
+    "Kifisia"
+   ],
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 38.0736,
+   "lng": 23.8103,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Rafina",
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 38.025,
+   "lng": 24.0056,
+   "kind": "town"
+  },
+  {
+   "name": "Sounio",
+   "aliases": [
+    "Sounion"
+   ],
+   "city": "Athens",
+   "country": "Greece",
+   "lat": 37.65,
+   "lng": 24.025,
+   "kind": "village"
+  },
+  {
+   "name": "Kalamaria",
+   "city": "Thessaloniki",
+   "country": "Greece",
+   "lat": 40.58,
+   "lng": 22.95,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Panorama",
+   "city": "Thessaloniki",
+   "country": "Greece",
+   "lat": 40.5883,
+   "lng": 23.0464,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Peraia",
+   "aliases": [
+    "Perea"
+   ],
+   "city": "Thessaloniki",
+   "country": "Greece",
+   "lat": 40.5,
+   "lng": 22.92,
+   "kind": "town"
+  },
+  {
+   "name": "Platanias",
+   "city": "Chania",
+   "country": "Greece",
+   "lat": 35.51,
+   "lng": 23.89,
+   "kind": "resort"
+  },
+  {
+   "name": "Kissamos",
+   "city": "Chania",
+   "country": "Greece",
+   "lat": 35.495,
+   "lng": 23.655,
+   "kind": "town"
+  },
+  {
+   "name": "Georgioupoli",
+   "city": "Chania",
+   "country": "Greece",
+   "lat": 35.36,
+   "lng": 24.26,
+   "kind": "resort"
+  },
+  {
+   "name": "Almyrida",
+   "city": "Chania",
+   "country": "Greece",
+   "lat": 35.38,
+   "lng": 24.2,
+   "kind": "village"
+  },
+  {
+   "name": "Hersonissos",
+   "aliases": [
+    "Chersonisos"
+   ],
+   "city": "Heraklion",
+   "country": "Greece",
+   "lat": 35.32,
+   "lng": 25.39,
+   "kind": "resort"
+  },
+  {
+   "name": "Malia",
+   "city": "Heraklion",
+   "country": "Greece",
+   "lat": 35.29,
+   "lng": 25.46,
+   "kind": "resort"
+  },
+  {
+   "name": "Gouves",
+   "city": "Heraklion",
+   "country": "Greece",
+   "lat": 35.34,
+   "lng": 25.29,
+   "kind": "village"
+  },
+  {
+   "name": "Lindos",
+   "city": "Rhodes",
+   "country": "Greece",
+   "lat": 36.0917,
+   "lng": 28.0872,
+   "kind": "village"
+  },
+  {
+   "name": "Faliraki",
+   "city": "Rhodes",
+   "country": "Greece",
+   "lat": 36.34,
+   "lng": 28.2,
+   "kind": "resort"
+  },
+  {
+   "name": "Ialysos",
+   "aliases": [
+    "Ialyssos",
+    "Trianta"
+   ],
+   "city": "Rhodes",
+   "country": "Greece",
+   "lat": 36.42,
+   "lng": 28.16,
+   "kind": "town"
+  },
+  {
+   "name": "Pefkos",
+   "aliases": [
+    "Pefki"
+   ],
+   "city": "Rhodes",
+   "country": "Greece",
+   "lat": 36.07,
+   "lng": 28.07,
+   "kind": "resort"
+  },
+  {
+   "name": "Paleokastritsa",
+   "city": "Corfu",
+   "country": "Greece",
+   "lat": 39.675,
+   "lng": 19.71,
+   "kind": "resort"
+  },
+  {
+   "name": "Sidari",
+   "city": "Corfu",
+   "country": "Greece",
+   "lat": 39.79,
+   "lng": 19.7,
+   "kind": "resort"
+  },
+  {
+   "name": "Kassiopi",
+   "city": "Corfu",
+   "country": "Greece",
+   "lat": 39.79,
+   "lng": 19.92,
+   "kind": "village"
+  },
+  {
+   "name": "Benitses",
+   "city": "Corfu",
+   "country": "Greece",
+   "lat": 39.54,
+   "lng": 19.91,
+   "kind": "village"
+  },
+  {
+   "name": "Fiskardo",
+   "city": "Kefalonia",
+   "country": "Greece",
+   "lat": 38.46,
+   "lng": 20.575,
+   "kind": "village"
+  },
+  {
+   "name": "Assos",
+   "city": "Kefalonia",
+   "country": "Greece",
+   "lat": 38.38,
+   "lng": 20.54,
+   "kind": "village"
+  },
+  {
+   "name": "Lassi",
+   "city": "Kefalonia",
+   "country": "Greece",
+   "lat": 38.17,
+   "lng": 20.47,
+   "kind": "resort"
+  },
+  {
+   "name": "Laganas",
+   "city": "Zakynthos",
+   "country": "Greece",
+   "lat": 37.72,
+   "lng": 20.86,
+   "kind": "resort"
+  },
+  {
+   "name": "Tsilivi",
+   "city": "Zakynthos",
+   "country": "Greece",
+   "lat": 37.81,
+   "lng": 20.85,
+   "kind": "resort"
+  },
+  {
+   "name": "Nidri",
+   "aliases": [
+    "Nydri"
+   ],
+   "city": "Lefkada",
+   "country": "Greece",
+   "lat": 38.7,
+   "lng": 20.71,
+   "kind": "resort"
+  },
+  {
+   "name": "Vasiliki",
+   "city": "Lefkada",
+   "country": "Greece",
+   "lat": 38.63,
+   "lng": 20.61,
+   "kind": "village"
+  },
+  {
+   "name": "Agios Nikitas",
+   "city": "Lefkada",
+   "country": "Greece",
+   "lat": 38.79,
+   "lng": 20.61,
+   "kind": "village"
+  },
+  {
+   "name": "Naoussa",
+   "city": "Paros",
+   "country": "Greece",
+   "lat": 37.125,
+   "lng": 25.24,
+   "kind": "town"
+  },
+  {
+   "name": "Agios Prokopios",
+   "city": "Naxos",
+   "country": "Greece",
+   "lat": 37.08,
+   "lng": 25.36,
+   "kind": "resort"
+  },
+  {
+   "name": "Oia",
+   "city": "Santorini",
+   "country": "Greece",
+   "lat": 36.46,
+   "lng": 25.376,
+   "kind": "village"
+  },
+  {
+   "name": "Fira",
+   "aliases": [
+    "Thira"
+   ],
+   "city": "Santorini",
+   "country": "Greece",
+   "lat": 36.4167,
+   "lng": 25.4333,
+   "kind": "town"
+  },
+  {
+   "name": "Kamari",
+   "city": "Santorini",
+   "country": "Greece",
+   "lat": 36.37,
+   "lng": 25.48,
+   "kind": "resort"
+  },
+  {
+   "name": "Perissa",
+   "city": "Santorini",
+   "country": "Greece",
+   "lat": 36.355,
+   "lng": 25.47,
+   "kind": "resort"
+  },
+  {
+   "name": "Ornos",
+   "city": "Mykonos",
+   "country": "Greece",
+   "lat": 37.42,
+   "lng": 25.32,
+   "kind": "resort"
+  },
+  {
+   "name": "Platis Gialos",
+   "city": "Mykonos",
+   "country": "Greece",
+   "lat": 37.41,
+   "lng": 25.34,
+   "kind": "resort"
+  },
+  {
+   "name": "Ano Mera",
+   "city": "Mykonos",
+   "country": "Greece",
+   "lat": 37.44,
+   "lng": 25.39,
+   "kind": "village"
+  },
+  {
+   "name": "Sunny Beach",
+   "aliases": [
+    "Slanchev Bryag"
+   ],
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.69,
+   "lng": 27.71,
+   "kind": "resort"
+  },
+  {
+   "name": "Nesebar",
+   "aliases": [
+    "Nessebar"
+   ],
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.6592,
+   "lng": 27.7364,
+   "kind": "town"
+  },
+  {
+   "name": "Sveti Vlas",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.71,
+   "lng": 27.75,
+   "kind": "resort"
+  },
+  {
+   "name": "Ravda",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.64,
+   "lng": 27.68,
+   "kind": "village"
+  },
+  {
+   "name": "Pomorie",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.5589,
+   "lng": 27.6417,
+   "kind": "town"
+  },
+  {
+   "name": "Sozopol",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.4181,
+   "lng": 27.695,
+   "kind": "town"
+  },
+  {
+   "name": "Chernomorets",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.445,
+   "lng": 27.645,
+   "kind": "town"
+  },
+  {
+   "name": "Primorsko",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.2653,
+   "lng": 27.7583,
+   "kind": "town"
+  },
+  {
+   "name": "Kiten",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.235,
+   "lng": 27.78,
+   "kind": "resort"
+  },
+  {
+   "name": "Tsarevo",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.1697,
+   "lng": 27.8489,
+   "kind": "town"
+  },
+  {
+   "name": "Ahtopol",
+   "city": "Burgas",
+   "country": "Bulgaria",
+   "lat": 42.1,
+   "lng": 27.94,
+   "kind": "town"
+  },
+  {
+   "name": "Golden Sands",
+   "aliases": [
+    "Zlatni Pyasatsi"
+   ],
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 43.2833,
+   "lng": 28.0417,
+   "kind": "resort"
+  },
+  {
+   "name": "Sveti Konstantin",
+   "aliases": [
+    "Saints Constantine and Helena"
+   ],
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 43.23,
+   "lng": 28.01,
+   "kind": "resort"
+  },
+  {
+   "name": "Albena",
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 43.37,
+   "lng": 28.08,
+   "kind": "resort"
+  },
+  {
+   "name": "Balchik",
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 43.405,
+   "lng": 28.16,
+   "kind": "town"
+  },
+  {
+   "name": "Kavarna",
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 43.43,
+   "lng": 28.34,
+   "kind": "town"
+  },
+  {
+   "name": "Byala",
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 42.8767,
+   "lng": 27.8867,
+   "kind": "town"
+  },
+  {
+   "name": "Obzor",
+   "city": "Varna",
+   "country": "Bulgaria",
+   "lat": 42.8167,
+   "lng": 27.8833,
+   "kind": "town"
+  },
+  {
+   "name": "Bankya",
+   "city": "Sofia",
+   "country": "Bulgaria",
+   "lat": 42.71,
+   "lng": 23.15,
+   "kind": "town"
+  },
+  {
+   "name": "Boyana",
+   "city": "Sofia",
+   "country": "Bulgaria",
+   "lat": 42.65,
+   "lng": 23.27,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Dragalevtsi",
+   "city": "Sofia",
+   "country": "Bulgaria",
+   "lat": 42.63,
+   "lng": 23.31,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Simeonovo",
+   "city": "Sofia",
+   "country": "Bulgaria",
+   "lat": 42.62,
+   "lng": 23.33,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Bansko",
+   "city": "Blagoevgrad",
+   "country": "Bulgaria",
+   "lat": 41.8383,
+   "lng": 23.4881,
+   "kind": "town"
+  },
+  {
+   "name": "Razlog",
+   "city": "Blagoevgrad",
+   "country": "Bulgaria",
+   "lat": 41.885,
+   "lng": 23.47,
+   "kind": "town"
+  },
+  {
+   "name": "Sandanski",
+   "city": "Blagoevgrad",
+   "country": "Bulgaria",
+   "lat": 41.5667,
+   "lng": 23.2833,
+   "kind": "town"
+  },
+  {
+   "name": "Melnik",
+   "city": "Blagoevgrad",
+   "country": "Bulgaria",
+   "lat": 41.525,
+   "lng": 23.395,
+   "kind": "town"
+  },
+  {
+   "name": "Mamaia",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 44.25,
+   "lng": 28.6167,
+   "kind": "resort"
+  },
+  {
+   "name": "Năvodari",
+   "aliases": [
+    "Navodari"
+   ],
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 44.3167,
+   "lng": 28.6,
+   "kind": "town"
+  },
+  {
+   "name": "Eforie",
+   "aliases": [
+    "Eforie Nord",
+    "Eforie Sud"
+   ],
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 44.05,
+   "lng": 28.64,
+   "kind": "resort"
+  },
+  {
+   "name": "Costinești",
+   "aliases": [
+    "Costinesti"
+   ],
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.95,
+   "lng": 28.63,
+   "kind": "resort"
+  },
+  {
+   "name": "Olimp",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.84,
+   "lng": 28.59,
+   "kind": "resort"
+  },
+  {
+   "name": "Neptun",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.83,
+   "lng": 28.59,
+   "kind": "resort"
+  },
+  {
+   "name": "Jupiter",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.835,
+   "lng": 28.59,
+   "kind": "resort"
+  },
+  {
+   "name": "Venus",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.825,
+   "lng": 28.585,
+   "kind": "resort"
+  },
+  {
+   "name": "Saturn",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.82,
+   "lng": 28.58,
+   "kind": "resort"
+  },
+  {
+   "name": "Mangalia",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.8167,
+   "lng": 28.5833,
+   "kind": "town"
+  },
+  {
+   "name": "2 Mai",
+   "aliases": [
+    "Doi Mai"
+   ],
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.77,
+   "lng": 28.575,
+   "kind": "village"
+  },
+  {
+   "name": "Vama Veche",
+   "city": "Constanta",
+   "country": "Romania",
+   "lat": 43.75,
+   "lng": 28.575,
+   "kind": "village"
+  },
+  {
+   "name": "Poiana Brașov",
+   "aliases": [
+    "Poiana Brasov"
+   ],
+   "city": "Brasov",
+   "country": "Romania",
+   "lat": 45.59,
+   "lng": 25.55,
+   "kind": "resort"
+  },
+  {
+   "name": "Predeal",
+   "city": "Brasov",
+   "country": "Romania",
+   "lat": 45.5,
+   "lng": 25.575,
+   "kind": "town"
+  },
+  {
+   "name": "Bran",
+   "city": "Brasov",
+   "country": "Romania",
+   "lat": 45.515,
+   "lng": 25.367,
+   "kind": "village"
+  },
+  {
+   "name": "Râșnov",
+   "aliases": [
+    "Rasnov"
+   ],
+   "city": "Brasov",
+   "country": "Romania",
+   "lat": 45.59,
+   "lng": 25.46,
+   "kind": "town"
+  },
+  {
+   "name": "Otopeni",
+   "city": "Bucharest",
+   "country": "Romania",
+   "lat": 44.55,
+   "lng": 26.07,
+   "kind": "town"
+  },
+  {
+   "name": "Voluntari",
+   "city": "Bucharest",
+   "country": "Romania",
+   "lat": 44.49,
+   "lng": 26.14,
+   "kind": "town"
+  },
+  {
+   "name": "Snagov",
+   "city": "Bucharest",
+   "country": "Romania",
+   "lat": 44.71,
+   "lng": 26.18,
+   "kind": "village"
+  },
+  {
+   "name": "Popești-Leordeni",
+   "aliases": [
+    "Popesti-Leordeni"
+   ],
+   "city": "Bucharest",
+   "country": "Romania",
+   "lat": 44.38,
+   "lng": 26.17,
+   "kind": "town"
+  },
+  {
+   "name": "Zemun",
+   "city": "Belgrade",
+   "country": "Serbia",
+   "lat": 44.843,
+   "lng": 20.401,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Novi Beograd",
+   "aliases": [
+    "New Belgrade"
+   ],
+   "city": "Belgrade",
+   "country": "Serbia",
+   "lat": 44.81,
+   "lng": 20.4,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Avala",
+   "city": "Belgrade",
+   "country": "Serbia",
+   "lat": 44.69,
+   "lng": 20.51,
+   "kind": "village"
+  },
+  {
+   "name": "Surčin",
+   "aliases": [
+    "Surcin"
+   ],
+   "city": "Belgrade",
+   "country": "Serbia",
+   "lat": 44.79,
+   "lng": 20.28,
+   "kind": "town"
+  },
+  {
+   "name": "Obrenovac",
+   "city": "Belgrade",
+   "country": "Serbia",
+   "lat": 44.655,
+   "lng": 20.2,
+   "kind": "town"
+  },
+  {
+   "name": "Sremski Karlovci",
+   "city": "Novi Sad",
+   "country": "Serbia",
+   "lat": 45.2,
+   "lng": 19.9333,
+   "kind": "town"
+  },
+  {
+   "name": "Petrovaradin",
+   "city": "Novi Sad",
+   "country": "Serbia",
+   "lat": 45.25,
+   "lng": 19.87,
+   "kind": "neighbourhood"
+  },
+  {
+   "name": "Fruška Gora",
+   "aliases": [
+    "Fruska Gora"
+   ],
+   "city": "Novi Sad",
+   "country": "Serbia",
+   "lat": 45.16,
+   "lng": 19.7,
+   "kind": "village"
+  },
+  {
+   "name": "Zlatibor",
+   "city": "Uzice",
+   "country": "Serbia",
+   "lat": 43.73,
+   "lng": 19.7,
+   "kind": "resort"
+  },
+  {
+   "name": "Kopaonik",
+   "city": "Kraljevo",
+   "country": "Serbia",
+   "lat": 43.28,
+   "lng": 20.8,
+   "kind": "resort"
+  },
+  {
+   "name": "Ilidža",
+   "aliases": [
+    "Ilidza"
+   ],
+   "city": "Sarajevo",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.83,
+   "lng": 18.31,
+   "kind": "town"
+  },
+  {
+   "name": "Vogošća",
+   "aliases": [
+    "Vogosca"
+   ],
+   "city": "Sarajevo",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.9,
+   "lng": 18.34,
+   "kind": "town"
+  },
+  {
+   "name": "Jahorina",
+   "city": "Sarajevo",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.73,
+   "lng": 18.57,
+   "kind": "resort"
+  },
+  {
+   "name": "Bjelašnica",
+   "aliases": [
+    "Bjelasnica"
+   ],
+   "city": "Sarajevo",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.71,
+   "lng": 18.27,
+   "kind": "resort"
+  },
+  {
+   "name": "Pale",
+   "city": "Sarajevo",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.82,
+   "lng": 18.57,
+   "kind": "town"
+  },
+  {
+   "name": "Trebević",
+   "aliases": [
+    "Trebevic"
+   ],
+   "city": "Sarajevo",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.83,
+   "lng": 18.44,
+   "kind": "village"
+  },
+  {
+   "name": "Blagaj",
+   "city": "Mostar",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.257,
+   "lng": 17.889,
+   "kind": "village"
+  },
+  {
+   "name": "Međugorje",
+   "aliases": [
+    "Medjugorje"
+   ],
+   "city": "Mostar",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.19,
+   "lng": 17.68,
+   "kind": "village"
+  },
+  {
+   "name": "Počitelj",
+   "aliases": [
+    "Pocitelj"
+   ],
+   "city": "Mostar",
+   "country": "Bosnia and Herzegovina",
+   "lat": 43.13,
+   "lng": 17.73,
+   "kind": "village"
+  },
+  {
+   "name": "Neum",
+   "city": "Mostar",
+   "country": "Bosnia and Herzegovina",
+   "lat": 42.92,
+   "lng": 17.6,
+   "kind": "town"
+  },
+  {
+   "name": "Graçanicë",
+   "aliases": [
+    "Gracanica"
+   ],
+   "city": "Prishtina",
+   "country": "Kosovo",
+   "lat": 42.6,
+   "lng": 21.19,
+   "kind": "town"
+  },
+  {
+   "name": "Fushë Kosovë",
+   "aliases": [
+    "Fushe Kosove",
+    "Kosovo Polje"
+   ],
+   "city": "Prishtina",
+   "country": "Kosovo",
+   "lat": 42.63,
+   "lng": 21.09,
+   "kind": "town"
+  },
+  {
+   "name": "Obiliq",
+   "aliases": [
+    "Obilic"
+   ],
+   "city": "Prishtina",
+   "country": "Kosovo",
+   "lat": 42.69,
+   "lng": 21.07,
+   "kind": "town"
+  },
+  {
+   "name": "Rugovë",
+   "aliases": [
+    "Rugova"
+   ],
+   "city": "Peja",
+   "country": "Kosovo",
+   "lat": 42.67,
+   "lng": 20.15,
+   "kind": "village"
+  },
+  {
+   "name": "Brezovicë",
+   "aliases": [
+    "Brezovica"
+   ],
+   "city": "Prizren",
+   "country": "Kosovo",
+   "lat": 42.2,
+   "lng": 21,
+   "kind": "resort"
+  },
+  {
+   "name": "Peštani",
+   "aliases": [
+    "Pestani"
+   ],
+   "city": "Ohrid",
+   "country": "North Macedonia",
+   "lat": 40.98,
+   "lng": 20.81,
+   "kind": "village"
+  },
+  {
+   "name": "Trpejca",
+   "city": "Ohrid",
+   "country": "North Macedonia",
+   "lat": 40.93,
+   "lng": 20.79,
+   "kind": "village"
+  },
+  {
+   "name": "Sveti Naum",
+   "city": "Ohrid",
+   "country": "North Macedonia",
+   "lat": 40.914,
+   "lng": 20.743,
+   "kind": "village"
+  },
+  {
+   "name": "Lagadin",
+   "city": "Ohrid",
+   "country": "North Macedonia",
+   "lat": 41.03,
+   "lng": 20.81,
+   "kind": "village"
+  },
+  {
+   "name": "Matka",
+   "city": "Skopje",
+   "country": "North Macedonia",
+   "lat": 41.95,
+   "lng": 21.3,
+   "kind": "village"
+  },
+  {
+   "name": "Mavrovo",
+   "city": "Gostivar",
+   "country": "North Macedonia",
+   "lat": 41.63,
+   "lng": 20.77,
+   "kind": "resort"
+  },
+  {
+   "name": "Krushevo",
+   "aliases": [
+    "Krusevo"
+   ],
+   "city": "Prilep",
+   "country": "North Macedonia",
+   "lat": 41.37,
+   "lng": 21.25,
+   "kind": "town"
+  },
+  {
+   "name": "Dojran",
+   "aliases": [
+    "Star Dojran"
+   ],
+   "city": "Gevgelija",
+   "country": "North Macedonia",
+   "lat": 41.19,
+   "lng": 22.72,
+   "kind": "town"
+  },
+  {
+   "name": "Krani",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.9394,
+   "lng": 20.9906,
+   "kind": "village"
+  },
+  {
+   "name": "Nakolec",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.905,
+   "lng": 21,
+   "kind": "village"
+  },
+  {
+   "name": "Dolno Dupeni",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.87,
+   "lng": 21.02,
+   "kind": "village"
+  },
+  {
+   "name": "Ljubojno",
+   "aliases": [
+    "Ljubojno Prespa"
+   ],
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.88,
+   "lng": 21.05,
+   "kind": "village"
+  },
+  {
+   "name": "Brajčino",
+   "aliases": [
+    "Brajcino"
+   ],
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.89,
+   "lng": 21.08,
+   "kind": "village"
+  },
+  {
+   "name": "Stenje",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.92,
+   "lng": 20.92,
+   "kind": "village"
+  },
+  {
+   "name": "Oteševo",
+   "aliases": [
+    "Otesevo"
+   ],
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 40.97,
+   "lng": 20.91,
+   "kind": "resort"
+  },
+  {
+   "name": "Pretor",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 41,
+   "lng": 21.02,
+   "kind": "resort"
+  },
+  {
+   "name": "Asamati",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 41.01,
+   "lng": 21.01,
+   "kind": "village"
+  },
+  {
+   "name": "Carev Dvor",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 41.08,
+   "lng": 21,
+   "kind": "village"
+  },
+  {
+   "name": "Jankovec",
+   "city": "Resen",
+   "country": "North Macedonia",
+   "lat": 41.1,
+   "lng": 21.01,
+   "kind": "village"
+  }
+ ]
+}

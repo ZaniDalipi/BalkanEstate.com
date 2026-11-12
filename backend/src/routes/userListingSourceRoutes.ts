@@ -8,7 +8,9 @@ import {
   remove,
   runNow,
   preview,
+  previewStatus,
   confirmImport,
+  importStatus,
   stats,
   detect,
   bulkDelete,
@@ -51,7 +53,9 @@ router.delete('/:id', remove);
 
 router.post('/:id/run', runNow);
 router.post('/:id/preview', preview);
+router.get('/:id/preview/:jobId', previewStatus);
 router.post('/:id/confirm-import', confirmImport);
+router.get('/:id/import/:jobId', importStatus);
 router.post('/:id/clear-imports', clearImports);
 router.get('/:id/stats', stats);
 

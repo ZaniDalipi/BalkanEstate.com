@@ -5,13 +5,16 @@ import ListingSourceTermsAcceptance from '../models/ListingSourceTermsAcceptance
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
 import { deleteDraftsForSources } from '../services/importReviewService';
-import { previewSource, getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
+import { getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
+import { getPreviewJob, startPreviewJob } from '../services/listingPreviewJobs';
+import { getImportJob, startImportJob } from '../services/listingRunJobs';
 import {
   detectFeedForUrl,
   detectFromJsonSample,
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
 import { resolveId } from '../utils/idObfuscation';
+import { FEED_PREVIEW_MAX, FEED_SYNC_MAX, parseListingLimit } from '../utils/listingFetchLimit';
 import type { RawListing } from '../services/listingAdapters/types';
 
 /**
@@ -243,18 +246,12 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
 
   // Validate query params at the API boundary
   const fullRefresh = req.query.fullRefresh === 'true';
-  let limit = 50;
-  if (req.query.limit !== undefined) {
-    const parsed = Number(req.query.limit);
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      res.status(400).json({
-        message: 'limit must be a positive integer between 1 and 200',
-        code: 'INVALID_LIMIT',
-      });
-      return;
-    }
-    limit = Math.max(1, Math.min(200, Math.floor(parsed)));
+  const parsedLimit = parseListingLimit(req.query.limit, FEED_SYNC_MAX);
+  if (parsedLimit.ok === false) {
+    res.status(400).json({ message: parsedLimit.error, code: 'INVALID_LIMIT' });
+    return;
   }
+  const limit = parsedLimit.value;
 
   try {
     const stats = await runSource(source, { fullRefresh, limit });
@@ -270,9 +267,10 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
 
 /**
  * POST /api/listing-sources/:id/preview
- * Fetch listings from the adapter without saving anything. Returns a previewId
- * and array of display items so the user can review/select before importing.
- * Limited to 100 items by default to keep the review modal manageable.
+ * Start fetching listings from the adapter, without saving anything. Answers
+ * 202 with a job to poll; once done the job carries a previewId and the
+ * display items so the user can review/select before importing.
+ * Fetches the whole feed (every page) by default, up to FEED_PREVIEW_MAX.
  */
 export const preview = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
@@ -293,33 +291,41 @@ export const preview = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  let limit = 50;
-  if (req.query.limit !== undefined) {
-    const parsed = Number(req.query.limit);
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      res.status(400).json({
-        message: 'limit must be a positive integer between 1 and 200',
-        code: 'INVALID_LIMIT',
-      });
-      return;
-    }
-    limit = Math.max(1, Math.min(200, Math.floor(parsed)));
+  const parsedLimit = parseListingLimit(req.query.limit, FEED_PREVIEW_MAX);
+  if (parsedLimit.ok === false) {
+    res.status(400).json({ message: parsedLimit.error, code: 'INVALID_LIMIT' });
+    return;
   }
+  const limit = parsedLimit.value;
 
-  try {
-    const result = await previewSource(source, limit);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({
-      message: (err as Error).message || 'Preview failed',
-      code: 'PREVIEW_FAILED',
-    });
+  // Runs in the background; the client polls GET /:id/preview/:jobId for progress.
+  const job = startPreviewJob(source, String(userId), limit);
+  res.status(202).json({ job });
+};
+
+/**
+ * GET /api/listing-sources/:id/preview/:jobId
+ * Progress of a preview: listings found and listing pages read so far, then
+ * the listings to review once it is done (or the reason it failed).
+ */
+export const previewStatus = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+  const jobId = String(req.params.jobId ?? '');
+  const job = /^[0-9a-f-]{36}$/i.test(jobId) ? getPreviewJob(jobId, String(userId), id) : undefined;
+  if (!job) {
+    res.status(404).json({ message: 'This fetch is no longer available — start it again.', code: 'PREVIEW_JOB_NOT_FOUND' });
+    return;
   }
+  res.json({ job });
 };
 
 /**
  * POST /api/listing-sources/:id/confirm-import
- * Import only the listings the user approved in the review modal.
+ * Import only the listings the user approved in the review modal. Answers 202
+ * with a job to poll (or 200 with empty stats when nothing was approved).
  * Body: { previewId: string, approvedIds: string[] }
  * Only approved items are saved and counted toward the monthly limit.
  */
@@ -382,15 +388,28 @@ export const confirmImport = async (req: Request, res: Response): Promise<void> 
     return;
   }
 
-  try {
-    const stats = await runSource(source, { preFetched });
-    res.json({ stats });
-  } catch (err) {
-    res.status(500).json({
-      message: (err as Error).message || 'Import failed',
-      code: 'INGEST_FAILED',
-    });
+  // Runs in the background; the client polls GET /:id/import/:jobId for progress.
+  const job = startImportJob(source, String(userId), preFetched);
+  res.status(202).json({ job });
+};
+
+/**
+ * GET /api/listing-sources/:id/import/:jobId
+ * Progress of an import: counts and the listings processed so far, then the
+ * final stats once it is done (or the reason it failed).
+ */
+export const importStatus = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const id = requireValidId(req, res);
+  if (!id) return;
+  const jobId = String(req.params.jobId ?? '');
+  const job = /^[0-9a-f-]{36}$/i.test(jobId) ? getImportJob(jobId, String(userId), id) : undefined;
+  if (!job) {
+    res.status(404).json({ message: 'This import is no longer being tracked — check your drafts.', code: 'IMPORT_JOB_NOT_FOUND' });
+    return;
   }
+  res.json({ job });
 };
 
 /** GET /api/listing-sources/:id/stats — counters + last 20 ingested listings. */

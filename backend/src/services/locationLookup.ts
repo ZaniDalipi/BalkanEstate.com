@@ -32,6 +32,20 @@ export const CITY_SLUG_MAP: Record<string, string> = {
   'himara': 'Himarë',
   'shijak': 'Shijak',
 
+  // ── Albania: coast and definite / accented spellings ──
+  'sarande': 'Sarandë', 'sarandë': 'Sarandë', 'himare': 'Himarë', 'himarë': 'Himarë', 'ksamil': 'Ksamil',
+  'ksamili': 'Ksamil', 'dhermi': 'Dhërmi', 'dhërmi': 'Dhërmi', 'orikum': 'Orikum', 'golem': 'Golem',
+  'shengjin': 'Shëngjin', 'shëngjin': 'Shëngjin', 'velipoje': 'Velipojë', 'velipojë': 'Velipojë',
+  'tepelene': 'Tepelenë', 'lalzit': 'Lalzit Bay', 'gjiriilalzit': 'Lalzit Bay', 'lalzibay': 'Lalzit Bay',
+  'lalzitbay': 'Lalzit Bay', 'qerret': 'Qerret', 'borsh': 'Borsh', 'palase': 'Palasë', 'vlorë': 'Vlorë',
+  'durrës': 'Durrës', 'korçë': 'Korçë', 'shkodër': 'Shkodër', 'kavajë': 'Kavajë',
+  'gjirokastër': 'Gjirokastër',
+  // ── Croatia: Istria and Kvarner ──
+  'medulin': 'Medulin', 'premantura': 'Premantura', 'banjole': 'Banjole', 'liznjan': 'Ližnjan',
+  'ližnjan': 'Ližnjan', 'vodnjan': 'Vodnjan', 'marcana': 'Marčana', 'marčana': 'Marčana', 'fazana': 'Fažana',
+  'fažana': 'Fažana', 'pomer': 'Pomer', 'poreč': 'Poreč', 'novigrad': 'Novigrad', 'labin': 'Labin',
+  'rabac': 'Rabac', 'buzet': 'Buzet', 'motovun': 'Motovun', 'opatija': 'Opatija',
+
   // ── Kosovo ────────────────────────────────────────────────────────────────
   'pristina': 'Pristina', 'prishtina': 'Pristina', 'prishtine': 'Pristina',
   'prizren': 'Prizren',

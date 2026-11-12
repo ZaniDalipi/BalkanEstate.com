@@ -667,6 +667,14 @@
     "southEast": "Jugoistok",
     "southWest": "Jugozapad"
   },
+  "listPanel": {
+    "hide": "Sakrij listu",
+    "hideHint": "Sakrij listu da vidiš cijelu mapu",
+    "show": "Prikaži listu",
+    "showCount_one": "Prikaži listu, {{count}} rezultat",
+    "showCount_few": "Prikaži listu, {{count}} rezultata",
+    "showCount_other": "Prikaži listu, {{count}} rezultata"
+  },
   "terrain": {
     "toggle": "Teren",
     "toggleAria": "Alat za teren i nagib",

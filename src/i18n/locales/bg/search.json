@@ -749,5 +749,16 @@
       "tiltedView": "Наклони изгледа"
     },
     "contours": "Хоризонтали през {{n}} m"
+  },
+  "propertyDetails": {
+    "title": "Подробности за имота",
+    "description": "Описание на имота",
+    "features": "Характеристики на имота",
+    "location": "Местоположение",
+    "priceHistory": "История на цените",
+    "similarProperties": "Подобни имоти",
+    "contactAgent": "Свържете се с агента",
+    "scheduleViewing": "Запазете оглед",
+    "shareProperty": "Сподели имота"
   }
 }

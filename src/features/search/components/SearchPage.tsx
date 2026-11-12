@@ -28,6 +28,9 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
 import MapLoadingVeil from '@/src/features/map/components/MapLoadingVeil';
+import ListCollapseTab from '../splitView/ListCollapseTab';
+import { useListCollapse } from '../splitView/useListCollapse';
+import { SEARCH_LIST_PANEL_ID, splitListPanelClass, splitMapPanelClass } from '../splitView/listCollapse';
 
 /** The panels' slide (420ms in src/index.css) plus a frame: nothing heavy happens before it ends. */
 const PANEL_SLIDE_MS = 450;
@@ -141,6 +144,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     // Zillow-style layout: split view only at lg+ (1024px), full-width with toggle on md tablets
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
+    // Split view only: the visitor can fold the list away and give the map the whole page.
+    const listCollapse = useListCollapse(showSplitView);
 
     // The two panels are the expensive halves of this page. In split view both
     // are on screen and each mounts at idle (`useDeferredMount`). On a phone or
@@ -350,7 +355,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${(isMobile || isTablet) && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
-                 <div ref={listMemory.panelRef} className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                 <div ref={listMemory.panelRef} id={SEARCH_LIST_PANEL_ID} className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col ${splitListPanelClass(showSplitView, listCollapse.collapsed)} search-list-panel lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || shownView === 'list'}
                     data-settled={listReleased}>
                     {mountList && (
@@ -375,8 +380,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
 
                 {/* --- Right Panel: Map --- */}
-                {/* On mobile/tablet: full-width behind list panel. On lg: 50% map, on xl+: 40% map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
+                {/* On mobile/tablet: full-width behind list panel. On lg: 55% map, on xl+: 45% map, or all of it with the list folded away */}
+                <div className={`h-full w-full ${splitMapPanelClass(showSplitView, listCollapse.collapsed)} lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full`}>
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || shownView === 'map'}
@@ -387,6 +392,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         {mountMap && <MapComponent {...mapProps} busy={isLoadingProperties} />}
                         <MapLoadingVeil covered={mapPending} busy={mapPending} />
                     </div>
+
+                    {showSplitView && (
+                        <ListCollapseTab
+                            collapsed={listCollapse.collapsed}
+                            onToggle={listCollapse.toggle}
+                            count={isLoadingProperties ? null : listProperties.length}
+                        />
+                    )}
 
                     {/* Draw hint banner - shown when navigating from explore cities */}
                     {showDrawHint && !isDrawing && !drawnBounds && (

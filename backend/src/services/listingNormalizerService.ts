@@ -3,10 +3,14 @@ import { Types } from 'mongoose';
 import type { IListingSource } from '../models/ListingSource';
 import type { IProperty, IPropertyImage } from '../models/Property';
 import type { RawListing } from './listingAdapters';
-import { geocodeAddress } from './geocodingService';
+import { geocodeAddressWithRateLimit, geocodeFreeformWithRateLimit } from './geocodingService';
+import { geocodeListing } from './listingAttributes/geocodeListing';
 import { uploadFromUrl } from './mediaService';
+import { fillFromRecordAttributes } from './listingAttributes/recordAttributes';
+import { selectListingPhotos } from './listingAttributes/listingPhotos';
+import { canonicalCity, canonicalCountry } from './listingAttributes/location';
+import { resolveLocation } from './listingAttributes/resolveLocation';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
-import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
 
@@ -365,6 +369,31 @@ const mapPropertyType = (raw: unknown): IProperty['propertyType'] | undefined =>
   return undefined;
 };
 
+/** Plural and Albanian / Romanian / Greek forms that appear in listing titles. */
+const TITLE_TYPE_WORDS: Record<string, IProperty['propertyType']> = {
+  apartments: 'apartment', apartmani: 'apartment', apartamente: 'apartment', apartament: 'apartment',
+  apartamentet: 'apartment', stanovi: 'apartment', banese: 'apartment', banesa: 'apartment', studios: 'apartment',
+  flats: 'apartment', diamerismata: 'apartment', penthouses: 'villa',
+  houses: 'house', kuce: 'house', kuca: 'house', shtepi: 'house', shtepia: 'house', casa: 'house', spiti: 'house',
+  villas: 'villa', vile: 'villa', vila: 'villa', villa: 'villa',
+  plots: 'land', lands: 'land', toka: 'land', truall: 'land', zemljiste: 'land', zemljista: 'land', teren: 'land', imanje: 'land',
+};
+
+/**
+ * Property type named by a whole word in a title or description
+ * ("VILA S BAZENOM", "Apartments for sale in…", "Banjole kuća"). Whole words
+ * only — "stan" must not match "stanje" or "Istanbul".
+ */
+export const propertyTypeFromText = (text: unknown): IProperty['propertyType'] | undefined => {
+  if (typeof text !== 'string' || !text) return undefined;
+  const words = text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().split(/[^\p{L}]+/u);
+  for (const w of words) {
+    const hit = TITLE_TYPE_WORDS[w] ?? PROPERTY_TYPE_MAP[w];
+    if (hit && hit !== 'other') return hit;
+  }
+  return undefined;
+};
+
 const mapListingType = (raw: unknown): IProperty['listingType'] | undefined => {
   if (!raw) return undefined;
   const key = String(raw).toLowerCase().replace(/\s+/g, '');
@@ -454,6 +483,38 @@ const applyFieldMap = (raw: RawListing, source: IListingSource): Record<string, 
   return out;
 };
 
+/**
+ * Every canonical field we can read from one raw listing, before parsing:
+ * the source's field map first, then the detail page (JSON-LD, OpenGraph,
+ * label/value blocks), then an attribute-by-attribute pass over the raw
+ * record. Pure — no network, no database — so the preview can share it.
+ */
+export const extractMappedFields = (raw: RawListing, source: IListingSource): Record<string, unknown> => {
+  const mapped = applyFieldMap(raw, source);
+
+  // Adapters that fetch a per-listing HTML detail page (e.g. HtmlScrapeAdapter
+  // with followDetails=true) attach the raw HTML at raw.raw.detailHtml. Pull
+  // every structured-data signal we can find from it (JSON-LD, OpenGraph,
+  // microdata, image galleries) without overwriting fields the index card
+  // already supplied — those are typically more accurate.
+  const detailHtml = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
+  if (typeof detailHtml === 'string' && detailHtml.length > 0) {
+    enrichFromDetailHtml(detailHtml, raw.url ?? source.baseUrl ?? '', mapped);
+  }
+
+  // Attribute-by-attribute pass over the whole raw record: any key the field
+  // map didn't cover (bathrooms, living rooms, floor, heating…) is recognised
+  // by name in every supported language and filled in when still empty.
+  fillFromRecordAttributes(raw.raw, mapped);
+
+  // Don't carry the raw HTML blob into sourceMetadata — it's huge and adds nothing.
+  if ('detailHtml' in mapped) delete mapped.detailHtml;
+  return mapped;
+};
+
+/** Numeric price of a raw price value ("150.000 €", 150000, "EUR 1,2M"), or undefined. */
+export const parsePriceAmount = (input: unknown): number | undefined => parsePrice(input)?.price;
+
 interface NormalizeOptions {
   rehostImages?: boolean;
 }
@@ -471,7 +532,8 @@ const collectImageUrls = (mapped: Record<string, unknown>): string[] => {
       }
     }
   }
-  return Array.from(new Set(urls.filter(Boolean)));
+  // Real photos only, each once in its largest size, no more than a listing may have.
+  return selectListingPhotos(urls.filter(Boolean));
 };
 
 const knownPropertyKeys = new Set<string>([
@@ -725,20 +787,7 @@ export const normalize = async (
   source: IListingSource,
   opts: NormalizeOptions = {}
 ): Promise<Partial<IProperty>> => {
-  const mapped = applyFieldMap(raw, source);
-
-  // Adapters that fetch a per-listing HTML detail page (e.g. HtmlScrapeAdapter
-  // with followDetails=true) attach the raw HTML at raw.raw.detailHtml. Pull
-  // every structured-data signal we can find from it (JSON-LD, OpenGraph,
-  // microdata, image galleries) without overwriting fields the index card
-  // already supplied — those are typically more accurate.
-  const detailHtml = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
-  if (typeof detailHtml === 'string' && detailHtml.length > 0) {
-    enrichFromDetailHtml(detailHtml, raw.url ?? source.baseUrl ?? '', mapped);
-  }
-
-  // Don't carry the raw HTML blob into sourceMetadata — it's huge and adds nothing.
-  if ('detailHtml' in mapped) delete mapped.detailHtml;
+  const mapped = extractMappedFields(raw, source);
 
   let parsedPrice = parsePrice(mapped.price);
   // Reject implausible prices from the field map (e.g. price field actually
@@ -761,66 +810,50 @@ export const normalize = async (
   const listingType: IProperty['listingType'] =
     explicitListing ?? (parsedPrice?.isRent ? 'rent' : 'sale');
 
-  const propertyType = mapPropertyType(mapped.propertyType) ?? 'other';
+  const propertyType = mapPropertyType(mapped.propertyType)
+    ?? propertyTypeFromText(mapped.title)
+    ?? propertyTypeFromText(typeof mapped.description === 'string' ? mapped.description.slice(0, 300) : undefined)
+    ?? 'other';
 
-  let lat = parseFloatLoose(mapped.lat);
-  let lng = parseFloatLoose(mapped.lng);
-  let city = (mapped.city as string | undefined)?.toString().trim();
-  let country = (mapped.country as string | undefined)?.toString().trim();
-
-  // If we have address but no city/country, try to extract them — but only
-  // accept parts that match our lookup tables to avoid setting "City Center"
-  // or "Neighborhood" as the city name.
-  if (mapped.address && (!city || !country)) {
-    const addrStr = (mapped.address as string).trim();
-    const addrParts = addrStr.split(',').map(p => p.trim()).filter(Boolean);
-    // Walk parts in reverse (country usually last, city second-to-last)
-    for (const part of [...addrParts].reverse()) {
-      const slug = part.toLowerCase().replace(/[-\s]/g, '');
-      if (!country && COUNTRY_SLUG_MAP[slug]) { country = COUNTRY_SLUG_MAP[slug]; continue; }
-      if (!city   && CITY_SLUG_MAP[slug])    { city    = CITY_SLUG_MAP[slug];    continue; }
-    }
-  }
-  // Last resort: try to extract city from the listing URL path using known city slugs.
-  if ((!city || !country) && raw.url) {
-    try {
-      const pathParts = new URL(raw.url).pathname.toLowerCase().split('/').map(p => p.replace(/[-_]/g, '')).filter(Boolean);
-      for (const part of pathParts) {
-        if (!country) country = COUNTRY_SLUG_MAP[part];
-        if (!city) city = CITY_SLUG_MAP[part];
-        if (city && country) break;
-      }
-    } catch { /* ignore */ }
-  }
+  // City / country / street / coordinates, matched to the places our app knows.
+  const location = resolveLocation(mapped, raw.url);
+  let lat = location.lat ?? null;
+  let lng = location.lng ?? null;
+  const city = location.city;
+  const country = location.country;
 
   // Build the address string. Clear it if it only contains city/country names so
   // we don't store "Tirana, Albania" as a street address.
-  const rawAddress = cleanAddressString(
-    (mapped.address as string | undefined)?.toString().trim()
-  );
+  const rawAddress = cleanAddressString(location.address);
   let address: string | undefined;
   if (rawAddress) {
     const parts = rawAddress.split(',').map(p => p.trim()).filter(Boolean);
     const allPartsAreLocations = parts.length > 0 && parts.every(p => {
-      const slug = p.toLowerCase().replace(/[-\s]/g, '');
-      return CITY_SLUG_MAP[slug] !== undefined || COUNTRY_SLUG_MAP[slug] !== undefined
+      return canonicalCity(p) !== undefined || canonicalCountry(p) !== undefined
         || (city && p.toLowerCase() === city.toLowerCase())
         || (country && p.toLowerCase() === country.toLowerCase());
     });
     address = allPartsAreLocations ? undefined : rawAddress;
   }
 
-  if ((lat == null || lng == null) && city && country) {
-    try {
-      const geo = await geocodeAddress(address ?? `${city}, ${country}`, city, country);
-      if (geo) {
-        lat = lat ?? geo.lat;
-        lng = lng ?? geo.lng;
-      }
-    } catch (err) {
-      cronLogger.info(`[normalizer] geocode failed for ${source.slug}/${raw.id}: ${(err as Error).message}`);
+  // No map position on the page: geocode the most precise place we have.
+  if (lat == null || lng == null) {
+    const geo = await geocodeListing(
+      { address, city, country, title: typeof mapped.title === 'string' ? mapped.title : undefined },
+      { structured: geocodeAddressWithRateLimit, freeform: geocodeFreeformWithRateLimit }
+    );
+    if (geo) {
+      lat = lat ?? geo.lat;
+      lng = lng ?? geo.lng;
+    } else if (location.approxLat !== undefined && location.approxLng !== undefined) {
+      // Last resort: the centre of the village / city the listing is in.
+      lat = location.approxLat;
+      lng = location.approxLng;
+    } else {
+      cronLogger.info(`[normalizer] no map position for ${source.slug}/${raw.id}`);
     }
   }
+
 
   // If the source belongs to a user, attribute imported listings to them.
   // Otherwise fall back to the system "external" seller account.

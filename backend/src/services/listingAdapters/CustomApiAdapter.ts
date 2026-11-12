@@ -2,10 +2,15 @@ import { JSONPath } from 'jsonpath-plus';
 import type { IListingSource } from '../../models/ListingSource';
 import { isValidListingItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
+import { nextLinkInPayload } from './jsonFeed/nextLinkInPayload';
+import { walkPages } from './pagination/walkPages';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
+const DEFAULT_MAX_PAGES = 200;
+
 interface CustomApiAdapterConfig {
-  endpoint: string;
+  endpoint?: string;
+  url?: string;
   itemsPath: string;
   idPath: string;
   urlPath?: string;
@@ -17,6 +22,8 @@ interface CustomApiAdapterConfig {
     | { type: 'basic'; username: string; password: string };
   headers?: Record<string, string>;
   query?: Record<string, string>;
+  params?: Record<string, string | number>;
+  maxPages?: number;
   pagination?: {
     type: 'page' | 'offset';
     pageParam: string;
@@ -62,40 +69,30 @@ export class CustomApiAdapter implements SourceAdapter {
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
     const cfg = (source.adapterConfig ?? {}) as unknown as CustomApiAdapterConfig;
-    if (!cfg.endpoint || !cfg.itemsPath || !cfg.idPath) {
+    // Older detector configs saved `url` / `params` instead of `endpoint` / `query`.
+    const endpoint = cfg.endpoint ?? cfg.url;
+    if (!endpoint || !cfg.itemsPath || !cfg.idPath) {
       throw new Error(`CustomApiAdapter: endpoint, itemsPath and idPath required (source ${source.slug})`);
     }
 
     const limit = options.limit ?? cfg.limit;
-    const out: RawListing[] = [];
     const since = options.since?.getTime();
     const headers = { ...buildAuthHeaders(cfg), ...(cfg.headers ?? {}) };
-    const maxPages = cfg.pagination?.maxPages ?? 1;
+    const p = cfg.pagination;
+    const query: Record<string, string | number> = { ...(cfg.params ?? {}), ...(cfg.query ?? {}) };
+    if (p?.type === 'page' && p.sizeParam && p.pageSize) query[p.sizeParam] = p.pageSize;
+    const firstUrl = Object.keys(query).length ? withQuery(endpoint, query) : endpoint;
+    const pattern = p?.type === 'page'
+      ? { kind: 'query' as const, param: p.pageParam, base: 1 as const }
+      : p?.type === 'offset' && p.pageSize
+        ? { kind: 'offset' as const, param: p.pageParam, perPage: p.pageSize }
+        : undefined;
 
-    for (let page = 1; page <= maxPages; page++) {
-      const params: Record<string, string | number> = { ...(cfg.query ?? {}) };
-      if (cfg.pagination?.type === 'page') {
-        params[cfg.pagination.pageParam] = page;
-        if (cfg.pagination.sizeParam && cfg.pagination.pageSize) params[cfg.pagination.sizeParam] = cfg.pagination.pageSize;
-      } else if (cfg.pagination?.type === 'offset' && cfg.pagination.pageSize) {
-        params[cfg.pagination.pageParam] = (page - 1) * cfg.pagination.pageSize;
-      }
-      const url = Object.keys(params).length ? withQuery(cfg.endpoint, params) : cfg.endpoint;
-
-      const response = await httpGet<unknown>(url, {
-        userAgent: cfg.userAgent,
-        requestDelayMs: cfg.requestDelayMs,
-        respectRobotsTxt: cfg.respectRobotsTxt,
-        headers,
-      });
-
-      const items = queryArray(response.data, cfg.itemsPath);
-      if (!items.length) break;
-
+    const toListings = (items: unknown[]): RawListing[] => {
+      const out: RawListing[] = [];
       for (const item of items) {
         const id = queryFirst(item, cfg.idPath);
         if (id == null) continue;
-        // Validate that this item looks like a real listing (not page metadata or other content)
         if (!isValidListingItem(item as Record<string, unknown>)) continue;
         if (since && cfg.publishedAtPath) {
           const ts = queryFirst(item, cfg.publishedAtPath);
@@ -104,10 +101,29 @@ export class CustomApiAdapter implements SourceAdapter {
         }
         const url = cfg.urlPath ? (queryFirst(item, cfg.urlPath) as string | undefined) : undefined;
         out.push({ id: String(id), url, raw: item as Record<string, unknown> });
-        if (limit && out.length >= limit) return out;
       }
-    }
+      return out;
+    };
 
-    return out;
+    return walkPages<RawListing>({
+      firstUrl,
+      pattern,
+      maxPages: p?.maxPages ?? cfg.maxPages ?? DEFAULT_MAX_PAGES,
+      limit,
+      keyOf: (l) => l.id,
+      onPage: (n) => options.onProgress?.(n, n),
+      load: async (url) => {
+        const response = await httpGet<unknown>(url, {
+          userAgent: cfg.userAgent,
+          requestDelayMs: cfg.requestDelayMs,
+          respectRobotsTxt: cfg.respectRobotsTxt,
+          headers,
+        });
+        return {
+          items: toListings(queryArray(response.data, cfg.itemsPath)),
+          nextUrl: nextLinkInPayload(response.data, url),
+        };
+      },
+    });
   }
 }

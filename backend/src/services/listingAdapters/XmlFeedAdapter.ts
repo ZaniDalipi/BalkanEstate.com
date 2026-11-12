@@ -1,12 +1,15 @@
 import { parseStringPromise } from 'xml2js';
-import { JSONPath } from 'jsonpath-plus';
 import type { IListingSource } from '../../models/ListingSource';
 import { isValidListingItem } from '../listingNormalizerService';
 import { httpGet } from './httpClient';
+import { queryArray, queryFirst, resolveItemId } from './jsonFeed/items';
+import { XML_PARSER_OPTIONS, detectXmlFeed } from './xmlFeed/detectXmlFeed';
 import type { FetchOptions, RawListing, SourceAdapter } from './types';
 
 interface XmlFeedAdapterConfig {
-  endpoint: string;
+  endpoint?: string;
+  /** Alias of `endpoint` used by some saved configs. */
+  url?: string;
   /** JSONPath into the parsed XML object yielding the array of items. */
   itemsPath: string;
   idPath: string;
@@ -20,57 +23,56 @@ interface XmlFeedAdapterConfig {
   limit?: number;
 }
 
-const queryFirst = (data: unknown, path: string): unknown =>
-  JSONPath({ path, json: data as object, wrap: false }) as unknown;
-
-const queryArray = (data: unknown, path: string): unknown[] => {
-  const result = JSONPath({ path, json: data as object }) as unknown[];
-  if (Array.isArray(result) && result.length === 1 && Array.isArray(result[0])) return result[0] as unknown[];
-  return Array.isArray(result) ? result : [];
-};
-
+/**
+ * Reads an XML listings export (one request, every listing in the file).
+ * Each element's attributes are mapped later, attribute by attribute, by the
+ * normalizer.
+ */
 export class XmlFeedAdapter implements SourceAdapter {
   readonly type = 'xmlFeed' as const;
 
   async fetchListings(source: IListingSource, options: FetchOptions = {}): Promise<RawListing[]> {
     const cfg = (source.adapterConfig ?? {}) as unknown as XmlFeedAdapterConfig;
-    if (!cfg.endpoint || !cfg.itemsPath || !cfg.idPath) {
+    const endpoint = cfg.endpoint ?? cfg.url;
+    if (!endpoint || !cfg.itemsPath || !cfg.idPath) {
       throw new Error(`XmlFeedAdapter: endpoint, itemsPath and idPath required (source ${source.slug})`);
     }
 
-    const response = await httpGet<string>(cfg.endpoint, {
+    const response = await httpGet<string>(endpoint, {
       userAgent: cfg.userAgent,
       requestDelayMs: cfg.requestDelayMs,
       respectRobotsTxt: cfg.respectRobotsTxt,
       responseType: 'text',
     });
+    const body = String(response.data);
+    const parsed = await parseStringPromise(body, { ...XML_PARSER_OPTIONS, ...(cfg.parserOptions ?? {}) });
 
-    const parsed = await parseStringPromise(String(response.data), {
-      explicitArray: false,
-      mergeAttrs: true,
-      ...(cfg.parserOptions ?? {}),
-    });
+    let items = queryArray(parsed, cfg.itemsPath);
+    if (items.length === 0) {
+      // The feed's structure changed since it was set up — locate the listings again.
+      const redetected = await detectXmlFeed(body);
+      if (redetected?.kind === 'listings') items = queryArray(parsed, redetected.itemsPath);
+    }
 
-    const items = queryArray(parsed, cfg.itemsPath);
     const out: RawListing[] = [];
     const since = options.since?.getTime();
     const limit = options.limit ?? cfg.limit;
-
-    for (const item of items) {
-      const id = queryFirst(item, cfg.idPath);
-      if (id == null) continue;
-      // Validate that this item looks like a real listing (not page metadata or other content)
-      if (!isValidListingItem(item as Record<string, unknown>)) continue;
+    items.forEach((item, i) => {
+      if (limit && out.length >= limit) return;
+      if (!item || typeof item !== 'object' || !isValidListingItem(item as Record<string, unknown>)) return;
       if (since && cfg.publishedAtPath) {
         const ts = queryFirst(item, cfg.publishedAtPath);
         const t = ts ? new Date(String(ts)).getTime() : NaN;
-        if (Number.isFinite(t) && t < since) continue;
+        if (Number.isFinite(t) && t < since) return;
       }
-      const url = cfg.urlPath ? (queryFirst(item, cfg.urlPath) as string | undefined) : undefined;
-      out.push({ id: String(id), url, raw: item as Record<string, unknown> });
-      if (limit && out.length >= limit) break;
-    }
-
+      const url = cfg.urlPath ? queryFirst(item, cfg.urlPath) : undefined;
+      out.push({
+        id: resolveItemId(item, cfg.idPath, i),
+        url: typeof url === 'string' ? url : undefined,
+        raw: item as Record<string, unknown>,
+      });
+    });
+    options.onProgress?.(out.length, out.length);
     return out;
   }
 }

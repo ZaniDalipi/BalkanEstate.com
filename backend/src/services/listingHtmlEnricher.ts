@@ -14,6 +14,13 @@
  */
 import * as cheerio from 'cheerio';
 import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
+import { applyLabelValue } from './listingAttributes/applyAttribute';
+import { listingJsonLdNodes } from './listingAttributes/jsonLdNodes';
+import { acceptLocationGuesses, countryFromPageSignals } from './listingAttributes/location';
+import { extractLabelledPairs, placeBesideMarkerIcon } from './listingAttributes/htmlPatterns';
+import { extractMapCoordinates } from './listingAttributes/mapCoordinates';
+import { photosOnPage } from './listingAttributes/pagePhotos';
+import { selectListingPhotos } from './listingAttributes/listingPhotos';
 
 type Mapped = Record<string, unknown>;
 
@@ -25,19 +32,11 @@ const setIfMissing = (target: Mapped, key: string, value: unknown): void => {
 
 const pushImages = (target: Mapped, urls: string[]): void => {
   if (!urls.length) return;
-  const existing = Array.isArray(target.images) ? (target.images as unknown[]) : [];
-  const existingUrls = new Set<string>(
-    existing
-      .map(i => (typeof i === 'string' ? i : (i as { url?: string })?.url))
-      .filter((u): u is string => typeof u === 'string')
-  );
-  const merged = [...existing];
-  for (const u of urls) {
-    if (!u || existingUrls.has(u)) continue;
-    if (u.startsWith('data:')) continue;
-    merged.push(u);
-    existingUrls.add(u);
-  }
+  const existing = (Array.isArray(target.images) ? (target.images as unknown[]) : [])
+    .map(i => (typeof i === 'string' ? i : (i as { url?: string })?.url))
+    .filter((u): u is string => typeof u === 'string');
+  // Each photo once (largest size), real photos only, at most a listing's worth.
+  const merged = selectListingPhotos([...existing, ...urls]);
   if (merged.length) target.images = merged;
 };
 
@@ -78,6 +77,7 @@ const extractFromJsonLdNode = (node: Record<string, unknown>, base: string, targ
     setIfMissing(target, 'city', a.addressLocality);
     setIfMissing(target, 'country', a.addressCountry);
     setIfMissing(target, 'postalCode', a.postalCode);
+    setIfMissing(target, 'region', a.addressRegion);
   } else if (typeof address === 'string') {
     setIfMissing(target, 'address', address);
   }
@@ -94,10 +94,14 @@ const extractFromJsonLdNode = (node: Record<string, unknown>, base: string, targ
     setIfMissing(target, 'sqft', (floorSize as Record<string, unknown>).value);
   }
 
-  setIfMissing(target, 'beds', node.numberOfRooms ?? node.numberOfBedrooms);
+  // numberOfRooms counts every room; prefer the bedroom count when given.
+  setIfMissing(target, 'beds', node.numberOfBedrooms ?? node.numberOfRooms);
+  setIfMissing(target, 'floor', node.floorLevel);
   setIfMissing(target, 'baths', node.numberOfBathroomsTotal ?? node.numberOfFullBathrooms);
   setIfMissing(target, 'yearBuilt', node.yearBuilt);
-  setIfMissing(target, 'propertyType', node['@type']);
+  // RealEstateListing / Product / Place say nothing about the kind of property.
+  const kind = [node['@type']].flat().find((t) => typeof t === 'string' && !/^(RealEstateListing|Product|Offer|Place|Residence|Accommodation)$/.test(t));
+  setIfMissing(target, 'propertyType', kind);
 
   // Images can be a string, an array of strings, or array of ImageObject.
   const images = node.image;
@@ -117,19 +121,18 @@ const extractFromJsonLdNode = (node: Record<string, unknown>, base: string, targ
 };
 
 const extractJsonLd = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
+  const blocks: unknown[] = [];
   $('script[type="application/ld+json"]').each((_, el) => {
     const txt = $(el).contents().text();
     if (!txt) return;
     try {
-      const data = JSON.parse(txt) as unknown;
-      const items = Array.isArray(data) ? data : [data];
-      for (const item of items) {
-        if (item && typeof item === 'object') extractFromJsonLdNode(item as Record<string, unknown>, base, target);
-      }
+      blocks.push(JSON.parse(txt) as unknown);
     } catch {
       // ignore malformed JSON-LD
     }
   });
+  // Only the listing's own nodes — never the agency, website or breadcrumbs.
+  for (const node of listingJsonLdNodes(blocks)) extractFromJsonLdNode(node, base, target);
 };
 
 const extractOpenGraph = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
@@ -182,148 +185,10 @@ const extractMicrodata = ($: cheerio.CheerioAPI, base: string, target: Mapped): 
   pushImages(target, microImages);
 };
 
-/**
- * When the same image appears in multiple resolutions via query params (e.g.
- * ?w=400 and ?w=1200), keep only the largest version to maximise quality.
- */
-const deduplicateImageUrls = (urls: string[]): string[] => {
-  // Group by the URL with size-related query params stripped.
-  const groups = new Map<string, { url: string; score: number }>();
-  for (const u of urls) {
-    let base = u;
-    let score = 0;
-    try {
-      const parsed = new URL(u);
-      // Score by explicit width/height params — prefer larger
-      const w = parseInt(parsed.searchParams.get('w') ?? parsed.searchParams.get('width') ?? '0', 10);
-      const h = parseInt(parsed.searchParams.get('h') ?? parsed.searchParams.get('height') ?? '0', 10);
-      score = w || h;
-      // Key = URL without size params
-      ['w', 'width', 'h', 'height', 'size', 'thumb', 'resize', 'dim'].forEach(p => parsed.searchParams.delete(p));
-      base = parsed.toString();
-    } catch { /* keep url as-is */ }
-    const existing = groups.get(base);
-    if (!existing || score > existing.score) groups.set(base, { url: u, score });
-  }
-  return Array.from(groups.values()).map(g => g.url);
-};
 
 /** Pull every reasonable image URL from <img> tags on the page (with srcset & lazy-load support). */
 const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
-  const found: string[] = [];
-  $('img').each((_, el) => {
-    const $el = $(el);
-    // Try every common lazy-load attr in priority order
-    const candidate =
-      $el.attr('src') ??
-      $el.attr('data-src') ??
-      $el.attr('data-lazy-src') ??
-      $el.attr('data-original') ??
-      $el.attr('data-lazy') ??
-      $el.attr('data-image');
-    if (candidate) found.push(resolveUrl(base, candidate));
-
-    // srcset: pick the largest
-    const srcset = $el.attr('srcset') ?? $el.attr('data-srcset');
-    if (srcset) {
-      const parts = srcset.split(',').map(p => p.trim());
-      let best: { url: string; width: number } | null = null;
-      for (const p of parts) {
-        const [u, w] = p.split(/\s+/);
-        const width = parseInt((w ?? '0').replace(/\D/g, ''), 10) || 0;
-        if (!best || width > best.width) best = { url: u, width };
-      }
-      if (best) found.push(resolveUrl(base, best.url));
-    }
-  });
-  // <source srcset> inside <picture> — prefer the largest descriptor
-  $('picture source').each((_, el) => {
-    const srcset = $(el).attr('srcset');
-    if (!srcset) return;
-    const parts = srcset.split(',').map(p => p.trim());
-    let best: { url: string; width: number } | null = null;
-    for (const p of parts) {
-      const [u, w] = p.split(/\s+/);
-      const width = parseInt((w ?? '0').replace(/\D/g, ''), 10) || 0;
-      if (!best || width > best.width) best = { url: u, width };
-    }
-    if (best) found.push(resolveUrl(base, best.url));
-  });
-
-  // Swiper, Fancybox, Slick, Lightbox and other gallery widgets store the
-  // full-resolution URL in data attributes on slide/thumbnail wrappers.
-  const galleryAttrSelectors = [
-    '[data-image]', '[data-src]', '[data-original]', '[data-image-url]',
-    '[data-gallery-image]', '[data-photo]', '[data-full]', '[data-full-image]',
-    '[data-fancybox]', '[data-fancybox-href]', '[data-lightbox]',
-    '[data-swiper-slide-index]', // Swiper slide — pull src from inner <img> instead
-    '.swiper-slide img', '.slick-slide img', '.flexslider li img',
-    '.gallery-item img', '.gallery-image img', '.fancybox img',
-    'a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".webp"]',
-  ];
-  for (const selector of galleryAttrSelectors) {
-    $(selector).each((_, el) => {
-      const $el = $(el);
-      const tag = (el as { tagName?: string }).tagName?.toLowerCase();
-      // For anchor tags pointing to images — use href
-      if (tag === 'a') {
-        const href = $el.attr('href') ?? $el.attr('data-fancybox-href');
-        if (href) found.push(resolveUrl(base, href));
-        return;
-      }
-      // For img tags — prefer explicit data attrs, then src
-      let url = $el.attr('data-full') ?? $el.attr('data-full-image') ??
-        $el.attr('data-src') ?? $el.attr('data-original') ??
-        $el.attr('data-image') ?? $el.attr('data-image-url') ??
-        $el.attr('src');
-      if (!url) {
-        const bg = $el.attr('style');
-        if (bg) {
-          const match = bg.match(/url\(['"]?([^'")\]]+)['"]?\)/i);
-          if (match) url = match[1];
-        }
-      }
-      if (url) found.push(resolveUrl(base, url));
-    });
-  }
-
-  // Also scan for JSON gallery arrays embedded in page scripts (common in WP/custom RE sites)
-  $('script:not([src])').each((_, el) => {
-    const src = $(el).html() ?? '';
-    // Look for arrays of image URLs in JS variables
-    const urlPattern = /["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))["']/gi;
-    let m: RegExpExecArray | null;
-    while ((m = urlPattern.exec(src)) !== null) {
-      found.push(m[1]);
-    }
-  });
-
-  // Filter out tracking pixels, icons, thumbnails, and non-listing images.
-  const meaningful = found.filter((u) => {
-    const lower = u.toLowerCase();
-    // Skip tracking pixels and 1x1 spacers
-    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
-    // Skip common icon/logo/avatar paths
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
-    // Skip known tracker domains
-    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
-    // Skip very small thumbnail hints in URL parameters
-    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
-    return true;
-  });
-
-  // Deduplicate: prefer higher-resolution variant when a URL appears in multiple
-  // sizes via query params (e.g. ?w=400 vs ?w=1200 — keep ?w=1200).
-  const deduped = deduplicateImageUrls(found.filter((u) => {
-    const lower = u.toLowerCase();
-    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
-    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
-    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
-    return true;
-  }));
-  pushImages(target, deduped);
-  void meaningful; // meaningful kept for potential future use
+  pushImages(target, photosOnPage($, base));
 };
 
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {
@@ -461,8 +326,23 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
     if (el.length) target.lng = el.attr('data-lng') ?? el.attr('data-lon');
   }
 
+  // Steps 3–4d guess the location from page layout. Their guesses are only
+  // kept when they hold up (see acceptLocationGuesses): layout guessing
+  // otherwise turns a "Load more" button into city "Load", country "More".
+  const seed = (): Mapped => ({ city: target.city, country: target.country, address: target.address });
+  /** Text next to a location label or in a location-named element. */
+  const labelled = seed();
+  /** Any short text in an element whose class mentions location / place / geo, or the page title. */
+  const chips = seed();
+  // The place shown beside a map-marker icon — `<i class="la la-map-marker"></i>Banjole`.
+  const marker = placeBesideMarkerIcon($);
+  if (marker && !labelled.city) {
+    labelled.city = marker.split(',')[0].trim();
+    if (marker.includes(',') && !labelled.address) labelled.address = marker;
+  }
+
   // 3. CSS class selectors for location chips/headers common on Balkan RE sites
-  if (!target.city) {
+  if (!labelled.city) {
     const locationSelectors = [
       '[class*="location-city"]', '[class*="city-name"]', '[class*="property-city"]',
       '[class*="listing-city"]', '[class*="grad"]', '[class*="lokacija"]',
@@ -475,7 +355,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
       if (text && text.length < 80 && text.length > 1) {
         const candidate = text.split(/[,/]/)[0].trim();
         if (!isNoisyLocationText(candidate)) {
-          target.city = candidate;
+          labelled.city = candidate;
           break;
         }
       }
@@ -486,7 +366,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
   //    Deliberately excludes h1/h2/title — those are almost always the property
   //    title, not the address, and including them caused the title to be stored
   //    in the address field on sites like Century 21 Albania.
-  if (!target.city || !target.country) {
+  if (!chips.city || !chips.country) {
     const chipSelectors = [
       '[class*="location"]', '[class*="address"]', '[class*="adresa"]',
       '[class*="property-address"]', '[class*="listing-address"]',
@@ -498,7 +378,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
     outer: for (const sel of chipSelectors) {
       const elements = $(sel).toArray();
       for (const el of elements) {
-        if (target.city && target.country) break outer;
+        if (chips.city && chips.country) break outer;
         const $el = $(el);
         // For headers/titles, include up to 5 children; for other selectors, keep tight
         const tagName = ((el as any).tagName || '').toLowerCase();
@@ -517,9 +397,9 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         if (commaIdx > 0 && commaIdx < text.length - 1) {
           const part1 = text.slice(0, commaIdx).trim();
           const part2 = text.slice(commaIdx + 1).trim();
-          if (!target.city && !isNoisyLocationText(part1)) target.city = part1;
-          if (!target.country && !isNoisyLocationText(part2)) target.country = part2;
-          if (target.city && target.country) break outer;
+          if (!chips.city && !isNoisyLocationText(part1)) chips.city = part1;
+          if (!chips.country && !isNoisyLocationText(part2)) chips.country = part2;
+          if (chips.city && chips.country) break outer;
           continue;
         }
 
@@ -528,12 +408,12 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
           const parts = text.split(/\s*(?:\/|>|»|·)\s+/)
             .map(p => p.trim()).filter(p => p.length > 0 && !isNoisyLocationText(p));
           if (parts.length >= 2) {
-            if (!target.city) target.city = parts[parts.length - 2] ?? parts[0];
-            if (!target.country) target.country = parts[parts.length - 1];
-            if (target.city && target.country) break outer;
+            if (!chips.city) chips.city = parts[parts.length - 2] ?? parts[0];
+            if (!chips.country) chips.country = parts[parts.length - 1];
+            if (chips.city && chips.country) break outer;
             continue;
           } else if (parts.length === 1) {
-            if (!target.city) target.city = parts[0];
+            if (!chips.city) chips.city = parts[0];
             continue;
           }
         }
@@ -541,44 +421,68 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         // Try space-separated (last word likely country, rest is city)
         const words = text.split(/\s+/);
         if (words.length === 2) {
-          if (!target.city && !isNoisyLocationText(words[0])) target.city = words[0];
-          if (!target.country && !isNoisyLocationText(words[1])) target.country = words[1];
-          if (target.city && target.country) break outer;
+          if (!chips.city && !isNoisyLocationText(words[0])) chips.city = words[0];
+          if (!chips.country && !isNoisyLocationText(words[1])) chips.country = words[1];
+          if (chips.city && chips.country) break outer;
         } else if (words.length > 2) {
           // For "8700 m² Land in Xhafzotaj, Durres" → last two words as city/country
           const lastWord = words[words.length - 1];
           const secondLast = words[words.length - 2];
-          if (!target.address) target.address = text;
-          if (!target.city && !isNoisyLocationText(secondLast)) target.city = secondLast;
-          if (!target.country && !isNoisyLocationText(lastWord)) target.country = lastWord;
+          if (!chips.address) chips.address = text;
+          if (!chips.city && !isNoisyLocationText(secondLast)) chips.city = secondLast;
+          if (!chips.country && !isNoisyLocationText(lastWord)) chips.country = lastWord;
         }
       }
-      if (target.city) break;
+      if (chips.city) break;
     }
   }
 
   // 4b. Page <title> — often contains "City, Country" or "in City" patterns
-  if (!target.city || !target.country) {
+  if (!chips.city || !chips.country) {
     const titleText = $('title').first().text().replace(/\s+/g, ' ').trim();
     if (titleText) {
       // "Apartment in Tirana, Albania — Agency" or "Villa Tirana Albania"
       const inMatch = titleText.match(/\bin\s+([A-ZČŠŽĆĐ][a-zA-ZčšžćđÀ-ÿ\s]{1,30}?)(?:\s*,\s*([A-ZČŠŽĆĐ][a-zA-ZčšžćđÀ-ÿ\s]{1,30}))?(?:\s*[-|·–—|]|$)/);
       if (inMatch) {
-        if (!target.city && inMatch[1]?.trim()) target.city = inMatch[1].trim();
-        if (!target.country && inMatch[2]?.trim()) target.country = inMatch[2].trim();
+        if (!chips.city && inMatch[1]?.trim()) chips.city = inMatch[1].trim();
+        if (!chips.country && inMatch[2]?.trim()) chips.country = inMatch[2].trim();
       }
       // "Apartment, Tirana, Albania" — last two comma-separated segments before separator
-      if (!target.city || !target.country) {
+      if (!chips.city || !chips.country) {
         const segments = titleText.split(/\s*[-–—|·]\s*/)[0].split(',').map(s => s.trim()).filter(Boolean);
         if (segments.length >= 3) {
           const last = segments[segments.length - 1];
           const secondLast = segments[segments.length - 2];
-          if (!target.country && last.length < 40 && /^[A-ZČŠŽĆĐ]/.test(last)) target.country = last;
-          if (!target.city && secondLast.length < 40 && /^[A-ZČŠŽĆĐ]/.test(secondLast)) target.city = secondLast;
+          if (!chips.country && last.length < 40 && /^[A-ZČŠŽĆĐ]/.test(last)) chips.country = last;
+          if (!chips.city && secondLast.length < 40 && /^[A-ZČŠŽĆĐ]/.test(secondLast)) chips.city = secondLast;
         }
       }
     }
   }
+
+  // 4d. Keyword-prefixed location in visible text:
+  //     "Location: Tirana, Albania", "Lokacija: Zagreb", "Grad: Beograd"
+  if (!labelled.city) {
+    const LOC_LABEL_RE = /(?:location|lokacija|ciudad|lage|emplacement|posizione|τοποθεσία|vendndodhja|locatie|helyszín|адреса|адрес|lokacija|grad|city|address)\s*[:–-]\s*([^,\n\r<]{2,60}?)(?:\s*,\s*([^,\n\r<]{2,40}?))?(?:\s*$|\s*[<\n])/i;
+    const visibleEls = $('p, li, span, div, td, th').toArray();
+    for (const el of visibleEls) {
+      const $el = $(el);
+      if ($el.children('p, div, ul, ol, table').length) continue;
+      const text = $el.text().replace(/\s+/g, ' ').trim();
+      if (text.length < 5 || text.length > 300) continue;
+      const m = text.match(LOC_LABEL_RE);
+      if (m?.[1]) {
+        const city = m[1].trim().replace(/[.,;]$/, '');
+        if (city.length < 60 && city.length > 1) {
+          if (!labelled.city) labelled.city = city;
+          if (!labelled.country && m[2]?.trim()) labelled.country = m[2].trim().replace(/[.,;]$/, '');
+          break;
+        }
+      }
+    }
+  }
+
+  acceptLocationGuesses(target, labelled, chips);
 
   // 4c. URL path — extract city/country from slug segments like /albania/tirana/
   if ((!target.city || !target.country) && baseUrl) {
@@ -599,28 +503,6 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
         if (target.city && target.country) break;
       }
     } catch { /* ignore invalid URLs */ }
-  }
-
-  // 4d. Keyword-prefixed location in visible text:
-  //     "Location: Tirana, Albania", "Lokacija: Zagreb", "Grad: Beograd"
-  if (!target.city) {
-    const LOC_LABEL_RE = /(?:location|lokacija|ciudad|lage|emplacement|posizione|τοποθεσία|vendndodhja|locatie|helyszín|адреса|адрес|lokacija|grad|city|address)\s*[:–-]\s*([^,\n\r<]{2,60}?)(?:\s*,\s*([^,\n\r<]{2,40}?))?(?:\s*$|\s*[<\n])/i;
-    const visibleEls = $('p, li, span, div, td, th').toArray();
-    for (const el of visibleEls) {
-      const $el = $(el);
-      if ($el.children('p, div, ul, ol, table').length) continue;
-      const text = $el.text().replace(/\s+/g, ' ').trim();
-      if (text.length < 5 || text.length > 300) continue;
-      const m = text.match(LOC_LABEL_RE);
-      if (m?.[1]) {
-        const city = m[1].trim().replace(/[.,;]$/, '');
-        if (city.length < 60 && city.length > 1) {
-          if (!target.city) target.city = city;
-          if (!target.country && m[2]?.trim()) target.country = m[2].trim().replace(/[.,;]$/, '');
-          break;
-        }
-      }
-    }
   }
 
   // 5. Property ID — aggressive scanning of all possible sources
@@ -662,7 +544,7 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
 
   // 5c. Text pattern search: "Property ID: Eon140479", "Ref #123", etc.
   if (!target.propertyId) {
-    const idPattern = /(?:property\s*id|listing\s*id|ref(?:erence)?|reference\s*no|ref\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude|imobil|proneese)|objektnummer|sifra\s*oglasa|number|code|sku)[:\s#]*([A-Za-z0-9\-_]+)/i;
+    const idPattern = /\b(?:property\s*id|listing\s*id|ref(?:erence)?|reference\s*no|ref\s*(?:no|#|id)?|id\s*(?:oglasa|nekretnine|ponude|imobil|proneese)|objektnummer|sifra\s*oglasa|number|code|sku)\b[:\s#]*([A-Za-z0-9\-_]+)/i;
     const leafElements = $('*').toArray();
     for (const el of leafElements) {
       if (target.propertyId) break;
@@ -671,7 +553,8 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
       const text = $el.text().trim();
       if (text.length < 3 || text.length > 200) continue;
       const m = text.match(idPattern);
-      if (m && m[1] && m[1].length >= 2 && m[1].length <= 50) {
+      // A reference always has a digit ("ALVS1455", "4471") — not "of" from "Number of rooms".
+      if (m && m[1] && m[1].length >= 2 && m[1].length <= 50 && /\d/.test(m[1])) {
         target.propertyId = m[1];
       }
     }
@@ -685,612 +568,16 @@ const extractStructuredLocationFromHtml = ($: cheerio.CheerioAPI, target: Mapped
  * and English — matching labels as displayed on detail pages.
  */
 const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target: Mapped): void => {
-  // Strip separators and non-letter/digit chars; keep all Unicode scripts
-  // (Cyrillic, Greek, Latin with diacritics, etc.).
-  const normLabel = (s: string): string =>
-    s.toLowerCase()
-      .replace(/[\s\-_./:()|]+/g, '')
-      .replace(/[^\p{L}\d]/gu, '')
-      .trim();
-
-  // Maps normalised label → canonical target field.
-  const LABEL_MAP: Record<string, string> = {
-    // ── Price ──────────────────────────────────────────────────────────────
-    // HR/BA
-    'cijena': 'price', 'cjena': 'price', 'prodajnacijjena': 'price', 'cijenaponude': 'price',
-    // SR Latin / SL
-    'cena': 'price', 'prodajnacena': 'price', 'prodajnicena': 'price',
-    // SR/MK/BG Cyrillic
-    'цена': 'price', 'продажнацена': 'price', 'продажна': 'price',
-    // RO
-    'pret': 'price', 'pretul': 'price', 'costul': 'price', 'pretzul': 'price',
-    // AL
-    'çmimi': 'price', 'cmimi': 'price', 'çmimiishitjes': 'price', 'cmimiishitjes': 'price',
-    // GR
-    'τιμή': 'price', 'τιμη': 'price', 'τιμήπώλησης': 'price', 'τιμηπωλησης': 'price',
-    // HU
-    'ár': 'price', 'ar': 'price', 'eladásiár': 'price', 'eladasiar': 'price',
-    // DE
-    'preis': 'price', 'kaufpreis': 'price', 'verkaufspreis': 'price', 'mietpreis': 'price', 'kaltmiete': 'price',
-    // FR
-    'prix': 'price', 'prixdevente': 'price', 'prixdachat': 'price', 'loyer': 'price',
-    // IT
-    'prezzo': 'price', 'prezzovendita': 'price', 'affitto': 'price',
-    // EN
-    'price': 'price', 'askingprice': 'price', 'listprice': 'price', 'salesprice': 'price', 'rentalprice': 'price',
-
-    // ── Area / Floor size ─────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'površina': 'sqft', 'povrsina': 'sqft', 'površinainterijera': 'sqft', 'povrsinainterijera': 'sqft',
-    'stambenapovrš': 'sqft', 'stambena': 'sqft', 'stambenapovrsi': 'sqft',
-    // SR/MK Cyrillic
-    'површина': 'sqft', 'квадратура': 'sqft', 'стамбена': 'sqft',
-    // BG Cyrillic
-    'площ': 'sqft', 'жилищнаплощ': 'sqft', 'застроена': 'sqft', 'ползваема': 'sqft',
-    // RO
-    'suprafata': 'sqft', 'suprafaţa': 'sqft', 'suprafatautila': 'sqft', 'suprafatautil': 'sqft',
-    'suprafataconstruita': 'sqft', 'suprafatabrutа': 'sqft',
-    // AL
-    'sipërfaqja': 'sqft', 'siperfaqja': 'sqft', 'sipërfaqe': 'sqft', 'siperfaqe': 'sqft',
-    // GR
-    'εμβαδόν': 'sqft', 'εμβαδον': 'sqft', 'εμβαδό': 'sqft',
-    // HU
-    'alapterület': 'sqft', 'alapterulet': 'sqft', 'hasznosalapterület': 'sqft',
-    // DE
-    'fläche': 'sqft', 'flache': 'sqft', 'wohnfläche': 'sqft', 'wohnflache': 'sqft',
-    'nutzfläche': 'sqft', 'nutzflache': 'sqft',
-    // FR
-    'surface': 'sqft', 'surfacehabitable': 'sqft', 'superficiehabitable': 'sqft',
-    // IT
-    'superficie': 'sqft', 'superficieabitabile': 'sqft', 'superficieutile': 'sqft',
-    // EN
-    'area': 'sqft', 'floorarea': 'sqft', 'livingarea': 'sqft', 'internalarea': 'sqft',
-    'grossarea': 'sqft', 'interiorarea': 'sqft', 'usablearea': 'sqft', 'netarea': 'sqft',
-    'size': 'sqft', 'propertysize': 'sqft', 'interiorsize': 'sqft',
-
-    // ── Plot / Land area ──────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'površinaokućnice': 'plotSqm', 'površinaokucnice': 'plotSqm', 'okućnica': 'plotSqm', 'okucnica': 'plotSqm',
-    'površinaparcele': 'plotSqm', 'površinazem': 'plotSqm',
-    // SR/MK Cyrillic
-    'површинапарцеле': 'plotSqm', 'плац': 'plotSqm', 'парцела': 'plotSqm',
-    // BG
-    'площназемя': 'plotSqm', 'дворна': 'plotSqm', 'парцел': 'plotSqm',
-    // RO
-    'suprafataterean': 'plotSqm', 'suprafatatotala': 'plotSqm',
-    // DE
-    'grundfläche': 'plotSqm', 'grundflache': 'plotSqm', 'grundstücksfläche': 'plotSqm',
-    // EN
-    'plotarea': 'plotSqm', 'landarea': 'plotSqm', 'plotsize': 'plotSqm',
-    'lotsize': 'plotSqm', 'groundarea': 'plotSqm', 'yardsize': 'plotSqm',
-
-    // ── Bedrooms ──────────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'spavaćesobe': 'beds', 'spavacesobe': 'beds', 'sobe': 'beds', 'spavaona': 'beds', 'brojsoba': 'beds',
-    // SR Cyrillic
-    'спаваћесобе': 'beds', 'собе': 'beds', 'бројсоби': 'beds', 'спаваоница': 'beds',
-    // MK Cyrillic
-    'соби': 'beds', 'броисоби': 'beds', 'спални': 'beds',
-    // BG Cyrillic
-    'спалня': 'beds', 'стаи': 'beds', 'броистаи': 'beds',
-    // SL
-    'spalnice': 'beds', 'številosob': 'beds',
-    // RO
-    'dormitoare': 'beds', 'camere': 'beds', 'camerededormit': 'beds', 'numarcamere': 'beds',
-    // AL
-    'dhomagjumi': 'beds', 'numridhomave': 'beds', 'dhoma': 'beds',
-    // GR
-    'υπνοδωμάτια': 'beds', 'υπνοδωματια': 'beds', 'κρεβατοκάμαρες': 'beds',
-    // HU
-    'hálószoba': 'beds', 'haloszoba': 'beds', 'szobák': 'beds', 'szobak': 'beds',
-    // DE
-    'schlafzimmer': 'beds', 'zimmeranzahl': 'beds',
-    // FR
-    'chambre': 'beds', 'chambres': 'beds', 'chambresàcoucher': 'beds',
-    // IT
-    'camera': 'beds', 'cameradaletto': 'beds',
-    // EN
-    'bedrooms': 'beds', 'bedroom': 'beds', 'beds': 'beds', 'numberofbedrooms': 'beds',
-
-    // ── Bathrooms ─────────────────────────────────────────────────────────
-    // HR/BA/SR
-    'kupatilo': 'baths', 'kupatila': 'baths', 'kupaonica': 'baths', 'toalet': 'baths',
-    // SR Cyrillic
-    'купатило': 'baths', 'тоалет': 'baths',
-    // BG
-    'баня': 'baths', 'бани': 'baths',
-    // RO
-    'baie': 'baths', 'bai': 'baths',
-    // AL
-    'banjo': 'baths', 'tualet': 'baths',
-    // GR
-    'μπάνιο': 'baths', 'μπανιο': 'baths', 'λουτρό': 'baths',
-    // HU
-    'fürdőszoba': 'baths', 'furdoszoba': 'baths',
-    // DE
-    'badezimmer': 'baths', 'bäder': 'baths',
-    // FR
-    'salledebain': 'baths', 'salledebains': 'baths',
-    // IT
-    'bagno': 'baths', 'bagni': 'baths',
-    // EN
-    'bathrooms': 'baths', 'bathroom': 'baths', 'baths': 'baths',
-
-    // ── Location / City ───────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'lokacija': 'city', 'mjesto': 'city', 'grad': 'city', 'adresa': 'city', 'općina': 'city', 'opcina': 'city',
-    // SR Cyrillic
-    'локација': 'city', 'место': 'city', 'град': 'city', 'адреса': 'city', 'општина': 'city',
-    // MK Cyrillic
-    'локациjа': 'city',
-    // BG Cyrillic
-    'местоположение': 'city', 'населеноместо': 'city', 'квартал': 'city', 'адрес': 'city',
-    // SL
-    'kraj': 'city',
-    // RO
-    'locatie': 'city', 'locaţie': 'city', 'localitate': 'city', 'oras': 'city', 'oraş': 'city',
-    // AL
-    'vendndodhja': 'city', 'qyteti': 'city',
-    // GR
-    'τοποθεσία': 'city', 'τοποθεσια': 'city', 'πόλη': 'city', 'πολη': 'city', 'περιοχή': 'city',
-    // HU
-    'helyszín': 'city', 'helyszin': 'city', 'város': 'city', 'varos': 'city', 'cím': 'city',
-    // DE
-    'lage': 'city', 'ort': 'city', 'stadt': 'city', 'standort': 'city', 'lageort': 'city',
-    // FR
-    'emplacement': 'city', 'ville': 'city', 'adresse': 'city',
-    // IT
-    'posizione': 'city', 'città': 'city', 'citta': 'city', 'indirizzo': 'city',
-    // EN
-    'location': 'city', 'city': 'city', 'address': 'city', 'town': 'city', 'district': 'city',
-
-    // ── Property type ─────────────────────────────────────────────────────
-    'vrstanekretnine': 'propertyType', 'vrstaponude': 'propertyType', 'tipnekretnine': 'propertyType',
-    'врстанекретнине': 'propertyType', 'тип': 'propertyType', 'видимот': 'propertyType',
-    'tipproprietate': 'propertyType', 'tipologie': 'propertyType',
-    'immobilienart': 'propertyType', 'objektart': 'propertyType',
-    'type': 'propertyType', 'propertytype': 'propertyType', 'typedebien': 'propertyType',
-
-    // ── Year built ────────────────────────────────────────────────────────
-    'godinaizgradnje': 'yearBuilt', 'godišnjaizgradnje': 'yearBuilt', 'godgradnje': 'yearBuilt',
-    'годинаградње': 'yearBuilt', 'годнастрояване': 'yearBuilt',
-    'anconstructie': 'yearBuilt', 'anconstruire': 'yearBuilt',
-    'vitacostruizione': 'yearBuilt', 'annodiristruzione': 'yearBuilt',
-    'baujahr': 'yearBuilt', 'építésiév': 'yearBuilt', 'epitesiév': 'yearBuilt',
-    'annéedeconstruction': 'yearBuilt',
-    'yearbuilt': 'yearBuilt', 'built': 'yearBuilt', 'constructionyear': 'yearBuilt',
-
-    // ── Floor ─────────────────────────────────────────────────────────────
-    'kat': 'floor', 'sprat': 'floor', 'etaža': 'floor', 'etaza': 'floor', 'etažnost': 'floor',
-    'спрат': 'floor', 'кат': 'floor', 'етаж': 'floor',
-    'etaj': 'floor', 'korridor': 'floor',
-    'stockwerk': 'floor', 'etage': 'floor', 'obergeschoss': 'floor',
-    'emelet': 'floor', 'piano': 'floor',
-    'floor': 'floor', 'floornumber': 'floor', 'storey': 'floor',
-
-    // ── Distance to sea ───────────────────────────────────────────────────
-    'udaljenostodmora': 'distanceToSea', 'udaljenostdoumora': 'distanceToSea', 'odmorja': 'distanceToSea',
-    'удаљеностодмора': 'distanceToSea', 'разстояниедоморе': 'distanceToSea',
-    'distantafatademare': 'distanceToSea', 'distantadalamare': 'distanceToSea',
-    'distanzevomeer': 'distanceToSea', 'meeresnähe': 'distanceToSea',
-    'distancetosea': 'distanceToSea', 'distancefromsea': 'distanceToSea', 'distancetothesea': 'distanceToSea',
-    'απόστασηαπόθάλασσα': 'distanceToSea', 'tengerközelség': 'distanceToSea',
-
-    // ── Living rooms ──────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'dnevnasoba': 'livingRooms', 'dnevnasobe': 'livingRooms', 'brojosobna': 'livingRooms',
-    'salon': 'livingRooms', 'boravak': 'livingRooms', 'boravišnisob': 'livingRooms',
-    // SR/MK Cyrillic
-    'дневнасоба': 'livingRooms', 'дневнасобе': 'livingRooms', 'дневни': 'livingRooms',
-    // BG
-    'дневна': 'livingRooms', 'хол': 'livingRooms',
-    // SL
-    'dnevnaoba': 'livingRooms', 'dnevnisobor': 'livingRooms',
-    // RO
-    'cameradeziua': 'livingRooms', 'cameradestat': 'livingRooms', 'salonro': 'livingRooms',
-    // AL
-    'dhomaejeteses': 'livingRooms', 'dhomaeqeteses': 'livingRooms',
-    // GR
-    'καθιστικό': 'livingRooms', 'καθιστικο': 'livingRooms', 'σαλόνι': 'livingRooms',
-    // HU
-    'nappali': 'livingRooms', 'nappaliszoba': 'livingRooms',
-    // DE
-    'wohnzimmer': 'livingRooms', 'wohnraum': 'livingRooms',
-    // FR
-    'séjour': 'livingRooms', 'sejour': 'livingRooms', 'salonsejourou': 'livingRooms',
-    // IT
-    'soggiorno': 'livingRooms', 'salone': 'livingRooms',
-    // EN
-    'livingroom': 'livingRooms', 'livingrooms': 'livingRooms', 'sittingroom': 'livingRooms',
-    'lounge': 'livingRooms', 'receptionrooms': 'livingRooms',
-
-    // ── Total floors in building ──────────────────────────────────────────
-    // HR/BA/SR Latin
-    'ukupnokatova': 'totalFloors', 'ukupnospratova': 'totalFloors', 'ukupnoetaža': 'totalFloors',
-    'ukupnoetaza': 'totalFloors', 'brojetaza': 'totalFloors', 'katnost': 'totalFloors',
-    // SR Cyrillic
-    'укупноспратова': 'totalFloors', 'укупноетажа': 'totalFloors', 'катност': 'totalFloors',
-    // BG
-    'броетажи': 'totalFloors', 'общоетажи': 'totalFloors',
-    // RO
-    'numaretaje': 'totalFloors', 'totaletaje': 'totalFloors',
-    // DE
-    'gesamtstockwerke': 'totalFloors', 'gesamtgeschosse': 'totalFloors', 'anzahlstockwerke': 'totalFloors',
-    // EN
-    'totalfloors': 'totalFloors', 'numberoffloors': 'totalFloors', 'floorsintotal': 'totalFloors',
-    'buildingfloors': 'totalFloors', 'totalstoreys': 'totalFloors',
-
-    // ── Parking ───────────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'parking': 'parking', 'parkiralište': 'parking', 'parkiraliste': 'parking',
-    'parkirnomjesto': 'parking', 'garaža': 'parking', 'garaza': 'parking', 'garažno': 'parking',
-    'garazno': 'parking',
-    // SR Cyrillic
-    'паркинг': 'parking', 'гаража': 'parking', 'паркиралиште': 'parking',
-    // BG
-    'паркомясто': 'parking', 'гараж': 'parking',
-    // RO
-    'parcare': 'parking', 'garage': 'parking', 'locparcare': 'parking',
-    // DE
-    'stellplatz': 'parking', 'garagenstellplatz': 'parking', 'tiefgarage': 'parking',
-    // EN
-    'parkingspaces': 'parking', 'parkingspots': 'parking', 'garageplaces': 'parking',
-
-    // ── Furnishing ────────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'namještenost': 'furnishing', 'namjestenost': 'furnishing', 'oprema': 'furnishing',
-    'namješteno': 'furnishing', 'namjesteno': 'furnishing', 'namještaj': 'furnishing',
-    // SR Cyrillic
-    'намештеност': 'furnishing', 'намештено': 'furnishing',
-    // BG
-    'обзавеждане': 'furnishing', 'обзаведен': 'furnishing',
-    // RO
-    'mobilare': 'furnishing', 'mobilat': 'furnishing', 'dotare': 'furnishing',
-    // AL
-    'mobilim': 'furnishing', 'mobiluar': 'furnishing',
-    // GR
-    'επίπλωση': 'furnishing', 'επιπλωση': 'furnishing', 'επιπλωμένο': 'furnishing',
-    // HU
-    'bútorozottság': 'furnishing', 'butorozottsag': 'furnishing',
-    // DE
-    'einrichtung': 'furnishing', 'möbliert': 'furnishing', 'moebliert': 'furnishing',
-    'möblierung': 'furnishing',
-    // FR
-    'ameublement': 'furnishing', 'meublé': 'furnishing', 'meuble': 'furnishing',
-    // IT
-    'arredamento': 'furnishing', 'arredato': 'furnishing',
-    // EN
-    'furnishing': 'furnishing', 'furnished': 'furnishing', 'furnishings': 'furnishing',
-
-    // ── Heating type ──────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'grijanje': 'heatingType', 'vrstagrija': 'heatingType', 'tipgrijanja': 'heatingType',
-    'centralnogrijanje': 'heatingType', 'centralnogrianj': 'heatingType',
-    // SR Cyrillic
-    'грејање': 'heatingType', 'централногрејање': 'heatingType',
-    // SL
-    'ogrevanje': 'heatingType', 'sistemogrevanja': 'heatingType',
-    // BG
-    'отопление': 'heatingType', 'видотопление': 'heatingType',
-    // RO
-    'incalzire': 'heatingType', 'tipincalzire': 'heatingType', 'sistemincalzire': 'heatingType',
-    // AL
-    'ngrohje': 'heatingType', 'sistemngrohjes': 'heatingType',
-    // GR
-    'θέρμανση': 'heatingType', 'θερμανση': 'heatingType',
-    // HU
-    'fűtés': 'heatingType', 'futes': 'heatingType', 'fűtésmód': 'heatingType',
-    // DE
-    'heizung': 'heatingType', 'heizungsart': 'heatingType', 'heizungstyp': 'heatingType',
-    // FR
-    'chauffage': 'heatingType', 'typedechauffage': 'heatingType',
-    // IT
-    'riscaldamento': 'heatingType', 'tipodiriscaldamento': 'heatingType',
-    // EN
-    'heating': 'heatingType', 'heatingtype': 'heatingType', 'heatingsystem': 'heatingType',
-
-    // ── Condition / state ─────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'stanje': 'condition', 'stanjenekretni': 'condition', 'stanjeuređen': 'condition',
-    // SR Cyrillic
-    'стање': 'condition', 'стањенекретнине': 'condition',
-    // SL
-    'stanjepremoženja': 'condition',
-    // BG
-    'състояние': 'condition', 'видсъстояние': 'condition',
-    // RO
-    'stare': 'condition', 'stareproprietate': 'condition', 'stareclad': 'condition',
-    // AL
-    'gjendja': 'condition', 'gjendjaepronesise': 'condition',
-    // GR
-    'κατάσταση': 'condition', 'κατασταση': 'condition',
-    // HU
-    'állapot': 'condition', 'allapot': 'condition', 'ingatlanállapota': 'condition',
-    // DE
-    'zustand': 'condition', 'objektzustand': 'condition', 'zustandsbeschreibung': 'condition',
-    // FR
-    'état': 'condition', 'etat': 'condition', 'étatdubien': 'condition',
-    // IT
-    'condizione': 'condition', 'stato': 'condition', 'statoimmobile': 'condition',
-    // EN
-    'status': 'condition', 'propertystatus': 'condition',
-    'condition': 'condition', 'propertycondition': 'condition', 'buildingcondition': 'condition',
-
-    // ── View type ─────────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'pogled': 'viewType', 'poglednamore': 'viewType', 'poglednagore': 'viewType',
-    'poglednagrad': 'viewType', 'tipapogleda': 'viewType',
-    // SR Cyrillic
-    'поглед': 'viewType', 'погледнаморе': 'viewType',
-    // BG
-    'изглед': 'viewType', 'гледка': 'viewType', 'видизглед': 'viewType',
-    // RO
-    'vedere': 'viewType', 'tipvedere': 'viewType',
-    // DE
-    'aussicht': 'viewType', 'ausblick': 'viewType', 'blickrichtung': 'viewType',
-    // FR
-    'vue': 'viewType', 'typdevue': 'viewType',
-    // IT
-    'vista': 'viewType', 'tipodivista': 'viewType',
-    // EN
-    'view': 'viewType', 'viewtype': 'viewType', 'propertyview': 'viewType',
-
-    // ── Energy rating ─────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'energetskirazred': 'energyRating', 'energetskiceptifikat': 'energyRating',
-    'energetskaklasa': 'energyRating',
-    // SR Cyrillic
-    'енергетскиразред': 'energyRating',
-    // BG
-    'енергийнакласа': 'energyRating', 'енергетиченрейтинг': 'energyRating',
-    // RO
-    'clasaenergetica': 'energyRating', 'certificatenergetica': 'energyRating',
-    // DE
-    'energieklasse': 'energyRating', 'energieausweis': 'energyRating', 'effizienzklasse': 'energyRating',
-    // FR
-    'classeenergetique': 'energyRating', 'diagnosticpe': 'energyRating',
-    // IT
-    'classeenergetica': 'energyRating', 'certificazioneenergetica': 'energyRating',
-    // EN
-    'energyrating': 'energyRating', 'energyclass': 'energyRating', 'epcrating': 'energyRating',
-    'energyefficiency': 'energyRating',
-
-    // ── Orientation ───────────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'orijentacija': 'orientation', 'stransvijetstrane': 'orientation',
-    // SR Cyrillic
-    'оријентација': 'orientation', 'страна': 'orientation',
-    // BG
-    'изложение': 'orientation', 'ориентация': 'orientation',
-    // DE
-    'ausrichtung': 'orientation', 'himmelsrichtung': 'orientation',
-    // EN
-    'orientation': 'orientation', 'facing': 'orientation', 'aspect': 'orientation',
-
-    // ── Distance to center ────────────────────────────────────────────────
-    // HR/BA/SR Latin
-    'udaljenostodcentra': 'distanceToCenter', 'udaljenostdocentra': 'distanceToCenter',
-    'odcentragrada': 'distanceToCenter',
-    // SR Cyrillic
-    'удаљеностодцентра': 'distanceToCenter',
-    // BG
-    'разстояниедоцентъра': 'distanceToCenter',
-    // RO
-    'distantafatadecentru': 'distanceToCenter',
-    // DE
-    'distanzzumzentrum': 'distanceToCenter', 'entfernungzumzentrum': 'distanceToCenter',
-    // EN
-    'distancetocenter': 'distanceToCenter', 'distancetocitycentre': 'distanceToCenter',
-    'distancefromcenter': 'distanceToCenter',
-
-    // ── Property / listing ID ─────────────────────────────────────────────
-    // EN
-    'propertyid': 'propertyId', 'listingid': 'propertyId', 'referenceid': 'propertyId',
-    'refid': 'propertyId', 'ref': 'propertyId', 'id': 'propertyId', 'mlsid': 'propertyId',
-    // HR/BA/SR
-    'šifraoglasa': 'propertyId', 'sifraoglasa': 'propertyId', 'idoglasa': 'propertyId',
-    'referenca': 'propertyId', 'oznaka': 'propertyId', 'sifra': 'propertyId',
-    // SR Cyrillic
-    'шифраогласа': 'propertyId', 'ознака': 'propertyId', 'шифра': 'propertyId',
-    // AL
-    'idproneesise': 'propertyId',
-    // DE
-    'objektnummer': 'propertyId', 'immobilienid': 'propertyId', 'referenznummer': 'propertyId',
-    // FR
-    'referencebien': 'propertyId', 'numerobien': 'propertyId',
-    // IT
-    'codiceimmobile': 'propertyId', 'riferimento': 'propertyId',
-
-    // ── Listing type (sale vs rent) ───────────────────────────────────────
-    // HR/BA/SR
-    'vrstaprodaje': 'listingType', 'tipoglasa': 'listingType',
-    'transakcija': 'listingType', 'nacinprodaje': 'listingType',
-    // SR Cyrillic
-    'врстапродаjе': 'listingType', 'трансакциjа': 'listingType',
-    // EN
-    'dealtype': 'listingType', 'transactiontype': 'listingType', 'offertype': 'listingType',
-    'listingtype': 'listingType',
-    // DE
-    'angebotsart': 'listingType', 'transaktionsart': 'listingType',
-    // AL
-    'llojioferte': 'listingType', 'transaksion': 'listingType',
-  };
-
-  const applyLabelValue = (labelRaw: string, valueRaw: string): void => {
-    if (!labelRaw || !valueRaw) return;
-    const key = normLabel(labelRaw);
-    const field = LABEL_MAP[key];
-    if (!field) return;
-
-    const v = valueRaw.trim();
-    if (!v) return;
-
-    if (field === 'price') {
-      // Override if no price yet, OR if the existing value is a bare integer < 1000
-      // (likely a dot-thousands price that JSON already collapsed: "620.000" → 620).
-      const existing = target.price;
-      const existingIsCollapsed = typeof existing === 'number' && existing < 1000;
-      if (!existing || existingIsCollapsed) target.price = v;
-    } else if (field === 'sqft' && !target.sqft) {
-      // Extract the leading numeric part, using the same separator logic as
-      // normalizePriceNumeric so "1.500 m²" → 1500 but "180.5 m²" → 180.5.
-      const m = v.match(/(\d[\d.,\s]*\d|\d)/);
-      if (m) {
-        const raw = m[1].replace(/ /g, ' ').trim();
-        // Dot-thousands: "1.500" → if 3 digits after last dot and no comma, strip dot
-        const stripped = /^\d{1,3}(\.\d{3})+$/.test(raw)
-          ? raw.replace(/\./g, '')
-          : raw.replace(/\s/g, '').replace(',', '.');
-        const n = parseFloat(stripped);
-        if (n >= 10 && n <= 50_000) target.sqft = n;
-      }
-    } else if (field === 'plotSqm' && !target.plotSqm) {
-      const m = v.match(/(\d[\d.,\s]*\d|\d)/);
-      if (m) {
-        const raw = m[1].replace(/ /g, ' ').trim();
-        const stripped = /^\d{1,3}(\.\d{3})+$/.test(raw)
-          ? raw.replace(/\./g, '')
-          : raw.replace(/\s/g, '').replace(',', '.');
-        const n = parseFloat(stripped);
-        if (n >= 1 && n <= 500_000) target.plotSqm = n;
-      }
-    } else if (field === 'beds' && !target.beds) {
-      const n = parseInt(v, 10);
-      if (n >= 1 && n <= 20) target.beds = n;
-    } else if (field === 'baths' && !target.baths) {
-      const n = parseInt(v, 10);
-      if (n >= 1 && n <= 10) target.baths = n;
-    } else if (field === 'city' && !target.city) {
-      target.city = v.split(/[,/]/)[0].trim();
-      if (!target.address) target.address = v;
-    } else if (field === 'propertyType' && !target.propertyType) {
-      target.propertyType = v;
-    } else if (field === 'yearBuilt' && !target.yearBuilt) {
-      const n = parseInt(v, 10);
-      if (n >= 1800 && n <= 2100) target.yearBuilt = n;
-    } else if (field === 'floor' && !target.floor) {
-      target.floor = v;
-    } else if (field === 'distanceToSea' && !target.distanceToSea) {
-      const n = parseDistanceValue(v);
-      if (n != null) target.distanceToSea = n;
-    } else if (field === 'livingRooms' && !target.livingRooms) {
-      const n = parseInt(v, 10);
-      if (n >= 1 && n <= 5) target.livingRooms = n;
-    } else if (field === 'totalFloors' && !target.totalFloors) {
-      const n = parseInt(v, 10);
-      if (n >= 1 && n <= 100) target.totalFloors = n;
-    } else if (field === 'parking' && !target.parking) {
-      const n = parseInt(v, 10);
-      if (n >= 1 && n <= 10) target.parking = n;
-    } else if (field === 'furnishing' && !target.furnishing) {
-      target.furnishing = mapFurnishingValue(v);
-    } else if (field === 'heatingType' && !target.heatingType) {
-      target.heatingType = mapHeatingValue(v);
-    } else if (field === 'condition' && !target.condition) {
-      target.condition = mapConditionValue(v);
-    } else if (field === 'viewType' && !target.viewType) {
-      target.viewType = mapViewValue(v);
-    } else if (field === 'energyRating' && !target.energyRating) {
-      const m = v.match(/\b([A-G][+]?)\b/);
-      if (m) target.energyRating = m[1].toUpperCase();
-    } else if (field === 'orientation' && !target.orientation) {
-      target.orientation = mapOrientationValue(v);
-    } else if (field === 'distanceToCenter' && !target.distanceToCenter) {
-      const n = parseDistanceValue(v);
-      if (n != null) target.distanceToCenter = n;
-    } else if (field === 'propertyId' && !target.propertyId) {
-      // Store the external listing ID if it looks reasonable (not a long URL/hash).
-      if (v.length <= 50 && !/^https?:\/\//.test(v)) target.propertyId = v;
-    } else if (field === 'listingType' && !target.listingType) {
-      const lv = v.toLowerCase();
-      if (/\b(sale|prodaj|shitj|vanzar|πωλ|eladó|verkauf|kauf|продаж)\b/i.test(lv)) target.listingType = 'sale';
-      else if (/\b(rent|najam|qira|chirie|ενοικ|kiadó|miete|наем|кирија)\b/i.test(lv)) target.listingType = 'rent';
-    }
-  };
-
-  /** Parse a distance string like "500m", "1.2 km", "800 metara" → number in metres. */
-  const parseDistanceValue = (v: string): number | null => {
-    const m = v.match(/(\d[\d.,\s]*\d|\d)\s*(km|m\b|mi\b|km\b|kilomet|meter|metar|metre)/i);
-    if (!m) {
-      const plain = v.match(/(\d[\d.,\s]*\d|\d)/);
-      if (plain) {
-        const n = parseFloat(plain[1].replace(/[\s.]/g, '').replace(',', '.'));
-        if (n >= 1 && n <= 100_000) return n;
-      }
-      return null;
-    }
-    const rawNum = parseFloat(m[1].replace(/[\s]/g, '').replace(',', '.'));
-    const unit = m[2].toLowerCase();
-    const metres = /km|kilomet/i.test(unit) ? rawNum * 1000 : rawNum;
-    if (metres >= 1 && metres <= 200_000) return metres;
-    return null;
-  };
-
-  const mapFurnishingValue = (v: string): string | undefined => {
-    const l = v.toLowerCase();
-    if (/\b(fully.?furn|kompletno|potpu(no|njen)|namješteno|opreml|vollmöbl|complet|arredato|meublé)\b/i.test(l)) return 'furnished';
-    if (/\b(semi|djelomič|teilmöbl|partiel|parzialmente|félbúto)\b/i.test(l)) return 'semi-furnished';
-    if (/\b(unfurn|nije|nenamy|bez\s*nam|ohne.?möb|non.?meub|non.?arred|bútorozatlan)\b/i.test(l)) return 'unfurnished';
-    if (/\b(furn|namješten|namešten|opremljen|möbliert|meublé|arredato|bútorozot)\b/i.test(l)) return 'furnished';
-    return undefined;
-  };
-
-  const mapHeatingValue = (v: string): string | undefined => {
-    const l = v.toLowerCase();
-    if (/\b(central|district|daljinsko|centralno|fernwärme|téléchauf)\b/i.test(l)) return 'central';
-    if (/\b(electr|elek|struj|elektr|elektro|électr|eletric)\b/i.test(l)) return 'electric';
-    if (/\b(gas|gaz|plin)\b/i.test(l)) return 'gas';
-    if (/\b(oil|mazut|loži|heiz[öo]l|fioul|gasoil)\b/i.test(l)) return 'oil';
-    if (/\b(heat.?pump|topl[oi]n[sa]\s*pumpa|wärmepumpe|pompe.?chaleur)\b/i.test(l)) return 'heat-pump';
-    if (/\b(solar|solarno|solaire)\b/i.test(l)) return 'solar';
-    if (/\b(wood|drv[ao]|bois|legna|holz|biomass|peć)\b/i.test(l)) return 'wood';
-    return undefined;
-  };
-
-  const mapConditionValue = (v: string): string | undefined => {
-    const l = v.toLowerCase();
-    if (/\b(new|novo|novo?gradnja|neubau|neuf|nuovo)\b/i.test(l)) return 'new';
-    if (/\b(excellent|odlič|izvrs|ausgezeich|excell|eccellente|kiváló)\b/i.test(l)) return 'excellent';
-    if (/\b(good|dobr[ao]|gut|bon|buono|jó)\b/i.test(l)) return 'good';
-    if (/\b(fair|srednje|prihvatl|befriedi|passable|discreto)\b/i.test(l)) return 'fair';
-    if (/\b(renovat|needs.?work|za.?renovir|umbaubedürf|rénov|da.?ristruttur|felújítand)\b/i.test(l)) return 'needs-renovation';
-    return undefined;
-  };
-
-  const mapViewValue = (v: string): string | undefined => {
-    const l = v.toLowerCase();
-    if (/\b(sea|more|meer|mer|mare|tenger|θάλ|deniz)\b/i.test(l)) return 'sea';
-    if (/\b(mountain|planin|berg|montagne|montagna|hegy)\b/i.test(l)) return 'mountain';
-    if (/\b(city|grad|stadt|ville|città|città|város)\b/i.test(l)) return 'city';
-    if (/\b(park|parque|parc|parco)\b/i.test(l)) return 'park';
-    if (/\b(garden|vrt|garten|jardin|giardino|kert)\b/i.test(l)) return 'garden';
-    if (/\b(street|ulica|straße|rue|strada|utca)\b/i.test(l)) return 'street';
-    return undefined;
-  };
-
-  const mapOrientationValue = (v: string): string | undefined => {
-    const l = v.toLowerCase().replace(/\s+/g, '');
-    if (/\b(northeast|severoistok|nordost|nordest)\b/i.test(l)) return 'northEast';
-    if (/\b(northwest|severozapad|nordwest|nordovest)\b/i.test(l)) return 'northWest';
-    if (/\b(southeast|jugoistok|südost|sudest)\b/i.test(l)) return 'southEast';
-    if (/\b(southwest|jugozapad|südwest|sudovest)\b/i.test(l)) return 'southWest';
-    if (/\b(north|sever|sjever|nord|nord|север)\b/i.test(l)) return 'north';
-    if (/\b(south|jug|sud|sud|юг)\b/i.test(l)) return 'south';
-    if (/\b(east|istok|ost|est|восток)\b/i.test(l)) return 'east';
-    if (/\b(west|zapad|west|ovest|запад)\b/i.test(l)) return 'west';
-    return undefined;
-  };
-
   // Pattern 1: <dt>Label</dt><dd>Value</dd>
   $('dl dt, dl th').each((_, el) => {
-    applyLabelValue($(el).text().trim(), $(el).next('dd, td').text().trim());
+    applyLabelValue(target, $(el).text().trim(), $(el).next('dd, td').text().trim());
   });
 
   // Pattern 2: table rows <tr><th>Label</th><td>Value</td></tr>
   $('tr').each((_, el) => {
     const cells = $(el).find('th, td');
     if (cells.length >= 2) {
-      applyLabelValue($(cells[0]).text().trim(), $(cells[1]).text().trim());
+      applyLabelValue(target, $(cells[0]).text().trim(), $(cells[1]).text().trim());
     }
   });
 
@@ -1307,7 +594,7 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
       const valueEl = $(el).next();
       const value = valueEl.text().trim()
         || $(el).siblings('[class*="value"],[class*="vrijednost"],[class*="field-value"],[class*="prop-value"],[class*="info-value"],[class*="detail-value"]').first().text().trim();
-      applyLabelValue(label, value);
+      applyLabelValue(target, label, value);
     });
   }
 
@@ -1327,8 +614,8 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
       });
       if (texts.length >= 2) {
         // Try both orderings since some sites put label first, others last
-        applyLabelValue(texts[texts.length - 1], texts[0]);
-        applyLabelValue(texts[0], texts[texts.length - 1]);
+        applyLabelValue(target, texts[texts.length - 1], texts[0]);
+        applyLabelValue(target, texts[0], texts[texts.length - 1]);
       }
     });
   }
@@ -1343,7 +630,7 @@ const extractBalkanLabelValues = ($: cheerio.CheerioAPI, baseUrl: string, target
     if (colonIdx > 0 && colonIdx < text.length - 1 && colonIdx < 40) {
       const label = text.slice(0, colonIdx).trim();
       const value = text.slice(colonIdx + 1).trim();
-      if (label && value && label.length < 40) applyLabelValue(label, value);
+      if (label && value && label.length < 40) applyLabelValue(target, label, value);
     }
   });
 
@@ -1556,11 +843,22 @@ export const enrichFromDetailHtml = (
   extractJsonLd($, baseUrl, target);
   extractOpenGraph($, baseUrl, target);
   extractMicrodata($, baseUrl, target);
+  // The map on the page: meta tags, map embeds and links, map scripts…
+  if (target.lat == null || target.lng == null) {
+    const coords = extractMapCoordinates($);
+    if (coords) {
+      target.lat = coords.lat;
+      target.lng = coords.lng;
+    }
+  }
   extractBalkanLabelValues($, baseUrl, target);
+  extractLabelledPairs($, target);
   extractStructuredBedsAndBaths($, target);
   extractGalleryImages($, baseUrl, target);
   extractStructuredPriceFromHtml($, target);
   extractStructuredLocationFromHtml($, target, baseUrl);
   extractSmartFieldsFromText($, target);
+  // Fallback for the country: the site's own (language, domain, phone prefix).
+  setIfMissing(target, 'pageCountry', countryFromPageSignals(html, baseUrl));
   return target;
 };

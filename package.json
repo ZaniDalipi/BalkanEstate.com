@@ -24,7 +24,8 @@
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:headed": "npx playwright test --headed",
     "test:e2e:debug": "npx playwright test --debug",
-    "test:all": "vitest run && npx playwright test"
+    "test:all": "vitest run && npx playwright test",
+    "sync:places": "node scripts/sync-place-catalog.mjs"
   },
   "dependencies": {
     "@dicebear/collection": "^9.4.0",
