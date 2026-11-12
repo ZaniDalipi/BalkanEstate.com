@@ -397,7 +397,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     {showSplitView && (
                         <>
                             {/* The search box is in the list's header: folded away, the map gets its own. */}
-                            <MapSearchDock shown={listCollapse.collapsed}>
+                            <MapSearchDock shown={listCollapse.collapsed} onReset={handleResetFilters}>
                                 <SearchLocationBar
                                     filters={filters}
                                     properties={properties}

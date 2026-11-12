@@ -1084,7 +1084,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                     {!showViewToggle && (
                         <>
                             {/* The search box is in the list's header: folded away, the map gets its own. */}
-                            <MapSearchDock shown={listCollapse.collapsed}>
+                            <MapSearchDock shown={listCollapse.collapsed} onReset={handleResetFilters}>
                                 <div className="flex-1 min-w-0">
                                     <VillaLocationBar
                                         query={filters.query}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { ArrowPathIcon } from '@/constants';
 import { searchDockMotion } from './tabMotion';
 
 interface MapSearchDockProps {
@@ -8,6 +9,8 @@ interface MapSearchDockProps {
     shown: boolean;
     /** The page's own search box in its pill form (the one its phone bar uses). */
     children: React.ReactNode;
+    /** The page's own Reset Filters: clears the query, filters and drawn area. */
+    onReset: () => void;
 }
 
 /**
@@ -24,8 +27,11 @@ interface MapSearchDockProps {
  * as `--map-dock-h` (see `splitMapPanelClass`), and the map's own top-left
  * overlays move down by it. Above the map's controls (1000–1003) so the
  * suggestions drop over them; pointer events pass through around the pill.
+ *
+ * Reset sits at the pill's end and runs the page's own Reset Filters, so
+ * starting over never needs the list back either.
  */
-const MapSearchDock: React.FC<MapSearchDockProps> = ({ shown, children }) => {
+const MapSearchDock: React.FC<MapSearchDockProps> = ({ shown, children, onReset }) => {
     const { t } = useTranslation(['search']);
     const reduceMotion = useReducedMotion() ?? false;
     const dock = searchDockMotion(reduceMotion);
@@ -45,6 +51,17 @@ const MapSearchDock: React.FC<MapSearchDockProps> = ({ shown, children }) => {
                 >
                     <div className="pointer-events-auto flex min-h-12 w-full max-w-md items-center rounded-full border border-white/70 bg-white/90 p-1 shadow-[0_8px_32px_rgba(15,23,42,0.18)] backdrop-blur-xl">
                         {children}
+                        <span aria-hidden="true" className="mx-1 h-6 w-px flex-shrink-0 bg-neutral-200" />
+                        <button
+                            type="button"
+                            onClick={onReset}
+                            aria-label={t('search:filters.resetFilters', 'Reset Filters')}
+                            title={t('search:filters.resetFilters', 'Reset Filters')}
+                            className="flex min-h-11 flex-shrink-0 touch-manipulation items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-primary active:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                        >
+                            <ArrowPathIcon className="h-4 w-4" />
+                            <span>{t('search:map.reset', 'Reset')}</span>
+                        </button>
                     </div>
                 </motion.div>
             )}

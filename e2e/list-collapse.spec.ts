@@ -53,6 +53,10 @@ for (const path of PAGES) {
       const input = dock.getByRole('combobox');
       await input.fill('Zagreb');
       await expect(input).toHaveValue('Zagreb');
+      // Reset from the map clears the search and keeps the list folded.
+      await dock.getByRole('button', { name: 'Reset Filters' }).click();
+      await expect(input).toHaveValue('');
+      await expect(list).toBeHidden();
 
       // Remembered on this device.
       await page.reload();

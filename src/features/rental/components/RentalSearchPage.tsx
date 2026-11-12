@@ -592,7 +592,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     {showSplitView && (
                         <>
                             {/* The search box is in the list's header: folded away, the map gets its own. */}
-                            <MapSearchDock shown={listCollapse.collapsed}>
+                            <MapSearchDock shown={listCollapse.collapsed} onReset={handleResetFilters}>
                                 <UniversalSearchBox
                                     value={filters.query}
                                     onValueChange={(value) => handleFilterChange('query', value)}

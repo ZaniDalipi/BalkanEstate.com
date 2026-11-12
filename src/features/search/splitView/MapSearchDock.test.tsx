@@ -24,7 +24,7 @@ function Page({ split = true }: { split?: boolean }) {
             <div data-testid="map" className={splitMapPanelClass(split, collapsed)}>
                 {split && (
                     <>
-                        <MapSearchDock shown={collapsed}>{box('Map search')}</MapSearchDock>
+                        <MapSearchDock shown={collapsed} onReset={() => setQuery('')}>{box('Map search')}</MapSearchDock>
                         <ListCollapseTab collapsed={collapsed} onToggle={toggle} count={4} />
                     </>
                 )}
@@ -63,6 +63,17 @@ describe('MapSearchDock — searching while the list is hidden', () => {
         fireEvent.click(screen.getByRole('button', { name: /^Show list/ }));
         await waitFor(() => expect(dock()).not.toBeInTheDocument());
         expect(screen.getByLabelText('List search')).toHaveValue('Zagreb');
+    });
+
+    it('resets the search from the map, without bringing the list back', () => {
+        render(<Page />);
+        fireEvent.click(screen.getByRole('button', { name: 'Hide list' }));
+        fireEvent.change(screen.getByLabelText('Map search'), { target: { value: 'Zagreb' } });
+
+        fireEvent.click(within(dock() as HTMLElement).getByRole('button', { name: 'Reset Filters' }));
+        expect(screen.getByLabelText('Map search')).toHaveValue('');
+        expect(dock()).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /^Show list/ })).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('does not take keyboard focus from the tab when it appears', () => {

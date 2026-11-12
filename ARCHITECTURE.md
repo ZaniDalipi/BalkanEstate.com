@@ -1592,6 +1592,9 @@ src/index.css @theme       --ease-split-open / --ease-split-close (springs as li
   `--map-dock-h` (3.75rem); the map's top-left overlays (coordinates chip,
   climate legend, sun control, draw hint) add it to their `top`, so they
   slide below the dock. Unset everywhere else, so other maps are unchanged.
+  A **Reset** button at the pill's end runs the page's own
+  `handleResetFilters` (query, filters, drawn area, map back to the region),
+  so starting over never needs the list back either.
 - **Reduced motion** turns every part off: the panels jump (no CSS
   transitions), the tab changes instantly, and the shade and pulse are not
   drawn.
