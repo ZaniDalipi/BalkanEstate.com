@@ -1057,7 +1057,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           onOpenViewer={() => setIsViewerOpen(true)}
           onNavigateTo3DTour={handleNavigateTo3DTour}
           onOpenFloorPlan={getFloorPlans(property).length > 0 ? openFloorPlan : undefined}
-          onViewFloorPlan={getFloorPlans(property).length > 0 ? () => openFloorPlan() : undefined}
           onView3DMap={
             property.lat != null && property.lng != null && !isNaN(property.lat) && !isNaN(property.lng)
               ? handleView3DMap

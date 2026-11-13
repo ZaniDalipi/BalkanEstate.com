@@ -28,8 +28,6 @@ interface PropertyGalleryProps {
   onView3DMap?: () => void;
   /** Open the floor plan viewer on this photo (shown when it has a floor plan spot). */
   onOpenFloorPlan?: (photoUrl: string) => void;
-  /** Open the floor plan itself; shown beside the 3D map button when the listing has one. */
-  onViewFloorPlan?: () => void;
   // Controlled mode props
   activeCategory?: PropertyImageTag | 'all';
   currentImageIndex?: number;
@@ -181,7 +179,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   onNavigateTo3DTour,
   onView3DMap,
   onOpenFloorPlan,
-  onViewFloorPlan,
   activeCategory: controlledCategory,
   currentImageIndex: controlledIndex,
   onCategoryChange,
@@ -1014,8 +1011,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               </button>
             )}
 
-            {/* Top-left badge stack: 3D Tour + 3D Map + Floor Plan */}
-            {((videoEnded && property.virtualTour360Url) || onView3DMap || onViewFloorPlan) && (
+            {/* Top-left badge stack: 3D Tour + 3D Map */}
+            {((videoEnded && property.virtualTour360Url) || onView3DMap) && (
               <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
                 {videoEnded && property.virtualTour360Url && (
                   <button
@@ -1034,16 +1031,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   >
                     <SoftIcon name="cube" className="w-5 h-5 flex-shrink-0" />
                     <span>{t('property:gallery.view3DMap', '3D Location Map')}</span>
-                  </button>
-                )}
-                {onViewFloorPlan && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onViewFloorPlan(); }}
-                    className="flex items-center gap-1.5 whitespace-nowrap min-h-[32px] bg-white/95 text-neutral-800 text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg ring-1 ring-black/10 hover:scale-105 active:scale-95 transition-all"
-                  >
-                    <SoftIcon name="area" className="w-5 h-5 flex-shrink-0" />
-                    <span>{t('property:gallery.viewFloorPlan', 'Floor Plan')}</span>
                   </button>
                 )}
               </div>
