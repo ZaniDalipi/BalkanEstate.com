@@ -1,17 +1,15 @@
 // The reader's preferences for the mobile thumb rail: which edge it sits on
-// and when it shows. Remembered on this device.
+// and when it shows. Remembered on this device; a stored copy is validated
+// field by field when it is read back (see navPrefs.ts).
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { safeLocalStorage } from '@/src/app/store/safeLocalStorage';
+import { DEFAULT_NAV_PREFS, isRailSide, isRailVisibility, readNavPrefs, type NavPrefs, type RailSide, type RailVisibility } from './navPrefs';
 
-export type RailSide = 'left' | 'right';
-/** always: a thin rail stays on the edge · scroll: it steps aside while scrolling · hidden: only a small tab. */
-export type RailVisibility = 'always' | 'scroll' | 'hidden';
+export type { RailSide, RailVisibility } from './navPrefs';
 
-interface SectionNavPrefs {
-  side: RailSide;
-  visibility: RailVisibility;
+interface SectionNavPrefs extends NavPrefs {
   setSide: (side: RailSide) => void;
   setVisibility: (visibility: RailVisibility) => void;
 }
@@ -19,15 +17,20 @@ interface SectionNavPrefs {
 export const useSectionNavPrefs = create<SectionNavPrefs>()(
   persist(
     (set) => ({
-      side: 'right',
-      visibility: 'always',
-      setSide: (side) => set({ side }),
-      setVisibility: (visibility) => set({ visibility }),
+      ...DEFAULT_NAV_PREFS,
+      // Guarded as well: a value from outside the union is ignored, not stored.
+      setSide: (side) => {
+        if (isRailSide(side)) set({ side });
+      },
+      setVisibility: (visibility) => {
+        if (isRailVisibility(visibility)) set({ visibility });
+      },
     }),
     {
       name: 'section-nav-prefs',
       storage: createJSONStorage(() => safeLocalStorage),
-      partialize: (s) => ({ side: s.side, visibility: s.visibility }),
+      partialize: (s): NavPrefs => ({ side: s.side, visibility: s.visibility }),
+      merge: (stored, current) => ({ ...current, ...readNavPrefs(stored) }),
     }
   )
 );

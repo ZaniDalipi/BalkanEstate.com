@@ -25,7 +25,7 @@ import AirQualityCard from './area-insights/AirQualityCard';
 import ZoneDynamicsCard from './area-insights/ZoneDynamicsCard';
 import NoiseCard from './area-insights/NoiseCard';
 import TrafficCard from './area-insights/TrafficCard';
-import { QueryErrorBoundary } from '@/src/app/components';
+import { ErrorBoundary, QueryErrorBoundary } from '@/src/app/components';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { generatePropertySlug } from '@/utils/slug';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
@@ -1049,8 +1049,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* Bookmark-style quick navigation — Notion-style vertical rail (desktop).
           Mounted at the page root, outside the backdrop-blurred header. */}
       <PropertySectionNav variant="rail" />
-      {/* Phones and tablets: a liquid-glass thumb rail on the reader's chosen edge. */}
-      <PropertySectionNav variant="thumb" />
+      {/* Phones and tablets: a liquid-glass thumb rail on the reader's chosen edge.
+          A shortcut, not content: if it ever fails to render, the error is
+          reported and the page carries on without it (scrolling still reaches
+          every section), instead of the whole listing falling over. */}
+      <ErrorBoundary level="feature" fallback={<></>}>
+        <PropertySectionNav variant="thumb" />
+      </ErrorBoundary>
 
       {/* Gallery — full-bleed, outside main container so it spans 100% page width */}
       <div className="animate-slide-up w-full" style={{ animationDelay: '0ms' }}>

@@ -923,6 +923,44 @@ Key decisions:
 
 ---
 
+## Property Page — "On this page" Section Navigation
+
+One menu of the page's sections, shown three ways by width
+(`PropertySectionNav`, `variant` prop). All three render from
+`section-nav/useSectionNav` (which sections exist, the one being read, scroll
+to one), so they always agree.
+
+| Width | Variant | Where |
+|-------|---------|-------|
+| < lg (phones, tablets) | `thumb` — liquid-glass rail on the left or right edge | page root |
+| lg – 1500px | `bar` — horizontal chip bar | inside the sticky header |
+| ≥ 1500px | `rail` — dash rail that expands on hover | page root |
+
+The thumb rail (`features/property-details/components/section-nav/`):
+
+- **Gesture** (`useRailScrub`): press the rail and the panel opens beside it
+  (never under the thumb); slide, and the row under the thumb lights up (a
+  light vibration on Android); let go on a row to jump, or well away from the
+  list to cancel. A tap without a slide leaves the panel open for tapping a
+  row; Esc or a tap outside closes it; Enter/Space on the rail opens it.
+- **Geometry is pure** (`thumbRailLayout.ts`, unit-tested): rows 36–44px,
+  panel centred on the rail and kept between the header and the bottom contact
+  bar (marked `data-thumb-rail-top-edge` / `data-thumb-rail-bottom-edge`,
+  measured each time it opens, `railGeometry.ts`); a short screen scrolls the
+  list.
+- **Preferences** (`sectionNavStore`, persisted as `section-nav-prefs`): side
+  `left | right` (default right) and visibility `always | scroll | hidden`
+  (default always). Stored values are validated field by field on read
+  (`navPrefs.ts`), so a damaged one falls back to its default.
+- **Steps aside** over the 3D map, and while scrolling when set to `scroll`.
+- **Liquid glass** is `.thumb-glass` / `.thumb-glass--panel` /
+  `.thumb-glass-tint` in `src/index.css`: these are unlayered, so they never
+  set `position` (the component does), and WebKit gets a smaller blur.
+- Mounted inside a feature `ErrorBoundary` with an empty fallback: a failure
+  is reported and the page carries on without the shortcut.
+
+---
+
 ## Sticky Bottom Action Bar
 
 Mobile-only companion to the desktop `PropertyContact` sidebar.
