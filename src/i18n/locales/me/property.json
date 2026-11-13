@@ -703,7 +703,21 @@
     "airQuality": "Kvalitet vazduha",
     "noise": "Buka",
     "traffic": "Saobraćaj",
-    "zoneDynamics": "Dinamika zone"
+    "zoneDynamics": "Dinamika zone",
+    "open": "Idi na odjeljak",
+    "settings": "Brza navigacija",
+    "slideHint": "Prevucite palcem, pustite za skok",
+    "done": "Gotovo",
+    "side": "Strana",
+    "left": "Lijevo",
+    "right": "Desno",
+    "show": "Prikaži",
+    "showAlways": "Uvijek",
+    "showAlwaysHint": "Tanka traka ostaje na ivici",
+    "showScroll": "Sakrij tokom skrolovanja",
+    "showScrollHint": "Skloni se dok skrolujete",
+    "showHidden": "Sklonjeno",
+    "showHiddenHint": "Samo mali jezičak; pritisnite ga za otvaranje"
   },
   "seo": {
     "title": "{{beds}}-sobni {{type}} za {{listingAction}} u {{city}}, {{country}} - €{{price}}",

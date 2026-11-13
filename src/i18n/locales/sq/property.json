@@ -764,7 +764,21 @@
     "airQuality": "Cilësia e ajrit",
     "noise": "Zhurma",
     "traffic": "Trafiku",
-    "zoneDynamics": "Dinamika e zonës"
+    "zoneDynamics": "Dinamika e zonës",
+    "open": "Kalo te një seksion",
+    "settings": "Navigim i shpejtë",
+    "slideHint": "Rrëshqit gishtin, lëshoje për të kaluar",
+    "done": "U krye",
+    "side": "Ana",
+    "left": "Majtas",
+    "right": "Djathtas",
+    "show": "Shfaq",
+    "showAlways": "Gjithmonë",
+    "showAlwaysHint": "Një shirit i hollë qëndron në skaj",
+    "showScroll": "Fshihe gjatë lëvizjes",
+    "showScrollHint": "Largohet ndërsa lëviz faqen",
+    "showHidden": "I fshehur",
+    "showHiddenHint": "Vetëm një skedë e vogël; shtype për ta hapur"
   },
   "seo": {
     "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",

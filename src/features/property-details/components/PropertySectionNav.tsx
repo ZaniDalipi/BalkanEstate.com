@@ -1,303 +1,51 @@
 // PropertySectionNav - Bookmark-style quick navigation for the property page
 //
-// Two responsive presentations of the same section bookmarks:
-//   • variant="rail" → Desktop (lg+): a Notion-style vertical "dash rail" fixed
-//                      in the left gutter (right of the global app sidebar).
-//                      Collapsed it shows dashes; on hover/focus it expands into
-//                      a labelled "On this page" panel. Mount at the PAGE ROOT —
-//                      never inside the backdrop-blurred header, whose filter
-//                      would become the containing block for the fixed rail.
-//   • variant="bar"  → Mobile/Tablet (< lg): a horizontal, touch-scrollable chip
-//                      bar. Mount inside the sticky page header.
+// Three responsive presentations of the same section bookmarks:
+//   • variant="rail"  → Wide desktop (≥1500px): a Notion-style vertical "dash
+//                       rail" fixed in the right gutter. Collapsed it shows
+//                       dashes; on hover/focus it expands into a labelled
+//                       "On this page" panel.
+//   • variant="bar"   → Laptops (lg – 1500px): a horizontal chip bar. Mount
+//                       inside the sticky page header.
+//   • variant="thumb" → Phones and tablets (< lg): a liquid-glass rail on the
+//                       left or right edge; hold it and slide the thumb to a
+//                       section (see section-nav/ThumbSectionRail).
+// Mount "rail" and "thumb" at the PAGE ROOT — never inside the
+// backdrop-blurred header, whose filter would become the containing block
+// for a fixed element.
 //
 // Clicking an item smooth-scrolls to the first *visible* element carrying the
 // matching `data-section` attribute. Bookmarks whose target is absent are
 // hidden so we never render a dead link.
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
-import { naturalTop, orderByPosition, pickActiveSection, pinnedContainer } from './sectionPositions';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { useSectionNav } from './section-nav/useSectionNav';
+import ThumbSectionRail from './section-nav/ThumbSectionRail';
 
 const ICON_CLASS = 'w-5 h-5 flex-shrink-0';
 
-interface SectionDef {
-  /** Matches the data-section attribute on the target element ('top' = page top) */
-  key: string;
-  labelKey: string;
-  fallback: string;
-  icon: SoftIconName;
-}
-
-// Static definitions live outside the component so the scroll/active-tracking
-// effects keep a stable reference (avoids re-subscribing on every render).
-// This is only the starting order: once the page is laid out, the menu follows
-// where each section really is (see sectionPositions.ts).
-const SECTION_DEFS: readonly SectionDef[] = [
-  {
-    key: 'top',
-    labelKey: 'property:sectionNav.overview',
-    fallback: 'Overview',
-    icon: 'info',
-  },
-  {
-    key: 'details',
-    labelKey: 'property:sectionNav.details',
-    fallback: 'Details',
-    icon: 'clipboard',
-  },
-  {
-    key: 'neighborhood',
-    labelKey: 'property:sectionNav.neighborhood',
-    fallback: 'Neighborhood',
-    icon: 'houses',
-  },
-  {
-    key: 'air-quality',
-    labelKey: 'property:sectionNav.airQuality',
-    fallback: 'Air Quality',
-    icon: 'leaf',
-  },
-  {
-    key: 'noise',
-    labelKey: 'property:sectionNav.noise',
-    fallback: 'Noise',
-    icon: 'mic',
-  },
-  {
-    key: 'traffic',
-    labelKey: 'property:sectionNav.traffic',
-    fallback: 'Traffic',
-    icon: 'car',
-  },
-  {
-    key: 'availability',
-    labelKey: 'property:sectionNav.availability',
-    fallback: 'Availability',
-    icon: 'calendar',
-  },
-  {
-    key: 'map',
-    labelKey: 'property:sectionNav.map',
-    fallback: '3D Map',
-    icon: 'mapGrid',
-  },
-  {
-    key: 'calculators',
-    labelKey: 'property:sectionNav.calculators',
-    fallback: 'Calculators',
-    icon: 'calculator',
-  },
-  {
-    key: 'price-history',
-    labelKey: 'property:sectionNav.priceHistory',
-    fallback: 'Price History',
-    icon: 'chart',
-  },
-  {
-    key: 'area-prices',
-    labelKey: 'property:sectionNav.areaPrices',
-    fallback: 'Area Prices',
-    icon: 'pin',
-  },
-  {
-    key: 'zone-dynamics',
-    labelKey: 'property:sectionNav.zoneDynamics',
-    fallback: 'Zone Dynamics',
-    icon: 'scales',
-  },
-  {
-    key: 'similar',
-    labelKey: 'property:sectionNav.similar',
-    fallback: 'Similar Homes',
-    icon: 'home',
-  },
-] as const;
-
-/** Page changes are measured at most this often (maps change the page on every pan). */
-const MUTATION_BATCH_MS = 250;
-
-/** A section becomes current once its top passes this far below the viewport top (under the header). */
-const ACTIVE_LINE_PX = 140;
-
-const prefersReducedMotion = (): boolean =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/**
- * Returns the first on-screen-rendered element matching the section key.
- * `PropertyContact` / `PropertyInfo` are rendered twice (mobile + desktop) —
- * only one is laid out, so we pick the element whose `offsetParent` is non-null.
- */
-const findTarget = (key: string): HTMLElement | null => {
-  if (key === 'top') return null;
-  if (typeof document === 'undefined') return null;
-  try {
-    const sel = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(key) : key;
-    const els = Array.from(document.querySelectorAll<HTMLElement>(`[data-section="${sel}"]`));
-    return els.find((el) => el.offsetParent !== null) || els[0] || null;
-  } catch {
-    return null;
-  }
-};
-
-/**
- * The property page scrolls inside an `overflow-y-auto` container (not the
- * window), so "scroll to top" must target that element. Walk up from a known
- * section to find the nearest scrollable ancestor; fall back to the window.
- */
-const getScrollContainer = (): HTMLElement | Window => {
-  if (typeof document === 'undefined') return window;
-  let el: HTMLElement | null =
-    findTarget('details') || document.querySelector<HTMLElement>('[data-section]');
-  while (el) {
-    const oy = getComputedStyle(el).overflowY;
-    if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) return el;
-    el = el.parentElement;
-  }
-  return window;
-};
-
-const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) => {
+const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' | 'thumb' }> = ({ variant }) => {
   const { t } = useTranslation(['property']);
-  const [activeKey, setActiveKey] = useState<string>('top');
-  // The rail floats over the page; get out of the way while the 3D map fills
-  // the viewport so it never covers the map's own controls or its shadows.
-  const [overMap, setOverMap] = useState(false);
-  // Keys of the sections present in the DOM (never a dead link), top to
-  // bottom as laid out; 'top' always first.
-  const [order, setOrder] = useState<string[]>(() => SECTION_DEFS.map((s) => s.key));
-  // Sections inside a sticky container (the desktop sidebar): always on
-  // screen, so they never count as the one being read.
-  const pinnedRef = useRef<Map<string, boolean>>(new Map());
-
-  const sections = useMemo(
-    () =>
-      order
-        .map((key) => SECTION_DEFS.find((s) => s.key === key))
-        .filter((s): s is SectionDef => !!s)
-        .map((s) => ({ ...s, label: t(s.labelKey, s.fallback) })),
-    [order, t]
-  );
-
-  // Detect which sections exist. Re-checked shortly after mount and whenever
-  // the page's content changes, because some sections (rental terms, lazy
-  // widgets, cards waiting for data) render later.
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    const recompute = () => {
-      const measured: Array<{ key: string; naturalTop: number }> = [];
-      const pinned = new Map<string, boolean>();
-      for (const s of SECTION_DEFS) {
-        if (s.key === 'top') continue;
-        const el = findTarget(s.key);
-        if (!el) continue;
-        const container = pinnedContainer(el);
-        pinned.set(s.key, container !== null);
-        measured.push({ key: s.key, naturalTop: naturalTop(el, container) });
-      }
-      pinnedRef.current = pinned;
-      const next = ['top', ...orderByPosition(measured)];
-      setOrder((prev) => (prev.length === next.length && prev.every((k, i) => k === next[i]) ? prev : next));
-    };
-    recompute();
-    timer = setTimeout(recompute, 800);
-    // Sections that appear once their data arrives (zone dynamics after the
-    // area prices load) get their bookmark then. Maps change the page on
-    // every pan, so checks are batched: at most one per MUTATION_BATCH_MS.
-    let batch: ReturnType<typeof setTimeout> | undefined;
-    const observer = typeof MutationObserver === 'function'
-      ? new MutationObserver(() => {
-          if (batch) return;
-          batch = setTimeout(() => {
-            batch = undefined;
-            recompute();
-          }, MUTATION_BATCH_MS);
-        })
-      : null;
-    observer?.observe(document.body, { childList: true, subtree: true });
-    // Crossing a breakpoint changes the layout (the sidebar is sticky on
-    // desktop only), so measure again.
-    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
-    const onResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(recompute, 150);
-    };
-    window.addEventListener('resize', onResize, { passive: true });
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(resizeTimer);
-      window.removeEventListener('resize', onResize);
-      observer?.disconnect();
-      clearTimeout(batch);
-    };
-  }, []);
-
-  const scrollToSection = useCallback((key: string) => {
-    setActiveKey(key);
-    const behavior: ScrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
-    if (key === 'top') {
-      const container = getScrollContainer();
-      container.scrollTo({ top: 0, behavior });
-      return;
-    }
-    const target = findTarget(key);
-    if (target) target.scrollIntoView({ behavior, block: 'start' });
-  }, []);
-
-  // Highlight the chip for whichever section is nearest the top of the viewport.
-  // Active is derived from viewport rects (works regardless of which element
-  // actually scrolls). Capture-phase listening catches the inner scroll
-  // container, since scroll events do not bubble to `window`.
-  useEffect(() => {
-    let frame = 0;
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        const positions = [];
-        for (const s of SECTION_DEFS) {
-          if (s.key === 'top') continue;
-          const el = findTarget(s.key);
-          if (el) positions.push({ key: s.key, top: el.getBoundingClientRect().top, pinned: pinnedRef.current.get(s.key) ?? false });
-        }
-        const container = getScrollContainer();
-        const atBottom = container instanceof Window
-          ? window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
-          : container.scrollTop + container.clientHeight >= container.scrollHeight - 2;
-        setActiveKey(pickActiveSection(positions, ACTIVE_LINE_PX, 'top', atBottom ? { viewportHeight: window.innerHeight } : undefined));
-        const mapEl = findTarget('map');
-        if (mapEl) {
-          const rect = mapEl.getBoundingClientRect();
-          const mid = window.innerHeight / 2;
-          setOverMap(rect.top < mid && rect.bottom > mid);
-        } else {
-          setOverMap(false);
-        }
-      });
-    };
-    onScroll();
-    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      document.removeEventListener('scroll', onScroll, { capture: true } as EventListenerOptions);
-      window.removeEventListener('resize', onScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, []);
+  const { sections, activeKey, overMap, scrollToSection } = useSectionNav();
 
   // Nothing worth jumping to if only "Overview" is present.
   if (sections.length <= 1) return null;
 
   const ariaLabel = t('property:sectionNav.ariaLabel', 'Property sections');
 
-  // ── Mobile / Tablet / standard laptops: horizontal chip bar (in the header) ──
-  // Shown below 1500px, where the left app sidebar + right contact sidebar leave
-  // no free gutter for a vertical rail (it would overlap the calculators).
+  if (variant === 'thumb') {
+    return <ThumbSectionRail sections={sections} activeKey={activeKey} overMap={overMap} onSelect={scrollToSection} />;
+  }
+
+  // ── Laptops / standard desktops: horizontal chip bar (in the header) ──
+  // Shown from lg up to 1500px, where the left app sidebar + right contact
+  // sidebar leave no free gutter for a vertical rail. Phones and tablets use
+  // the thumb rail instead.
   if (variant === 'bar') {
     return (
-      <nav aria-label={ariaLabel} className="min-[1500px]:hidden border-t border-neutral-100">
+      <nav aria-label={ariaLabel} className="hidden lg:block min-[1500px]:hidden border-t border-neutral-100">
         <div className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6">
           <ul className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-2">
             {sections.map((s) => {

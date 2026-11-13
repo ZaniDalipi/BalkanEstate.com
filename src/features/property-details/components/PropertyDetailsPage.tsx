@@ -857,7 +857,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       )}
 
       {/* Header - Compact on mobile with PWA safe area */}
-      <div className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <div data-thumb-rail-top-edge className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         {/* Breadcrumbs - Hidden on mobile, visible on larger screens */}
         <div
           className={`px-3 sm:px-4 overflow-hidden transition-all duration-300 ease-in-out hidden sm:block ${
@@ -1042,13 +1042,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           </div>
         </div>
 
-        {/* Bookmark-style quick navigation — horizontal chip bar (mobile/tablet) */}
+        {/* Bookmark-style quick navigation — horizontal chip bar (laptops) */}
         <PropertySectionNav variant="bar" />
       </div>
 
       {/* Bookmark-style quick navigation — Notion-style vertical rail (desktop).
           Mounted at the page root, outside the backdrop-blurred header. */}
       <PropertySectionNav variant="rail" />
+      {/* Phones and tablets: a liquid-glass thumb rail on the reader's chosen edge. */}
+      <PropertySectionNav variant="thumb" />
 
       {/* Gallery — full-bleed, outside main container so it spans 100% page width */}
       <div className="animate-slide-up w-full" style={{ animationDelay: '0ms' }}>
@@ -1263,6 +1265,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* Sticky Bottom Action Bar - Mobile Only (Zillow-style) */}
       {!isOwner && property.status !== 'sold' && (
         <div
+          data-thumb-rail-bottom-edge
           className="lg:hidden fixed bottom-0 left-0 right-0 md:left-(--sidebar-rail-w) z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-3 py-2.5 flex items-center gap-2.5"
           style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
         >

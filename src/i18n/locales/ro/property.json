@@ -765,7 +765,21 @@
     "airQuality": "Calitatea aerului",
     "noise": "Zgomot",
     "traffic": "Trafic",
-    "zoneDynamics": "Dinamica zonei"
+    "zoneDynamics": "Dinamica zonei",
+    "open": "Salt la o secțiune",
+    "settings": "Navigare rapidă",
+    "slideHint": "Glisează cu degetul, eliberează pentru salt",
+    "done": "Gata",
+    "side": "Parte",
+    "left": "Stânga",
+    "right": "Dreapta",
+    "show": "Afișare",
+    "showAlways": "Mereu",
+    "showAlwaysHint": "O bară subțire rămâne pe margine",
+    "showScroll": "Ascunde la derulare",
+    "showScrollHint": "Se retrage cât timp derulezi",
+    "showHidden": "Ascunsă",
+    "showHiddenHint": "Doar o filă mică; apas-o ca să se deschidă"
   },
   "seo": {
     "description": "{{type}} cu {{beds}} dormitoare, {{baths}} băi de {{listingAction}} în {{city}}, {{country}}. {{sqft}}m² pentru €{{price}}.",

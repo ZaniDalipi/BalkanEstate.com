@@ -764,7 +764,21 @@
     "airQuality": "Качество на въздуха",
     "noise": "Шум",
     "traffic": "Трафик",
-    "zoneDynamics": "Динамика на района"
+    "zoneDynamics": "Динамика на района",
+    "open": "Към раздел",
+    "settings": "Бърза навигация",
+    "slideHint": "Плъзнете с палеца, пуснете за преход",
+    "done": "Готово",
+    "side": "Страна",
+    "left": "Ляво",
+    "right": "Дясно",
+    "show": "Показване",
+    "showAlways": "Винаги",
+    "showAlwaysHint": "Тънка лента остава на ръба",
+    "showScroll": "Скриване при превъртане",
+    "showScrollHint": "Отдръпва се, докато превъртате",
+    "showHidden": "Прибрано",
+    "showHiddenHint": "Само малко езиче; натиснете го, за да се отвори"
   },
   "seo": {
     "description": "{{type}} с {{beds}} спални, {{baths}} бани за {{listingAction}} в {{city}}, {{country}}. {{sqft}}m² за €{{price}}.",

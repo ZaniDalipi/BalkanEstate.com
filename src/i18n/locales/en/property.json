@@ -798,7 +798,21 @@
     "airQuality": "Air Quality",
     "noise": "Noise",
     "traffic": "Traffic",
-    "zoneDynamics": "Zone Dynamics"
+    "zoneDynamics": "Zone Dynamics",
+    "open": "Jump to a section",
+    "settings": "Quick navigation",
+    "slideHint": "Slide your thumb, let go to jump",
+    "done": "Done",
+    "side": "Side",
+    "left": "Left",
+    "right": "Right",
+    "show": "Show",
+    "showAlways": "Always",
+    "showAlwaysHint": "A slim rail stays on the edge",
+    "showScroll": "Hide while scrolling",
+    "showScrollHint": "Steps aside while you scroll",
+    "showHidden": "Tucked away",
+    "showHiddenHint": "Only a small tab; press it to open"
   },
   "featured": {
     "spacesLabel": "Spaces",
