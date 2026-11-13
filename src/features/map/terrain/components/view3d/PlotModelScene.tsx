@@ -4,8 +4,8 @@ import { House } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlotModel, type PlotSurface } from '../../hooks/usePlotModel';
 import { useSurfacePictures } from '../../hooks/useSurfacePictures';
-import { useSurroundings } from '../../hooks/useSurroundings';
-import type { TerrainAnalysis, TerrainPoint } from '../../types';
+import type { ElevationGrid, TerrainAnalysis, TerrainPoint } from '../../types';
+import type { Building } from '../../utils/buildingFootprints';
 import type { Exaggeration } from '../../utils/terrain3dScene';
 import Scene3DControls from './Scene3DControls';
 import { SceneFailed, SceneLoading } from './SceneStatus';
@@ -13,6 +13,11 @@ import { SceneFailed, SceneLoading } from './SceneStatus';
 export interface PlotModelSceneProps {
   analysis: TerrainAnalysis;
   polygon: TerrainPoint[];
+  /** The land round the plot (null while it loads) and the buildings on it (null: none to show). */
+  ground: ElevationGrid | null;
+  buildings: Building[] | null;
+  showBuildings: boolean;
+  onShowBuildings: (on: boolean) => void;
   surface: PlotSurface;
   onSurface: (surface: PlotSurface) => void;
   exaggeration: Exaggeration;
@@ -21,13 +26,12 @@ export interface PlotModelSceneProps {
   onClose: () => void;
 }
 
-const PlotModelScene: React.FC<PlotModelSceneProps> = ({ analysis, polygon, surface, onSurface, exaggeration, onExaggeration, reduceMotion, onClose }) => {
+const PlotModelScene: React.FC<PlotModelSceneProps> = ({ analysis, polygon, ground, buildings, showBuildings, onShowBuildings, surface, onSurface, exaggeration, onExaggeration, reduceMotion, onClose }) => {
   const { t } = useTranslation('search');
   const host = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLDivElement>(null);
-  const ground = useSurroundings(analysis);
   const pictures = useSurfacePictures(ground, analysis, polygon);
-  const { status, satelliteReady, camera } = usePlotModel(host, label, { ground, analysis, pictures, surface, exaggeration, reduceMotion });
+  const { status, satelliteReady, camera } = usePlotModel(host, label, { ground, analysis, pictures, surface, buildings: showBuildings ? buildings : null, exaggeration, reduceMotion });
 
   return (
     <>
@@ -50,6 +54,8 @@ const PlotModelScene: React.FC<PlotModelSceneProps> = ({ analysis, polygon, surf
           surface={surface}
           onSurface={onSurface}
           satellite={satelliteReady}
+          buildings={buildings?.length ? showBuildings : null}
+          onBuildings={onShowBuildings}
           exaggeration={exaggeration}
           onExaggeration={onExaggeration}
           camera={camera}

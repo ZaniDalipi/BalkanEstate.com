@@ -411,6 +411,8 @@ export const terrainKeys = {
     [...terrainKeys.all, 'grid', bounds.south, bounds.west, bounds.north, bounds.east] as const,
   satellite: (bounds: { south: number; west: number; north: number; east: number }) =>
     [...terrainKeys.all, 'satellite', bounds.south, bounds.west, bounds.north, bounds.east] as const,
+  buildings: (bounds: { south: number; west: number; north: number; east: number }) =>
+    [...terrainKeys.all, 'buildings', bounds.south, bounds.west, bounds.north, bounds.east] as const,
 };
 
 // ============================================================================

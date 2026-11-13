@@ -754,7 +754,9 @@
       "zoomIn": "Uvećaj",
       "zoomOut": "Umanji",
       "topView": "Pogled ravno odozgo",
-      "tiltedView": "Nagni prikaz"
+      "tiltedView": "Nagni prikaz",
+      "buildings": "Zgrade",
+      "buildingsNote": "Okolne zgrade su iz OpenStreetMapa; gdje visina nedostaje, uzima se 5 m."
     },
     "contours": "Izohipse na svakih {{n}} m"
   }

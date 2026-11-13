@@ -2,11 +2,14 @@
  * The 3D view's scene: the ground around the plot (plotModel) with its
  * picture draped over it, fading into haze towards its edges; the plot's own
  * sharp sheet just above the ground; light from the north-west with real
- * shadows over the plot; the house at the best spot. Built once;
- * `setStretch` and `setSurface` change it in place.
+ * shadows over the plot; the house at the best spot; the buildings round
+ * it, once they have loaded. Built once; `setStretch`, `setSurface` and
+ * `setBuildings` change it in place.
  */
 import * as THREE from 'three';
 import type { ElevationGrid, TerrainAnalysis } from '../types';
+import type { Building } from './buildingFootprints';
+import { createBuildingsLayer } from './buildingsLayer';
 import { houseAxis } from './house';
 import { createHouseModel, houseRotationY } from './houseModel3d';
 import { drapeMesh, MODEL_SIZE, plotTerrain, surfaceAt, surfaceMesh, toModel, type MeshData, type PlotTerrain } from './plotModel';
@@ -35,6 +38,8 @@ export interface PlotScene {
   labelAnchor: THREE.Vector3 | null;
   setStretch: (exaggeration: number) => void;
   setSurface: (layers: SceneLayers) => void;
+  /** Show these buildings round the plot (null: none). */
+  setBuildings: (buildings: Building[] | null) => void;
   /** Thicken the haze with distance from the camera to what it looks at. */
   setHaze: (distance: number) => void;
   dispose: () => void;
@@ -128,9 +133,13 @@ export function createPlotScene(
   const labelAnchor = house ? new THREE.Vector3() : null;
   const target = new THREE.Vector3();
 
+  const buildings = createBuildingsLayer(terrain, ground, exaggeration);
+  scene.add(buildings.mesh);
+
   const setStretch = (stretch: number) => {
     reshape(surface, surfaceMesh(terrain, stretch));
     reshape(sheet, drapeMesh(terrain, sheetBox, SHEET_SEGMENTS, stretch, lift));
+    buildings.stretch(stretch);
     target.set(centre.x, surfaceAt(terrain, centre.x, centre.z, stretch), centre.z);
     sun.target.position.copy(target);
     sun.position.copy(target).addScaledVector(SUN, reach * 4);
@@ -157,6 +166,7 @@ export function createPlotScene(
         material.needsUpdate = true;
       }
     },
+    setBuildings: (next: Building[] | null) => buildings.show(next),
     setHaze: (distance) => {
       fog.near = distance + MODEL_SIZE * 0.15;
       fog.far = distance + MODEL_SIZE * 0.75;

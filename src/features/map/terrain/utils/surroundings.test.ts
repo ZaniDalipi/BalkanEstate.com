@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boxSizeM, surroundingsBounds } from './surroundings';
+import { boxSizeM, buildingsArea, surroundingsBounds } from './surroundings';
 import { makeGrid } from './testGrid';
 
 const sizeOf = (b: ReturnType<typeof surroundingsBounds>) => boxSizeM({ ...b, rows: 1, cols: 1 });
@@ -23,5 +23,16 @@ describe('surroundingsBounds', () => {
     const huge = sizeOf(surroundingsBounds(makeGrid(65, 65, () => 400, 100))).widthM; // 6.5 km plot
     expect(huge).toBeGreaterThan(6500);
     expect(huge).toBeLessThan(8000);
+  });
+});
+
+describe('buildingsArea', () => {
+  it('covers three plot widths, at least 600 m, and stays on the ground', () => {
+    const plot = makeGrid(30, 30, () => 400); // 300 m
+    const ground = surroundingsBounds(plot);
+    expect(sizeOf(buildingsArea(plot, ground)).widthM).toBeCloseTo(900, -1);
+    expect(sizeOf(buildingsArea(makeGrid(5, 5, () => 400), ground)).widthM).toBeCloseTo(600, -1);
+    const tight = { south: plot.south, north: plot.north, west: plot.west, east: plot.east };
+    expect(buildingsArea(plot, tight)).toEqual(tight);
   });
 });

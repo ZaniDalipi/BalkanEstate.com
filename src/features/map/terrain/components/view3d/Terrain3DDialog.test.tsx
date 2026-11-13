@@ -15,16 +15,17 @@ vi.mock('react-i18next', () => ({
 const model = vi.hoisted(() => ({
   status: 'ready' as 'loading' | 'ready' | 'failed',
   satelliteReady: true,
-  options: null as null | { surface: string; exaggeration: number },
+  options: null as null | { surface: string; exaggeration: number; buildings: unknown },
   camera: {
     zoomIn: vi.fn(), zoomOut: vi.fn(), turnLeft: vi.fn(), turnRight: vi.fn(),
     tilted: true, toggleTilt: vi.fn(), reset: vi.fn(), orbiting: false, toggleOrbit: vi.fn(), canOrbit: true,
   },
 }));
-vi.mock('../../hooks/useSurroundings', () => ({ useSurroundings: () => null }));
+const around = vi.hoisted(() => ({ buildings: null as null | Array<{ ring: unknown[]; heightM: number; measured: boolean }> }));
+vi.mock('../../hooks/useSurroundings', () => ({ useSurroundings: () => ({ ground: null, buildings: around.buildings }) }));
 vi.mock('../../hooks/useSurfacePictures', () => ({ useSurfacePictures: () => ({ slope: null, satellite: null }) }));
 vi.mock('../../hooks/usePlotModel', () => ({
-  usePlotModel: (_host: unknown, _label: unknown, options: { surface: string; exaggeration: number }) => {
+  usePlotModel: (_host: unknown, _label: unknown, options: { surface: string; exaggeration: number; buildings: unknown }) => {
     model.options = options;
     return { status: model.status, satelliteReady: model.satelliteReady, camera: model.camera };
   },
@@ -43,6 +44,7 @@ const analysis = result.value;
 
 beforeEach(() => {
   Object.assign(model, { status: 'ready', satelliteReady: true, options: null });
+  around.buildings = null;
   Object.values(model.camera).forEach((v) => { if (typeof v === 'function') (v as ReturnType<typeof vi.fn>).mockClear(); });
 });
 afterEach(() => cleanup());
@@ -95,6 +97,23 @@ describe('Terrain3DDialog', () => {
     expect(model.camera.reset).toHaveBeenCalledTimes(1);
     act(() => { fireEvent.keyDown(window, { key: 'Escape' }); });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('stands the buildings round the plot, says where they come from, and hides them on request', () => {
+    const building = { ring: [], heightM: 9, measured: true };
+    around.buildings = [building];
+    open();
+    expect(model.options?.buildings).toEqual([building]);
+    expect(screen.getByText(/from OpenStreetMap/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Buildings' }));
+    expect(model.options?.buildings).toBeNull();
+    expect(screen.getByRole('button', { name: 'Buildings' }).getAttribute('aria-pressed')).toBe('false');
+    expect(screen.queryByText(/from OpenStreetMap/)).toBeNull();
+  });
+
+  it('offers no buildings switch when there are none', () => {
+    open();
+    expect(screen.queryByRole('button', { name: 'Buildings' })).toBeNull();
   });
 
   it('says plainly when the browser cannot draw 3D, with a way back', () => {

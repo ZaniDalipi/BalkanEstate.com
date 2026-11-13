@@ -407,7 +407,8 @@ export default defineConfig(({ mode }) => {
                   return 'maplibre';
                 }
                 // three.js - the terrain tool's 3D plot model, lazy loaded with its dialog
-                if (id.includes('node_modules/three/')) {
+                // …with the vector-tile decoder its buildings layer reads OpenStreetMap tiles with
+                if (id.includes('node_modules/three/') || id.includes('node_modules/@mapbox/vector-tile/') || id.includes('node_modules/pbf/') || id.includes('node_modules/@mapbox/point-geometry/')) {
                   return 'three';
                 }
                 // Internationalization - needed early but separate

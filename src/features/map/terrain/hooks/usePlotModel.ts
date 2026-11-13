@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { ElevationGrid, TerrainAnalysis } from '../types';
+import type { Building } from '../utils/buildingFootprints';
 import { between, fitRadius, orbitOf, placeOnOrbit, startOrbit, type Orbit } from '../utils/orbitCamera';
 import { MODEL_SIZE } from '../utils/plotModel';
 import { createPlotScene } from '../utils/plotScene';
@@ -18,6 +19,8 @@ export interface PlotModelOptions {
   analysis: TerrainAnalysis;
   pictures: SurfacePictures;
   surface: PlotSurface;
+  /** The buildings to stand round the plot (null: none). */
+  buildings: Building[] | null;
   exaggeration: Exaggeration;
   reduceMotion: boolean;
 }
@@ -151,6 +154,11 @@ export function usePlotModel(container: React.RefObject<HTMLDivElement>, label: 
   useEffect(() => {
     if (parts.current && layers) parts.current.plot.setSurface(layers);
   }, [layers, status]);
+
+  // The buildings round the plot.
+  useEffect(() => {
+    parts.current?.plot.setBuildings(o.buildings);
+  }, [o.buildings, status]);
 
   // Stretch the land: at once under reduced motion, otherwise over a moment.
   useEffect(() => {

@@ -17,9 +17,11 @@ export interface Terrain3DInfoProps {
   analysis: TerrainAnalysis;
   surface: PlotSurface;
   exaggeration: Exaggeration;
+  /** Whether buildings from the map stand round the plot. */
+  buildings: boolean;
 }
 
-const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, surface, exaggeration }) => {
+const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, surface, exaggeration, buildings }) => {
   const { t } = useTranslation('search');
   const { stats } = analysis;
   return (
@@ -41,6 +43,9 @@ const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, surfac
           : t('terrain.view3d.exaggerated', 'Heights are stretched ×{{n}} so the shape of the land is easier to see.', { n: exaggeration })}
         {analysis.buildSpot && (
           <> {t('terrain.view3d.houseNote', 'The house marks the best place to build, at true size (about 12 × 9 m).')}</>
+        )}
+        {buildings && (
+          <> {t('terrain.view3d.buildingsNote', 'Buildings around are from OpenStreetMap; where a height is missing it is taken as 5 m.')}</>
         )}
       </p>
     </div>

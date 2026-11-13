@@ -756,7 +756,9 @@
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
       "topView": "Look straight down",
-      "tiltedView": "Tilt the view"
+      "tiltedView": "Tilt the view",
+      "buildings": "Buildings",
+      "buildingsNote": "Buildings around are from OpenStreetMap; where a height is missing it is taken as 5 m."
     },
     "contours": "Contour lines every {{n}} m"
   },

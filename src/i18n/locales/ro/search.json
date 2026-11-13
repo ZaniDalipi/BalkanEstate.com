@@ -746,7 +746,9 @@
       "zoomIn": "Mărește",
       "zoomOut": "Micșorează",
       "topView": "Privește drept de sus",
-      "tiltedView": "Înclină vederea"
+      "tiltedView": "Înclină vederea",
+      "buildings": "Clădiri",
+      "buildingsNote": "Clădirile din jur sunt din OpenStreetMap; unde lipsește înălțimea, se ia 5 m."
     },
     "contours": "Curbe de nivel la fiecare {{n}} m"
   },

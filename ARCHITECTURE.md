@@ -633,7 +633,8 @@ labels ("3–5%"), slim arrows pointing downhill, a frosted-glass panel with the
 headline numbers and the split across five slope classes, and a house drawn
 at the best place to build. **View in 3D** opens the plot in 3D with the
 land round it — real relief and the satellite photo for a few times the
-plot's size — and a house, to turn, tilt and fly around.
+plot's size — the buildings round it at their heights, and a house, to
+turn, tilt and fly around.
 
 ```
 GoogleMapComponent
@@ -653,11 +654,12 @@ GoogleMapComponent
   └── TerrainPanel       draw step / loading / failed / results (glass, lucide icons)
         └── Terrain3DButton → Terrain3DDialog (lazy)
               ├── PlotModelScene   three.js canvas, "Best spot" label, loading / no-WebGL states
-              │     ├── useSurroundings — heights of the box round the plot (surroundingsBounds)
+              │     ├── useSurroundings — heights round the plot (surroundingsBounds) and
+              │     │     useNearbyBuildings — OpenStreetMap buildings (buildingsArea, fetchBuildings)
               │     ├── useSurfacePictures — satellite photo (TanStack), grey relief, plot layers
               │     └── usePlotModel — renderer, OrbitControls, stretch, haze; useCameraButtons
               │           └── createPlotScene  ground surface, the plot's sheet (drapeMesh),
-              │                                houseModel3d, lights, fog
+              │                                buildingsLayer, houseModel3d, lights, fog
               ├── Scene3DControls  Slope / Satellite, height 1–5×, Camera3DControls
               └── Terrain3DInfo    size, height range, colour scale, stretch note
 ```
@@ -701,6 +703,15 @@ Key decisions:
   (`drapeMesh`, drawn with a polygon offset), carrying its slope colours and
   outline at full sharpness — in one picture with kilometres of land a small
   plot was a blur. "Satellite" leaves only the outline on that sheet.
+- **Buildings come from OpenFreeMap's vector tiles**, the source the 3D
+  location map uses: zoom-14 tiles over a square three plot widths across
+  (0.6–1.6 km, `buildingsArea`), decoded with `@mapbox/vector-tile`. Each
+  outline is clipped to its own tile so buildings split across tiles meet
+  without doubling, and stands on the lowest ground under it with its roof
+  `render_height` above the highest (5 m when the map has none — the info
+  card says so). Buildings keep true height when the ground is stretched.
+  One merged mesh, flat-shaded, pale like an architect's model. If the tiles
+  can't be read the view simply has no buildings and no "Buildings" switch.
 - **Heights can be stretched 1, 2, 3 or 5×**, opening at what the relief
   needs (`defaultExaggeration`); changes animate the mesh's vertical scale.
 - **The camera opens framing the plot with room round it** (`fitRadius`: the

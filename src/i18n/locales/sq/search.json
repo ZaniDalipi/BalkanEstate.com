@@ -746,7 +746,9 @@
       "zoomIn": "Zmadho",
       "zoomOut": "Zvogëlo",
       "topView": "Shiko drejt nga lart",
-      "tiltedView": "Pjerrëso pamjen"
+      "tiltedView": "Pjerrëso pamjen",
+      "buildings": "Ndërtesat",
+      "buildingsNote": "Ndërtesat përreth janë nga OpenStreetMap; kur lartësia mungon, merret 5 m."
     },
     "contours": "Vija niveli çdo {{n}} m"
   },
