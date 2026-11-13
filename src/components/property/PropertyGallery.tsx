@@ -19,6 +19,8 @@ import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
 import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_ICONS } from '@/shared/property/galleryImages';
 import { ListingTypePicture, SoftIcon } from '@/src/shared/illustrations';
+import { supportsWebGL } from '@/src/components/ui/morph-gallery';
+import { ListingMorphStage } from './ListingMorphStage';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -278,6 +280,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const isWideViewport = useMediaQuery(WIDE_VIEWPORT_QUERY);
   const containerAspect = isWideViewport ? CONTAINER_ASPECT_DESKTOP : CONTAINER_ASPECT_MOBILE;
 
+  // Photos change through the WebGL morph dissolve where the browser can draw
+  // it. Without WebGL, or once any photo cannot be textured (no CORS header, a
+  // broken URL, a lost context), the gallery drops back to the slide track for
+  // the rest of the visit.
+  const [morphOff, setMorphOff] = useState(() => !supportsWebGL());
+
   // YouTube, Vimeo, Facebook, TikTok, and Instagram can be embedded via iframe
   // TikTok uses their official player embed: tiktok.com/player/v1/{videoId}
   // Instagram uses their /embed/ endpoint for reels and posts
@@ -496,6 +504,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [activeCategory, allImages, categorizedImages]);
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
+  const currentCategoryUrls = useMemo(
+    () => imagesForCurrentCategory.map((img) => img.url),
+    [imagesForCurrentCategory]
+  );
 
   // Where the current photo was taken on the floor plan, if the seller marked it.
   const currentSpot = useMemo(
@@ -646,6 +658,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800 flex items-center justify-center">
                 <BuildingOfficeIcon className="w-20 h-20 text-neutral-500" />
               </div>
+            ) : !morphOff ? (
+              <ListingMorphStage
+                urls={currentCategoryUrls}
+                index={currentImageIndex}
+                wide={isWideViewport}
+                onStatusChange={(status) => status === 'unavailable' && setMorphOff(true)}
+              />
             ) : (
               /* Persistent slide track. Every windowed photo stays mounted and is
                  positioned by its offset, so changing photo is a GPU transform
