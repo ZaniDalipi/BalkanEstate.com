@@ -875,11 +875,11 @@
     "RO": "Rumani",
     "RS": "Serbi",
     "SI": "Slloveni",
-  "loadError": {
-    "title": "Kjo faqe nuk mund të ngarkohej",
-    "retry": "Provo përsëri"
-  }
-},
+    "loadError": {
+      "title": "Kjo faqe nuk mund të ngarkohej",
+      "retry": "Provo përsëri"
+    }
+  },
   "formDraft": {
     "restoredTitle": "Rikthyem atë që kishit plotësuar herën e fundit.",
     "restoredMessage": "Ruajtur në këtë pajisje më {{date}}.",
@@ -892,5 +892,41 @@
   },
   "formSubmit": {
     "shortcutPrefix": "ose shtypni"
+  },
+  "hints": {
+    "ui": {
+      "tipLabel": "Këshillë",
+      "allTips": "Të gjitha këshillat",
+      "hide": "Fshih këshillën",
+      "title": "Këshilla",
+      "intro": "Gjëra të vogla që mund të bëni dhe që kalojnë pa u vënë re.",
+      "close": "Mbyll këshillat",
+      "autoSwitch": "Shfaq një këshillë herë pas here",
+      "menuLabel": "Këshilla: çfarë mund të bëni"
+    },
+    "groups": {
+      "property": "Te një njoftim",
+      "search": "Në kërkim",
+      "global": "Kudo",
+      "current": "Në këtë faqe"
+    },
+    "items": {
+      "agentHold": "Shtypni dhe mbani foton e agjentit në shiritin poshtë për të parë njoftimet e tjera të tij. Një prekje hap profilin.",
+      "photoOpenTouch": "Prekni fotot për t'i hapur në ekran të plotë, pastaj rrëshqitni mes tyre.",
+      "photoOpenPointer": "Klikoni fotot për t'i hapur në ekran të plotë, pastaj përdorni shigjetat për të lëvizur mes tyre.",
+      "sectionRail": "Mbani shiritin prej xhami në anë të ekranit dhe rrëshqitni gishtin për të kaluar direkt te një seksion.",
+      "photoZoomTouch": "Në ekran të plotë, prekni dy herë një foto për ta zmadhuar dhe rrëshqitni poshtë për ta mbyllur.",
+      "photoZoomPointer": "Në ekran të plotë, klikoni dy herë një foto ose shtypni + dhe − për zmadhim. Esc e mbyll.",
+      "photoDraw": "Në ekran të plotë, përdorni stilolapsin për të vizatuar mbi një foto dhe dërgojeni te shitësi me pyetjen tuaj.",
+      "drawArea": "Përdorni lapsin në hartë për të vizatuar zonën tuaj dhe për të parë vetëm njoftimet brenda saj.",
+      "cardSwipe": "Rrëshqitni foton e një njoftimi majtas ose djathtas për të parë më shumë foto pa e hapur.",
+      "saveSearch": "Ruani kërkimin dhe ne do t'ju njoftojmë kur të dalin njoftime të reja që përputhen.",
+      "mapOptions": "Opsionet e hartës kalojnë në pamje satelitore ose rrugore dhe mund të tregojnë rreziqe klimatike si përmbytjet ose nxehtësia.",
+      "listFold": "Përdorni skedën në anë të hartës për të palosur listën dhe për të parë gjithë hartën.",
+      "aiSwipe": "Pyesni Kërkimin me AI me fjalët tuaja. Te përputhjet, rrëshqitni djathtas për të ruajtur një shtëpi dhe majtas për ta kaluar.",
+      "swipeBack": "Rrëshqitni nga skaji i majtë i ekranit për t'u kthyer mbrapa.",
+      "submitShortcut": "Në formularët e mesazheve dhe kontaktit, shtypni Ctrl + Enter (⌘ + Enter në Mac) për të dërguar.",
+      "findTips": "Të gjitha këshillat janë në menu te Këshilla, sa herë t'i doni."
+    }
   }
 }

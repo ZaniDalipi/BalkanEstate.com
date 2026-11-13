@@ -875,11 +875,11 @@
     "RO": "România",
     "RS": "Serbia",
     "SI": "Slovenia",
-  "loadError": {
-    "title": "Pagina nu a putut fi încărcată",
-    "retry": "Încercați din nou"
-  }
-},
+    "loadError": {
+      "title": "Pagina nu a putut fi încărcată",
+      "retry": "Încercați din nou"
+    }
+  },
   "formDraft": {
     "restoredTitle": "Am restabilit ce ați completat data trecută.",
     "restoredMessage": "Salvat pe acest dispozitiv la {{date}}.",
@@ -892,5 +892,41 @@
   },
   "formSubmit": {
     "shortcutPrefix": "sau apăsați"
+  },
+  "hints": {
+    "ui": {
+      "tipLabel": "Sfat",
+      "allTips": "Toate sfaturile",
+      "hide": "Ascunde sfatul",
+      "title": "Sfaturi",
+      "intro": "Lucruri mici pe care le puteți face și care trec ușor neobservate.",
+      "close": "Închide sfaturile",
+      "autoSwitch": "Arată din când în când un sfat",
+      "menuLabel": "Sfaturi: ce puteți face"
+    },
+    "groups": {
+      "property": "Într-un anunț",
+      "search": "În căutare",
+      "global": "Peste tot",
+      "current": "Pe această pagină"
+    },
+    "items": {
+      "agentHold": "Țineți apăsat pe fotografia agentului din bara de jos pentru a vedea celelalte anunțuri ale sale. O atingere îi deschide profilul.",
+      "photoOpenTouch": "Atingeți fotografiile pentru a le deschide pe tot ecranul, apoi glisați între ele.",
+      "photoOpenPointer": "Faceți clic pe fotografii pentru a le deschide pe tot ecranul, apoi folosiți săgețile pentru a trece de la una la alta.",
+      "sectionRail": "Țineți bara de sticlă de la marginea ecranului și glisați degetul pentru a sări direct la o secțiune.",
+      "photoZoomTouch": "Pe tot ecranul, atingeți de două ori o fotografie pentru a o mări și glisați în jos pentru a o închide.",
+      "photoZoomPointer": "Pe tot ecranul, faceți dublu clic pe o fotografie sau apăsați + și − pentru zoom. Esc o închide.",
+      "photoDraw": "Pe tot ecranul, desenați cu creionul pe o fotografie și trimiteți-o vânzătorului împreună cu întrebarea dvs.",
+      "drawArea": "Folosiți creionul de pe hartă pentru a desena propria zonă și a vedea doar anunțurile din ea.",
+      "cardSwipe": "Glisați fotografia unui anunț la stânga sau la dreapta pentru a vedea mai multe fotografii fără a-l deschide.",
+      "saveSearch": "Salvați căutarea și vă anunțăm când apar anunțuri noi potrivite.",
+      "mapOptions": "Opțiunile hărții trec la vedere din satelit sau stradală și pot arăta riscuri climatice precum inundații sau caniculă.",
+      "listFold": "Folosiți fila de la marginea hărții pentru a plia lista și a vedea toată harta.",
+      "aiSwipe": "Întrebați Căutarea AI cu propriile cuvinte. În potriviri, glisați la dreapta pentru a salva o casă și la stânga pentru a trece peste ea.",
+      "swipeBack": "Glisați de la marginea din stânga a ecranului pentru a reveni.",
+      "submitShortcut": "În formularele de mesaje și contact, apăsați Ctrl + Enter (⌘ + Enter pe Mac) pentru a trimite.",
+      "findTips": "Toate sfaturile sunt în meniu, la Sfaturi, oricând le doriți."
+    }
   }
 }

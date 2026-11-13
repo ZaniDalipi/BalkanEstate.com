@@ -63,6 +63,7 @@ const EnterpriseCreationForm = lazy(() => import('./src/features/seller/componen
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const StickyAdBanner = lazy(() => import('./src/features/promo/components/StickyBar'));
+const HintsHost = lazy(() => import('./src/features/hints').then(m => ({ default: m.HintsHost })));
 const AdPreviewIndicator = lazy(() => import('./src/features/promo/components/PreviewIndicator'));
 
 // Google Maps API is deferred - only loads when map pages are visited (see MapComponent.tsx)
@@ -456,6 +457,11 @@ const MainLayout: React.FC = () => {
         {/* Ad preview mode indicator (opened from admin "View on site") */}
         <Suspense fallback={null}>
           <AdPreviewIndicator />
+        </Suspense>
+
+        {/* Tips: one short tip now and then, and the Tips panel (menu → Tips) */}
+        <Suspense fallback={null}>
+          <HintsHost />
         </Suspense>
 
 
