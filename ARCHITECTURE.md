@@ -624,6 +624,108 @@ Key decisions:
 
 ---
 
+## Map Terrain Tool — slope and where to build
+
+"Terrain" on the search map (next to Measure): tap corners 1, 2, 3… around a
+piece of land, press **Show slope**, and the area is painted as a smooth
+surface coloured by steepness (green → red) with white contour lines, range
+labels ("3–5%"), slim arrows pointing downhill, a frosted-glass panel with the
+headline numbers and the split across five slope classes, and a house drawn
+at the best place to build. **View in 3D** opens the plot in 3D with the
+land round it — real relief and the satellite photo for a few times the
+plot's size — the buildings round it at their heights, and a house, to
+turn, tilt and fly around.
+
+```
+GoogleMapComponent
+  ├── useTerrainTool(map, showTerrain)        src/features/map/terrain/hooks
+  │     ├── useMapPointDrawing — map taps → corners (crosshair, no dbl-tap zoom)
+  │     ├── validateTerrainArea — ≥3 corners, edges don't cross, 100 m² – 7.5 km
+  │     ├── useElevationGrid(requestBounds(area))   TanStack Query, terrainKeys
+  │     │     └── GET /api/terrain/elevation-grid?south&west&north&east
+  │     └── analyzeTerrain(grid, area)        pure, utils/
+  │           ├── computeSlopeField   Horn's method, slope % + fall line per cell
+  │           ├── computeTerrainStats 5 classes: flat <3, gentle <8, moderate <15, steep <25, very steep
+  │           ├── findBuildSpot       largest easy patch (<8 %), its deepest cell
+  │           ├── slopeArrows / slopeLabels   both keep clear of the house
+  │           └── contourInterval     1–100 m, a dozen lines at most
+  ├── TerrainMapLayers   outline, corners, arrows, labels, house roof, pin
+  │     └── useSlopeGroundOverlay — slopeImageUrl → GroundOverlay (fades in)
+  └── TerrainPanel       draw step / loading / failed / results (glass, lucide icons)
+        └── Terrain3DButton → Terrain3DDialog (lazy)
+              ├── PlotModelScene   three.js canvas, "Best spot" label, loading / no-WebGL states
+              │     ├── useSurroundings — heights round the plot (surroundingsBounds) and
+              │     │     useNearbyBuildings — OpenStreetMap buildings (buildingsArea, fetchBuildings)
+              │     ├── useSurfacePictures — satellite photo (TanStack), grey relief, plot layers
+              │     └── usePlotModel — renderer, OrbitControls, stretch, haze; useCameraButtons
+              │           └── createPlotScene  ground surface, the plot's sheet (drapeMesh),
+              │                                buildingsLayer, houseModel3d, lights, fog
+              ├── Scene3DControls  Slope / Satellite, height 1–5×, Camera3DControls
+              └── Terrain3DInfo    size, height range, colour scale, stretch note
+```
+
+**The slope picture** (`slopePixels`, painted once per analysis and cached in
+`slopeImageUrl`): the ~8 m grid is softened (the ~30 m survey leaves a grid
+pattern), resampled with Catmull-Rom splines to up to 1024 px, coloured from
+one continuous scale (`slopeRamp` — the legend, labels and 3D view use it
+too), lit softly from the north-west (`hillshade`), and crossed by antialiased
+contour lines, every fifth stronger. The canvas then keeps only what lies in
+the drawn shape.
+
+**The house** (`house.ts`): a 12 × 9 m one-storey house, true size, long side
+across the fall line (east–west on level ground). In 2D it is a roof seen from
+above, one slope lit and one shaded. In 3D it is a three.js model
+(`houseModel3d`) — walls on a footing, gable roof, windows, a door facing
+downhill — that casts a real shadow on the land.
+
+Key decisions:
+- **Heights come from Terrain Tiles** (AWS Open Data, Terrarium PNGs, free, no
+  key). The backend (`backend/src/services/terrain/`) reads them, decodes with
+  sharp, caches 64 in memory, and returns a height grid (8 m at the finest, at
+  most 10 000 cells, boxes up to 8 km a side). Rate limited per IP. The 3D model
+  is built from that same grid. `TERRAIN_TILES_URL`
+  overrides the source.
+- **Server samples, client analyses.** The endpoint is a plain height grid; all
+  the judgement is pure, unit-tested code in the client.
+- **Markers above the slope picture.** A Google GroundOverlay shares the
+  overlay layer with OverlayViews and is added later, so it would cover them:
+  corners, arrows and labels live in the overlay-mouse-target pane, the pin in
+  the float pane.
+- **The plot in its surroundings.** Map-based 3D (MapLibre relief, then
+  Google photorealistic 3D) looked flat at plot scale, so the 3D window draws
+  its own scene with three.js. A second height grid covers a square four
+  plot widths across (1.2–7 km, `surroundingsBounds`); if it can't be had the
+  view falls back to the plot's own grid. Over that ground goes the satellite
+  photo (Esri tiles stitched at zoom ≤ 17 — past that Esri answers "Map data
+  not yet available"), or the relief in soft grey until it arrives; its edges
+  fade into a haze that the fog and the sky share (`HAZE`), so there is no
+  hard end to the land. The plot has its own sheet just above the ground
+  (`drapeMesh`, drawn with a polygon offset), carrying its slope colours and
+  outline at full sharpness — in one picture with kilometres of land a small
+  plot was a blur. "Satellite" leaves only the outline on that sheet.
+- **Buildings come from OpenFreeMap's vector tiles**, the source the 3D
+  location map uses: zoom-14 tiles over a square three plot widths across
+  (0.6–1.6 km, `buildingsArea`), decoded with `@mapbox/vector-tile`. Each
+  outline is clipped to its own tile so buildings split across tiles meet
+  without doubling, and stands on the lowest ground under it with its roof
+  `render_height` above the highest (5 m when the map has none — the info
+  card says so). Buildings keep true height when the ground is stretched.
+  One merged mesh, flat-shaded, pale like an architect's model. If the tiles
+  can't be read the view simply has no buildings and no "Buildings" switch.
+- **Heights can be stretched 1, 2, 3 or 5×**, opening at what the relief
+  needs (`defaultExaggeration`); changes animate the mesh's vertical scale.
+- **The camera opens framing the plot with room round it** (`fitRadius`: the
+  plot's half-diagonal against the narrower field of view, so an upright
+  phone stands further back), looking uphill (`openingBearing`), and, on wide
+  screens, lifted clear of the controls with a view offset. OrbitControls with
+  damping move it by hand; the buttons tween along the orbit the short way
+  round (`orbitCamera`).
+- **3D is optional.** three.js loads only when the view is opened; without
+  WebGL the dialog says so and leads back. Under reduced motion moves are
+  instant and there is no fly-around.
+- **Honest about precision.** ~30 m survey: the panel says "estimate, not a
+  topographic survey"; the 3D card says how much heights are stretched.
+
 ## 3D Property Map — Sun & Shadows
 
 The 3D building view on a listing (`Map3DBuildings`, MapLibre) simulates where

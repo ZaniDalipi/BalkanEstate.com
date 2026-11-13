@@ -690,6 +690,91 @@
     "southEast": "South-east",
     "southWest": "South-west"
   },
+  "terrain": {
+    "toggle": "Terrain",
+    "toggleAria": "Terrain and slope tool",
+    "title": "Terrain & slope",
+    "expand": "Expand panel",
+    "collapse": "Collapse panel",
+    "instructions": "Tap the map to place corners 1, 2, 3… around the land. Add at least 3.",
+    "corners": "Corners: {{n}}",
+    "undo": "Undo",
+    "clear": "Clear",
+    "analyze": "Show slope",
+    "errors": {
+      "edgesCross": "The edges cross. Undo the last corner and place it somewhere else.",
+      "tooSmall": "This area is too small. Draw at least 10 × 10 m.",
+      "tooLarge": "This area is too large. Keep each side under 7.5 km."
+    },
+    "loading": "Reading the ground…",
+    "failed": {
+      "unavailable": "Elevation data could not be loaded right now.",
+      "busy": "Too many requests. Wait a few minutes and try again.",
+      "rejected": "This area cannot be analysed. Try a smaller area.",
+      "noData": "There is no elevation data here. The area may be water."
+    },
+    "retry": "Try again",
+    "editArea": "Edit area",
+    "redraw": "Draw another area",
+    "stats": {
+      "area": "Area",
+      "elevation": "Elevation range",
+      "meanSlope": "Average slope",
+      "maxSlope": "Steepest slope"
+    },
+    "disclaimer": "Estimate from ~{{resolution}} m elevation data. Not a topographic survey.",
+    "arrowsHint": "Arrows point downhill",
+    "legendTitle": "Rating · green is easiest to build on",
+    "classes": {
+      "flat": "Flat",
+      "gentle": "Gentle",
+      "moderate": "Moderate",
+      "steep": "Steep",
+      "verySteep": "Very steep"
+    },
+    "advice": {
+      "flat": "Ideal for building",
+      "gentle": "Easy to build, little levelling",
+      "moderate": "Buildable with split levels or terraces",
+      "steep": "Needs retaining walls and costlier foundations",
+      "verySteep": "Problematic for most buildings"
+    },
+    "spot": {
+      "title": "Best place to build",
+      "easy": "About {{area}} of flat to gentle ground in one piece.",
+      "workable": "No flat ground here. The gentlest piece is about {{area}}, buildable with some earthworks.",
+      "none": "No easy spot to build: most of this land is steep. Expect terraces and retaining walls, and ask an engineer before you buy.",
+      "show": "Show on map",
+      "marker": "Best spot"
+    },
+    "view3d": {
+      "open": "View in 3D",
+      "title": "Terrain in 3D",
+      "loading": "Loading 3D terrain…",
+      "noWebgl": "This browser can't show 3D maps (WebGL is off or not supported). The slope map still works.",
+      "back": "Back to the slope map",
+      "height": "Height",
+      "trueScale": "Heights are shown true to scale.",
+      "exaggerated": "Heights are stretched ×{{n}} so the shape of the land is easier to see.",
+      "hint": "Drag to move · right-drag or two fingers to turn and tilt · scroll or pinch to zoom.",
+      "camera": "Camera",
+      "turnLeft": "Turn left",
+      "turnRight": "Turn right",
+      "orbit": "Fly around",
+      "reset": "Reset view",
+      "houseNote": "The house marks the best place to build, at true size (about 12 × 9 m).",
+      "layer": "Show",
+      "slope": "Slope",
+      "satellite": "Satellite",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "topView": "Look straight down",
+      "tiltedView": "Tilt the view",
+      "buildings": "Buildings",
+      "buildingsNote": "Buildings around are from OpenStreetMap; where a height is missing it is taken as 5 m."
+    },
+    "contours": "Contour lines every {{n}} m"
+  },
   "listPanel": {
     "hide": "Hide list",
     "hideHint": "Hide the list to see the whole map",
