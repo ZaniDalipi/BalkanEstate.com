@@ -107,9 +107,9 @@ export default function MorphGallery({
       onFocus={() => setHeld(true)}
       onBlur={() => setHeld(false)}
     >
-      {status === 'unavailable' ? (
-        <MorphFallback items={items} active={active} />
-      ) : (
+      {/* Under the canvas while a photo cannot be textured; on its own without WebGL. */}
+      {(status === 'unavailable' || status === 'blocked') && <MorphFallback items={items} active={active} />}
+      {status !== 'unavailable' && (
         <MorphStage
           sources={items.map((i) => i.src)}
           index={active}

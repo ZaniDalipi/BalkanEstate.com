@@ -19,8 +19,9 @@ const containAlways = () => false;
  * annotation and the room styler. The layer takes no pointer events, so swipes,
  * double-click zoom and drags still reach the viewer. It hides (rather than
  * unmounting, which would rebuild the WebGL context) while the plain photo is
- * needed, and removes itself for good when it cannot texture a photo or has
- * no WebGL, leaving the viewer exactly as it was.
+ * needed. A photo it cannot texture (a dead link, no CORS) is simply shown by
+ * the <img> underneath while the canvas fades out, and the morph resumes on the
+ * next photo. Only a browser without WebGL removes the layer for good.
  */
 export const ViewerMorphLayer: React.FC<ViewerMorphLayerProps> = ({ urls, index, hidden }) => {
   const [off, setOff] = useState(() => !supportsWebGL());

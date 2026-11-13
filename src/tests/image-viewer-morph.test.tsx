@@ -1,8 +1,9 @@
 /**
  * The fullscreen photo viewer changes photo through the WebGL morph where it
- * can. The plain <img> stays underneath for zoom and annotation, and the
- * viewer must look exactly as before wherever the morph cannot run: no WebGL,
- * a refused context, or a photo that cannot be textured (no CORS).
+ * can. The plain <img> stays underneath for zoom and annotation. Without
+ * WebGL (or with a refused context) the viewer looks exactly as before; a
+ * single photo that cannot be textured (dead link, no CORS) costs only that
+ * photo's morph, never the whole gallery's.
  */
 
 import React from 'react';
@@ -48,6 +49,8 @@ const renderViewer = () =>
   render(<ImageViewerModal images={images} startIndex={0} onClose={() => undefined} />);
 
 const layer = () => document.querySelector<HTMLElement>('[data-testid="viewer-morph-layer"]');
+const canvasOpacity = () => layer()?.querySelector('canvas')?.style.opacity;
+const fakeImage = () => ({ naturalWidth: 1600, naturalHeight: 1000 }) as HTMLImageElement;
 
 const withWebGL = (context: unknown) => {
   vi.stubGlobal('WebGLRenderingContext', class {});
@@ -111,10 +114,36 @@ describe('ImageViewerModal morph transition', () => {
     await waitFor(() => expect(layer()).toBeNull());
   });
 
-  it('removes itself when a photo cannot be textured', async () => {
+  it('shows a photo it cannot texture as the plain photo, keeping the layer for the rest', async () => {
     withWebGL(fakeGl());
     loadTextureImage.mockImplementation(() => Promise.reject(new Error('no CORS')));
     renderViewer();
-    await waitFor(() => expect(layer()).toBeNull());
+    await waitFor(() => expect(canvasOpacity()).toBe('0'));
+    // The layer stays: the next photo that loads gets the morph again.
+    expect(layer()).not.toBeNull();
+    expect(screen.getByAltText('Property image {{current}} of {{total}}')).toBeTruthy();
+  });
+
+  it('keeps the morph when only a neighbouring photo is broken', async () => {
+    withWebGL(fakeGl());
+    loadTextureImage.mockImplementation((src) =>
+      src.includes('/p1/') ? Promise.reject(new Error('404')) : Promise.resolve(fakeImage())
+    );
+    renderViewer();
+    // Photo 0 is fine, so it is drawn even though photo 1 next to it failed.
+    await waitFor(() => expect(canvasOpacity()).toBe('1'));
+  });
+
+  it('steps past a broken photo and resumes the morph on the next good one', async () => {
+    withWebGL(fakeGl());
+    loadTextureImage.mockImplementation((src) =>
+      src.includes('/p1/') ? Promise.reject(new Error('404')) : Promise.resolve(fakeImage())
+    );
+    renderViewer();
+    await waitFor(() => expect(canvasOpacity()).toBe('1'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next image' }));
+    await waitFor(() => expect(canvasOpacity()).toBe('0'));
+    fireEvent.click(screen.getByRole('button', { name: 'Next image' }));
+    await waitFor(() => expect(canvasOpacity()).toBe('1'));
   });
 });

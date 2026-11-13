@@ -2,8 +2,12 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createMorphProgram, getMorphContext } from './morphGl';
 import { createMorphScene, type MorphScene, type MorphSceneInput } from './morphScene';
 
-/** `loading` until the first photo is drawn; `unavailable` means use a non-WebGL fallback. */
-export type MorphStatus = 'loading' | 'ready' | 'unavailable';
+/**
+ * `loading` until the photo asked for is drawn. `blocked`: that one photo could
+ * not be textured, so the caller shows it without the morph (later photos come
+ * back to `ready`). `unavailable`: no WebGL at all, use the fallback for good.
+ */
+export type MorphStatus = 'loading' | 'ready' | 'blocked' | 'unavailable';
 
 /**
  * Runs the morph scene on a canvas. The GL context is built once per mount (and
@@ -32,7 +36,7 @@ export function useMorphRenderer(
     try {
       built = createMorphScene(gl, canvas, createMorphProgram(gl), () => latest.current, {
         onReady: () => setStatus('ready'),
-        onUnavailable: () => setStatus('unavailable'),
+        onBlocked: () => setStatus('blocked'),
       });
     } catch {
       // A driver that refused the program: show the photos without the morph.

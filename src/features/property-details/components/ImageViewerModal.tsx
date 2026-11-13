@@ -655,9 +655,8 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 </div>
 
                 {/* Photo changes dissolve through the morph; zoom and annotate use the plain photo above */}
-                {!imageError && (
-                    <ViewerMorphLayer urls={imageUrls} index={currentIndex} hidden={isZoomed || annotateMode} />
-                )}
+                {/* Hidden, not unmounted, on a broken photo: unmounting would rebuild the WebGL context */}
+                <ViewerMorphLayer urls={imageUrls} index={currentIndex} hidden={isZoomed || annotateMode || imageError} />
 
                 {/* Drawing canvas — only in annotate mode, NOT inside zoom wrapper so it covers full area */}
                 {annotateMode && (

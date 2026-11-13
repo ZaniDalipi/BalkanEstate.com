@@ -32,10 +32,14 @@ interface Texture {
 }
 
 export interface MorphSceneCallbacks {
-  /** The first photo is on the canvas. */
+  /** The photo asked for is on the canvas (first draw, or back after `onBlocked`). */
   onReady: () => void;
-  /** A photo could not be textured (no CORS, broken URL, refused upload). */
-  onUnavailable: () => void;
+  /**
+   * The photo asked for cannot be textured (no CORS, broken URL, refused
+   * upload). The caller shows that one photo its own way; the scene draws
+   * again with the next photo that does load.
+   */
+  onBlocked: () => void;
 }
 
 export interface MorphScene {
@@ -53,6 +57,9 @@ export const createMorphScene = (
 ): MorphScene => {
   const textures = new Map<string, Texture>();
   const loading = new Set<string>();
+  /** Photos that will never texture; not retried while the scene lives. */
+  const failed = new Set<string>();
+  let blocked = false;
   let dead = false;
   let raf = 0;
   let shown = false;
@@ -63,11 +70,11 @@ export const createMorphScene = (
   let startedAt = 0;
   let direction: 1 | -1 = 1;
 
-  const fail = () => {
-    if (dead) return;
-    dead = true;
-    cancelAnimationFrame(raf);
-    cb.onUnavailable();
+  /** One photo is out; the rest of the gallery keeps the morph. */
+  const markFailed = (src: string) => {
+    failed.add(src);
+    advance();
+    schedule();
   };
 
   /** Srcs that should hold a texture: the window round the active photo, plus what is on screen. */
@@ -87,9 +94,20 @@ export const createMorphScene = (
 
   /** Starts (or queues, until its texture lands) the dissolve to `target`. */
   const advance = () => {
+    if (failed.has(target)) {
+      if (!blocked) {
+        blocked = true;
+        cb.onBlocked();
+      }
+      return;
+    }
     if (!textures.has(target)) return;
-    if (!shown) {
+    // First photo, or back from one we could not texture: the screen was not
+    // showing our canvas, so dissolving from a stale photo would be wrong.
+    // Show the new one directly.
+    if (!shown || blocked) {
       shown = true;
+      blocked = false;
       from = to = target;
       progress = 1;
       cb.onReady();
@@ -115,7 +133,7 @@ export const createMorphScene = (
 
   const ensure = () => {
     for (const src of wanted()) {
-      if (!src || textures.has(src) || loading.has(src)) continue;
+      if (!src || textures.has(src) || loading.has(src) || failed.has(src)) continue;
       loading.add(src);
       loadTextureImage(src).then(
         (img) => {
@@ -124,7 +142,7 @@ export const createMorphScene = (
           try {
             textures.set(src, { tex: uploadTexture(gl, img), aspect: img.naturalWidth / Math.max(img.naturalHeight, 1) });
           } catch {
-            fail();
+            markFailed(src);
             return;
           }
           advance();
@@ -133,10 +151,9 @@ export const createMorphScene = (
         },
         () => {
           loading.delete(src);
-          // A photo we cannot texture would leave a hole in the gallery, and
-          // showing a neighbour in its place shows the wrong room. Hand the
-          // whole gallery back to the caller's non-WebGL version instead.
-          fail();
+          // Never show a neighbour in its place (that is the wrong room):
+          // the caller shows this one photo without the morph.
+          if (!dead) markFailed(src);
         },
       );
     }
