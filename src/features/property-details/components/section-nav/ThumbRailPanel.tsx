@@ -1,12 +1,15 @@
 // The thumb rail's glass panel: "On this page" with every section, opened
-// beside the rail so the thumb never covers a label. A gear swaps the list
-// for the rail's settings.
+// beside the rail so the thumb never covers a label. A gear pushes the rail's
+// settings in from the side, like an iOS navigation page; the panel keeps its
+// size, so nothing jumps.
 
 import React, { forwardRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings2 } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
+import ThumbRailPanelHeader from './ThumbRailPanelHeader';
 import ThumbRailRow from './ThumbRailRow';
 import ThumbRailSettings from './ThumbRailSettings';
+import { PAGE_SPRING, REDUCED } from './railMotion';
 import type { NavSection } from './sectionDefs';
 import type { RailSide } from './sectionNavStore';
 import type { PanelLayout } from './thumbRailLayout';
@@ -14,7 +17,6 @@ import type { PanelLayout } from './thumbRailLayout';
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   side: RailSide;
   geometry: PanelLayout;
-  room: number;
   sections: NavSection[];
   activeKey: string;
   /** Row under the sliding thumb, -1 for none. */
@@ -28,24 +30,42 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   panelRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
+/** `custom` = going to settings: it enters from the trailing side, the list slips back under it. */
+const PAGES: Variants = {
+  enter: (toSettings: boolean) => ({ x: toSettings ? '100%' : '-30%', opacity: toSettings ? 1 : 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (toSettings: boolean) => ({ x: toSettings ? '-30%' : '100%', opacity: toSettings ? 0 : 1 }),
+};
+const FADE: Variants = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } };
+
 const ThumbRailPanel = forwardRef<HTMLDivElement, Props>(
-  ({ side, geometry, room, sections, activeKey, hover, sliding, settingsOpen, onToggleSettings, onSelect, listRef, panelRef, style, ...motionProps }, ref) => {
+  ({ side, geometry, sections, activeKey, hover, sliding, settingsOpen, onToggleSettings, onSelect, listRef, panelRef, style, ...motionProps }, ref) => {
     const { t } = useTranslation(['property']);
+    const reduceMotion = useReducedMotion();
     const title = t('property:sectionNav.onThisPage', 'On this page');
     const setRefs = useCallback((el: HTMLDivElement | null) => {
       panelRef.current = el;
       if (typeof ref === 'function') ref(el);
       else if (ref) ref.current = el;
     }, [panelRef, ref]);
+    const page = {
+      custom: settingsOpen,
+      variants: reduceMotion ? FADE : PAGES,
+      initial: 'enter',
+      animate: 'center',
+      exit: 'exit',
+      transition: reduceMotion ? REDUCED : PAGE_SPRING,
+      className: 'absolute inset-0 overflow-y-auto overscroll-contain',
+    };
     return (
       <div
         ref={setRefs}
         role="dialog"
         aria-label={title}
-        className="thumb-glass thumb-glass--panel fixed z-[45] w-60 max-w-[calc(100vw-5rem)] rounded-[26px] flex flex-col overflow-hidden"
+        className="thumb-glass thumb-glass--panel fixed z-[45] w-60 max-w-[calc(100vw-5rem)] rounded-[26px] flex flex-col overflow-hidden select-none"
         style={{
           top: geometry.top,
-          ...(settingsOpen ? { maxHeight: room } : { height: geometry.height }),
+          height: geometry.height,
           ...(side === 'right'
             ? { right: 'calc(env(safe-area-inset-right, 0px) + 3.5rem)' }
             : { left: 'calc(var(--thumb-rail-left) + 3.5rem)' }),
@@ -53,47 +73,32 @@ const ThumbRailPanel = forwardRef<HTMLDivElement, Props>(
         }}
         {...motionProps}
       >
-        <div className={`flex items-center gap-2 pl-4 pr-1.5 pt-1.5 pb-1 ${side === 'right' ? 'flex-row-reverse pl-1.5 pr-4' : ''}`}>
-          <div className={`flex-1 min-w-0 ${side === 'right' ? 'text-right' : ''}`}>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 truncate">
-              {settingsOpen ? t('property:sectionNav.settings', 'Quick navigation') : title}
-            </p>
-            {!settingsOpen && (
-              <p className="text-[11px] text-neutral-500 truncate">
-                {t('property:sectionNav.slideHint', 'Slide your thumb, let go to jump')}
-              </p>
+        <ThumbRailPanelHeader side={side} title={title} settingsOpen={settingsOpen} onToggleSettings={onToggleSettings} />
+        <div className="relative flex-1 min-h-0 overflow-hidden">
+          <AnimatePresence initial={false} custom={settingsOpen}>
+            {settingsOpen ? (
+              <motion.div key="settings" {...page}>
+                <ThumbRailSettings />
+              </motion.div>
+            ) : (
+              <motion.div key="list" {...page}>
+                <ul ref={listRef} className="relative isolate px-1.5 pb-1.5">
+                  {sections.map((s, i) => (
+                    <ThumbRailRow
+                      key={s.key}
+                      section={s}
+                      side={side}
+                      height={geometry.rowHeight}
+                      hot={sliding && i === hover}
+                      current={s.key === activeKey}
+                      onSelect={() => onSelect(i)}
+                    />
+                  ))}
+                </ul>
+              </motion.div>
             )}
-          </div>
-          <button
-            type="button"
-            onClick={onToggleSettings}
-            aria-label={settingsOpen ? t('property:sectionNav.done', 'Done') : t('property:sectionNav.settings', 'Quick navigation')}
-            aria-expanded={settingsOpen}
-            className="flex-none min-w-[44px] h-11 px-2 rounded-full flex items-center justify-center text-primary-dark font-bold text-sm active:bg-white/70"
-          >
-            {settingsOpen ? t('property:sectionNav.done', 'Done') : <Settings2 aria-hidden="true" className="w-5 h-5 text-neutral-600" />}
-          </button>
+          </AnimatePresence>
         </div>
-
-        {settingsOpen ? (
-          <div className="overflow-y-auto overscroll-contain">
-            <ThumbRailSettings />
-          </div>
-        ) : (
-          <ul ref={listRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-1.5 pb-1.5">
-            {sections.map((s, i) => (
-              <ThumbRailRow
-                key={s.key}
-                section={s}
-                side={side}
-                height={geometry.rowHeight}
-                hot={sliding && i === hover}
-                current={s.key === activeKey}
-                onSelect={() => onSelect(i)}
-              />
-            ))}
-          </ul>
-        )}
       </div>
     );
   }

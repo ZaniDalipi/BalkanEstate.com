@@ -13,6 +13,8 @@ export const BOTTOM_EDGE_ATTR = 'data-thumb-rail-bottom-edge';
 const GAP_PX = 8;
 const FALLBACK_TOP_PX = 72;
 const FALLBACK_BOTTOM_PX = 96;
+/** Room for the settings view, so swapping to it never resizes the panel. */
+const MIN_PANEL_PX = 420;
 
 /** Bottom (top edge) of the first laid-out element with `attr`, or null. */
 const edge = (attr: string, which: 'bottom' | 'top'): number | null => {
@@ -25,8 +27,8 @@ const edge = (attr: string, which: 'bottom' | 'top'): number | null => {
 
 export interface RailGeometry {
   layout: PanelLayout;
-  /** Height of the free band, px (the settings view may use all of it). */
-  room: number;
+  /** The rail's middle, px from the viewport top. */
+  anchorY: number;
 }
 
 export const readRailGeometry = (rowCount: number): RailGeometry => {
@@ -35,6 +37,7 @@ export const readRailGeometry = (rowCount: number): RailGeometry => {
   const barTop = typeof document === 'undefined' ? null : edge(BOTTOM_EDGE_ATTR, 'top');
   const topInset = Math.max(headerBottom ?? FALLBACK_TOP_PX, 0) + GAP_PX;
   const bottomInset = (barTop === null ? FALLBACK_BOTTOM_PX : viewportHeight - barTop) + GAP_PX;
-  const layout = panelLayout({ viewportHeight, rowCount, anchorY: viewportHeight * RAIL_CENTER, topInset, bottomInset });
-  return { layout, room: Math.max(viewportHeight - topInset - bottomInset, layout.height) };
+  const anchorY = viewportHeight * RAIL_CENTER;
+  const layout = panelLayout({ viewportHeight, rowCount, anchorY, topInset, bottomInset, minHeight: MIN_PANEL_PX });
+  return { layout, anchorY };
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_ROW_PX, MIN_ROW_PX, PANEL_CHROME_PX, isSlide, panelLayout, rowIndexAt } from './thumbRailLayout';
+import { MAX_ROW_PX, MIN_ROW_PX, PANEL_CHROME_PX, isSlide, panelLayout, panelOriginY, rowIndexAt } from './thumbRailLayout';
 
 const phone = { viewportHeight: 844, topInset: 80, bottomInset: 100 };
 
@@ -29,6 +29,30 @@ describe('panelLayout', () => {
     expect(l.rowHeight).toBe(MIN_ROW_PX);
     expect(l.height).toBe(400 - 60 - 60);
     expect(l.top).toBe(60);
+  });
+});
+
+describe('panelLayout minHeight', () => {
+  it('keeps a short list tall enough for the settings view, re-centred on the rail', () => {
+    const l = panelLayout({ ...phone, rowCount: 3, anchorY: 480, minHeight: 420 });
+    expect(l.height).toBe(420);
+    expect(l.top).toBe(480 - 210);
+  });
+
+  it('never grows past the room available', () => {
+    const l = panelLayout({ viewportHeight: 400, topInset: 60, bottomInset: 60, rowCount: 3, anchorY: 200, minHeight: 420 });
+    expect(l.height).toBe(280);
+  });
+});
+
+describe('panelOriginY', () => {
+  it('is the rail position inside the panel', () => {
+    expect(panelOriginY(480, { top: 300, height: 400, rowHeight: 40 })).toBe(180);
+  });
+
+  it('stays inside the panel when the rail is beyond its edge', () => {
+    expect(panelOriginY(100, { top: 300, height: 400, rowHeight: 40 })).toBe(0);
+    expect(panelOriginY(900, { top: 300, height: 400, rowHeight: 40 })).toBe(400);
   });
 });
 

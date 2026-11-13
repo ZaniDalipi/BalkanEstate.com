@@ -66,9 +66,10 @@ export function useRailScrub({ rowCount, rowHeight, listRef, onPick }: Options) 
   const rowAt = (clientY: number): number => {
     const list = listRef.current;
     if (!list) return -1;
+    // The list's own box: already moved by however far its page is scrolled.
     const rect = list.getBoundingClientRect();
     const { rowHeight: h, rowCount: n } = latest.current;
-    return rowIndexAt(clientY + list.scrollTop, rect.top, h, n);
+    return rowIndexAt(clientY, rect.top, h, n);
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {

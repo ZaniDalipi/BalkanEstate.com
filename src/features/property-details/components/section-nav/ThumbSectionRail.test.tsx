@@ -94,6 +94,26 @@ describe('ThumbSectionRail', () => {
     expect(JSON.parse(writes[writes.length - 1][1]).state).toEqual({ side: 'left', visibility: 'hidden' });
   });
 
+  it('never lets a long press on the rail start selecting the page (iOS)', async () => {
+    const { handle } = setup();
+    const touch = new Event('touchstart', { bubbles: true, cancelable: true });
+    handle.dispatchEvent(touch);
+    expect(touch.defaultPrevented).toBe(true);
+
+    pointer(handle, 'pointerdown', 300);
+    expect(document.documentElement).toHaveClass('thumb-rail-no-select');
+    const select = new Event('selectstart', { bubbles: true, cancelable: true });
+    document.body.dispatchEvent(select);
+    expect(select.defaultPrevented).toBe(true);
+
+    pointer(handle, 'pointerup', 300);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await waitFor(() => expect(document.documentElement).not.toHaveClass('thumb-rail-no-select'));
+    const later = new Event('selectstart', { bubbles: true, cancelable: true });
+    document.body.dispatchEvent(later);
+    expect(later.defaultPrevented).toBe(false);
+  });
+
   it('steps aside over the 3D map', () => {
     const onSelect = vi.fn();
     render(<ThumbSectionRail sections={sections} activeKey="top" overMap onSelect={onSelect} />);

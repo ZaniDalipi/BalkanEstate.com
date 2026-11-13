@@ -952,7 +952,19 @@ The thumb rail (`features/property-details/components/section-nav/`):
   `left | right` (default right) and visibility `always | scroll | hidden`
   (default always). Stored values are validated field by field on read
   (`navPrefs.ts`), so a damaged one falls back to its default.
-- **Steps aside** over the 3D map, and while scrolling when set to `scroll`.
+- **Steps aside** over the 3D map, and while scrolling when set to `scroll`
+  (slides off the edge: transform and opacity only).
+- **No accidental selection** (`useSelectionGuard`): a long press is how the
+  rail is used, and on iOS also how text selection starts. The rail cancels
+  its native `touchstart` (non-passive; pointer events still arrive), and while
+  it is pressed or open `html.thumb-rail-no-select` makes the page
+  unselectable, `selectstart` is refused and any selection is cleared.
+- **Motion** (`railMotion.ts`): iOS-style springs, transform and opacity only.
+  The panel grows out of the rail (scaled from the rail's edge at its height,
+  `panelOriginY`) and folds back into it; one highlight (`layoutId`) glides
+  from row to row under the thumb, beneath the rows' text; settings push in
+  from the side and the panel keeps its size (`minHeight`). Reduced motion
+  gets short fades.
 - **Liquid glass** is `.thumb-glass` / `.thumb-glass--panel` /
   `.thumb-glass-tint` in `src/index.css`: these are unlayered, so they never
   set `position` (the component does), and WebKit gets a smaller blur.

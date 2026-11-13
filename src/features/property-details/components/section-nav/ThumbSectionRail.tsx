@@ -10,9 +10,12 @@ import { useEscapeLayer } from '@/src/features/developments/components/public/ex
 import ThumbRailHandle from './ThumbRailHandle';
 import ThumbRailPanel from './ThumbRailPanel';
 import { readRailGeometry } from './railGeometry';
+import { DIM_FADE, PANEL_EXIT, PANEL_SPRING, REDUCED } from './railMotion';
+import { panelOriginY } from './thumbRailLayout';
 import { useSectionNavPrefs } from './sectionNavStore';
 import { useRailScrub } from './useRailScrub';
 import { useScrollActivity } from './useScrollActivity';
+import { useSelectionGuard } from './useSelectionGuard';
 import type { NavSection } from './sectionDefs';
 
 const MotionPanel = motion.create(ThumbRailPanel);
@@ -57,6 +60,8 @@ const ThumbSectionRail: React.FC<Props> = ({ sections, activeKey, overMap, onSel
   }, [close]);
 
   useEscapeLayer(panelRef, closeAll, open);
+  // A long press must never start iOS text selection on the page.
+  useSelectionGuard(handleRef, open);
 
   const onPressHandle = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!open) setGeometry(readRailGeometry(sections.length));
@@ -68,18 +73,29 @@ const ThumbSectionRail: React.FC<Props> = ({ sections, activeKey, overMap, onSel
   };
 
   const away = !open && (overMap || (visibility === 'scroll' && scrolling));
-  const offset = side === 'right' ? 12 : -12;
+  // The panel grows out of the rail and folds back into it, like an iOS
+  // context menu: scaled from the rail's edge, at the rail's height.
+  const origin = `${side === 'right' ? '100%' : '0%'} ${panelOriginY(geometry.anchorY, geometry.layout)}px`;
+  const shown = { opacity: 1, scale: 1, x: 0 };
+  const folded = reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.5, x: side === 'right' ? 16 : -16 };
 
   return (
     <div className="lg:hidden print:hidden [--thumb-rail-left:env(safe-area-inset-left,0px)] md:[--thumb-rail-left:var(--sidebar-rail-w)]">
-      {open && (
-        <div
-          aria-hidden="true"
-          data-testid="thumb-rail-backdrop"
-          onClick={closeAll}
-          className="fixed inset-0 z-[44] bg-neutral-900/15"
-        />
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="dim"
+            aria-hidden="true"
+            data-testid="thumb-rail-backdrop"
+            onClick={closeAll}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={reduceMotion ? REDUCED : DIM_FADE}
+            className="fixed inset-0 z-[44] bg-neutral-900/15 select-none"
+          />
+        )}
+      </AnimatePresence>
       <ThumbRailHandle
         ref={handleRef}
         side={side}
@@ -101,7 +117,6 @@ const ThumbSectionRail: React.FC<Props> = ({ sections, activeKey, overMap, onSel
             listRef={listRef}
             side={side}
             geometry={geometry.layout}
-            room={geometry.room}
             sections={sections}
             activeKey={activeKey}
             hover={hover}
@@ -112,11 +127,10 @@ const ThumbSectionRail: React.FC<Props> = ({ sections, activeKey, overMap, onSel
               closeAll();
               pick(i);
             }}
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: offset, scale: 0.96 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: offset, scale: 0.96 }}
-            transition={{ duration: reduceMotion ? 0.12 : 0.18, ease: [0.2, 0.8, 0.2, 1] }}
-            style={{ transformOrigin: side === 'right' ? 'right center' : 'left center' }}
+            initial={folded}
+            animate={{ ...shown, transition: reduceMotion ? REDUCED : PANEL_SPRING }}
+            exit={{ ...folded, transition: reduceMotion ? REDUCED : PANEL_EXIT }}
+            style={{ transformOrigin: origin }}
           />
         )}
       </AnimatePresence>

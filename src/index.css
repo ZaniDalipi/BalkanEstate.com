@@ -295,6 +295,16 @@ fieldset {
 html.is-webkit .thumb-glass {
   backdrop-filter: blur(8px) saturate(180%);
 }
+/* While the thumb rail is pressed or open, nothing on the page can be
+   selected: a long press on the rail must never start iOS text selection
+   (see section-nav/useSelectionGuard). Only set for that moment. */
+html.thumb-rail-no-select,
+html.thumb-rail-no-select * {
+  /* Standard property only: the build adds the -webkit- prefix Safari needs
+     (a hand-written pair would be collapsed to one, see the WebKit notes). */
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
 
 /* Glass input field — light theme */
 .glass-input {

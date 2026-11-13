@@ -30,6 +30,8 @@ export interface PanelLayoutInput {
   /** Room kept free at the top (header, notch) and bottom (contact bar), px. */
   topInset: number;
   bottomInset: number;
+  /** The panel is never shorter than this (room for its settings view), px. */
+  minHeight?: number;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
@@ -38,11 +40,11 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), h
  * Centre the panel on the rail, keep it between the insets, and give the rows
  * as much height as fits (between MIN_ROW_PX and MAX_ROW_PX).
  */
-export const panelLayout = ({ viewportHeight, rowCount, anchorY, topInset, bottomInset }: PanelLayoutInput): PanelLayout => {
+export const panelLayout = ({ viewportHeight, rowCount, anchorY, topInset, bottomInset, minHeight = 0 }: PanelLayoutInput): PanelLayout => {
   const room = Math.max(viewportHeight - topInset - bottomInset, PANEL_CHROME_PX + MIN_ROW_PX);
   const rows = Math.max(rowCount, 1);
   const rowHeight = clamp(Math.floor((room - PANEL_CHROME_PX) / rows), MIN_ROW_PX, MAX_ROW_PX);
-  const height = Math.min(PANEL_CHROME_PX + rowHeight * rows, room);
+  const height = Math.min(Math.max(PANEL_CHROME_PX + rowHeight * rows, minHeight), room);
   const top = clamp(anchorY - height / 2, topInset, Math.max(topInset, viewportHeight - bottomInset - height));
   return { top: Math.round(top), rowHeight, height };
 };
@@ -61,3 +63,10 @@ export const rowIndexAt = (y: number, listTop: number, rowHeight: number, rowCou
 /** True once a press has moved far enough to count as a slide. */
 export const isSlide = (dx: number, dy: number, threshold = SLIDE_THRESHOLD_PX): boolean =>
   Math.hypot(dx, dy) > threshold;
+
+/**
+ * Where the rail sits inside the open panel, px from the panel's top: the
+ * point the panel grows out of and shrinks back into (kept within the panel).
+ */
+export const panelOriginY = (anchorY: number, layout: PanelLayout): number =>
+  Math.round(clamp(anchorY - layout.top, 0, layout.height));
