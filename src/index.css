@@ -235,6 +235,67 @@ fieldset {
   }
 }
 
+/* Liquid glass for the mobile thumb rail (property page "On this page", see
+   section-nav/ThumbSectionRail). Frosted fill, a gradient rim drawn with a
+   mask (::before) and light pooling at the top edge (::after), as on curved
+   glass. `isolation` keeps the two pseudo layers above the fill and below the
+   content. The element must be positioned (relative/fixed: set by the
+   component, so this unlayered rule never overrides Tailwind's position
+   utilities). Only the standard `backdrop-filter` is written: the build adds
+   the prefix itself (see "WebKit compositing budget" below). */
+.thumb-glass {
+  isolation: isolate;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.4));
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.08),
+    0 10px 28px -10px rgba(15, 23, 42, 0.38);
+}
+.thumb-glass--panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.7));
+  backdrop-filter: blur(24px) saturate(190%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 12px 28px -14px rgba(15, 23, 42, 0.3),
+    0 32px 64px -28px rgba(15, 23, 42, 0.45);
+}
+.thumb-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3) 38%, rgba(15, 23, 42, 0.08) 62%, rgba(255, 255, 255, 0.65));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.thumb-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.08) 36%, rgba(255, 255, 255, 0) 60%);
+  pointer-events: none;
+}
+/* Tinted glass: the row under the thumb, and the chosen option. */
+.thumb-glass-tint {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(41, 151, 255, 0.96), rgba(2, 82, 205, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 30, 90, 0.25),
+    0 10px 24px -10px rgba(2, 82, 205, 0.7);
+}
+/* WebKit pays for blur radius on every frame: a smaller one reads the same
+   behind this much fill. */
+html.is-webkit .thumb-glass {
+  backdrop-filter: blur(8px) saturate(180%);
+}
+
 /* Glass input field — light theme */
 .glass-input {
   background: rgba(255, 255, 255, 0.7);

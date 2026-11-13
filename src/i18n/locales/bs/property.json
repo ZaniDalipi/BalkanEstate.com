@@ -765,7 +765,21 @@
     "airQuality": "Kvalitet zraka",
     "noise": "Buka",
     "traffic": "Saobraćaj",
-    "zoneDynamics": "Dinamika zone"
+    "zoneDynamics": "Dinamika zone",
+    "open": "Idi na odjeljak",
+    "settings": "Brza navigacija",
+    "slideHint": "Prevucite palcem, pustite za skok",
+    "done": "Gotovo",
+    "side": "Strana",
+    "left": "Lijevo",
+    "right": "Desno",
+    "show": "Prikaži",
+    "showAlways": "Uvijek",
+    "showAlwaysHint": "Tanka traka ostaje na rubu",
+    "showScroll": "Sakrij tokom skrolanja",
+    "showScrollHint": "Skloni se dok skrolate",
+    "showHidden": "Sklonjeno",
+    "showHiddenHint": "Samo mali jezičak; pritisnite ga za otvaranje"
   },
   "seo": {
     "description": "{{type}} sa {{beds}} spavaćih soba, {{baths}} kupatila za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
