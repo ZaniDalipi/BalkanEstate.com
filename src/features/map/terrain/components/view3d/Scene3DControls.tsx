@@ -25,7 +25,7 @@ export interface Scene3DControlsProps {
 const Scene3DControls: React.FC<Scene3DControlsProps> = ({ surface, onSurface, satellite, buildings, onBuildings, exaggeration, onExaggeration, camera }) => {
   const { t } = useTranslation('search');
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-2 px-3 sm:bottom-6">
+    <div className="pointer-events-none absolute inset-x-0 bottom-[calc(1rem+var(--t3d-safe-bottom))] flex flex-col items-center gap-2 pl-[calc(0.75rem+var(--t3d-safe-left))] pr-[calc(0.75rem+var(--t3d-safe-right))] sm:bottom-6">
       <p className={`hidden rounded-full px-3 py-1 sm:block ${GLASS} ${CAPTION}`}>
         {t('terrain.view3d.hint', 'Drag to move · right-drag or two fingers to turn and tilt · scroll or pinch to zoom.')}
       </p>

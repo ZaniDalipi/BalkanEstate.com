@@ -1482,6 +1482,27 @@ html[data-zoom] {
   --sidebar-rail-w: calc(5rem + env(safe-area-inset-left, 0px));
 }
 
+/* Terrain 3D window: full screen on phones, so in the installed app its card,
+   close button and controls would sit under the status bar and the home
+   indicator. They add these insets to their offsets; the 3D picture itself
+   still runs to the edges. The top reuses the floating-search pad (minus its
+   8px gap) for the 44px floor on Android PWAs that report a 0 inset. From
+   `sm` up the window is a centred card with its own margin: no insets. */
+.terrain3d-stage {
+  --t3d-safe-top: calc(var(--floating-search-top-pad, 8px) - 8px);
+  --t3d-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --t3d-safe-left: env(safe-area-inset-left, 0px);
+  --t3d-safe-right: env(safe-area-inset-right, 0px);
+}
+@media (min-width: 640px) {
+  .terrain3d-stage {
+    --t3d-safe-top: 0px;
+    --t3d-safe-bottom: 0px;
+    --t3d-safe-left: 0px;
+    --t3d-safe-right: 0px;
+  }
+}
+
 /* Residence explorer in full screen: the stage covers the whole viewport, so
    in the installed app its floating controls would sit under the status bar,
    the notch and the home indicator. Its controls add these insets to their
