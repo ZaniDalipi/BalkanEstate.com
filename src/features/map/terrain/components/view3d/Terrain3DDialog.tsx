@@ -47,7 +47,7 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
         aria-labelledby={titleId}
         // Focus lands on the dialog itself: inside it for the keyboard, with no ring drawn on a button nobody chose.
         tabIndex={-1}
-        className="relative h-full w-full overflow-hidden bg-[#e6ebf1] shadow-2xl outline-none sm:h-[min(86dvh,820px)] sm:max-w-6xl sm:rounded-[28px] sm:ring-1 sm:ring-black/10"
+        className="terrain3d-stage relative h-full w-full overflow-hidden bg-[#e6ebf1] shadow-2xl outline-none sm:h-[min(86dvh,820px)] sm:max-w-6xl sm:rounded-[28px] sm:ring-1 sm:ring-black/10"
       >
         <PlotModelScene
           analysis={analysis}
@@ -63,14 +63,14 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
           reduceMotion={reduceMotion}
           onClose={onClose}
         />
-        <div className="absolute left-3 top-3 sm:left-4 sm:top-4">
+        <div className="absolute left-[calc(0.75rem+var(--t3d-safe-left))] top-[calc(0.75rem+var(--t3d-safe-top))] sm:left-4 sm:top-4">
           <Terrain3DInfo titleId={titleId} analysis={analysis} surface={surface} exaggeration={exaggeration} buildings={buildingsShown} />
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label={t('common:close', 'Close')}
-          className={`absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-gray-800 transition hover:bg-white sm:right-4 sm:top-4 ${GLASS}`}
+          className={`absolute right-[calc(0.75rem+var(--t3d-safe-right))] top-[calc(0.75rem+var(--t3d-safe-top))] flex h-11 w-11 items-center justify-center rounded-full text-gray-800 transition hover:bg-white sm:right-4 sm:top-4 ${GLASS}`}
         >
           <X aria-hidden="true" className="h-5 w-5" strokeWidth={2} />
         </button>
