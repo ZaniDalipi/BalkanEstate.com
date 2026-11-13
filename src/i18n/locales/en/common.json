@@ -912,5 +912,41 @@
   },
   "formSubmit": {
     "shortcutPrefix": "or press"
+  },
+  "hints": {
+    "ui": {
+      "tipLabel": "Tip",
+      "allTips": "All tips",
+      "hide": "Hide tip",
+      "title": "Tips",
+      "intro": "Small things you can do that are easy to miss.",
+      "close": "Close tips",
+      "autoSwitch": "Show a tip now and then",
+      "menuLabel": "Tips: things you can do"
+    },
+    "groups": {
+      "property": "On a listing",
+      "search": "In search",
+      "global": "Everywhere",
+      "current": "On this page"
+    },
+    "items": {
+      "agentHold": "Press and hold the agent's photo in the bar at the bottom to see their other listings. A tap opens their profile.",
+      "photoOpenTouch": "Tap the photos to open them full screen, then swipe between them.",
+      "photoOpenPointer": "Click the photos to open them full screen, then use the arrow keys to move between them.",
+      "sectionRail": "Hold the glass rail at the edge of the screen and slide your thumb to jump straight to a section.",
+      "photoZoomTouch": "In full screen, double-tap a photo to zoom in, and swipe down to close it.",
+      "photoZoomPointer": "In full screen, double-click a photo or press + and − to zoom. Esc closes it.",
+      "photoDraw": "In full screen, use the pen to draw on a photo and send it to the seller with your question.",
+      "drawArea": "Use the pencil on the map to draw your own area and see only the listings inside it.",
+      "cardSwipe": "Swipe a listing's photo left or right to see more photos without opening it.",
+      "saveSearch": "Save your search and we'll tell you when new listings match it.",
+      "mapOptions": "Map options switch to satellite or street view and can show climate risks such as flood or heat.",
+      "listFold": "Use the tab on the map's edge to fold the list away and see the whole map.",
+      "aiSwipe": "Ask AI Search in your own words. In your matches, swipe right to save a home and left to skip it.",
+      "swipeBack": "Swipe in from the left edge of the screen to go back.",
+      "submitShortcut": "In message and contact forms, press Ctrl + Enter (⌘ + Enter on a Mac) to send.",
+      "findTips": "All tips are in the menu under Tips, whenever you want them."
+    }
   }
 }

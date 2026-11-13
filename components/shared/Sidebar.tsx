@@ -16,6 +16,7 @@ import { createLogger } from '@/shared/utils/logger';
 import { LogoIcon, UsersIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
+import { useHintsStore } from '@/src/features/hints/hooks/hintsStore';
 import { SoftIcon, NavPicture, type NavPictureName } from '@/src/shared/illustrations';
 
 const navLogger = createLogger('SidebarNav');
@@ -144,6 +145,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation(['nav', 'common', 'auth']);
+    const openHints = useHintsStore((s) => s.openPanel);
     const { state, dispatch, logout } = useAppContext();
     const { isAuthenticated, currentUser, conversations } = state;
     const { view: activeView, detail } = useRouteView();
@@ -417,6 +419,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 </nav>
 
                 <div className="p-1.5 border-t border-neutral-200 flex-shrink-0 space-y-0.5">
+                    {/* Tips: every easy-to-miss action, listed */}
+                    <button
+                        onClick={() => { openHints(); onClose(); }}
+                        className="flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
+                        aria-label={t('common:hints.ui.menuLabel', 'Tips: things you can do')}
+                    >
+                        <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><SoftIcon name="lightbulb" className="nav-dock-icon w-6 h-6 max-w-none -m-0.5" /></div>
+                        <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('common:hints.ui.title', 'Tips')}</span>
+                    </button>
                     {/* Language Switcher */}
                     <LanguageSwitcher variant="sidebar" />
 

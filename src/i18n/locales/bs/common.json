@@ -888,5 +888,41 @@
   },
   "formSubmit": {
     "shortcutPrefix": "ili pritisnite"
+  },
+  "hints": {
+    "ui": {
+      "tipLabel": "Savjet",
+      "allTips": "Svi savjeti",
+      "hide": "Sakrij savjet",
+      "title": "Savjeti",
+      "intro": "Sitnice koje možete uraditi, a lako ih je propustiti.",
+      "close": "Zatvori savjete",
+      "autoSwitch": "Povremeno prikaži savjet",
+      "menuLabel": "Savjeti: šta sve možete"
+    },
+    "groups": {
+      "property": "Na oglasu",
+      "search": "U pretrazi",
+      "global": "Svugdje",
+      "current": "Na ovoj stranici"
+    },
+    "items": {
+      "agentHold": "Pritisnite i držite fotografiju agenta na traci dolje da vidite njegove druge oglase. Dodir otvara profil.",
+      "photoOpenTouch": "Dodirnite fotografije da ih otvorite preko cijelog ekrana, pa prevucite između njih.",
+      "photoOpenPointer": "Kliknite fotografije da ih otvorite preko cijelog ekrana, pa koristite strelice za kretanje između njih.",
+      "sectionRail": "Držite staklenu traku na rubu ekrana i povucite palac da odmah skočite na odjeljak.",
+      "photoZoomTouch": "Preko cijelog ekrana dvaput dodirnite fotografiju da je uvećate, a prevucite nadolje da je zatvorite.",
+      "photoZoomPointer": "Preko cijelog ekrana dvaput kliknite fotografiju ili pritisnite + i − za uvećanje. Esc zatvara.",
+      "photoDraw": "Preko cijelog ekrana olovkom crtajte po fotografiji i pošaljite je prodavcu uz svoje pitanje.",
+      "drawArea": "Olovkom na mapi nacrtajte svoje područje i vidite samo oglase unutar njega.",
+      "cardSwipe": "Prevucite fotografiju oglasa lijevo ili desno da vidite još fotografija bez otvaranja.",
+      "saveSearch": "Sačuvajte pretragu i javit ćemo vam kad se pojave novi odgovarajući oglasi.",
+      "mapOptions": "Opcije mape prebacuju na satelitski ili ulični prikaz i mogu prikazati klimatske rizike poput poplava ili vrućine.",
+      "listFold": "Jezičkom na rubu mape sklopite listu i vidite cijelu mapu.",
+      "aiSwipe": "Pitajte AI pretragu svojim riječima. U rezultatima prevucite desno da sačuvate dom, a lijevo da ga preskočite.",
+      "swipeBack": "Prevucite od lijevog ruba ekrana da se vratite nazad.",
+      "submitShortcut": "U formama za poruke i kontakt pritisnite Ctrl + Enter (⌘ + Enter na Macu) za slanje.",
+      "findTips": "Svi savjeti su u meniju pod Savjeti, kad god vam zatrebaju."
+    }
   }
 }
