@@ -1832,6 +1832,62 @@ Height is handled separately:
 
 ---
 
+## Open Houses & Auctions — optional dates on a listing
+
+Both are **opt-in**: a listing without an open house or auction looks and
+behaves exactly as before (no empty boxes, no badges, nothing extra sent).
+
+| | Open house | Auction |
+|---|---|---|
+| What | Time windows anyone may drop by; visitors RSVP | Information only — date, online or in person, place or link, starting price, deposit note. Bidding happens elsewhere (bank, notary, auction house) |
+| Stored in | `OpenHouse` collection (with `rsvps[]`) | `Property.auction` subdocument |
+| Set by the owner | Listing form (new listings) and My Listings → "Open house" | Listing form "Selling at auction" (new and edited listings); `null` removes it |
+| Rules | `backend/src/services/openHouse/openHouseRules.ts` | `backend/src/services/auction/auctionRules.ts` |
+| Client mirror | `features/open-houses/utils/openHouseDraft.ts` | `features/auctions/utils/auctionDraft.ts` |
+
+```
+OpenHouse / Property.auction ──► listingEventDates.refreshEventDates()
+                                    └─ Property.nextOpenHouseAt, nextEventAt   (indexed)
+GET /api/properties
+  ├─ hasOpenHouse · openHouseFrom/To (visitor's weekend) · hasAuction · auctionWithinDays
+  ├─ sortBy=events-soonest (skips the promotion re-sort)
+  └─ each card: nextOpenHouse + auction essentials (sanitizer strips internals)
+```
+
+- **Search runs in the browser too.** `utils/propertyUtils.ts` applies
+  `matchesEventFilters` and the `events_soonest` sort from
+  `features/listing-events/utils/listingEvents.ts`; the API clients send the
+  same filters through `eventSearchParams` (which works out "this weekend" in the
+  visitor's own time zone).
+- **One event model on screen.** `features/listing-events` turns a listing into
+  `ListingEvent`s and shows them everywhere: `EventRibbon` (result cards, map
+  popup), `markerEventTag` (Google and Leaflet pins: "Open Sat", "Auction Fri"),
+  `EventFilterChips` (open house this week / this weekend / any, auctions / this
+  week), `ListingEventBanner` (listing page: countdown, calendar file,
+  directions or the auction link), `HomeEventsSection` (landing page: open houses
+  from now to the end of this Sunday, soonest first; hidden when there are none).
+- **Dates.** Stored as UTC instants. Screens use the viewer's clock; emails and
+  push use the listing's zone (`openHouseTime.ts`). Dates are always written
+  dd/mm/yyyy (`src/shared/utils/dmyDate.ts`, with a short weekday in front), and
+  typed that way too (`DmyDateField`), instead of the browser's date picker whose
+  order follows the device's locale.
+- **People who saved the home** (`Favorite`, alerts on, never the owner) are told
+  about a new open house or auction and reminded the day before
+  (`savedHomeEventAlerts.ts`, `listingEventReminderJob.ts`, every 15 minutes in
+  `cron/index.ts`, which also moves `nextEventAt` on once an event has passed).
+  RSVPs get their own reminders (`openHouseReminderJob.ts`). Each reminder is
+  claimed with a flag before it is sent, so two runs never send it twice.
+- **Privacy.** Visitors never see who else is coming; a guest cancels only their
+  own sign-up (by its id); only http(s) auction links are rendered.
+- **Telling sellers.** `listing-events/announcement/EventsAnnouncementDialog`
+  (mounted once in `App.tsx`) opens when a signed-in user with listings
+  (`subscription.activeListingsCount` / `listingsCount`) opens the app, during
+  one week from the first time they see it. It waits for any other dialog to
+  close (`otherLayerOpen`). "Not now" / × / Esc close it for this visit;
+  "Add one to a listing" and "Don't show this again" turn it off. The start date
+  and the "off" choice are kept per browser (`announcementStore`, safe storage);
+  a broken stored date counts as "never seen".
+
 ## Schedule Viewing Modal
 
 3-step wizard:

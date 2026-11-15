@@ -7,6 +7,7 @@ import { paths } from '@/src/app/router/paths';
 import { useProperty } from '@/src/features/properties/hooks/useProperty';
 import { SocialShare } from '@/src/components/marketing/SocialShare';
 import { cn } from '@/src/lib/utils';
+import OpenHouseSection from '@/src/features/open-houses/components/OpenHouseSection';
 
 const PropertyInquiryModal = lazy(() => import('@/src/features/inquiries/components/PropertyInquiryModal'));
 const ScheduleViewingModal = lazy(() => import('@/src/features/rental/components/ScheduleViewingModal'));
@@ -60,6 +61,20 @@ export const ListingActions: React.FC<ListingActionsProps> = ({ listingId, pursu
             {t('explorer.drawer.scheduleViewing', 'Schedule viewing')}
           </button>
         </div>
+      )}
+      {pursuable && property && (
+        // Only when the owner planned an open house; renders nothing otherwise.
+        <OpenHouseSection
+          property={property}
+          viewer={{
+            name: state.currentUser?.name ?? '',
+            email: state.currentUser?.email ?? '',
+            phone: state.currentUser?.phone ?? '',
+            isSignedIn: state.isAuthenticated,
+          }}
+          onRequestViewing={() => setOpen('viewing')}
+          onAskSeller={() => setOpen('inquiry')}
+        />
       )}
       <div className="flex flex-wrap gap-2">
         <button type="button" onClick={onSave} disabled={!property} aria-pressed={saved} className={secondary}>

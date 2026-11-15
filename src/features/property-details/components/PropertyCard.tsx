@@ -15,6 +15,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
+import EventRibbon from '@/src/features/listing-events/components/EventRibbon';
 import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
@@ -429,7 +430,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-          <div className="flex flex-col gap-1.5">
+          {/* items-start: each badge hugs its text, so a long one (an auction
+              ribbon) does not stretch the others into wide bars. */}
+          <div className="flex min-w-0 flex-col items-start gap-1.5">
             {/* Listing Type Badge — luxury variant for luxury-villa */}
             {isLuxuryVilla ? (
               <div className="bg-gradient-to-r from-[#FFA500] to-[#E8940A] text-white text-[10px] font-bold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-sm">
@@ -494,6 +497,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 {t('property:status.new').toUpperCase()}
               </div>
             )}
+
+            {/* Open house / auction — only when the owner planned one */}
+            {!isSold && !isRented && <EventRibbon property={property} className="self-start" />}
 
             {/* iOS-style Promotion Badges */}
             {!isSold && isActivelyPromoted && promotionTier && (

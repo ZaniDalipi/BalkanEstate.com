@@ -16,6 +16,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useRouteView } from '@/src/app/router/useRouteView';
 import { ListingTypePicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+import ManageOpenHouses from '@/src/features/open-houses/components/ManageOpenHouses';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -255,6 +256,12 @@ const ListingCard: React.FC<{
                     </button>
                 )}
              </div>
+             {/* Optional: plan open houses and see who's coming */}
+             {property.status === 'active' && (
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                    <ManageOpenHouses propertyId={property.id} />
+                </div>
+             )}
         </div>
     </div>
 );

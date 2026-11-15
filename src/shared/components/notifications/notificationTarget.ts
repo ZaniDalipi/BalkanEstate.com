@@ -26,6 +26,8 @@ const isLocalPath = (p: string) => /^\/(?!\/)/.test(p);
 
 export function notificationTarget({ type, data }: NotificationTargetInput): NotificationTarget | null {
   if (VIEWING_TYPES.has(type)) return { path: paths.account('viewings'), direction: 'morph' };
+  // The host manages open houses (and sees who's coming) from My Listings.
+  if (type === 'open_house_rsvp') return { path: paths.account('listings'), direction: 'morph' };
   if (!data) return null;
 
   const agencyId = str(data.agencyId);

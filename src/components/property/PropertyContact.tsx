@@ -15,6 +15,7 @@ import PropertyInquiryModal from '@/src/features/inquiries/components/PropertyIn
 import RentAffordabilityCalculator from '@/src/features/rental/components/RentAffordabilityCalculator';
 import MoveInCostBreakdown from '@/src/features/rental/components/MoveInCostBreakdown';
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
+import OpenHouseSection from '@/src/features/open-houses/components/OpenHouseSection';
 import { formatCityPlace } from '@/shared/geo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { navigate } from '@/src/app/router/navigation';
@@ -242,6 +243,21 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           </button>
         )}
       </div>
+
+      {/* Open house — only when the owner planned one; renders nothing otherwise */}
+      {property.status !== 'sold' && (
+        <OpenHouseSection
+          property={property}
+          viewer={{
+            name: currentUser?.name || '',
+            email: currentUser?.email || '',
+            phone: currentUser?.phone || '',
+            isSignedIn: !!currentUser,
+          }}
+          onRequestViewing={property.visitAvailability?.enabled ? handleScheduleVisit : undefined}
+          onAskSeller={() => setShowInquiryModal(true)}
+        />
+      )}
 
       {/* Contact Seller Card */}
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">

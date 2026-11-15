@@ -435,3 +435,24 @@ export const poiKeys = {
   all: ['pois'] as const,
   tile: (x: number, y: number) => [...poiKeys.all, 'tile', x, y] as const,
 };
+
+// ============================================================================
+// Open houses (optional, per listing)
+// Used by: features/open-houses
+// ============================================================================
+
+export const openHouseKeys = {
+  all: ['openHouses'] as const,
+  property: (propertyId: string) => [...openHouseKeys.all, 'property', propertyId] as const,
+  mine: (propertyId?: string) => [...openHouseKeys.all, 'mine', propertyId ?? 'all'] as const,
+};
+
+// ============================================================================
+// Listing events (open houses & auctions together)
+// Used by: features/listing-events (home page feed)
+// ============================================================================
+
+export const listingEventKeys = {
+  all: ['listingEvents'] as const,
+  feed: (country: string, limit: number, weekEnd: string) => [...listingEventKeys.all, 'feed', country, limit, weekEnd] as const,
+};

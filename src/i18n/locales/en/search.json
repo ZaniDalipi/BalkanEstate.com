@@ -96,7 +96,13 @@
     "priceIncreased": "Price Increased",
     "constructionStatus": "Construction",
     "kitchens": "Kitchens",
-    "orientation": "Orientation"
+    "orientation": "Orientation",
+    "openHouseWeekend": "Open house this weekend",
+    "openHouseAny": "Any open house",
+    "auctionAny": "Auctions",
+    "auctionWeek": "Auction this week",
+    "eventsGroup": "Open houses and auctions",
+    "openHouseWeek": "Open house this week"
   },
   "options": {
     "any": "Any",
@@ -191,7 +197,8 @@
     "priceReduced": "Recently Reduced",
     "pricePerSqm": "Price per m²",
     "yearBuiltDesc": "Newest Built",
-    "yearBuiltAsc": "Oldest Built"
+    "yearBuiltAsc": "Oldest Built",
+    "eventsSoonest": "Soonest open house / auction"
   },
   "results": {
     "showing": "Showing {{count}} properties",
@@ -343,6 +350,11 @@
       "loading": "Loading places of interest…",
       "empty": "No places of interest in this view. Try another area.",
       "error": "Places of interest could not be loaded. Please try again in a moment."
+    },
+    "eventTag": {
+      "openHouse": "Open",
+      "auction": "Auction",
+      "today": "today"
     }
   },
   "newsletter": {
