@@ -5,7 +5,7 @@ import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties, useMyListingsInfinite } from '../../src/features/properties/hooks';
-import { PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon } from '../../constants';
+import { PencilIcon, TrashIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
@@ -24,6 +24,8 @@ const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
     </svg>
 );
+import { ListingActionBar } from '@/src/features/seller/components/listingActions';
+import { buildListingActions, isListingActionable, type ListingActionId } from '@/src/features/seller/utils/listingActions';
 
 // Role badge component to show which role created the listing
 const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
@@ -98,11 +100,30 @@ const ListingCard: React.FC<{
         navigate(paths.editListing(property.id), { state: { property } });
     };
 
-    const isActionable = property.status === 'active' || property.status === 'pending';
-    const isPromoted = property.isPromoted && property.promotionEndDate && new Date(property.promotionEndDate) > new Date();
-
-    // Check if can renew (24hr cooldown)
-    const canRenew = renewalStatus?.canRenew ?? true;
+    const isActionable = isListingActionable(property.status);
+    const actions = buildListingActions({
+        status: property.status,
+        listingType: property.listingType,
+        createdAsRole: property.createdAsRole,
+        isPromoted: property.isPromoted,
+        promotionEndDate: property.promotionEndDate,
+        imageCount: property.images?.length ?? 0,
+        hasVideo: Boolean(property.videoUrl),
+        canReassignToAgency,
+        renewal: renewalStatus,
+    });
+    const actionHandlers: Record<ListingActionId, (id: string) => void> = {
+        promote: onPromote,
+        extendPromotion: onExtend,
+        video: onVideo,
+        renew: onRenew,
+        moveToAgency: onReassignRole,
+        moveToPrivate: onReassignRole,
+        markSold: onMarkAsSold,
+        markRented: onMarkAsSold,
+        markAvailable: onMarkAsAvailable,
+    };
+    const handleAction = (actionId: ListingActionId) => actionHandlers[actionId](property.id);
 
     // Check if property has valid map coordinates
     const hasValidCoordinates = property.lat != null && !isNaN(property.lat) && property.lng != null && !isNaN(property.lng);
@@ -126,7 +147,7 @@ const ListingCard: React.FC<{
                 )}
             </div>
         </button>
-        <div className="flex-grow flex flex-col">
+        <div className="flex-grow flex flex-col min-w-0">
             <div className="flex justify-between items-start">
                 <div onClick={handleCardClick} className="cursor-pointer">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -152,10 +173,10 @@ const ListingCard: React.FC<{
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
-                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="p-2 text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
+                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="flex h-[44px] w-[44px] items-center justify-center text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
                         <PencilIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="flex h-[44px] w-[44px] items-center justify-center text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
                         <TrashIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
@@ -262,6 +283,7 @@ const ListingCard: React.FC<{
                     <ManageOpenHouses propertyId={property.id} />
                 </div>
              )}
+            <ListingActionBar actions={actions} onAction={handleAction} onEdit={() => navigate(paths.editListing(property.id), { state: { property } })} />
         </div>
     </div>
 );
