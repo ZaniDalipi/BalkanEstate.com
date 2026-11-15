@@ -22,7 +22,15 @@
   },
   "individuals": {
     "title": "Истакнути професионалци",
-    "subtitle": "Повежите се са вештим појединцима који нуде експертизу у целом сектору некретнина"
+    "subtitle": "Повежите се са вештим појединцима који нуде експертизу у целом сектору некретнина",
+    "eyebrow": "Upoznajte stručnjake",
+    "flip": "Kliknite ili pritisnite Enter da okrenete karticu",
+    "back": "Kliknite ponovo ili pritisnite Esc da je vratite",
+    "show": "Prikaži",
+    "cta": "Ponudite svoje usluge",
+    "profile": "Pogledaj profil",
+    "email": "Email",
+    "call": "Pozovi"
   },
   "filters": {
     "all": "Све"

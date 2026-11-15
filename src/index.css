@@ -49,6 +49,15 @@
   /* Required by shadcn-style components that use `border-border`. */
   --color-border: rgba(0, 0, 0, 0.1);
   --color-ring: rgba(0, 122, 255, 0.5);
+  /* shadcn card + chart tokens (used by src/components/ui/team-lanyard-rail).
+     Charts 1–5 are the lanyard ribbon / badge band colours. */
+  --color-card: #ffffff;
+  --color-card-foreground: #1A202C;
+  --color-chart-1: #0252CD;
+  --color-chart-2: #10B981;
+  --color-chart-3: #F59E0B;
+  --color-chart-4: #8B5CF6;
+  --color-chart-5: #F43F5E;
 
   /* Neutral Colors */
   --color-neutral-50: #F8F9FA;

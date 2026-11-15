@@ -22,7 +22,15 @@
   },
   "individuals": {
     "title": "Istaknuti stručnjaci",
-    "subtitle": "Povežite se sa iskusnim pojedincima koji nude stručnost u cijelom sektoru nekretnina"
+    "subtitle": "Povežite se sa iskusnim pojedincima koji nude stručnost u cijelom sektoru nekretnina",
+    "eyebrow": "Upoznajte stručnjake",
+    "flip": "Kliknite ili pritisnite Enter da okrenete karticu",
+    "back": "Kliknite ponovo ili pritisnite Esc da je vratite",
+    "show": "Prikaži",
+    "cta": "Ponudite svoje usluge",
+    "profile": "Pogledaj profil",
+    "email": "Email",
+    "call": "Pozovi"
   },
   "filters": {
     "all": "Sve"

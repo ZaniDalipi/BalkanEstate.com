@@ -13,7 +13,7 @@ import BusinessGridSkeleton from './BusinessGridSkeleton';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
 import ChipScroller from '@/src/components/ui/ChipScroller';
 import { useOffscreen } from '../hooks/useOffscreen';
-import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
+import FeaturedProfessionalsRail from './FeaturedProfessionalsRail';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, MicrophoneIcon, ArrowPathIcon, MapIcon } from '@/constants';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
@@ -196,26 +196,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     }, 800);
   }, [listings, navigateToListing]);
 
-  // Derive individuals for AnimatedTooltip row
+  // Individuals on screen (stats + the featured professionals rail)
   const individualListings = useMemo(() =>
     listings.filter(l => l.listingType === 'individual'),
   [listings]);
-
-  const tooltipItems: AnimatedTooltipItem[] = useMemo(() => {
-    const shuffled = [...individualListings].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 12).map((l, i) => ({
-      id: i,
-      name: l.name,
-      designation: t(`categories.${l.category}`),
-      image: l.logoUrl || '',
-      location: `${l.city}, ${l.country}`,
-      phone: l.contactPhone,
-      email: l.contactEmail,
-      services: l.services,
-      isVerified: l.isVerified,
-      listingId: l.id,
-    }));
-  }, [individualListings, t]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -242,27 +226,6 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     navigateToListing(listing);
   }, [navigateToListing]);
 
-  const handleTooltipClick = useCallback((item: AnimatedTooltipItem) => {
-    const match = individualListings.find(l =>
-      (item.listingId && (l.id === item.listingId || l.slug === item.listingId)) || l.name === item.name
-    );
-    if (match) {
-      navigateToListing(match);
-    }
-  }, [individualListings, navigateToListing]);
-
-  const handleQuoteRequest = useCallback((item: AnimatedTooltipItem) => {
-    // Build pre-filled message for requesting a quote
-    const subject = encodeURIComponent(`Quote Request - ${item.name}`);
-    const body = encodeURIComponent(
-      `Hi ${item.name},\n\nI found your profile on BalkanEstate and I'm interested in your ${item.designation} services.\n\nCould you please provide me with a quote?\n\nThank you!`
-    );
-    if (item.email) {
-      window.open(`mailto:${item.email}?subject=${subject}&body=${body}`, '_self');
-    } else if (item.phone) {
-      window.open(`tel:${item.phone}`, '_self');
-    }
-  }, []);
 
   // Back like the platform's own back: to wherever the visitor came from
   // (search, home, another business); the directory only when there is no
@@ -621,34 +584,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           </div>
         </motion.div>
 
-        {/* Individuals AnimatedTooltip showcase */}
-        <AnimatePresence>
-          {(activeTab === 'all' || activeTab === 'individuals') && tooltipItems.length > 0 && (
-            <motion.div
-              className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-blue-900/95 to-indigo-900 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl overflow-visible relative"
-              initial={{ opacity: 0, y: 20, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -10, height: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-            >
-              {/* Decorative accent */}
-              <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl" />
-              </div>
-
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-1">
-                  <SoftIcon name="users" className="w-6 h-6 flex-shrink-0" />
-                  <h3 className="text-white font-bold text-base sm:text-lg">{t('individuals.title')}</h3>
-                </div>
-                <p className="text-white/50 text-xs sm:text-sm mb-4 sm:mb-5 leading-relaxed">{t('individuals.subtitle')}</p>
-                <div className="flex justify-center overflow-visible">
-                  <AnimatedTooltip items={tooltipItems} onItemClick={handleTooltipClick} onQuoteRequest={handleQuoteRequest} />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Featured professionals: ID badges on lanyards */}
+        {(activeTab === 'all' || activeTab === 'individuals') && (
+          <FeaturedProfessionalsRail listings={individualListings} onListYourself={handleCreateClick} />
+        )}
 
         {/* Category filters */}
         <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>

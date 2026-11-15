@@ -22,7 +22,15 @@
   },
   "individuals": {
     "title": "Profesioniști recomandați",
-    "subtitle": "Conectați-vă cu persoane calificate care oferă expertiză în întregul sector imobiliar"
+    "subtitle": "Conectați-vă cu persoane calificate care oferă expertiză în întregul sector imobiliar",
+    "eyebrow": "Cunoaște profesioniștii",
+    "flip": "Fă clic sau apasă Enter pentru a întoarce ecusonul",
+    "back": "Fă clic din nou sau apasă Esc pentru a-l întoarce înapoi",
+    "show": "Arată",
+    "cta": "Oferă-ți serviciile",
+    "profile": "Vezi profilul",
+    "email": "Email",
+    "call": "Sună"
   },
   "filters": {
     "all": "Toate"

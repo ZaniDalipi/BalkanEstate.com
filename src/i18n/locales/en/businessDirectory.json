@@ -22,7 +22,15 @@
   },
   "individuals": {
     "title": "Featured Professionals",
-    "subtitle": "Connect with skilled individuals offering expertise across the real estate sector"
+    "subtitle": "Connect with skilled individuals offering expertise across the real estate sector",
+    "eyebrow": "Meet the professionals",
+    "flip": "Click or press Enter to flip the badge",
+    "back": "Click again or press Esc to turn it back",
+    "show": "Show",
+    "cta": "Offer your services",
+    "profile": "View profile",
+    "email": "Email",
+    "call": "Call"
   },
   "filters": {
     "all": "All"

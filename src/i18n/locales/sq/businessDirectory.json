@@ -22,7 +22,15 @@
   },
   "individuals": {
     "title": "Profesionistë të Veçantë",
-    "subtitle": "Lidhuni me individë të aftë që ofrojnë ekspertizë në të gjithë sektorin e pasurive të paluajtshme"
+    "subtitle": "Lidhuni me individë të aftë që ofrojnë ekspertizë në të gjithë sektorin e pasurive të paluajtshme",
+    "eyebrow": "Njihuni me profesionistët",
+    "flip": "Klikoni ose shtypni Enter për ta kthyer kartën",
+    "back": "Klikoni përsëri ose shtypni Esc për ta kthyer mbrapsht",
+    "show": "Shfaq",
+    "cta": "Ofroni shërbimet tuaja",
+    "profile": "Shiko profilin",
+    "email": "Email",
+    "call": "Telefono"
   },
   "filters": {
     "all": "Të gjitha"
