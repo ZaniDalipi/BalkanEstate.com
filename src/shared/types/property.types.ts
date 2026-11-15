@@ -378,6 +378,8 @@ export interface Filters {
   hasOpenHouse?: boolean | null;
   /** Optional: an open house this weekend (the visitor's own weekend). */
   openHouseWeekend?: boolean | null;
+  /** Optional: an open house from now until the end of this Sunday. */
+  openHouseThisWeek?: boolean | null;
   /** Optional: only homes going to auction; `auctionWithinDays` narrows it. */
   hasAuction?: boolean | null;
   auctionWithinDays?: number | null;
@@ -439,6 +441,7 @@ export const initialFilters: Filters = {
   hasPriceIncrease: null,
   hasOpenHouse: null,
   openHouseWeekend: null,
+  openHouseThisWeek: null,
   hasAuction: null,
   auctionWithinDays: null,
   minPricePerSqm: null,

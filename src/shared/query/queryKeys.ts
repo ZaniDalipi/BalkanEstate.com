@@ -454,5 +454,5 @@ export const openHouseKeys = {
 
 export const listingEventKeys = {
   all: ['listingEvents'] as const,
-  feed: (country: string, limit: number) => [...listingEventKeys.all, 'feed', country, limit] as const,
+  feed: (country: string, limit: number, weekEnd: string) => [...listingEventKeys.all, 'feed', country, limit, weekEnd] as const,
 };

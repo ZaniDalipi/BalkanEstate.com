@@ -1242,8 +1242,6 @@
     "depositOptional": "Depozita dhe kushtet (opsionale)",
     "directions": "Udhëzime",
     "from": "nga {{price}}",
-    "homeSubtitle": "Ejani këtë fundjavë, ose shënoni një datë në kalendar.",
-    "homeTitle": "Ditë të hapura dhe ankande së shpejti",
     "inPerson": "Fizikisht",
     "online": "Online",
     "ribbonAuction": "Ankand · {{when}}",
@@ -1276,7 +1274,10 @@
       "body": "Zgjidhni një datë kur blerësit mund të vijnë, ose datën kur shtëpia juaj del në ankand. Shfaqet te shpallja, në kërkim dhe në hartë, dhe njoftohen ata që e kanë ruajtur shtëpinë. Të dyja janë opsionale.",
       "cta": "Shtojeni te një shpallje",
       "later": "Jo tani",
-      "daysLeft": "Ditë të mbetura: {{count}}"
-    }
+      "daysLeft": "Ditë të mbetura: {{count}}",
+      "never": "Mos e shfaq më"
+    },
+    "homeWeekTitle": "Ditë të hapura këtë javë",
+    "homeWeekSubtitle": "{{range}} · ejani, pa takim paraprak."
   }
 }

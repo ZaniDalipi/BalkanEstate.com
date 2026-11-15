@@ -24,7 +24,8 @@ interface Chip {
  */
 const EventFilterChips: React.FC<EventFilterChipsProps> = ({ filters, onFilterChange }) => {
   const { t } = useTranslation('search');
-  const setOpenHouse = (mode: 'weekend' | 'any' | null) => {
+  const setOpenHouse = (mode: 'week' | 'weekend' | 'any' | null) => {
+    onFilterChange('openHouseThisWeek', mode === 'week' ? true : null);
     onFilterChange('openHouseWeekend', mode === 'weekend' ? true : null);
     onFilterChange('hasOpenHouse', mode === 'any' ? true : null);
   };
@@ -33,11 +34,13 @@ const EventFilterChips: React.FC<EventFilterChipsProps> = ({ filters, onFilterCh
     onFilterChange('hasAuction', mode === 'any' ? true : null);
   };
   const weekend = filters.openHouseWeekend === true;
-  const anyOh = !weekend && filters.hasOpenHouse === true;
+  const ohWeek = !weekend && filters.openHouseThisWeek === true;
+  const anyOh = !weekend && !ohWeek && filters.hasOpenHouse === true;
   const week = filters.auctionWithinDays === 7;
   const anyAuction = !week && filters.hasAuction === true;
 
   const chips: Chip[] = [
+    { id: 'oh-week', kind: 'openHouse', label: t('filters.openHouseWeek', { defaultValue: 'Open house this week' }), active: ohWeek, toggle: () => setOpenHouse(ohWeek ? null : 'week') },
     { id: 'oh-weekend', kind: 'openHouse', label: t('filters.openHouseWeekend', { defaultValue: 'Open house this weekend' }), active: weekend, toggle: () => setOpenHouse(weekend ? null : 'weekend') },
     { id: 'oh-any', kind: 'openHouse', label: t('filters.openHouseAny', { defaultValue: 'Any open house' }), active: anyOh, toggle: () => setOpenHouse(anyOh ? null : 'any') },
     { id: 'auction-any', kind: 'auction', label: t('filters.auctionAny', { defaultValue: 'Auctions' }), active: anyAuction, toggle: () => setAuction(anyAuction ? null : 'any') },
@@ -45,14 +48,14 @@ const EventFilterChips: React.FC<EventFilterChipsProps> = ({ filters, onFilterCh
   ];
 
   return (
-    <div role="group" aria-label={t('filters.eventsGroup', { defaultValue: 'Open houses and auctions' })} className="grid grid-cols-2 gap-2">
+    <div role="group" aria-label={t('filters.eventsGroup', { defaultValue: 'Open houses and auctions' })} className="flex flex-wrap gap-2">
       {chips.map((c) => (
         <button
           key={c.id}
           type="button"
           aria-pressed={c.active}
           onClick={c.toggle}
-          className={`flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
+          className={`flex min-h-[44px] flex-1 basis-[45%] items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-medium transition-colors sm:basis-[30%] ${
             c.active
               ? c.kind === 'openHouse' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-amber-300 bg-amber-50 text-amber-800'
               : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'

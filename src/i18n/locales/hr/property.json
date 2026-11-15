@@ -1243,8 +1243,6 @@
     "depositOptional": "Jamčevina i uvjeti (neobavezno)",
     "directions": "Upute za put",
     "from": "od {{price}}",
-    "homeSubtitle": "Svratite ovaj vikend ili zabilježite datum u kalendar.",
-    "homeTitle": "Uskoro dani otvorenih vrata i dražbe",
     "inPerson": "Uživo",
     "online": "Online",
     "ribbonAuction": "Dražba · {{when}}",
@@ -1277,7 +1275,10 @@
       "body": "Odaberite datum kada kupci mogu svratiti ili datum dražbe vaše nekretnine. Prikazuje se u oglasu, u pretrazi i na karti, a obavještavaju se i oni koji su spremili vašu nekretninu. Oboje je neobavezno.",
       "cta": "Dodajte na oglas",
       "later": "Ne sada",
-      "daysLeft": "Preostalo dana: {{count}}"
-    }
+      "daysLeft": "Preostalo dana: {{count}}",
+      "never": "Ne prikazuj ponovno"
+    },
+    "homeWeekTitle": "Dani otvorenih vrata ovaj tjedan",
+    "homeWeekSubtitle": "{{range}} · svratite, bez dogovaranja termina."
   }
 }

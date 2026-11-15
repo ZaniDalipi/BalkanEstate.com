@@ -85,7 +85,8 @@
     "openHouseAny": "Çdo ditë e hapur",
     "auctionAny": "Ankande",
     "auctionWeek": "Ankand këtë javë",
-    "eventsGroup": "Ditë të hapura dhe ankande"
+    "eventsGroup": "Ditë të hapura dhe ankande",
+    "openHouseWeek": "Ditë e hapur këtë javë"
   },
   "options": {
     "any": "Çdo",

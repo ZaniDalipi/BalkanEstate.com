@@ -1243,8 +1243,6 @@
     "depositOptional": "Garanție și condiții (opțional)",
     "directions": "Indicații",
     "from": "de la {{price}}",
-    "homeSubtitle": "Treceți în acest weekend sau notați o dată în calendar.",
-    "homeTitle": "Zile ale porților deschise și licitații în curând",
     "inPerson": "Cu prezență fizică",
     "online": "Online",
     "ribbonAuction": "Licitație · {{when}}",
@@ -1277,7 +1275,10 @@
       "body": "Alegeți o dată când cumpărătorii pot trece sau data licitației pentru locuința dvs. Apare în anunț, în căutare și pe hartă, iar cei care au salvat locuința sunt anunțați. Ambele sunt opționale.",
       "cta": "Adăugați la un anunț",
       "later": "Nu acum",
-      "daysLeft": "Zile rămase: {{count}}"
-    }
+      "daysLeft": "Zile rămase: {{count}}",
+      "never": "Nu mai afișa"
+    },
+    "homeWeekTitle": "Zile ale porților deschise săptămâna aceasta",
+    "homeWeekSubtitle": "{{range}} · treceți, fără programare."
   }
 }

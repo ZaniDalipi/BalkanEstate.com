@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { weekendRange } from './weekendRange';
+import { thisWeekRange } from './thisWeekRange';
+import { openHousesThisWeek } from './weekOpenHouses';
+import type { EventSource } from '../types';
 import { eventSearchParams } from './eventSearchParams';
 import { listingEvents, matchesEventFilters, nextEventTime, nextListingEvent, auctionIsLive } from './listingEvents';
 import { countdownParts, directionsUrl, safeHttpUrl } from './eventFormat';
@@ -21,6 +24,22 @@ describe('weekendRange', () => {
   });
 });
 
+describe('thisWeekRange', () => {
+  it('runs from now to the end of Sunday', () => {
+    expect(thisWeekRange(wed)).toEqual({ from: wed, to: new Date(2026, 10, 23) });
+    const sunday = new Date(2026, 10, 22, 15);
+    expect(thisWeekRange(sunday).to).toEqual(new Date(2026, 10, 23));
+    const monday = new Date(2026, 10, 23, 9);
+    expect(thisWeekRange(monday).to).toEqual(new Date(2026, 10, 30));
+  });
+
+  it("keeps only this week's open houses, soonest first", () => {
+    const oh = (d: number, h: number) => ({ nextOpenHouse: { startsAt: iso(d, h), endsAt: iso(d, h + 2) } });
+    const homes: Array<{ id: string } & EventSource> = [{ id: 'sat', ...oh(21, 11) }, { id: 'next', ...oh(24, 11) }, { id: 'thu', ...oh(19, 17) }, { id: 'none' }];
+    expect(openHousesThisWeek(homes, wed).map((h) => h.id)).toEqual(['thu', 'sat']);
+  });
+});
+
 describe('eventSearchParams', () => {
   it('sends nothing by default', () => expect(eventSearchParams({}, wed)).toEqual([]));
   it('turns "this weekend" into a window and "this week" into days', () => {
@@ -30,6 +49,10 @@ describe('eventSearchParams', () => {
       ['auctionWithinDays', '7'],
     ]);
     expect(eventSearchParams({ hasOpenHouse: true, hasAuction: true }, wed)).toEqual([['hasOpenHouse', 'true'], ['hasAuction', 'true']]);
+    expect(eventSearchParams({ openHouseThisWeek: true }, wed)).toEqual([
+      ['openHouseFrom', wed.toISOString()],
+      ['openHouseTo', new Date(2026, 10, 23).toISOString()],
+    ]);
   });
 });
 
@@ -55,6 +78,8 @@ describe('listing events', () => {
     expect(matchesEventFilters(p, { openHouseWeekend: true }, wed)).toBe(true);
     expect(matchesEventFilters({ nextOpenHouse: { startsAt: iso(19, 11), endsAt: iso(19, 13) } }, { openHouseWeekend: true }, wed)).toBe(false);
     expect(matchesEventFilters({}, { hasOpenHouse: true }, wed)).toBe(false);
+    expect(matchesEventFilters({ nextOpenHouse: { startsAt: iso(19, 11), endsAt: iso(19, 13) } }, { openHouseThisWeek: true }, wed)).toBe(true);
+    expect(matchesEventFilters({ nextOpenHouse: { startsAt: iso(24, 11), endsAt: iso(24, 13) } }, { openHouseThisWeek: true }, wed)).toBe(false);
     expect(matchesEventFilters(p, { auctionWithinDays: 7 }, wed)).toBe(true);
     expect(matchesEventFilters({ auction: { ...auction, startsAt: iso(30, 18) } }, { auctionWithinDays: 7 }, wed)).toBe(false);
     expect(matchesEventFilters({ nextOpenHouse: oh }, { hasAuction: true }, wed)).toBe(false);

@@ -1,6 +1,5 @@
 import type { EventSource, ListingEvent } from '../types';
-import { weekendRange } from './weekendRange';
-import type { EventFilterValues } from './eventSearchParams';
+import { openHouseWindow, type EventFilterValues } from './eventSearchParams';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const time = (iso: string | undefined): number => (iso ? Date.parse(iso) : NaN);
@@ -32,11 +31,11 @@ export function nextListingEvent(p: EventSource, now: Date): ListingEvent | null
 
 /** Client-side check of the optional event filters (search runs in the browser). */
 export function matchesEventFilters(p: EventSource, f: EventFilterValues, now: Date): boolean {
-  if (f.openHouseWeekend === true) {
+  const window = openHouseWindow(f, now);
+  if (window) {
     const o = p.nextOpenHouse;
     if (!o || !openHouseIsLive(o, now)) return false;
-    const { from, to } = weekendRange(now);
-    if (!(time(o.startsAt) < to.getTime() && time(o.endsAt) > from.getTime())) return false;
+    if (!(time(o.startsAt) < window.to.getTime() && time(o.endsAt) > window.from.getTime())) return false;
   } else if (f.hasOpenHouse === true && !openHouseIsLive(p.nextOpenHouse, now)) {
     return false;
   }

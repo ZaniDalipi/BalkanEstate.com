@@ -85,7 +85,8 @@
     "openHouseAny": "Bilo koji dan otvorenih vrata",
     "auctionAny": "Aukcije",
     "auctionWeek": "Aukcija ove sedmice",
-    "eventsGroup": "Dani otvorenih vrata i aukcije"
+    "eventsGroup": "Dani otvorenih vrata i aukcije",
+    "openHouseWeek": "Dan otvorenih vrata ove sedmice"
   },
   "options": {
     "any": "Bilo Koji",

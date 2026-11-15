@@ -1242,8 +1242,6 @@
     "depositOptional": "Deposit & terms (optional)",
     "directions": "Directions",
     "from": "from {{price}}",
-    "homeSubtitle": "Drop by this weekend, or put a date in your calendar.",
-    "homeTitle": "Open houses & auctions coming up",
     "inPerson": "In person",
     "online": "Online",
     "ribbonAuction": "Auction · {{when}}",
@@ -1276,7 +1274,10 @@
       "body": "Pick a date when buyers can drop by, or the date your home goes to auction. It shows on your listing, in search and on the map, and people who saved your home are told. Both are optional.",
       "cta": "Add one to a listing",
       "later": "Not now",
-      "daysLeft": "Days left: {{count}}"
-    }
+      "daysLeft": "Days left: {{count}}",
+      "never": "Don't show this again"
+    },
+    "homeWeekTitle": "Open houses this week",
+    "homeWeekSubtitle": "{{range}} · drop by, no appointment needed."
   }
 }

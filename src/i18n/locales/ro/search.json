@@ -85,7 +85,8 @@
     "openHouseAny": "Orice zi a porților deschise",
     "auctionAny": "Licitații",
     "auctionWeek": "Licitație săptămâna aceasta",
-    "eventsGroup": "Zile ale porților deschise și licitații"
+    "eventsGroup": "Zile ale porților deschise și licitații",
+    "openHouseWeek": "Zi a porților deschise săptămâna aceasta"
   },
   "options": {
     "any": "Oricare",

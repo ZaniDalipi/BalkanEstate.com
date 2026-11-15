@@ -1862,9 +1862,10 @@ GET /api/properties
 - **One event model on screen.** `features/listing-events` turns a listing into
   `ListingEvent`s and shows them everywhere: `EventRibbon` (result cards, map
   popup), `markerEventTag` (Google and Leaflet pins: "Open Sat", "Auction Fri"),
-  `EventFilterChips`, `ListingEventBanner` (listing page: countdown, calendar
-  file, directions or the auction link), `HomeEventsSection` (home page, hidden
-  when empty).
+  `EventFilterChips` (open house this week / this weekend / any, auctions / this
+  week), `ListingEventBanner` (listing page: countdown, calendar file,
+  directions or the auction link), `HomeEventsSection` (landing page: open houses
+  from now to the end of this Sunday, soonest first; hidden when there are none).
 - **Dates.** Stored as UTC instants. Screens use the viewer's clock; emails and
   push use the listing's zone (`openHouseTime.ts`).
 - **People who saved the home** (`Favorite`, alerts on, never the owner) are told
@@ -1875,11 +1876,14 @@ GET /api/properties
   claimed with a flag before it is sent, so two runs never send it twice.
 - **Privacy.** Visitors never see who else is coming; a guest cancels only their
   own sign-up (by its id); only http(s) auction links are rendered.
-- **Telling sellers.** `listing-events/announcement/EventsAnnouncementCard` shows
-  on the home screen to signed-in users with listings
-  (`subscription.activeListingsCount` / `listingsCount`) for one week from the
-  first time each of them sees it, until they close it. The start date and the
-  "closed" choice are kept per browser (`announcementStore`, safe storage).
+- **Telling sellers.** `listing-events/announcement/EventsAnnouncementDialog`
+  (mounted once in `App.tsx`) opens when a signed-in user with listings
+  (`subscription.activeListingsCount` / `listingsCount`) opens the app, during
+  one week from the first time they see it. It waits for any other dialog to
+  close (`otherLayerOpen`). "Not now" / × / Esc close it for this visit;
+  "Add one to a listing" and "Don't show this again" turn it off. The start date
+  and the "off" choice are kept per browser (`announcementStore`, safe storage);
+  a broken stored date counts as "never seen".
 
 ## Schedule Viewing Modal
 

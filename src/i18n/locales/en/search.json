@@ -101,7 +101,8 @@
     "openHouseAny": "Any open house",
     "auctionAny": "Auctions",
     "auctionWeek": "Auction this week",
-    "eventsGroup": "Open houses and auctions"
+    "eventsGroup": "Open houses and auctions",
+    "openHouseWeek": "Open house this week"
   },
   "options": {
     "any": "Any",

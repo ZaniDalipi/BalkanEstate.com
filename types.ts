@@ -578,6 +578,7 @@ export interface Filters {
     hasPriceIncrease: boolean | null; // Filter for properties with price increase
     hasOpenHouse?: boolean | null; // Optional: only homes with an upcoming open house
     openHouseWeekend?: boolean | null; // Optional: an open house this weekend (visitor's weekend)
+    openHouseThisWeek?: boolean | null; // Optional: an open house from now to the end of Sunday
     hasAuction?: boolean | null; // Optional: only homes going to auction
     auctionWithinDays?: number | null; // Optional: auction within N days
     minPricePerSqm: number | null; // Filter by min price per square meter
@@ -638,6 +639,7 @@ export const initialFilters: Filters = {
     hasPriceIncrease: null,
     hasOpenHouse: null,
     openHouseWeekend: null,
+    openHouseThisWeek: null,
     hasAuction: null,
     auctionWithinDays: null,
     minPricePerSqm: null,

@@ -1244,8 +1244,6 @@
     "depositOptional": "Depozit i uslovi (neobavezno)",
     "directions": "Uputstvo za put",
     "from": "od {{price}}",
-    "homeSubtitle": "Svratite ovog vikenda ili zabilježite datum u kalendar.",
-    "homeTitle": "Uskoro dani otvorenih vrata i aukcije",
     "inPerson": "Uživo",
     "online": "Online",
     "ribbonAuction": "Aukcija · {{when}}",
@@ -1278,7 +1276,10 @@
       "body": "Izaberite datum kada kupci mogu svratiti ili datum aukcije vaše nekretnine. Prikazuje se u oglasu, u pretrazi i na mapi, a obavještavaju se i oni koji su sačuvali vašu nekretninu. Oboje je neobavezno.",
       "cta": "Dodajte na oglas",
       "later": "Ne sada",
-      "daysLeft": "Preostalo dana: {{count}}"
-    }
+      "daysLeft": "Preostalo dana: {{count}}",
+      "never": "Ne prikazuj ponovo"
+    },
+    "homeWeekTitle": "Dani otvorenih vrata ove sedmice",
+    "homeWeekSubtitle": "{{range}} · svratite, bez zakazivanja termina."
   }
 }

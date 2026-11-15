@@ -14,7 +14,7 @@ const h = vi.hoisted(() => ({ openHouses: [] as unknown[], feed: vi.fn() }));
 vi.mock('@/src/features/open-houses/api/openHouseApi', () => ({
   fetchPropertyOpenHouses: () => Promise.resolve(h.openHouses),
 }));
-vi.mock('../api/eventFeedApi', () => ({ fetchUpcomingEventListings: (...a: unknown[]) => h.feed(...a) }));
+vi.mock('../api/eventFeedApi', () => ({ fetchOpenHousesThisWeek: (...a: unknown[]) => h.feed(...a) }));
 vi.mock('@/src/features/property-details/components/PropertyCard', () => ({
   default: ({ property }: { property: { title: string } }) => <div>{property.title}</div>,
 }));
@@ -74,6 +74,11 @@ describe('EventFilterChips', () => {
     fireEvent.click(anyOh);
     expect(state()).toMatchObject({ openHouseWeekend: null, hasOpenHouse: null });
 
+    const week = screen.getByRole('button', { name: 'Open house this week' });
+    fireEvent.click(week);
+    expect(state()).toMatchObject({ openHouseThisWeek: true, openHouseWeekend: null, hasOpenHouse: null });
+    expect(week).toHaveAttribute('aria-pressed', 'true');
+
     fireEvent.click(screen.getByRole('button', { name: /Auction this week/ }));
     expect(state()).toMatchObject({ auctionWithinDays: 7, hasAuction: null });
   });
@@ -119,12 +124,22 @@ describe('HomeEventsSection', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('lists upcoming homes and opens the sorted search', async () => {
-    h.feed.mockResolvedValue([{ id: 'a', title: 'Sea view flat' }]);
+  it("lists this week's open houses, soonest first, and opens the search", async () => {
+    // Pinned to a Wednesday so "this week" is predictable (Wed → Sun night).
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 18, 10, 0));
+    const oh = (d: number, h: number) => ({ startsAt: new Date(2026, 10, d, h).toISOString(), endsAt: new Date(2026, 10, d, h + 2).toISOString() });
+    h.feed.mockResolvedValue([
+      { id: 'sat', title: 'Saturday flat', nextOpenHouse: oh(21, 11) },
+      { id: 'next', title: 'Next week flat', nextOpenHouse: oh(24, 11) },
+      { id: 'thu', title: 'Thursday house', nextOpenHouse: oh(19, 17) },
+    ]);
     const onSeeAll = vi.fn();
     wrap(<HomeEventsSection country="montenegro" onSeeAll={onSeeAll} />);
-    expect(await screen.findByText('Sea view flat')).toBeInTheDocument();
-    expect(h.feed).toHaveBeenCalledWith(8, 'montenegro');
+    expect(await screen.findByRole('heading', { name: 'Open houses this week' })).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Thursday house', 'Saturday flat']);
+    expect(screen.getByText(/Wed, Nov 18 – Sun, Nov 22/)).toBeInTheDocument();
+    expect(h.feed).toHaveBeenCalledWith(8, 'montenegro', expect.any(Date));
     fireEvent.click(screen.getByRole('button', { name: 'See all' }));
     expect(onSeeAll).toHaveBeenCalled();
   });

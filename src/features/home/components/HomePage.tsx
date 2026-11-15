@@ -25,7 +25,6 @@ const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m
 const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
 const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
 const HomeEventsSection = lazy(() => import('@/src/features/listing-events/components/HomeEventsSection'));
-const EventsAnnouncementCard = lazy(() => import('@/src/features/listing-events/announcement/EventsAnnouncementCard'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
@@ -208,9 +207,9 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
     }
   }, []);
 
-  /** Search, soonest open house / auction first. */
+  /** Search: this week's open houses, soonest first. */
   const handleSeeUpcomingEvents = useCallback(() => {
-    const filters = { ...state.searchPageState.filters, sortBy: 'events_soonest' };
+    const filters = { ...state.searchPageState.filters, openHouseThisWeek: true, sortBy: 'events_soonest' };
     dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { filters, activeFilters: filters } });
     navigate(paths.search(), { direction: 'forward' });
   }, [state.searchPageState.filters, dispatch]);
@@ -260,13 +259,6 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
       <AppShowcaseSection onNavigate={handleNavigate} />
 
-      {/* Sellers, for one week: open houses and auctions are new */}
-      {isAuthenticated && currentUser && (
-        <Suspense fallback={null}>
-          <EventsAnnouncementCard user={currentUser} />
-        </Suspense>
-      )}
-
       {isAuthenticated && currentUser && (
         <QuickAccessSection
           user={currentUser}
@@ -284,7 +276,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         <RecentlyViewedSection onPropertyClick={handlePropertyClick} />
       </Suspense>
 
-      {/* Open houses & auctions coming up — hidden when there are none */}
+      {/* Open houses this week — hidden when there are none */}
       <Suspense fallback={null}>
         <HomeEventsSection country={state.searchPageState.filters.country} onSeeAll={handleSeeUpcomingEvents} />
       </Suspense>
