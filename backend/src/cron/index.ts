@@ -19,6 +19,8 @@ import { runMediaRetention } from '../services/media/mediaRetentionService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processOpenHouseReminders } from '../jobs/openHouseReminderJob';
+import { processListingEventReminders } from '../jobs/listingEventReminderJob';
+import { refreshPassedEventDates } from '../services/listingEvents/listingEventDates';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
 import { runScoreFullRefresh } from '../jobs/scoreBackfillJob';
 import { runMonthlyCityMarketDigest } from '../jobs/cityMarketDigestJob';
@@ -494,6 +496,10 @@ export const startCronJobs = () => {
       try {
         const count = await processOpenHouseReminders();
         if (count > 0) cronLogger.info(`🏡 Sent ${count} open house reminder(s)`);
+        const saved = await processListingEventReminders();
+        if (saved > 0) cronLogger.info(`🔨 Sent ${saved} saved-home open house / auction reminder(s)`);
+        // Move listings past an event on to their next one (or clear it).
+        await refreshPassedEventDates();
       } catch (error) {
         cronLogger.error('Open house reminder cron error:', error);
       }

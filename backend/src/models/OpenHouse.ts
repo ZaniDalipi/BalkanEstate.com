@@ -25,6 +25,8 @@ export interface IOpenHouse extends Document {
   note?: string;
   capacity?: number;
   status: 'scheduled' | 'cancelled';
+  /** When people who saved the home were reminded (once, the day before). */
+  favoritesRemindedAt?: Date;
   rsvps: mongoose.Types.DocumentArray<IOpenHouseRsvp & mongoose.Types.Subdocument>;
   createdAt: Date;
   updatedAt: Date;
@@ -52,6 +54,7 @@ const OpenHouseSchema = new Schema<IOpenHouse>(
     note: { type: String, trim: true, maxlength: 500 },
     capacity: { type: Number, min: 1, max: 500 },
     status: { type: String, enum: ['scheduled', 'cancelled'], default: 'scheduled' },
+    favoritesRemindedAt: { type: Date },
     rsvps: { type: [RsvpSchema], default: [] },
   },
   { timestamps: true },

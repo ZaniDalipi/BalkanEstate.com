@@ -149,7 +149,7 @@ describe('Open house API', () => {
 
 describe('Open house service helpers for search', () => {
   it('lists only properties with an upcoming, scheduled open house', async () => {
-    const { propertyIdsWithUpcomingOpenHouse, nextOpenHouseByProperty, insertDrafts } =
+    const { propertyIdsWithOpenHouseBetween, nextOpenHouseByProperty, insertDrafts } =
       require('../../services/openHouse/openHouseService');
     const OpenHouse = mongoose.model('OpenHouse');
     const { owner, property } = await setup();
@@ -165,8 +165,11 @@ describe('Open house service helpers for search', () => {
     await OpenHouse.create({ propertyId: other._id, hostId: owner._id, ...windowIn(2), status: 'cancelled' });
     await OpenHouse.create({ propertyId: past._id, hostId: owner._id, startsAt: new Date(Date.now() - 3 * 3600_000), endsAt: new Date(Date.now() - 3600_000) });
 
-    const ids = (await propertyIdsWithUpcomingOpenHouse()).map(String);
+    const ids = (await propertyIdsWithOpenHouseBetween(new Date(), new Date(Date.now() + 7 * 86_400_000))).map(String);
     expect(ids).toEqual([String(property._id)]);
+    // The listing's own date for search and sorting follows its soonest open house.
+    const fresh = await (await import('../../models/Property')).default.findById(property._id).lean();
+    expect(fresh?.nextOpenHouseAt?.toISOString()).toBe(soon.startsAt);
 
     const next = await nextOpenHouseByProperty([String(property._id), String(other._id)]);
     expect(next.get(String(property._id))).toEqual(soon);

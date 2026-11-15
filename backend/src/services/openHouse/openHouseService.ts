@@ -4,6 +4,8 @@ import Property from '../../models/Property';
 import User from '../../models/User';
 import { createNotificationWithPush } from '../engagementService';
 import { apiLogger } from '../../utils/logger';
+import { refreshEventDates } from '../listingEvents/listingEventDates';
+import { alertSavers } from '../listingEvents/savedHomeEventAlerts';
 import {
   checkAgainstSchedule,
   OpenHouseDraft,
@@ -101,7 +103,13 @@ export async function insertDrafts(
   drafts: OpenHouseDraft[],
 ): Promise<IOpenHouse[]> {
   if (drafts.length === 0) return [];
-  return OpenHouse.insertMany(drafts.map((d) => ({ ...d, propertyId, hostId }))) as unknown as Promise<IOpenHouse[]>;
+  const created = (await OpenHouse.insertMany(drafts.map((d) => ({ ...d, propertyId, hostId })))) as unknown as IOpenHouse[];
+  await refreshEventDates(propertyId);
+  // One alert per batch, about the soonest new date, to people who saved the home.
+  const soonest = [...drafts].sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())[0];
+  alertSavers(propertyId, { kind: 'openHouse', startsAt: soonest.startsAt, endsAt: soonest.endsAt })
+    .catch((err) => apiLogger.error('Saved-home open house alerts failed:', err));
+  return created;
 }
 
 async function ownedProperty(propertyId: string, userId: string) {
@@ -157,6 +165,7 @@ export async function cancelOpenHouse(openHouseId: string, userId: string): Prom
 
   oh.status = 'cancelled';
   await oh.save();
+  await refreshEventDates(oh.propertyId);
 
   const ctx = mailContext(owned.value, oh);
   for (const r of oh.rsvps) {
@@ -291,9 +300,9 @@ export async function listForHost(hostId: string, propertyId?: string, now: Date
   }));
 }
 
-/** Property ids with an upcoming open house — for the optional search filter. */
-export async function propertyIdsWithUpcomingOpenHouse(now: Date = new Date()): Promise<mongoose.Types.ObjectId[]> {
-  return OpenHouse.distinct('propertyId', upcomingFilter(now));
+/** Property ids with a scheduled open house overlapping [from, to) — e.g. "this weekend". */
+export async function propertyIdsWithOpenHouseBetween(from: Date, to: Date): Promise<mongoose.Types.ObjectId[]> {
+  return OpenHouse.distinct('propertyId', { status: 'scheduled', startsAt: { $lt: to }, endsAt: { $gt: from } });
 }
 
 /** Next upcoming open house per property, for badges on result cards. */

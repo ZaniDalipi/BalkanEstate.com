@@ -1,8 +1,12 @@
 import { Request, Response } from 'express';
+import { parseEventSearch } from '../services/listingEvents/eventSearchFilters';
+import { parseAuctionField } from '../services/auction/auctionRules';
+import { refreshEventDates } from '../services/listingEvents/listingEventDates';
+import { alertSavers } from '../services/listingEvents/savedHomeEventAlerts';
 import {
   insertDrafts,
   nextOpenHouseByProperty,
-  propertyIdsWithUpcomingOpenHouse,
+  propertyIdsWithOpenHouseBetween,
   validateDrafts,
 } from '../services/openHouse/openHouseService';
 import mongoose from 'mongoose';
@@ -406,10 +410,19 @@ export const getProperties = async (
       'images.publicId': 0,
     };
 
-    // Optional "Open house" filter: only listings with an upcoming one.
-    if (req.query.hasOpenHouse === 'true') {
-      const withOpenHouse = await propertyIdsWithUpcomingOpenHouse();
-      filter.$and = [...(filter.$and || []), { _id: { $in: withOpenHouse } }];
+    // Optional open house / auction filters (all off unless asked for).
+    const eventSearch = parseEventSearch(req.query as Record<string, unknown>, new Date());
+    const eventConditions = [...eventSearch.conditions];
+    if (eventSearch.openHouseWindow) {
+      const ids = await propertyIdsWithOpenHouseBetween(eventSearch.openHouseWindow.from, eventSearch.openHouseWindow.to);
+      eventConditions.push({ _id: { $in: ids } });
+    }
+    if (eventConditions.length > 0) filter.$and = [...(filter.$and || []), ...eventConditions];
+    if (eventSearch.soonestFirst) {
+      // Soonest event first, ahead of the default order.
+      for (const key of Object.keys(sort)) delete sort[key];
+      sort.nextEventAt = 1;
+      sort._id = 1;
     }
 
     // Execute query with .lean() for 5-10x faster reads (plain JS objects, no Mongoose overhead)
@@ -437,7 +450,9 @@ export const getProperties = async (
 
     // Use centralized highlighting utility for sorting
     const currentHour = new Date().getHours();
-    properties = sortPropertiesWithHighlighting(properties, currentHour);
+    // "Soonest open house / auction" is a date order the visitor asked for:
+    // keep it as the database returned it.
+    if (!eventSearch.soonestFirst) properties = sortPropertiesWithHighlighting(properties, currentHour);
 
     // Log highlighting stats for monitoring
     const stats = getHighlightingStats(properties);
@@ -664,6 +679,12 @@ export const createProperty = async (
         message: 'Validation failed',
         errors: [{ field: 'openHouses', message: openHouseDrafts.error }],
       });
+      return;
+    }
+    // Optional auction details, checked before anything is saved.
+    const auctionInput = parseAuctionField(req.body.auction, new Date());
+    if (auctionInput.ok === false) {
+      res.status(400).json({ message: 'Validation failed', errors: [{ field: 'auction', message: auctionInput.error }] });
       return;
     }
 
@@ -1034,7 +1055,10 @@ export const createProperty = async (
 
     let property;
     try {
-      property = await Property.create(propertyData);
+      property = await Property.create({
+        ...propertyData,
+        ...(auctionInput.value ? { auction: auctionInput.value, nextEventAt: auctionInput.value.startsAt } : {}),
+      });
     } catch (createError) {
       // Property creation failed — roll back the atomic counter increment
       await User.findByIdAndUpdate(user._id, {
@@ -1260,6 +1284,22 @@ export const updateProperty = async (
       return;
     }
 
+    // Optional auction: undefined = untouched, null = removed, object = set.
+    const previousAuctionStart = property.auction?.startsAt;
+    const auctionInput = parseAuctionField(req.body.auction, new Date(), previousAuctionStart);
+    if (auctionInput.ok === false) {
+      res.status(400).json({ message: 'Validation failed', errors: [{ field: 'auction', message: auctionInput.error }] });
+      return;
+    }
+    if (auctionInput.value === null) {
+      property.auction = undefined;
+    } else if (auctionInput.value) {
+      const sameDate = previousAuctionStart?.getTime() === auctionInput.value.startsAt.getTime();
+      // A new date means the day-before reminder is due again.
+      property.auction = { ...auctionInput.value, reminderSentAt: sameDate ? property.auction?.reminderSentAt : undefined };
+    }
+    const auctionIsNew = !!auctionInput.value && previousAuctionStart?.getTime() !== auctionInput.value.startsAt.getTime();
+
     // IMPORTANT: Protect immutable fields from being changed after creation
     // These fields are set once at creation and should NEVER change:
     // - createdAsRole: Determines if this was posted as private_seller or agent
@@ -1340,6 +1380,14 @@ export const updateProperty = async (
     await fileDraftListingMedia(property);
 
     await property.save();
+
+    if (auctionInput.value !== undefined) {
+      await refreshEventDates(property._id);
+      if (auctionIsNew && auctionInput.value) {
+        alertSavers(property._id, { kind: 'auction', startsAt: auctionInput.value.startsAt, startingPrice: auctionInput.value.startingPrice })
+          .catch((err) => propertyLogger.error('Saved-home auction alerts failed:', err));
+      }
+    }
 
     // Record price change for alerts if price was updated
     if (updateData.price !== undefined && updateData.price !== previousPrice) {

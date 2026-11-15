@@ -1,11 +1,11 @@
 import { sendEmail } from '../emailService';
 
-const escapeHtml = (s: string | undefined | null): string =>
+export const escapeHtml = (s: string | undefined | null): string =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
 const frontendUrl = (): string => process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
-interface OpenHouseMail {
+export interface OpenHouseMail {
   to: string;
   name: string;
   propertyTitle: string;
@@ -14,7 +14,7 @@ interface OpenHouseMail {
   when: string;
 }
 
-const layout = (heading: string, body: string, propertyId: string): string => `
+export const layout = (heading: string, body: string, propertyId: string): string => `
 <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #111827;">
   <h2 style="margin: 0 0 16px 0;">${escapeHtml(heading)}</h2>
   ${body}
@@ -26,7 +26,7 @@ const layout = (heading: string, body: string, propertyId: string): string => `
   </p>
 </div>`;
 
-const details = (m: OpenHouseMail): string => `
+export const details = (m: OpenHouseMail): string => `
   <p style="margin: 0 0 8px 0;"><strong>${escapeHtml(m.propertyTitle)}</strong></p>
   <p style="margin: 0 0 8px 0; color: #4b5563;">${escapeHtml(m.propertyAddress)}</p>
   <p style="margin: 0 0 8px 0;">🗓 ${escapeHtml(m.when)}</p>`;

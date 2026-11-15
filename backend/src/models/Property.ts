@@ -41,6 +41,17 @@ export interface IFloorplanLevel {
 /** Most floor plans one listing can have. */
 export const MAX_FLOORPLANS = 10;
 
+export interface IPropertyAuction {
+  startsAt: Date;
+  endsAt?: Date;
+  mode: 'online' | 'in_person';
+  startingPrice?: number;
+  location?: string;
+  url?: string;
+  depositNote?: string;
+  reminderSentAt?: Date;
+}
+
 export interface IPropertyImage {
   url: string;
   publicId?: string; // storage key for image management and deletion (optional for backwards compatibility)
@@ -229,6 +240,12 @@ export interface IProperty extends Document {
   parkingIncluded?: boolean;
   // Visit/viewing availability
   visitAvailability?: IVisitAvailability;
+  /** Optional: the home is sold at an auction held elsewhere (bank, notary, auction house). */
+  auction?: IPropertyAuction;
+  /** Denormalized: start of the soonest upcoming open house (kept by listingEventDates). */
+  nextOpenHouseAt?: Date;
+  /** Denormalized: the soonest upcoming open house or auction start. */
+  nextEventAt?: Date;
   // External-source ingestion fields (set when listing was imported from a third-party site)
   source?: string;
   sourceListingId?: string;
@@ -790,6 +807,25 @@ const PropertySchema: Schema = new Schema(
       slotDurationMinutes: { type: Number, default: 30 },
       notes: { type: String },
     },
+    // Optional auction details — information only, the bidding happens elsewhere
+    auction: {
+      type: new Schema(
+        {
+          startsAt: { type: Date, required: true },
+          endsAt: { type: Date },
+          mode: { type: String, enum: ['online', 'in_person'], required: true },
+          startingPrice: { type: Number, min: 1 },
+          location: { type: String, trim: true, maxlength: 300 },
+          url: { type: String, trim: true, maxlength: 500 },
+          depositNote: { type: String, trim: true, maxlength: 500 },
+          reminderSentAt: { type: Date },
+        },
+        { _id: false },
+      ),
+      default: undefined,
+    },
+    nextOpenHouseAt: { type: Date },
+    nextEventAt: { type: Date },
     // External ingestion fields
     source: {
       type: String,
@@ -1000,6 +1036,10 @@ PropertySchema.index({ country: 1, price: 1, status: 1 });
 PropertySchema.index({ listingType: 1, price: 1, status: 1 });
 // Seller's own listings sorted by creation date
 PropertySchema.index({ sellerId: 1, status: 1, createdAt: -1 });
+// Open houses & auctions: optional filters and the "soonest first" sort
+PropertySchema.index({ nextOpenHouseAt: 1 }, { sparse: true });
+PropertySchema.index({ 'auction.startsAt': 1 }, { sparse: true });
+PropertySchema.index({ nextEventAt: 1 }, { sparse: true });
 // Default sort order (lastRenewed) with status filter — covers the most common query
 PropertySchema.index({ status: 1, lastRenewed: -1 });
 
