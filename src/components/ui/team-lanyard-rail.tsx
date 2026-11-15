@@ -4,11 +4,14 @@
  * Team lanyard rail: badges on lanyards hanging from a rail; hover/brush,
  * pull down, click to flip. Vendored from 21st.dev (@dhxwhy/team-lanyard-rail)
  * and kept as one file on purpose so it can be compared with / updated from
- * upstream. Local changes: the carousel dots are 44px tap targets with the
- * small dot drawn inside (the upstream dot was the whole 6px button); the
- * back face prints the role engraved in its band, and lays name / bio / two
- * tags out in a box that stops above the links and QR code, so long text can
- * never run into them. Colours come from the shadcn tokens in src/index.css (@theme):
+ * upstream. Local changes:
+ * - the carousel dots are 44px tap targets with the small dot drawn inside
+ *   (the upstream dot was the whole 6px button);
+ * - the role is engraved in the band on both faces (the front drops its
+ *   plain role line under the name);
+ * - the back lays name / bio / two tags out in a box that stops above the
+ *   links and QR code, so long text can never run into them.
+ * Colours come from the shadcn tokens in src/index.css (@theme):
  * background, foreground, card, muted, border, ring and chart-1…5.
  */
 
@@ -296,8 +299,9 @@ function Band({ tone, tall, label }: { tone: string; tall?: boolean; label?: str
       <span className="absolute inset-x-0 bottom-0 h-px bg-black/15" />
       {label && (
         // Engraved: light letters pressed into the band (dark edge above, light edge below).
+        // On the tall front band it sits between the clip slot and the portrait.
         <span
-          className="absolute inset-x-[0.8em] bottom-[0.42em] block truncate text-center text-[0.62em] font-extrabold uppercase tracking-[0.26em]"
+          className={`absolute block truncate text-center font-extrabold uppercase ${tall ? "inset-x-[1.6em] top-[2.35em] text-[0.5em] tracking-[0.24em]" : "inset-x-[0.8em] bottom-[0.42em] text-[0.62em] tracking-[0.26em]"}`}
           style={{ color: "color-mix(in oklab, white 88%, currentColor)", textShadow: "0 -0.08em 0 color-mix(in oklab, black 45%, transparent), 0 0.08em 0 color-mix(in oklab, white 35%, transparent)" }}
         >
           {label}
@@ -346,16 +350,15 @@ const BadgeFaces = React.memo(function BadgeFaces({ item, tone }: { item: Lanyar
   return (
     <>
       <span data-face="front" className="absolute inset-0 flex flex-col items-center overflow-hidden rounded-[0.85em] border border-border bg-card px-[0.8em] pb-[0.7em] text-card-foreground [backface-visibility:hidden]" style={{ transform: "translateZ(1px)" }}>
-        <Band tone={tone} tall />
+        <Band tone={tone} tall label={item.role} />
         <Hole />
-        <span className="relative mt-[2.05em] block size-[5.3em] shrink-0 rounded-full bg-card p-[0.2em]" style={{ boxShadow: "0 0.15em 0.5em color-mix(in oklab, var(--color-foreground) 22%, transparent)" }}>
+        <span className="relative mt-[2.3em] block size-[5.3em] shrink-0 rounded-full bg-card p-[0.2em]" style={{ boxShadow: "0 0.15em 0.5em color-mix(in oklab, var(--color-foreground) 22%, transparent)" }}>
           <span className="relative block size-full overflow-hidden rounded-full bg-muted">
             <Silhouette />
             {!failed && <img src={item.image} alt="" draggable={false} decoding="async" onError={() => setFailed(true)} className="pointer-events-none absolute inset-0 block size-full select-none object-cover" />}
           </span>
         </span>
         <span className="mt-[0.55em] block w-full truncate text-center text-[1.08em] font-semibold leading-tight tracking-tight">{item.name}</span>
-        <span className="mt-[0.15em] block w-full truncate text-center text-[0.8em] leading-snug text-muted-foreground">{item.role}</span>
         {item.team && <span className="mt-[0.5em] block w-full truncate text-center text-[0.6em] font-medium uppercase tracking-[0.2em] text-muted-foreground">{item.team}</span>}
         <span className="mt-auto block w-full border-t border-dashed border-border pt-[0.5em]">
           <svg aria-hidden="true" viewBox={`0 0 ${bars.width} 20`} preserveAspectRatio="none" className="block h-[1.6em] w-full text-foreground/80">
