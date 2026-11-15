@@ -8,6 +8,8 @@ import { AdSlot } from '@/src/features/promo';
 import BusinessDetailPage from './BusinessDetailPage';
 import BusinessDirectoryMap from './BusinessDirectoryMap';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
+import ListBusinessFab from './ListBusinessFab';
+import { useOffscreen } from '../hooks/useOffscreen';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, MicrophoneIcon, ArrowPathIcon, MapIcon } from '@/constants';
@@ -266,6 +268,10 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     }
     action();
   }, [state.currentUser, dispatch]);
+
+  // The floating phone button shows while the inline one is out of view.
+  const [listButton, setListButton] = useState<HTMLButtonElement | null>(null);
+  const listButtonOffscreen = useOffscreen(listButton);
 
   const handleCreateClick = useCallback(() => {
     requireAuth(() => navigate(paths.businessListingNew()));
@@ -596,6 +602,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
             {/* List Your Business - requires auth */}
             <motion.button
+              ref={setListButton}
               type="button"
               onClick={handleCreateClick}
               className="liquid-tint flex min-h-[40px] flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm"
@@ -845,6 +852,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       </div>
 
       <Footer />
+      <ListBusinessFab visible={listButtonOffscreen} onClick={handleCreateClick} />
     </div>
   );
 };
