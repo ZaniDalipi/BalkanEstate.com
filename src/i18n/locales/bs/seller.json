@@ -511,7 +511,15 @@
     "moveToPrivateHint": "Premjestite ovaj oglas na svoj privatni prodajni profil",
     "moveToAgencyConfirm": "Premjestiti ovaj oglas u vašu agenciju? Bit će prikazan s vašim agentskim podacima.",
     "moveToAgencyConfirmNamed": "Premjestiti ovaj oglas u \"{{agency}}\"? Bit će prikazan pod vašom agencijom s vašim agentskim podacima.",
-    "moveToPrivateConfirm": "Vratiti ovaj oglas na vaš privatni prodajni profil? Podaci o agenciji bit će uklonjeni."
+    "moveToPrivateConfirm": "Vratiti ovaj oglas na vaš privatni prodajni profil? Podaci o agenciji bit će uklonjeni.",
+    "actionsLabel": "Akcije oglasa",
+    "renewCountdown": "{{hours}}h {{minutes}}m",
+    "actionBlocked": {
+      "notActive": "Dostupno kada oglas postane aktivan.",
+      "noImages": "Prvo dodajte fotografije oglasu da biste napravili video.",
+      "addPhotos": "Dodaj fotografije",
+      "dismiss": "Zatvori"
+    }
   },
   "actions": {
     "subscribeToPro": "Pretplatite se na Pro",

@@ -5,7 +5,7 @@ import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties, useMyListingsInfinite } from '../../src/features/properties/hooks';
-import { PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon } from '../../constants';
+import { PencilIcon, TrashIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
@@ -16,13 +16,8 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useRouteView } from '@/src/app/router/useRouteView';
 import { ListingTypePicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
-
-// Video Icon component
-const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-    </svg>
-);
+import { ListingActionBar } from '@/src/features/seller/components/listingActions';
+import { buildListingActions, isListingActionable, type ListingActionId } from '@/src/features/seller/utils/listingActions';
 
 // Role badge component to show which role created the listing
 const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
@@ -97,11 +92,30 @@ const ListingCard: React.FC<{
         navigate(paths.editListing(property.id), { state: { property } });
     };
 
-    const isActionable = property.status === 'active' || property.status === 'pending';
-    const isPromoted = property.isPromoted && property.promotionEndDate && new Date(property.promotionEndDate) > new Date();
-
-    // Check if can renew (24hr cooldown)
-    const canRenew = renewalStatus?.canRenew ?? true;
+    const isActionable = isListingActionable(property.status);
+    const actions = buildListingActions({
+        status: property.status,
+        listingType: property.listingType,
+        createdAsRole: property.createdAsRole,
+        isPromoted: property.isPromoted,
+        promotionEndDate: property.promotionEndDate,
+        imageCount: property.images?.length ?? 0,
+        hasVideo: Boolean(property.videoUrl),
+        canReassignToAgency,
+        renewal: renewalStatus,
+    });
+    const actionHandlers: Record<ListingActionId, (id: string) => void> = {
+        promote: onPromote,
+        extendPromotion: onExtend,
+        video: onVideo,
+        renew: onRenew,
+        moveToAgency: onReassignRole,
+        moveToPrivate: onReassignRole,
+        markSold: onMarkAsSold,
+        markRented: onMarkAsSold,
+        markAvailable: onMarkAsAvailable,
+    };
+    const handleAction = (actionId: ListingActionId) => actionHandlers[actionId](property.id);
 
     // Check if property has valid map coordinates
     const hasValidCoordinates = property.lat != null && !isNaN(property.lat) && property.lng != null && !isNaN(property.lng);
@@ -125,7 +139,7 @@ const ListingCard: React.FC<{
                 )}
             </div>
         </button>
-        <div className="flex-grow flex flex-col">
+        <div className="flex-grow flex flex-col min-w-0">
             <div className="flex justify-between items-start">
                 <div onClick={handleCardClick} className="cursor-pointer">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -151,10 +165,10 @@ const ListingCard: React.FC<{
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
-                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="p-2 text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
+                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="flex h-11 w-11 items-center justify-center text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
                         <PencilIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="flex h-11 w-11 items-center justify-center text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
                         <TrashIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
@@ -184,77 +198,7 @@ const ListingCard: React.FC<{
                 )}
             </div>
 
-             <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
-                {isPromoted ? (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onExtend(property.id); }}
-                        disabled={!isActionable}
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <ClockIcon className="w-4 h-4" />
-                        {t('seller:myListings.extendPromotion', 'Extend Promotion')}
-                    </button>
-                ) : (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onPromote(property.id); }}
-                        disabled={!isActionable}
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg hover:from-violet-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <SparklesIcon className="w-4 h-4" />
-                        {t('seller:myListings.promote', 'Promote')}
-                    </button>
-                )}
-                <button
-                    onClick={(e) => { e.stopPropagation(); onVideo(property.id); }}
-                    disabled={!property.images || property.images.length === 0}
-                    title={property.images && property.images.length > 0 ? t('account:ui.myListings.createVideoReel', 'Create video reel') : t('account:ui.myListings.addImagesFirst', 'Add images first')}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <VideoIcon className="w-4 h-4" />
-                    {property.videoUrl ? t('seller:myListings.video', 'Video') : t('seller:myListings.createVideo', 'Create Video')}
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onRenew(property.id); }}
-                    disabled={!isActionable || !canRenew}
-                    title={!canRenew && renewalStatus ? `Can renew in ${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : t('account:ui.myListings.renewListingToAppearAt', 'Renew listing to appear at top')}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-700 bg-neutral-100 border border-neutral-200 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <ArrowPathIcon className="w-4 h-4" />
-                    {!canRenew && renewalStatus ? `${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : t('seller:myListings.renew', 'Renew')}
-                </button>
-                {property.createdAsRole !== ('external' as UserRole) && (property.createdAsRole === UserRole.AGENT || canReassignToAgency) && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onReassignRole(property.id); }}
-                        title={property.createdAsRole === UserRole.AGENT
-                            ? t('seller:myListings.moveToPrivateHint', 'Move this listing to your private seller profile')
-                            : t('seller:myListings.moveToAgencyHint', 'Move this listing to your agency')}
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
-                    >
-                        <BuildingOfficeIcon className="w-4 h-4" />
-                        {property.createdAsRole === UserRole.AGENT
-                            ? t('seller:myListings.moveToPrivate', 'Move to Private')
-                            : t('seller:myListings.moveToAgency', 'Move to Agency')}
-                    </button>
-                )}
-                {property.status === 'rented' ? (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onMarkAsAvailable(property.id); }}
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                    >
-                        <ArrowPathIcon className="w-4 h-4" />
-                        {t('rental:status.markAsAvailable')}
-                    </button>
-                ) : (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onMarkAsSold(property.id); }}
-                        disabled={!isActionable}
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <CheckCircleIcon className="w-4 h-4" />
-                        {property.listingType === 'rent' ? t('rental:status.markAsRented') : t('rental:status.markAsSold')}
-                    </button>
-                )}
-             </div>
+            <ListingActionBar actions={actions} onAction={handleAction} onEdit={() => navigate(paths.editListing(property.id), { state: { property } })} />
         </div>
     </div>
 );

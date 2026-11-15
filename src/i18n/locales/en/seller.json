@@ -515,7 +515,15 @@
     "moveToPrivateHint": "Move this listing to your private seller profile",
     "moveToAgencyConfirm": "Move this listing to your agency? It will be shown with your agent details.",
     "moveToAgencyConfirmNamed": "Move this listing to \"{{agency}}\"? It will be shown under your agency with your agent details.",
-    "moveToPrivateConfirm": "Move this listing back to your private seller profile? Agency details will be removed from it."
+    "moveToPrivateConfirm": "Move this listing back to your private seller profile? Agency details will be removed from it.",
+    "actionsLabel": "Listing actions",
+    "renewCountdown": "{{hours}}h {{minutes}}m",
+    "actionBlocked": {
+      "notActive": "Available once the listing is active.",
+      "noImages": "Add photos to the listing first to create a video.",
+      "addPhotos": "Add photos",
+      "dismiss": "Dismiss"
+    }
   },
   "form": {
     "basicInfo": "Basic Information",
