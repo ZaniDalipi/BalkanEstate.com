@@ -75,7 +75,8 @@
     "beFirst": "Be the First to List"
   },
   "results": {
-    "showing": "{{count}} businesses found"
+    "showing": "{{count}} businesses found",
+    "loading": "Loading businesses"
   },
   "empty": {
     "title": "No businesses found",

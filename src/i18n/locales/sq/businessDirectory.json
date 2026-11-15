@@ -75,7 +75,8 @@
     "beFirst": "Bëhuni i Pari që Liston"
   },
   "results": {
-    "showing": "{{count}} biznese u gjetën"
+    "showing": "{{count}} biznese u gjetën",
+    "loading": "Po ngarkohen bizneset"
   },
   "empty": {
     "title": "Nuk u gjetën biznese",

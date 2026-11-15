@@ -75,7 +75,8 @@
     "beFirst": "Fii primul care se înscrie"
   },
   "results": {
-    "showing": "{{count}} afaceri găsite"
+    "showing": "{{count}} afaceri găsite",
+    "loading": "Se încarcă afacerile"
   },
   "empty": {
     "title": "Nu au fost găsite afaceri",

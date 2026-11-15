@@ -75,7 +75,8 @@
     "beFirst": "Budite prvi na popisu"
   },
   "results": {
-    "showing": "Pronađeno {{count}} tvrtki"
+    "showing": "Pronađeno {{count}} tvrtki",
+    "loading": "Učitavanje tvrtki"
   },
   "empty": {
     "title": "Nisu pronađene tvrtke",

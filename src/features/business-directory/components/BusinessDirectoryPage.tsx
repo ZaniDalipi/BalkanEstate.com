@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings, useMyBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
@@ -9,6 +9,8 @@ import BusinessDetailPage from './BusinessDetailPage';
 import BusinessDirectoryMap from './BusinessDirectoryMap';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
 import ListBusinessFab from './ListBusinessFab';
+import BusinessGridSkeleton from './BusinessGridSkeleton';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
 import ChipScroller from '@/src/components/ui/ChipScroller';
 import { useOffscreen } from '../hooks/useOffscreen';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
@@ -165,11 +167,19 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     limit: 20,
   }), [search, selectedCategory, listingTypeFilter, page]);
 
-  const { listings: allListings, total, totalPages, isLoading } = useBusinessListings(filters);
+  const { listings: allListings, total, totalPages, isLoading, isSwitching } = useBusinessListings(filters);
   const { listings: myListings, isLoading: myListingsLoading } = useMyBusinessListings(!!state.currentUser);
 
   const listings = activeTab === 'mine' ? myListings : allListings;
   const effectiveLoading = activeTab === 'mine' ? myListingsLoading : isLoading;
+  // Every switch shows the loading cards: while the new results load (the old
+  // ones are only placeholder data), and for a moment even when cached.
+  const resultsKey = `${activeTab}|${selectedCategory}|${search}|${page}`;
+  const resultsLoading = useMinimumLoading(
+    resultsKey,
+    effectiveLoading || (activeTab !== 'mine' && isSwitching),
+  );
+  const reduceMotion = useReducedMotion();
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
     navigate(paths.businessListing(generateBusinessSlug(listing)));
@@ -464,7 +474,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       </div>
 
       {/* === ANIMATED STATS BAR === */}
-      {!effectiveLoading && total > 0 && activeTab !== 'mine' && (
+      {!isLoading && total > 0 && activeTab !== 'mine' && (
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 sm:-mt-6 mb-6 relative z-10"
           initial="hidden"
@@ -676,112 +686,39 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           </ChipScroller>
         </motion.div>
 
-        {/* Results info */}
-        <AnimatePresence mode="wait">
-          {!effectiveLoading && (
-            <motion.p
-              key={`results-${total}`}
-              className="text-xs sm:text-sm text-neutral-500 mb-4"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.3 }}
-            >
-              {activeTab === 'mine'
-                ? t('results.showing', { count: myListings.length })
-                : t('results.showing', { count: total })}
-            </motion.p>
+        {/* Results count: a placeholder bar while loading keeps the line's height */}
+        <div className="mb-4 flex min-h-5 items-center" aria-live="polite">
+          {resultsLoading ? (
+            <div className="h-3 w-32 animate-pulse rounded bg-neutral-200" />
+          ) : (
+            <p className="text-xs text-neutral-500 sm:text-sm">
+              {t('results.showing', { count: activeTab === 'mine' ? myListings.length : total })}
+            </p>
           )}
-        </AnimatePresence>
+        </div>
 
-        {/* Loading state - shimmer skeletons */}
-        <AnimatePresence>
-          {effectiveLoading && (
+        {/* One state at a time (loading, grid, map, empty): the old one leaves before the next enters */}
+        <AnimatePresence mode="wait" initial={false}>
+          {resultsLoading ? (
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              key="loading"
+              role="status"
+              aria-label={t('results.loading', 'Loading businesses')}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.15 }}
             >
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="liquid-surface overflow-hidden rounded-[28px]">
-                  <div className="h-20 sm:h-24 relative overflow-hidden bg-neutral-200">
-                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                  </div>
-                  <div className="px-4 sm:px-5 -mt-8">
-                    <div className="w-14 h-14 rounded-xl bg-neutral-200 border-4 border-white relative overflow-hidden">
-                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" style={{ animationDelay: `${i * 150}ms` }} />
-                    </div>
-                  </div>
-                  <div className="p-4 pt-3 space-y-2.5">
-                    <div className="h-5 bg-neutral-200 rounded-lg w-3/4 relative overflow-hidden">
-                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" style={{ animationDelay: `${i * 150 + 100}ms` }} />
-                    </div>
-                    <div className="h-3 bg-neutral-100 rounded w-1/2" />
-                    <div className="h-3 bg-neutral-100 rounded w-full" />
-                    <div className="h-3 bg-neutral-100 rounded w-2/3" />
-                  </div>
-                  <div className="px-4 py-3 border-t border-neutral-100 flex justify-between">
-                    <div className="h-3 bg-neutral-100 rounded w-1/3" />
-                    <div className="h-3 bg-neutral-100 rounded w-1/4" />
-                  </div>
-                </div>
-              ))}
+              <BusinessGridSkeleton />
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Listings grid or map */}
-        <AnimatePresence mode="wait">
-          {!effectiveLoading && listings.length > 0 && viewMode === 'grid' && (
+          ) : listings.length === 0 ? (
             <motion.div
-              key={`listings-${selectedCategory}-${activeTab}-${page}`}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {listings.map((listing) => (
-                <motion.div key={listing.id} variants={cardVariants}>
-                  <BusinessCard
-                    listing={listing}
-                    onClick={handleCardClick}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Map view */}
-        <AnimatePresence mode="wait">
-          {!effectiveLoading && listings.length > 0 && viewMode === 'map' && (
-            <motion.div
-              key="map-view"
-              className="h-[500px] sm:h-[600px] lg:h-[700px]"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.3 }}
-            >
-              <BusinessDirectoryMap
-                listings={listings}
-                onListingClick={handleCardClick}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Empty state */}
-        <AnimatePresence>
-          {!effectiveLoading && listings.length === 0 && (
-            <motion.div
+              key="empty"
               className="text-center py-16 relative"
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="relative">
                 <SoftIcon name="store" className="block w-20 h-20 mx-auto mb-6" />
@@ -803,6 +740,38 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
                   {t('cta.beFirst')}
                 </motion.button>
               </div>
+            </motion.div>
+          ) : viewMode === 'map' ? (
+            <motion.div
+              key="map-view"
+              className="h-[500px] sm:h-[600px] lg:h-[700px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <BusinessDirectoryMap
+                listings={listings}
+                onListingClick={handleCardClick}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`listings-${resultsKey}`}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            >
+              {listings.map((listing) => (
+                <motion.div key={listing.id} variants={cardVariants}>
+                  <BusinessCard
+                    listing={listing}
+                    onClick={handleCardClick}
+                  />
+                </motion.div>
+              ))}
             </motion.div>
           )}
         </AnimatePresence>

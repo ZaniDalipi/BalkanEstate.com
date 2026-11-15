@@ -13,7 +13,7 @@ import {
 import type { BusinessListingFilters, CreateBusinessListingData } from '@/src/shared/types/businessListing.types';
 
 export function useBusinessListings(filters?: BusinessListingFilters) {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, isPlaceholderData, error, refetch } = useQuery({
     queryKey: businessDirectoryKeys.list(filters),
     queryFn: () => getBusinessListings(filters),
     staleTime: 3 * 60 * 1000,
@@ -26,6 +26,8 @@ export function useBusinessListings(filters?: BusinessListingFilters) {
     page: data?.page || 1,
     totalPages: data?.totalPages || 1,
     isLoading,
+    /** Still showing the previous filters' results while these load. */
+    isSwitching: isPlaceholderData,
     error,
     refetch,
   };

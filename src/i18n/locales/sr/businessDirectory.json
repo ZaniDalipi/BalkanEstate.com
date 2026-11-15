@@ -75,7 +75,8 @@
     "beFirst": "Будите први који ће се објавити"
   },
   "results": {
-    "showing": "{{count}} бизниса пронађено"
+    "showing": "{{count}} бизниса пронађено",
+    "loading": "Učitavanje firmi"
   },
   "empty": {
     "title": "Нису пронађени бизниси",
