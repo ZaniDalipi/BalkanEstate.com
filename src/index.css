@@ -2733,6 +2733,18 @@ html {
   body {
     overscroll-behavior-y: none;
   }
+}
+
+/* Liquid glass material: see the "Liquid glass (business profile)" header
+   above. Applies everywhere — browser tabs and the installed app alike. */
+@layer components {
+  .liquid-surface,
+  .liquid-control,
+  .liquid-tint,
+  .liquid-dark {
+    position: relative;
+    isolation: isolate;
+  }
 
   .liquid-surface::before,
   .liquid-control::before,
