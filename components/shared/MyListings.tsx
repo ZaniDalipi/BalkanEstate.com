@@ -165,10 +165,10 @@ const ListingCard: React.FC<{
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
-                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="flex h-11 w-11 items-center justify-center text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
+                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="flex h-[44px] w-[44px] items-center justify-center text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
                         <PencilIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="flex h-11 w-11 items-center justify-center text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="flex h-[44px] w-[44px] items-center justify-center text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
                         <TrashIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>

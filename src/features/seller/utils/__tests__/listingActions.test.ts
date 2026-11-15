@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildListingActions, isPromotionLive, type ListingActionInput } from '../listingActions';
+import { buildListingActions, isPromotionLive, listingActionSpan, type ListingActionInput } from '../listingActions';
 
 const NOW = Date.UTC(2026, 10, 15);
 const base: ListingActionInput = {
@@ -54,5 +54,25 @@ describe('isPromotionLive', () => {
   it('ignores missing or invalid end dates', () => {
     expect(isPromotionLive({ isPromoted: true, now: NOW })).toBe(false);
     expect(isPromotionLive({ isPromoted: true, promotionEndDate: 'not a date', now: NOW })).toBe(false);
+  });
+});
+
+describe('listingActionSpan', () => {
+  const spans = (count: number) => Array.from({ length: count }, (_, i) => listingActionSpan(i, count));
+
+  it('gives the main action a full row and pairs the rest', () => {
+    expect(spans(5)).toEqual(['full', 'half', 'half', 'half', 'half']);
+  });
+
+  it('stretches the last action when the rest do not pair up', () => {
+    expect(spans(4)).toEqual(['full', 'half', 'half', 'full']);
+    expect(spans(2)).toEqual(['full', 'full']);
+  });
+
+  it('never leaves a row half empty', () => {
+    for (let count = 1; count <= 8; count += 1) {
+      const halves = spans(count).filter((s) => s === 'half').length;
+      expect(halves % 2).toBe(0);
+    }
   });
 });

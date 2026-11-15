@@ -1,7 +1,8 @@
 import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SoftIcon } from '@/src/shared/illustrations';
-import type { ListingAction, ListingActionId } from '../../utils/listingActions';
+import { listingActionSpan, type ListingAction, type ListingActionId } from '../../utils/listingActions';
+import { LISTING_ACTION_GRID } from './listingActionStyles';
 import { ListingActionButton } from './ListingActionButton';
 
 interface ListingActionBarProps {
@@ -12,9 +13,10 @@ interface ListingActionBarProps {
 }
 
 /**
- * The action row of a "My listings" card. Buttons share one width and height
- * and wrap into as many equal columns as the card has room for, so the row
- * looks the same on phones, tablets and desktops. Pressing a blocked action
+ * The action row of a "My listings" card. Sized by the card, not the screen
+ * (a container query): wide cards show every action as an equal tile in one
+ * row; narrow cards put the main action on its own row and pair the rest, so
+ * no row is left half empty. Pressing a blocked action
  * explains why next to the row instead of doing nothing.
  */
 export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onAction, onEdit }) => {
@@ -31,14 +33,20 @@ export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onA
   };
 
   return (
-    <div className="mt-4">
+    <div className="@container mt-4">
       <div
         role="group"
         aria-label={t('seller:myListings.actionsLabel', 'Listing actions')}
-        className="grid auto-rows-fr grid-cols-[repeat(auto-fit,minmax(min(100%,8.25rem),1fr))] gap-2"
+        className={LISTING_ACTION_GRID}
       >
-        {actions.map((action) => (
-          <ListingActionButton key={action.id} action={action} reasonId={reasonId} onPress={press} />
+        {actions.map((action, i) => (
+          <ListingActionButton
+            key={action.id}
+            action={action}
+            reasonId={reasonId}
+            span={listingActionSpan(i, actions.length)}
+            onPress={press}
+          />
         ))}
       </div>
       {explained?.blocked && (
@@ -55,7 +63,7 @@ export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onA
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="min-h-11 rounded-lg px-2 font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="min-h-[44px] rounded-lg px-2 font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {t('seller:myListings.actionBlocked.addPhotos', 'Add photos')}
             </button>
@@ -64,7 +72,7 @@ export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onA
             type="button"
             onClick={(e) => { e.stopPropagation(); setExplainedId(null); }}
             aria-label={t('seller:myListings.actionBlocked.dismiss', 'Dismiss')}
-            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-lg hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <SoftIcon name="xmark" className="h-4 w-4" />
           </button>

@@ -155,3 +155,15 @@ export const buildListingActions = (input: ListingActionInput): ListingAction[] 
   ];
   return actions.filter((a): a is ListingAction => a !== null);
 };
+
+/**
+ * Width of an action on a narrow (two-column) card, so no row is left half
+ * empty: the first action — the main one — gets a full row, and when the rest
+ * don't pair up, the last one fills its row too.
+ */
+export const listingActionSpan = (index: number, count: number): 'full' | 'half' => {
+  if (count <= 1 || index === 0) return 'full';
+  const isLast = index === count - 1;
+  const restIsOdd = (count - 1) % 2 === 1;
+  return isLast && restIsOdd ? 'full' : 'half';
+};
