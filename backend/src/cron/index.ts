@@ -18,6 +18,7 @@ import { cleanupOrphanedTempImages } from '../services/mediaService';
 import { runMediaRetention } from '../services/media/mediaRetentionService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
+import { processOpenHouseReminders } from '../jobs/openHouseReminderJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
 import { runScoreFullRefresh } from '../jobs/scoreBackfillJob';
 import { runMonthlyCityMarketDigest } from '../jobs/cityMarketDigestJob';
@@ -53,6 +54,7 @@ let activityCleanupTask: cron.ScheduledTask | null = null;
 let newsFetchTask: cron.ScheduledTask | null = null;
 let newsCleanupTask: cron.ScheduledTask | null = null;
 let rentalExpiryTask: cron.ScheduledTask | null = null;
+let openHouseReminderTask: cron.ScheduledTask | null = null;
 let listingIngestTask: cron.ScheduledTask | null = null;
 let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
@@ -486,6 +488,18 @@ export const startCronJobs = () => {
     });
   });
 
+  // Open house reminders - every 15 minutes, a day before and ~2 hours before
+  openHouseReminderTask = cron.schedule('*/15 * * * *', async () => {
+    await withDbConnection('open house reminders', async () => {
+      try {
+        const count = await processOpenHouseReminders();
+        if (count > 0) cronLogger.info(`🏡 Sent ${count} open house reminder(s)`);
+      } catch (error) {
+        cronLogger.error('Open house reminder cron error:', error);
+      }
+    });
+  });
+
   // Pre-computed property stats (hourly)
   startPropertyStatsJob();
 
@@ -572,6 +586,7 @@ export const stopCronJobs = () => {
   if (newsFetchTask) newsFetchTask.stop();
   if (newsCleanupTask) newsCleanupTask.stop();
   if (rentalExpiryTask) rentalExpiryTask.stop();
+  if (openHouseReminderTask) openHouseReminderTask.stop();
   if (listingIngestTask) listingIngestTask.stop();
   if (deferredReplayTask) deferredReplayTask.stop();
   if (scoreRefreshTask) scoreRefreshTask.stop();

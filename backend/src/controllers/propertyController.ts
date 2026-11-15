@@ -1,4 +1,10 @@
 import { Request, Response } from 'express';
+import {
+  insertDrafts,
+  nextOpenHouseByProperty,
+  propertyIdsWithUpcomingOpenHouse,
+  validateDrafts,
+} from '../services/openHouse/openHouseService';
 import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
@@ -400,6 +406,12 @@ export const getProperties = async (
       'images.publicId': 0,
     };
 
+    // Optional "Open house" filter: only listings with an upcoming one.
+    if (req.query.hasOpenHouse === 'true') {
+      const withOpenHouse = await propertyIdsWithUpcomingOpenHouse();
+      filter.$and = [...(filter.$and || []), { _id: { $in: withOpenHouse } }];
+    }
+
     // Execute query with .lean() for 5-10x faster reads (plain JS objects, no Mongoose overhead)
     // Fetch more than needed to allow for promoted property sorting
     const fetchLimit = Math.min(limitNum + 20, limitNum * 2); // Fetch slightly extra for promotion sort, capped
@@ -476,7 +488,17 @@ export const getProperties = async (
     }
 
     // Sanitize: strip PII (email, phone, license) from list responses
-    const sanitizedProperties = enrichedProperties.map((p: any) => sanitizeProperty(p, 'list'));
+    // and add the next open house (if the owner planned one) for card badges.
+    const nextOpenHouses = await nextOpenHouseByProperty(enrichedProperties.map((p: any) => String(p._id)))
+      .catch((err) => {
+        propertyLogger.error('Failed to load open houses for results:', err);
+        return new Map<string, { startsAt: string; endsAt: string }>();
+      });
+    const sanitizedProperties = enrichedProperties.map((p: any) => {
+      const clean = sanitizeProperty(p, 'list');
+      const nextOpenHouse = nextOpenHouses.get(String(p._id));
+      return nextOpenHouse ? { ...clean, nextOpenHouse } : clean;
+    });
 
     // Build cursor for next page (last item in current results)
     const lastItem = sanitizedProperties[sanitizedProperties.length - 1];
@@ -631,6 +653,17 @@ export const createProperty = async (
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Optional open houses picked in the listing form. Checked before anything
+    // is saved so a bad date is fixed in the form instead of half-creating.
+    const openHouseDrafts = await validateDrafts(req.body.openHouses, null);
+    if (openHouseDrafts.ok === false) {
+      res.status(400).json({
+        message: 'Validation failed',
+        errors: [{ field: 'openHouses', message: openHouseDrafts.error }],
+      });
       return;
     }
 
@@ -1013,6 +1046,13 @@ export const createProperty = async (
         },
       });
       throw createError;
+    }
+
+    // Best-effort: the listing is live either way, and the seller can add the
+    // open house again from My Listings if saving it failed.
+    if (openHouseDrafts.value.length > 0) {
+      await insertDrafts(String(property._id), String(user._id), openHouseDrafts.value)
+        .catch((err) => propertyLogger.error('Failed to save open houses for new listing:', err));
     }
 
     // The frontend uploads images as drafts before the property exists, so
