@@ -2881,3 +2881,27 @@ html {
   html.is-webkit .liquid-dark,
   html.is-webkit .liquid-map .maplibregl-ctrl-group { backdrop-filter: blur(8px) saturate(170%); }
 }
+
+/* Business directory hero: the wavy bottom edge is cut out of the hero with a
+   mask, so the page's own tinted backdrop shows below the curve. (Painting a
+   flat-colour wave over it left a visible seam against that backdrop.)
+   Two layers: a solid block for everything above the wave band, and the wave
+   shape stretched across the band. They overlap by 1px so no hairline shows. */
+.bd-hero-wave {
+  --bd-wave-h: 32px;
+  -webkit-mask-image:
+    linear-gradient(#000, #000),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0 0H1440V40C1200 80 960 80 720 40C480 0 240 0 0 40Z'/%3E%3C/svg%3E");
+  mask-image:
+    linear-gradient(#000, #000),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'%3E%3Cpath d='M0 0H1440V40C1200 80 960 80 720 40C480 0 240 0 0 40Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% calc(100% - var(--bd-wave-h) + 1px), 100% var(--bd-wave-h);
+  mask-size: 100% calc(100% - var(--bd-wave-h) + 1px), 100% var(--bd-wave-h);
+  -webkit-mask-position: top, bottom;
+  mask-position: top, bottom;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+@media (min-width: 640px) {
+  .bd-hero-wave { --bd-wave-h: 56px; }
+}

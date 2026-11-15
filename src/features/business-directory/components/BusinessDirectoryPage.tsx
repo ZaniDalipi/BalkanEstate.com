@@ -314,8 +314,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
   return (
     <div className="liquid-backdrop min-h-screen">
-      {/* === PREMIUM HERO SECTION === */}
-      <div className="relative overflow-hidden">
+      {/* === PREMIUM HERO SECTION === (its wavy bottom edge is a mask, .bd-hero-wave) */}
+      <div className="bd-hero-wave relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900" />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-violet-600/20" />
 
@@ -460,12 +460,6 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           </div>
         </div>
 
-        {/* Wave divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 80V40C240 0 480 0 720 40C960 80 1200 80 1440 40V80H0Z" fill="#f2f2f7" />
-          </svg>
-        </div>
       </div>
 
       {/* === ANIMATED STATS BAR === */}
@@ -508,7 +502,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       )}
 
       {/* Ad — horizontal leaderboard between the hero/stats and the listings */}
-      <AdSlot page="business-directory" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" showPlaceholder />
+      <AdSlot page="business-directory" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-2" showPlaceholder />
 
       {/* === MAIN CONTENT === */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -521,7 +515,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           viewport={{ once: true }}
         >
           {/* Scrollable tabs wrapper on mobile */}
-          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 -mt-2 pt-2 -mb-6 pb-6 sm:mx-0 sm:px-0">
             <div className="liquid-control flex min-w-max items-center gap-1 rounded-full p-1">
               {tabs.map((tab) => (
                 <motion.button
@@ -552,7 +546,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
             </div>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
+          {/* Wraps instead of scrolling: a scroll box would clip the glass shadows. */}
+          <div className="flex flex-wrap items-center gap-2">
             {/* Map / Grid toggle */}
             <motion.button
               type="button"
@@ -646,7 +641,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Category filters */}
         <motion.div
-          className="flex gap-1.5 sm:gap-2 overflow-x-auto py-2 scrollbar-hide mb-3 -mx-4 px-4 sm:-mx-1 sm:px-1"
+          className="flex gap-1.5 sm:gap-2 overflow-x-auto pt-2 pb-8 -mb-5 scrollbar-hide -mx-4 px-4 sm:-mx-1 sm:px-1"
           variants={fadeUpVariants}
           initial="hidden"
           whileInView="visible"

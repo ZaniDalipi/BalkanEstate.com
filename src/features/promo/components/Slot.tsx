@@ -204,7 +204,11 @@ const AdSlot: React.FC<AdSlotProps> = ({
             justifyContent: 'center',
             gap: 6,
             textAlign: 'center',
-            padding: 12,
+            padding: '18px 20px',
+            // The ratio is a minimum here: on a phone 970:250 is ~100px, less
+            // than the badge, title and button need, so the box grows to fit
+            // them instead of clipping (no image inside to crop).
+            overflow: 'visible',
             cursor: 'pointer',
             textDecoration: 'none',
             border: '2px dashed rgba(79,70,229,0.35)',
