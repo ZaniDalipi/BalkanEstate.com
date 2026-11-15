@@ -96,7 +96,8 @@
     "priceIncreased": "Price Increased",
     "constructionStatus": "Construction",
     "kitchens": "Kitchens",
-    "orientation": "Orientation"
+    "orientation": "Orientation",
+    "openHouse": "Open house coming up"
   },
   "options": {
     "any": "Any",

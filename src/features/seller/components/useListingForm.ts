@@ -26,6 +26,7 @@ import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/p
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
 import { resolveTotalArea } from '@/shared/property/area';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
+import type { OpenHouseDraft } from '@/src/features/open-houses/types';
 
 /**
  * Maximum images a listing can carry. The backend applies the same cap to both
@@ -220,6 +221,8 @@ export const useListingForm = (
     const [images, setImages] = useState<ImageData[]>([]);
     // One entry per floor (Floor 1, Floor 2, Attic…), in order.
     const [floorplans, setFloorplans] = useState<FloorPlanDraft[]>([]);
+    // Optional open houses for a new listing — empty unless the seller adds one.
+    const [openHouseDrafts, setOpenHouseDrafts] = useState<OpenHouseDraft[]>([]);
 
     /** Set every photo's floor plan spot at once (index-aligned with images). */
     const setPhotoSpots = useCallback((spots: (FloorplanSpot | undefined)[]) => {
@@ -1460,6 +1463,8 @@ export const useListingForm = (
                     ...(listingData.visitAvailability.enabled ? {
                         visitAvailability: listingData.visitAvailability,
                     } : {}),
+                    // Optional open houses — only sent with a new listing
+                    ...(!propertyToEdit && openHouseDrafts.length > 0 ? { openHouses: openHouseDrafts } : {}),
                 },
             ) as Property;
 
@@ -1542,6 +1547,13 @@ export const useListingForm = (
             // nothing about which field to fix, so spell the fields out.
             const fieldFailures: { field?: string; message?: string }[] =
                 Array.isArray(err.details?.errors) ? err.details.errors : [];
+            // A rejected open house date: say so next to the open house section too.
+            if (fieldFailures.some(f => f.field === 'openHouses')) {
+                setFieldErrors(prev => ({
+                    ...prev,
+                    openHouses: t('property:openHouse.errors.checkDates', "One of the open house dates can't be used. Change or remove it, then publish again."),
+                }));
+            }
             const errorMessage = fieldFailures.length > 0
                 ? fieldFailures
                     .map(({ field, message }) => (field ? `${field}: ${message}` : message))
@@ -1809,6 +1821,7 @@ export const useListingForm = (
         images, setImages,
         setPhotoSpots,
         floorplans, removeFloorplan, renameFloorplan, replaceFloorplan,
+        openHouseDrafts, setOpenHouseDrafts,
         listingData, setListingData,
         language, setLanguage,
         aiPropertyType, setAiPropertyType,

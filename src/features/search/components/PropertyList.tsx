@@ -10,6 +10,7 @@ import AiSearch from './AiSearch';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import type { OutOfAreaKind } from '../outOfArea';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
+import OpenHouseFilterToggle from '@/src/features/open-houses/components/OpenHouseFilterToggle';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
 import UniversalSearchBox from '../universal/UniversalSearchBox';
@@ -373,6 +374,11 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                     {t('search:filters.priceIncreased', 'Price Increased')}
                 </button>
             </div>
+
+            <OpenHouseFilterToggle
+                active={filters.hasOpenHouse === true}
+                onToggle={() => onFilterChange('hasOpenHouse', filters.hasOpenHouse === true ? null : true)}
+            />
 
             <div className="border-t border-neutral-200 pt-4">
                 <button type="button" onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="w-full flex justify-between items-center text-left">
@@ -897,6 +903,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
         filters.maxDaysListed,
         filters.hasDiscount,
         filters.hasPriceIncrease,
+        filters.hasOpenHouse,
         filters.saleStatus && filters.saleStatus !== 'available' ? filters.saleStatus : null,
     ].filter(v => v !== null && v !== undefined && v !== '' && v !== false).length;
 

@@ -80,7 +80,8 @@
     "priceIncreased": "Αυξημένη τιμή",
     "constructionStatus": "Κατασκευή",
     "kitchens": "Κουζίνες",
-    "orientation": "Προσανατολισμός"
+    "orientation": "Προσανατολισμός",
+    "openHouse": "Με ανοιχτή επίσκεψη σύντομα"
   },
   "options": {
     "any": "Οποιοδήποτε",

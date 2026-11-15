@@ -276,6 +276,13 @@ export interface Property {
   currency?: string;
   // Computed price discount flag
   hasDiscount?: boolean;
+  /** Next upcoming open house, only when the owner chose to host one. */
+  nextOpenHouse?: { startsAt: string; endsAt: string };
+  /**
+   * Create-only: open houses the seller optionally picked in the listing form.
+   * Sent once with the new listing; never read back on the listing itself.
+   */
+  openHouses?: { startsAt: string; endsAt: string; note?: string; capacity?: number }[];
   // Alias fields (for component compatibility)
   bedrooms?: number;
   bathrooms?: number;
@@ -350,6 +357,8 @@ export interface Filters {
   has360Tour: boolean | null;
   hasDiscount: boolean | null;
   hasPriceIncrease: boolean | null;
+  /** Optional: only listings with an upcoming open house. */
+  hasOpenHouse?: boolean | null;
   minPricePerSqm: number | null;
   maxPricePerSqm: number | null;
   maxDaysListed: number | null;
@@ -406,6 +415,7 @@ export const initialFilters: Filters = {
   has360Tour: null,
   hasDiscount: null,
   hasPriceIncrease: null,
+  hasOpenHouse: null,
   minPricePerSqm: null,
   maxPricePerSqm: null,
   maxDaysListed: null,

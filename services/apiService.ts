@@ -1371,6 +1371,10 @@ function transformToBackendProperty(frontendProp: Property): any {
   if (frontendProp.visitAvailability) {
     result.visitAvailability = frontendProp.visitAvailability;
   }
+  // Optional open houses picked when creating the listing
+  if (frontendProp.openHouses && frontendProp.openHouses.length > 0) {
+    result.openHouses = frontendProp.openHouses;
+  }
 
   // Distance fields
   if (frontendProp.distanceToCenter !== undefined) {

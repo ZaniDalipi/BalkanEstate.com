@@ -80,7 +80,8 @@
     "priceIncreased": "Зголемена цена",
     "constructionStatus": "Градба",
     "kitchens": "Кујни",
-    "orientation": "Ориентација"
+    "orientation": "Ориентација",
+    "openHouse": "Наскоро ден на отворени врати"
   },
   "options": {
     "any": "Било кој",

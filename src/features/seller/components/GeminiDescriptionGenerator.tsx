@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/liquid-glass-button';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
 import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
+import OpenHouseDraftFields from '@/src/features/open-houses/components/OpenHouseDraftFields';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, TagListInput,
@@ -72,6 +73,7 @@ const GeminiDescriptionGenerator: React.FC<{
         handleGenerate,
         handleInputChange, handlePriceChange, handleImageTagChange,
         handleListingTypeChange, handleVisitAvailabilityChange, handleVisitDayToggle,
+        openHouseDrafts, setOpenHouseDrafts,
         handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
@@ -774,6 +776,15 @@ const GeminiDescriptionGenerator: React.FC<{
                             </div>
                         )}
                     </fieldset>
+
+                    {/* ===== Open house (optional, new listings only; later ones from My Listings) ===== */}
+                    {!propertyToEdit && (
+                        <OpenHouseDraftFields
+                            value={openHouseDrafts}
+                            onChange={setOpenHouseDrafts}
+                            error={fieldErrors.openHouses}
+                        />
+                    )}
 
                     {/* Description */}
                     <fieldset id={fieldAnchorId('description')}>

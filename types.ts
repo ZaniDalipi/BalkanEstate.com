@@ -466,6 +466,10 @@ export interface Property {
     // Price discount
     hasDiscount?: boolean;
     isNegotiable?: boolean;
+    /** Next upcoming open house, only when the owner chose to host one. */
+    nextOpenHouse?: { startsAt: string; endsAt: string };
+    /** Create-only: open houses picked in the listing form, sent once with a new listing. */
+    openHouses?: { startsAt: string; endsAt: string; note?: string; capacity?: number }[];
     // External source (imported listings)
     source?: string;
     sourceUrl?: string;
@@ -569,6 +573,7 @@ export interface Filters {
     has360Tour: boolean | null; // Filter for properties with 360 virtual tour
     hasDiscount: boolean | null; // Filter for properties with price reduction
     hasPriceIncrease: boolean | null; // Filter for properties with price increase
+    hasOpenHouse?: boolean | null; // Optional: only homes with an upcoming open house
     minPricePerSqm: number | null; // Filter by min price per square meter
     maxPricePerSqm: number | null; // Filter by max price per square meter
     maxDaysListed: number | null; // Filter by max days since listing (e.g., 1, 3, 7, 30)
@@ -625,6 +630,7 @@ export const initialFilters: Filters = {
     has360Tour: null,
     hasDiscount: null,
     hasPriceIncrease: null,
+    hasOpenHouse: null,
     minPricePerSqm: null,
     maxPricePerSqm: null,
     maxDaysListed: null,

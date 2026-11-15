@@ -24,6 +24,7 @@ export function transformBackendProperty(backendProp: any): Property {
     address: backendProp.address,
     city: backendProp.city,
     country: backendProp.country,
+    ...(backendProp.nextOpenHouse ? { nextOpenHouse: backendProp.nextOpenHouse } : {}),
     // Room counts, open-plan area, parking and floors, read from the type
     // table so a newly added attribute cannot be dropped here.
     ...copyTypeAttributes(backendProp),
@@ -230,6 +231,10 @@ export function transformToBackendProperty(frontendProp: Property): any {
   if (frontendProp.visitAvailability) {
     result.visitAvailability = frontendProp.visitAvailability;
   }
+  // Optional open houses picked when creating the listing
+  if (frontendProp.openHouses && frontendProp.openHouses.length > 0) {
+    result.openHouses = frontendProp.openHouses;
+  }
 
   // Distance fields
   if (frontendProp.distanceToCenter !== undefined)
@@ -281,6 +286,8 @@ export const getProperties = async (
       params.append('hasDiscount', 'true');
     if (filters.hasPriceIncrease === true)
       params.append('hasPriceIncrease', 'true');
+    if (filters.hasOpenHouse === true)
+      params.append('hasOpenHouse', 'true');
   }
 
   const queryString = params.toString();

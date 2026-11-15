@@ -435,3 +435,14 @@ export const poiKeys = {
   all: ['pois'] as const,
   tile: (x: number, y: number) => [...poiKeys.all, 'tile', x, y] as const,
 };
+
+// ============================================================================
+// Open houses (optional, per listing)
+// Used by: features/open-houses
+// ============================================================================
+
+export const openHouseKeys = {
+  all: ['openHouses'] as const,
+  property: (propertyId: string) => [...openHouseKeys.all, 'property', propertyId] as const,
+  mine: (propertyId?: string) => [...openHouseKeys.all, 'mine', propertyId ?? 'all'] as const,
+};

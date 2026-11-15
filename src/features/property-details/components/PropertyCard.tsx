@@ -15,6 +15,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
+import OpenHouseBadge from '@/src/features/open-houses/components/OpenHouseBadge';
 import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
@@ -494,6 +495,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 {t('property:status.new').toUpperCase()}
               </div>
             )}
+
+            {/* Open house — only when the owner planned one */}
+            {!isSold && !isRented && <OpenHouseBadge nextOpenHouse={property.nextOpenHouse} className="self-start" />}
 
             {/* iOS-style Promotion Badges */}
             {!isSold && isActivelyPromoted && promotionTier && (
