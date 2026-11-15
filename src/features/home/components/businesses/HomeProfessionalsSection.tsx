@@ -21,7 +21,7 @@ const HomeProfessionalsSection: React.FC = () => {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
       return;
     }
-    navigate(paths.businessListingNew());
+    navigate(paths.businessListingNew('individual'));
   }, [state.currentUser, dispatch]);
 
   if (isLoading) return <div className="mx-auto mb-12 h-[26rem] max-w-6xl animate-pulse rounded-[28px] bg-slate-100 px-4" aria-busy="true" />;

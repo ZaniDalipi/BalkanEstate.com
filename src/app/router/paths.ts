@@ -71,7 +71,8 @@ export const paths = {
 
   businessDirectory: (tab?: BusinessDirectoryTab) =>
     tab ? `/business-directory/${tab}` : '/business-directory',
-  businessListingNew: () => '/business-directory/new',
+  /** The create form; `type` preselects Business or Individual (e.g. "Offer your services" → individual). */
+  businessListingNew: (type?: 'business' | 'individual') => withQuery('/business-directory/new', type ? { type } : undefined),
   businessListing: (slugOrId: string) => `/business-directory/${seg(slugOrId)}`,
 
   savedSearches: () => '/saved-searches',

@@ -59,6 +59,6 @@ describe('HomeProfessionalsSection', () => {
     h.user = { id: 'u1' };
     rerender(<HomeProfessionalsSection />);
     fireEvent.click(screen.getByRole('button', { name: /Offer your services/ }));
-    expect(h.navigate).toHaveBeenCalledWith('/business-directory/new');
+    expect(h.navigate).toHaveBeenCalledWith('/business-directory/new?type=individual');
   });
 });

@@ -22,6 +22,8 @@ const MapLocationPicker = lazy(() => import('@/src/features/seller/components/Ma
 interface CreateBusinessListingFormProps {
   onBack: () => void;
   onSuccess: () => void;
+  /** Listing type to start on (from the link that opened the form); wins over a restored draft's. */
+  initialType?: ListingType;
 }
 
 type FieldErrorKey = 'name' | 'category' | 'contactPhone' | 'country' | 'city';
@@ -98,7 +100,7 @@ const emptyDraft = (phone = '', email = ''): BusinessListingDraft => ({
 const citiesOf = (countryName: string): CityData[] =>
   BALKAN_LOCATIONS.find(c => c.name === countryName)?.cities ?? [];
 
-const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ onBack, onSuccess }) => {
+const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ onBack, onSuccess, initialType }) => {
   const { t } = useTranslation('businessDirectory');
   const { state } = useAppContext();
   const { createListing, isLoading, error } = useCreateBusinessListing();
@@ -119,7 +121,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
     city: useRef<HTMLSelectElement>(null),
   };
 
-  const [listingType, setListingType] = useState<ListingType>(start.listingType);
+  const [listingType, setListingType] = useState<ListingType>(initialType ?? start.listingType);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
@@ -542,6 +544,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                 <button
                   type="button"
                   onClick={() => setListingType('business')}
+                  aria-pressed={listingType === 'business'}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
                     listingType === 'business'
                       ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
@@ -557,6 +560,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                 <button
                   type="button"
                   onClick={() => setListingType('individual')}
+                  aria-pressed={listingType === 'individual'}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
                     listingType === 'individual'
                       ? 'border-violet-500 bg-violet-50 shadow-md shadow-violet-500/10'

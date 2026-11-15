@@ -71,6 +71,22 @@ beforeEach(() => {
 });
 
 describe('CreateBusinessListingForm', () => {
+  it('starts on the type the link asked for ("Offer your services" → Individual), even over a restored draft', () => {
+    const { unmount } = render(<CreateBusinessListingForm onBack={vi.fn()} onSuccess={vi.fn()} initialType="individual" />);
+    expect(screen.getByRole('button', { pressed: true, name: /individual/i })).toBeInTheDocument();
+    unmount();
+
+    writeFormDraft(KEY, savedDraft); // a Business draft
+    render(<CreateBusinessListingForm onBack={vi.fn()} onSuccess={vi.fn()} initialType="individual" />);
+    expect(screen.getByRole('button', { pressed: true, name: /individual/i })).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Drita Cleaning')).toBeInTheDocument();
+  });
+
+  it('starts on Business when the link names no type', () => {
+    render(<CreateBusinessListingForm onBack={vi.fn()} onSuccess={vi.fn()} />);
+    expect(screen.getByRole('button', { pressed: true, name: /business/i })).toBeInTheDocument();
+  });
+
   it('brings back an unfinished listing and offers to start over', () => {
     writeFormDraft(KEY, savedDraft);
     render(<CreateBusinessListingForm onBack={vi.fn()} onSuccess={vi.fn()} />);

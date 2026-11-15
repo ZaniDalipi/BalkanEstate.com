@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings, useMyBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
@@ -15,6 +16,7 @@ import ChipScroller from '@/src/components/ui/ChipScroller';
 import { useOffscreen } from '../hooks/useOffscreen';
 import FeaturedProfessionalsRail from './FeaturedProfessionalsRail';
 import { MAX_LANYARDS } from '../utils/lanyardMembers';
+import { listingTypeFromQuery } from '../utils/listingTypeFromQuery';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, MicrophoneIcon, ArrowPathIcon, MapIcon } from '@/constants';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
@@ -256,6 +258,13 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     requireAuth(() => navigate(paths.businessListingNew()));
   }, [requireAuth]);
 
+  // "Offer your services" (professionals rail): the form opens on Individual.
+  const handleOfferServices = useCallback(() => {
+    requireAuth(() => navigate(paths.businessListingNew('individual')));
+  }, [requireAuth]);
+  const [searchParams] = useSearchParams();
+  const createType = listingTypeFromQuery(searchParams.get('type'));
+
   const handleCreateSuccess = useCallback(() => {
     // Replace, so Back does not return to an emptied form
     navigate(paths.businessDirectory('mine'), { replace: true });
@@ -279,7 +288,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   }
 
   if (creating && state.currentUser) {
-    return <CreateBusinessListingForm onBack={() => goBack(paths.businessDirectory())} onSuccess={handleCreateSuccess} />;
+    return <CreateBusinessListingForm onBack={() => goBack(paths.businessDirectory())} onSuccess={handleCreateSuccess} initialType={createType} />;
   }
 
   const tabs: { key: TabType; label: string; icon: SoftIconName | null }[] = [
@@ -594,7 +603,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         {professionalsLoading ? (
           <div className="mb-6 h-[26rem] animate-pulse rounded-[28px] bg-white/70 sm:mb-8" aria-hidden="true" />
         ) : (
-          <FeaturedProfessionalsRail listings={professionals} onListYourself={handleCreateClick} className="mb-6 sm:mb-8" showWhenEmpty />
+          <FeaturedProfessionalsRail listings={professionals} onListYourself={handleOfferServices} className="mb-6 sm:mb-8" showWhenEmpty />
         )}
 
         {/* Category filters */}
