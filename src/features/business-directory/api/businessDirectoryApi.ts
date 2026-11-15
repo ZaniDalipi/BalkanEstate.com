@@ -3,6 +3,8 @@ import type {
   BusinessListingFilters,
   BusinessListingsResponse,
   BusinessListing,
+  BusinessCategorySummary,
+  ListingType,
   CreateBusinessListingData,
 } from '@/src/shared/types/businessListing.types';
 
@@ -11,6 +13,7 @@ export const getBusinessListings = async (
 ): Promise<BusinessListingsResponse> => {
   const params = new URLSearchParams();
   if (filters?.category) params.append('category', filters.category);
+  if (filters?.customCategory) params.append('customCategory', filters.customCategory);
   if (filters?.listingType) params.append('listingType', filters.listingType);
   if (filters?.city) params.append('city', filters.city);
   if (filters?.country) params.append('country', filters.country);
@@ -88,3 +91,7 @@ export const uploadBusinessBanner = async (
     formData
   );
 };
+
+/** Categories in use, including the names owners typed for "other". */
+export const getBusinessCategories = async (listingType?: ListingType): Promise<BusinessCategorySummary> =>
+  apiRequest<BusinessCategorySummary>(`/business-listings/categories${listingType ? `?listingType=${listingType}` : ''}`);

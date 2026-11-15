@@ -8,6 +8,7 @@ import { generateBusinessSlug } from '@/utils/slug';
 import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { toLanyardMembers } from '../utils/lanyardMembers';
+import { categoryLabel } from '../utils/categoryStyle';
 import { useShareAndCopy } from '../hooks/useShareAndCopy';
 import RailActions from './RailActions';
 import ShareCardDialog from './share/ShareCardDialog';
@@ -41,7 +42,7 @@ const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ l
   const { toast, copy } = useShareAndCopy('');
 
   const members = useMemo(() => toLanyardMembers(people, {
-    roleOf: (l) => l.customCategory || t(`categories.${l.category}`),
+    roleOf: (l) => categoryLabel(l, t),
     imageOf: (l) => optimizeImageUrl(l.logoUrl || l.owner?.avatarUrl, { width: 240, height: 240 }),
     profileHrefOf: (l) => localizePath(profilePath(l)),
     labels: {

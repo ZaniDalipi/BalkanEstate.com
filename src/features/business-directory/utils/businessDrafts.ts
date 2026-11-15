@@ -12,6 +12,8 @@ export const businessEditDraftKey = (listingId: string, userId: string) =>
 export interface BusinessDraftSummary {
   name: string;
   category: BusinessCategory | '';
+  /** The owner's own words when the category is "other". */
+  customCategory?: string;
   city: string;
   country: string;
   savedAt: number;
@@ -29,6 +31,7 @@ export function readBusinessCreateDraft(userId: string, now = Date.now()): Busin
   return {
     name: (form.name ?? '').trim(),
     category: form.category ?? '',
+    customCategory: form.customCategory?.trim() || undefined,
     city: form.city ?? '',
     country: form.country ?? '',
     savedAt: stored.savedAt,

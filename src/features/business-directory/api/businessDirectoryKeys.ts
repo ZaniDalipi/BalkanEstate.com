@@ -6,6 +6,7 @@ export const businessDirectoryKeys = {
   list: (filters?: BusinessListingFilters) => [...businessDirectoryKeys.lists(), { filters }] as const,
   details: () => [...businessDirectoryKeys.all, 'detail'] as const,
   detail: (id: string) => [...businessDirectoryKeys.details(), id] as const,
+  categories: (listingType?: string) => [...businessDirectoryKeys.all, 'categories', listingType ?? 'all'] as const,
   myListings: () => [...businessDirectoryKeys.all, 'my-listings'] as const,
   place: (id: string) => [...businessDirectoryKeys.all, 'place', id] as const,
   /** Coordinates arrive rounded (~10 m) so small GPS jitter reuses the route. */

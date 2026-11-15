@@ -16,6 +16,7 @@ import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice'
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
 import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
+import CustomCategorySuggestions, { CUSTOM_CATEGORY_SUGGESTIONS_ID } from './CustomCategorySuggestions';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -719,6 +720,8 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                     <input
                       id="customCategory"
                       name="customCategory"
+                      list={CUSTOM_CATEGORY_SUGGESTIONS_ID}
+                      autoComplete="off"
                       type="text"
                       value={formData.customCategory || ''}
                       onChange={handleChange}
@@ -726,6 +729,7 @@ const CreateBusinessListingForm: React.FC<CreateBusinessListingFormProps> = ({ o
                       className={inputClasses()}
                       placeholder={t('form.placeholders.customCategory', 'e.g. Property Management, Solar Energy...')}
                     />
+                    <CustomCategorySuggestions />
                   </div>
                 )}
               </div>

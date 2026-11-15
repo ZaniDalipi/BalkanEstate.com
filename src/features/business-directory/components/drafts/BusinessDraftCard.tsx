@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessDraftSummary } from '../../utils/businessDrafts';
+import { categoryLabel } from '../../utils/categoryStyle';
 
 interface BusinessDraftCardProps {
   draft: BusinessDraftSummary;
@@ -30,7 +31,7 @@ const BusinessDraftCard: React.FC<BusinessDraftCardProps> = ({ draft, onContinue
           </span>
           <h4 className={`font-bold truncate ${draft.name ? 'text-neutral-900' : 'text-neutral-500 italic'}`}>{name}</h4>
           <p className="text-xs text-neutral-500 truncate">
-            {[draft.category ? t(`categories.${draft.category}`) : '', place].filter(Boolean).join(' · ')}
+            {[draft.category ? categoryLabel({ category: draft.category, customCategory: draft.customCategory }, t) : '', place].filter(Boolean).join(' · ')}
           </p>
         </div>
       </div>

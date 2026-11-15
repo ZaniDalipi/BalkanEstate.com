@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import {
   getBusinessListings,
+  getBusinessCategories,
   getBusinessListing,
   createBusinessListing,
   updateBusinessListing,
@@ -36,6 +37,7 @@ const upload = multer({
 
 // Public routes
 router.get('/', getBusinessListings);
+router.get('/categories', getBusinessCategories);
 
 // Protected routes (must come before /:id to avoid conflicts)
 router.get('/my-listings', protect, getMyBusinessListings);
