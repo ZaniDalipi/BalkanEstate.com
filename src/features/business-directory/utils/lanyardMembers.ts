@@ -3,7 +3,8 @@ import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 
 /** How many professionals hang on the rail; more turns it into a crowd. */
 export const MAX_LANYARDS = 8;
-const BIO_MAX = 140;
+/** The back shows three short lines: keep the text to what fits. */
+const BIO_MAX = 110;
 
 export interface LanyardMapping {
   /** Translated category name, printed as the role. */
@@ -40,7 +41,7 @@ export function factsBio(l: BusinessListing, role: string, facts: LanyardMapping
   return parts.join(' ');
 }
 
-/** Up to three short chips: Verified, services, then price, founding year, a language, member since. */
+/** Up to two short chips (the back stays minimal): Verified, services, then price, founding year, a language, member since. */
 export function badgeTags(l: BusinessListing, map: LanyardMapping): string[] {
   const joined = Number.parseInt(l.createdAt?.slice(0, 4) ?? '', 10);
   const chips = [
@@ -51,7 +52,7 @@ export function badgeTags(l: BusinessListing, map: LanyardMapping): string[] {
     ...(l.languages?.length ? [l.languages[0]] : []),
     ...(Number.isFinite(joined) ? [map.facts.memberSince(joined)] : []),
   ].map((c) => c.trim()).filter(Boolean);
-  return Array.from(new Set(chips)).slice(0, 3);
+  return Array.from(new Set(chips)).slice(0, 2);
 }
 
 export function shortBio(text: string | undefined, max = BIO_MAX): string | undefined {
@@ -60,7 +61,8 @@ export function shortBio(text: string | undefined, max = BIO_MAX): string | unde
   if (clean.length <= max) return clean;
   const cut = clean.slice(0, max);
   const lastSpace = cut.lastIndexOf(' ');
-  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+  // No "more.…": drop trailing punctuation before the ellipsis.
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd().replace(/[\s.,;:!?\-–—]+$/u, '')}…`;
 }
 
 /** Individual listings → badges for the lanyard rail (profile link first, then email, then phone). */

@@ -37,7 +37,7 @@ describe('toLanyardMembers', () => {
     })], map);
     expect(m).toMatchObject({
       id: 'id1', name: 'Ana', role: 'role:cleaning', team: 'Pula, Croatia', image: 'img:id1', bio: 'Tidy homes.',
-      tags: ['Verified', 'Deep clean', 'Windows'], tone: 1,
+      tags: ['Verified', 'Deep clean'], tone: 1,
     });
     expect(m?.links).toEqual([
       { label: 'Profile', href: '/en/business-directory/ana' },
@@ -63,6 +63,7 @@ describe('shortBio', () => {
   it('collapses whitespace and trims long text at a word', () => {
     expect(shortBio('  a   b ')).toBe('a b');
     expect(shortBio('one two three four five', 16)).toBe('one two three…');
+    expect(shortBio('Tours, hotels, and more. Captivate everyone', 25)).toBe('Tours, hotels, and more…');
     expect(shortBio('')).toBeUndefined();
   });
 });
@@ -80,11 +81,11 @@ describe('factsBio', () => {
 describe('badgeTags', () => {
   it('fills free slots with price, founding year, a language and member since', () => {
     const l = listing({ priceRange: '$$', yearEstablished: 2019, languages: ['English'], createdAt: '2024-05-01T00:00:00Z' });
-    expect(badgeTags(l, map)).toEqual(['$$', 'Est. 2019', 'English']);
+    expect(badgeTags(l, map)).toEqual(['$$', 'Est. 2019']);
     expect(badgeTags(listing({ createdAt: '2024-05-01T00:00:00Z' }), map)).toEqual(['Member since 2024']);
   });
-  it('keeps Verified and services first, without duplicates, at most three', () => {
+  it('keeps Verified and services first, without duplicates, at most two', () => {
     const l = listing({ isVerified: true, services: ['Windows', 'Windows', ' '], priceRange: '$' });
-    expect(badgeTags(l, map)).toEqual(['Verified', 'Windows', '$']);
+    expect(badgeTags(l, map)).toEqual(['Verified', 'Windows']);
   });
 });
