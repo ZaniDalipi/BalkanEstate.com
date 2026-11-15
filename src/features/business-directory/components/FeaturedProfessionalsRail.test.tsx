@@ -24,6 +24,14 @@ const person = (over: Partial<BusinessListing> = {}): BusinessListing => ({
 } as BusinessListing);
 
 describe('FeaturedProfessionalsRail', () => {
+  it('invites the first professional when asked to show while empty', () => {
+    const onList = vi.fn();
+    render(<FeaturedProfessionalsRail listings={[]} onListYourself={onList} showWhenEmpty />);
+    expect(screen.getByRole('heading', { name: 'Featured Professionals' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Offer your services/ }));
+    expect(onList).toHaveBeenCalledTimes(1);
+  });
+
   it('renders nothing without individuals', () => {
     const { container } = render(<FeaturedProfessionalsRail listings={[person({ listingType: 'business' })]} onListYourself={() => {}} />);
     expect(container.firstChild).toBeNull();

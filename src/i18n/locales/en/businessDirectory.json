@@ -30,7 +30,8 @@
     "cta": "Offer your services",
     "profile": "View profile",
     "email": "Email",
-    "call": "Call"
+    "call": "Call",
+    "empty": "No professionals listed yet. Offer your services and be the first badge on the rail."
   },
   "filters": {
     "all": "All"
@@ -420,5 +421,19 @@
     "paypal": "PayPal",
     "crypto": "Crypto",
     "invoice": "Invoice"
+  },
+  "shareCard": {
+    "title": "Share as a card",
+    "subtitle": "A card with a QR code that opens this page on BalkanEstate.",
+    "scan": "Scan to view on BalkanEstate",
+    "share": "Share card",
+    "download": "Download image",
+    "shareLink": "Share the link",
+    "copyLink": "Copy link",
+    "close": "Close",
+    "preview": "Share card for {{name}}",
+    "making": "Making the card…",
+    "failed": "The card couldn’t be made. You can still share the link below.",
+    "retry": "Try again"
   }
 }

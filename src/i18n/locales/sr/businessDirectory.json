@@ -30,7 +30,8 @@
     "cta": "Ponudite svoje usluge",
     "profile": "Pogledaj profil",
     "email": "Email",
-    "call": "Pozovi"
+    "call": "Pozovi",
+    "empty": "Još nema stručnjaka. Ponudite svoje usluge i budite prva kartica na šipki."
   },
   "filters": {
     "all": "Све"
@@ -423,5 +424,19 @@
     "paypal": "PayPal",
     "crypto": "Крипто",
     "invoice": "Фактура"
+  },
+  "shareCard": {
+    "title": "Podeli kao karticu",
+    "subtitle": "Kartica sa QR kodom koji otvara ovu stranicu na BalkanEstate.",
+    "scan": "Skenirajte za prikaz na BalkanEstate",
+    "share": "Podeli karticu",
+    "download": "Preuzmi sliku",
+    "shareLink": "Podeli link",
+    "copyLink": "Kopiraj link",
+    "close": "Zatvori",
+    "preview": "Kartica za {{name}}",
+    "making": "Pravim karticu…",
+    "failed": "Kartica nije mogla da se napravi. Link i dalje možete podeliti ispod.",
+    "retry": "Pokušaj ponovo"
   }
 }

@@ -4,7 +4,8 @@
  * Team lanyard rail: badges on lanyards hanging from a rail; hover/brush,
  * pull down, click to flip. Vendored from 21st.dev (@dhxwhy/team-lanyard-rail)
  * and kept as one file on purpose so it can be compared with / updated from
- * upstream. Colours come from the shadcn tokens in src/index.css (@theme):
+ * upstream. Local change: the carousel dots are 44px tap targets with the
+ * small dot drawn inside (the upstream dot was the whole 6px button). Colours come from the shadcn tokens in src/index.css (@theme):
  * background, foreground, card, muted, border, ring and chart-1…5.
  */
 
@@ -1121,9 +1122,11 @@ export function TeamLanyardRail({
       </div>
 
       {size.carousel && count > 1 && (
-        <div className="relative z-10 mt-1 flex justify-center gap-1.5" role="group" aria-label={labels.show}>
+        <div className="relative z-10 flex justify-center" role="group" aria-label={labels.show}>
           {items.map((item, i) => (
-            <button key={item.id} type="button" aria-label={`${labels.show} ${item.name}`} aria-current={centerIndex === i} onClick={() => { stop(); setActive(i); }} className={`h-1.5 rounded-full outline-none transition-[width,background-color] duration-300 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none ${centerIndex === i ? "w-6 bg-foreground" : "w-1.5 bg-foreground/25 hover:bg-foreground/45"}`} />
+            <button key={item.id} type="button" aria-label={`${labels.show} ${item.name}`} aria-current={centerIndex === i} onClick={() => { stop(); setActive(i); }} className="group flex h-11 items-center px-1 outline-none">
+              <span aria-hidden="true" className={`block h-1.5 rounded-full transition-[width,background-color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-ring motion-reduce:transition-none ${centerIndex === i ? "w-6 bg-foreground" : "w-1.5 bg-foreground/25 group-hover:bg-foreground/45"}`} />
+            </button>
           ))}
         </div>
       )}

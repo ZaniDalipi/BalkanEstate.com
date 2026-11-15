@@ -1,13 +1,17 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TeamLanyardRail from '@/src/components/ui/team-lanyard-rail';
-import { PlusIcon } from '@/constants';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { localizePath, navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { generateBusinessSlug } from '@/utils/slug';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { toLanyardMembers } from '../utils/lanyardMembers';
+import { useShareAndCopy } from '../hooks/useShareAndCopy';
+import RailActions from './RailActions';
+import ShareCardDialog from './share/ShareCardDialog';
+import { DetailToast } from './detail/DetailToast';
 
 interface FeaturedProfessionalsRailProps {
   /** Listings on screen; individuals among them hang on the rail. */
@@ -16,19 +20,28 @@ interface FeaturedProfessionalsRailProps {
   onListYourself: () => void;
   /** Spacing around the card, from the page that places it. */
   className?: string;
+  /** With nobody to show: an invitation to be the first (true) or nothing (false). */
+  showWhenEmpty?: boolean;
 }
 
+const CARD = 'overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.14),0_28px_60px_-32px_rgba(15,23,42,0.28)]';
 const profilePath = (l: BusinessListing) => paths.businessListing(generateBusinessSlug(l));
 
 /**
  * Featured professionals as ID badges on lanyards: hover or tap to meet
- * someone, pull a badge down, click to flip it for their bio and contacts.
+ * someone, pull a badge down, click to flip it for their bio and contacts;
+ * open or share whoever is up front from the buttons underneath.
  */
-const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ listings, onListYourself, className = '' }) => {
+const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ listings, onListYourself, className = '', showWhenEmpty = false }) => {
   const { t } = useTranslation('businessDirectory');
+  const people = useMemo(() => listings.filter((l) => l.listingType === 'individual'), [listings]);
+  const [active, setActive] = useState<number | null>(null);
+  const [flipped, setFlipped] = useState<number | null>(null);
+  const [sharing, setSharing] = useState<BusinessListing | null>(null);
+  const { toast, copy } = useShareAndCopy('');
 
-  const members = useMemo(() => toLanyardMembers(listings, {
-    roleOf: (l) => t(`categories.${l.category}`),
+  const members = useMemo(() => toLanyardMembers(people, {
+    roleOf: (l) => l.customCategory || t(`categories.${l.category}`),
     imageOf: (l) => optimizeImageUrl(l.logoUrl || l.owner?.avatarUrl, { width: 240, height: 240 }),
     profileHrefOf: (l) => localizePath(profilePath(l)),
     labels: {
@@ -37,14 +50,11 @@ const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ l
       call: t('individuals.call', 'Call'),
       verified: t('verified', 'Verified'),
     },
-  }), [listings, t]);
+  }), [people, t]);
 
-  // The badges' profile links are plain <a href>: open them in the app
-  // (no full reload) unless the visitor asked for a new tab.
-  const routes = useMemo(
-    () => new Map(listings.map((l) => [localizePath(profilePath(l)), profilePath(l)])),
-    [listings],
-  );
+  // Badge links are plain <a href>: open our own pages in the app (no reload)
+  // unless the visitor asked for a new tab.
+  const routes = useMemo(() => new Map(people.map((l) => [localizePath(profilePath(l)), profilePath(l)])), [people]);
   const openInApp = useCallback((e: React.MouseEvent) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const href = (e.target as Element).closest('a')?.getAttribute('href');
@@ -54,35 +64,43 @@ const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ l
     navigate(path);
   }, [routes]);
 
-  if (members.length === 0) return null;
+  const current = flipped ?? active;
+  const person = current === null ? null : people[current] ?? null;
+  const actions = (
+    <RailActions person={person} onOpen={(l) => navigate(profilePath(l))} onShare={setSharing} onListYourself={onListYourself} />
+  );
+
+  if (members.length === 0) {
+    if (!showWhenEmpty) return null;
+    return (
+      <div className={`${CARD} flex flex-col items-center gap-3 px-6 py-10 text-center ${className}`}>
+        <SoftIcon name="users" className="h-14 w-14" />
+        <h2 className="text-2xl font-medium tracking-tight text-neutral-900">{t('individuals.title', 'Featured Professionals')}</h2>
+        <p className="max-w-md text-sm text-neutral-500">{t('individuals.empty', 'No professionals listed yet. Offer your services and be the first badge on the rail.')}</p>
+        {actions}
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`overflow-hidden rounded-[28px] border border-white/80 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.14),0_28px_60px_-32px_rgba(15,23,42,0.28)] ${className}`}
-      onClick={openInApp}
-    >
+    <div className={`${CARD} ${className}`} onClick={openInApp}>
       <TeamLanyardRail
         items={members}
         eyebrow={t('individuals.eyebrow', 'Meet the professionals')}
         heading={t('individuals.title', 'Featured Professionals')}
         caption={t('individuals.subtitle', 'Connect with skilled individuals offering expertise across the real estate sector')}
         autoplay
+        onActiveChange={setActive}
+        onFlippedChange={setFlipped}
         labels={{
           flip: t('individuals.flip', 'Click or press Enter to flip the badge'),
           back: t('individuals.back', 'Click again or press Esc to turn it back'),
           show: t('individuals.show', 'Show'),
         }}
-        action={(
-          <button
-            type="button"
-            onClick={onListYourself}
-            className="liquid-tint inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold"
-          >
-            <PlusIcon className="h-4 w-4" />
-            {t('individuals.cta', 'Offer your services')}
-          </button>
-        )}
+        action={actions}
       />
+      {sharing && <ShareCardDialog listing={sharing} onClose={() => setSharing(null)} onCopy={copy} />}
+      <DetailToast toast={toast} />
     </div>
   );
 };

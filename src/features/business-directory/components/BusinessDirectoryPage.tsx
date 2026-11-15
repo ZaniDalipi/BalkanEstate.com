@@ -14,6 +14,7 @@ import { useMinimumLoading } from '../hooks/useMinimumLoading';
 import ChipScroller from '@/src/components/ui/ChipScroller';
 import { useOffscreen } from '../hooks/useOffscreen';
 import FeaturedProfessionalsRail from './FeaturedProfessionalsRail';
+import { MAX_LANYARDS } from '../utils/lanyardMembers';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
 import { SearchIcon, PlusIcon, MicrophoneIcon, ArrowPathIcon, MapIcon } from '@/constants';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
@@ -33,6 +34,9 @@ interface BusinessDirectoryPageProps {
 }
 
 type TabType = 'all' | 'businesses' | 'individuals' | 'mine';
+
+/** The featured professionals rail's own query: independent of the tab and filters below it. */
+const PROFESSIONALS_FILTER = { listingType: 'individual' as const, limit: MAX_LANYARDS };
 type ViewMode = 'grid' | 'map';
 
 const CATEGORY_ICONS: Record<string, SoftIconName> = {
@@ -169,6 +173,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
   const { listings: allListings, total, totalPages, isLoading, isSwitching } = useBusinessListings(filters);
   const { listings: myListings, isLoading: myListingsLoading } = useMyBusinessListings(!!state.currentUser);
+  const { listings: professionals, isLoading: professionalsLoading } = useBusinessListings(PROFESSIONALS_FILTER);
 
   const listings = activeTab === 'mine' ? myListings : allListings;
   const effectiveLoading = activeTab === 'mine' ? myListingsLoading : isLoading;
@@ -584,9 +589,12 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
           </div>
         </motion.div>
 
-        {/* Featured professionals: ID badges on lanyards */}
-        {(activeTab === 'all' || activeTab === 'individuals') && (
-          <FeaturedProfessionalsRail listings={individualListings} onListYourself={handleCreateClick} className="mb-6 sm:mb-8" />
+        {/* Featured professionals: ID badges on lanyards. Always shown, on every
+            tab and filter (its own query), with an invitation when there are none. */}
+        {professionalsLoading ? (
+          <div className="mb-6 h-[26rem] animate-pulse rounded-[28px] bg-white/70 sm:mb-8" aria-hidden="true" />
+        ) : (
+          <FeaturedProfessionalsRail listings={professionals} onListYourself={handleCreateClick} className="mb-6 sm:mb-8" showWhenEmpty />
         )}
 
         {/* Category filters */}

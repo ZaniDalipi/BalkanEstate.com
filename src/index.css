@@ -2914,3 +2914,12 @@ html {
 @media (min-width: 640px) {
   .bd-hero-wave { --bd-wave-h: 56px; }
 }
+
+/* Team lanyard rail: the app gives every touch-screen button and link a 44px
+   minimum height (index.html, "Better touch targets"). The contact lines
+   printed on a badge's back are ~10px text inside a ~180px card, so that rule
+   stretched them over the bio. They are decoration-sized there; the rail's
+   own 44px action buttons below it are the touch targets. */
+[data-slot="team-lanyard-rail"] [data-links] a {
+  min-height: 0;
+}

@@ -30,7 +30,8 @@
     "cta": "Oferă-ți serviciile",
     "profile": "Vezi profilul",
     "email": "Email",
-    "call": "Sună"
+    "call": "Sună",
+    "empty": "Încă nu există profesioniști. Oferă-ți serviciile și fii primul ecuson de pe bară."
   },
   "filters": {
     "all": "Toate"
@@ -423,5 +424,19 @@
     "paypal": "PayPal",
     "crypto": "Cripto",
     "invoice": "Factură"
+  },
+  "shareCard": {
+    "title": "Distribuie ca ecuson",
+    "subtitle": "Un ecuson cu cod QR care deschide această pagină pe BalkanEstate.",
+    "scan": "Scanează pentru a vedea pe BalkanEstate",
+    "share": "Distribuie ecusonul",
+    "download": "Descarcă imaginea",
+    "shareLink": "Distribuie linkul",
+    "copyLink": "Copiază linkul",
+    "close": "Închide",
+    "preview": "Ecuson pentru {{name}}",
+    "making": "Se creează ecusonul…",
+    "failed": "Ecusonul nu a putut fi creat. Poți distribui totuși linkul de mai jos.",
+    "retry": "Încearcă din nou"
   }
 }

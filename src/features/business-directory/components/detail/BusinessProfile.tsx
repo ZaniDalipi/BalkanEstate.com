@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'framer-motion';
 import { optimizeImageUrl } from '@/config/mediaConfig';
@@ -9,6 +9,7 @@ import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import { useNow } from '../../hooks/useNow';
 import { useScrolledPast } from '../../hooks/useScrolledPast';
 import { useShareAndCopy } from '../../hooks/useShareAndCopy';
+import ShareCardDialog from '../share/ShareCardDialog';
 import { useVisitorLocation } from '../../hooks/useVisitorLocation';
 import { useBusinessPlace } from '../../hooks/useBusinessPlace';
 import { haversineKm } from '../../utils/travel';
@@ -47,7 +48,9 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const now = useNow();
   const actionsRef = useRef<HTMLDivElement>(null);
   const actionsPast = useScrolledPast(actionsRef);
-  const { toast, share, copy } = useShareAndCopy(listing.name);
+  const { toast, copy } = useShareAndCopy(listing.name);
+  // Share opens the card: image + QR code to this page, the share sheet, networks, copy link.
+  const [sharing, setSharing] = useState(false);
   const { location, locate } = useVisitorLocation();
   const reduceMotion = useReducedMotion();
   const jumpTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
@@ -90,7 +93,7 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
           distanceKm={distanceKm}
           onDistanceClick={() => jumpTo('business-location')}
         >
-          <BusinessQuickActions ref={actionsRef} actions={quickActions(channels)} onShare={share} />
+          <BusinessQuickActions ref={actionsRef} actions={quickActions(channels)} onShare={() => setSharing(true)} />
         </BusinessIdentityCard>
 
         <div className="mt-5 grid gap-5 px-3 sm:mt-6 sm:px-0 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
@@ -119,6 +122,7 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
         <Footer />
       </div>
       <BusinessMobileActionBar visible={actionsPast && !isOwner} name={listing.name} status={status} channels={channels} />
+      {sharing && <ShareCardDialog listing={listing} onClose={() => setSharing(false)} onCopy={copy} />}
       <DetailToast toast={toast} />
     </div>
   );

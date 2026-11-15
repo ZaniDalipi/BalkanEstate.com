@@ -30,7 +30,8 @@
     "cta": "Ofroni shërbimet tuaja",
     "profile": "Shiko profilin",
     "email": "Email",
-    "call": "Telefono"
+    "call": "Telefono",
+    "empty": "Ende nuk ka profesionistë. Ofroni shërbimet tuaja dhe bëhuni karta e parë në shirit."
   },
   "filters": {
     "all": "Të gjitha"
@@ -420,5 +421,19 @@
     "paypal": "PayPal",
     "crypto": "Kriptomonedha",
     "invoice": "Faturë"
+  },
+  "shareCard": {
+    "title": "Ndaje si kartë",
+    "subtitle": "Një kartë me kod QR që hap këtë faqe në BalkanEstate.",
+    "scan": "Skano për ta parë në BalkanEstate",
+    "share": "Ndaj kartën",
+    "download": "Shkarko imazhin",
+    "shareLink": "Ndaj lidhjen",
+    "copyLink": "Kopjo lidhjen",
+    "close": "Mbyll",
+    "preview": "Karta për {{name}}",
+    "making": "Po krijohet karta…",
+    "failed": "Karta nuk u krijua dot. Mund ta ndani përsëri lidhjen më poshtë.",
+    "retry": "Provo përsëri"
   }
 }

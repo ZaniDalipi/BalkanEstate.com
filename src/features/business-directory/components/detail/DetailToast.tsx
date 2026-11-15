@@ -7,7 +7,7 @@ import type { Toast } from '../../hooks/useShareAndCopy';
 export const DetailToast: React.FC<{ toast: Toast }> = ({ toast }) => {
   const reduce = useReducedMotion();
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-28 z-50 flex justify-center px-4 lg:bottom-8" role="status" aria-live="polite">
+    <div className="pointer-events-none fixed inset-x-0 bottom-28 z-[5100] flex justify-center px-4 lg:bottom-8" role="status" aria-live="polite">
       <AnimatePresence>
         {toast && (
           <motion.p
