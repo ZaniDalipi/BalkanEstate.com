@@ -31,7 +31,13 @@
     "profile": "View profile",
     "email": "Email",
     "call": "Call",
-    "empty": "No professionals listed yet. Offer your services and be the first badge on the rail."
+    "empty": "No professionals listed yet. Offer your services and be the first badge on the rail.",
+    "facts": {
+      "locatedIn": "{{role}} in {{place}}.",
+      "serves": "Serves {{areas}}.",
+      "speaks": "Speaks {{languages}}.",
+      "memberSince": "Member since {{year}}"
+    }
   },
   "filters": {
     "all": "All"

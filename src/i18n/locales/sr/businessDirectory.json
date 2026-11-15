@@ -31,7 +31,13 @@
     "profile": "Pogledaj profil",
     "email": "Email",
     "call": "Pozovi",
-    "empty": "Još nema stručnjaka. Ponudite svoje usluge i budite prva kartica na šipki."
+    "empty": "Još nema stručnjaka. Ponudite svoje usluge i budite prva kartica na šipki.",
+    "facts": {
+      "locatedIn": "{{role}} u mestu {{place}}.",
+      "serves": "Radi i u: {{areas}}.",
+      "speaks": "Govori: {{languages}}.",
+      "memberSince": "Član od {{year}}"
+    }
   },
   "filters": {
     "all": "Све"

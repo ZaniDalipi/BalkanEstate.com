@@ -31,7 +31,13 @@
     "profile": "Vezi profilul",
     "email": "Email",
     "call": "Sună",
-    "empty": "Încă nu există profesioniști. Oferă-ți serviciile și fii primul ecuson de pe bară."
+    "empty": "Încă nu există profesioniști. Oferă-ți serviciile și fii primul ecuson de pe bară.",
+    "facts": {
+      "locatedIn": "{{role}} în {{place}}.",
+      "serves": "Activează și în: {{areas}}.",
+      "speaks": "Vorbește: {{languages}}.",
+      "memberSince": "Membru din {{year}}"
+    }
   },
   "filters": {
     "all": "Toate"
