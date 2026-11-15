@@ -301,7 +301,8 @@ function Band({ tone, tall, label }: { tone: string; tall?: boolean; label?: str
         // Engraved: light letters pressed into the band (dark edge above, light edge below).
         // On the tall front band it sits between the clip slot and the portrait.
         <span
-          className={`absolute block truncate text-center font-extrabold uppercase ${tall ? "inset-x-[1.6em] top-[2.35em] text-[0.5em] tracking-[0.24em]" : "inset-x-[0.8em] bottom-[0.42em] text-[0.62em] tracking-[0.26em]"}`}
+          // Same size and weight on both faces; on the tall front band it sits below the clip slot (which ends at 1.28em).
+          className={`absolute block truncate text-center text-[0.62em] font-extrabold uppercase tracking-[0.26em] ${tall ? "inset-x-[1.3em] top-[2.2em]" : "inset-x-[0.8em] bottom-[0.42em]"}`}
           style={{ color: "color-mix(in oklab, white 88%, currentColor)", textShadow: "0 -0.08em 0 color-mix(in oklab, black 45%, transparent), 0 0.08em 0 color-mix(in oklab, white 35%, transparent)" }}
         >
           {label}
@@ -352,7 +353,7 @@ const BadgeFaces = React.memo(function BadgeFaces({ item, tone }: { item: Lanyar
       <span data-face="front" className="absolute inset-0 flex flex-col items-center overflow-hidden rounded-[0.85em] border border-border bg-card px-[0.8em] pb-[0.7em] text-card-foreground [backface-visibility:hidden]" style={{ transform: "translateZ(1px)" }}>
         <Band tone={tone} tall label={item.role} />
         <Hole />
-        <span className="relative mt-[2.3em] block size-[5.3em] shrink-0 rounded-full bg-card p-[0.2em]" style={{ boxShadow: "0 0.15em 0.5em color-mix(in oklab, var(--color-foreground) 22%, transparent)" }}>
+        <span className="relative mt-[2.55em] block size-[5.3em] shrink-0 rounded-full bg-card p-[0.2em]" style={{ boxShadow: "0 0.15em 0.5em color-mix(in oklab, var(--color-foreground) 22%, transparent)" }}>
           <span className="relative block size-full overflow-hidden rounded-full bg-muted">
             <Silhouette />
             {!failed && <img src={item.image} alt="" draggable={false} decoding="async" onError={() => setFailed(true)} className="pointer-events-none absolute inset-0 block size-full select-none object-cover" />}
