@@ -1269,6 +1269,15 @@
       "auctionUrlRequired": "Adăugați linkul unde se poate licita online",
       "auctionPrice": "Introduceți prețul de pornire ca număr sau lăsați gol",
       "auctionServer": "Detaliile licitației nu pot fi salvate așa. Verificați-le și publicați din nou."
+    },
+    "announce": {
+      "close": "Închide mesajul",
+      "badge": "Nou pentru anunțurile dvs.",
+      "title": "Acum puteți organiza zile ale porților deschise și anunța licitații",
+      "body": "Alegeți o dată când cumpărătorii pot trece sau data licitației pentru locuința dvs. Apare în anunț, în căutare și pe hartă, iar cei care au salvat locuința sunt anunțați. Ambele sunt opționale.",
+      "cta": "Adăugați la un anunț",
+      "later": "Nu acum",
+      "daysLeft": "Zile rămase: {{count}}"
     }
   }
 }

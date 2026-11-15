@@ -1269,6 +1269,15 @@
       "auctionUrlRequired": "Dodajte poveznicu na kojoj se može licitirati online",
       "auctionPrice": "Unesite početnu cijenu kao broj ili ostavite prazno",
       "auctionServer": "Podaci o dražbi ne mogu se spremiti ovakvi. Provjerite ih i ponovno objavite."
+    },
+    "announce": {
+      "close": "Zatvori ovu poruku",
+      "badge": "Novo za vaše oglase",
+      "title": "Sada možete organizirati dane otvorenih vrata i najaviti dražbe",
+      "body": "Odaberite datum kada kupci mogu svratiti ili datum dražbe vaše nekretnine. Prikazuje se u oglasu, u pretrazi i na karti, a obavještavaju se i oni koji su spremili vašu nekretninu. Oboje je neobavezno.",
+      "cta": "Dodajte na oglas",
+      "later": "Ne sada",
+      "daysLeft": "Preostalo dana: {{count}}"
     }
   }
 }

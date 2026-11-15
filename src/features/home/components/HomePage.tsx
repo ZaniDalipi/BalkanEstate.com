@@ -25,6 +25,7 @@ const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m
 const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
 const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
 const HomeEventsSection = lazy(() => import('@/src/features/listing-events/components/HomeEventsSection'));
+const EventsAnnouncementCard = lazy(() => import('@/src/features/listing-events/announcement/EventsAnnouncementCard'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
@@ -258,6 +259,13 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" showPlaceholder />
 
       <AppShowcaseSection onNavigate={handleNavigate} />
+
+      {/* Sellers, for one week: open houses and auctions are new */}
+      {isAuthenticated && currentUser && (
+        <Suspense fallback={null}>
+          <EventsAnnouncementCard user={currentUser} />
+        </Suspense>
+      )}
 
       {isAuthenticated && currentUser && (
         <QuickAccessSection

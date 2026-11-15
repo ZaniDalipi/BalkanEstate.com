@@ -1268,6 +1268,15 @@
       "auctionUrlRequired": "Add the link where people can bid online",
       "auctionPrice": "Enter the starting price as a number, or leave it empty",
       "auctionServer": "The auction details can't be saved as they are. Check them and publish again."
+    },
+    "announce": {
+      "close": "Close this message",
+      "badge": "New for your listings",
+      "title": "You can now host open houses and announce auctions",
+      "body": "Pick a date when buyers can drop by, or the date your home goes to auction. It shows on your listing, in search and on the map, and people who saved your home are told. Both are optional.",
+      "cta": "Add one to a listing",
+      "later": "Not now",
+      "daysLeft": "Days left: {{count}}"
     }
   }
 }

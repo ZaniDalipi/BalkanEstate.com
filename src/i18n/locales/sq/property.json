@@ -1268,6 +1268,15 @@
       "auctionUrlRequired": "Shtoni lidhjen ku njerëzit mund të ofertojnë online",
       "auctionPrice": "Shkruani çmimin fillestar si numër, ose lëreni bosh",
       "auctionServer": "Të dhënat e ankandit nuk mund të ruhen kështu. Kontrollojini dhe publikoni përsëri."
+    },
+    "announce": {
+      "close": "Mbyll këtë mesazh",
+      "badge": "E re për shpalljet tuaja",
+      "title": "Tani mund të organizoni ditë të hapura dhe të shpallni ankande",
+      "body": "Zgjidhni një datë kur blerësit mund të vijnë, ose datën kur shtëpia juaj del në ankand. Shfaqet te shpallja, në kërkim dhe në hartë, dhe njoftohen ata që e kanë ruajtur shtëpinë. Të dyja janë opsionale.",
+      "cta": "Shtojeni te një shpallje",
+      "later": "Jo tani",
+      "daysLeft": "Ditë të mbetura: {{count}}"
     }
   }
 }

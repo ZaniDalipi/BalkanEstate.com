@@ -1875,6 +1875,11 @@ GET /api/properties
   claimed with a flag before it is sent, so two runs never send it twice.
 - **Privacy.** Visitors never see who else is coming; a guest cancels only their
   own sign-up (by its id); only http(s) auction links are rendered.
+- **Telling sellers.** `listing-events/announcement/EventsAnnouncementCard` shows
+  on the home screen to signed-in users with listings
+  (`subscription.activeListingsCount` / `listingsCount`) for one week from the
+  first time each of them sees it, until they close it. The start date and the
+  "closed" choice are kept per browser (`announcementStore`, safe storage).
 
 ## Schedule Viewing Modal
 
