@@ -109,7 +109,9 @@ export const getPriorityScore = (property: {
 };
 
 /**
- * Sort properties with promotion priority and hourly rotation
+ * Sort properties with promotion priority and hourly rotation.
+ * Promoted tiers come first and rotate within a tier; standard listings keep
+ * their input order, so pass them already sorted (e.g. by the visitor's sortBy).
  *
  * @param properties - Array of properties to sort
  * @param currentHour - Current hour (0-23), defaults to system time
@@ -122,8 +124,6 @@ export const sortPropertiesWithHighlighting = <T extends {
   promotionEndDate?: Date | number | null;
   promotionTier?: string;
   hasUrgentBadge?: boolean;
-  lastRenewed?: Date | number;
-  createdAt?: Date | number;
 }>(
   properties: T[],
   currentHour: number = new Date().getHours()
@@ -150,14 +150,10 @@ export const sortPropertiesWithHighlighting = <T extends {
       return aSlot - bSlot;
     }
 
-    // For standard properties, maintain lastRenewed/createdAt order
-    const aTime = a.lastRenewed || a.createdAt;
-    const bTime = b.lastRenewed || b.createdAt;
-
-    const aTimestamp = aTime instanceof Date ? aTime.getTime() : (aTime || 0);
-    const bTimestamp = bTime instanceof Date ? bTime.getTime() : (bTime || 0);
-
-    return bTimestamp - aTimestamp;
+    // Standard properties keep the order they came in (Array.prototype.sort is
+    // stable), so the database's sort — the visitor's sortBy, or newest first by
+    // default — survives within the tier.
+    return 0;
   });
 };
 
