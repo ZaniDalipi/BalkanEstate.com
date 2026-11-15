@@ -35,6 +35,7 @@ const NewsSection = lazy(() => import('./NewsSection'));
 const TestimonialsSection = lazy(() => import('./TestimonialsSection'));
 const HomeResidencesSection = lazy(() => import('./residences/HomeResidencesSection'));
 const HomeBusinessesSection = lazy(() => import('./businesses/HomeBusinessesSection'));
+const HomeProfessionalsSection = lazy(() => import('./businesses/HomeProfessionalsSection'));
 
 const SectionFallback = () => (
   <div className="py-16 flex justify-center">
@@ -278,8 +279,8 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         </Suspense>
       </div>
 
-      {/* Just below the featured listings: new residences (a scroll stack)
-          and the business directory. */}
+      {/* Just below the featured listings: new residences (a scroll stack),
+          the business directory and its featured professionals. */}
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
           <HomeResidencesSection />
@@ -288,6 +289,11 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
           <HomeBusinessesSection />
+        </Suspense>
+      </div>
+      <div className="content-below-fold">
+        <Suspense fallback={<SectionFallback />}>
+          <HomeProfessionalsSection />
         </Suspense>
       </div>
 

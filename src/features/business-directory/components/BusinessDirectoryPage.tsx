@@ -586,7 +586,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Featured professionals: ID badges on lanyards */}
         {(activeTab === 'all' || activeTab === 'individuals') && (
-          <FeaturedProfessionalsRail listings={individualListings} onListYourself={handleCreateClick} />
+          <FeaturedProfessionalsRail listings={individualListings} onListYourself={handleCreateClick} className="mb-6 sm:mb-8" />
         )}
 
         {/* Category filters */}

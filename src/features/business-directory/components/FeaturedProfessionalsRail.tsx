@@ -14,6 +14,8 @@ interface FeaturedProfessionalsRailProps {
   listings: BusinessListing[];
   /** "Offer your services": starts a new listing (sign-in guarded by the page). */
   onListYourself: () => void;
+  /** Spacing around the card, from the page that places it. */
+  className?: string;
 }
 
 const profilePath = (l: BusinessListing) => paths.businessListing(generateBusinessSlug(l));
@@ -22,7 +24,7 @@ const profilePath = (l: BusinessListing) => paths.businessListing(generateBusine
  * Featured professionals as ID badges on lanyards: hover or tap to meet
  * someone, pull a badge down, click to flip it for their bio and contacts.
  */
-const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ listings, onListYourself }) => {
+const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ listings, onListYourself, className = '' }) => {
   const { t } = useTranslation('businessDirectory');
 
   const members = useMemo(() => toLanyardMembers(listings, {
@@ -56,7 +58,7 @@ const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ l
 
   return (
     <div
-      className="mb-6 overflow-hidden rounded-[28px] border border-white/80 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.14),0_28px_60px_-32px_rgba(15,23,42,0.28)] sm:mb-8"
+      className={`overflow-hidden rounded-[28px] border border-white/80 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.14),0_28px_60px_-32px_rgba(15,23,42,0.28)] ${className}`}
       onClick={openInApp}
     >
       <TeamLanyardRail
