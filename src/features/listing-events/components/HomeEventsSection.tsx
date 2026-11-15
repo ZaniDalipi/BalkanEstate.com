@@ -33,7 +33,7 @@ const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({ country, onSeeAll
               {t('listingEvents.homeSubtitle', { defaultValue: 'Drop by this weekend, or put a date in your calendar.' })}
             </p>
           </div>
-          <button type="button" onClick={onSeeAll} className="min-h-[44px] rounded-lg px-3 text-sm font-semibold text-primary-700 hover:bg-primary-50">
+          <button type="button" onClick={onSeeAll} className="min-h-[44px] rounded-lg px-3 text-sm font-semibold text-primary hover:bg-primary/10">
             {t('listingEvents.seeAll', { defaultValue: 'See all' })}
           </button>
         </div>

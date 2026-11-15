@@ -24,7 +24,7 @@ const AuctionDetails: React.FC<{ auction: Auction; country?: string }> = ({ auct
 
   return (
     <div className="mt-2 space-y-1 text-sm">
-      <dl className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-1">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
         {rows.map(([k, v]) => (
           <React.Fragment key={k}>
             <dt className="text-neutral-500">{k}</dt>

@@ -58,7 +58,7 @@ const AuctionFields: React.FC<AuctionFieldsProps> = ({ value, onChange, error, s
           </div>
           <AuctionModePicker value={value.mode} onChange={(mode) => onChange({ ...value, mode })} />
           {value.mode === 'in_person' ? (
-            <FormField label={t('listingEvents.auctionPlace', { defaultValue: 'Place' })} placeholder={t('listingEvents.auctionPlaceHint', { defaultValue: 'e.g. Notary office, Main St 12, Budva' })} maxLength={300} value={value.location} onChange={set('location')} error={errorFor('location')} />
+            <FormField label={t('listingEvents.auctionPlace', { defaultValue: 'Auction venue' })} placeholder={t('listingEvents.auctionPlaceHint', { defaultValue: 'e.g. Notary office, Main St 12, Budva' })} maxLength={300} value={value.location} onChange={set('location')} error={errorFor('location')} />
           ) : null}
           <FormField
             label={value.mode === 'online' ? t('listingEvents.auctionLinkLabel', { defaultValue: 'Auction link' }) : t('listingEvents.auctionLinkOptional', { defaultValue: 'Auction link (optional)' })}

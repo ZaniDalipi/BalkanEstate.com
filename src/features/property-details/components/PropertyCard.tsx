@@ -430,7 +430,9 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-          <div className="flex flex-col gap-1.5">
+          {/* items-start: each badge hugs its text, so a long one (an auction
+              ribbon) does not stretch the others into wide bars. */}
+          <div className="flex min-w-0 flex-col items-start gap-1.5">
             {/* Listing Type Badge — luxury variant for luxury-villa */}
             {isLuxuryVilla ? (
               <div className="bg-gradient-to-r from-[#FFA500] to-[#E8940A] text-white text-[10px] font-bold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-sm">
