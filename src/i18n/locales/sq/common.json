@@ -928,5 +928,9 @@
       "submitShortcut": "Në formularët e mesazheve dhe kontaktit, shtypni Ctrl + Enter (⌘ + Enter në Mac) për të dërguar.",
       "findTips": "Të gjitha këshillat janë në menu te Këshilla, sa herë t'i doni."
     }
+  },
+  "scroller": {
+    "scrollLeft": "Lëviz majtas",
+    "scrollRight": "Lëviz djathtas"
   }
 }

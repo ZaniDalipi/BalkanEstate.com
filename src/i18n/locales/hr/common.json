@@ -928,5 +928,9 @@
       "submitShortcut": "U obrascima za poruke i kontakt pritisnite Ctrl + Enter (⌘ + Enter na Macu) za slanje.",
       "findTips": "Svi savjeti su u izborniku pod Savjeti, kad god vam zatrebaju."
     }
+  },
+  "scroller": {
+    "scrollLeft": "Pomakni lijevo",
+    "scrollRight": "Pomakni desno"
   }
 }

@@ -948,5 +948,9 @@
       "submitShortcut": "In message and contact forms, press Ctrl + Enter (⌘ + Enter on a Mac) to send.",
       "findTips": "All tips are in the menu under Tips, whenever you want them."
     }
+  },
+  "scroller": {
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right"
   }
 }

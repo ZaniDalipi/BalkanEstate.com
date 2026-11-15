@@ -928,5 +928,9 @@
       "submitShortcut": "În formularele de mesaje și contact, apăsați Ctrl + Enter (⌘ + Enter pe Mac) pentru a trimite.",
       "findTips": "Toate sfaturile sunt în meniu, la Sfaturi, oricând le doriți."
     }
+  },
+  "scroller": {
+    "scrollLeft": "Derulează la stânga",
+    "scrollRight": "Derulează la dreapta"
   }
 }

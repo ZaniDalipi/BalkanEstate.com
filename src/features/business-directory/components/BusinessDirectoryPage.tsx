@@ -9,6 +9,7 @@ import BusinessDetailPage from './BusinessDetailPage';
 import BusinessDirectoryMap from './BusinessDirectoryMap';
 import CreateBusinessListingForm from './CreateBusinessListingForm';
 import ListBusinessFab from './ListBusinessFab';
+import ChipScroller from '@/src/components/ui/ChipScroller';
 import { useOffscreen } from '../hooks/useOffscreen';
 import AnimatedTooltip, { type AnimatedTooltipItem } from '@/src/components/ui/AnimatedTooltip';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type ListingType } from '@/src/shared/types/businessListing.types';
@@ -640,43 +641,39 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
         </AnimatePresence>
 
         {/* Category filters */}
-        <motion.div
-          className="flex gap-1.5 sm:gap-2 overflow-x-auto pt-2 pb-8 -mb-5 scrollbar-hide -mx-4 px-4 sm:-mx-1 sm:px-1"
-          variants={fadeUpVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <motion.button
-            type="button"
-            onClick={() => handleCategoryClick('')}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 ${
-              selectedCategory === ''
-                ? 'liquid-tint'
-                : 'liquid-control text-neutral-700'
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {t('filters.all')}
-          </motion.button>
-          {BUSINESS_CATEGORIES.filter(c => c !== 'other').slice(0, 10).map((category) => (
+        <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <ChipScroller className="gap-1.5 sm:gap-2 pt-2 pb-8 -mb-5 -mx-4 px-4 sm:-mx-1 sm:px-1">
             <motion.button
-              key={category}
               type="button"
-              onClick={() => handleCategoryClick(category)}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 whitespace-nowrap ${
-                selectedCategory === category
+              onClick={() => handleCategoryClick('')}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 ${
+                selectedCategory === ''
                   ? 'liquid-tint'
                   : 'liquid-control text-neutral-700'
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <CategoryIcon category={category} className="inline-block w-5 h-5 mr-1 align-[-5px]" />
-              {t(`categories.${category}`)}
+              {t('filters.all')}
             </motion.button>
-          ))}
+            {BUSINESS_CATEGORIES.filter(c => c !== 'other').slice(0, 10).map((category) => (
+              <motion.button
+                key={category}
+                type="button"
+                onClick={() => handleCategoryClick(category)}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 whitespace-nowrap ${
+                  selectedCategory === category
+                    ? 'liquid-tint'
+                    : 'liquid-control text-neutral-700'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <CategoryIcon category={category} className="inline-block w-5 h-5 mr-1 align-[-5px]" />
+                {t(`categories.${category}`)}
+              </motion.button>
+            ))}
+          </ChipScroller>
         </motion.div>
 
         {/* Results info */}
