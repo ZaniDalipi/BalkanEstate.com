@@ -1224,8 +1224,10 @@
       "tooMany": "Previše pokušaja. Sačekajte malo i pokušajte ponovo.",
       "checkDetails": "Provjerite podatke i pokušajte ponovo.",
       "generic": "Nešto nije u redu. Pokušajte ponovo.",
-      "checkDates": "Jedan od datuma dana otvorenih vrata ne može se koristiti. Promijenite ga ili uklonite pa ponovo objavite."
-    }
+      "checkDates": "Jedan od datuma dana otvorenih vrata ne može se koristiti. Promijenite ga ili uklonite pa ponovo objavite.",
+      "dateInvalid": "Unesite datum kao dd/mm/gggg"
+    },
+    "datePlaceholder": "dd/mm/gggg"
   },
   "listingEvents": {
     "auction": "Aukcija",
@@ -1266,7 +1268,8 @@
       "auctionLocation": "Navedite gdje se aukcija održava",
       "auctionUrlRequired": "Dodajte link na kojem se može licitirati online",
       "auctionPrice": "Unesite početnu cijenu kao broj ili ostavite prazno",
-      "auctionServer": "Podaci o aukciji ne mogu se sačuvati ovakvi. Provjerite ih i ponovo objavite."
+      "auctionServer": "Podaci o aukciji ne mogu se sačuvati ovakvi. Provjerite ih i ponovo objavite.",
+      "auctionDateInvalid": "Unesite datum kao dd/mm/gggg"
     },
     "announce": {
       "close": "Zatvori ovu poruku",

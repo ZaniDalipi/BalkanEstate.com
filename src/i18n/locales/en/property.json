@@ -1223,8 +1223,10 @@
       "tooMany": "Too many tries. Please wait a little and try again.",
       "checkDetails": "Please check the details and try again.",
       "generic": "Something went wrong. Please try again.",
-      "checkDates": "One of the open house dates can't be used. Change or remove it, then publish again."
-    }
+      "checkDates": "One of the open house dates can't be used. Change or remove it, then publish again.",
+      "dateInvalid": "Enter the date as dd/mm/yyyy"
+    },
+    "datePlaceholder": "dd/mm/yyyy"
   },
   "listingEvents": {
     "auction": "Auction",
@@ -1265,7 +1267,8 @@
       "auctionLocation": "Tell bidders where the auction takes place",
       "auctionUrlRequired": "Add the link where people can bid online",
       "auctionPrice": "Enter the starting price as a number, or leave it empty",
-      "auctionServer": "The auction details can't be saved as they are. Check them and publish again."
+      "auctionServer": "The auction details can't be saved as they are. Check them and publish again.",
+      "auctionDateInvalid": "Enter the date as dd/mm/yyyy"
     },
     "announce": {
       "close": "Close this message",

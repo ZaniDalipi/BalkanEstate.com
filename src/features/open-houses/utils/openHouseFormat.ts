@@ -1,4 +1,5 @@
 import { toIntlLocale } from '@/src/shared/utils/intlLocale';
+import { formatDMY } from '@/src/shared/utils/dmyDate';
 
 /**
  * Open houses are shown in the viewer's own clock, like every other time on
@@ -13,7 +14,9 @@ export function formatOpenHouseWindow(
   const locale = toIntlLocale(lang);
   const start = new Date(startsAt);
   const end = new Date(endsAt);
-  const day = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', timeZone }).format(start);
+  // Short weekday + the date as dd/mm/yyyy (the site's one date format).
+  const weekday = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone }).format(start);
+  const day = `${weekday} ${formatDMY(start, timeZone)}`;
   const hm = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone });
   return { day, time: `${hm.format(start)}–${hm.format(end)}` };
 }

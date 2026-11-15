@@ -1,3 +1,4 @@
+import { toISODate } from '@/src/shared/utils/dmyDate';
 import type { OpenHouseDraft } from '../types';
 
 /**
@@ -7,7 +8,7 @@ import type { OpenHouseDraft } from '../types';
  */
 
 export interface OpenHouseFormValues {
-  date: string;  // YYYY-MM-DD, local
+  date: string;  // dd/mm/yyyy, local
   start: string; // HH:MM, local
   end: string;   // HH:MM, local
   note: string;
@@ -45,9 +46,11 @@ export function localDateTime(date: string, time: string): Date | null {
 
 export function draftFromForm(v: OpenHouseFormValues, now: Date): DraftResult {
   if (!v.date) return err('date', 'dateRequired', 'Choose a date');
-  const start = localDateTime(v.date, v.start);
+  const isoDate = toISODate(v.date);
+  if (!isoDate) return err('date', 'dateInvalid', 'Enter the date as dd/mm/yyyy');
+  const start = localDateTime(isoDate, v.start);
   if (!start) return err('start', 'startRequired', 'Choose a start time');
-  const end = localDateTime(v.date, v.end);
+  const end = localDateTime(isoDate, v.end);
   if (!end) return err('end', 'endRequired', 'Choose an end time');
   if (start <= now) return err('start', 'inPast', 'The open house must start in the future');
   const length = end.getTime() - start.getTime();

@@ -1,13 +1,14 @@
 import { toIntlLocale } from '@/src/shared/utils/intlLocale';
+import { formatDMY } from '@/src/shared/utils/dmyDate';
 import { formatOpenHouseWindow, openHouseWhen, type OpenHouseWhen } from '@/src/features/open-houses/utils/openHouseFormat';
 import type { ListingEvent } from '../types';
 
-/** "Sat 21 Nov · 18:00" in the viewer's clock — an auction is one moment. */
+/** "Sat 21/11/2026 · 18:00" in the viewer's clock — an auction is one moment. */
 export function formatEventMoment(iso: string, lang: string, timeZone?: string): { day: string; time: string } {
   const locale = toIntlLocale(lang);
   const d = new Date(iso);
   return {
-    day: new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', timeZone }).format(d),
+    day: `${new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone }).format(d)} ${formatDMY(d, timeZone)}`,
     time: new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone }).format(d),
   };
 }

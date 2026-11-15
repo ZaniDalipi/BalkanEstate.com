@@ -1,4 +1,5 @@
 import { toIntlLocale } from '@/src/shared/utils/intlLocale';
+import { formatDMY } from '@/src/shared/utils/dmyDate';
 import { nextListingEvent } from '@/src/features/listing-events/utils/listingEvents';
 import type { EventSource } from '@/src/features/listing-events/types';
 
@@ -28,8 +29,8 @@ export function markerEventTag(p: EventSource, now: Date, lang: string, labels: 
     ? labels.today
     : new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(start);
   const name = e.kind === 'openHouse' ? labels.openHouse : labels.auction;
-  const full = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(start);
-  return { kind: e.kind, text: `${name} ${day}`, title: `${name} · ${full}` };
+  const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false }).format(start);
+  return { kind: e.kind, text: `${name} ${day}`, title: `${name} · ${formatDMY(start)} ${time}` };
 }
 
 const TAG_COLORS = { openHouse: '#059669', auction: '#d97706' } as const;

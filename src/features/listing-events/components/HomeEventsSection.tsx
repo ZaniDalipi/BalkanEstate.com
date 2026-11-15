@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { toIntlLocale } from '@/src/shared/utils/intlLocale';
+import { formatDMY } from '@/src/shared/utils/dmyDate';
 import { useOpenHousesThisWeek } from '../hooks/useListingEventsFeed';
 import { thisWeekRange } from '../utils/thisWeekRange';
 import EventIcon from './EventIcon';
@@ -13,12 +14,13 @@ interface HomeEventsSectionProps {
   onSeeAll: () => void;
 }
 
-/** "Mon 16 – Sun 22 Nov": today until the end of this week, in the viewer's language. */
+/** "Mon 16/11/2026 – Sun 22/11/2026": today until the end of this week. */
 function weekLabel(lang: string, now: Date): string {
   const { from, to } = thisWeekRange(now);
   const lastDay = new Date(to.getTime() - 1);
-  const fmt = new Intl.DateTimeFormat(toIntlLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' });
-  return from.toDateString() === lastDay.toDateString() ? fmt.format(from) : `${fmt.format(from)} – ${fmt.format(lastDay)}`;
+  const weekday = new Intl.DateTimeFormat(toIntlLocale(lang), { weekday: 'short' });
+  const fmt = (d: Date) => `${weekday.format(d)} ${formatDMY(d)}`;
+  return from.toDateString() === lastDay.toDateString() ? fmt(from) : `${fmt(from)} – ${fmt(lastDay)}`;
 }
 
 /**

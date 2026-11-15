@@ -106,8 +106,8 @@ describe('open house time formatting', () => {
     expect(listingTimeZone('Greece')).toBe('Europe/Bucharest');
     expect(listingTimeZone('Montenegro')).toBe('Europe/Belgrade');
     expect(formatOpenHouseWindow(at('2026-11-21T10:00:00Z'), at('2026-11-21T12:00:00Z'), 'Serbia'))
-      .toBe('Saturday 21 November, 11:00–13:00');
+      .toBe('Saturday 21/11/2026, 11:00–13:00');
     expect(formatOpenHouseWindow(at('2026-11-21T10:00:00Z'), at('2026-11-21T12:00:00Z'), 'Greece'))
-      .toBe('Saturday 21 November, 12:00–14:00');
+      .toBe('Saturday 21/11/2026, 12:00–14:00');
   });
 });

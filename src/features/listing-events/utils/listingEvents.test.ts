@@ -118,14 +118,15 @@ describe('markerEventTag', () => {
 });
 
 describe('draftAuction', () => {
-  const form = { ...EMPTY_AUCTION_FORM, date: '2026-11-25', time: '18:00', location: 'Notary, Budva' };
+  const form = { ...EMPTY_AUCTION_FORM, date: '25/11/2026', time: '18:00', location: 'Notary, Budva' };
   it('makes an in-person auction', () => {
     const r = draftAuction({ ...form, startingPrice: '80.000' }, wed);
     expect(r).toEqual({ ok: true, value: { startsAt: new Date(2026, 10, 25, 18).toISOString(), mode: 'in_person', location: 'Notary, Budva', startingPrice: 80000 } });
   });
   it.each([
     [{ date: '' }, 'date'],
-    [{ date: '2026-11-17' }, 'date'],
+    [{ date: '17/11/2026' }, 'date'],
+    [{ date: '32/11/2026' }, 'date'],
     [{ location: '' }, 'location'],
     [{ mode: 'online' as const, url: '' }, 'url'],
     [{ url: 'ftp://x' }, 'url'],
@@ -137,8 +138,8 @@ describe('draftAuction', () => {
   });
   it('keeps a saved auction that has begun, and round-trips the form', () => {
     const started = new Date(2026, 10, 17, 18).toISOString();
-    expect(draftAuction({ ...form, date: '2026-11-17' }, wed, started).ok).toBe(true);
-    expect(auctionToForm({ startsAt: started, mode: 'online', url: 'https://x.test' })).toMatchObject({ date: '2026-11-17', time: '18:00', mode: 'online', url: 'https://x.test' });
+    expect(draftAuction({ ...form, date: '17/11/2026' }, wed, started).ok).toBe(true);
+    expect(auctionToForm({ startsAt: started, mode: 'online', url: 'https://x.test' })).toMatchObject({ date: '17/11/2026', time: '18:00', mode: 'online', url: 'https://x.test' });
     expect(auctionToForm(null)).toBeNull();
   });
 });

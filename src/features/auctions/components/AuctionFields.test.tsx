@@ -26,7 +26,7 @@ const Harness: React.FC<{ onValid: (v: unknown) => void }> = ({ onValid }) => {
 const nextMonth = () => {
   const d = new Date();
   d.setDate(d.getDate() + 30);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 };
 
 describe('AuctionFields', () => {
@@ -46,6 +46,13 @@ describe('AuctionFields', () => {
 
     fireEvent.click(screen.getByText('Publish'));
     expect(screen.getByRole('alert')).toHaveTextContent('Choose the auction date');
+
+    // Typed digits get their slashes; an impossible date is explained.
+    fireEvent.change(screen.getByLabelText('Date'), { target: { value: '31022027' } });
+    expect(screen.getByLabelText('Date')).toHaveValue('31/02/2027');
+    expect(screen.getByLabelText('Date')).toHaveAttribute('placeholder', 'dd/mm/yyyy');
+    fireEvent.click(screen.getByText('Publish'));
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter the date as dd/mm/yyyy');
 
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: nextMonth() } });
     fireEvent.click(screen.getByText('Publish'));

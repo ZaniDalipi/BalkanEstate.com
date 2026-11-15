@@ -1867,7 +1867,10 @@ GET /api/properties
   directions or the auction link), `HomeEventsSection` (landing page: open houses
   from now to the end of this Sunday, soonest first; hidden when there are none).
 - **Dates.** Stored as UTC instants. Screens use the viewer's clock; emails and
-  push use the listing's zone (`openHouseTime.ts`).
+  push use the listing's zone (`openHouseTime.ts`). Dates are always written
+  dd/mm/yyyy (`src/shared/utils/dmyDate.ts`, with a short weekday in front), and
+  typed that way too (`DmyDateField`), instead of the browser's date picker whose
+  order follows the device's locale.
 - **People who saved the home** (`Favorite`, alerts on, never the owner) are told
   about a new open house or auction and reminded the day before
   (`savedHomeEventAlerts.ts`, `listingEventReminderJob.ts`, every 15 minutes in

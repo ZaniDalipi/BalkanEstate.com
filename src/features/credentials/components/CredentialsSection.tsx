@@ -14,6 +14,7 @@ import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { Credential, addCredential, updateCredential, deleteCredential, isPrivateDocumentUrl, openPrivateDocument } from '../api/credentialApi';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { submitLicense, getLicenseFormatHint } from '../api/licenseApi';
+import { autoFormatDate, fromISODate, toISODate } from '@/src/shared/utils/dmyDate';
 
 interface CredentialsSectionProps {
   credentials: Credential[];
@@ -70,27 +71,6 @@ const getTimeUntilExpiry = (expiryDate: string | undefined): string | null => {
 };
 
 // ─── Date Helpers (DD/MM/YYYY) ────────────────────────────────────────────────
-
-const fromISODate = (iso: string): string => {
-  if (!iso) return '';
-  const [y, m, d] = iso.split('-');
-  if (!y || !m || !d) return '';
-  return `${d}/${m}/${y}`;
-};
-
-const toISODate = (dmy: string): string => {
-  if (!dmy) return '';
-  const [d, m, y] = dmy.split('/');
-  if (!d || !m || !y) return '';
-  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-};
-
-const autoFormatDate = (value: string): string => {
-  const digits = value.replace(/\D/g, '').slice(0, 8);
-  if (digits.length > 4) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-  if (digits.length > 2) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  return digits;
-};
 
 // Applies date formatting while restoring cursor to the correct digit position
 const applyDateChange = (

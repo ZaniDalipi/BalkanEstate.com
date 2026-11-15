@@ -4,12 +4,12 @@ import {
   draftFromForm,
   EMPTY_OPEN_HOUSE_FORM,
   overlapsAny,
-  todayInputValue,
   type DraftError,
   type OpenHouseFormValues,
 } from '../utils/openHouseDraft';
 import type { OpenHouseDraft } from '../types';
 import FormField from './FormField';
+import DmyDateField from './DmyDateField';
 
 interface OpenHouseWindowFormProps {
   /** Windows already chosen for this listing — a new one may not overlap them. */
@@ -49,7 +49,7 @@ const OpenHouseWindowForm: React.FC<OpenHouseWindowFormProps> = ({ existing, sub
   return (
     <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <FormField label={t('openHouse.date', { defaultValue: 'Date' })} type="date" min={todayInputValue(new Date())} value={values.date} onChange={set('date')} error={errorFor('date')} />
+        <DmyDateField label={t('openHouse.date', { defaultValue: 'Date' })} value={values.date} onChange={(date) => { setValues((v) => ({ ...v, date })); setError(null); }} error={errorFor('date')} />
         <FormField label={t('openHouse.from', { defaultValue: 'From' })} type="time" step={900} value={values.start} onChange={set('start')} error={errorFor('start')} />
         <FormField label={t('openHouse.to', { defaultValue: 'To' })} type="time" step={900} value={values.end} onChange={set('end')} error={errorFor('end')} />
       </div>

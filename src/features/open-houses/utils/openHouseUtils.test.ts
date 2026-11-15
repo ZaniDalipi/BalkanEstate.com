@@ -8,7 +8,7 @@ import { openHouseErrorKey } from './openHouseErrorKey';
 // Local wall clock: 15 Nov 2026, 10:00
 const now = new Date(2026, 10, 15, 10, 0);
 const form = (over: Partial<OpenHouseFormValues> = {}): OpenHouseFormValues =>
-  ({ date: '2026-11-21', start: '11:00', end: '13:00', note: '', capacity: '', ...over });
+  ({ date: '21/11/2026', start: '11:00', end: '13:00', note: '', capacity: '', ...over });
 
 describe('draftFromForm', () => {
   it('turns the local date and times into an ISO window', () => {
@@ -24,11 +24,13 @@ describe('draftFromForm', () => {
   it.each([
     [{ date: '' }, 'date', 'dateRequired'],
     [{ start: '' }, 'start', 'startRequired'],
-    [{ date: '2026-11-14' }, 'start', 'inPast'],
+    [{ date: '14/11/2026' }, 'start', 'inPast'],
+    [{ date: '31/02/2027' }, 'date', 'dateInvalid'],
+    [{ date: '2026-11-21' }, 'date', 'dateInvalid'],
     [{ end: '10:00' }, 'end', 'endBeforeStart'],
     [{ end: '11:15' }, 'end', 'tooShort'],
     [{ end: '18:00' }, 'end', 'tooLong'],
-    [{ date: '2027-07-01' }, 'date', 'tooFar'],
+    [{ date: '01/07/2027' }, 'date', 'tooFar'],
     [{ capacity: '0' }, 'capacity', 'capacity'],
     [{ capacity: 'lots' }, 'capacity', 'capacity'],
   ])('points %j at the %s field', (over, field, key) => {
@@ -62,8 +64,7 @@ describe('formatOpenHouseWindow / openHouseWhen', () => {
   it('formats day and time span in the given zone', () => {
     const r = formatOpenHouseWindow('2026-11-21T10:00:00Z', '2026-11-21T12:00:00Z', 'en', 'Europe/Belgrade');
     expect(r.time).toBe('11:00–13:00');
-    expect(r.day).toContain('21');
-    expect(r.day).toMatch(/Sat/);
+    expect(r.day).toBe('Sat 21/11/2026');
   });
 
   it('says now, today or tomorrow when it fits', () => {

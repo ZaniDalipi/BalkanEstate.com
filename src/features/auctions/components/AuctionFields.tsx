@@ -1,7 +1,7 @@
 import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormField from '@/src/features/open-houses/components/FormField';
-import { todayInputValue } from '@/src/features/open-houses/utils/openHouseDraft';
+import DmyDateField from '@/src/features/open-houses/components/DmyDateField';
 import { EMPTY_AUCTION_FORM, type AuctionError, type AuctionFormValues } from '../utils/auctionDraft';
 import AuctionModePicker from './AuctionModePicker';
 
@@ -53,7 +53,7 @@ const AuctionFields: React.FC<AuctionFieldsProps> = ({ value, onChange, error, s
       {value && (
         <div id={panelId} className="mt-3 space-y-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <FormField label={t('openHouse.date', { defaultValue: 'Date' })} type="date" min={todayInputValue(new Date())} value={value.date} onChange={set('date')} error={errorFor('date')} />
+            <DmyDateField label={t('openHouse.date', { defaultValue: 'Date' })} value={value.date} onChange={(date) => onChange({ ...value, date })} error={errorFor('date')} />
             <FormField label={t('listingEvents.time', { defaultValue: 'Time' })} type="time" step={900} value={value.time} onChange={set('time')} error={errorFor('time')} />
           </div>
           <AuctionModePicker value={value.mode} onChange={(mode) => onChange({ ...value, mode })} />

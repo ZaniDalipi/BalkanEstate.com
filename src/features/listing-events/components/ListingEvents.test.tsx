@@ -138,7 +138,7 @@ describe('HomeEventsSection', () => {
     wrap(<HomeEventsSection country="montenegro" onSeeAll={onSeeAll} />);
     expect(await screen.findByRole('heading', { name: 'Open houses this week' })).toBeInTheDocument();
     expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Thursday house', 'Saturday flat']);
-    expect(screen.getByText(/Wed, Nov 18 – Sun, Nov 22/)).toBeInTheDocument();
+    expect(screen.getByText(/Wed 18\/11\/2026 – Sun 22\/11\/2026/)).toBeInTheDocument();
     expect(h.feed).toHaveBeenCalledWith(8, 'montenegro', expect.any(Date));
     fireEvent.click(screen.getByRole('button', { name: 'See all' }));
     expect(onSeeAll).toHaveBeenCalled();

@@ -1223,8 +1223,10 @@
       "tooMany": "Shumë përpjekje. Ju lutemi prisni pak dhe provoni përsëri.",
       "checkDetails": "Ju lutemi kontrolloni të dhënat dhe provoni përsëri.",
       "generic": "Diçka shkoi keq. Ju lutemi provoni përsëri.",
-      "checkDates": "Një nga datat e ditës së hapur nuk mund të përdoret. Ndryshojeni ose hiqeni, pastaj publikoni përsëri."
-    }
+      "checkDates": "Një nga datat e ditës së hapur nuk mund të përdoret. Ndryshojeni ose hiqeni, pastaj publikoni përsëri.",
+      "dateInvalid": "Shkruani datën si dd/mm/vvvv"
+    },
+    "datePlaceholder": "dd/mm/vvvv"
   },
   "listingEvents": {
     "auction": "Ankand",
@@ -1265,7 +1267,8 @@
       "auctionLocation": "Tregojuni ofertuesve ku zhvillohet ankandi",
       "auctionUrlRequired": "Shtoni lidhjen ku njerëzit mund të ofertojnë online",
       "auctionPrice": "Shkruani çmimin fillestar si numër, ose lëreni bosh",
-      "auctionServer": "Të dhënat e ankandit nuk mund të ruhen kështu. Kontrollojini dhe publikoni përsëri."
+      "auctionServer": "Të dhënat e ankandit nuk mund të ruhen kështu. Kontrollojini dhe publikoni përsëri.",
+      "auctionDateInvalid": "Shkruani datën si dd/mm/vvvv"
     },
     "announce": {
       "close": "Mbyll këtë mesazh",

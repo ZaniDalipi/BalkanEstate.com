@@ -22,7 +22,7 @@ const Harness: React.FC<{ onChange?: (v: OpenHouseDraft[]) => void }> = ({ onCha
 const nextWeek = () => {
   const d = new Date();
   d.setDate(d.getDate() + 7);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 };
 
 describe('OpenHouseDraftFields (listing form)', () => {

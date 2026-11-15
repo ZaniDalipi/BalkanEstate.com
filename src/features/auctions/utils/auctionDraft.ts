@@ -1,5 +1,6 @@
 import type { ListingAuction } from '@/src/shared/types/property.types';
-import { localDateTime, todayInputValue } from '@/src/features/open-houses/utils/openHouseDraft';
+import { localDateTime } from '@/src/features/open-houses/utils/openHouseDraft';
+import { formatDMY, toISODate } from '@/src/shared/utils/dmyDate';
 
 /**
  * The seller's auction fields → what the API takes. Mirrors the server's
@@ -8,7 +9,7 @@ import { localDateTime, todayInputValue } from '@/src/features/open-houses/utils
  */
 
 export interface AuctionFormValues {
-  date: string;  // YYYY-MM-DD, local
+  date: string;  // dd/mm/yyyy, local
   time: string;  // HH:MM, local
   mode: 'online' | 'in_person';
   location: string;
@@ -37,7 +38,7 @@ export function auctionToForm(a: ListingAuction | null | undefined): AuctionForm
   const d = new Date(a.startsAt);
   if (Number.isNaN(d.getTime())) return null;
   return {
-    date: todayInputValue(d),
+    date: formatDMY(d),
     time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
     mode: a.mode,
     location: a.location ?? '',
@@ -62,7 +63,9 @@ const isHttpUrl = (s: string): boolean => {
  */
 export function draftAuction(v: AuctionFormValues, now: Date, existingStartsAt?: string): AuctionDraftResult {
   if (!v.date) return err('date', 'auctionDate', 'Choose the auction date');
-  const start = localDateTime(v.date, v.time);
+  const isoDate = toISODate(v.date);
+  if (!isoDate) return err('date', 'auctionDateInvalid', 'Enter the date as dd/mm/yyyy');
+  const start = localDateTime(isoDate, v.time);
   if (!start) return err('time', 'auctionTime', 'Choose the auction time');
   const unchanged = existingStartsAt != null && Date.parse(existingStartsAt) === start.getTime();
   if (!unchanged && start <= now) return err('date', 'auctionPast', 'The auction must be in the future');

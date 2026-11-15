@@ -1224,8 +1224,10 @@
       "tooMany": "Prea multe încercări. Așteptați puțin și încercați din nou.",
       "checkDetails": "Verificați datele și încercați din nou.",
       "generic": "Ceva nu a mers bine. Încercați din nou.",
-      "checkDates": "Una dintre datele zilei porților deschise nu poate fi folosită. Modificați-o sau eliminați-o, apoi publicați din nou."
-    }
+      "checkDates": "Una dintre datele zilei porților deschise nu poate fi folosită. Modificați-o sau eliminați-o, apoi publicați din nou.",
+      "dateInvalid": "Introduceți data ca zz/ll/aaaa"
+    },
+    "datePlaceholder": "zz/ll/aaaa"
   },
   "listingEvents": {
     "auction": "Licitație",
@@ -1266,7 +1268,8 @@
       "auctionLocation": "Spuneți ofertanților unde are loc licitația",
       "auctionUrlRequired": "Adăugați linkul unde se poate licita online",
       "auctionPrice": "Introduceți prețul de pornire ca număr sau lăsați gol",
-      "auctionServer": "Detaliile licitației nu pot fi salvate așa. Verificați-le și publicați din nou."
+      "auctionServer": "Detaliile licitației nu pot fi salvate așa. Verificați-le și publicați din nou.",
+      "auctionDateInvalid": "Introduceți data ca zz/ll/aaaa"
     },
     "announce": {
       "close": "Închide mesajul",
