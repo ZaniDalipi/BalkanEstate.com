@@ -50,6 +50,13 @@ const FeaturedProfessionalsRail: React.FC<FeaturedProfessionalsRailProps> = ({ l
       call: t('individuals.call', 'Call'),
       verified: t('verified', 'Verified'),
     },
+    facts: {
+      locatedIn: (role, place) => t('individuals.facts.locatedIn', { role, place, defaultValue: '{{role}} in {{place}}.' }),
+      serves: (areas) => t('individuals.facts.serves', { areas, defaultValue: 'Serves {{areas}}.' }),
+      speaks: (languages) => t('individuals.facts.speaks', { languages, defaultValue: 'Speaks {{languages}}.' }),
+      established: (year) => t('detail.established', { year, defaultValue: 'Est. {{year}}' }),
+      memberSince: (year) => t('individuals.facts.memberSince', { year, defaultValue: 'Member since {{year}}' }),
+    },
   }), [people, t]);
 
   // Badge links are plain <a href>: open our own pages in the app (no reload)

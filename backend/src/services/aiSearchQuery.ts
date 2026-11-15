@@ -40,7 +40,7 @@ const NON_NEGATIVE_KEYS = ['minFloorNumber', 'maxFloorNumber'] as const;
 
 const BOOLEAN_KEYS = [
   'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity', 'hasAirConditioning',
-  'hasPool', 'petsAllowed', 'has360Tour', 'hasDiscount',
+  'hasPool', 'petsAllowed', 'has360Tour', 'hasDiscount', 'hasOpenHouse', 'hasAuction',
 ] as const;
 
 const RANGE_PAIRS = [
@@ -103,6 +103,8 @@ export const AI_SEARCH_QUERY_SCHEMA = {
     petsAllowed: bool('Pets allowed.'),
     has360Tour: bool('Has a 360° virtual tour.'),
     hasDiscount: bool('Price was reduced.'),
+    hasOpenHouse: bool('Has an upcoming open house (people can drop by without an appointment).'),
+    hasAuction: bool('Sold at an auction (bank, notary or auction house).'),
     maxDaysListed: int('Listed within this many days.'),
     maxDistanceToCenter: num('Max km to the city centre.'),
     maxDistanceToSea: num('Max km to the sea / beach.'),
@@ -134,6 +136,7 @@ export const AI_SEARCH_RULES = `
         - Energy rating "A+" → energyRating "A+".
         - Distances: "less than 500 m from a school" → maxDistanceToSchool 0.5 (always km). "near the sea / walking distance to the beach" → maxDistanceToSea 1. "close to the centre" → maxDistanceToCenter 2.
         - Yes/no features use their field (hasBalcony, hasGarden, hasElevator, hasSecurity, hasAirConditioning, hasPool, petsAllowed, has360Tour). "no pets" → petsAllowed false.
+        - "open house", "dita e hapur", "dan otvorenih vrata" → hasOpenHouse true. "auction", "ankand", "aukcija", "licitacija", "търг", "δημοπρασία", "licitație" → hasAuction true. Only set these when asked for.
         - Anything else the listing must have (fireplace, sauna, jacuzzi, gym, storage, wine cellar, panoramic view, floor heating, smart home, duplex, penthouse, sea view from the terrace, ...) → amenities. Each entry is ONE requirement written as "english term|translations" in Albanian, Serbian/Croatian/Bosnian, Macedonian, Bulgarian, Greek and Romanian, separated by "|", so listings written in any of those languages are found. Use short stems that appear in listing text ("ngrohje në dysheme", not a whole sentence).
         - Read the WHOLE message, including every comma-separated item, and map each one. Before answering, check each requirement the user wrote has a home in searchQuery.
         - Orientation ("south facing", "faces east") → orientation: north, south, east, west, northEast, northWest, southEast, southWest.

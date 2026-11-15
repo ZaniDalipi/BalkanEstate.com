@@ -120,6 +120,17 @@ export const sanitizeProperty = (property: any, context: 'list' | 'detail' = 'li
     }
   }
 
+  // Open house / auction bookkeeping is internal; the auction itself is shown
+  // (only its essentials in lists).
+  delete cleaned.nextOpenHouseAt;
+  delete cleaned.nextEventAt;
+  if (cleaned.auction && typeof cleaned.auction === 'object') {
+    const { reminderSentAt: _sent, ...auction } = cleaned.auction;
+    cleaned.auction = context === 'list'
+      ? { startsAt: auction.startsAt, endsAt: auction.endsAt, mode: auction.mode, startingPrice: auction.startingPrice }
+      : auction;
+  }
+
   // Sanitize the populated seller object
   if (cleaned.sellerId && typeof cleaned.sellerId === 'object') {
     cleaned.sellerId = sanitizeSeller(cleaned.sellerId, context);

@@ -18,6 +18,7 @@ import { useRouteView } from '@/src/app/router/useRouteView';
 import { ListingTypePicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { ListingActionBar } from '@/src/features/seller/components/listingActions';
 import { buildListingActions, isListingActionable, type ListingActionId } from '@/src/features/seller/utils/listingActions';
+import ManageOpenHouses from '@/src/features/open-houses/components/ManageOpenHouses';
 
 // Role badge component to show which role created the listing
 const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
@@ -199,6 +200,12 @@ const ListingCard: React.FC<{
             </div>
 
             <ListingActionBar actions={actions} onAction={handleAction} onEdit={() => navigate(paths.editListing(property.id), { state: { property } })} />
+            {/* Optional: plan open houses and see who's coming */}
+            {property.status === 'active' && (
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                    <ManageOpenHouses propertyId={property.id} />
+                </div>
+            )}
         </div>
     </div>
 );

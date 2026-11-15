@@ -116,6 +116,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import propertyValuationRoutes from './routes/propertyValuationRoutes';
 import inquiryRoutes from './routes/inquiryRoutes';
 import viewingRoutes from './routes/viewingRoutes';
+import openHouseRoutes from './routes/openHouseRoutes';
 import measurementRoutes from './routes/measurementRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import siteContentRoutes from './routes/siteContentRoutes';
@@ -393,6 +394,7 @@ app.use('/api/notifications', notificationRoutes); // User notifications
 app.use('/api/valuations', aiRateLimiter, propertyValuationRoutes); // AI-powered - rate limited
 app.use('/api/inquiries', inquiryRoutes); // Buyer-to-agent inquiries (rate limited)
 app.use('/api/viewings', viewingRoutes); // Property viewing scheduling (rate limited)
+app.use('/api/open-houses', openHouseRoutes); // Optional open houses + RSVPs
 app.use('/api/measurements', measurementRoutes); // User land measurements
 app.use('/api/analytics', analyticsRoutes); // Analytics and activity tracking
 app.use('/api/site-content', siteContentRoutes); // Public site content (how it works videos)

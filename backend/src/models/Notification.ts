@@ -27,6 +27,12 @@ export type NotificationType =
   | 'residence_offline'          // Owner: a residence went offline (trial ended, no pass)
   | 'residence_agency_grace'     // Agency: subscription ended; free residences go offline after the grace
   | 'admin_alert'                // Admin: a new user or listing on the site
+  | 'open_house_rsvp'            // Host: someone is coming to an open house
+  | 'open_house_cancelled'       // Visitor: an open house they signed up for was cancelled
+  | 'open_house_reminder'        // Visitor: an open house they signed up for starts soon
+  | 'saved_home_open_house'      // A saved home now has an open house
+  | 'saved_home_auction'         // A saved home now goes to auction
+  | 'auction_reminder'           // A saved home's auction is tomorrow
   | 'system';               // System notifications
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -93,6 +99,12 @@ const NotificationSchema: Schema = new Schema(
         'residence_offline',
         'residence_agency_grace',
         'admin_alert',
+        'open_house_rsvp',
+        'open_house_cancelled',
+        'open_house_reminder',
+        'saved_home_open_house',
+        'saved_home_auction',
+        'auction_reminder',
         'system',
       ],
       required: true,

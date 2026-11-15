@@ -43,6 +43,7 @@ import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
+import ListingEventBanner from '@/src/features/listing-events/components/ListingEventBanner';
 import ExternalSourceBadge from '@/src/features/properties/components/ExternalSourceBadge';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/src/shared/utils/seller';
@@ -1086,6 +1087,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
             {/* "Part of <residence>": links to the apartment in the residence explorer */}
             <ListingResidenceBadge listingId={property.id} className="mx-4 lg:mx-0" />
+
+            {/* Open house / auction with a countdown — nothing when there is neither */}
+            <ListingEventBanner property={property} />
 
             {/* Mobile Only: Property Info (description) shown early */}
             <div data-section="details" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>

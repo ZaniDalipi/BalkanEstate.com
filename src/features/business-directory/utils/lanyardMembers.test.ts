@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toLanyardMembers, shortBio, MAX_LANYARDS } from './lanyardMembers';
+import { toLanyardMembers, shortBio, factsBio, badgeTags, MAX_LANYARDS } from './lanyardMembers';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 
 const listing = (over: Partial<BusinessListing>): BusinessListing => ({
@@ -13,6 +13,13 @@ const map = {
   imageOf: (l: BusinessListing) => `img:${l.id}`,
   profileHrefOf: (l: BusinessListing) => `/en/business-directory/${l.slug}`,
   labels: { profile: 'Profile', email: 'Email', call: 'Call', verified: 'Verified' },
+  facts: {
+    locatedIn: (role: string, place: string) => `${role} in ${place}.`,
+    serves: (areas: string) => `Serves ${areas}.`,
+    speaks: (languages: string) => `Speaks ${languages}.`,
+    established: (year: number) => `Est. ${year}`,
+    memberSince: (year: number) => `Member since ${year}`,
+  },
 };
 
 describe('toLanyardMembers', () => {
@@ -42,7 +49,8 @@ describe('toLanyardMembers', () => {
   it('leaves out contact links it has no data for', () => {
     const [m] = toLanyardMembers([listing({})], map);
     expect(m?.links).toEqual([{ label: 'Profile', href: '/en/business-directory/ana' }]);
-    expect(m?.bio).toBeUndefined();
+    // No description: the back says what and where instead of staying empty.
+    expect(m?.bio).toBe('role:cleaning in Pula, Croatia.');
   });
 
   it('cycles the five tones', () => {
@@ -56,5 +64,27 @@ describe('shortBio', () => {
     expect(shortBio('  a   b ')).toBe('a b');
     expect(shortBio('one two three four five', 16)).toBe('one two three…');
     expect(shortBio('')).toBeUndefined();
+  });
+});
+
+describe('factsBio', () => {
+  it('summarises place, other areas served, languages and founding year', () => {
+    const l = listing({ serviceAreas: ['Pula', 'Rovinj', 'Poreč', 'Umag'], languages: ['Croatian', 'English', 'Italian', 'German'], yearEstablished: 2019 });
+    expect(factsBio(l, 'Cleaning', map.facts)).toBe('Cleaning in Pula, Croatia. Serves Rovinj, Poreč. Speaks Croatian, English, Italian. Est. 2019');
+  });
+  it('is just the role when there is no place', () => {
+    expect(factsBio(listing({ city: '', country: '' }), 'Cleaning', map.facts)).toBe('Cleaning');
+  });
+});
+
+describe('badgeTags', () => {
+  it('fills free slots with price, founding year, a language and member since', () => {
+    const l = listing({ priceRange: '$$', yearEstablished: 2019, languages: ['English'], createdAt: '2024-05-01T00:00:00Z' });
+    expect(badgeTags(l, map)).toEqual(['$$', 'Est. 2019', 'English']);
+    expect(badgeTags(listing({ createdAt: '2024-05-01T00:00:00Z' }), map)).toEqual(['Member since 2024']);
+  });
+  it('keeps Verified and services first, without duplicates, at most three', () => {
+    const l = listing({ isVerified: true, services: ['Windows', 'Windows', ' '], priceRange: '$' });
+    expect(badgeTags(l, map)).toEqual(['Verified', 'Windows', '$']);
   });
 });

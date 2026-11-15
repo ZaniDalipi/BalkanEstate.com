@@ -31,7 +31,13 @@
     "profile": "Shiko profilin",
     "email": "Email",
     "call": "Telefono",
-    "empty": "Ende nuk ka profesionistë. Ofroni shërbimet tuaja dhe bëhuni karta e parë në shirit."
+    "empty": "Ende nuk ka profesionistë. Ofroni shërbimet tuaja dhe bëhuni karta e parë në shirit.",
+    "facts": {
+      "locatedIn": "{{role}} në {{place}}.",
+      "serves": "Shërben në {{areas}}.",
+      "speaks": "Flet {{languages}}.",
+      "memberSince": "Anëtar që nga {{year}}"
+    }
   },
   "filters": {
     "all": "Të gjitha"

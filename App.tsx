@@ -64,6 +64,7 @@ const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingL
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const StickyAdBanner = lazy(() => import('./src/features/promo/components/StickyBar'));
 const HintsHost = lazy(() => import('./src/features/hints').then(m => ({ default: m.HintsHost })));
+const EventsAnnouncementDialog = lazy(() => import('./src/features/listing-events/announcement/EventsAnnouncementDialog'));
 const AdPreviewIndicator = lazy(() => import('./src/features/promo/components/PreviewIndicator'));
 
 // Google Maps API is deferred - only loads when map pages are visited (see MapComponent.tsx)
@@ -463,6 +464,13 @@ const MainLayout: React.FC = () => {
         <Suspense fallback={null}>
           <HintsHost />
         </Suspense>
+
+        {/* Sellers, for one week: open houses and auctions are new (a dialog on opening the app) */}
+        {state.isAuthenticated && state.currentUser && (
+          <Suspense fallback={null}>
+            <EventsAnnouncementDialog user={state.currentUser} />
+          </Suspense>
+        )}
 
 
         {/* Mobile floating hamburger for home page — rendered outside all scroll/overflow containers

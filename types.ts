@@ -32,7 +32,8 @@ export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type { PropertyImageTag } from './src/shared/types/property.types';
-import type { PropertyImageTag, SaleStatusFilter } from './src/shared/types/property.types';
+import type { PropertyImageTag, SaleStatusFilter, ListingAuction } from './src/shared/types/property.types';
+export type { ListingAuction } from './src/shared/types/property.types';
 export type { SaleStatusFilter } from './src/shared/types/property.types';
 
 export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'villas' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'about' | 'business-directory' | 'blog' | 'developments' | 'development-dashboard' | 'not-found';
@@ -466,6 +467,12 @@ export interface Property {
     // Price discount
     hasDiscount?: boolean;
     isNegotiable?: boolean;
+    /** Next upcoming open house, only when the owner chose to host one. */
+    nextOpenHouse?: { startsAt: string; endsAt: string };
+    /** Optional auction details; `null` only when sending "remove the auction". */
+    auction?: ListingAuction | null;
+    /** Create-only: open houses picked in the listing form, sent once with a new listing. */
+    openHouses?: { startsAt: string; endsAt: string; note?: string; capacity?: number }[];
     // External source (imported listings)
     source?: string;
     sourceUrl?: string;
@@ -569,6 +576,11 @@ export interface Filters {
     has360Tour: boolean | null; // Filter for properties with 360 virtual tour
     hasDiscount: boolean | null; // Filter for properties with price reduction
     hasPriceIncrease: boolean | null; // Filter for properties with price increase
+    hasOpenHouse?: boolean | null; // Optional: only homes with an upcoming open house
+    openHouseWeekend?: boolean | null; // Optional: an open house this weekend (visitor's weekend)
+    openHouseThisWeek?: boolean | null; // Optional: an open house from now to the end of Sunday
+    hasAuction?: boolean | null; // Optional: only homes going to auction
+    auctionWithinDays?: number | null; // Optional: auction within N days
     minPricePerSqm: number | null; // Filter by min price per square meter
     maxPricePerSqm: number | null; // Filter by max price per square meter
     maxDaysListed: number | null; // Filter by max days since listing (e.g., 1, 3, 7, 30)
@@ -625,6 +637,11 @@ export const initialFilters: Filters = {
     has360Tour: null,
     hasDiscount: null,
     hasPriceIncrease: null,
+    hasOpenHouse: null,
+    openHouseWeekend: null,
+    openHouseThisWeek: null,
+    hasAuction: null,
+    auctionWithinDays: null,
     minPricePerSqm: null,
     maxPricePerSqm: null,
     maxDaysListed: null,
@@ -703,6 +720,10 @@ export interface AiSearchQuery {
     petsAllowed?: boolean;
     has360Tour?: boolean;
     hasDiscount?: boolean;
+    /** Only homes with an upcoming open house. */
+    hasOpenHouse?: boolean;
+    /** Only homes going to auction. */
+    hasAuction?: boolean;
     maxDaysListed?: number;
     maxDistanceToCenter?: number;
     maxDistanceToSea?: number;
