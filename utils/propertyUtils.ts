@@ -5,6 +5,7 @@ import { normalizeConstructionStatus } from '../src/shared/property/construction
 import { listingHasAmenity } from './amenityMatch';
 import { bedsWithinRange } from './bedroomFilter';
 import { hasFeatureRequest } from './featureMatchRequest';
+import { matchesEventFilters, nextEventTime } from '@/src/features/listing-events/utils/listingEvents';
 
 /**
  * `base` plus every listing of `extra` it does not already hold. Used to fold
@@ -30,6 +31,7 @@ export const filterProperties = (properties: Property[], filters: Filters, optio
     // its words are all required (typing more narrows), spellings are folded
     // so "Becici" and "Bečići" are one word, and a typo is forgiven.
     const queryMatcher = createPropertyMatcher(filters.query ?? '');
+    const now = new Date();
 
     return properties.filter(p => {
         // Ensure property has valid coordinates
@@ -211,7 +213,9 @@ export const filterProperties = (properties: Property[], filters: Filters, optio
                amenitiesMatch &&
                minPricePerSqmMatch &&
                maxPricePerSqmMatch &&
-               maxDaysListedMatch;
+               maxDaysListedMatch &&
+               // Optional open house / auction filters
+               matchesEventFilters(p, filters, now);
     });
 };
 
@@ -342,6 +346,17 @@ export const filterAndSortProperties = (properties: Property[], activeFilters: F
             if (hasDiscountA !== hasDiscountB) return hasDiscountB - hasDiscountA;
             return getPropertyTime(b) - getPropertyTime(a);
         });
+        // Soonest open house or auction first; homes without one keep the newest order after them.
+        case 'events_soonest': {
+            const now = new Date();
+            return promotionSorted.sort((a, b) => {
+                const diff = nextEventTime(a, now) - nextEventTime(b, now);
+                if (Number.isFinite(diff) && diff !== 0) return diff;
+                const aHas = Number.isFinite(nextEventTime(a, now)), bHas = Number.isFinite(nextEventTime(b, now));
+                if (aHas !== bHas) return aHas ? -1 : 1;
+                return getPropertyTime(b) - getPropertyTime(a);
+            });
+        }
         case 'newest':
         default:
             return byNewest();

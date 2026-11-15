@@ -24,6 +24,7 @@ import { navigate, localizePath } from '@/src/app/router/navigation';
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
 const HomeSpecialOffersSection = lazy(() => import('./HomeSpecialOffersSection'));
 const RecentlyViewedSection = lazy(() => import('./RecentlyViewedSection'));
+const HomeEventsSection = lazy(() => import('@/src/features/listing-events/components/HomeEventsSection'));
 const TopAgentsSection = lazy(() => import('./TopAgentsSection'));
 const TopAgenciesSection = lazy(() => import('./TopAgenciesSection'));
 const CategoriesSection = lazy(() => import('./CategoriesSection'));
@@ -206,6 +207,13 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
     }
   }, []);
 
+  /** Search, soonest open house / auction first. */
+  const handleSeeUpcomingEvents = useCallback(() => {
+    const filters = { ...state.searchPageState.filters, sortBy: 'events_soonest' };
+    dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { filters, activeFilters: filters } });
+    navigate(paths.search(), { direction: 'forward' });
+  }, [state.searchPageState.filters, dispatch]);
+
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {
     const filters = { ...state.searchPageState.filters };
     if (propertyType !== 'any') {
@@ -266,6 +274,11 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
       <Suspense fallback={<SectionFallback />}>
         <RecentlyViewedSection onPropertyClick={handlePropertyClick} />
+      </Suspense>
+
+      {/* Open houses & auctions coming up — hidden when there are none */}
+      <Suspense fallback={null}>
+        <HomeEventsSection country={state.searchPageState.filters.country} onSeeAll={handleSeeUpcomingEvents} />
       </Suspense>
 
       <div className="content-below-fold">

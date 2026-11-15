@@ -10,7 +10,7 @@ import AiSearch from './AiSearch';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import type { OutOfAreaKind } from '../outOfArea';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
-import OpenHouseFilterToggle from '@/src/features/open-houses/components/OpenHouseFilterToggle';
+import EventFilterChips from '@/src/features/listing-events/components/EventFilterChips';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
 import UniversalSearchBox from '../universal/UniversalSearchBox';
@@ -375,10 +375,8 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                 </button>
             </div>
 
-            <OpenHouseFilterToggle
-                active={filters.hasOpenHouse === true}
-                onToggle={() => onFilterChange('hasOpenHouse', filters.hasOpenHouse === true ? null : true)}
-            />
+            {/* Open houses & auctions (optional) */}
+            <EventFilterChips filters={filters} onFilterChange={onFilterChange} />
 
             <div className="border-t border-neutral-200 pt-4">
                 <button type="button" onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="w-full flex justify-between items-center text-left">
@@ -904,6 +902,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
         filters.hasDiscount,
         filters.hasPriceIncrease,
         filters.hasOpenHouse,
+        filters.openHouseWeekend,
+        filters.hasAuction,
+        filters.auctionWithinDays,
         filters.saleStatus && filters.saleStatus !== 'available' ? filters.saleStatus : null,
     ].filter(v => v !== null && v !== undefined && v !== '' && v !== false).length;
 
@@ -1148,6 +1149,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
                                     <option value="featured">{t('search:sort.featured')}</option>
                                     <option value="price_reduced">{t('search:sort.priceReduced')}</option>
+                                    <option value="events_soonest">{t('search:sort.eventsSoonest', 'Soonest open house / auction')}</option>
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                     <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -1302,6 +1304,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
                                         <option value="featured">{t('search:sort.featured')}</option>
                                         <option value="price_reduced">{t('search:sort.priceReduced')}</option>
+                                        <option value="events_soonest">{t('search:sort.eventsSoonest', 'Soonest open house / auction')}</option>
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                         <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>

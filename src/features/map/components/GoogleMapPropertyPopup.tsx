@@ -11,6 +11,7 @@ import { formatPrice } from '@/utils/currency';
 import { resolveDisplayArea } from '@/shared/property/area';
 import { PROMOTION_TIER_COLORS, PROMOTION_TIER_ICONS } from './googleMapConstants';
 import { SoftIcon } from '@/src/shared/illustrations';
+import EventRibbon from '@/src/features/listing-events/components/EventRibbon';
 
 interface GoogleMapPropertyPopupProps {
   property: Property;
@@ -169,6 +170,9 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
             ? t('property:byNegotiation', 'By Negotiation')
             : formatPrice(property.price, property.country)}
         </div>
+
+        {/* Open house / auction, when there is one */}
+        <EventRibbon property={property} className="map-popup-reveal map-popup-reveal-2 mb-1.5" />
 
         {/* Location */}
         <p className="map-popup-reveal map-popup-reveal-2 text-[11px] text-gray-500 mb-2.5 truncate">

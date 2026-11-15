@@ -2,6 +2,7 @@
 // Handles all property-related API calls
 
 import { httpClient } from './httpClient';
+import { eventSearchParams } from '@/src/features/listing-events/utils/eventSearchParams';
 
 export class PropertyApiClient {
   async getProperties(filters?: any): Promise<any> {
@@ -30,8 +31,8 @@ export class PropertyApiClient {
         params.append('hasDiscount', 'true');
       if (filters.hasPriceIncrease === true)
         params.append('hasPriceIncrease', 'true');
-      if (filters.hasOpenHouse === true)
-        params.append('hasOpenHouse', 'true');
+      // Optional open house / auction filters
+      for (const [key, value] of eventSearchParams(filters, new Date())) params.append(key, value);
     }
 
     const queryString = params.toString();

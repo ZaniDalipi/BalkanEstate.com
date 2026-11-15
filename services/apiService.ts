@@ -1283,6 +1283,8 @@ function transformBackendProperty(backendProp: any): Property {
     maxOccupants: backendProp.maxOccupants,
     orientation: backendProp.orientation,
     visitAvailability: backendProp.visitAvailability,
+    ...(backendProp.nextOpenHouse ? { nextOpenHouse: backendProp.nextOpenHouse } : {}),
+    ...(backendProp.auction ? { auction: backendProp.auction } : {}),
     // Luxury-villa daily-rental fields — without these the property detail,
     // My Listings and saved-homes paths silently lose them (only the villa
     // list saw them, because it spreads the raw API row).
@@ -1374,6 +1376,10 @@ function transformToBackendProperty(frontendProp: Property): any {
   // Optional open houses picked when creating the listing
   if (frontendProp.openHouses && frontendProp.openHouses.length > 0) {
     result.openHouses = frontendProp.openHouses;
+  }
+  // Optional auction: an object sets it, null removes it, absent leaves it.
+  if (frontendProp.auction !== undefined) {
+    result.auction = frontendProp.auction;
   }
 
   // Distance fields

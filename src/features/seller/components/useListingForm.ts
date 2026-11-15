@@ -27,6 +27,8 @@ import { stripAttributesForType } from '@/shared/property/typeAttributes';
 import { resolveTotalArea } from '@/shared/property/area';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
 import type { OpenHouseDraft } from '@/src/features/open-houses/types';
+import type { ListingAuction } from '@/src/shared/types/property.types';
+import { auctionToForm, draftAuction, type AuctionError, type AuctionFormValues } from '@/src/features/auctions/utils/auctionDraft';
 
 /**
  * Maximum images a listing can carry. The backend applies the same cap to both
@@ -223,6 +225,15 @@ export const useListingForm = (
     const [floorplans, setFloorplans] = useState<FloorPlanDraft[]>([]);
     // Optional open houses for a new listing — empty unless the seller adds one.
     const [openHouseDrafts, setOpenHouseDrafts] = useState<OpenHouseDraft[]>([]);
+    // Optional auction — null unless the seller switches it on (or the listing has one).
+    const [auctionForm, setAuctionFormState] = useState<AuctionFormValues | null>(() => auctionToForm(propertyToEdit?.auction));
+    const [auctionError, setAuctionError] = useState<AuctionError | null>(null);
+    const setAuctionForm = useCallback((next: AuctionFormValues | null) => {
+        setAuctionFormState(next);
+        setAuctionError(null);
+        // A server complaint about the old values no longer applies.
+        setFieldErrors(prev => (prev.auction ? { ...prev, auction: '' } : prev));
+    }, []);
 
     /** Set every photo's floor plan spot at once (index-aligned with images). */
     const setPhotoSpots = useCallback((spots: (FloorplanSpot | undefined)[]) => {
@@ -1183,6 +1194,24 @@ export const useListingForm = (
             return;
         }
 
+        // Optional auction: checked here so the reason shows next to its field.
+        let auctionPayload: ListingAuction | null | undefined;
+        if (auctionForm) {
+            const checked = draftAuction(auctionForm, new Date(), propertyToEdit?.auction?.startsAt);
+            if (checked.ok === false) {
+                setAuctionError(checked.error);
+                showError(
+                    t('property:listingEvents.auctionCheckTitle', 'Check the auction details'),
+                    t(checked.error.key, checked.error.defaultValue),
+                );
+                setIsSubmitting(false);
+                return;
+            }
+            auctionPayload = checked.value;
+        } else if (propertyToEdit?.auction) {
+            auctionPayload = null; // switched off: remove it
+        }
+
         try {
             // Step 1: Upload images to R2 before creating the property
             let imageUrls: PropertyImage[] = [];
@@ -1465,6 +1494,8 @@ export const useListingForm = (
                     } : {}),
                     // Optional open houses — only sent with a new listing
                     ...(!propertyToEdit && openHouseDrafts.length > 0 ? { openHouses: openHouseDrafts } : {}),
+                    // Optional auction: set, removed (null) or left alone (absent)
+                    ...(auctionPayload !== undefined ? { auction: auctionPayload } : {}),
                 },
             ) as Property;
 
@@ -1548,6 +1579,12 @@ export const useListingForm = (
             const fieldFailures: { field?: string; message?: string }[] =
                 Array.isArray(err.details?.errors) ? err.details.errors : [];
             // A rejected open house date: say so next to the open house section too.
+            if (fieldFailures.some(f => f.field === 'auction')) {
+                setFieldErrors(prev => ({
+                    ...prev,
+                    auction: t('property:listingEvents.errors.auctionServer', "The auction details can't be saved as they are. Check them and publish again."),
+                }));
+            }
             if (fieldFailures.some(f => f.field === 'openHouses')) {
                 setFieldErrors(prev => ({
                     ...prev,
@@ -1822,6 +1859,7 @@ export const useListingForm = (
         setPhotoSpots,
         floorplans, removeFloorplan, renameFloorplan, replaceFloorplan,
         openHouseDrafts, setOpenHouseDrafts,
+        auctionForm, setAuctionForm, auctionError,
         listingData, setListingData,
         language, setLanguage,
         aiPropertyType, setAiPropertyType,

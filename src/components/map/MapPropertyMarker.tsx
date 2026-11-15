@@ -19,6 +19,7 @@ import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/
 import { formatCityPlace } from '@/shared/geo';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
 import { useProgressiveList } from '@/src/shared/hooks/useProgressiveList';
+import { markerEventTag, markerEventTagHtml } from '@/src/features/map/utils/markerEventTag';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -623,11 +624,20 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
  * Supports night mode with glowing neon effects
  */
 const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boolean = false, isNightMode: boolean = false): L.DivIcon => {
-  if (zoom < ZOOM_THRESHOLD) {
-    return createSimpleMarkerIcon(property, isHovered, isNightMode, zoom);
-  }
-  return createDetailedMarkerIcon(property, isHovered, isNightMode, zoom);
+  const base = zoom < ZOOM_THRESHOLD
+    ? createSimpleMarkerIcon(property, isHovered, isNightMode, zoom)
+    : createDetailedMarkerIcon(property, isHovered, isNightMode, zoom);
+  // "Open Sat" / "Auction Fri" above the pin when the owner planned one
+  const tag = eventTagFor(property);
+  if (!tag || typeof base.options.html !== 'string') return base;
+  return L.divIcon({ ...base.options, html: `<div style="position:relative">${base.options.html}${markerEventTagHtml(tag)}</div>` });
 };
+
+const eventTagFor = (property: Property) => (isClosedListing(property) ? null : markerEventTag(property, new Date(), i18n.language, {
+  openHouse: i18n.t('search:map.eventTag.openHouse', 'Open'),
+  auction: i18n.t('search:map.eventTag.auction', 'Auction'),
+  today: i18n.t('search:map.eventTag.today', 'today'),
+}));
 
 /**
  * Everything a marker's appearance is derived from.
@@ -657,6 +667,8 @@ const iconSignature = (
     property.hasUrgentBadge ? 'u' : '',
     // Sold and rented pins carry a translated word
     isClosedListing(property) ? `${property.status}:${i18n.language}` : '',
+    // Open house / auction tag (changes with the day and language)
+    eventTagFor(property)?.text ?? '',
   ].join('|');
 
 /**

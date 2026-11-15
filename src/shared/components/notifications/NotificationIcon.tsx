@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AlertCircle, Building2, Calendar, CheckCircle, Clock, Home, MessageSquare, ShieldCheck, Star, Ticket, TrendingDown, TrendingUp, UserMinus, UserPlus, XCircle,
+  AlertCircle, Building2, Calendar, DoorOpen, Gavel, CheckCircle, Clock, Home, MessageSquare, ShieldCheck, Star, Ticket, TrendingDown, TrendingUp, UserMinus, UserPlus, XCircle,
 } from 'lucide-react';
 
 const ICONS: Record<string, React.ReactElement> = {
@@ -28,6 +28,13 @@ const ICONS: Record<string, React.ReactElement> = {
   residence_trial_reminder: <Clock className="w-4 h-4 text-amber-500" />,
   residence_agency_grace: <Clock className="w-4 h-4 text-amber-500" />,
   residence_offline: <Building2 className="w-4 h-4 text-red-500" />,
+  // Open houses & auctions
+  open_house_rsvp: <DoorOpen className="w-4 h-4 text-emerald-600" />,
+  open_house_cancelled: <XCircle className="w-4 h-4 text-red-500" />,
+  open_house_reminder: <DoorOpen className="w-4 h-4 text-emerald-600" />,
+  saved_home_open_house: <DoorOpen className="w-4 h-4 text-emerald-600" />,
+  saved_home_auction: <Gavel className="w-4 h-4 text-amber-600" />,
+  auction_reminder: <Gavel className="w-4 h-4 text-amber-600" />,
   // Admins: a new user or listing on the site
   admin_alert: <ShieldCheck className="w-4 h-4 text-indigo-600" />,
 };

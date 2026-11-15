@@ -75,6 +75,7 @@ import {
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { CLOSED_MARKER_COLOR, closedMarkerLabel, isClosedListing } from '@/src/shared/map/closedListing';
+import { appendMarkerEventTag, markerEventTag } from '../utils/markerEventTag';
 import { softIconHtml } from '@/src/shared/illustrations';
 
 // Inject CSS for marker entrance fly-in animation (Google Maps variant)
@@ -151,7 +152,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     hoveredPropertyId,
   } = props;
 
-  const { t } = useTranslation(['search', 'property']);
+  const { t, i18n } = useTranslation(['search', 'property']);
 
   // Map state
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -1135,7 +1136,16 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         }, delay + 900);
       }
 
-      if (!isLuxuryVilla) markerDiv.textContent = price;
+      if (!isLuxuryVilla) {
+        markerDiv.textContent = price;
+        // "Open Sat" / "Auction Fri" when the owner planned one
+        const eventTag = isClosedListing(property) ? null : markerEventTag(property, new Date(), i18n.language, {
+          openHouse: t('search:map.eventTag.openHouse', 'Open'),
+          auction: t('search:map.eventTag.auction', 'Auction'),
+          today: t('search:map.eventTag.today', 'today'),
+        });
+        if (eventTag) appendMarkerEventTag(markerDiv, eventTag);
+      }
 
       // A marker mid-animation must not take a hover transform: the animation
       // outranks the inline style while it runs, then hands back to a stale

@@ -53,7 +53,7 @@ const OpenHouseSection: React.FC<OpenHouseSectionProps> = ({ property, viewer, o
   };
 
   return (
-    <section aria-labelledby={`open-house-${property.id}`} className="rounded-xl border border-emerald-200 bg-white p-4 shadow-lg">
+    <section data-open-house-section aria-labelledby={`open-house-${property.id}`} className="scroll-mt-24 rounded-xl border border-emerald-200 bg-white p-4 shadow-lg">
       <h3 id={`open-house-${property.id}`} className="text-base font-bold text-neutral-900">
         {t('openHouse.title', { defaultValue: 'Open house' })}
       </h3>

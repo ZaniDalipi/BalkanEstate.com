@@ -81,7 +81,11 @@
     "constructionStatus": "Izgradnja",
     "kitchens": "Kuhinje",
     "orientation": "Orijentacija",
-    "openHouse": "Uskoro dan otvorenih vrata"
+    "openHouseWeekend": "Dan otvorenih vrata ovaj vikend",
+    "openHouseAny": "Bilo koji dan otvorenih vrata",
+    "auctionAny": "Aukcije",
+    "auctionWeek": "Aukcija ove sedmice",
+    "eventsGroup": "Dani otvorenih vrata i aukcije"
   },
   "options": {
     "any": "Bilo koji",
@@ -176,7 +180,8 @@
     "priceReduced": "Nedavno sniženo",
     "pricePerSqm": "Cijena po m²",
     "yearBuiltDesc": "Najnovije izgrađeno",
-    "yearBuiltAsc": "Najstarije izgrađeno"
+    "yearBuiltAsc": "Najstarije izgrađeno",
+    "eventsSoonest": "Najskoriji dan otvorenih vrata / aukcija"
   },
   "results": {
     "showing": "Prikazivanje {{count}} nekretnina",
@@ -328,6 +333,11 @@
       "loading": "Učitavanje zanimljivih mjesta…",
       "empty": "Nema zanimljivih mjesta u ovom prikazu. Probajte drugo područje.",
       "error": "Zanimljiva mjesta nisu učitana. Pokušajte ponovo za trenutak."
+    },
+    "eventTag": {
+      "openHouse": "Otvoreno",
+      "auction": "Aukcija",
+      "today": "danas"
     }
   },
   "newsletter": {

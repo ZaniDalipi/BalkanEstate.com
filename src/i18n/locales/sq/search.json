@@ -81,7 +81,11 @@
     "constructionStatus": "Ndërtimi",
     "kitchens": "Kuzhina",
     "orientation": "Orientimi",
-    "openHouse": "Me ditë të hapur së shpejti"
+    "openHouseWeekend": "Ditë e hapur këtë fundjavë",
+    "openHouseAny": "Çdo ditë e hapur",
+    "auctionAny": "Ankande",
+    "auctionWeek": "Ankand këtë javë",
+    "eventsGroup": "Ditë të hapura dhe ankande"
   },
   "options": {
     "any": "Çdo",
@@ -176,7 +180,8 @@
     "priceReduced": "Çmimi i Ulur Kohët",
     "pricePerSqm": "Çmimi për m²",
     "yearBuiltDesc": "Të ndërtuara më së fundi",
-    "yearBuiltAsc": "Të ndërtuara më parë"
+    "yearBuiltAsc": "Të ndërtuara më parë",
+    "eventsSoonest": "Dita e hapur / ankandi më i afërt"
   },
   "results": {
     "showing": "Duke treguar {{count}} prona",
@@ -328,6 +333,11 @@
       "loading": "Po ngarkohen vendet me interes…",
       "empty": "Nuk ka vende me interes në këtë pamje. Provo një zonë tjetër.",
       "error": "Vendet me interes nuk u ngarkuan. Provo përsëri pas pak."
+    },
+    "eventTag": {
+      "openHouse": "Hapur",
+      "auction": "Ankand",
+      "today": "sot"
     }
   },
   "newsletter": {

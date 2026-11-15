@@ -137,5 +137,8 @@ export const aiQueryToFilters = (query: AiSearchQuery): Filters => {
         if (typeof value === 'boolean') filters[key] = value;
         else if (booleans[key]) filters[key] = true;
     }
+    // Open houses and auctions are "only these" filters: there is no "without".
+    if (query.hasOpenHouse === true) filters.hasOpenHouse = true;
+    if (query.hasAuction === true) filters.hasAuction = true;
     return filters;
 };

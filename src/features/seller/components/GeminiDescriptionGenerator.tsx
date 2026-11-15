@@ -27,6 +27,7 @@ import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
 import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
 import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
 import OpenHouseDraftFields from '@/src/features/open-houses/components/OpenHouseDraftFields';
+import AuctionFields from '@/src/features/auctions/components/AuctionFields';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
     LANGUAGES, TagListInput,
@@ -74,6 +75,7 @@ const GeminiDescriptionGenerator: React.FC<{
         handleInputChange, handlePriceChange, handleImageTagChange,
         handleListingTypeChange, handleVisitAvailabilityChange, handleVisitDayToggle,
         openHouseDrafts, setOpenHouseDrafts,
+        auctionForm, setAuctionForm, auctionError,
         handleGoToPreview, handleBackToForm,
         handleSubmit,
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
@@ -778,6 +780,14 @@ const GeminiDescriptionGenerator: React.FC<{
                     </fieldset>
 
                     {/* ===== Open house (optional, new listings only; later ones from My Listings) ===== */}
+                    {/* ===== Auction (optional, new and edited listings) ===== */}
+                    <AuctionFields
+                        value={auctionForm}
+                        onChange={setAuctionForm}
+                        error={auctionError}
+                        serverError={fieldErrors.auction}
+                    />
+
                     {!propertyToEdit && (
                         <OpenHouseDraftFields
                             value={openHouseDrafts}

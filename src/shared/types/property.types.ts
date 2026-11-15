@@ -141,6 +141,21 @@ export interface PropertyPriceHistoryResponse {
   status?: string;
 }
 
+/**
+ * Optional: the home is sold at an auction held elsewhere (bank, notary,
+ * auction house). Dates are ISO strings. Lists carry only startsAt, endsAt,
+ * mode and startingPrice.
+ */
+export interface ListingAuction {
+  startsAt: string;
+  endsAt?: string;
+  mode: 'online' | 'in_person';
+  startingPrice?: number;
+  location?: string;
+  url?: string;
+  depositNote?: string;
+}
+
 export interface Property {
   id: string;
   propertyId?: string; // Custom property ID assigned by agency/agent
@@ -278,6 +293,8 @@ export interface Property {
   hasDiscount?: boolean;
   /** Next upcoming open house, only when the owner chose to host one. */
   nextOpenHouse?: { startsAt: string; endsAt: string };
+  /** Optional auction details; `null` only when sending "remove the auction". */
+  auction?: ListingAuction | null;
   /**
    * Create-only: open houses the seller optionally picked in the listing form.
    * Sent once with the new listing; never read back on the listing itself.
@@ -359,6 +376,11 @@ export interface Filters {
   hasPriceIncrease: boolean | null;
   /** Optional: only listings with an upcoming open house. */
   hasOpenHouse?: boolean | null;
+  /** Optional: an open house this weekend (the visitor's own weekend). */
+  openHouseWeekend?: boolean | null;
+  /** Optional: only homes going to auction; `auctionWithinDays` narrows it. */
+  hasAuction?: boolean | null;
+  auctionWithinDays?: number | null;
   minPricePerSqm: number | null;
   maxPricePerSqm: number | null;
   maxDaysListed: number | null;
@@ -416,6 +438,9 @@ export const initialFilters: Filters = {
   hasDiscount: null,
   hasPriceIncrease: null,
   hasOpenHouse: null,
+  openHouseWeekend: null,
+  hasAuction: null,
+  auctionWithinDays: null,
   minPricePerSqm: null,
   maxPricePerSqm: null,
   maxDaysListed: null,

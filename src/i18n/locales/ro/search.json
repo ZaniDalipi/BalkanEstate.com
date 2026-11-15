@@ -81,7 +81,11 @@
     "constructionStatus": "Construcție",
     "kitchens": "Bucătării",
     "orientation": "Orientare",
-    "openHouse": "Cu zi a porților deschise în curând"
+    "openHouseWeekend": "Zi a porților deschise în acest weekend",
+    "openHouseAny": "Orice zi a porților deschise",
+    "auctionAny": "Licitații",
+    "auctionWeek": "Licitație săptămâna aceasta",
+    "eventsGroup": "Zile ale porților deschise și licitații"
   },
   "options": {
     "any": "Oricare",
@@ -176,7 +180,8 @@
     "priceReduced": "Preț Redus Recent",
     "pricePerSqm": "Preț pe m²",
     "yearBuiltDesc": "Cel mai nou construit",
-    "yearBuiltAsc": "Cel mai vechi construit"
+    "yearBuiltAsc": "Cel mai vechi construit",
+    "eventsSoonest": "Cea mai apropiată zi a porților deschise / licitație"
   },
   "results": {
     "showing": "Se afișează {{count}} proprietăți",
@@ -328,6 +333,11 @@
       "loading": "Se încarcă locurile de interes…",
       "empty": "Niciun loc de interes în această vizualizare. Încercați altă zonă.",
       "error": "Locurile de interes nu au putut fi încărcate. Încercați din nou imediat."
+    },
+    "eventTag": {
+      "openHouse": "Deschis",
+      "auction": "Licitație",
+      "today": "azi"
     }
   },
   "newsletter": {
