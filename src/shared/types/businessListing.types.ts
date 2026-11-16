@@ -99,6 +99,8 @@ export interface BusinessListing {
 
 export interface BusinessListingFilters {
   category?: BusinessCategory;
+  /** An owner-named category (category "other" + their own words), matched without case. */
+  customCategory?: string;
   listingType?: ListingType;
   city?: string;
   country?: string;
@@ -144,4 +146,10 @@ export interface CreateBusinessListingData {
     tiktok?: string;
   };
   businessHours?: Record<string, string>;
+}
+
+/** Categories in use: built-in counts, and the names owners gave "other" (merged spellings). */
+export interface BusinessCategorySummary {
+  categories: { key: string; count: number }[];
+  custom: { name: string; count: number }[];
 }

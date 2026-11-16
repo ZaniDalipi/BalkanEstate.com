@@ -12,7 +12,8 @@ import CreateBusinessListingForm from './CreateBusinessListingForm';
 import ListBusinessFab from './ListBusinessFab';
 import BusinessGridSkeleton from './BusinessGridSkeleton';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
-import ChipScroller from '@/src/components/ui/ChipScroller';
+import CategoryFilterChips from './CategoryFilterChips';
+import { categoryFilters } from '../utils/categoryChoices';
 import { useOffscreen } from '../hooks/useOffscreen';
 import FeaturedProfessionalsRail from './FeaturedProfessionalsRail';
 import { MAX_LANYARDS } from '../utils/lanyardMembers';
@@ -108,7 +109,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   // Filters
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<BusinessCategory | ''>('');
+  // '' (all), a built-in key, or `custom:<name>` (a name owners gave "other").
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const urlTab: TabType = initialTab ?? 'all';
   const [activeTab, setActiveTab] = useState<TabType>(urlTab);
   const [page, setPage] = useState(1);
@@ -167,7 +169,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
   const filters = useMemo(() => ({
     search: search || undefined,
-    category: selectedCategory || undefined,
+    ...categoryFilters(selectedCategory),
     listingType: listingTypeFilter,
     page,
     limit: 20,
@@ -214,7 +216,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     setPage(1);
   }, [searchInput]);
 
-  const handleCategoryClick = useCallback((category: BusinessCategory | '') => {
+  const handleCategoryClick = useCallback((category: string) => {
     setSelectedCategory(category);
     setPage(1);
   }, []);
@@ -608,38 +610,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
 
         {/* Category filters */}
         <motion.div variants={fadeUpVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-          <ChipScroller className="gap-1.5 sm:gap-2 pt-2 pb-8 -mb-5 -mx-4 px-4 sm:-mx-1 sm:px-1">
-            <motion.button
-              type="button"
-              onClick={() => handleCategoryClick('')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 ${
-                selectedCategory === ''
-                  ? 'liquid-tint'
-                  : 'liquid-control text-neutral-700'
-              }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t('filters.all')}
-            </motion.button>
-            {BUSINESS_CATEGORIES.filter(c => c !== 'other').slice(0, 10).map((category) => (
-              <motion.button
-                key={category}
-                type="button"
-                onClick={() => handleCategoryClick(category)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-medium flex-shrink-0 whitespace-nowrap ${
-                  selectedCategory === category
-                    ? 'liquid-tint'
-                    : 'liquid-control text-neutral-700'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <CategoryIcon category={category} className="inline-block w-5 h-5 mr-1 align-[-5px]" />
-                {t(`categories.${category}`)}
-              </motion.button>
-            ))}
-          </ChipScroller>
+          <CategoryFilterChips selected={selectedCategory} onSelect={handleCategoryClick} />
         </motion.div>
 
         {/* Results count: a placeholder bar while loading keeps the line's height */}

@@ -5,6 +5,7 @@ import { IUser } from '../models/User';
 import { uploadImage, deleteImage } from '../services/mediaService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 import { encodeId, resolveId } from '../utils/idObfuscation';
+import { customCategoryFilter, getBusinessCategorySummary } from '../services/businessCategories/businessCategories';
 
 /** Transform lean document: map _id → obfuscated id, strip internals */
 const transformLean = (doc: any) => {
@@ -33,6 +34,17 @@ export const getBusinessListings = async (
     const category = req.query.category as string;
     if (category && BUSINESS_CATEGORIES.includes(category as any)) {
       filter.category = category;
+    }
+
+    // Owner-named category ("other" + their own words), e.g. ?customCategory=360virtualtours
+    const customCategory = req.query.customCategory;
+    if (typeof customCategory === 'string' && customCategory.trim()) {
+      const byName = customCategoryFilter(customCategory);
+      if (!byName) {
+        res.status(400).json({ message: 'customCategory must be at most 100 characters' });
+        return;
+      }
+      Object.assign(filter, byName);
     }
 
     // City filter
@@ -82,6 +94,20 @@ export const getBusinessListings = async (
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to fetch business listings', error: error.message });
+  }
+};
+
+// @desc    Categories in use: built-in counts and the names owners gave "other"
+// @route   GET /api/business-listings/categories?listingType=individual
+// @access  Public
+export const getBusinessCategories = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const listingType = req.query.listingType as string;
+    const type = listingType && LISTING_TYPES.includes(listingType as any) ? listingType : undefined;
+    res.set('Cache-Control', 'public, max-age=300');
+    res.status(200).json(await getBusinessCategorySummary(type));
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to fetch business categories', error: error.message });
   }
 };
 

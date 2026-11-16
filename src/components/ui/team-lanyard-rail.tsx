@@ -4,8 +4,14 @@
  * Team lanyard rail: badges on lanyards hanging from a rail; hover/brush,
  * pull down, click to flip. Vendored from 21st.dev (@dhxwhy/team-lanyard-rail)
  * and kept as one file on purpose so it can be compared with / updated from
- * upstream. Local change: the carousel dots are 44px tap targets with the
- * small dot drawn inside (the upstream dot was the whole 6px button). Colours come from the shadcn tokens in src/index.css (@theme):
+ * upstream. Local changes:
+ * - the carousel dots are 44px tap targets with the small dot drawn inside
+ *   (the upstream dot was the whole 6px button);
+ * - the role is engraved in the band on both faces (the front drops its
+ *   plain role line under the name);
+ * - the back lays name / bio / two tags out in a box that stops above the
+ *   links and QR code, so long text can never run into them.
+ * Colours come from the shadcn tokens in src/index.css (@theme):
  * background, foreground, card, muted, border, ring and chart-1…5.
  */
 
@@ -283,14 +289,25 @@ function LinkIcon({ label }: { label: string }) {
 
 const LINK_ROW = "inline-flex items-center gap-[0.3em] rounded-[0.4em] px-[0.3em] py-[0.14em] text-[0.68em] font-medium leading-tight";
 
-function Band({ tone, tall }: { tone: string; tall?: boolean }) {
+function Band({ tone, tall, label }: { tone: string; tall?: boolean; label?: string }) {
   return (
     <span
       aria-hidden="true"
-      className={`absolute inset-x-0 top-0 block ${tone} ${tall ? "h-[4.3em]" : "h-[2.15em]"}`}
+      className={`absolute inset-x-0 top-0 block ${tone} ${tall ? "h-[4.3em]" : label ? "h-[3.15em]" : "h-[2.15em]"}`}
       style={{ background: "repeating-linear-gradient(135deg, transparent 0 0.45em, color-mix(in oklab, white 10%, transparent) 0.45em 0.56em), linear-gradient(180deg, color-mix(in oklab, currentColor 80%, white), currentColor 72%, color-mix(in oklab, currentColor 86%, black))" }}
     >
       <span className="absolute inset-x-0 bottom-0 h-px bg-black/15" />
+      {label && (
+        // Engraved: light letters pressed into the band (dark edge above, light edge below).
+        // On the tall front band it sits between the clip slot and the portrait.
+        <span
+          // Same size and weight on both faces; on the tall front band it sits below the clip slot (which ends at 1.28em).
+          className={`absolute block truncate text-center text-[0.62em] font-extrabold uppercase tracking-[0.26em] ${tall ? "inset-x-[1.3em] top-[2.2em]" : "inset-x-[0.8em] bottom-[0.42em]"}`}
+          style={{ color: "color-mix(in oklab, white 88%, currentColor)", textShadow: "0 -0.08em 0 color-mix(in oklab, black 45%, transparent), 0 0.08em 0 color-mix(in oklab, white 35%, transparent)" }}
+        >
+          {label}
+        </span>
+      )}
     </span>
   );
 }
@@ -329,21 +346,20 @@ const BadgeFaces = React.memo(function BadgeFaces({ item, tone }: { item: Lanyar
   const bars = React.useMemo(() => barcode(seed), [seed]);
   const digits = String(seed % 1000000000).padStart(9, "0");
   const [failed, setFailed] = React.useState(false);
-  const tags = (item.tags ?? []).slice(0, 3);
+  const tags = (item.tags ?? []).slice(0, 2);
   const links = (item.links ?? []).slice(0, 3);
   return (
     <>
       <span data-face="front" className="absolute inset-0 flex flex-col items-center overflow-hidden rounded-[0.85em] border border-border bg-card px-[0.8em] pb-[0.7em] text-card-foreground [backface-visibility:hidden]" style={{ transform: "translateZ(1px)" }}>
-        <Band tone={tone} tall />
+        <Band tone={tone} tall label={item.role} />
         <Hole />
-        <span className="relative mt-[2.05em] block size-[5.3em] shrink-0 rounded-full bg-card p-[0.2em]" style={{ boxShadow: "0 0.15em 0.5em color-mix(in oklab, var(--color-foreground) 22%, transparent)" }}>
+        <span className="relative mt-[2.55em] block size-[5.3em] shrink-0 rounded-full bg-card p-[0.2em]" style={{ boxShadow: "0 0.15em 0.5em color-mix(in oklab, var(--color-foreground) 22%, transparent)" }}>
           <span className="relative block size-full overflow-hidden rounded-full bg-muted">
             <Silhouette />
             {!failed && <img src={item.image} alt="" draggable={false} decoding="async" onError={() => setFailed(true)} className="pointer-events-none absolute inset-0 block size-full select-none object-cover" />}
           </span>
         </span>
         <span className="mt-[0.55em] block w-full truncate text-center text-[1.08em] font-semibold leading-tight tracking-tight">{item.name}</span>
-        <span className="mt-[0.15em] block w-full truncate text-center text-[0.8em] leading-snug text-muted-foreground">{item.role}</span>
         {item.team && <span className="mt-[0.5em] block w-full truncate text-center text-[0.6em] font-medium uppercase tracking-[0.2em] text-muted-foreground">{item.team}</span>}
         <span className="mt-auto block w-full border-t border-dashed border-border pt-[0.5em]">
           <svg aria-hidden="true" viewBox={`0 0 ${bars.width} 20`} preserveAspectRatio="none" className="block h-[1.6em] w-full text-foreground/80">
@@ -354,22 +370,18 @@ const BadgeFaces = React.memo(function BadgeFaces({ item, tone }: { item: Lanyar
         <Finish />
       </span>
       <span data-face="back" className="absolute inset-0 overflow-hidden rounded-[0.85em] border border-border bg-card text-card-foreground [backface-visibility:hidden]" style={{ transform: "rotateY(180deg) translateZ(1px)" }}>
-        <Band tone={tone} />
+        <Band tone={tone} label={item.role} />
         <Hole />
-        <span className="absolute inset-x-[0.85em] top-[2.6em] block">
-          <span className="block truncate text-[0.95em] font-semibold leading-tight">{item.name}</span>
-          <span className="block truncate text-[0.72em] leading-snug text-muted-foreground">{item.role}</span>
+        {/* Name, bio and tags live in a box that ends above the links + QR zone, so they can never overlap it. */}
+        <span className="absolute inset-x-[0.85em] top-[3.6em] bottom-[5.1em] flex flex-col overflow-hidden">
+          <span className="block shrink-0 truncate text-[0.95em] font-semibold leading-tight">{item.name}</span>
+          {item.bio && <span data-bio className="mt-[0.45em] line-clamp-3 text-[0.72em] leading-[1.4] text-muted-foreground">{item.bio}</span>}
+          {tags.length > 0 && (
+            <span className="mt-auto flex shrink-0 gap-[0.28em] overflow-hidden pt-[0.4em]">
+              {tags.map((tag) => <span key={tag} className="block max-w-[48%] shrink-0 truncate rounded-full border border-border bg-muted/60 px-[0.6em] py-[0.16em] text-[0.58em] leading-tight text-muted-foreground">{tag}</span>)}
+            </span>
+          )}
         </span>
-        {item.bio && (
-          <span className="absolute inset-x-[0.85em] top-[5.1em] block">
-            <span data-bio className="line-clamp-4 block text-[0.74em] leading-[1.4]">{item.bio}</span>
-          </span>
-        )}
-        {tags.length > 0 && (
-          <span className="absolute inset-x-[0.85em] top-[9.8em] flex flex-wrap gap-[0.28em]">
-            {tags.map((tag) => <span key={tag} className="block rounded-full border border-border bg-muted/60 px-[0.6em] py-[0.16em] text-[0.6em] leading-tight text-muted-foreground">{tag}</span>)}
-          </span>
-        )}
         {links.length > 0 && (
           <span aria-hidden="true" className="absolute bottom-[0.75em] left-[0.6em] flex flex-col items-start gap-[0.1em] transition-opacity duration-150 motion-reduce:transition-none" style={{ opacity: "var(--drawn, 1)" }}>
             {links.map((link) => <span key={link.label} className={LINK_ROW}><LinkIcon label={link.label} />{link.label}</span>)}

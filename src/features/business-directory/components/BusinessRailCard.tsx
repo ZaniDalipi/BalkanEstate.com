@@ -5,11 +5,12 @@ import { optimizeImageUrl } from '@/config/mediaConfig';
 import { AppLink } from '@/src/app/router/AppLink';
 import { paths } from '@/src/app/router/paths';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
+import { categoryLabel } from '../utils/categoryStyle';
 
 /** A business in the home page row: banner with its logo, name, category and city. The whole card is one link. */
 export const BusinessRailCard: React.FC<{ listing: BusinessListing }> = ({ listing: b }) => {
   const { t } = useTranslation('businessDirectory');
-  const category = b.category === 'other' && b.customCategory ? b.customCategory : t(`categories.${b.category}`);
+  const category = categoryLabel(b, t);
   return (
     <AppLink
       to={paths.businessListing(b.slug || b.id)}

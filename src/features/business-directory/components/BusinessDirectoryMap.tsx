@@ -10,6 +10,7 @@ import {
   XMarkIcon,
 } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { categoryLabel } from '../utils/categoryStyle';
 
 interface BusinessDirectoryMapProps {
   listings: BusinessListing[];
@@ -271,7 +272,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                   }
                 `}>
                   <p className="text-sm font-bold leading-tight">{listing.name}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5">{t(`categories.${listing.category}`)}</p>
+                  <p className="text-xs text-neutral-400 mt-0.5">{categoryLabel(listing, t)}</p>
                   {/* Tooltip arrow */}
                   <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 bg-neutral-900" />
                 </div>
@@ -344,7 +345,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                           </h3>
                           <p className="text-xs text-neutral-500 flex items-center gap-1">
                             <SoftIcon name={selectedListing.listingType === 'individual' ? 'user' : 'store'} className="w-4 h-4 flex-shrink-0" />
-                            {t(`categories.${selectedListing.category}`)}
+                            {categoryLabel(selectedListing, t)}
                           </p>
                         </div>
                       </div>

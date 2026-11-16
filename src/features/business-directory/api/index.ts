@@ -1,6 +1,7 @@
 export { businessDirectoryKeys } from './businessDirectoryKeys';
 export {
   getBusinessListings,
+  getBusinessCategories,
   getBusinessListing,
   getMyBusinessListings,
   createBusinessListing,
