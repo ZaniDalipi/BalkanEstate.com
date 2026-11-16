@@ -258,7 +258,8 @@
     "tenantNamePlaceholder": "π.χ. Γιώργος Παπαδόπουλος",
     "tenantNameHint": "Προαιρετικό. Ορατό μόνο σε εσάς.",
     "rentalNotesLabel": "Σημειώσεις",
-    "rentalNotesPlaceholder": "π.χ. Μηνιαία πληρωμή την 1η, εγγύηση πληρωμένη..."
+    "rentalNotesPlaceholder": "π.χ. Μηνιαία πληρωμή την 1η, εγγύηση πληρωμένη...",
+    "rentedUntilInvalid": "Επιλέξτε τη σημερινή ή μεταγενέστερη ημερομηνία, ή αφήστε το κενό."
   },
   "rules": {
     "title": "Κανόνες Ενοικίασης — {{country}}",

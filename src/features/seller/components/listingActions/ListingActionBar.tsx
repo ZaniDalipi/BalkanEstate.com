@@ -1,33 +1,49 @@
 import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SoftIcon } from '@/src/shared/illustrations';
 import { listingActionSpan, type ListingAction, type ListingActionId } from '../../utils/listingActions';
+import type { ListingFeedback } from '../../hooks/useListingTasks';
+import type { ListingTaskId } from '../../utils/listingActionFeedback';
 import { LISTING_ACTION_GRID } from './listingActionStyles';
 import { ListingActionButton } from './ListingActionButton';
+import { ListingActionNotice } from './ListingActionNotice';
 
 interface ListingActionBarProps {
   actions: ListingAction[];
   onAction: (id: ListingActionId) => void;
   /** Opens the listing editor — offered when a blocked action needs a fix there. */
   onEdit: () => void;
+  /** What this card is doing right now; its button shows a spinner and the rest wait. */
+  pendingTask?: ListingTaskId | null;
+  /** Result of the last action: a confirmation, or why it failed. */
+  feedback?: ListingFeedback | null;
+  onDismissFeedback?: () => void;
 }
 
 /**
  * The action row of a "My listings" card. Sized by the card, not the screen
  * (a container query): wide cards show every action as an equal tile in one
  * row; narrow cards put the main action on its own row and pair the rest, so
- * no row is left half empty. Pressing a blocked action
- * explains why next to the row instead of doing nothing.
+ * no row is left half empty. Every press gets an answer under the row: why a
+ * blocked action can't run, a spinner while one works, then that it worked or
+ * why it didn't.
  */
-export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onAction, onEdit }) => {
+export const ListingActionBar: React.FC<ListingActionBarProps> = ({
+  actions, onAction, onEdit, pendingTask = null, feedback = null, onDismissFeedback,
+}) => {
   const { t } = useTranslation(['seller']);
   const reasonId = useId();
   const [explainedId, setExplainedId] = useState<ListingActionId | null>(null);
   // Derived, so the message disappears by itself once the action is usable.
   const explained = actions.find((a) => a.id === explainedId && a.blocked);
+  const busy = pendingTask !== null;
 
   const press = (action: ListingAction) => {
-    if (action.blocked) { setExplainedId(action.id); return; }
+    if (busy) return;
+    if (action.blocked) {
+      onDismissFeedback?.();
+      setExplainedId(action.id);
+      return;
+    }
     setExplainedId(null);
     onAction(action.id);
   };
@@ -37,6 +53,7 @@ export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onA
       <div
         role="group"
         aria-label={t('seller:myListings.actionsLabel', 'Listing actions')}
+        aria-busy={busy || undefined}
         className={LISTING_ACTION_GRID}
       >
         {actions.map((action, i) => (
@@ -45,38 +62,31 @@ export const ListingActionBar: React.FC<ListingActionBarProps> = ({ actions, onA
             action={action}
             reasonId={reasonId}
             span={listingActionSpan(i, actions.length)}
+            state={pendingTask === action.id ? 'working' : busy ? 'waiting' : 'ready'}
             onPress={press}
           />
         ))}
       </div>
-      {explained?.blocked && (
-        <div
+      {explained?.blocked && !busy && (
+        <ListingActionNotice
           id={reasonId}
-          role="alert"
-          className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
-        >
-          <SoftIcon name="info" className="h-4 w-4 shrink-0" />
-          <span className="min-w-0 flex-1">
-            {t(explained.blocked.key, explained.blocked.defaultValue, explained.blocked.values)}
-          </span>
-          {explained.blocked.fix === 'edit' && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="min-h-[44px] rounded-lg px-2 font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {t('seller:myListings.actionBlocked.addPhotos', 'Add photos')}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setExplainedId(null); }}
-            aria-label={t('seller:myListings.actionBlocked.dismiss', 'Dismiss')}
-            className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-lg hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <SoftIcon name="xmark" className="h-4 w-4" />
-          </button>
-        </div>
+          tone="info"
+          message={t(explained.blocked.key, explained.blocked.defaultValue, explained.blocked.values)}
+          action={explained.blocked.fix === 'edit'
+            ? { label: t('seller:myListings.actionBlocked.addPhotos', 'Add photos'), onPress: onEdit }
+            : undefined}
+          onDismiss={() => setExplainedId(null)}
+        />
+      )}
+      {feedback && !busy && !explained && (
+        <ListingActionNotice
+          tone={feedback.kind}
+          message={t(feedback.text.key, feedback.text.defaultValue, feedback.text.values)}
+          action={feedback.retry
+            ? { label: t('seller:myListings.actionError.retry', 'Try again'), onPress: feedback.retry }
+            : undefined}
+          onDismiss={() => onDismissFeedback?.()}
+        />
       )}
     </div>
   );

@@ -972,3 +972,25 @@ export default {
   validateFloorplanSpot,
   sanitizeFloorplanSpot,
 };
+
+/**
+ * An optional calendar date from a date input (yyyy-mm-dd) that must be today
+ * or later. Empty is valid: the field is optional.
+ */
+export function validateNotPastDate(value: string, today: Date = new Date()): ValidationResult {
+  const trimmed = (value ?? '').trim();
+  if (trimmed === '') return { isValid: true };
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  const parsed = match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null;
+  // new Date() rolls 2026-02-31 over to March; a real date keeps its month.
+  if (!match || !parsed || parsed.getMonth() !== Number(match[2]) - 1) {
+    return { isValid: false, error: 'Enter a valid date' };
+  }
+
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (parsed.getTime() < startOfToday.getTime()) {
+    return { isValid: false, error: 'Date cannot be in the past' };
+  }
+  return { isValid: true };
+}

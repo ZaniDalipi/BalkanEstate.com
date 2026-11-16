@@ -258,7 +258,8 @@
     "tenantNamePlaceholder": "npr. Marko Marković",
     "tenantNameHint": "Opciono. Vidljivo samo vama.",
     "rentalNotesLabel": "Napomene",
-    "rentalNotesPlaceholder": "npr. Mesečna uplata 1. u mesecu, depozit plaćen..."
+    "rentalNotesPlaceholder": "npr. Mesečna uplata 1. u mesecu, depozit plaćen...",
+    "rentedUntilInvalid": "Izaberite današnji ili kasniji datum, ili ostavite prazno."
   },
   "rules": {
     "title": "Pravila iznajmljivanja — {{country}}",

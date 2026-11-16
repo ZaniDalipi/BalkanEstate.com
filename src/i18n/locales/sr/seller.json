@@ -519,6 +519,32 @@
       "noImages": "Prvo dodajte fotografije oglasu da biste napravili video.",
       "addPhotos": "Dodaj fotografije",
       "dismiss": "Zatvori"
+    },
+    "actionWorking": "U toku…",
+    "openListing": "Otvori oglas",
+    "actionError": {
+      "retry": "Pokušaj ponovo",
+      "generic": "Nije uspelo. Pokušajte ponovo.",
+      "renew": "Oglas nije obnovljen. Pokušajte ponovo.",
+      "move": "Oglas nije premešten. Pokušajte ponovo.",
+      "status": "Oglas nije ažuriran. Pokušajte ponovo.",
+      "delete": "Oglas nije obrisan. Pokušajte ponovo.",
+      "offline": "Niste na mreži. Proverite vezu i pokušajte ponovo.",
+      "agentRequired": "Samo registrovani agenti mogu premestiti oglas u agenciju.",
+      "external": "Uvezeni oglasi se ne mogu premeštati.",
+      "invalidDate": "Izaberite ispravan datum.",
+      "session": "Vaša sesija je istekla. Prijavite se ponovo.",
+      "forbidden": "Ne možete menjati ovaj oglas.",
+      "notFound": "Ovaj oglas više ne postoji.",
+      "rateLimited": "Previše pokušaja. Sačekajte trenutak i pokušajte ponovo."
+    },
+    "actionDone": {
+      "renewed": "Obnovljeno. Vaš oglas je ponovo na vrhu.",
+      "movedToAgency": "Premešteno u vašu agenciju.",
+      "movedToPrivate": "Premešteno na vaš privatni profil.",
+      "sold": "Označeno kao prodato.",
+      "rented": "Označeno kao izdato.",
+      "available": "Ponovo označeno kao dostupno."
     }
   },
   "form": {

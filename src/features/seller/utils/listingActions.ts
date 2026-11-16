@@ -167,3 +167,20 @@ export const listingActionSpan = (index: number, count: number): 'full' | 'half'
   const restIsOdd = (count - 1) % 2 === 1;
   return isLast && restIsOdd ? 'full' : 'half';
 };
+
+export const RENEW_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Whether a listing last renewed at `lastRenewed` can be renewed at `now`, and
+ * the time left if not. Same arithmetic as the server (whole minutes, rounded
+ * up), so the countdown on the button matches the server's answer.
+ */
+export const renewalStatusOf = (lastRenewed: Date | number | string | null | undefined, now: number): RenewalStatus => {
+  if (lastRenewed === null || lastRenewed === undefined || lastRenewed === '') return { canRenew: true };
+  const last = new Date(lastRenewed).getTime();
+  if (!Number.isFinite(last)) return { canRenew: true };
+  const remaining = last + RENEW_COOLDOWN_MS - now;
+  if (remaining <= 0) return { canRenew: true };
+  const totalMinutes = Math.ceil(remaining / 60_000);
+  return { canRenew: false, hoursRemaining: Math.floor(totalMinutes / 60), minutesRemaining: totalMinutes % 60 };
+};

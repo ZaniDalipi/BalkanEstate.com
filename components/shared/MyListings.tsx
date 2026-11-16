@@ -1,215 +1,22 @@
-import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyStatus, UserRole } from '../../types';
-import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties, useMyListingsInfinite } from '../../src/features/properties/hooks';
-import { PencilIcon, TrashIcon } from '../../constants';
+import { PencilIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
-import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import { VideoGenerator } from '../../src/features/videos';
 import { useUnfinishedListingDrafts } from '@/src/features/seller/hooks/useUnfinishedListingDrafts';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useRouteView } from '@/src/app/router/useRouteView';
-import { ListingTypePicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
-import { ListingActionBar } from '@/src/features/seller/components/listingActions';
-import { buildListingActions, isListingActionable, type ListingActionId } from '@/src/features/seller/utils/listingActions';
-import ManageOpenHouses from '@/src/features/open-houses/components/ManageOpenHouses';
-
-// Role badge component to show which role created the listing
-const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
-    const { t } = useTranslation(['seller', 'account']);
-    if (!role) return null;
-
-    const isAgent = role === 'agent' || role === UserRole.AGENT;
-
-    return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
-            isAgent
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-purple-100 text-purple-700'
-        }`}>
-            {isAgent ? (
-                <>
-                    <SoftIcon name="building" className="w-4 h-4" />
-                    {t('account:roles.agent', 'Agent')}
-                </>
-            ) : (
-                <>
-                    <SoftIcon name="home" className="w-4 h-4" />
-                    {t('account:roles.privateSeller', 'Private Seller')}
-                </>
-            )}
-        </span>
-    );
-};
-
-const StatusBadge: React.FC<{ status: PropertyStatus }> = ({ status }) => {
-    const { t } = useTranslation(['seller']);
-    const statusStyles: Record<string, { bg: string, text: string, icon: SoftIconName }> = {
-        active: { bg: 'bg-green-100', text: 'text-green-800', icon: 'check' },
-        draft: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'pencil' },
-        pending: { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'clock' },
-        sold: { bg: 'bg-neutral-200', text: 'text-neutral-700', icon: 'tag' },
-        rented: { bg: 'bg-orange-100', text: 'text-orange-800', icon: 'key' },
-    };
-    const style = statusStyles[status] || statusStyles.draft;
-    return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text}`}>
-            <SoftIcon name={style.icon} className="w-5 h-5" />
-            <span className="capitalize">{t(`seller:myListings.${status}`, status)}</span>
-        </span>
-    );
-};
-
-const ListingCard: React.FC<{
-    property: Property,
-    onRenew: (id: string) => void,
-    onMarkAsSold: (id: string) => void,
-    onMarkAsAvailable: (id: string) => void,
-    onDelete: (id: string) => void,
-    onPromote: (id: string) => void,
-    onExtend: (id: string) => void,
-    onVideo: (id: string) => void,
-    onReassignRole: (id: string) => void,
-    canReassignToAgency: boolean,
-    renewalStatus: { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number } | null,
-}> = ({ property, onRenew, onMarkAsSold, onMarkAsAvailable, onDelete, onPromote, onExtend, onVideo, onReassignRole, canReassignToAgency, renewalStatus }) => {
-    const { t } = useTranslation(['rental', 'common', 'seller']);
-    const { dispatch } = useAppContext();
-    const [imageError, setImageError] = useState(false);
-
-    const handleCardClick = () => {
-        navigate(paths.property(property.id), { state: { property } });
-    };
-
-    const handleEditClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        // Navigate to edit listing URL
-        navigate(paths.editListing(property.id), { state: { property } });
-    };
-
-    const isActionable = isListingActionable(property.status);
-    const actions = buildListingActions({
-        status: property.status,
-        listingType: property.listingType,
-        createdAsRole: property.createdAsRole,
-        isPromoted: property.isPromoted,
-        promotionEndDate: property.promotionEndDate,
-        imageCount: property.images?.length ?? 0,
-        hasVideo: Boolean(property.videoUrl),
-        canReassignToAgency,
-        renewal: renewalStatus,
-    });
-    const actionHandlers: Record<ListingActionId, (id: string) => void> = {
-        promote: onPromote,
-        extendPromotion: onExtend,
-        video: onVideo,
-        renew: onRenew,
-        moveToAgency: onReassignRole,
-        moveToPrivate: onReassignRole,
-        markSold: onMarkAsSold,
-        markRented: onMarkAsSold,
-        markAvailable: onMarkAsAvailable,
-    };
-    const handleAction = (actionId: ListingActionId) => actionHandlers[actionId](property.id);
-
-    // Check if property has valid map coordinates
-    const hasValidCoordinates = property.lat != null && !isNaN(property.lat) && property.lng != null && !isNaN(property.lng);
-
-    return (
-    <div className="bg-white p-4 rounded-xl border border-neutral-200 hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row gap-5">
-        {/* Image container - fixed size with image fitted inside */}
-        <button onClick={handleCardClick} className="block flex-shrink-0">
-            <div className="w-full sm:w-56 h-44 bg-neutral-100 rounded-lg overflow-hidden flex items-center justify-center">
-                {imageError ? (
-                    <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
-                        <SoftIcon name="building" className="w-12 h-12" />
-                    </div>
-                ) : (
-                    <img
-                        src={optimizeImageUrl(property.imageUrl, { width: 640 }) || property.imageUrl}
-                        alt={property.address}
-                        className="w-full h-full object-cover object-center"
-                        onError={() => setImageError(true)}
-                    />
-                )}
-            </div>
-        </button>
-        <div className="flex-grow flex flex-col min-w-0">
-            <div className="flex justify-between items-start">
-                <div onClick={handleCardClick} className="cursor-pointer">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <StatusBadge status={property.status} />
-                        <ListingTypeBadge listingType={property.listingType} />
-                        <RoleBadge role={property.createdAsRole} />
-                        {!hasValidCoordinates && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title={t('account:ui.myListings.thisPropertyWonTAppear', 'This property won\'t appear on the map. Edit to set location.')}>
-                                <SoftIcon name="warning" className="w-4 h-4" />
-                                {t('seller:myListings.noMapLocation', 'No Map Location')}
-                            </span>
-                        )}
-                    </div>
-                    {property.propertyId && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-600" title={t('seller:myListings.propertyIdLabel', 'Property ID')}>
-                            ID: {property.propertyId}
-                        </span>
-                    )}
-                    {property.title && (
-                        <p className="font-bold text-lg sm:text-xl text-neutral-900 mt-1 line-clamp-1">{property.title}</p>
-                    )}
-                    <p className={`font-bold ${property.title ? 'text-base' : 'text-lg sm:text-xl'} text-primary mt-1`}>{property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country)}</p>
-                    <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
-                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="flex h-[44px] w-[44px] items-center justify-center text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
-                        <PencilIcon className="w-5 h-5" aria-hidden="true" />
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="flex h-[44px] w-[44px] items-center justify-center text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
-                        <TrashIcon className="w-5 h-5" aria-hidden="true" />
-                    </button>
-                </div>
-            </div>
-
-            <div className="flex-grow"></div>
-
-            <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500 mt-3 pt-3 border-t">
-                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.views', 'Views')}><SoftIcon name="eye" className="w-5 h-5" /> {property.views || 0}</div>
-                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.saves', 'Saves')}><SoftIcon name="heart" className="w-5 h-5" /> {property.saves || 0}</div>
-                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.inquiries', 'Inquiries')}><SoftIcon name="chat" className="w-5 h-5" /> {property.inquiries || 0}</div>
-                {property.lastRenewed && isActionable && (
-                    <div className="flex items-center gap-1.5 text-green-600" title={t('account:ui.myListings.lastRenewed', 'Last Renewed')}>
-                        <SoftIcon name="calendar" className="w-5 h-5" />
-                        <span className="text-xs font-medium">
-                            {new Date(property.lastRenewed).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </span>
-                    </div>
-                )}
-                {property.status === 'rented' && property.rentedUntil && (
-                    <div className="flex items-center gap-1.5 text-orange-600" title={t('account:ui.myListings.rentedUntil', 'Rented until')}>
-                        <SoftIcon name="calendar" className="w-5 h-5" />
-                        <span className="text-xs font-medium">
-                            {t('seller:myListings.rentedUntil', 'Rented until {{date}}', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) })}
-                        </span>
-                    </div>
-                )}
-            </div>
-
-            <ListingActionBar actions={actions} onAction={handleAction} onEdit={() => navigate(paths.editListing(property.id), { state: { property } })} />
-            {/* Optional: plan open houses and see who's coming */}
-            {property.status === 'active' && (
-                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                    <ManageOpenHouses propertyId={property.id} />
-                </div>
-            )}
-        </div>
-    </div>
-);
-};
+import { ListingTypePicture, SoftIcon } from '@/src/shared/illustrations';
+import { MyListingCard } from '@/src/features/seller/components/myListings/MyListingCard';
+import { useMyListingMutations } from '@/src/features/seller/hooks/useMyListingMutations';
+import { renewalStatusOf, type ListingActionId, type RenewalStatus } from '@/src/features/seller/utils/listingActions';
+import { validateNotPastDate } from '@/src/shared/utils/validation';
 
 const FilterPill: React.FC<{
     label: string;
@@ -230,31 +37,9 @@ const FilterPill: React.FC<{
 );
 
 
-const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) => {
-    const { t } = useTranslation(['seller']);
-    const isRent = listingType === 'rent';
-    return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
-            isRent ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
-        }`}>
-            {isRent ? (
-                <>
-                    <ListingTypePicture type="rent" className="w-4 h-4" />
-                    {t('seller:myListings.forRent', 'For Rent')}
-                </>
-            ) : (
-                <>
-                    <ListingTypePicture type="sale" className="w-4 h-4" />
-                    {t('seller:myListings.forSale', 'For Sale')}
-                </>
-            )}
-        </span>
-    );
-};
-
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { t } = useTranslation(['rental', 'common', 'seller', 'account']);
-    const { state, dispatch } = useAppContext();
+    const { state } = useAppContext();
     const [showSoldConfirm, setShowSoldConfirm] = useState(false);
     const [showRentedModal, setShowRentedModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -276,29 +61,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [propertyForVideo, setPropertyForVideo] = useState<Property | null>(null);
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
-    const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
-    const skipNextRefetchRef = useRef(false);
-
-    // Calculate renewal status based on lastRenewed
-    const calculateRenewalStatus = (lastRenewed?: Date | number | string) => {
-        if (!lastRenewed) return { canRenew: true };
-
-        const COOLDOWN_HOURS = 24;
-        const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
-        const lastRenewedTime = new Date(lastRenewed).getTime();
-        const now = Date.now();
-        const timeSinceRenewal = now - lastRenewedTime;
-
-        if (timeSinceRenewal >= cooldownMs) {
-            return { canRenew: true };
-        }
-
-        const timeRemaining = cooldownMs - timeSinceRenewal;
-        const hoursRemaining = Math.floor(timeRemaining / (60 * 60 * 1000));
-        const minutesRemaining = Math.ceil((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
-
-        return { canRenew: false, hoursRemaining, minutesRemaining };
-    };
+    const [renewalStatuses, setRenewalStatuses] = useState<Record<string, RenewalStatus>>({});
+    const [rentedUntilError, setRentedUntilError] = useState<string | null>(null);
 
     // Listings are loaded in chunks of 20 as the user scrolls; filtering,
     // search and sorting happen on the server
@@ -321,14 +85,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const fetchMyListings = useCallback(() => { refetch(); }, [refetch]);
     const loadMore = useCallback(() => { fetchNextPage(); }, [fetchNextPage]);
 
-    // Delayed refetch for real-time updates - skips if an optimistic update just happened
-    const realtimeRefetch = useCallback(() => {
-        if (skipNextRefetchRef.current) {
-            skipNextRefetchRef.current = false;
-            return;
-        }
-        fetchMyListings();
-    }, [fetchMyListings]);
+    // Real-time updates re-read the list; it only ever shows what the server stores.
+    const realtimeRefetch = fetchMyListings;
 
     // Enable real-time updates via WebSocket
     // When any property is created/updated/deleted, refresh the list
@@ -368,9 +126,10 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     // Renewal statuses: recalculated whenever listings change, and every minute
     useEffect(() => {
         const recalculate = () => {
-            const updated: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
+            const now = Date.now();
+            const updated: Record<string, RenewalStatus> = {};
             myProperties.forEach(p => {
-                updated[p.id] = calculateRenewalStatus(p.lastRenewed);
+                updated[p.id] = renewalStatusOf(p.lastRenewed, now);
             });
             setRenewalStatuses(updated);
         };
@@ -464,112 +223,51 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         return () => observer.disconnect();
     }, [hasMore, isLoading, isLoadingMore, myProperties.length, loadMore]);
 
-    const handleRenew = async (id: string) => {
-        // Optimistic: update UI immediately
-        const newLastRenewedTimestamp = Date.now();
-        setMyProperties(prev => prev.map(p =>
-            p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
-        ));
-        setRenewalStatuses(prev => ({
-            ...prev,
-            [id]: calculateRenewalStatus(new Date(newLastRenewedTimestamp)),
-        }));
-        dispatch({ type: 'RENEW_PROPERTY', payload: id });
-
-        try {
-            const result = await api.renewProperty(id);
-
-            if (result.success && result.lastRenewed) {
-                // Sync with exact server timestamp
-                const serverTimestamp = new Date(result.lastRenewed).getTime();
-                setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, lastRenewed: serverTimestamp } : p
-                ));
-                setRenewalStatuses(prev => ({
-                    ...prev,
-                    [id]: calculateRenewalStatus(new Date(serverTimestamp)),
-                }));
-            }
-        } catch (error: any) {
-            // Revert optimistic update on failure
-            const errorDetails = error.details || error;
-            if (error.code === 'RENEWAL_COOLDOWN' || errorDetails.code === 'RENEWAL_COOLDOWN') {
-                setRenewalStatuses(prev => ({
-                    ...prev,
-                    [id]: {
-                        canRenew: false,
-                        hoursRemaining: errorDetails.hoursRemaining,
-                        minutesRemaining: errorDetails.minutesRemaining,
-                    },
-                }));
-            }
-            // Re-fetch to restore accurate state
-            fetchMyListings();
-        }
-    };
+    const mutations = useMyListingMutations({
+        listings: myProperties,
+        setListings: setMyProperties,
+        setCounts,
+        refetch: fetchMyListings,
+    });
 
     const handleMarkAsSoldClick = (id: string) => {
         const prop = myProperties.find(p => p.id === id);
+        setPropertyToMarkSold(id);
         if (prop?.listingType === 'rent') {
-            setPropertyToMarkSold(id);
             setRentedUntilDate('');
+            setRentedUntilError(null);
             setShowRentedModal(true);
         } else {
-            setPropertyToMarkSold(id);
             setShowSoldConfirm(true);
         }
     };
 
-    const confirmMarkAsRented = async () => {
-        if (propertyToMarkSold) {
-            const id = propertyToMarkSold;
-            const rentedAt = Date.now();
-            const until = rentedUntilDate ? new Date(rentedUntilDate).getTime() : undefined;
-            // Close modal + update UI instantly
-            setShowRentedModal(false);
-            setPropertyToMarkSold(null);
-            setRentedUntilDate('');
-            skipNextRefetchRef.current = true;
-            setMyProperties(prev => prev.map(p =>
-                p.id === id ? { ...p, status: 'rented' as PropertyStatus, rentedAt, rentedUntil: until } : p
-            ));
-            dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id, rentedAt, rentedUntil: until } });
-            window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id, status: 'rented', rentedAt, rentedUntil: until } }));
-            // Fire API in background
-            try {
-                await api.markPropertyAsRented(id, rentedUntilDate || undefined);
-                window.dispatchEvent(new CustomEvent('property-status-changed'));
-            } catch (error) {
-                // Revert on failure
-                setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
-                ));
-                dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: id });
-            }
-        }
+    const closeRentedModal = () => {
+        setShowRentedModal(false);
+        setPropertyToMarkSold(null);
+        setRentedUntilDate('');
+        setRentedUntilError(null);
     };
 
-    const confirmMarkAsSold = async () => {
-        if (propertyToMarkSold) {
-            const id = propertyToMarkSold;
-            // Close modal + update UI instantly
-            setShowSoldConfirm(false);
-            setPropertyToMarkSold(null);
-            skipNextRefetchRef.current = true;
-            setMyProperties(prev => prev.map(p =>
-                p.id === id ? { ...p, status: 'sold' as PropertyStatus } : p
-            ));
-            dispatch({ type: 'MARK_PROPERTY_SOLD', payload: id });
-            // Fire API in background
-            try {
-                await api.markPropertyAsSold(id);
-            } catch (error) {
-                // Revert on failure
-                setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, status: 'active' as PropertyStatus } : p
-                ));
-            }
+    const confirmMarkAsRented = () => {
+        if (!propertyToMarkSold) return;
+        const check = validateNotPastDate(rentedUntilDate);
+        if (check.isValid === false) {
+            setRentedUntilError(t('rental:status.rentedUntilInvalid', 'Choose today or a later date, or leave it empty.'));
+            return;
         }
+        const id = propertyToMarkSold;
+        const until = rentedUntilDate;
+        closeRentedModal();
+        void mutations.markRented(id, until);
+    };
+
+    const confirmMarkAsSold = () => {
+        if (!propertyToMarkSold) return;
+        const id = propertyToMarkSold;
+        setShowSoldConfirm(false);
+        setPropertyToMarkSold(null);
+        void mutations.markSold(id);
     };
 
     const handleMarkAsAvailableClick = (id: string) => {
@@ -577,30 +275,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         setShowAvailableConfirm(true);
     };
 
-    const confirmMarkAsAvailable = async () => {
-        if (propertyToMarkAvailable) {
-            const id = propertyToMarkAvailable;
-            // Close modal + update UI instantly
-            setShowAvailableConfirm(false);
-            setPropertyToMarkAvailable(null);
-            skipNextRefetchRef.current = true;
-            setMyProperties(prev => prev.map(p =>
-                p.id === id ? { ...p, status: 'active' as PropertyStatus, rentedAt: undefined, rentedUntil: undefined } : p
-            ));
-            dispatch({ type: 'MARK_PROPERTY_AVAILABLE', payload: id });
-            window.dispatchEvent(new CustomEvent('property-status-update', { detail: { id, status: 'active', rentedAt: undefined, rentedUntil: undefined } }));
-            // Fire API in background
-            try {
-                await api.markPropertyAsAvailable(id);
-                window.dispatchEvent(new CustomEvent('property-status-changed'));
-            } catch (error) {
-                // Revert on failure
-                setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, status: 'rented' as PropertyStatus } : p
-                ));
-                dispatch({ type: 'MARK_PROPERTY_RENTED', payload: { id } });
-            }
-        }
+    const confirmMarkAsAvailable = () => {
+        if (!propertyToMarkAvailable) return;
+        const id = propertyToMarkAvailable;
+        setShowAvailableConfirm(false);
+        setPropertyToMarkAvailable(null);
+        void mutations.markAvailable(id);
     };
 
     // Whether the current user is allowed to post/reassign listings under an agency.
@@ -623,44 +303,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         setShowReassignConfirm(true);
     };
 
-    const confirmReassignRole = async () => {
+    const confirmReassignRole = () => {
         if (!propertyToReassign) return;
         const { id, targetRole } = propertyToReassign;
-        const previousRole = myProperties.find(p => p.id === id)?.createdAsRole;
-
-        // Close modal + update UI optimistically
         setShowReassignConfirm(false);
         setPropertyToReassign(null);
-        skipNextRefetchRef.current = true;
-        setMyProperties(prev => prev.map(p =>
-            p.id === id
-                ? { ...p, createdAsRole: targetRole as UserRole, seller: { ...p.seller, type: targetRole === 'agent' ? 'agent' : 'private' } }
-                : p
-        ));
-
-        try {
-            const result = await api.reassignPropertyRole(id, targetRole);
-            // Sync with authoritative server response
-            setMyProperties(prev => prev.map(p => p.id === id ? result.property : p));
-            if (result.updatedSubscription) {
-                dispatch({
-                    type: 'UPDATE_USER',
-                    payload: {
-                        subscription: {
-                            ...state.currentUser?.subscription,
-                            ...result.updatedSubscription,
-                        } as any,
-                    },
-                });
-            }
-            window.dispatchEvent(new CustomEvent('property-status-changed'));
-        } catch (error) {
-            // Revert optimistic update, then re-fetch to restore accurate state
-            setMyProperties(prev => prev.map(p =>
-                p.id === id ? { ...p, createdAsRole: previousRole } : p
-            ));
-            fetchMyListings();
-        }
+        void mutations.reassign(id, targetRole);
     };
 
     const handleDeleteClick = (id: string) => {
@@ -668,53 +316,11 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = async () => {
-        if (propertyToDelete) {
-            const deletingId = propertyToDelete;
-
-            // Optimistic: remove from UI immediately
-            dispatch({ type: 'DELETE_PROPERTY', payload: deletingId });
-            const deleted = myProperties.find(p => p.id === deletingId);
-            setMyProperties(prev => prev.filter(p => p.id !== deletingId));
-            if (deleted) {
-                setCounts(prev => ({
-                    all: Math.max(0, prev.all - 1),
-                    sale: Math.max(0, prev.sale - (deleted.listingType === 'rent' ? 0 : 1)),
-                    rent: Math.max(0, prev.rent - (deleted.listingType === 'rent' ? 1 : 0)),
-                    private_seller: Math.max(0, prev.private_seller - (deleted.createdAsRole === 'private_seller' ? 1 : 0)),
-                    agent: Math.max(0, prev.agent - (deleted.createdAsRole === 'agent' ? 1 : 0)),
-                }));
-            }
-            setShowDeleteConfirm(false);
-            setPropertyToDelete(null);
-            // Notify other pages (rental search, search page) to update instantly
-            window.dispatchEvent(new CustomEvent('property-deleted', { detail: { id: deletingId } }));
-            window.dispatchEvent(new CustomEvent('property-status-changed'));
-
-            // Then delete from backend in background
-            try {
-                const result = await api.deleteProperty(deletingId);
-
-                // Update user's subscription counts if returned from backend
-                if (result.updatedSubscription) {
-                    dispatch({
-                        type: 'UPDATE_USER',
-                        payload: {
-                            subscription: {
-                                ...state.currentUser?.subscription,
-                                ...result.updatedSubscription,
-                            } as any
-                        }
-                    });
-                }
-            } catch (error) {
-                // If backend fails, re-fetch to restore accurate state
-                fetchMyListings();
-            }
-            return;
-        }
+    const confirmDelete = () => {
+        const id = propertyToDelete;
         setShowDeleteConfirm(false);
         setPropertyToDelete(null);
+        if (id) void mutations.remove(id);
     };
 
     const handlePromote = (id: string) => {
@@ -741,6 +347,21 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             setPropertyForVideo(property);
             setShowVideoModal(true);
         }
+    };
+
+    const handleListingAction = (action: ListingActionId, id: string) => {
+        const handlers: Record<ListingActionId, (listingId: string) => void> = {
+            promote: handlePromote,
+            extendPromotion: handleExtend,
+            video: handleVideo,
+            renew: (listingId) => { void mutations.renew(listingId); },
+            moveToAgency: handleReassignRoleClick,
+            moveToPrivate: handleReassignRoleClick,
+            markSold: handleMarkAsSoldClick,
+            markRented: handleMarkAsSoldClick,
+            markAvailable: handleMarkAsAvailableClick,
+        };
+        handlers[action](id);
     };
 
     const handleVideoSuccess = () => {
@@ -816,7 +437,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             {/* Mark as Rented with date picker */}
             <Modal
                 isOpen={showRentedModal}
-                onClose={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }}
+                onClose={closeRentedModal}
                 title={t('rental:status.markAsRented')}
             >
                 <div className="space-y-4">
@@ -824,18 +445,24 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                         {t('rental:status.markAsRentedDesc')}
                     </p>
                     <div>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('rental:status.rentedUntilLabel')}</label>
+                        <label htmlFor="rented-until" className="block text-sm font-medium text-neutral-700 mb-1">{t('rental:status.rentedUntilLabel')}</label>
                         <input
+                            id="rented-until"
                             type="date"
                             value={rentedUntilDate}
-                            onChange={(e) => setRentedUntilDate(e.target.value)}
+                            onChange={(e) => { setRentedUntilDate(e.target.value); setRentedUntilError(null); }}
                             min={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                            aria-invalid={rentedUntilError ? true : undefined}
+                            aria-describedby={rentedUntilError ? 'rented-until-error' : undefined}
+                            className={`w-full min-h-[44px] px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm ${rentedUntilError ? 'border-red-400' : 'border-neutral-300'}`}
                         />
+                        {rentedUntilError && (
+                            <p id="rented-until-error" role="alert" className="text-xs text-red-600 mt-1">{rentedUntilError}</p>
+                        )}
                         <p className="text-xs text-neutral-400 mt-1">{t('rental:status.leaveEmptyHint')}</p>
                     </div>
                     <div className="flex justify-center gap-4 pt-2">
-                        <button onClick={() => { setShowRentedModal(false); setPropertyToMarkSold(null); setRentedUntilDate(''); }} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
+                        <button onClick={closeRentedModal} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('common:cancel')}</button>
                         <button onClick={confirmMarkAsRented} className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">{t('rental:status.markAsRented')}</button>
                     </div>
                 </div>
@@ -1077,19 +704,16 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             ) : filteredAndSortedProperties.length > 0 ? (
                 <div className="space-y-4">
                     {filteredAndSortedProperties.map(prop =>
-                        <ListingCard
+                        <MyListingCard
                             key={prop.id}
                             property={prop}
-                            onRenew={handleRenew}
-                            onMarkAsSold={handleMarkAsSoldClick}
-                            onMarkAsAvailable={handleMarkAsAvailableClick}
-                            onDelete={handleDeleteClick}
-                            onPromote={handlePromote}
-                            onExtend={handleExtend}
-                            onVideo={handleVideo}
-                            onReassignRole={handleReassignRoleClick}
                             canReassignToAgency={canActAsAgent}
                             renewalStatus={renewalStatuses[prop.id] || null}
+                            pendingTask={mutations.pending[prop.id] ?? null}
+                            feedback={mutations.feedback[prop.id] ?? null}
+                            onAction={handleListingAction}
+                            onDelete={handleDeleteClick}
+                            onDismissFeedback={mutations.dismiss}
                         />
                     )}
                     {hasMore && (

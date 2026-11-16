@@ -632,6 +632,32 @@
       "noImages": "Shtoni fillimisht foto në shpallje për të krijuar një video.",
       "addPhotos": "Shto foto",
       "dismiss": "Mbyll"
+    },
+    "actionWorking": "Duke punuar…",
+    "openListing": "Hap shpalljen",
+    "actionError": {
+      "retry": "Provo përsëri",
+      "generic": "Nuk funksionoi. Ju lutemi provoni përsëri.",
+      "renew": "Shpallja nuk u rinovua. Ju lutemi provoni përsëri.",
+      "move": "Shpallja nuk u zhvendos. Ju lutemi provoni përsëri.",
+      "status": "Shpallja nuk u përditësua. Ju lutemi provoni përsëri.",
+      "delete": "Shpallja nuk u fshi. Ju lutemi provoni përsëri.",
+      "offline": "Jeni jashtë linje. Kontrolloni lidhjen dhe provoni përsëri.",
+      "agentRequired": "Vetëm agjentët e regjistruar mund ta zhvendosin një shpallje te një agjenci.",
+      "external": "Shpalljet e importuara nuk mund të zhvendosen.",
+      "invalidDate": "Zgjidhni një datë të vlefshme.",
+      "session": "Sesioni juaj ka skaduar. Ju lutemi hyni përsëri.",
+      "forbidden": "Nuk mund ta ndryshoni këtë shpallje.",
+      "notFound": "Kjo shpallje nuk ekziston më.",
+      "rateLimited": "Shumë përpjekje. Prisni pak dhe provoni përsëri."
+    },
+    "actionDone": {
+      "renewed": "U rinovua. Shpallja juaj është sërish në krye.",
+      "movedToAgency": "U zhvendos te agjencia juaj.",
+      "movedToPrivate": "U zhvendos te profili juaj privat.",
+      "sold": "U shënua si e shitur.",
+      "rented": "U shënua si e dhënë me qira.",
+      "available": "U shënua sërish si e disponueshme."
     }
   },
   "form": {

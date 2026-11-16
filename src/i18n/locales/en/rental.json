@@ -260,7 +260,8 @@
     "tenantNamePlaceholder": "e.g. John Smith",
     "tenantNameHint": "Optional. Only visible to you.",
     "rentalNotesLabel": "Notes",
-    "rentalNotesPlaceholder": "e.g. Monthly payment on the 1st, deposit paid..."
+    "rentalNotesPlaceholder": "e.g. Monthly payment on the 1st, deposit paid...",
+    "rentedUntilInvalid": "Choose today or a later date, or leave it empty."
   },
   "rules": {
     "title": "Rental Rules — {{country}}",
