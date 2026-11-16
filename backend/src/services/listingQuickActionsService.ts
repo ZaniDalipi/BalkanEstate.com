@@ -46,7 +46,12 @@ export type RenewResult =
   | { ok: false; reason: 'cooldown'; lastRenewed: Date; cooldown: RenewCooldown };
 
 /** Put the listing back on top of the results, at most once per cooldown. */
-export const renewListing = async (propertyId: string, userId: string, now = new Date()): Promise<RenewResult> => {
+export const renewListing = async (
+  propertyId: string,
+  userId: string,
+  now = new Date(),
+  isRetry = false
+): Promise<RenewResult> => {
   const _id = new mongoose.Types.ObjectId(propertyId);
   const sellerId = new mongoose.Types.ObjectId(userId);
   const renewableBefore = new Date(now.getTime() - RENEW_COOLDOWN_MS);
@@ -68,8 +73,11 @@ export const renewListing = async (propertyId: string, userId: string, now = new
   if (String(existing.sellerId) !== String(sellerId)) return { ok: false, reason: 'forbidden' };
   const cooldown = renewCooldown(existing.lastRenewed, now);
   if (!cooldown) {
-    // The listing became renewable between the two queries; one retry settles it.
-    return renewListing(propertyId, userId, new Date());
+    // The listing became renewable between the two queries: one retry settles
+    // it. A second miss means the write itself is not landing - say so rather
+    // than loop.
+    if (isRetry) throw new Error(`Renew did not apply to listing ${propertyId}`);
+    return renewListing(propertyId, userId, new Date(), true);
   }
   return { ok: false, reason: 'cooldown', lastRenewed: existing.lastRenewed, cooldown };
 };
@@ -195,6 +203,13 @@ export const reassignListingRole = async (
   // Only the request that actually flips the role moves the counters.
   const written = await Property.updateOne({ _id, sellerId, createdAsRole: { $nin: [targetRole, 'external'] } }, update);
   if (written.modifiedCount !== 1) {
+    // Nothing written. That is fine only if another request got there first
+    // and the listing now has the role asked for; anything else is a failure
+    // and must not be reported as "moved".
+    const current = await Property.findById(_id).select('createdAsRole').lean();
+    if (current?.createdAsRole !== targetRole) {
+      throw new Error(`Role change did not apply to listing ${propertyId}`);
+    }
     return { ok: true, changed: false, previousRole, subscription: null };
   }
 

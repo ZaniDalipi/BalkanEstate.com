@@ -122,6 +122,10 @@ export const apiRequest = async <T>(
   const config: RequestInit = {
     method,
     credentials: 'include', // Send httpOnly cookies (refresh token)
+    // A signed-in read is often a read-back of something the user just changed
+    // (renewed, moved, marked sold). Always check with the server instead of
+    // reusing the browser's copy; an unchanged answer is still a cheap 304.
+    cache: requiresAuth && method === 'GET' ? 'no-cache' : 'default',
     headers: {
       'Content-Type': 'application/json',
       ...csrfHeaders,
