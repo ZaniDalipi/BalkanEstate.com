@@ -523,7 +523,37 @@
       "noImages": "Add photos to the listing first to create a video.",
       "addPhotos": "Add photos",
       "dismiss": "Dismiss"
-    }
+    },
+    "actionWorking": "Working…",
+    "openListing": "Open listing",
+    "actionError": {
+      "retry": "Try again",
+      "generic": "That didn't work. Please try again.",
+      "renew": "The listing wasn't renewed. Please try again.",
+      "move": "The listing wasn't moved. Please try again.",
+      "status": "The listing wasn't updated. Please try again.",
+      "delete": "The listing wasn't deleted. Please try again.",
+      "offline": "You're offline. Check your connection and try again.",
+      "agentRequired": "Only registered agents can move a listing to an agency.",
+      "external": "Imported listings can't be moved.",
+      "invalidDate": "Choose a valid date.",
+      "session": "Your session has expired. Please sign in again.",
+      "forbidden": "You can't change this listing.",
+      "notFound": "This listing no longer exists.",
+      "rateLimited": "Too many attempts. Please wait a moment and try again."
+    },
+    "actionDone": {
+      "renewed": "Renewed. Your listing is back at the top.",
+      "movedToAgency": "Moved to your agency.",
+      "movedToPrivate": "Moved to your private profile.",
+      "sold": "Marked as sold.",
+      "rented": "Marked as rented.",
+      "available": "Marked as available again."
+    },
+    "filterByStatus": "Filter by status",
+    "filterByType": "Filter by sale or rent",
+    "allCount": "All ({{count}})",
+    "loadError": "Your listings couldn't be loaded."
   },
   "form": {
     "basicInfo": "Basic Information",

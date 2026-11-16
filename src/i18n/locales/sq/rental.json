@@ -258,7 +258,8 @@
     "tenantNamePlaceholder": "p.sh. Arben Hoxha",
     "tenantNameHint": "Opsionale. E dukshme vetem per ju.",
     "rentalNotesLabel": "Shenime",
-    "rentalNotesPlaceholder": "p.sh. Pagesa mujore me 1 te muajit, depozita e paguar..."
+    "rentalNotesPlaceholder": "p.sh. Pagesa mujore me 1 te muajit, depozita e paguar...",
+    "rentedUntilInvalid": "Zgjidhni ditën e sotme ose një datë të mëvonshme, ose lëreni bosh."
   },
   "rules": {
     "title": "Rregullat e Qirase — {{country}}",

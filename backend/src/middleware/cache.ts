@@ -5,6 +5,7 @@
  * Set REDIS_URL env var to automatically use Redis (multi-instance / distributed).
  */
 
+import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import { apiLogger } from '../utils/logger';
 
@@ -230,9 +231,35 @@ const generateCacheKey = (req: Request): string => {
       return acc;
     }, {});
   const queryString = JSON.stringify(sortedQuery);
-  const authStatus = req.headers.authorization ? 'auth' : 'public';
-  return `${req.method}:${authStatus}:${baseUrl}:${queryString}`;
+  return `${req.method}:${audienceOf(req)}:${baseUrl}:${queryString}`;
 };
+
+/**
+ * Who a cached answer belongs to. Visitors share one copy. A signed-in request
+ * gets a copy of its own, keyed by a hash of its token: the answer to a
+ * signed-in request can hold that person's own data, so it must never be
+ * handed to somebody else. (It used to be keyed just "auth", which served one
+ * user's answer to the next signed-in user for the length of the TTL.)
+ */
+const audienceOf = (req: Request): string => {
+  const authorization = req.headers.authorization;
+  if (!authorization) return 'public';
+  return `auth-${crypto.createHash('sha256').update(authorization).digest('hex').slice(0, 32)}`;
+};
+
+/**
+ * What the browser may do with the answer.
+ *
+ * A visitor's copy may be reused until it expires. A signed-in user changes
+ * things (renews a listing, moves it, marks it sold) and reads them straight
+ * back: the server forgets its copy on every such change, but it cannot reach
+ * into the browser's cache, so the browser must ask each time (`no-cache`).
+ * That is still cheap: an unchanged answer is a 304 from the ETag.
+ */
+const cacheControlFor = (req: Request, maxAgeSeconds: number): string =>
+  req.headers.authorization
+    ? 'private, no-cache'
+    : `private, max-age=${maxAgeSeconds}, must-revalidate`;
 
 const generateETag = (data: any): string => {
   const str = JSON.stringify(data);
@@ -266,8 +293,16 @@ const cacheBlacklist = [
   '/api/analytics',
 ];
 
+/**
+ * Paths that answer "mine": /my/listings, /me, /my-agency ... wherever they
+ * are mounted. Always read fresh, and never kept by the browser either.
+ */
+const PERSONAL_PATH = /\/(my|me|mine)(\/|-|$)/;
+
+export const isPersonalPath = (path: string): boolean => PERSONAL_PATH.test(path);
+
 const isBlacklisted = (path: string): boolean => {
-  return cacheBlacklist.some(pattern => path.includes(pattern));
+  return isPersonalPath(path) || cacheBlacklist.some(pattern => path.includes(pattern));
 };
 
 // In-memory store cleanup (Redis handles TTL natively)
@@ -305,6 +340,7 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
   }
 
   if (isBlacklisted(path)) {
+    if (isPersonalPath(path)) res.setHeader('Cache-Control', 'private, no-store');
     next();
     return;
   }
@@ -327,7 +363,7 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
         res.setHeader('X-Cache', 'HIT');
         res.setHeader('X-Cache-Age', Math.floor(age / 1000).toString());
         res.setHeader('ETag', cached.etag);
-        res.setHeader('Cache-Control', `private, max-age=${maxAge}, must-revalidate`);
+        res.setHeader('Cache-Control', cacheControlFor(req, maxAge));
         res.setHeader('Vary', 'Authorization');
         res.json(cached.data);
         return;
@@ -349,7 +385,7 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
         const maxAge = Math.floor(ttl / 1000);
         res.setHeader('X-Cache', 'MISS');
         res.setHeader('ETag', etag);
-        res.setHeader('Cache-Control', `private, max-age=${maxAge}, must-revalidate`);
+        res.setHeader('Cache-Control', cacheControlFor(req, maxAge));
         res.setHeader('Vary', 'Authorization');
       }
 

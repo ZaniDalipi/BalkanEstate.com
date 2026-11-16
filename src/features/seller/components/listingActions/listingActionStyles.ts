@@ -40,3 +40,10 @@ export const LISTING_ACTION_TONES: Record<ListingActionTone, string> = {
 
 /** A blocked action stays focusable and clickable (to explain why) but looks inactive. */
 export const LISTING_ACTION_BLOCKED = 'cursor-not-allowed opacity-55 saturate-50 hover:shadow-sm';
+
+/** Another action of the same card is running: visibly parked, not clickable. */
+export const LISTING_ACTION_WAITING = 'cursor-progress opacity-50';
+
+/** Replaces the icon of the action that is running; takes the label's colour. */
+export const LISTING_ACTION_SPINNER =
+  'h-5 w-5 shrink-0 rounded-full border-2 border-current border-t-transparent motion-safe:animate-spin motion-reduce:border-dotted';

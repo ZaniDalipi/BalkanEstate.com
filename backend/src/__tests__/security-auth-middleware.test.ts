@@ -7,7 +7,7 @@ import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { protect } from '../middleware/auth';
-import { createSignupPayload, getAuthToken } from './setup';
+import { createSignupPayload, getAuthToken, readRefreshCookie } from './setup';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret';
@@ -38,8 +38,10 @@ describe('Auth Middleware Security', () => {
         .post('/api/auth/signup')
         .send(createSignupPayload());
 
-      const refreshToken = signupRes.body.refreshToken;
-      expect(refreshToken).toBeDefined();
+      // The refresh token is an httpOnly cookie only - never in the body
+      expect(signupRes.body.refreshToken).toBeUndefined();
+      const refreshToken = readRefreshCookie(signupRes)?.token;
+      expect(refreshToken).toBeTruthy();
 
       // Attempt to use the refresh token as a Bearer token on a protected route
       const res = await request(app)

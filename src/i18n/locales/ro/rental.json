@@ -258,7 +258,8 @@
     "tenantNamePlaceholder": "ex. Ion Popescu",
     "tenantNameHint": "Opțional. Vizibil doar pentru dvs.",
     "rentalNotesLabel": "Note",
-    "rentalNotesPlaceholder": "ex. Plata lunară pe data de 1, garanția plătită..."
+    "rentalNotesPlaceholder": "ex. Plata lunară pe data de 1, garanția plătită...",
+    "rentedUntilInvalid": "Alegeți data de azi sau una ulterioară, ori lăsați gol."
   },
   "rules": {
     "title": "Reguli de Închiriere — {{country}}",

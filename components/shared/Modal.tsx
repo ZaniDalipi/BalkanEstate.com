@@ -70,7 +70,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     <div
       className="fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex items-stretch sm:items-center justify-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
       onClick={handleBackdropClick}
-      aria-hidden="true"
     >
       <div
         className={`bg-white shadow-xl p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto h-full sm:h-auto rounded-none sm:rounded-lg max-h-full sm:max-h-[95vh] md:max-h-[90vh]`}

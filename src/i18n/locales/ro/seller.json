@@ -519,7 +519,37 @@
       "noImages": "Adăugați mai întâi fotografii la anunț pentru a crea un videoclip.",
       "addPhotos": "Adaugă fotografii",
       "dismiss": "Închide"
-    }
+    },
+    "actionWorking": "Se lucrează…",
+    "openListing": "Deschide anunțul",
+    "actionError": {
+      "retry": "Încearcă din nou",
+      "generic": "Nu a funcționat. Încercați din nou.",
+      "renew": "Anunțul nu a fost reînnoit. Încercați din nou.",
+      "move": "Anunțul nu a fost mutat. Încercați din nou.",
+      "status": "Anunțul nu a fost actualizat. Încercați din nou.",
+      "delete": "Anunțul nu a fost șters. Încercați din nou.",
+      "offline": "Sunteți offline. Verificați conexiunea și încercați din nou.",
+      "agentRequired": "Doar agenții înregistrați pot muta un anunț la o agenție.",
+      "external": "Anunțurile importate nu pot fi mutate.",
+      "invalidDate": "Alegeți o dată validă.",
+      "session": "Sesiunea a expirat. Autentificați-vă din nou.",
+      "forbidden": "Nu puteți modifica acest anunț.",
+      "notFound": "Acest anunț nu mai există.",
+      "rateLimited": "Prea multe încercări. Așteptați puțin și încercați din nou."
+    },
+    "actionDone": {
+      "renewed": "Reînnoit. Anunțul dvs. este din nou primul.",
+      "movedToAgency": "Mutat la agenția dvs.",
+      "movedToPrivate": "Mutat la profilul dvs. privat.",
+      "sold": "Marcat ca vândut.",
+      "rented": "Marcat ca închiriat.",
+      "available": "Marcat din nou ca disponibil."
+    },
+    "filterByStatus": "Filtrează după stare",
+    "filterByType": "Filtrează după vânzare sau închiriere",
+    "allCount": "Toate ({{count}})",
+    "loadError": "Anunțurile dvs. nu au putut fi încărcate."
   },
   "form": {
     "basicInfo": "Informații de Bază",

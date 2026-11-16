@@ -519,7 +519,37 @@
       "noImages": "Najprije dodajte fotografije oglasu kako biste izradili video.",
       "addPhotos": "Dodaj fotografije",
       "dismiss": "Zatvori"
-    }
+    },
+    "actionWorking": "U tijeku…",
+    "openListing": "Otvori oglas",
+    "actionError": {
+      "retry": "Pokušaj ponovno",
+      "generic": "Nije uspjelo. Pokušajte ponovno.",
+      "renew": "Oglas nije obnovljen. Pokušajte ponovno.",
+      "move": "Oglas nije premješten. Pokušajte ponovno.",
+      "status": "Oglas nije ažuriran. Pokušajte ponovno.",
+      "delete": "Oglas nije obrisan. Pokušajte ponovno.",
+      "offline": "Niste na mreži. Provjerite vezu i pokušajte ponovno.",
+      "agentRequired": "Samo registrirani agenti mogu premjestiti oglas u agenciju.",
+      "external": "Uvezeni oglasi ne mogu se premještati.",
+      "invalidDate": "Odaberite ispravan datum.",
+      "session": "Vaša je sesija istekla. Prijavite se ponovno.",
+      "forbidden": "Ne možete mijenjati ovaj oglas.",
+      "notFound": "Ovaj oglas više ne postoji.",
+      "rateLimited": "Previše pokušaja. Pričekajte trenutak i pokušajte ponovno."
+    },
+    "actionDone": {
+      "renewed": "Obnovljeno. Vaš je oglas ponovno na vrhu.",
+      "movedToAgency": "Premješteno u vašu agenciju.",
+      "movedToPrivate": "Premješteno na vaš privatni profil.",
+      "sold": "Označeno kao prodano.",
+      "rented": "Označeno kao iznajmljeno.",
+      "available": "Ponovno označeno kao dostupno."
+    },
+    "filterByStatus": "Filtriraj po statusu",
+    "filterByType": "Filtriraj po prodaji ili najmu",
+    "allCount": "Sve ({{count}})",
+    "loadError": "Vaši oglasi nisu se mogli učitati."
   },
   "form": {
     "basicInfo": "Osnovne informacije",

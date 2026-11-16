@@ -24,6 +24,31 @@ const createTestApp = () => {
   return app;
 };
 
+/**
+ * A listing the API accepts today: flat fields (no `location` / `features`
+ * objects), a map position, and at least one photo.
+ */
+const validListing = (overrides: Record<string, unknown> = {}) => ({
+  title: 'Modern Apartment in City Center',
+  description: 'Beautiful 2-bedroom apartment with stunning views',
+  price: 150000,
+  propertyType: 'apartment',
+  listingType: 'sale',
+  address: '123 Main Street',
+  city: 'Pristina',
+  country: 'Kosovo',
+  lat: 42.66,
+  lng: 21.16,
+  beds: 2,
+  baths: 1,
+  livingRooms: 1,
+  sqft: 85,
+  yearBuilt: 2010,
+  imageUrl: 'https://example.com/a.jpg',
+  images: [{ url: 'https://example.com/a.jpg' }],
+  ...overrides,
+});
+
 describe('Properties API', () => {
   describe('GET /api/properties', () => {
     it('should return empty array when no properties exist', async () => {
@@ -85,25 +110,7 @@ describe('Properties API', () => {
       const app = createTestApp();
       const { accessToken } = await getAuthToken(app);
 
-      const propertyData = {
-        title: 'Modern Apartment in City Center',
-        description: 'Beautiful 2-bedroom apartment with stunning views',
-        price: 150000,
-        propertyType: 'apartment',
-        listingType: 'sale',
-        location: {
-          address: '123 Main Street',
-          city: 'Pristina',
-          country: 'Kosovo',
-        },
-        features: {
-          bedrooms: 2,
-          bathrooms: 1,
-          area: 85,
-          parking: true,
-          furnished: false,
-        },
-      };
+      const propertyData = validListing();
 
       const response = await request(app)
         .post('/api/properties')
@@ -112,9 +119,10 @@ describe('Properties API', () => {
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(201);
-      expect(response.body.title).toBe(propertyData.title);
-      expect(response.body.price).toBe(propertyData.price);
-      expect(response.body.location.city).toBe(propertyData.location.city);
+      expect(response.body.property.title).toBe(propertyData.title);
+      expect(response.body.property.price).toBe(propertyData.price);
+      expect(response.body.property.city).toBe(propertyData.city);
+      expect(response.body.property.status).toBe('active');
     });
 
     it('should reject property creation without auth', async () => {
@@ -141,11 +149,28 @@ describe('Properties API', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
           title: 'Incomplete Property',
-          // Missing required fields
+          images: [{ url: 'https://example.com/a.jpg' }],
+          // Missing the other required fields
         })
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(400);
+      expect(response.body.message).toBe('Validation failed');
+      expect(response.body.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should reject a listing without a photo', async () => {
+      const app = createTestApp();
+      const { accessToken } = await getAuthToken(app);
+
+      const response = await request(app)
+        .post('/api/properties')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(validListing({ images: [] }))
+        .expect('Content-Type', /json/);
+
+      expect(response.status).toBe(422);
+      expect(response.body.code).toBe('IMAGES_REQUIRED');
     });
   });
 
@@ -155,30 +180,15 @@ describe('Properties API', () => {
       const { accessToken } = await getAuthToken(app);
 
       // First create a property
-      const propertyData = {
-        title: 'Property to Fetch',
-        description: 'Test property',
-        price: 100000,
-        propertyType: 'house',
-        listingType: 'sale',
-        location: {
-          address: '456 Test Road',
-          city: 'Tirana',
-          country: 'Albania',
-        },
-        features: {
-          bedrooms: 3,
-          bathrooms: 2,
-          area: 120,
-        },
-      };
+      const propertyData = validListing({ title: 'Property to Fetch', propertyType: 'house', city: 'Tirana', country: 'Albania' });
 
       const createResponse = await request(app)
         .post('/api/properties')
         .set('Authorization', `Bearer ${accessToken}`)
         .send(propertyData);
 
-      const propertyId = createResponse.body._id;
+      expect(createResponse.status).toBe(201);
+      const propertyId = createResponse.body.property._id;
 
       // Now fetch it
       const response = await request(app)
@@ -186,8 +196,10 @@ describe('Properties API', () => {
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(200);
-      expect(response.body._id).toBe(propertyId);
-      expect(response.body.title).toBe(propertyData.title);
+      expect(response.body.property.title).toBe(propertyData.title);
+      expect(response.body.property.city).toBe('Tirana');
+      // Public responses never carry the creator's email
+      expect(response.body.property.createdByEmail).toBeUndefined();
     });
 
     it('should return 404 for non-existent property', async () => {
@@ -221,21 +233,10 @@ describe('Properties API', () => {
       const createResponse = await request(app)
         .post('/api/properties')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({
-          title: 'Property to Update',
-          description: 'Original description',
-          price: 100000,
-          propertyType: 'apartment',
-          listingType: 'sale',
-          location: {
-            address: '789 Update Street',
-            city: 'Skopje',
-            country: 'North Macedonia',
-          },
-          features: { bedrooms: 2, bathrooms: 1, area: 70 },
-        });
+        .send(validListing({ title: 'Property to Update', price: 100000, city: 'Skopje', country: 'North Macedonia' }));
 
-      const propertyId = createResponse.body._id;
+      expect(createResponse.status).toBe(201);
+      const propertyId = createResponse.body.property._id;
 
       // Update it
       const response = await request(app)
@@ -248,8 +249,8 @@ describe('Properties API', () => {
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(200);
-      expect(response.body.title).toBe('Updated Property Title');
-      expect(response.body.price).toBe(120000);
+      expect(response.body.property.title).toBe('Updated Property Title');
+      expect(response.body.property.price).toBe(120000);
     });
 
     it('should reject update without auth', async () => {
@@ -274,21 +275,10 @@ describe('Properties API', () => {
       const createResponse = await request(app)
         .post('/api/properties')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({
-          title: 'Property to Delete',
-          description: 'Will be deleted',
-          price: 50000,
-          propertyType: 'land',
-          listingType: 'sale',
-          location: {
-            address: '999 Delete Lane',
-            city: 'Podgorica',
-            country: 'Montenegro',
-          },
-          features: { area: 500 },
-        });
+        .send(validListing({ title: 'Property to Delete', price: 50000, city: 'Podgorica', country: 'Montenegro' }));
 
-      const propertyId = createResponse.body._id;
+      expect(createResponse.status).toBe(201);
+      const propertyId = createResponse.body.property._id;
 
       // Delete it
       const response = await request(app)

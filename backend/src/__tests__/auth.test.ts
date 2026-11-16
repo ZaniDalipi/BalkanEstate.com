@@ -4,7 +4,7 @@
 
 import request from 'supertest';
 import express from 'express';
-import { createSignupPayload, getAuthToken } from './setup';
+import { createSignupPayload, getAuthToken, readRefreshCookie } from './setup';
 
 // Create a minimal express app for testing
 const createTestApp = () => {
@@ -102,7 +102,10 @@ describe('Auth API', () => {
         .expect('Content-Type', /json/);
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toMatch(/already exists|registered/i);
+      // The answer must not reveal that the email is registered (enumeration):
+      // it is the same generic refusal any failed signup gets.
+      expect(response.body.message).toMatch(/unable to create account/i);
+      expect(response.body.message).not.toMatch(/already exists|registered|in use|taken/i);
     });
   });
 
@@ -134,7 +137,10 @@ describe('Auth API', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('user');
       expect(response.body).toHaveProperty('accessToken');
-      expect(response.body).toHaveProperty('refreshToken');
+      // The refresh token is an httpOnly cookie only - never readable by scripts
+      expect(response.body).not.toHaveProperty('refreshToken');
+      expect(readRefreshCookie(response)).toMatchObject({ httpOnly: true });
+      expect(readRefreshCookie(response)?.token).toBeTruthy();
       expect(response.body.user.email).toBe(loginUserPayload.email);
     });
 

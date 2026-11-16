@@ -258,7 +258,8 @@
     "tenantNamePlaceholder": "пр. Марко Марковски",
     "tenantNameHint": "Опционално. Видливо само за вас.",
     "rentalNotesLabel": "Белешки",
-    "rentalNotesPlaceholder": "пр. Месечна уплата на 1-ви, депозит платен..."
+    "rentalNotesPlaceholder": "пр. Месечна уплата на 1-ви, депозит платен...",
+    "rentedUntilInvalid": "Изберете денешен или подоцнежен датум, или оставете празно."
   },
   "rules": {
     "title": "Правила за издавање — {{country}}",

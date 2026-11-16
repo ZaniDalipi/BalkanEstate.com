@@ -26,6 +26,7 @@ import {
 import {
   runCityMarketDigest,
   rankChangesForFocus,
+  emptyFocus,
   toDigestCity,
   previewCityMarketDigest,
 } from '../services/cityMarketDigestService';
@@ -348,7 +349,7 @@ describe('City market digest ranking', () => {
   it('puts a followed city ahead of a bigger regional mover', () => {
     const ranked = rankChangesForFocus(
       [change('Belgrade', 'Serbia', 9), change('Tirana', 'Albania', 3)],
-      { cities: new Set(['tirana']), countries: new Set() },
+      { ...emptyFocus(), savedCities: new Set(['tirana|albania']) },
       6,
     );
 
@@ -360,7 +361,7 @@ describe('City market digest ranking', () => {
   it('prefers the reader’s country when no city matches', () => {
     const ranked = rankChangesForFocus(
       [change('Belgrade', 'Serbia', 9), change('Durres', 'Albania', 3)],
-      { cities: new Set(), countries: new Set(['albania']) },
+      { ...emptyFocus(), countries: new Set(['albania']) },
       6,
     );
 
@@ -372,7 +373,7 @@ describe('City market digest ranking', () => {
   it('falls back to biggest-mover order with no focus at all', () => {
     const ranked = rankChangesForFocus(
       [change('Tirana', 'Albania', 3), change('Belgrade', 'Serbia', 9)],
-      { cities: new Set(), countries: new Set() },
+      emptyFocus(),
       6,
     );
 
@@ -382,7 +383,7 @@ describe('City market digest ranking', () => {
   it('caps the list at the configured city count', () => {
     const many = ['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c, i) => change(c, 'Serbia', 10 - i));
 
-    expect(rankChangesForFocus(many, { cities: new Set(), countries: new Set() }, 3)).toHaveLength(3);
+    expect(rankChangesForFocus(many, emptyFocus(), 3)).toHaveLength(3);
   });
 
   it('maps a change to a view model with a deep link to that city', () => {
@@ -407,7 +408,9 @@ describe('City market digest run', () => {
   /** Baseline + current snapshot for one city, moving by `changePct`. */
   const movingCity = async (city: string, country: string, changePct: number) => {
     const base = 2400;
-    await snapshotDoc({ city, country, countryCode: 'XX', avgPricePerSqm: base, capturedAt: daysAgo(40) });
+    // The baseline must predate the comparison window, which with no earlier
+    // run opens `historyLookbackDays` (45) before now.
+    await snapshotDoc({ city, country, countryCode: 'XX', avgPricePerSqm: base, capturedAt: daysAgo(60) });
     await snapshotDoc({
       city, country, countryCode: 'XX',
       avgPricePerSqm: Math.round(base * (1 + changePct / 100)),
@@ -507,7 +510,8 @@ describe('City market digest run', () => {
 
     expect(result.status).toBe('skipped');
     expect(result.citiesChanged).toBe(1);
-    expect(result.note).toMatch(/out-of-cycle threshold/);
+    // The reason now also says that no follower of the city exists to email instead
+    expect(result.note).toMatch(/below the 5% whole-audience threshold/);
     expect(sendSpy).not.toHaveBeenCalled();
   });
 

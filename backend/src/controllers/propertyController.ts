@@ -42,6 +42,7 @@ import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { isDraftListingKey } from '../services/media/mediaKeys';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
+import { renewListing, reassignListingRole, isListingRole, RENEW_COOLDOWN_HOURS } from '../services/listingQuickActionsService';
 import { respondIfValidationError } from '../middleware/propertyValidation';
 import { TYPE_ATTRIBUTES } from '../config/typeAttributes';
 import {
@@ -1450,9 +1451,8 @@ export const reassignPropertyRole = async (
     if (!id) return;
 
     // Validate the requested target role at the system boundary
-    const targetRole = req.body?.role;
-    const VALID_TARGET_ROLES = ['private_seller', 'agent'] as const;
-    if (!targetRole || !VALID_TARGET_ROLES.includes(targetRole)) {
+    const targetRole: unknown = req.body?.role;
+    if (!isListingRole(targetRole)) {
       res.status(400).json({
         message: "Invalid role. Must be 'private_seller' or 'agent'.",
         code: 'INVALID_TARGET_ROLE',
@@ -1460,167 +1460,47 @@ export const reassignPropertyRole = async (
       return;
     }
 
-    const property = await Property.findById(id);
-    if (!property) {
-      res.status(404).json({ message: 'Property not found' });
-      return;
-    }
+    const userId = String((req.user as IUser)._id);
+    const result = await reassignListingRole(id, userId, targetRole);
 
-    // Check ownership
-    const currentUser = req.user as IUser;
-    if (property.sellerId.toString() !== String(currentUser._id).toString()) {
-      res.status(403).json({ message: 'Not authorized to update this property' });
-      return;
-    }
-
-    // Externally ingested listings are not owned content and must not be reclassified
-    if (property.createdAsRole === 'external') {
-      res.status(400).json({
-        message: 'Imported listings cannot be reassigned.',
-        code: 'EXTERNAL_LISTING_NOT_REASSIGNABLE',
-      });
-      return;
-    }
-
-    // No-op guard: already in the requested role
-    if (property.createdAsRole === targetRole) {
-      res.status(400).json({
-        message: targetRole === 'agent'
-          ? 'This listing is already posted under your agency.'
-          : 'This listing is already posted as a private seller.',
-        code: 'ROLE_UNCHANGED',
-      });
-      return;
-    }
-
-    const user = await User.findById(String(currentUser._id));
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    // To move a listing into the agency/agent context the user must actually be able
-    // to act as an agent. Mirrors the frontend RoleSelector eligibility check.
-    if (targetRole === 'agent') {
-      const canActAsAgent =
-        user.role === 'agent' ||
-        (Array.isArray(user.availableRoles) && user.availableRoles.includes('agent')) ||
-        !!user.agentId ||
-        !!user.licenseNumber ||
-        !!user.agencyId ||
-        user.agency?.role === 'agent' ||
-        user.agency?.role === 'owner';
-
-      if (!canActAsAgent) {
-        res.status(403).json({
-          message: 'You must be a registered agent to move a listing to an agency.',
-          code: 'AGENT_ROLE_REQUIRED',
-        });
-        return;
-      }
-    }
-
-    const previousRole = property.createdAsRole;
-
-    if (targetRole === 'agent') {
-      // Snapshot the agent/agency credentials at reassignment time, mirroring createProperty
-      property.createdAsRole = 'agent';
-      property.createdByAgencyName = user.agencyName || undefined;
-      property.createdByAgencyId = user.agencyId || user.agency?.agencyId || undefined;
-      property.createdByLicenseNumber = user.licenseNumber || undefined;
-    } else {
-      // Moving back to private seller — strip agency attribution
-      property.createdAsRole = 'private_seller';
-      property.createdByAgencyName = undefined;
-      property.createdByAgencyId = undefined;
-      property.createdByLicenseNumber = undefined;
-    }
-
-    await property.save();
-
-    // Propagate the change to every denormalized snapshot of THIS listing so the
-    // whole database stays consistent — not just the live Property document.
-    // (Agency `stats.totalListings` and agency listing pages read from live
-    // Property queries, so they reflect the change automatically.)
-    try {
-      // Historical sale records keep the seller's role captured at sale time
-      await SalesHistory.updateMany(
-        { propertyId: property._id },
-        { $set: { sellerRole: targetRole } }
-      );
-
-      // Archived (sold/rented/deleted) snapshots keep role + agency attribution
-      if (targetRole === 'agent') {
-        const set: Record<string, unknown> = { createdAsRole: 'agent' };
-        const unset: Record<string, 1> = {};
-        if (property.createdByAgencyName) set.createdByAgencyName = property.createdByAgencyName;
-        else unset.createdByAgencyName = 1;
-        if (property.createdByAgencyId) set.createdByAgencyId = property.createdByAgencyId;
-        else unset.createdByAgencyId = 1;
-
-        const archiveUpdate: Record<string, unknown> = { $set: set };
-        if (Object.keys(unset).length > 0) archiveUpdate.$unset = unset;
-        await ArchivedListing.updateMany({ originalPropertyId: property._id }, archiveUpdate);
-      } else {
-        await ArchivedListing.updateMany(
-          { originalPropertyId: property._id },
-          {
-            $set: { createdAsRole: 'private_seller' },
-            $unset: { createdByAgencyName: 1, createdByAgencyId: 1 },
-          }
-        );
-      }
-    } catch (propagateError) {
-      // Non-fatal: the live listing is already updated; historical snapshots are
-      // best-effort and also self-heal via the periodic stats/recompute jobs.
-      propertyLogger.error('Failed to propagate role reassignment to denormalized records (non-fatal):', propagateError);
-    }
-
-    // Shift the per-role subscription counters. These are incremented by role at
-    // creation time (regardless of later status), so we shift them unconditionally
-    // here and floor at 0 to stay resilient to any pre-existing drift.
-    let updatedSubscription: Record<string, unknown> | null = null;
-    if (user.subscription) {
-      if (previousRole === 'agent' && (user.subscription.agentCount || 0) > 0) {
-        user.subscription.agentCount = (user.subscription.agentCount || 0) - 1;
-      } else if (previousRole === 'private_seller' && (user.subscription.privateSellerCount || 0) > 0) {
-        user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) - 1;
-      }
-
-      if (targetRole === 'agent') {
-        user.subscription.agentCount = (user.subscription.agentCount || 0) + 1;
-      } else {
-        user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) + 1;
-      }
-
-      await user.save();
-
-      updatedSubscription = {
-        activeListingsCount: user.subscription.activeListingsCount,
-        privateSellerCount: user.subscription.privateSellerCount,
-        agentCount: user.subscription.agentCount,
-        listingsLimit: user.subscription.listingsLimit,
-        tier: user.subscription.tier,
+    if (result.ok === false) {
+      const failures: Record<typeof result.reason, { status: number; message: string; code: string }> = {
+        not_found: { status: 404, message: 'Property not found', code: 'PROPERTY_NOT_FOUND' },
+        user_not_found: { status: 404, message: 'User not found', code: 'USER_NOT_FOUND' },
+        forbidden: { status: 403, message: 'Not authorized to update this property', code: 'NOT_OWNER' },
+        external: { status: 400, message: 'Imported listings cannot be reassigned.', code: 'EXTERNAL_LISTING_NOT_REASSIGNABLE' },
+        agent_required: { status: 403, message: 'You must be a registered agent to move a listing to an agency.', code: 'AGENT_ROLE_REQUIRED' },
       };
+      const failure = failures[result.reason];
+      res.status(failure.status).json({ message: failure.message, code: failure.code });
+      return;
     }
 
-    propertyLogger.info(
-      `🔁 Property ${property._id} reassigned: ${previousRole} → ${targetRole} by user ${user._id}`
+    // Read the listing back for the response (reading never validates).
+    const property = await Property.findById(id).populate(
+      'sellerId',
+      'name email phone avatarUrl avatarOptions gender role agencyName agencyId licenseNumber'
     );
+    if (!property) {
+      res.status(404).json({ message: 'Property not found', code: 'PROPERTY_NOT_FOUND' });
+      return;
+    }
 
-    // Populate seller info for the response, then broadcast + invalidate caches
-    await property.populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName agencyId licenseNumber');
-
-    emitPropertyUpdated(String(property._id), property.toObject());
-    invalidateCache('/api/properties');
+    if (result.changed) {
+      propertyLogger.info(`🔁 Property ${id} reassigned: ${result.previousRole} → ${targetRole} by user ${userId}`);
+      emitPropertyUpdated(String(property._id), property.toObject());
+      invalidateCache('/api/properties');
+    }
 
     res.json({
       property: sanitizeProperty(property.toObject(), 'detail'),
-      updatedSubscription,
+      updatedSubscription: result.subscription,
+      // True when the listing already had this role: nothing was written.
+      unchanged: !result.changed,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     propertyLogger.error('Reassign property role error:', error);
-    res.status(500).json({ message: 'Error reassigning property role' });
+    res.status(500).json({ message: 'Error reassigning property role', code: 'REASSIGN_FAILED' });
   }
 };
 
@@ -2054,7 +1934,7 @@ export const markAsSold = async (
       const user = await User.findById(String(currentUser._id));
       if (user && user.listingsCount > 0) {
         user.listingsCount -= 1;
-        await user.save();
+        await user.save({ validateModifiedOnly: true });
 
         // Update agent stats if user is an agent
         if (user.role === 'agent') {
@@ -2076,7 +1956,9 @@ export const markAsSold = async (
     const soldDate = new Date();
     property.status = 'sold';
     property.soldAt = soldDate;
-    await property.save();
+    // Only the fields changed here are validated: an older listing that no
+    // longer passes today's full validation can still be marked as sold.
+    await property.save({ validateModifiedOnly: true });
 
     // Update seller's sold statistics in real-time
     await updateSoldStats(String(currentUser._id), property.price || 0);
@@ -2086,7 +1968,11 @@ export const markAsSold = async (
     if (user) {
       const daysOnMarket = Math.floor((soldDate.getTime() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24));
 
-      await SalesHistory.create({
+      // The listing is already sold at this point. Its sale record is kept for
+      // statistics; failing to write one (an older listing with missing
+      // details) must not turn a successful sale into a server error.
+      try {
+        await SalesHistory.create({
         sellerId: user._id,
         sellerName: user.name,
         sellerEmail: user.email,
@@ -2105,9 +1991,11 @@ export const markAsSold = async (
         totalViews: property.views || 0,
         totalSaves: property.saves || 0,
         daysOnMarket,
-      });
-
-      propertyLogger.info(`📊 Sales history record created for property ${property._id}`);
+        });
+        propertyLogger.info(`📊 Sales history record created for property ${property._id}`);
+      } catch (historyError: unknown) {
+        propertyLogger.error('Failed to create sales history record (non-fatal):', historyError);
+      }
 
       // Archive the sold listing (keep one photo and details)
       try {
@@ -2195,12 +2083,19 @@ export const markAsRented = async (
       return;
     }
 
+    // Validate the optional end date before anything is changed
+    const rentedUntil = req.body?.rentedUntil ? new Date(req.body.rentedUntil) : null;
+    if (rentedUntil && Number.isNaN(rentedUntil.getTime())) {
+      res.status(400).json({ message: 'The rented-until date is not a valid date.', code: 'INVALID_RENTED_UNTIL' });
+      return;
+    }
+
     // Decrement listing count if property was active
     if (property.status === 'active' || property.status === 'pending') {
       const user = await User.findById(String(currentUser._id));
       if (user && user.listingsCount > 0) {
         user.listingsCount -= 1;
-        await user.save();
+        await user.save({ validateModifiedOnly: true });
       }
     }
 
@@ -2210,7 +2105,7 @@ export const markAsRented = async (
 
     // Accept optional rentedUntil date from request body
     if (req.body?.rentedUntil) {
-      property.rentedUntil = new Date(req.body.rentedUntil);
+      property.rentedUntil = rentedUntil as Date;
     }
 
     // Store optional tenant info (private, owner-only)
@@ -2221,7 +2116,7 @@ export const markAsRented = async (
       property.currentRentalNotes = req.body.notes;
     }
 
-    await property.save();
+    await property.save({ validateModifiedOnly: true });
 
     // Archive the rented listing (keep one photo and details)
     try {
@@ -2311,7 +2206,7 @@ export const markAsAvailable = async (
     const user = await User.findById(String(currentUser._id));
     if (user) {
       user.listingsCount += 1;
-      await user.save();
+      await user.save({ validateModifiedOnly: true });
     }
 
     // Save current rental period to history before clearing
@@ -2485,73 +2380,45 @@ export const renewProperty = async (
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    propertyLogger.info('🔄 Renew property request:', id);
-
     if (!req.user) {
-      propertyLogger.info('❌ Renew failed: Not authorized');
       res.status(401).json({ message: 'Not authorized' });
       return;
     }
 
-    const property = await Property.findById(id);
+    const result = await renewListing(id, String((req.user as IUser)._id));
 
-    if (!property) {
-      res.status(404).json({ message: 'Property not found' });
-      return;
-    }
-
-    // Check ownership
-    if (property.sellerId.toString() !== String((req.user as IUser)._id).toString()) {
-      res.status(403).json({ message: 'Not authorized to renew this property' });
-      return;
-    }
-
-    // Check 24hr cooldown
-    const COOLDOWN_HOURS = 24;
-    const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
-    const now = new Date();
-
-    if (property.lastRenewed) {
-      const lastRenewedTime = new Date(property.lastRenewed).getTime();
-      const timeSinceRenewal = now.getTime() - lastRenewedTime;
-
-      if (timeSinceRenewal < cooldownMs) {
-        const canRenewAt = new Date(lastRenewedTime + cooldownMs);
-        const hoursRemaining = Math.ceil((cooldownMs - timeSinceRenewal) / (60 * 60 * 1000));
-        const minutesRemaining = Math.ceil((cooldownMs - timeSinceRenewal) / (60 * 1000)) % 60;
-
+    if (result.ok === false) {
+      if (result.reason === 'cooldown') {
         res.status(429).json({
-          message: `You can only renew once every ${COOLDOWN_HOURS} hours`,
+          message: `You can only renew once every ${RENEW_COOLDOWN_HOURS} hours`,
           code: 'RENEWAL_COOLDOWN',
-          canRenewAt: canRenewAt.toISOString(),
-          hoursRemaining,
-          minutesRemaining,
-          lastRenewed: property.lastRenewed,
+          canRenewAt: result.cooldown.canRenewAt.toISOString(),
+          hoursRemaining: result.cooldown.hoursRemaining,
+          minutesRemaining: result.cooldown.minutesRemaining,
+          lastRenewed: result.lastRenewed,
         });
-        return;
+      } else if (result.reason === 'not_found') {
+        res.status(404).json({ message: 'Property not found', code: 'PROPERTY_NOT_FOUND' });
+      } else {
+        res.status(403).json({ message: 'Not authorized to renew this property', code: 'NOT_OWNER' });
       }
+      return;
     }
 
-    property.lastRenewed = now;
-    await property.save();
-    propertyLogger.info('✅ Property renewed successfully:', property._id, 'lastRenewed:', now.toISOString());
+    propertyLogger.info('✅ Property renewed:', id, 'lastRenewed:', result.lastRenewed.toISOString());
 
     // Invalidate properties cache so renewed position is reflected immediately
     invalidateCache('/api/properties');
 
-    // Calculate when they can renew next
-    const canRenewAt = new Date(now.getTime() + cooldownMs);
-
     res.json({
       success: true,
       message: 'Property renewed successfully! It will appear at the top of search results.',
-      property,
-      lastRenewed: now.toISOString(),
-      canRenewAt: canRenewAt.toISOString(),
+      lastRenewed: result.lastRenewed.toISOString(),
+      canRenewAt: result.canRenewAt.toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     propertyLogger.error('Renew property error:', error);
-    res.status(500).json({ message: 'Error renewing property' });
+    res.status(500).json({ message: 'Error renewing property', code: 'RENEW_FAILED' });
   }
 };
 

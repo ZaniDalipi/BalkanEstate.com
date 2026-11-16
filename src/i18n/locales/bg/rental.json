@@ -258,7 +258,8 @@
     "tenantNamePlaceholder": "напр. Иван Иванов",
     "tenantNameHint": "По избор. Видимо само за вас.",
     "rentalNotesLabel": "Бележки",
-    "rentalNotesPlaceholder": "напр. Месечно плащане на 1-во число, депозит платен..."
+    "rentalNotesPlaceholder": "напр. Месечно плащане на 1-во число, депозит платен...",
+    "rentedUntilInvalid": "Изберете днешна или по-късна дата, или оставете празно."
   },
   "rules": {
     "title": "Правила за наемане — {{country}}",
