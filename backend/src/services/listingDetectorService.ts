@@ -7,10 +7,12 @@ import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
 import { isValidListingItem, isValidRssItem } from './listingNormalizerService';
 import { findSiteProfile } from './listingDetectorProfiles';
-import { fetchWithBrowser } from './listingAdapters/browserClient';
+import { fetchWithBrowser, type CapturedJson } from './listingAdapters/browserClient';
 import { extractEmbeddedSpaListings } from './listingAdapters/embeddedState';
 import { detectXmlFeed } from './listingAdapters/xmlFeed/detectXmlFeed';
 import { discoverSitemapUrls } from './listingAdapters/sitemap';
+import { detectRepeatedCards } from './listingAdapters/htmlScrape/detectRepeatedCards';
+import { findListingApi } from './listingAdapters/browserApiSniff';
 import { planCatalogue } from './listingAdapters/htmlScrape/detectCatalogue';
 import { fieldForFeedKey } from './listingAttributes/labelMap';
 import type { CoverageItem } from './listingAttributes/feedCoverage';
@@ -62,6 +64,8 @@ const LISTING_URL_FRAGMENTS = [
   '/for-sale/', '/for-rent/',
   '/sale/', '/rent/',
   '/detail/', '/details/', '/-detail-', '/detail-',
+  // Catalogue-style sites call a property a product / item / ad / offer / object
+  '/product/', '/products/', '/item/', '/items/', '/ad/', '/ads/', '/offer/', '/offers/', '/object/', '/objekt/',
   // Romance / Germanic
   '/inmueble/', '/inmuebles/', '/casa/', '/pisos/', '/piso/', '/vivienda/',
   '/immobilien/', '/wohnung/', '/haus/',
@@ -151,6 +155,9 @@ export const looksLikeListingPath = (pathname: string): boolean => {
 
   // Permissive accept: any listing-y fragment anywhere in the path.
   if (LISTING_URL_FRAGMENTS.some((f) => lower.includes(f))) return true;
+
+  // Database-id detail pages: a Mongo ObjectId or a UUID as a path segment.
+  if (/\/(?:[0-9a-f]{24}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:[/?]|$)/.test(lower)) return true;
 
   // Numeric-id detail pages: /property/12345, /oglas/12345, /-12345, /id/12345
   if (/\/\d{3,}(?:[/-]|$)/.test(lower)) return true;
@@ -292,10 +299,7 @@ const probeWordPress = async (baseUrl: string): Promise<{ items: Record<string, 
  *
  * Returns null when fewer than 2 listing-link anchors are found.
  */
-export const detectHtmlScrape = (
-  html: string,
-  pageUrl: string
-): {
+type HtmlScrapeDetection = {
   selectors: {
     listingItem: string;
     link: string;
@@ -306,7 +310,17 @@ export const detectHtmlScrape = (
   };
   sample: Record<string, unknown>;
   count: number;
-} | null => {
+};
+
+export const detectHtmlScrape = (html: string, pageUrl: string): HtmlScrapeDetection | null => {
+  const byLinks = detectByListingLinks(html, pageUrl);
+  if (byLinks) return byLinks;
+  // The links don't look like listings — look for the repeated card layout instead.
+  const repeated = detectRepeatedCards(html, pageUrl);
+  return repeated ? describeCards(html, pageUrl, repeated.selector, repeated.count) : null;
+};
+
+const detectByListingLinks = (html: string, pageUrl: string): HtmlScrapeDetection | null => {
   const $ = cheerio.load(html);
 
   // 1. Collect anchors that point at listing-detail URLs.
@@ -410,6 +424,17 @@ export const detectHtmlScrape = (
   }
 
   if (!listingItemSelector || bestCount < 2) return null;
+  return describeCards(html, pageUrl, listingItemSelector, bestCount);
+};
+
+/** Reads the card's fields (title, price, image, link …) from the first card matched by `listingItemSelector`. */
+const describeCards = (
+  html: string,
+  pageUrl: string,
+  listingItemSelector: string,
+  bestCount: number
+): HtmlScrapeDetection | null => {
+  const $ = cheerio.load(html);
 
   // 6. Now figure out per-card child selectors using the first matched card as a probe.
   const firstCard = $(listingItemSelector).first();
@@ -455,11 +480,18 @@ export const detectHtmlScrape = (
   }
 
   // 7. Build a sample object from the first card so the wizard can show a preview.
-  const linkAnchorInCard = firstCard.find('a[href]').filter((_, a) => {
+  const anchorsInCard = firstCard.find('a[href]');
+  const listingAnchor = anchorsInCard.filter((_, a) => {
     const href = $(a).attr('href') || '';
     let pn: string;
     try { pn = new URL(href, pageUrl).pathname; } catch { return false; }
     return looksLikeListingPath(pn);
+  }).first();
+  // Cards found by layout rather than by link shape: take the first real internal link.
+  const linkAnchorInCard = listingAnchor.length ? listingAnchor : anchorsInCard.filter((_, a) => {
+    const href = $(a).attr('href') || '';
+    if (!href || /^(#|javascript:|mailto:|tel:)/i.test(href)) return false;
+    try { return new URL(href, pageUrl).origin === new URL(pageUrl).origin; } catch { return false; }
   }).first();
   const linkHref = linkAnchorInCard.attr('href') || '';
   // Match the listing links by their first meaningful path segment — skipping a
@@ -1310,11 +1342,25 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
   //     Launch a real browser, wait for network to settle, then re-run all
   //     detection steps on the fully-rendered DOM.
   let browserHtml: string | null = null;
+  let browserJson: CapturedJson[] = [];
   try {
-    const result = await fetchWithBrowser(url, { waitUntil: 'networkidle', settleMs: 1000 });
+    const result = await fetchWithBrowser(url, { waitUntil: 'networkidle', settleMs: 1000, captureJson: true, scroll: true });
     browserHtml = result.html;
+    browserJson = result.json;
   } catch (browserErr) {
     // Browser fetch failed — swallow and fall through to the final error
+  }
+
+  // The page's own data API is the best source: structured, complete, paged.
+  const api = findListingApi(browserJson);
+  if (api) {
+    return {
+      adapterType: 'jsonFeed',
+      adapterConfig: { endpoint: api.endpoint, itemsPath: api.itemsPath, idPath: '$.id', urlPath: '$.url' },
+      fieldMap: buildJsonFieldMap(api.items[0]),
+      sample: api.items[0],
+      hint: `The page loads its listings from an API (${new URL(api.endpoint).hostname}) — ${api.items.length} listing(s) found`,
+    };
   }
 
   if (browserHtml && browserHtml.length > 500) {

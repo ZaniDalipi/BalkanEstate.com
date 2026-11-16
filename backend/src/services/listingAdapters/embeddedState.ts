@@ -12,7 +12,7 @@ export interface EmbeddedListings {
  * Walk a deeply-nested object/array and return the first array that has at
  * least 2 items that look like real-estate listings.
  */
-const findListingsInState = (
+export const findListingsInState = (
   obj: unknown,
   depth = 0,
   path = '$'

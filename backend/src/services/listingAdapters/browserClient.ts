@@ -94,10 +94,22 @@ const getBrowser = async (): Promise<import('playwright-core').Browser> => {
   }
 };
 
+/** A JSON response the page fetched on its own while rendering (its data API). */
+export interface CapturedJson {
+  url: string;
+  data: unknown;
+}
+
 export interface BrowserFetchResult {
   html: string;
   url: string;
+  /** JSON GET responses the page loaded; only filled when `captureJson` is set. */
+  json: CapturedJson[];
 }
+
+const MAX_CAPTURED_JSON = 40;
+const MAX_JSON_BYTES = 5_000_000;
+const SCROLL_STEPS = 6;
 
 /**
  * Fetch a URL using a real Chromium browser. Waits for the network to quiet
@@ -115,6 +127,10 @@ export const fetchWithBrowser = async (
     waitForSelector?: string;
     /** Additional ms to wait after load before snapshot. Useful for React hydration. */
     settleMs?: number;
+    /** Keep the JSON the page fetches (its data API), so listings can be read from the source. */
+    captureJson?: boolean;
+    /** Scroll down so lazily loaded / infinite-scroll cards are rendered before the snapshot. */
+    scroll?: boolean;
   } = {}
 ): Promise<BrowserFetchResult> => {
   const {
@@ -122,6 +138,8 @@ export const fetchWithBrowser = async (
     waitUntil = 'networkidle',
     waitForSelector,
     settleMs = 500,
+    captureJson = false,
+    scroll = false,
   } = options;
 
   const browser = await getBrowser();
@@ -148,20 +166,50 @@ export const fetchWithBrowser = async (
       }
     });
 
+    const pending: Promise<void>[] = [];
+    const json: CapturedJson[] = [];
+    if (captureJson) {
+      page.on('response', (res) => {
+        const req = res.request();
+        const type = req.resourceType();
+        if (req.method() !== 'GET' || (type !== 'fetch' && type !== 'xhr') || !res.ok()) return;
+        if (!(res.headers()['content-type'] ?? '').includes('json') || pending.length >= MAX_CAPTURED_JSON) return;
+        pending.push(
+          res.text().then((text) => {
+            if (text.length > MAX_JSON_BYTES) return;
+            json.push({ url: res.url(), data: JSON.parse(text) as unknown });
+          }).catch(() => { /* body gone or not JSON */ })
+        );
+      });
+    }
+
     await page.goto(url, { waitUntil, timeout: timeoutMs });
 
     if (waitForSelector) {
       await page.waitForSelector(waitForSelector, { timeout: 10_000 }).catch(() => {});
     }
+    if (scroll) {
+      let lastHeight = 0;
+      for (let i = 0; i < SCROLL_STEPS; i++) {
+        // A string: this project has no DOM types, the code runs inside the page.
+        const height = await page.evaluate<number>(
+          '(window.scrollTo(0, document.body.scrollHeight), document.body.scrollHeight)'
+        ).catch(() => lastHeight);
+        if (height === lastHeight) break;
+        lastHeight = height;
+        await page.waitForTimeout(500);
+      }
+    }
     if (settleMs > 0) {
       await page.waitForTimeout(settleMs);
     }
+    await Promise.allSettled(pending);
 
     const html = await page.content();
     const finalUrl = page.url();
 
-    log.info(`[browser] Fetched ${url} → ${html.length} chars`);
-    return { html, url: finalUrl };
+    log.info(`[browser] Fetched ${url} → ${html.length} chars, ${json.length} JSON response(s)`);
+    return { html, url: finalUrl, json };
   } finally {
     await context.close().catch(() => {});
   }
