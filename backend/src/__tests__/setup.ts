@@ -88,6 +88,24 @@ export const createSignupPayload = (overrides: Record<string, any> = {}) => ({
   ...overrides,
 });
 
+/** Name of the refresh-token cookie (utils/cookieUtils.ts). */
+const REFRESH_COOKIE = 'balkan_rt';
+
+/**
+ * The refresh token of an auth response. It is only ever sent as an httpOnly
+ * cookie (never in the body), so tests read it from Set-Cookie.
+ */
+export const readRefreshCookie = (res: { headers: Record<string, unknown> }) => {
+  const header = res.headers['set-cookie'];
+  const cookies: string[] = Array.isArray(header) ? header : typeof header === 'string' ? [header] : [];
+  const cookie = cookies.find((c) => c.startsWith(`${REFRESH_COOKIE}=`));
+  if (!cookie) return null;
+  return {
+    token: decodeURIComponent(cookie.split(';')[0].split('=').slice(1).join('=')),
+    httpOnly: /;\s*HttpOnly/i.test(cookie),
+  };
+};
+
 /**
  * Signs up a user via the API and returns the accessToken.
  * Centralizes token extraction so tests don't break if response shape changes.
@@ -101,7 +119,7 @@ export const getAuthToken = async (app: express.Express, userOverrides: Record<s
 
   return {
     accessToken: res.body.accessToken,
-    refreshToken: res.body.refreshToken,
+    refreshToken: readRefreshCookie(res)?.token,
     user: res.body.user,
     signupPayload: payload,
   };

@@ -40,6 +40,8 @@ import { createMockUser, getAuthToken } from './setup';
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const NOW = new Date('2026-09-02T09:00:00.000Z');
 const daysAgo = (days: number) => new Date(NOW.getTime() - days * MS_PER_DAY);
+/** Older than the digest's default 45-day lookback (config/cityMarketDigest.ts). */
+const BASELINE_DAYS_AGO = 60;
 
 const marketRow = (overrides: Record<string, unknown> = {}) =>
   CityMarketData.create({
@@ -87,7 +89,10 @@ const snapshot = (overrides: Record<string, unknown> = {}) => {
 /** Baseline + current snapshot for one city, moving by `changePct`. */
 const movingCity = async (city: string, country: string, changePct: number) => {
   const base = 2400;
-  await snapshot({ city, country, countryCode: 'XX', avgPricePerSqm: base, capturedAt: daysAgo(40) });
+  // The baseline must predate the comparison window. With no earlier digest
+  // run, that window opens `historyLookbackDays` (45) before now, so a baseline
+  // only 40 days old sat inside it and the city counted as "newly tracked".
+  await snapshot({ city, country, countryCode: 'XX', avgPricePerSqm: base, capturedAt: daysAgo(BASELINE_DAYS_AGO) });
   await snapshot({
     city, country, countryCode: 'XX',
     avgPricePerSqm: Math.round(base * (1 + changePct / 100)),
