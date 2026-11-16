@@ -8,9 +8,10 @@
 import crypto from 'crypto';
 import sharp from 'sharp';
 import BusinessListing from '../../models/BusinessListing';
-import { resolveId } from '../../utils/idObfuscation';
+import { encodeId, resolveId } from '../../utils/idObfuscation';
 import { loadPhoto } from '../developments/share/residenceShareImage';
 import { CARD_H, CARD_W, buildBusinessCard, categoryText, type Box } from './businessShareLayout';
+import { renderIndividualCard } from './individualShareImage';
 
 const CACHE_MAX = 200;
 const cache = new Map<string, Buffer>();
@@ -19,6 +20,10 @@ export class BusinessNotFoundError extends Error {}
 
 export interface BusinessShareFacts {
   id: string;
+  /** The id the app uses (encoded): the individual card's link and colour come from it. */
+  publicId: string;
+  /** Individuals get their badge card; businesses the cover-photo card. */
+  listingType: 'business' | 'individual';
   version: string;
   name: string;
   category: string;
@@ -33,7 +38,7 @@ export interface BusinessShareFacts {
 }
 
 const FIELDS =
-  'name category customCategory city country logoUrl bannerUrl bannerPosition isVerified isActive updatedAt services yearEstablished licenseNumber priceRange languages';
+  'listingType name category customCategory city country logoUrl bannerUrl bannerPosition isVerified isActive updatedAt services yearEstablished licenseNumber priceRange languages';
 
 /** "Verified", "4 years in business", "Licensed", "$$", "3 languages" — whatever the listing has. */
 export function cardFacts(
@@ -59,6 +64,8 @@ export async function businessShareFacts(idOrSlug: string): Promise<BusinessShar
   if (!doc || doc.isActive === false) throw new BusinessNotFoundError(idOrSlug);
   return {
     id: String(doc._id),
+    publicId: encodeId(String(doc._id)),
+    listingType: doc.listingType === 'individual' ? 'individual' : 'business',
     version: doc.updatedAt ? new Date(doc.updatedAt).getTime().toString(36) : '0',
     name: doc.name,
     category: categoryText(doc.category, doc.customCategory),
@@ -153,6 +160,11 @@ export async function renderBusinessCard(f: BusinessShareFacts, coverRaw: Buffer
 }
 
 async function render(f: BusinessShareFacts): Promise<Buffer> {
+  if (f.listingType === 'individual') {
+    // Their portrait is the logo field (the form calls it the avatar for individuals).
+    const photo = f.logoUrl ? await loadPhoto(f.logoUrl) : null;
+    return renderIndividualCard({ publicId: f.publicId, name: f.name, category: f.category, place: f.place, facts: f.facts }, photo);
+  }
   const [coverRaw, logoRaw] = await Promise.all([
     f.coverUrl ? loadPhoto(f.coverUrl) : Promise.resolve(null),
     f.logoUrl ? loadPhoto(f.logoUrl) : Promise.resolve(null),

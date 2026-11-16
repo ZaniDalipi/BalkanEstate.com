@@ -32,13 +32,13 @@ const ShareCardDialog: React.FC<ShareCardDialogProps> = ({ listing, onClose, onC
   useEffect(() => { closeButton.current?.focus(); }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-[5000] flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[5000] flex items-end justify-center bg-slate-900/30 p-0 backdrop-blur-[3px] sm:items-center sm:p-4" onClick={onClose}>
       <motion.div
         ref={panel}
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-card-title"
-        className="dialog-fit max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[28px] bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl sm:rounded-[28px]"
+        className="liquid-surface !bg-white/85 dialog-fit max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[28px] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-[28px]"
         onClick={(e) => e.stopPropagation()}
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,9 +54,9 @@ const ShareCardDialog: React.FC<ShareCardDialogProps> = ({ listing, onClose, onC
           </button>
         </div>
 
-        <div className="mx-auto mb-4 aspect-[4/5] w-full max-w-[280px] overflow-hidden rounded-2xl bg-neutral-100">
-          {state.status === 'ready' && <img src={state.previewUrl} alt={t('shareCard.preview', 'Share card for {{name}}', { name: listing.name })} className="h-full w-full object-cover" />}
-          {state.status === 'making' && <div className="h-full w-full animate-pulse bg-neutral-200" role="status" aria-label={t('shareCard.making', 'Making the card…')} />}
+        <div className="liquid-control mx-auto mb-4 aspect-[4/5] w-full max-w-[280px] overflow-hidden rounded-2xl p-1.5">
+          {state.status === 'ready' && <img src={state.previewUrl} alt={t('shareCard.preview', 'Share card for {{name}}', { name: listing.name })} className="h-full w-full rounded-xl object-cover" />}
+          {state.status === 'making' && <div className="h-full w-full animate-pulse rounded-xl bg-white/60" role="status" aria-label={t('shareCard.making', 'Making the card…')} />}
           {state.status === 'error' && (
             <div role="alert" className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-neutral-600">
               {t('shareCard.failed', 'The card couldn’t be made. You can still share the link below.')}

@@ -1,5 +1,6 @@
 import type { LanyardMember } from '@/src/components/ui/team-lanyard-rail';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
+import { toneIndex } from './shareCard/shareCardData';
 
 /** How many professionals hang on the rail; more turns it into a crowd. */
 export const MAX_LANYARDS = 8;
@@ -84,7 +85,8 @@ export function toLanyardMembers(listings: BusinessListing[], map: LanyardMappin
         bio: shortBio(l.description) ?? shortBio(factsBio(l, role, map.facts)),
         tags: badgeTags(l, map),
         links,
-        tone: ((i % 5) + 1) as LanyardMember['tone'],
+        // The listing's own colour (same as its share card and link preview), not its place in the row.
+        tone: (toneIndex(l.id) + 1) as LanyardMember['tone'],
       };
     });
 }
