@@ -12,7 +12,10 @@ import { extractEmbeddedSpaListings } from './listingAdapters/embeddedState';
 import { detectXmlFeed } from './listingAdapters/xmlFeed/detectXmlFeed';
 import { discoverSitemapUrls } from './listingAdapters/sitemap';
 import { detectRepeatedCards } from './listingAdapters/htmlScrape/detectRepeatedCards';
-import { findListingApi } from './listingAdapters/browserApiSniff';
+import { findListingApi, type ListingApi } from './listingAdapters/browserApiSniff';
+import { discoverBundleApi } from './listingAdapters/spaBundle/discoverBundleApi';
+import { looksLikeAppShell } from './listingAdapters/spaBundle/extractApiCandidates';
+import { cronLogger } from '../utils/logger';
 import { planCatalogue } from './listingAdapters/htmlScrape/detectCatalogue';
 import { fieldForFeedKey } from './listingAttributes/labelMap';
 import type { CoverageItem } from './listingAttributes/feedCoverage';
@@ -1088,6 +1091,15 @@ const detectFromSitemapBehindBotCheck = async (pageUrl: string): Promise<DetectR
   };
 };
 
+/** A JSON feed on the API a page loads its listings from. */
+const listingApiResult = (api: ListingApi, what: string): DetectResult => ({
+  adapterType: 'jsonFeed',
+  adapterConfig: { endpoint: api.endpoint, itemsPath: api.itemsPath, idPath: '$.id', urlPath: '$.url' },
+  fieldMap: buildJsonFieldMap(api.items[0]),
+  sample: api.items[0],
+  hint: `${what} (${new URL(api.endpoint).hostname}) — ${api.items.length} listing(s) found`,
+});
+
 export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> => {
   const url = rawUrl.trim();
 
@@ -1321,6 +1333,13 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     }
   }
 
+  // ── 4c. Single-page app: read its JavaScript for the API it loads listings from.
+  //        Works without a headless browser, so it also runs where none is installed.
+  if (html && typeof html === 'string' && looksLikeAppShell(html)) {
+    const api = await discoverBundleApi(html, url).catch(() => null);
+    if (api) return listingApiResult(api, 'The app loads its listings from an API');
+  }
+
   // ── 5. Sitemap discovery — most reliable for JS-heavy portals ─────────────────
   //     Fetch detail pages individually and parse JSON-LD / OpenGraph from each.
   const sitemap = await discoverSitemapUrls(url);
@@ -1348,20 +1367,13 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     browserHtml = result.html;
     browserJson = result.json;
   } catch (browserErr) {
-    // Browser fetch failed — swallow and fall through to the final error
+    // No browser on this server, or the page would not load — fall through to the final error.
+    cronLogger.warn(`[detect] headless browser unavailable for ${url}: ${(browserErr as Error).message}`);
   }
 
   // The page's own data API is the best source: structured, complete, paged.
   const api = findListingApi(browserJson);
-  if (api) {
-    return {
-      adapterType: 'jsonFeed',
-      adapterConfig: { endpoint: api.endpoint, itemsPath: api.itemsPath, idPath: '$.id', urlPath: '$.url' },
-      fieldMap: buildJsonFieldMap(api.items[0]),
-      sample: api.items[0],
-      hint: `The page loads its listings from an API (${new URL(api.endpoint).hostname}) — ${api.items.length} listing(s) found`,
-    };
-  }
+  if (api) return listingApiResult(api, 'The page loads its listings from an API');
 
   if (browserHtml && browserHtml.length > 500) {
     // Re-run JSON-LD check on browser-rendered HTML
@@ -1461,6 +1473,13 @@ export const detectFeedForUrl = async (rawUrl: string): Promise<DetectResult> =>
     throw new Error(
       `Could not auto-detect listings: ${fetchFailureReason} ` +
       'Try pasting a direct JSON feed URL or a JSON sample from the agency portal.'
+    );
+  }
+  if (html && looksLikeAppShell(html)) {
+    throw new Error(
+      'This site builds its pages with JavaScript and we could not find where it loads its listings from. ' +
+      'Open a listing on the site, and if it has an API address (often shown in the browser\'s Network tab as a ' +
+      '".../api/..." request), paste that address here — or use "Paste JSON sample" with one of its responses.'
     );
   }
   throw new Error(

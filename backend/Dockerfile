@@ -32,6 +32,12 @@ RUN addgroup -g 1001 -S nodejs && \
 # font file, but fontconfig needs a config to resolve any family at all.
 RUN apk add --no-cache fontconfig ttf-dejavu
 
+# Chromium for the external-feed detector and scraper: sites built with
+# JavaScript (React, Vue …) only show their listings once a browser runs them.
+# Without it every such site fails with "Could not auto-detect".
+RUN apk add --no-cache chromium nss
+ENV PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium-browser
+
 # Copy package files
 COPY package*.json ./
 
