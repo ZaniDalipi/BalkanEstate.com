@@ -1,14 +1,25 @@
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 
-/** The lanyard / band colours, mirroring --color-chart-1…5 in src/index.css (canvas can't read CSS vars cheaply). */
+/**
+ * The lanyard / band colours, mirroring --color-chart-1…5 in src/index.css
+ * (canvas can't read CSS vars cheaply) and BADGE_TONES in
+ * backend/src/services/businessShare/individualShareLayout.ts. Keep the three in step.
+ */
 export const CARD_TONES = ['#0252CD', '#10B981', '#F59E0B', '#8B5CF6', '#F43F5E'] as const;
 
-/** A stable tone per listing, so its card looks the same every time it is shared. */
-export function toneFor(id: string): string {
+/**
+ * A listing's colour (0–4) from its id: the rail's badge, the share card and
+ * the link preview (the backend's toneIndex, same hash) all use it, so a
+ * professional is one colour everywhere.
+ */
+export function toneIndex(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return CARD_TONES[h % CARD_TONES.length] ?? CARD_TONES[0];
+  return h % CARD_TONES.length;
 }
+
+/** The listing's colour as hex, for the canvas card. */
+export const toneFor = (id: string): string => CARD_TONES[toneIndex(id)] ?? CARD_TONES[0];
 
 /** Up to two initials for the portrait when there is no photo (or it can't be drawn). */
 export function initials(name: string): string {

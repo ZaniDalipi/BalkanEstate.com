@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { toLanyardMembers, shortBio, factsBio, badgeTags, MAX_LANYARDS } from './lanyardMembers';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
+import { CARD_TONES, toneFor, toneIndex } from './shareCard/shareCardData';
 
 const listing = (over: Partial<BusinessListing>): BusinessListing => ({
   id: 'id1', owner: {}, listingType: 'individual', name: 'Ana', slug: 'ana', category: 'cleaning',
@@ -37,7 +38,7 @@ describe('toLanyardMembers', () => {
     })], map);
     expect(m).toMatchObject({
       id: 'id1', name: 'Ana', role: 'role:cleaning', team: 'Pula, Croatia', image: 'img:id1', bio: 'Tidy homes.',
-      tags: ['Verified', 'Deep clean'], tone: 1,
+      tags: ['Verified', 'Deep clean'], tone: toneIndex('id1') + 1,
     });
     expect(m?.links).toEqual([
       { label: 'Profile', href: '/en/business-directory/ana' },
@@ -53,9 +54,11 @@ describe('toLanyardMembers', () => {
     expect(m?.bio).toBe('role:cleaning in Pula, Croatia.');
   });
 
-  it('cycles the five tones', () => {
-    const out = toLanyardMembers(Array.from({ length: 6 }, (_, i) => listing({ id: `p${i}` })), map);
-    expect(out.map((m) => m.tone)).toEqual([1, 2, 3, 4, 5, 1]);
+  it('gives each professional their own colour, the one their share card uses', () => {
+    const out = toLanyardMembers([listing({ id: 'abc' }), listing({ id: 'p1' })], map);
+    expect(out.map((m) => m.tone)).toEqual([toneIndex('abc') + 1, toneIndex('p1') + 1]);
+    expect(toneIndex('abc')).toBe(4); // the backend's toneIndex('abc') is 4 too (individual-share-card.test.ts)
+    expect(toneFor('abc')).toBe(CARD_TONES[4]);
   });
 });
 

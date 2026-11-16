@@ -47,7 +47,7 @@ export interface BusinessData {
 }
 
 /** Bump when the card's look changes, so feeds that cache by URL fetch the new one. */
-export const CARD_DESIGN = 'g2';
+export const CARD_DESIGN = 'g3';
 
 /** The directory's own tabs share the URL shape; they are not businesses. */
 const DIRECTORY_TABS = new Set(['businesses', 'individuals', 'mine']);

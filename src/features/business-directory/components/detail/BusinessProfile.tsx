@@ -59,7 +59,7 @@ export const BusinessProfile: React.FC<BusinessProfileProps> = ({ listing, isOwn
   const channels = useMemo(() => contactChannels(listing), [listing]);
   const category = categoryLabel(listing, t);
   // The same 1200×630 share card the link-preview crawlers get (cover + logo + name).
-  const shareCard = `${API_URL}/og/business/${encodeURIComponent(listing.id)}/image.jpg?v=${Date.parse(listing.updatedAt).toString(36)}.g2`;
+  const shareCard = `${API_URL}/og/business/${encodeURIComponent(listing.id)}/image.jpg?v=${Date.parse(listing.updatedAt).toString(36)}.g3`; // .g3 = CARD_DESIGN in functions/_og-business.ts
   const photo = optimizeImageUrl(listing.bannerUrl || listing.logoUrl, { width: 1200 });
   const tint = optimizeImageUrl(listing.bannerUrl, { width: 160 });
   const { place, isLocating: isLocatingPlace } = useBusinessPlace(listing);
