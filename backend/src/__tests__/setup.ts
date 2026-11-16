@@ -83,6 +83,8 @@ export const createSignupPayload = (overrides: Record<string, any> = {}) => ({
   name: 'Test User',
   email: `test-${Date.now()}@example.com`,
   password: 'S3cur€Pass!x9Kw',
+  // Signup refuses a request without a phone number (PHONE_REQUIRED).
+  phone: '+38344123456',
   ...overrides,
 });
 
