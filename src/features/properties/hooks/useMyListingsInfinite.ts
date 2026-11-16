@@ -97,6 +97,8 @@ export function useMyListingsInfinite(filters: MyListingsFilters, options?: { en
     listings,
     counts: query.data?.pages[0]?.counts ?? EMPTY_COUNTS,
     isLoading: query.isPending,
+    /** The first chunk could not be loaded (nothing to show yet). */
+    isError: query.isError && !query.data,
     isFetchingNextPage: query.isFetchingNextPage,
     hasMore: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,

@@ -45,7 +45,7 @@ describe('ListingActionBar', () => {
   });
 
   it('hides the reason once dismissed', () => {
-    setup({ status: 'sold' });
+    setup({ status: 'draft' });
     fireEvent.click(screen.getByRole('button', { name: 'Promote' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Available once the listing is active.');
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));

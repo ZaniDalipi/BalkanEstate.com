@@ -658,7 +658,11 @@
       "sold": "U shënua si e shitur.",
       "rented": "U shënua si e dhënë me qira.",
       "available": "U shënua sërish si e disponueshme."
-    }
+    },
+    "filterByStatus": "Filtro sipas statusit",
+    "filterByType": "Filtro sipas shitjes ose qirasë",
+    "allCount": "Të gjitha ({{count}})",
+    "loadError": "Shpalljet tuaja nuk mund të ngarkoheshin."
   },
   "form": {
     "basicInfo": "Informacione Bazë",

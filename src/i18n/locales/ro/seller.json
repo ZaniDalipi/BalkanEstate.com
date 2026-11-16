@@ -545,7 +545,11 @@
       "sold": "Marcat ca vândut.",
       "rented": "Marcat ca închiriat.",
       "available": "Marcat din nou ca disponibil."
-    }
+    },
+    "filterByStatus": "Filtrează după stare",
+    "filterByType": "Filtrează după vânzare sau închiriere",
+    "allCount": "Toate ({{count}})",
+    "loadError": "Anunțurile dvs. nu au putut fi încărcate."
   },
   "form": {
     "basicInfo": "Informații de Bază",

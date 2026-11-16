@@ -153,7 +153,11 @@ export const buildListingActions = (input: ListingActionInput): ListingAction[] 
     reassignAction(input),
     closeAction(input, actionable),
   ];
-  return actions.filter((a): a is ListingAction => a !== null);
+  // A sold or rented listing isn't coming back to "active" by itself, so the
+  // actions that need an active listing are left out there rather than shown
+  // as a row of dead buttons. Elsewhere (a draft, say) they stay, and explain.
+  const closed = input.status === 'sold' || input.status === 'rented';
+  return actions.filter((a): a is ListingAction => a !== null && !(closed && a.blocked === NOT_ACTIVE));
 };
 
 /**

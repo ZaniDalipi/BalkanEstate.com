@@ -549,7 +549,11 @@
       "sold": "Marked as sold.",
       "rented": "Marked as rented.",
       "available": "Marked as available again."
-    }
+    },
+    "filterByStatus": "Filter by status",
+    "filterByType": "Filter by sale or rent",
+    "allCount": "All ({{count}})",
+    "loadError": "Your listings couldn't be loaded."
   },
   "form": {
     "basicInfo": "Basic Information",

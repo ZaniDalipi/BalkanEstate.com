@@ -34,8 +34,14 @@ describe('buildListingActions', () => {
 
   it('blocks status actions with a reason when the listing is not active', () => {
     for (const id of ['promote', 'renew', 'markSold']) {
-      expect(find({ status: 'sold' }, id)?.blocked?.key).toBe('seller:myListings.actionBlocked.notActive');
+      expect(find({ status: 'draft' }, id)?.blocked?.key).toBe('seller:myListings.actionBlocked.notActive');
     }
+  });
+
+  it('leaves out what a sold or rented listing can no longer do', () => {
+    expect(ids({ status: 'sold' })).toEqual(['video']);
+    expect(ids({ status: 'rented', listingType: 'rent' })).toEqual(['video', 'markAvailable']);
+    expect(ids({ status: 'sold', createdAsRole: 'agent' })).toEqual(['video', 'moveToPrivate']);
   });
 
   it('blocks video without photos and points to the editor', () => {

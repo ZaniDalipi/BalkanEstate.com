@@ -545,7 +545,11 @@
       "sold": "Označeno kao prodato.",
       "rented": "Označeno kao izdato.",
       "available": "Ponovo označeno kao dostupno."
-    }
+    },
+    "filterByStatus": "Filtriraj po statusu",
+    "filterByType": "Filtriraj po prodaji ili izdavanju",
+    "allCount": "Sve ({{count}})",
+    "loadError": "Vaši oglasi nisu mogli da se učitaju."
   },
   "form": {
     "basicInfo": "Основне Информације",

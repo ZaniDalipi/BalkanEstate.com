@@ -12,30 +12,11 @@ import { useUnfinishedListingDrafts } from '@/src/features/seller/hooks/useUnfin
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useRouteView } from '@/src/app/router/useRouteView';
-import { ListingTypePicture, SoftIcon } from '@/src/shared/illustrations';
+import { MyListingsFilters } from '@/src/features/seller/components/myListings/MyListingsFilters';
 import { MyListingCard } from '@/src/features/seller/components/myListings/MyListingCard';
 import { useMyListingMutations } from '@/src/features/seller/hooks/useMyListingMutations';
 import { renewalStatusOf, type ListingActionId, type RenewalStatus } from '@/src/features/seller/utils/listingActions';
 import { validateNotPastDate } from '@/src/shared/utils/validation';
-
-const FilterPill: React.FC<{
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-    count?: number;
-}> = ({ label, isActive, onClick, count }) => (
-    <button
-        onClick={onClick}
-        className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 flex-grow text-center capitalize ${
-            isActive
-                ? 'bg-white text-primary shadow'
-                : 'text-neutral-600 hover:bg-neutral-200'
-        }`}
-    >
-        {label} {count !== undefined && <span className="text-xs opacity-70">({count})</span>}
-    </button>
-);
-
 
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { t } = useTranslation(['rental', 'common', 'seller', 'account']);
@@ -70,6 +51,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         listings: myProperties,
         counts,
         isLoading,
+        isError: isLoadError,
         isFetchingNextPage: isLoadingMore,
         hasMore,
         fetchNextPage,
@@ -405,15 +387,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         </div>
     );
 
-    const statusFilterOptions: { label: string, value: PropertyStatus | 'all' }[] = [
-        { label: t('seller:myListings.filters.all', 'All'), value: 'all' },
-        { label: t('seller:myListings.filters.active', 'Active'), value: 'active' },
-        { label: t('seller:myListings.filters.pending', 'Pending'), value: 'pending' },
-        { label: t('seller:myListings.filters.sold', 'Sold'), value: 'sold' },
-        { label: t('seller:myListings.filters.rented', 'Rented'), value: 'rented' as PropertyStatus },
-        { label: t('seller:myListings.filters.draft', 'Draft'), value: 'draft' },
-    ];
-
     // Only show role filter if user has listings in both roles
     const showRoleFilter = roleCounts.private_seller > 0 && roleCounts.agent > 0;
 
@@ -562,7 +535,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                       onClick={() => {
                           navigate(paths.createListing());
                       }}
-                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm"
+                      className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm"
                     >
                       <PencilIcon className="w-4 h-4"/>
                       <span>{t('seller:myListings.newSaleListing', 'New Sale Listing')}</span>
@@ -571,7 +544,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                       onClick={() => {
                           navigate(paths.createRental());
                       }}
-                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                      className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
                     >
                       <PencilIcon className="w-4 h-4"/>
                       <span>{t('seller:myListings.newRentalListing', 'New Rental Listing')}</span>
@@ -582,120 +555,35 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             {/* Unfinished listings saved on this device (listed in the Drafts tab instead when it is open) */}
             {statusFilter !== 'draft' && localDrafts.map(renderLocalDraft)}
 
-            {/* Property ID Search */}
-            <div className="relative max-w-sm">
-                <input
-                    type="text"
-                    value={propertyIdSearch}
-                    onChange={(e) => setPropertyIdSearch(e.target.value)}
-                    placeholder={t('seller:myListings.searchListings', 'Search by ID, title, address...')}
-                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                    aria-label={t('seller:myListings.searchListings', 'Search listings')}
-                />
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                {propertyIdSearch && (
-                    <button
-                        onClick={() => setPropertyIdSearch('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-                        aria-label={t('common:clear', 'Clear')}
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                )}
-            </div>
-
-            {/* Listing Type Filter (Sale / Rent) */}
-            {showListingTypeFilter && (
-                <div className="flex items-center space-x-1 bg-gradient-to-r from-emerald-50 to-blue-50 p-1.5 rounded-full border border-neutral-200 self-start max-w-full sm:max-w-md">
-                    <button
-                        onClick={() => setListingTypeFilter('all')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex-grow text-center ${
-                            listingTypeFilter === 'all' ? 'bg-white text-neutral-800 shadow' : 'text-neutral-600 hover:bg-white/50'
-                        }`}
-                    >
-                        {t('account:ui.myListings.all', 'All (')}{listingTypeCounts.all})
-                    </button>
-                    <button
-                        onClick={() => setListingTypeFilter('sale')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex-grow text-center ${
-                            listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-700 hover:bg-emerald-100'
-                        }`}
-                    >
-                        <ListingTypePicture type="sale" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('seller:myListings.forSaleCount', 'For Sale ({{count}})', { count: listingTypeCounts.sale })}
-                    </button>
-                    <button
-                        onClick={() => setListingTypeFilter('rent')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex-grow text-center ${
-                            listingTypeFilter === 'rent' ? 'bg-blue-600 text-white shadow' : 'text-blue-700 hover:bg-blue-100'
-                        }`}
-                    >
-                        <ListingTypePicture type="rent" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('seller:myListings.forRentCount', 'For Rent ({{count}})', { count: listingTypeCounts.rent })}
-                    </button>
-                </div>
-            )}
-
-            {/* Role Filter - Only show if user has listings in both roles */}
-            {showRoleFilter && (
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-100">
-                    <p className="text-sm text-neutral-600 mb-3 font-medium">{t('account:ui.myListings.filterByPostingRole', 'Filter by posting role:')}</p>
-                    <div className="flex flex-wrap gap-2">
-                        <button
-                            onClick={() => setRoleFilter('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                                roleFilter === 'all'
-                                    ? 'bg-white text-neutral-800 shadow-md'
-                                    : 'bg-white/50 text-neutral-600 hover:bg-white/80'
-                            }`}
-                        >
-                            {t('seller:myListings.postingRole.all', 'All Listings')} ({roleCounts.all})
-                        </button>
-                        <button
-                            onClick={() => setRoleFilter('private_seller')}
-                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                                roleFilter === 'private_seller'
-                                    ? 'bg-purple-600 text-white shadow-md'
-                                    : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                            }`}
-                        >
-                            <SoftIcon name="home" className="w-5 h-5" />
-                            {t('account:roles.privateSeller', 'Private Seller')} ({roleCounts.private_seller})
-                        </button>
-                        <button
-                            onClick={() => setRoleFilter('agent')}
-                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                                roleFilter === 'agent'
-                                    ? 'bg-blue-600 text-white shadow-md'
-                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                            }`}
-                        >
-                            <SoftIcon name="building" className="w-5 h-5" />
-                            {t('account:roles.agent', 'Agent')} ({roleCounts.agent})
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Status Filter */}
-            <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200 self-start max-w-full sm:max-w-lg overflow-x-auto">
-                {statusFilterOptions.map(option => (
-                    <FilterPill
-                        key={option.value}
-                        label={option.label}
-                        isActive={statusFilter === option.value}
-                        onClick={() => setStatusFilter(option.value)}
-                    />
-                ))}
-            </div>
+            <MyListingsFilters
+                search={propertyIdSearch}
+                onSearch={setPropertyIdSearch}
+                status={statusFilter}
+                onStatus={setStatusFilter}
+                listingType={listingTypeFilter}
+                onListingType={setListingTypeFilter}
+                listingTypeCounts={showListingTypeFilter ? listingTypeCounts : null}
+                role={roleFilter}
+                onRole={setRoleFilter}
+                roleCounts={showRoleFilter ? roleCounts : null}
+            />
 
             {statusFilter === 'draft' && localDrafts.length > 0 && (
                 <div className="space-y-4">{localDrafts.map(renderLocalDraft)}</div>
             )}
 
-            {isLoading ? (
+            {isLoadError ? (
+                <div role="alert" className="flex flex-col items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+                    <p className="font-semibold text-red-800">{t('seller:myListings.loadError', "Your listings couldn't be loaded.")}</p>
+                    <button
+                        type="button"
+                        onClick={fetchMyListings}
+                        className="min-h-[44px] rounded-lg bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    >
+                        {t('seller:myListings.actionError.retry', 'Try again')}
+                    </button>
+                </div>
+            ) : isLoading ? (
                 <div className="space-y-4">
                     <ListingCardSkeleton />
                     <ListingCardSkeleton />

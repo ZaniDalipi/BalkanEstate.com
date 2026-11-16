@@ -545,7 +545,11 @@
       "sold": "Označeno kao prodano.",
       "rented": "Označeno kao iznajmljeno.",
       "available": "Ponovno označeno kao dostupno."
-    }
+    },
+    "filterByStatus": "Filtriraj po statusu",
+    "filterByType": "Filtriraj po prodaji ili najmu",
+    "allCount": "Sve ({{count}})",
+    "loadError": "Vaši oglasi nisu se mogli učitati."
   },
   "form": {
     "basicInfo": "Osnovne informacije",

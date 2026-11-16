@@ -2,7 +2,7 @@ import React from 'react';
 
 const ListingCardSkeleton: React.FC = () => {
     return (
-        <div className="bg-white p-4 rounded-xl border border-neutral-200 flex flex-col sm:flex-row gap-5 animate-pulse">
+        <div className="bg-white p-3 sm:p-4 rounded-2xl border border-neutral-200 flex flex-col sm:flex-row gap-4 motion-safe:animate-pulse" aria-hidden="true">
             <div className="w-full sm:w-48 h-40 bg-neutral-200 rounded-lg flex-shrink-0"></div>
             <div className="flex-grow flex flex-col w-full">
                 <div className="h-5 bg-neutral-200 rounded w-24 mb-2"></div>
