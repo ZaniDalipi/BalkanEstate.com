@@ -1,17 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ResidenceExplorer } from './ResidenceExplorer';
 import { EMPTY_CRITERIA } from '../../../utils/unitFilters';
 import type { ExplorerNav } from '../../../hooks/useExplorerUrlState';
 import type { DevelopmentBuilding, DevelopmentFloor, PublicSceneView, PublicUnit } from '../../../types';
 
 vi.mock('react-i18next', async () => (await import('./__tests__/i18nMock')).default);
-const views = vi.hoisted(() => ({ byTarget: {} as Record<string, PublicSceneView[]> }));
+const views = vi.hoisted(() => ({
+  byTarget: {} as Record<string, PublicSceneView[]>,
+  /** One-off answers, used before byTarget: a list of views or a failure. */
+  queue: {} as Record<string, Array<PublicSceneView[] | Error>>,
+}));
 vi.mock('../../../api/developmentsApi', () => ({
-  getPublicViews: (_slug: string, type: string, id?: string) =>
-    Promise.resolve({ views: views.byTarget[`${type}:${id ?? ''}`] ?? [] }),
+  getPublicViews: (_slug: string, type: string, id?: string) => {
+    const key = `${type}:${id ?? ''}`;
+    const next = views.queue[key]?.shift();
+    if (next instanceof Error) return Promise.reject(next);
+    return Promise.resolve({ views: next ?? views.byTarget[key] ?? [] });
+  },
 }));
 vi.mock('@/src/app/router/navigation', () => ({ navigate: vi.fn() }));
 
@@ -26,8 +34,8 @@ const buildings = [
 ] as DevelopmentBuilding[];
 const units = [{ id: 'u1', unitNumber: 'A1', unitType: 'apartment', availability: 'available', buildingId: 'b1', floorId: 'f', listingIds: [] }] as unknown as PublicUnit[];
 
-const Harness: React.FC<{ onOpen?: (id: string) => void; immersive?: boolean; floors?: DevelopmentFloor[] }> = ({ onOpen = () => undefined, immersive, floors = [] }) => {
-  const [nav, setNav] = useState<ExplorerNav>({});
+const Harness: React.FC<{ onOpen?: (id: string) => void; immersive?: boolean; floors?: DevelopmentFloor[]; startNav?: ExplorerNav }> = ({ onOpen = () => undefined, immersive, floors = [], startNav = {} }) => {
+  const [nav, setNav] = useState<ExplorerNav>(startNav);
   return (
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <ResidenceExplorer
@@ -42,6 +50,7 @@ const Harness: React.FC<{ onOpen?: (id: string) => void; immersive?: boolean; fl
 
 beforeEach(() => {
   views.byTarget = {};
+  views.queue = {};
 });
 
 describe('ResidenceExplorer', () => {
@@ -123,5 +132,21 @@ describe('ResidenceExplorer', () => {
     expect(box).toHaveClass('pointer-events-none');
     expect(row.parentElement).toHaveClass('pointer-events-auto', 'max-w-full');
   });
-});
 
+  describe('a floor picture', () => {
+    const floors = [
+      { id: 'f', buildingId: 'b1', label: 'Ground floor', level: 0, order: 0, hasViews: true },
+      { id: 'f2', buildingId: 'b1', label: 'Floor 1', level: 1, order: 1 },
+    ] as DevelopmentFloor[];
+    const floorView = () => view('front', [{ id: 'h', shape: 'polygon', points: tri, linkType: 'unit', linkId: 'u1', z: 0 }]);
+
+    it('says when it could not be loaded, instead of passing it off as not posted, and tries again', async () => {
+      views.queue['floor:f'] = [new Error('network')];
+      views.byTarget['floor:f'] = [floorView()];
+      render(<Harness floors={floors} startNav={{ building: 'b1', floor: 'f' }} />);
+      fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
+      await waitFor(() => expect(screen.getByRole('button', { name: /Apt A1/ })).toBeInTheDocument());
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
+});

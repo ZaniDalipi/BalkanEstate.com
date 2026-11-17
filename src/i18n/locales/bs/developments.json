@@ -488,7 +488,8 @@
       "title": "Spratovi",
       "whole": "Cijela zgrada",
       "hasPlan": "Ima tlocrt"
-    }
+    },
+    "viewsFailed": "Slika se nije mogla učitati."
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",

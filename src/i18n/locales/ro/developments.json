@@ -488,7 +488,8 @@
       "title": "Etaje",
       "whole": "Toată clădirea",
       "hasPlan": "Are plan de etaj"
-    }
+    },
+    "viewsFailed": "Imaginea nu a putut fi încărcată."
   },
   "feature": {
     "big_terrace": "Cu terasă mare",

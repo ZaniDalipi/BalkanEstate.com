@@ -58,6 +58,9 @@ export function useExplorerTarget({ slug, residenceName, nav, buildings, floors 
     navForCrumb,
     type,
     buildingId,
+    /** The building/floor pictures could not be loaded (not the same as "none posted"). */
+    failed: type !== 'development' && !!target.error && views.length === 0,
+    retry: () => void target.refetch(),
     /** Nothing published anywhere we would open on: the page shows filters + grid only. */
     nothingPublished: !isLoading && rootEmpty && (type === 'development' || views.length === 0) && !nav.building && !nav.floor,
   };

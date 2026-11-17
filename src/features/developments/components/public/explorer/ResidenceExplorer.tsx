@@ -95,6 +95,14 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
     return (
       <>
         {p.header}
+        {target.failed && (
+          <div role="alert" className="flex flex-wrap items-center gap-3 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:px-8">
+            {t('explorer.viewsFailed', 'The picture could not be loaded.')}
+            <button type="button" onClick={target.retry} className="min-h-[44px] rounded-md border border-amber-300 bg-white px-3 font-semibold hover:bg-amber-100">
+              {t('explorer.showcase.retry', 'Try again')}
+            </button>
+          </div>
+        )}
         {floorList(crumb && { label: crumb.label, onClick: () => go(target.navForCrumb(target.crumbs.length - 2)) })}
       </>
     );

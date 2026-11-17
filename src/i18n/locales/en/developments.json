@@ -461,7 +461,8 @@
       "title": "Floors",
       "whole": "Whole building",
       "hasPlan": "Has a floor plan"
-    }
+    },
+    "viewsFailed": "The picture could not be loaded."
   },
   "feature": {
     "big_terrace": "With big terrace",
