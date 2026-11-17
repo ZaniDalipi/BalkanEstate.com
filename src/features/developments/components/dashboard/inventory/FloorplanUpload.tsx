@@ -18,8 +18,11 @@ interface FloorplanUploadProps {
   canRemove?: boolean;
   /** The unit as the server returned it after an upload or removal. */
   onUnit?: (unit: DashboardUnit) => void;
-  /** The picked-but-not-yet-uploaded file (null once uploaded or cleared), so the dialog's Save can upload it. */
-  onPending?: (file: File | null) => void;
+  /**
+   * The picked file is held by the caller (the edit dialog uploads it on Save,
+   * or before placing photos on it); no upload button here then.
+   */
+  pending?: { file: File | null; onChange: (file: File | null) => void };
 }
 
 export const FLOORPLAN_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -30,28 +33,28 @@ export const checkFloorplanFile = (file: File): 'type' | 'size' | null =>
   !FLOORPLAN_TYPES.includes(file.type) ? 'type' : file.size > FLOORPLAN_MAX_BYTES ? 'size' : null;
 
 /**
- * Pick → validate → preview a unit's floorplan image. With `onPending` the
- * picked file is handed to the caller (the edit dialog uploads it on Save);
+ * Pick → validate → preview a unit's floorplan image. With `pending` the
+ * picked file is held by the caller (the edit dialog uploads it on Save);
  * without it, an "Upload floorplan" button uploads it here.
  */
-export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit, onPending }) => {
+export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit, pending }) => {
   const { t } = useTranslation('developments');
   const apiText = useApiErrorText();
   const inputId = useId();
   const notify = useNotification();
   const { confirm } = useConfirmation();
   const { uploadFloorplan, isUploadingFloorplan, removeFloorplan, isRemovingFloorplan } = useUnitAdmin(developmentId);
-  const [file, setFile] = useState<File | null>(null);
+  const [ownFile, setOwnFile] = useState<File | null>(null);
+  const file = pending ? pending.file : ownFile;
+  const setFile = pending ? pending.onChange : setOwnFile;
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    onPending?.(file);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [file]);
-
-  useEffect(() => {
-    if (!file) return undefined;
+    if (!file) {
+      setPreview(null);
+      return undefined;
+    }
     const url = URL.createObjectURL(file);
     setPreview(url);
     return () => URL.revokeObjectURL(url);
@@ -125,12 +128,12 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
           {current?.url ? t('inventory.floorplan.replace', 'Replace image') : t('inventory.floorplan.choose', 'Choose image')}
         </label>
         <input id={inputId} type="file" accept={FLOORPLAN_TYPES.join(',')} onChange={onPick} disabled={disabled} className="sr-only" />
-        {file && onPending && (
+        {file && pending && (
           <span role="status" className="text-sm text-slate-600">
             {t('inventory.floorplan.pendingHint', 'Saved when you press Save changes.')}
           </span>
         )}
-        {file && !onPending && (
+        {file && !pending && (
           <Button type="button" onClick={onUpload} disabled={isUploadingFloorplan}>
             {isUploadingFloorplan ? t('inventory.floorplan.uploading', 'Uploading…') : t('inventory.floorplan.upload', 'Upload floorplan')}
           </Button>

@@ -1,84 +1,133 @@
 /**
  * Finding the walls of a floor-plan picture, so the plan can be shown as a
- * model with its walls standing up. Plans draw walls as thick dark lines:
- * a pixel is "wall" when it is dark and grey, and an opening (erode, then
- * dilate) drops thin dark strokes — room names, dimensions, furniture
- * outlines — while keeping the thick ones.
+ * model with its walls standing up. Works for drawn plans with filled walls
+ * and for paper plans photographed with a phone (uneven light, walls drawn
+ * as two thin lines, often hatched):
+ *
+ * 1. ink — a pixel clearly darker than the paper around it, or dark outright;
+ * 2. close — a wall's two lines and its hatching become one solid wall;
+ * 3. drop thick — areas wider than any wall (a tiled floor, the table round
+ *    the sheet) go;
+ * 4. open — thin strokes (text, dimension lines, furniture outlines) go;
+ * 5. keep long — only shapes long enough to be walls stay.
  */
+import { closeMask, dropThick, keepLong, openMask } from './maskOps';
+
+export { openMask } from './maskOps';
 
 export interface WallMask {
   width: number;
   height: number;
   /** 1 = wall, 0 = not, row by row. */
   cells: Uint8Array;
+  /** The walls' extent (longer side of their bounding box), in cells: the building's size on the sheet. */
+  span: number;
 }
 
-/** Darker than this (0–255 luminance) can be a wall. */
+/** Dark outright (0–255 luminance): a filled wall, whatever surrounds it. */
 const DARK = 85;
-/** Greyer than this (max − min channel) can be a wall; coloured furniture and plants are not. */
-const GREY = 45;
+/** Darker than the local paper by this much: a pencil or ink line on a photographed sheet. */
+const BELOW_PAPER = 38;
+/** Greyer than this (max − min channel): coloured furniture, plants and floors are not walls. */
+const GREY = 70;
 /** Walls must cover at least this share of the picture… */
 const MIN_SHARE = 0.004;
 /** …and at most this (a dark or photographic picture is not a line plan). */
 const MAX_SHARE = 0.3;
 
-/** Dark, grey, opaque pixels of RGBA `data` (pure). */
-export function darkPixels(data: Uint8ClampedArray, width: number, height: number): Uint8Array {
-  const out = new Uint8Array(width * height);
-  for (let i = 0, p = 0; p < out.length; i += 4, p += 1) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    if (data[i + 3] < 128) continue;
-    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-    if (lum < DARK && Math.max(r, g, b) - Math.min(r, g, b) < GREY) out[p] = 1;
-  }
-  return out;
-}
-
-/** Square-window min (erode) or max (dilate) of radius `r`, done as two 1-D passes. */
-function morph(cells: Uint8Array, width: number, height: number, r: number, keep: 0 | 1): Uint8Array {
-  const pass = (src: Uint8Array, horizontal: boolean) => {
-    const dst = new Uint8Array(src.length);
-    for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        // Erode keeps a cell only when every neighbour is set; dilate sets it when any is.
-        let v = keep === 0 ? 1 : 0;
-        for (let k = -r; k <= r; k += 1) {
-          const nx = horizontal ? x + k : x;
-          const ny = horizontal ? y : y + k;
-          const inside = nx >= 0 && ny >= 0 && nx < width && ny < height;
-          const c = inside ? src[ny * width + nx] : 0;
-          if (keep === 0 && !c) { v = 0; break; }
-          if (keep === 1 && c) { v = 1; break; }
-        }
-        dst[y * width + x] = v;
-      }
-    }
-    return dst;
-  };
-  return pass(pass(cells, true), false);
-}
-
-/** Thin strokes (narrower than 2r + 1 cells) removed, thick ones kept at their size. */
-export const openMask = (cells: Uint8Array, width: number, height: number, r: number): Uint8Array =>
-  r < 1 ? cells : morph(morph(cells, width, height, r, 0), width, height, r, 1);
+/** Sizes of the steps, as shares of the picture's longer side. */
+const SCALE = {
+  /** Neighbourhood the paper's brightness is measured over. */
+  paper: 1 / 24,
+  /** Widest gap between a wall's two lines that is filled in. */
+  close: 1 / 90,
+  /** Half the thickest wall kept. */
+  thick: 1 / 45,
+  /** Shortest wall kept. */
+  span: 1 / 12,
+} as const;
 
 /** Opening radius for a picture of this size: about 1/380 of its longer side. */
 export const openingRadius = (width: number, height: number): number => Math.max(1, Math.round(Math.max(width, height) / 380));
 
+const luminance = (data: Uint8ClampedArray) => {
+  const lum = new Float32Array(data.length / 4);
+  for (let p = 0, i = 0; p < lum.length; p += 1, i += 4) lum[p] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+  return lum;
+};
+
+/** Mean of `values` over the square of radius r round each cell (summed-area table). */
+export function localMean(values: Float32Array, width: number, height: number, r: number): Float32Array {
+  const sum = new Float64Array((width + 1) * (height + 1));
+  for (let y = 0; y < height; y += 1) {
+    let row = 0;
+    for (let x = 0; x < width; x += 1) {
+      row += values[y * width + x];
+      sum[(y + 1) * (width + 1) + x + 1] = sum[y * (width + 1) + x + 1] + row;
+    }
+  }
+  const out = new Float32Array(values.length);
+  for (let y = 0; y < height; y += 1) {
+    const y0 = Math.max(0, y - r);
+    const y1 = Math.min(height, y + r + 1);
+    for (let x = 0; x < width; x += 1) {
+      const x0 = Math.max(0, x - r);
+      const x1 = Math.min(width, x + r + 1);
+      const total = sum[y1 * (width + 1) + x1] - sum[y0 * (width + 1) + x1] - sum[y1 * (width + 1) + x0] + sum[y0 * (width + 1) + x0];
+      out[y * width + x] = total / ((x1 - x0) * (y1 - y0));
+    }
+  }
+  return out;
+}
+
+/** Ink: opaque, greyish pixels that are dark outright or clearly darker than the paper round them (pure). */
+export function darkPixels(data: Uint8ClampedArray, width: number, height: number): Uint8Array {
+  const lum = luminance(data);
+  const paper = localMean(lum, width, height, Math.max(2, Math.round(Math.max(width, height) * SCALE.paper)));
+  const out = new Uint8Array(width * height);
+  for (let p = 0, i = 0; p < out.length; p += 1, i += 4) {
+    if (data[i + 3] < 128) continue;
+    const grey = Math.max(data[i], data[i + 1], data[i + 2]) - Math.min(data[i], data[i + 1], data[i + 2]) < GREY;
+    if (grey && (lum[p] < DARK || lum[p] < paper[p] - BELOW_PAPER)) out[p] = 1;
+  }
+  return out;
+}
+
 /**
  * The walls of a plan picture (RGBA pixels), or null when it does not look
- * like a line plan with dark walls (too little or too much dark).
+ * like a plan with walls (too little or too much found).
  */
 export function findWalls(data: Uint8ClampedArray, width: number, height: number): WallMask | null {
-  const cells = openMask(darkPixels(data, width, height), width, height, openingRadius(width, height));
+  const long = Math.max(width, height);
+  const px = (share: number) => Math.max(1, Math.round(long * share));
+  let cells = darkPixels(data, width, height);
+  cells = closeMask(cells, width, height, px(SCALE.close));
+  cells = dropThick(cells, width, height, px(SCALE.thick));
+  cells = openMask(cells, width, height, openingRadius(width, height));
+  cells = keepLong(cells, width, height, px(SCALE.span));
   let count = 0;
-  for (let i = 0; i < cells.length; i += 1) count += cells[i];
+  let minX = width;
+  let maxX = -1;
+  let minY = height;
+  let maxY = -1;
+  for (let p = 0; p < cells.length; p += 1) {
+    if (!cells[p]) continue;
+    count += 1;
+    const x = p % width;
+    const y = (p - x) / width;
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
   const share = count / cells.length;
   if (share < MIN_SHARE || share > MAX_SHARE) return null;
-  return { width, height, cells };
+  return { width, height, cells, span: Math.max(maxX - minX, maxY - minY) + 1 };
 }
+
+/** Wall height for the model, as a share of the picture's width: in scale with the building, not the sheet it is drawn on. */
+export const wallHeightShare = (mask: Pick<WallMask, 'width' | 'span'>): number =>
+  Math.min(0.06, Math.max(0.02, (0.05 * mask.span) / mask.width));
 
 /** RGBA pixels painting the wall cells in one colour, everything else transparent (pure). */
 export function paintMask(mask: WallMask, [r, g, b]: readonly [number, number, number]): Uint8ClampedArray {

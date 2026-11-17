@@ -1,17 +1,25 @@
 import { useEffect, useState } from 'react';
 import { optimizeImageUrl } from '@/config/mediaConfig';
-import { findWalls, paintMask, type WallMask } from './wallMask';
+import { findWalls, paintMask, wallHeightShare, type WallMask } from './wallMask';
 
-/** The walls as two pictures: their sides and their tops. */
+/** The walls as pictures: their sides in tones from base to top, and their tops. */
 export interface PlanWallImages {
-  side: string;
+  sides: string[];
   top: string;
+  /** Wall height as a share of the picture's width. */
+  height: number;
 }
 
 /** Longest side the plan is read at (enough for walls, quick to scan). */
 const READ_SIZE = 768;
-const SIDE: readonly [number, number, number] = [87, 83, 78];
-const TOP: readonly [number, number, number] = [28, 25, 23];
+/** Side tones from the base (in shadow) up to the top edge (catching the light). */
+const SIDES: readonly (readonly [number, number, number])[] = [
+  [74, 70, 66],
+  [96, 92, 87],
+  [122, 117, 111],
+  [150, 145, 138],
+];
+const TOP: readonly [number, number, number] = [38, 35, 32];
 
 /** Plans already read this visit (url → walls, or null for "no walls found"). */
 const cache = new Map<string, PlanWallImages | null>();
@@ -61,7 +69,7 @@ export function usePlanWalls(url: string, enabled = true): PlanWallImages | null
           if (ctx) {
             ctx.drawImage(img, 0, 0, w, h);
             const mask = findWalls(ctx.getImageData(0, 0, w, h).data, w, h);
-            if (mask) found = { side: toDataUrl(mask, SIDE), top: toDataUrl(mask, TOP) };
+            if (mask) found = { sides: SIDES.map((c) => toDataUrl(mask, c)), top: toDataUrl(mask, TOP), height: wallHeightShare(mask) };
           }
         } catch {
           // A tainted canvas (no CORS) or no canvas support: stay flat.

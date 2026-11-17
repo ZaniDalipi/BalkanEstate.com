@@ -51,11 +51,11 @@ const UNIT: DashboardUnit = {
   gallery: [{ url: 'https://img.example/g1.jpg' }, { url: 'https://img.example/g2.jpg' }],
 };
 
-const renderMedia = (role?: string) =>
+const renderMedia = (role?: string, unit: DashboardUnit = UNIT) =>
   render(
     <NotificationProvider>
       <ConfirmationProvider>
-        <UnitMediaSections developmentId="dev1" unit={UNIT} role={role} />
+        <UnitMediaSections developmentId="dev1" unit={unit} role={role} />
       </ConfirmationProvider>
     </NotificationProvider>
   );
@@ -133,5 +133,43 @@ describe('UnitMediaSections', () => {
     await userEvent.click(screen.getByRole('button', { name: 'inventory.floorplan.remove' }));
     await confirmLast('inventory.floorplan.remove');
     await waitFor(() => expect(screen.queryByRole('button', { name: /createListing\.photoSpots\.start/ })).not.toBeInTheDocument());
+  });
+
+  describe('placing photos from the moment there is a plan', () => {
+    const START = /createListing\.photoSpots\.start/;
+
+    it('with a plan and no photos: asks for photos, then opens the placer once they are uploaded', async () => {
+      const bare = { ...UNIT, gallery: [] };
+      vi.mocked(api.uploadUnitGallery).mockResolvedValue({ unit: { ...bare, gallery: [{ url: 'https://img.example/n.jpg' }] } });
+      renderMedia('owner', bare);
+      const input = screen.getByLabelText('inventory.gallery.add') as HTMLInputElement;
+      const opened = vi.spyOn(input, 'click');
+      await userEvent.click(screen.getByRole('button', { name: START }));
+      expect(opened).toHaveBeenCalled();
+      await userEvent.upload(input, [image('n.jpg')]);
+      expect(await screen.findByRole('button', { name: 'stub-place' })).toBeInTheDocument();
+    });
+
+    it('offers placing as soon as a plan is picked, uploading it before the placer opens', async () => {
+      const noPlan = { ...UNIT, floorplan: undefined };
+      vi.mocked(api.uploadUnitFloorplan).mockResolvedValue({ unit: { ...noPlan, floorplan: { url: 'https://img.example/new-plan.jpg' } } });
+      renderMedia('owner', noPlan);
+      expect(screen.queryByRole('button', { name: START })).not.toBeInTheDocument();
+      const plan = image('plan.jpg');
+      await userEvent.upload(screen.getByLabelText('inventory.floorplan.choose'), plan);
+      await userEvent.click(await screen.findByRole('button', { name: START }));
+      await waitFor(() => expect(api.uploadUnitFloorplan).toHaveBeenCalledWith('dev1', 'u1', plan));
+      expect(await screen.findByRole('button', { name: 'stub-place' })).toBeInTheDocument();
+    });
+
+    it('says why when the plan cannot be uploaded, and does not open the placer', async () => {
+      const noPlan = { ...UNIT, floorplan: undefined };
+      vi.mocked(api.uploadUnitFloorplan).mockRejectedValue(new Error('upload failed'));
+      renderMedia('owner', noPlan);
+      await userEvent.upload(screen.getByLabelText('inventory.floorplan.choose'), image('plan.jpg'));
+      await userEvent.click(await screen.findByRole('button', { name: START }));
+      expect(await screen.findByRole('alert')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'stub-place' })).not.toBeInTheDocument();
+    });
   });
 });

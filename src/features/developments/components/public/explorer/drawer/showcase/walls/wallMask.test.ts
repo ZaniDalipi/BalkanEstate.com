@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { darkPixels, findWalls, openMask, openingRadius, paintMask } from './wallMask';
+import { darkPixels, findWalls, openMask, openingRadius, paintMask, wallHeightShare } from './wallMask';
 import { ORBIT_TILT, orbitBy, orbitByDrag } from './planOrbit';
 
 /** An RGBA picture filled white, with `paint` setting some pixels. */
@@ -53,6 +53,56 @@ describe('findWalls', () => {
   });
 });
 
+describe('findWalls on a photographed paper plan', () => {
+  // A 400×300 sheet lit from the left (paper 215 → 150), walls drawn as two
+  // 2-px ink lines 8 px apart with hatching, a room label, a long dimension
+  // line, a tiled bathroom, and the dark table showing past the sheet's edge.
+  const W = 400;
+  const H = 300;
+  const ink: [number, number, number] = [70, 68, 66];
+  const inBand = (v: number, a: number) => v >= a && v < a + 12; // a wall band: two lines at a and a+10, hatch between
+  const wallAt = (x: number, y: number) => {
+    const across = (v: number, a: number) => v === a || v === a + 1 || v === a + 10 || v === a + 11 || (inBand(v, a) && (x + y) % 5 === 0);
+    const frame = x >= 40 && x < 360 && y >= 40 && y < 260;
+    if (!frame) return false;
+    return across(y, 40) || across(y, 248) || across(x, 40) || across(x, 348) || (x >= 200 && across(y, 150)) || (y >= 150 && across(x, 200));
+  };
+  const data = picture(W, H, (x, y) => {
+    if (x >= 370) return [30, 28, 26]; // the table, past the sheet's edge
+    const paper = Math.round(215 - (x / W) * 65);
+    if (wallAt(x, y)) return ink;
+    if (y === 280 && x >= 40 && x < 360) return ink; // dimension line
+    if (y >= 95 && y < 101 && x >= 100 && x < 130 && x % 3 === 0) return ink; // label strokes
+    if (x >= 215 && x < 345 && y >= 165 && y < 245 && (x % 16 === 0 || y % 16 === 0)) return ink; // bathroom tiles (wider than a wall's gap)
+    return [paper, paper - 4, paper - 12];
+  });
+  const walls = findWalls(data, W, H);
+  const at = (x: number, y: number) => walls!.cells[y * W + x];
+
+  it('finds the hatched double-line walls, including on the dim side of the sheet', () => {
+    expect(walls).not.toBeNull();
+    expect(at(120, 45)).toBe(1); // top wall, bright side
+    expect(at(353, 120)).toBe(1); // right wall, dim side
+    expect(at(205, 200)).toBe(1); // inner wall
+  });
+
+  it('leaves the rooms, the label, the dimension line, the tiles and the table flat', () => {
+    expect(at(120, 120)).toBe(0);
+    expect(at(110, 97)).toBe(0);
+    expect(at(200, 280)).toBe(0);
+    expect(at(280, 205)).toBe(0);
+    expect(at(390, 150)).toBe(0);
+  });
+});
+
+describe('wallHeightShare', () => {
+  it('scales with the building, within bounds', () => {
+    expect(wallHeightShare({ width: 1000, span: 500 })).toBeCloseTo(0.025);
+    expect(wallHeightShare({ width: 1000, span: 100 })).toBe(0.02);
+    expect(wallHeightShare({ width: 1000, span: 1400 })).toBe(0.06);
+  });
+});
+
 describe('openingRadius', () => {
   it('grows with the picture', () => {
     expect(openingRadius(100, 50)).toBe(1);
@@ -62,7 +112,7 @@ describe('openingRadius', () => {
 
 describe('paintMask', () => {
   it('paints walls opaque and leaves the rest transparent', () => {
-    const px = paintMask({ width: 2, height: 1, cells: Uint8Array.from([1, 0]) }, [1, 2, 3]);
+    const px = paintMask({ width: 2, height: 1, cells: Uint8Array.from([1, 0]), span: 1 }, [1, 2, 3]);
     expect(Array.from(px)).toEqual([1, 2, 3, 255, 0, 0, 0, 0]);
   });
 });

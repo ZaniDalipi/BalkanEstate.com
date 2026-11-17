@@ -4,8 +4,6 @@ import type { PlanWallImages } from './usePlanWalls';
 
 interface PlanWallsProps {
   walls: PlanWallImages;
-  /** Wall height as a share of the plan's width. */
-  height?: number;
 }
 
 /** Slices stacked to make a wall; more look smoother, fewer draw faster. */
@@ -15,9 +13,10 @@ const LAYER = 'pointer-events-none absolute inset-0 h-full w-full select-none ob
 
 /**
  * The plan's walls standing up from it: the wall shape stacked in thin
- * slices (sides) under a dark cap (tops). They grow up from the plan.
+ * slices, shaded from the base up, under a dark cap. They grow up from the plan;
+ * their height is in scale with the building drawn, not the sheet.
  */
-export const PlanWalls: React.FC<PlanWallsProps> = ({ walls, height = 0.06 }) => {
+export const PlanWalls: React.FC<PlanWallsProps> = ({ walls }) => {
   const reduced = useReducedMotion();
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -30,7 +29,8 @@ export const PlanWalls: React.FC<PlanWallsProps> = ({ walls, height = 0.06 }) =>
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const wallPx = width * height;
+  const wallPx = width * walls.height;
+  const tone = (i: number) => walls.sides[Math.min(walls.sides.length - 1, Math.floor((i / SLICES) * walls.sides.length))];
 
   return (
     <motion.div
@@ -44,7 +44,7 @@ export const PlanWalls: React.FC<PlanWallsProps> = ({ walls, height = 0.06 }) =>
       transition={{ duration: reduced ? 0 : 0.6, ease: 'easeOut' }}
     >
       {Array.from({ length: SLICES }, (_, i) => (
-        <img key={i} src={walls.side} alt="" draggable={false} className={LAYER} style={{ transform: `translateZ(${((i + 1) / (SLICES + 1)) * wallPx}px)` }} />
+        <img key={i} src={tone(i)} alt="" draggable={false} className={LAYER} style={{ transform: `translateZ(${((i + 1) / (SLICES + 1)) * wallPx}px)` }} />
       ))}
       <img src={walls.top} alt="" draggable={false} className={LAYER} style={{ transform: `translateZ(${wallPx}px)` }} />
     </motion.div>

@@ -1,15 +1,17 @@
-import React, { useId, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { cn } from '@/src/lib/utils';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import type { DashboardUnit, UnitImage } from '../../../types';
-import { GALLERY_MAX_TOTAL, GALLERY_TYPES, checkGalleryFiles, type GalleryFileProblem } from './galleryFiles';
+import { GALLERY_MAX_TOTAL, checkGalleryFiles, type GalleryFileProblem } from './galleryFiles';
 import { useApiErrorText } from '../../../hooks/useApiErrorText';
 import { UnitPhotoSpotsButton } from './UnitPhotoSpotsButton';
+import { GalleryAddButton } from './GalleryAddButton';
+import { usePlacePhotosFlow } from './usePlacePhotosFlow';
 
 interface UnitGallerySectionProps {
   developmentId: string;
@@ -21,8 +23,11 @@ interface UnitGallerySectionProps {
   canRemove: boolean;
   /** The unit as the server returned it after a change. */
   onUnit: (unit: DashboardUnit) => void;
-  /** The unit's floor plan, when it has one: photos can then be placed on it. */
-  floorplanUrl?: string;
+  /**
+   * Present once the unit has a floor plan, saved or just picked: photos can
+   * then be placed on it. Resolves the plan's URL, uploading a picked one first.
+   */
+  preparePlan?: () => Promise<string | null>;
 }
 
 /**
@@ -30,7 +35,7 @@ interface UnitGallerySectionProps {
  * multi-file "Add photos" picker, and placing photos on the floor plan.
  * All act immediately (separate from Save).
  */
-export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developmentId, unitId, gallery, canUpload, canRemove, onUnit, floorplanUrl }) => {
+export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developmentId, unitId, gallery, canUpload, canRemove, onUnit, preparePlan }) => {
   const { t } = useTranslation('developments');
   const apiText = useApiErrorText();
   const inputId = useId();
@@ -40,6 +45,13 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
   const [error, setError] = useState<string | null>(null);
   const remaining = Math.max(0, GALLERY_MAX_TOTAL - gallery.length);
   const busy = isUploadingGallery || isRemovingGalleryImage;
+  const picker = useRef<HTMLInputElement>(null);
+  const placing = usePlacePhotosFlow({
+    photoCount: gallery.length,
+    preparePlan: preparePlan ?? (async () => null),
+    pickPhotos: () => picker.current?.click(),
+    onError: (err) => setError(apiText.text(err)),
+  });
 
   const problemText = (p: GalleryFileProblem) =>
     ({
@@ -54,13 +66,18 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
     e.target.value = '';
     if (files.length === 0) return;
     const problem = checkGalleryFiles(files, gallery.length);
-    if (problem) return setError(problemText(problem));
+    if (problem) {
+      placing.forget();
+      return setError(problemText(problem));
+    }
     setError(null);
     try {
       const { unit } = await addGalleryImages({ unitId, files });
       onUnit(unit);
+      placing.photosAdded();
       void notify.success(t('inventory.gallery.addedTitle', 'Photos added'), t('inventory.gallery.added', 'Photos added to the gallery: {{n}}.', { n: files.length }));
     } catch (err) {
+      placing.forget();
       setError(apiText.text(err));
     }
   };
@@ -119,24 +136,22 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
         </ul>
       )}
       {canUpload && (
-        <div className="flex flex-wrap items-center gap-2">
-          <label
-            htmlFor={inputId}
-            className={cn(
-              'inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:min-h-[40px]',
-              (busy || remaining === 0) && 'pointer-events-none opacity-50'
-            )}
-          >
-            <ImagePlus className="h-4 w-4" aria-hidden="true" />
-            {isUploadingGallery ? t('inventory.gallery.uploading', 'Uploading…') : t('inventory.gallery.add', 'Add photos')}
-          </label>
-          <input id={inputId} type="file" multiple accept={GALLERY_TYPES.join(',')} onChange={onPick} disabled={busy || remaining === 0} className="sr-only" />
-          {isUploadingGallery && <span role="status" className="text-sm text-slate-600">{t('inventory.gallery.uploadingStatus', 'Uploading photos…')}</span>}
-        </div>
+        <GalleryAddButton ref={picker} busy={busy} full={remaining === 0} uploading={isUploadingGallery} onPick={onPick} onOpen={placing.forget} />
       )}
-      {canUpload && floorplanUrl && gallery.length > 0 && (
+      {canUpload && preparePlan && (
         <div className="mt-3">
-          <UnitPhotoSpotsButton developmentId={developmentId} unitId={unitId} floorplanUrl={floorplanUrl} gallery={gallery} disabled={busy} onUnit={onUnit} onError={setError} />
+          <UnitPhotoSpotsButton
+            developmentId={developmentId}
+            unitId={unitId}
+            gallery={gallery}
+            planUrl={placing.planUrl}
+            onStart={placing.start}
+            onClose={placing.close}
+            disabled={busy || (gallery.length === 0 && remaining === 0)}
+            preparing={placing.preparing}
+            onUnit={onUnit}
+            onError={setError}
+          />
         </div>
       )}
       {error && <p role="alert" className="mt-2 text-sm text-red-600">{error}</p>}
