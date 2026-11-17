@@ -6,12 +6,13 @@ import {
   deleteUnit,
   deleteUnitFloorplan,
   deleteUnitGalleryImage,
+  setUnitGallerySpots,
   downloadUnitsCsv,
   updateUnit,
   uploadUnitFloorplan,
   uploadUnitGallery,
 } from '../api/developmentsApi';
-import type { BulkUnitUpdatePayload, UpdateUnitPayload } from '../types';
+import type { BulkUnitUpdatePayload, UnitPhotoSpotChange, UpdateUnitPayload } from '../types';
 
 /** Save a blob as a file through a temporary object URL. */
 export function triggerDownload(blob: Blob, filename: string): void {
@@ -70,6 +71,10 @@ export function useUnitAdmin(developmentId: string) {
     mutationFn: (vars: { unitId: string; index: number }) => deleteUnitGalleryImage(developmentId, vars.unitId, vars.index),
     onSuccess: invalidate,
   });
+  const gallerySpots = useMutation({
+    mutationFn: (vars: { unitId: string; spots: UnitPhotoSpotChange[] }) => setUnitGallerySpots(developmentId, vars.unitId, vars.spots),
+    onSuccess: invalidate,
+  });
   const exportCsv = useMutation({
     mutationFn: async (filename?: string) => {
       const blob = await downloadUnitsCsv(developmentId);
@@ -92,6 +97,8 @@ export function useUnitAdmin(developmentId: string) {
     isUploadingGallery: addGallery.isPending,
     removeGalleryImage: removeGallery.mutateAsync,
     isRemovingGalleryImage: removeGallery.isPending,
+    placeGalleryPhotos: gallerySpots.mutateAsync,
+    isPlacingGalleryPhotos: gallerySpots.isPending,
     exportCsv: exportCsv.mutateAsync,
     isExporting: exportCsv.isPending,
   };

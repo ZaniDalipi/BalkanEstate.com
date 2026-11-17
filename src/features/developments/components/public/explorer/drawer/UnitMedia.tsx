@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Building2, LayoutGrid, Images } from 'lucide-react';
 import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import type { LinkedListing, PublicUnit } from '../../../../types';
-import { unitGallery } from './unitGallery';
+import { planViewerPhotos, unitPhotos } from './unitGallery';
 
 const ImageViewerModal = lazy(() => import('@/src/features/property-details/components/ImageViewerModal'));
 const FloorPlanViewerModal = lazy(() => import('@/src/features/property-details/components/FloorPlanViewerModal'));
@@ -24,7 +24,8 @@ interface UnitMediaProps {
  */
 export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onModalChange, heroBeside }) => {
   const { t } = useTranslation('developments');
-  const photos = unitGallery(unit, primaryListing);
+  const all = unitPhotos(unit, primaryListing);
+  const photos = all.map((p) => p.url);
   const [viewer, setViewer] = useState<{ kind: 'photos'; index: number } | { kind: 'plan' } | null>(null);
   const open = (v: NonNullable<typeof viewer>) => {
     setViewer(v);
@@ -75,7 +76,7 @@ export const UnitMedia: React.FC<UnitMediaProps> = ({ unit, primaryListing, onMo
             {viewer.kind === 'photos' ? (
               <ImageViewerModal images={photos.map((url) => ({ url, tag: 'other' }))} startIndex={viewer.index} onClose={close} propertyId={unit.primaryListingId} />
             ) : (
-              <FloorPlanViewerModal floors={[{ url: unit.floorplan!.url, label: t('explorer.drawer.floorplan', 'Floor plan') }]} onClose={close} title={`${t('explorer.apt', 'Apt')} ${unit.unitNumber}`} />
+              <FloorPlanViewerModal floors={[{ url: unit.floorplan!.url, label: t('explorer.drawer.floorplan', 'Floor plan') }]} photos={planViewerPhotos(all)} onClose={close} title={`${t('explorer.apt', 'Apt')} ${unit.unitNumber}`} />
             )}
           </Suspense>,
           document.body

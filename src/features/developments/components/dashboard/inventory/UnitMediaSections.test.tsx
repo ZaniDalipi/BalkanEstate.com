@@ -14,6 +14,22 @@ vi.mock('../../../api/developmentsApi', () => ({
   deleteUnitFloorplan: vi.fn(),
   uploadUnitGallery: vi.fn(),
   deleteUnitGalleryImage: vi.fn(),
+  setUnitGallerySpots: vi.fn(),
+}));
+
+// The placer itself is the listing editor's (tested there); here a stub that places photo 2.
+vi.mock('@/src/features/seller/components/FloorPlanPhotoPlacer', () => ({
+  default: ({ photos, onSave, onClose }: { photos: { url: string; floorplanSpot?: unknown }[]; onSave: (s: unknown[]) => void; onClose: () => void }) => (
+    <button
+      type="button"
+      onClick={() => {
+        onSave(photos.map((p, i) => (i === 1 ? { x: 40, y: 60, angle: 180 } : p.floorplanSpot)));
+        onClose();
+      }}
+    >
+      stub-place
+    </button>
+  ),
 }));
 
 import * as api from '../../../api/developmentsApi';
@@ -96,5 +112,26 @@ describe('UnitMediaSections', () => {
     expect(screen.queryByRole('button', { name: 'inventory.gallery.remove' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'inventory.floorplan.remove' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('inventory.gallery.add')).not.toBeInTheDocument();
+  });
+
+  it('places photos on the floor plan and sends only the changed spot', async () => {
+    vi.mocked(api.setUnitGallerySpots).mockResolvedValue({
+      unit: { ...UNIT, gallery: [UNIT.gallery![0], { ...UNIT.gallery![1], floorplanSpot: { x: 40, y: 60, angle: 180 } }] },
+    });
+    renderMedia('owner');
+    await userEvent.click(screen.getByRole('button', { name: /inventory\.gallery\.placeOnPlan/ }));
+    await userEvent.click(await screen.findByRole('button', { name: 'stub-place' }));
+    await waitFor(() =>
+      expect(api.setUnitGallerySpots).toHaveBeenCalledWith('dev1', 'u1', [{ url: 'https://img.example/g2.jpg', spot: { x: 40, y: 60, angle: 180 } }])
+    );
+  });
+
+  it('offers placing only when the unit has a floor plan', async () => {
+    vi.mocked(api.deleteUnitFloorplan).mockResolvedValue({ unit: { ...UNIT, floorplan: undefined } });
+    renderMedia('owner');
+    expect(screen.getByRole('button', { name: /inventory\.gallery\.placeOnPlan/ })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.floorplan.remove' }));
+    await confirmLast('inventory.floorplan.remove');
+    await waitFor(() => expect(screen.queryByRole('button', { name: /inventory\.gallery\.placeOnPlan/ })).not.toBeInTheDocument());
   });
 });

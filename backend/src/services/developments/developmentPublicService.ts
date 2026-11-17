@@ -136,9 +136,9 @@ const UNIT_DETAIL_FIELDS = ['description', 'gallery', 'floorplan'] as const;
 
 const stripImage = (img: unknown): Record<string, unknown> | undefined => {
   if (!img || typeof img !== 'object') return undefined;
-  const { url, width, height } = img as Record<string, unknown>;
+  const { url, width, height, floorplanSpot } = img as Record<string, unknown>;
   if (typeof url !== 'string' || !url) return undefined;
-  return { url, ...(width ? { width } : {}), ...(height ? { height } : {}) };
+  return { url, ...(width ? { width } : {}), ...(height ? { height } : {}), ...(floorplanSpot ? { floorplanSpot } : {}) };
 };
 
 interface UnitContext {

@@ -40,6 +40,7 @@ import type {
   UnitFacets,
   ControllableListing,
   DashboardUnit,
+  UnitPhotoSpotChange,
   UnitListQuery,
   UpdateUnitPayload,
   BulkUnitUpdatePayload,
@@ -369,6 +370,14 @@ export const deleteUnitGalleryImage = (
   index: number
 ): Promise<{ unit: DashboardUnit }> =>
   apiRequest(`${DASH}/${developmentId}/units/${unitId}/gallery/${index}`, { method: 'DELETE', requiresAuth: true });
+
+/** Place gallery photos on the unit's floor plan (or take them off, with `spot: null`). */
+export const setUnitGallerySpots = (
+  developmentId: string,
+  unitId: string,
+  spots: UnitPhotoSpotChange[]
+): Promise<{ unit: DashboardUnit }> =>
+  apiRequest(`${DASH}/${developmentId}/units/${unitId}/gallery/spots`, { method: 'PATCH', body: { spots }, requiresAuth: true });
 
 /** The development's audit trail, newest first (owner/manager only — `team.manage`). */
 export const listDevelopmentAudit = async (

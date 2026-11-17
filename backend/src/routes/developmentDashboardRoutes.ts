@@ -34,6 +34,7 @@ import {
   deleteUnitFloorplan,
   uploadUnitGallery,
   deleteUnitGalleryImage,
+  updateUnitGallerySpots,
   listAudit,
   structureDeleteImpact,
   deleteStructureHandler,
@@ -334,6 +335,14 @@ router.post(
   requireDevelopmentPermission('media.upload'),
   galleryImages('images'),
   uploadUnitGallery
+);
+router.patch(
+  '/:developmentId/units/:unitId/gallery/spots',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  updateUnitGallerySpots
 );
 router.delete(
   '/:developmentId/units/:unitId/gallery/:index',

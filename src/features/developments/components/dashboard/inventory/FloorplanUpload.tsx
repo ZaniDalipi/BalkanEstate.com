@@ -29,7 +29,11 @@ export const FLOORPLAN_MAX_BYTES = 10 * 1024 * 1024;
 export const checkFloorplanFile = (file: File): 'type' | 'size' | null =>
   !FLOORPLAN_TYPES.includes(file.type) ? 'type' : file.size > FLOORPLAN_MAX_BYTES ? 'size' : null;
 
-/** Pick → validate → preview → upload a unit's floorplan image (uploads immediately, separate from Save). */
+/**
+ * Pick → validate → preview a unit's floorplan image. With `onPending` the
+ * picked file is handed to the caller (the edit dialog uploads it on Save);
+ * without it, an "Upload floorplan" button uploads it here.
+ */
 export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit, onPending }) => {
   const { t } = useTranslation('developments');
   const apiText = useApiErrorText();
@@ -121,7 +125,12 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
           {current?.url ? t('inventory.floorplan.replace', 'Replace image') : t('inventory.floorplan.choose', 'Choose image')}
         </label>
         <input id={inputId} type="file" accept={FLOORPLAN_TYPES.join(',')} onChange={onPick} disabled={disabled} className="sr-only" />
-        {file && (
+        {file && onPending && (
+          <span role="status" className="text-sm text-slate-600">
+            {t('inventory.floorplan.pendingHint', 'Saved when you press Save changes.')}
+          </span>
+        )}
+        {file && !onPending && (
           <Button type="button" onClick={onUpload} disabled={isUploadingFloorplan}>
             {isUploadingFloorplan ? t('inventory.floorplan.uploading', 'Uploading…') : t('inventory.floorplan.upload', 'Upload floorplan')}
           </Button>

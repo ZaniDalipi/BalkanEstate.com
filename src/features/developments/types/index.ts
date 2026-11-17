@@ -647,6 +647,21 @@ export interface UnitImage {
   url: string;
   width?: number;
   height?: number;
+  /** Gallery photos only: where on the unit's floor plan it was taken and which way the camera faced. */
+  floorplanSpot?: UnitPhotoSpot;
+}
+
+/** A camera on a unit's floor plan: x/y in percent of the plan, angle clockwise from up. */
+export interface UnitPhotoSpot {
+  x: number;
+  y: number;
+  angle: number;
+}
+
+/** One photo placed on (or, with null, taken off) the unit's floor plan. */
+export interface UnitPhotoSpotChange {
+  url: string;
+  spot: UnitPhotoSpot | null;
 }
 
 /** A unit as the dashboard inventory sees it (GET /dashboard/developments/:id/units). */

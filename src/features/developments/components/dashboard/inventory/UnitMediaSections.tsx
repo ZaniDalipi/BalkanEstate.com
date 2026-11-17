@@ -42,6 +42,7 @@ export const UnitMediaSections: React.FC<UnitMediaSectionsProps> = ({ developmen
         developmentId={developmentId}
         unitId={unit.id}
         gallery={live.gallery ?? []}
+        floorplanUrl={live.floorplan?.url}
         canUpload={canUpload}
         canRemove={canRemove}
         onUnit={onUnit}

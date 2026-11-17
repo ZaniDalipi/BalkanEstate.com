@@ -474,7 +474,8 @@
       "floorAlt": "{{floor}}: {{name}} evidențiat",
       "loading": "Se încarcă imaginea etajului…",
       "floorFailed": "Imaginea etajului nu a putut fi încărcată.",
-      "retry": "Încearcă din nou"
+      "retry": "Încearcă din nou",
+      "photoSpots": "Unde au fost făcute fotografiile"
     },
     "dive": {
       "skip": "Omite",
@@ -867,7 +868,8 @@
       "removeTitle": "Elimini planul?",
       "removeMessage": "Imaginea planului este eliminată de la această unitate.",
       "removedTitle": "Plan eliminat",
-      "removed": "Unitatea nu mai are un plan."
+      "removed": "Unitatea nu mai are un plan.",
+      "pendingHint": "Se salvează când apăsați Salvează modificările."
     },
     "listingStatus": {
       "active": "Activ",
@@ -893,7 +895,12 @@
       "tooMany": "Adăugați cel mult 10 fotografii odată.",
       "full": "O unitate poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
       "addedTitle": "Fotografii adăugate",
-      "added": "Fotografii adăugate în galerie: {{n}}."
+      "added": "Fotografii adăugate în galerie: {{n}}.",
+      "placeOnPlan": "Plasează pe plan",
+      "placing": "Se salvează…",
+      "placedCount": "{{placed}}/{{total}}",
+      "spotsSavedTitle": "Fotografii plasate",
+      "spotsSaved": "Cumpărătorii văd acum unde a fost făcută fiecare fotografie pe plan."
     },
     "prefill": {
       "open": "Completează dintr-unul dintre anunțurile dvs.",
@@ -1457,7 +1464,8 @@
     "BUILDER_NOT_FOUND": "Acest ansamblu nu și-a prezentat încă constructorul.",
     "BUSINESS_NOT_FOUND": "Această companie nu este printre înregistrările dvs. din Catalogul de firme. Alegeți una pe care o dețineți.",
     "CODE_IN_USE": "Acest cod a fost folosit, așa că rămâne în evidență. Dezactivați-l în schimb.",
-    "CODE_NOT_FOUND": "Acest cod nu mai există. Reîncărcați pagina."
+    "CODE_NOT_FOUND": "Acest cod nu mai există. Reîncărcați pagina.",
+    "FLOORPLAN_REQUIRED": "Încărcați mai întâi un plan, apoi plasați fotografiile pe el."
   },
   "notices": {
     "trialEndsSoon": {

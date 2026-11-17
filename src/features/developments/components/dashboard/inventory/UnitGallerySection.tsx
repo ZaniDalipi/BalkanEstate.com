@@ -9,6 +9,7 @@ import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import type { DashboardUnit, UnitImage } from '../../../types';
 import { GALLERY_MAX_TOTAL, GALLERY_TYPES, checkGalleryFiles, type GalleryFileProblem } from './galleryFiles';
 import { useApiErrorText } from '../../../hooks/useApiErrorText';
+import { UnitPhotoSpotsButton } from './UnitPhotoSpotsButton';
 
 interface UnitGallerySectionProps {
   developmentId: string;
@@ -20,13 +21,16 @@ interface UnitGallerySectionProps {
   canRemove: boolean;
   /** The unit as the server returned it after a change. */
   onUnit: (unit: DashboardUnit) => void;
+  /** The unit's floor plan, when it has one: photos can then be placed on it. */
+  floorplanUrl?: string;
 }
 
 /**
  * A unit's photo gallery: thumbnails with a remove button each, and a
- * multi-file "Add photos" picker. Both act immediately (separate from Save).
+ * multi-file "Add photos" picker, and placing photos on the floor plan.
+ * All act immediately (separate from Save).
  */
-export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developmentId, unitId, gallery, canUpload, canRemove, onUnit }) => {
+export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developmentId, unitId, gallery, canUpload, canRemove, onUnit, floorplanUrl }) => {
   const { t } = useTranslation('developments');
   const apiText = useApiErrorText();
   const inputId = useId();
@@ -127,6 +131,9 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
             {isUploadingGallery ? t('inventory.gallery.uploading', 'Uploading…') : t('inventory.gallery.add', 'Add photos')}
           </label>
           <input id={inputId} type="file" multiple accept={GALLERY_TYPES.join(',')} onChange={onPick} disabled={busy || remaining === 0} className="sr-only" />
+          {floorplanUrl && gallery.length > 0 && (
+            <UnitPhotoSpotsButton developmentId={developmentId} unitId={unitId} floorplanUrl={floorplanUrl} gallery={gallery} disabled={busy} onUnit={onUnit} onError={setError} />
+          )}
           {isUploadingGallery && <span role="status" className="text-sm text-slate-600">{t('inventory.gallery.uploadingStatus', 'Uploading photos…')}</span>}
         </div>
       )}

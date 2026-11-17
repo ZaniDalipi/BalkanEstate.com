@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hasUnitMedia, unitGallery, unitPhotos } from './unitGallery';
+import { hasUnitMedia, planViewerPhotos, unitGallery, unitPhotos } from './unitGallery';
 
 describe('unitGallery', () => {
   it('prefers the unit gallery', () => {
@@ -24,5 +24,21 @@ describe('hasUnitMedia', () => {
     expect(hasUnitMedia({ floorplan: { url: 'p' } })).toBe(true);
     expect(hasUnitMedia({}, { id: 'l', images: [], imageUrl: 'cover' })).toBe(true);
     expect(hasUnitMedia({ floorplan: { url: '' }, gallery: [{ url: '' }] }, { id: 'l', images: [] })).toBe(false);
+  });
+});
+
+describe('planViewerPhotos', () => {
+  const spot = { x: 10, y: 20, angle: 90 };
+  it('keeps each own photo\'s floor plan spot', () => {
+    expect(unitPhotos({ gallery: [{ url: 'a', floorplanSpot: spot }, { url: 'b' }] })).toEqual([{ url: 'a', floorplanSpot: spot }, { url: 'b' }]);
+  });
+  it('gives the viewer every photo once any is placed', () => {
+    expect(planViewerPhotos([{ url: 'a', floorplanSpot: spot }, { url: 'b' }])).toEqual([
+      { url: 'a', tag: 'other', floorplanSpot: spot },
+      { url: 'b', tag: 'other' },
+    ]);
+  });
+  it('is undefined when no photo is on the plan', () => {
+    expect(planViewerPhotos([{ url: 'a' }])).toBeUndefined();
   });
 });

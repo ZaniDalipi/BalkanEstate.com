@@ -448,7 +448,8 @@
       "floorAlt": "{{floor}}: {{name}} highlighted",
       "loading": "Loading the floor picture…",
       "floorFailed": "The floor picture could not be loaded.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "photoSpots": "Where photos were taken"
     },
     "dive": {
       "skip": "Skip",
@@ -860,7 +861,8 @@
       "removeTitle": "Remove the floor plan?",
       "removeMessage": "The floor plan image is removed from this unit.",
       "removedTitle": "Floor plan removed",
-      "removed": "The unit no longer has a floor plan."
+      "removed": "The unit no longer has a floor plan.",
+      "pendingHint": "Saved when you press Save changes."
     },
     "listingStatus": {
       "active": "Active",
@@ -886,7 +888,12 @@
       "tooMany": "Add at most 10 photos at a time.",
       "full": "A unit can have at most {{max}} photos. {{remaining}} more can be added.",
       "addedTitle": "Photos added",
-      "added": "Photos added to the gallery: {{n}}."
+      "added": "Photos added to the gallery: {{n}}.",
+      "placeOnPlan": "Place on floor plan",
+      "placing": "Saving…",
+      "placedCount": "{{placed}}/{{total}}",
+      "spotsSavedTitle": "Photos placed",
+      "spotsSaved": "Buyers now see where each photo was taken on the floor plan."
     },
     "prefill": {
       "open": "Fill from one of your listings",
@@ -1446,7 +1453,8 @@
     "BUILDER_NOT_FOUND": "This residence has not introduced its builder yet.",
     "BUSINESS_NOT_FOUND": "This company is not one of your Business Directory listings. Pick one you own.",
     "CODE_IN_USE": "This code was used, so it stays for the records. Switch it off instead.",
-    "CODE_NOT_FOUND": "This code no longer exists. Reload the page."
+    "CODE_NOT_FOUND": "This code no longer exists. Reload the page.",
+    "FLOORPLAN_REQUIRED": "Upload a floor plan first, then place the photos on it."
   },
   "notices": {
     "trialEndsSoon": {

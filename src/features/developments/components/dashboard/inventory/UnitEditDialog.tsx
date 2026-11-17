@@ -48,6 +48,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
       setUploading(true);
       try {
         await uploadFloorplan({ unitId: unit.id, file: pendingFloorplan });
+        void notify.success(t('inventory.floorplan.uploadedTitle', 'Floorplan uploaded'), t('inventory.floorplan.uploaded', 'The floorplan is saved.'));
       } catch (err) {
         editor.setFormError(apiText.text(err));
         return;

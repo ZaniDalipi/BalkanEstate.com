@@ -305,11 +305,13 @@ describe('UnitEditDialog', () => {
       expect(api.updateUnit).not.toHaveBeenCalled();
     });
 
-    it('uploads a picked but not yet uploaded floorplan on Save', async () => {
+    it('uploads a picked floorplan only on Save, with no separate upload button', async () => {
       vi.mocked(api.uploadUnitFloorplan).mockResolvedValue({ unit: { ...UNIT, floorplan: { url: 'https://img.example/fp.jpg' } } });
       renderDialog('owner');
       const file = image('plan.jpg');
       await userEvent.upload(screen.getByLabelText('inventory.floorplan.choose'), file);
+      expect(screen.queryByRole('button', { name: 'inventory.floorplan.upload' })).not.toBeInTheDocument();
+      expect(api.uploadUnitFloorplan).not.toHaveBeenCalled();
       const save = screen.getByRole('button', { name: 'inventory.edit.save' });
       await waitFor(() => expect(save).toBeEnabled());
       await userEvent.click(save);

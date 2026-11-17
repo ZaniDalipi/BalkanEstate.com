@@ -608,6 +608,21 @@ export const deleteUnitGalleryImage = async (req: Request, res: Response): Promi
   }
 };
 
+/** PATCH /:developmentId/units/:unitId/gallery/spots — body `{ spots: [{ url, spot: { x, y, angle } | null }] }` */
+export const updateUnitGallerySpots = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const unit = await unitAdmin.setUnitGallerySpots({
+      development: req.development!,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+      spots: (req.body as { spots?: unknown } | undefined)?.spots,
+    });
+    res.json({ unit });
+  } catch (error) {
+    sendServiceError(res, error, 'place unit photos on the floor plan');
+  }
+};
+
 /** GET /:developmentId/audit — the development's activity trail, newest first. */
 export const listAudit = async (req: Request, res: Response): Promise<void> => {
   try {

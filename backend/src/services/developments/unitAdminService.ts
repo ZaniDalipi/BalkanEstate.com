@@ -44,6 +44,7 @@ import { resolveEffectiveAvailability, type AvailabilitySource } from './unitAva
 import { assertTypeChangeKeepsLinks, resolveLinkedUnits, unlinkEverywhere, UnitLinkConflictError } from './unitLinks';
 import { applyToLinkedUnits, linkedIdsOf, parseAlsoLinked } from './linkedAvailability';
 import { tourUrlProblem } from './unitTour';
+import { assertUnitPhotoSpots } from './unitPhotoSpots';
 
 const log = createLogger('UnitAdminService');
 
@@ -1002,6 +1003,50 @@ export const removeUnitGalleryImage = async (params: {
     targetType: 'unit',
     targetId: updated._id as mongoose.Types.ObjectId,
     metadata: { gallery: { removed: 1 } },
+  });
+  return toDashboardUnit(developmentId, updated);
+};
+
+/**
+ * Place gallery photos on the unit's floor plan (or take them off). Each
+ * change names its photo by URL, so a photo added or removed meanwhile
+ * can't shift the spots onto the wrong picture.
+ */
+export const setUnitGallerySpots = async (params: {
+  development: IDevelopment;
+  actorId: Id;
+  unitId: unknown;
+  spots: unknown;
+}): Promise<DashboardUnitJSON> => {
+  const { development, actorId } = params;
+  const developmentId = development._id as mongoose.Types.ObjectId;
+  const unit = await requireRefInDevelopment(DevelopmentUnit, params.unitId, developmentId, 'unitId');
+  if (!unit.floorplan?.url) {
+    throw new ValidationError('Upload a floor plan before placing photos on it', { code: 'FLOORPLAN_REQUIRED', field: 'spots' });
+  }
+  const changes = assertUnitPhotoSpots(params.spots, (unit.gallery ?? []).map((g) => g.url));
+  if (changes.length === 0) return toDashboardUnit(developmentId, unit);
+  const $set: Record<string, unknown> = {};
+  const $unset: Record<string, ''> = {};
+  const arrayFilters: Record<string, string>[] = [];
+  changes.forEach((c, i) => {
+    arrayFilters.push({ [`p${i}.url`]: c.url });
+    if (c.spot) $set[`gallery.$[p${i}].floorplanSpot`] = c.spot;
+    else $unset[`gallery.$[p${i}].floorplanSpot`] = '';
+  });
+  const updated = await DevelopmentUnit.findOneAndUpdate(
+    { _id: unit._id, developmentId, deletedAt: LIVE },
+    { ...(Object.keys($set).length ? { $set } : {}), ...(Object.keys($unset).length ? { $unset } : {}) },
+    { new: true, arrayFilters, runValidators: true }
+  );
+  if (!updated) throw new NotFoundError('unitId not found in this development', { code: 'UNIT_NOT_FOUND' });
+  await recordDevelopmentAudit({
+    developmentId,
+    action: 'unit.update',
+    actorId,
+    targetType: 'unit',
+    targetId: updated._id as mongoose.Types.ObjectId,
+    metadata: { gallery: { spots: changes.filter((c) => c.spot).length } },
   });
   return toDashboardUnit(developmentId, updated);
 };

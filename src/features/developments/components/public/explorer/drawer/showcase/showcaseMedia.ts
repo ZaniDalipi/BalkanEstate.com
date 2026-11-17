@@ -1,5 +1,6 @@
 import type { PublicUnit } from '../../../../../types';
-import type { UnitPhoto } from '../unitGallery';
+import type { PropertyImage } from '@/types';
+import { planViewerPhotos, type UnitPhoto } from '../unitGallery';
 import type { FloorShot } from './floorShot';
 
 /**
@@ -8,7 +9,8 @@ import type { FloorShot } from './floorShot';
  * the apartment on its floor's picture, and its photos.
  */
 export interface ShowcaseMedia {
-  plan?: { url: string; ratio: number };
+  /** `photos`: all of them, for the plan viewer, when the developer placed any on the plan. */
+  plan?: { url: string; ratio: number; photos?: PropertyImage[] };
   floor?: FloorShot;
   photos?: UnitPhoto[];
 }
@@ -28,7 +30,10 @@ export const SHOWCASE_PHOTOS = 8;
 export function showcaseMedia(unit: Pick<PublicUnit, 'floorplan'>, photos: UnitPhoto[], floor?: FloorShot | null): ShowcaseMedia | null {
   const media: ShowcaseMedia = {};
   const plan = unit.floorplan;
-  if (plan?.url) media.plan = { url: plan.url, ratio: plan.width && plan.height ? plan.width / plan.height : 4 / 3 };
+  if (plan?.url) {
+    const placed = planViewerPhotos(photos);
+    media.plan = { url: plan.url, ratio: plan.width && plan.height ? plan.width / plan.height : 4 / 3, ...(placed ? { photos: placed } : {}) };
+  }
   if (floor) media.floor = floor;
   const shown = photos.filter((p) => !!p.url).slice(0, SHOWCASE_PHOTOS);
   if (shown.length) media.photos = shown;

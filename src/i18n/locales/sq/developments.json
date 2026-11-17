@@ -472,7 +472,8 @@
       "floorAlt": "{{floor}}: {{name}} i theksuar",
       "loading": "Po ngarkohet fotoja e katit…",
       "floorFailed": "Fotoja e katit nuk mund të ngarkohej.",
-      "retry": "Provo përsëri"
+      "retry": "Provo përsëri",
+      "photoSpots": "Ku janë bërë fotot"
     },
     "dive": {
       "skip": "Kapërce",
@@ -860,7 +861,8 @@
       "removeTitle": "Të hiqet planimetria?",
       "removeMessage": "Imazhi i planimetrisë hiqet nga kjo njësi.",
       "removedTitle": "Planimetria u hoq",
-      "removed": "Njësia nuk ka më planimetri."
+      "removed": "Njësia nuk ka më planimetri.",
+      "pendingHint": "Ruhet kur shtyp Ruaj ndryshimet."
     },
     "listingStatus": {
       "active": "Aktive",
@@ -886,7 +888,12 @@
       "tooMany": "Shtoni deri në 10 foto njëherësh.",
       "full": "Një njësi mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
       "addedTitle": "Fotot u shtuan",
-      "added": "Foto të shtuara në galeri: {{n}}."
+      "added": "Foto të shtuara në galeri: {{n}}.",
+      "placeOnPlan": "Vendos në planimetri",
+      "placing": "Po ruhet…",
+      "placedCount": "{{placed}}/{{total}}",
+      "spotsSavedTitle": "Fotot u vendosën",
+      "spotsSaved": "Blerësit tani shohin ku është bërë secila foto në planimetri."
     },
     "prefill": {
       "open": "Plotëso nga një prej njoftimeve tuaja",
@@ -1446,7 +1453,8 @@
     "BUILDER_NOT_FOUND": "Kjo rezidencë ende nuk e ka prezantuar ndërtuesin.",
     "BUSINESS_NOT_FOUND": "Kjo kompani nuk është ndër listimet tuaja në Drejtorinë e Bizneseve. Zgjidhni një që e zotëroni.",
     "CODE_IN_USE": "Ky kod është përdorur, ndaj mbetet në regjistër. Çaktivizojeni në vend të kësaj.",
-    "CODE_NOT_FOUND": "Ky kod nuk ekziston më. Ringarkoni faqen."
+    "CODE_NOT_FOUND": "Ky kod nuk ekziston më. Ringarkoni faqen.",
+    "FLOORPLAN_REQUIRED": "Ngarko fillimisht një planimetri, pastaj vendos fotot mbi të."
   },
   "notices": {
     "trialEndsSoon": {

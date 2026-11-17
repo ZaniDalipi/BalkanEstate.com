@@ -474,7 +474,8 @@
       "floorAlt": "{{floor}}: {{name}} označen",
       "loading": "Učitavanje slike sprata…",
       "floorFailed": "Slika sprata nije mogla biti učitana.",
-      "retry": "Pokušaj ponovo"
+      "retry": "Pokušaj ponovo",
+      "photoSpots": "Gdje su fotografije snimljene"
     },
     "dive": {
       "skip": "Preskoči",
@@ -867,7 +868,8 @@
       "removeTitle": "Ukloniti tlocrt?",
       "removeMessage": "Slika tlocrta se uklanja s ove jedinice.",
       "removedTitle": "Tlocrt uklonjen",
-      "removed": "Jedinica više nema tlocrt."
+      "removed": "Jedinica više nema tlocrt.",
+      "pendingHint": "Sprema se kada pritisnete Sačuvaj promjene."
     },
     "listingStatus": {
       "active": "Aktivan",
@@ -893,7 +895,12 @@
       "tooMany": "Dodajte najviše 10 fotografija odjednom.",
       "full": "Jedinica može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
       "addedTitle": "Fotografije dodane",
-      "added": "Fotografija dodano u galeriju: {{n}}."
+      "added": "Fotografija dodano u galeriju: {{n}}.",
+      "placeOnPlan": "Postavi na tlocrt",
+      "placing": "Spremanje…",
+      "placedCount": "{{placed}}/{{total}}",
+      "spotsSavedTitle": "Fotografije postavljene",
+      "spotsSaved": "Kupci sada vide gdje je svaka fotografija snimljena na tlocrtu."
     },
     "prefill": {
       "open": "Popuni iz jednog od vaših oglasa",
@@ -1457,7 +1464,8 @@
     "BUILDER_NOT_FOUND": "Ova rezidencija još nije predstavila investitora.",
     "BUSINESS_NOT_FOUND": "Ova kompanija nije među vašim unosima u Imeniku firmi. Odaberite onu koju posjedujete.",
     "CODE_IN_USE": "Ovaj kod je iskorišten, pa ostaje u evidenciji. Umjesto toga ga isključite.",
-    "CODE_NOT_FOUND": "Ovaj kod više ne postoji. Ponovo učitajte stranicu."
+    "CODE_NOT_FOUND": "Ovaj kod više ne postoji. Ponovo učitajte stranicu.",
+    "FLOORPLAN_REQUIRED": "Prvo učitajte tlocrt, a zatim na njega postavite fotografije."
   },
   "notices": {
     "trialEndsSoon": {

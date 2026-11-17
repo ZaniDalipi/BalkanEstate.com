@@ -15,6 +15,8 @@ export interface IUnitImage {
   publicId?: string;
   width?: number;
   height?: number;
+  /** Gallery photos only: where on the unit's floor plan it was taken (percent of the plan) and the camera's angle. */
+  floorplanSpot?: { x: number; y: number; angle: number };
 }
 
 /**
@@ -81,12 +83,22 @@ export interface IDevelopmentUnit extends Document {
   updatedAt: Date;
 }
 
+const UnitPhotoSpotSchema = new Schema(
+  {
+    x: { type: Number, required: true, min: 0, max: 100 },
+    y: { type: Number, required: true, min: 0, max: 100 },
+    angle: { type: Number, required: true, min: 0, max: 360 },
+  },
+  { _id: false }
+);
+
 const UnitImageSchema = new Schema<IUnitImage>(
   {
     url: { type: String, required: true, trim: true, maxlength: 2048 },
     publicId: { type: String, trim: true },
     width: { type: Number, min: 1 },
     height: { type: Number, min: 1 },
+    floorplanSpot: { type: UnitPhotoSpotSchema, default: undefined },
   },
   { _id: false }
 );
