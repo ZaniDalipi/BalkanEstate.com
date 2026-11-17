@@ -12,6 +12,7 @@ vi.mock('../../../api/developmentsApi', () => ({
   updateUnit: vi.fn(),
   deleteUnit: vi.fn(),
   uploadUnitFloorplan: vi.fn(),
+  uploadUnitGallery: vi.fn(),
   getUnitPrefill: vi.fn(),
   getAttachableListings: vi.fn(),
   attachListing: vi.fn(),
@@ -286,6 +287,34 @@ describe('UnitEditDialog', () => {
       await userEvent.clear(tourInput());
       await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
       await waitFor(() => expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { virtualTourUrl: null }));
+    });
+  });
+
+  describe('media changes', () => {
+    const image = (name: string) => new File(['x'], name, { type: 'image/jpeg' });
+
+    it('enables Save after photos are added, and closes without a field update', async () => {
+      vi.mocked(api.uploadUnitGallery).mockResolvedValue({ unit: { ...UNIT, gallery: [{ url: 'https://img.example/g1.jpg' }] } });
+      renderDialog('owner');
+      const save = screen.getByRole('button', { name: 'inventory.edit.save' });
+      expect(save).toBeDisabled();
+      await userEvent.upload(screen.getByLabelText('inventory.gallery.add'), [image('a.jpg')]);
+      await waitFor(() => expect(save).toBeEnabled());
+      await userEvent.click(save);
+      await waitFor(() => expect(onClose).toHaveBeenCalled());
+      expect(api.updateUnit).not.toHaveBeenCalled();
+    });
+
+    it('uploads a picked but not yet uploaded floorplan on Save', async () => {
+      vi.mocked(api.uploadUnitFloorplan).mockResolvedValue({ unit: { ...UNIT, floorplan: { url: 'https://img.example/fp.jpg' } } });
+      renderDialog('owner');
+      const file = image('plan.jpg');
+      await userEvent.upload(screen.getByLabelText('inventory.floorplan.choose'), file);
+      const save = screen.getByRole('button', { name: 'inventory.edit.save' });
+      await waitFor(() => expect(save).toBeEnabled());
+      await userEvent.click(save);
+      await waitFor(() => expect(api.uploadUnitFloorplan).toHaveBeenCalledWith('dev1', 'u1', file));
+      await waitFor(() => expect(onClose).toHaveBeenCalled());
     });
   });
 });

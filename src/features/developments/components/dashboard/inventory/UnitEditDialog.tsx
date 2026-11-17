@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/components/ui/button';
@@ -32,15 +32,30 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
   const apiText = useApiErrorText();
   const { confirm } = useConfirmation();
   const notify = useNotification();
-  const { deleteUnit, isDeleting } = useUnitAdmin(developmentId);
+  const { deleteUnit, isDeleting, uploadFloorplan } = useUnitAdmin(developmentId);
+  const [mediaChanged, setMediaChanged] = useState(false);
+  const [pendingFloorplan, setPendingFloorplan] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const editor = useUnitEditor(developmentId, unit, role, floors);
   const { perms } = editor;
+  const canSave = editor.dirty || mediaChanged || !!pendingFloorplan;
   const disabled = { unit: !perms.unit, price: !perms.price, availability: !perms.availability };
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editor.dirty) return onClose();
-    if (await editor.save()) onClose();
+    if (editor.dirty && !(await editor.save())) return;
+    if (pendingFloorplan) {
+      setUploading(true);
+      try {
+        await uploadFloorplan({ unitId: unit.id, file: pendingFloorplan });
+      } catch (err) {
+        editor.setFormError(apiText.text(err));
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+    onClose();
   };
 
   const onDelete = async () => {
@@ -81,7 +96,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
           />
         )}
         <UnitEditSections developmentId={developmentId} unit={unit} form={editor.form} set={editor.set} errors={editor.errors} disabled={disabled} buildings={buildings} floors={floors} />
-        <UnitMediaSections developmentId={developmentId} unit={unit} role={role} />
+        <UnitMediaSections developmentId={developmentId} unit={unit} role={role} onChanged={() => setMediaChanged(true)} onPendingFloorplan={setPendingFloorplan} />
         <div className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-slate-200 bg-white pt-3">
           {perms.unit && (
             <Button type="button" variant="ghost" onClick={onDelete} disabled={isDeleting} className="text-red-700 hover:bg-red-50 hover:text-red-800">
@@ -92,8 +107,8 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
             <Button type="button" variant="outline" onClick={onClose}>
               {t('wizard.cancel', 'Cancel')}
             </Button>
-            <Button type="submit" disabled={editor.isSaving || !editor.dirty}>
-              {editor.isSaving ? t('inventory.edit.saving', 'Saving…') : t('inventory.edit.save', 'Save changes')}
+            <Button type="submit" disabled={editor.isSaving || uploading || !canSave}>
+              {editor.isSaving || uploading ? t('inventory.edit.saving', 'Saving…') : t('inventory.edit.save', 'Save changes')}
             </Button>
           </div>
         </div>

@@ -18,6 +18,8 @@ interface FloorplanUploadProps {
   canRemove?: boolean;
   /** The unit as the server returned it after an upload or removal. */
   onUnit?: (unit: DashboardUnit) => void;
+  /** The picked-but-not-yet-uploaded file (null once uploaded or cleared), so the dialog's Save can upload it. */
+  onPending?: (file: File | null) => void;
 }
 
 export const FLOORPLAN_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -28,7 +30,7 @@ export const checkFloorplanFile = (file: File): 'type' | 'size' | null =>
   !FLOORPLAN_TYPES.includes(file.type) ? 'type' : file.size > FLOORPLAN_MAX_BYTES ? 'size' : null;
 
 /** Pick → validate → preview → upload a unit's floorplan image (uploads immediately, separate from Save). */
-export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit }) => {
+export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit, onPending }) => {
   const { t } = useTranslation('developments');
   const apiText = useApiErrorText();
   const inputId = useId();
@@ -38,6 +40,11 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    onPending?.(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file]);
 
   useEffect(() => {
     if (!file) return undefined;
