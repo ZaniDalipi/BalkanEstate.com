@@ -928,5 +928,11 @@
   "scroller": {
     "scrollLeft": "Pomjeri lijevo",
     "scrollRight": "Pomjeri desno"
+  },
+  "unsaved": {
+    "title": "Odbaciti izmjene?",
+    "message": "Imate izmjene koje još nisu sačuvane. Ako sada zatvorite, bit će izgubljene.",
+    "discard": "Odbaci izmjene",
+    "keep": "Nastavi uređivanje"
   }
 }

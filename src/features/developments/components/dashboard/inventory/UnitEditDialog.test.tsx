@@ -319,4 +319,45 @@ describe('UnitEditDialog', () => {
       await waitFor(() => expect(onClose).toHaveBeenCalled());
     });
   });
+
+  describe('closing with unsaved changes', () => {
+    const edit = async () => {
+      const number = field('unit.number');
+      await userEvent.clear(number);
+      await userEvent.type(number, 'A1b');
+    };
+
+    it('closes at once when nothing changed', async () => {
+      renderDialog();
+      await userEvent.click(screen.getByRole('button', { name: 'wizard.cancel' }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('asks first, and Keep editing keeps the dialog and the changes', async () => {
+      renderDialog();
+      await edit();
+      await userEvent.click(screen.getByRole('button', { name: 'wizard.cancel' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'unsaved.keep' }));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(field('unit.number').value).toBe('A1b');
+    });
+
+    it('Discard changes closes', async () => {
+      renderDialog();
+      await edit();
+      await userEvent.click(screen.getByRole('button', { name: 'wizard.cancel' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'unsaved.discard' }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('asks once on Esc, and a second Esc only dismisses the question', async () => {
+      renderDialog();
+      await edit();
+      await userEvent.keyboard('{Escape}');
+      expect(await screen.findAllByRole('button', { name: 'unsaved.keep' })).toHaveLength(1);
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'unsaved.keep' })).not.toBeInTheDocument());
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
 });

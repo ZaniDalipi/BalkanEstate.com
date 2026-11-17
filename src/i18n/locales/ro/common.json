@@ -932,5 +932,11 @@
   "scroller": {
     "scrollLeft": "Derulează la stânga",
     "scrollRight": "Derulează la dreapta"
+  },
+  "unsaved": {
+    "title": "Renunțați la modificări?",
+    "message": "Aveți modificări care nu sunt încă salvate. Dacă închideți acum, se pierd.",
+    "discard": "Renunță la modificări",
+    "keep": "Continuă editarea"
   }
 }

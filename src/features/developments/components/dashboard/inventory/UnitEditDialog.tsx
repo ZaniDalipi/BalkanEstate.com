@@ -4,6 +4,7 @@ import Modal from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/components/ui/button';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import { useGuardedClose } from '@/src/shared/hooks/useGuardedClose';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import type { DashboardUnit, DevelopmentBuilding, DevelopmentFloor } from '../../../types';
 import { FillFromListing } from './FillFromListing';
@@ -39,6 +40,8 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
   const editor = useUnitEditor(developmentId, unit, role, floors);
   const { perms } = editor;
   const canSave = editor.dirty || mediaChanged || !!pendingFloorplan;
+  // Photos are already saved; field edits and a picked floor plan are not.
+  const requestClose = useGuardedClose(editor.dirty || !!pendingFloorplan, onClose);
   const disabled = { unit: !perms.unit, price: !perms.price, availability: !perms.availability };
 
   const onSave = async (e: React.FormEvent) => {
@@ -78,7 +81,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
   };
 
   return (
-    <Modal isOpen onClose={onClose} title={t('inventory.edit.title', 'Edit unit {{number}}', { number: unit.unitNumber })} size="3xl" fullScreenBreakpoint="md">
+    <Modal isOpen onClose={() => void requestClose()} title={t('inventory.edit.title', 'Edit unit {{number}}', { number: unit.unitNumber })} size="3xl" fullScreenBreakpoint="md">
       <form onSubmit={onSave} noValidate className="space-y-4">
         {editor.formError && (
           <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -105,7 +108,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
             </Button>
           )}
           <div className="ml-auto flex gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={() => void requestClose()}>
               {t('wizard.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={editor.isSaving || uploading || !canSave}>

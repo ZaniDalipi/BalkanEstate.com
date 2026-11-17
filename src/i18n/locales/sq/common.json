@@ -932,5 +932,11 @@
   "scroller": {
     "scrollLeft": "Lëviz majtas",
     "scrollRight": "Lëviz djathtas"
+  },
+  "unsaved": {
+    "title": "Të hidhen ndryshimet?",
+    "message": "Keni ndryshime që nuk janë ruajtur ende. Nëse e mbyllni tani, ato humbasin.",
+    "discard": "Hidhi ndryshimet",
+    "keep": "Vazhdo redaktimin"
   }
 }

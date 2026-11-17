@@ -78,8 +78,16 @@ const Modal: React.FC<ModalProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleBackdropClick = useCallback(() => {
-    onClose();
+  // Close only on a click that both starts and ends on the backdrop: selecting
+  // text in a field and letting go outside the dialog must not close it.
+  const pressedOnBackdrop = useRef(false);
+  const handleBackdropMouseDown = useCallback((e: React.MouseEvent) => {
+    pressedOnBackdrop.current = e.target === e.currentTarget;
+  }, []);
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    const fromBackdrop = pressedOnBackdrop.current && e.target === e.currentTarget;
+    pressedOnBackdrop.current = false;
+    if (fromBackdrop) onClose();
   }, [onClose]);
 
   const handleContentClick = useCallback((e: React.MouseEvent) => {
@@ -146,6 +154,7 @@ const Modal: React.FC<ModalProps> = ({
   const modalContent = (
     <div
       className={bp.backdrop}
+      onMouseDown={handleBackdropMouseDown}
       onClick={handleBackdropClick}
       role="presentation"
     >

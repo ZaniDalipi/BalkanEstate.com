@@ -952,5 +952,11 @@
   "scroller": {
     "scrollLeft": "Scroll left",
     "scrollRight": "Scroll right"
+  },
+  "unsaved": {
+    "title": "Discard your changes?",
+    "message": "You have changes that are not saved yet. If you close now, they are lost.",
+    "discard": "Discard changes",
+    "keep": "Keep editing"
   }
 }
