@@ -95,6 +95,46 @@ describe('findWalls on a photographed paper plan', () => {
   });
 });
 
+describe('findWalls on CAD and rendered plans', () => {
+  // A 600×400 plan: 8-px filled walls, the top one cut into short pieces by
+  // two windows (thin lines), a bold heading, a room label, dark green plants,
+  // a grey rug with shadow, and a 2-px furniture outline.
+  const W = 600;
+  const H = 400;
+  const wall: [number, number, number] = [40, 44, 48];
+  const data = picture(W, H, (x, y) => {
+    const box = x >= 100 && x < 500 && y >= 80 && y < 340;
+    const edge = box && (x < 108 || x >= 492 || y >= 332 || y < 88);
+    const window = y < 88 && ((x >= 160 && x < 230) || (x >= 330 && x < 420));
+    if (edge && window) return y === 80 || y === 87 ? [60, 60, 60] : null; // window: two hairlines
+    if (edge) return wall;
+    if (y >= 30 && y < 48 && x >= 240 && x < 360 && (x % 9 < 3 || y < 33 || y >= 45)) return [10, 10, 10]; // bold heading (3-px strokes)
+    if (y >= 200 && y < 206 && x >= 260 && x < 330 && x % 4 < 2) return [30, 30, 30]; // room label
+    if (x >= 130 && x < 170 && y >= 280 && y < 320 && (x + y) % 3 !== 0) return [25, 50, 20]; // dark plant
+    if (x >= 300 && x < 420 && y >= 240 && y < 300) return [120, 118, 116]; // grey rug in shadow
+    if ((x === 200 || x === 201) && y >= 120 && y < 260) return [0, 0, 0]; // furniture outline
+    return [235, 228, 218];
+  });
+  const walls = findWalls(data, W, H);
+  const at = (x: number, y: number) => walls!.cells[y * W + x];
+
+  it('keeps every wall, including the pieces between windows', () => {
+    expect(walls).not.toBeNull();
+    expect(at(104, 200)).toBe(1); // left wall
+    expect(at(280, 84)).toBe(1); // top wall, between the windows
+    expect(at(130, 84)).toBe(1); // top wall, corner piece
+  });
+
+  it('leaves the windows, heading, label, plants, rug and outlines flat', () => {
+    expect(at(190, 84)).toBe(0);
+    expect(at(300, 40)).toBe(0);
+    expect(at(280, 203)).toBe(0);
+    expect(at(150, 300)).toBe(0);
+    expect(at(360, 270)).toBe(0);
+    expect(at(200, 200)).toBe(0);
+  });
+});
+
 describe('wallHeightShare', () => {
   it('scales with the building, within bounds', () => {
     expect(wallHeightShare({ width: 1000, span: 500 })).toBeCloseTo(0.025);
@@ -106,7 +146,7 @@ describe('wallHeightShare', () => {
 describe('openingRadius', () => {
   it('grows with the picture', () => {
     expect(openingRadius(100, 50)).toBe(1);
-    expect(openingRadius(768, 1152)).toBe(3);
+    expect(openingRadius(768, 1152)).toBe(2);
   });
 });
 

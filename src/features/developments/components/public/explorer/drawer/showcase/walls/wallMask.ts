@@ -1,17 +1,20 @@
 /**
  * Finding the walls of a floor-plan picture, so the plan can be shown as a
  * model with its walls standing up. Works for drawn plans with filled walls
- * and for paper plans photographed with a phone (uneven light, walls drawn
- * as two thin lines, often hatched):
+ * on CAD sheets, rendered plans, and paper plans photographed with a phone
+ * (uneven light):
  *
- * 1. ink — a pixel clearly darker than the paper around it, or dark outright;
- * 2. close — a wall's two lines and its hatching become one solid wall;
- * 3. drop thick — areas wider than any wall (a tiled floor, the table round
- *    the sheet) go;
- * 4. open — thin strokes (text, dimension lines, furniture outlines) go;
- * 5. keep long — only shapes long enough to be walls stay.
+ * 1. ink — grey and dark: dark outright, or (on a dim photo) under about half
+ *    the brightness of the paper round it — never mid-grey shadows or fabric;
+ * 2. close — one-pixel cracks sealed, nothing more (wider closing fuses text
+ *    and furniture outlines into blocks);
+ * 3. drop thick — areas wider than any wall (the table round the sheet) go;
+ * 4. open, drop thin — hairlines go, then any shape nowhere as thick as a
+ *    wall (text, even bold; dimension lines; furniture outlines);
+ * 5. keep long — only shapes long enough to be walls stay, pieces of a wall
+ *    cut by windows and doors counting together.
  */
-import { closeMask, dropThick, keepLong, openMask } from './maskOps';
+import { closeMask, dropThick, dropThin, keepLong, openMask } from './maskOps';
 
 export { openMask } from './maskOps';
 
@@ -25,11 +28,15 @@ export interface WallMask {
 }
 
 /** Dark outright (0–255 luminance): a filled wall, whatever surrounds it. */
-const DARK = 85;
-/** Darker than the local paper by this much: a pencil or ink line on a photographed sheet. */
-const BELOW_PAPER = 38;
-/** Greyer than this (max − min channel): coloured furniture, plants and floors are not walls. */
+const DARK = 70;
+/** On a dim photographed sheet: darker than this share of the paper round it… */
+const PAPER_SHARE = 0.55;
+/** …but never lighter than this (grey shadows, fabric and floor patterns are not walls). */
+const DARK_MAX = 110;
+/** Greyer than this (max − min channel): coloured furniture, plants and floors are not walls… */
 const GREY = 70;
+/** …and, relative to its brightness, dark greens and browns (plants, shadows on wood) are coloured too. */
+const GREY_SHARE = 0.25;
 /** Walls must cover at least this share of the picture… */
 const MIN_SHARE = 0.004;
 /** …and at most this (a dark or photographic picture is not a line plan). */
@@ -39,16 +46,18 @@ const MAX_SHARE = 0.3;
 const SCALE = {
   /** Neighbourhood the paper's brightness is measured over. */
   paper: 1 / 24,
-  /** Widest gap between a wall's two lines that is filled in. */
-  close: 1 / 90,
   /** Half the thickest wall kept. */
-  thick: 1 / 45,
+  thick: 1 / 40,
+  /** Half the thinnest wall kept: bold text and drawn lines are thinner. */
+  thin: 1 / 300,
   /** Shortest wall kept. */
-  span: 1 / 12,
+  span: 1 / 8,
+  /** Widest opening (window, door) a wall's pieces are joined across. */
+  join: 1 / 50,
 } as const;
 
-/** Opening radius for a picture of this size: about 1/380 of its longer side. */
-export const openingRadius = (width: number, height: number): number => Math.max(1, Math.round(Math.max(width, height) / 380));
+/** Opening radius for a picture of this size: drops hairlines (text, dimensions, outlines), about 1/700 of its longer side. */
+export const openingRadius = (width: number, height: number): number => Math.max(1, Math.round(Math.max(width, height) / 700));
 
 const luminance = (data: Uint8ClampedArray) => {
   const lum = new Float32Array(data.length / 4);
@@ -87,8 +96,10 @@ export function darkPixels(data: Uint8ClampedArray, width: number, height: numbe
   const out = new Uint8Array(width * height);
   for (let p = 0, i = 0; p < out.length; p += 1, i += 4) {
     if (data[i + 3] < 128) continue;
-    const grey = Math.max(data[i], data[i + 1], data[i + 2]) - Math.min(data[i], data[i + 1], data[i + 2]) < GREY;
-    if (grey && (lum[p] < DARK || lum[p] < paper[p] - BELOW_PAPER)) out[p] = 1;
+    const max = Math.max(data[i], data[i + 1], data[i + 2]);
+    const spread = max - Math.min(data[i], data[i + 1], data[i + 2]);
+    const grey = spread < GREY && spread <= max * GREY_SHARE + 6;
+    if (grey && (lum[p] < DARK || lum[p] < Math.min(DARK_MAX, paper[p] * PAPER_SHARE))) out[p] = 1;
   }
   return out;
 }
@@ -101,10 +112,12 @@ export function findWalls(data: Uint8ClampedArray, width: number, height: number
   const long = Math.max(width, height);
   const px = (share: number) => Math.max(1, Math.round(long * share));
   let cells = darkPixels(data, width, height);
-  cells = closeMask(cells, width, height, px(SCALE.close));
+  // Only seal one-pixel cracks (anti-aliasing, scan noise): wider closing fuses text and furniture into blocks.
+  cells = closeMask(cells, width, height, 1);
   cells = dropThick(cells, width, height, px(SCALE.thick));
   cells = openMask(cells, width, height, openingRadius(width, height));
-  cells = keepLong(cells, width, height, px(SCALE.span));
+  cells = dropThin(cells, width, height, px(SCALE.thin));
+  cells = keepLong(cells, width, height, px(SCALE.span), px(SCALE.join));
   let count = 0;
   let minX = width;
   let maxX = -1;
