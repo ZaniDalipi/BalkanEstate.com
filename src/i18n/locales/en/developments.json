@@ -370,7 +370,9 @@
         "invalid": "Please check this value.",
         "tooShort": "This is too short.",
         "tooLong": "This is too long."
-      }
+      },
+      "call": "Call {{phone}}",
+      "callLabel": "Call the developer at {{phone}}"
     },
     "unitType": {
       "apartment": "Apartment",

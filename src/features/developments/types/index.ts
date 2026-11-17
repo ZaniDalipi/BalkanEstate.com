@@ -460,6 +460,8 @@ export interface PublicUnitDetail {
     city: string;
     country: string;
     allowUnitInquiries?: boolean;
+    /** The number buyers can call about the apartment (the residence's, else its builder's). */
+    phone?: string;
   };
   listings: LinkedListing[];
   companions?: UnitCompanion[];

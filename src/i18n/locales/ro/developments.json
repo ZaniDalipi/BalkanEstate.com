@@ -394,7 +394,9 @@
         "invalid": "Verifică această valoare.",
         "tooShort": "Este prea scurt.",
         "tooLong": "Este prea lung."
-      }
+      },
+      "call": "Sunați la {{phone}}",
+      "callLabel": "Sunați dezvoltatorul la {{phone}}"
     },
     "unitType": {
       "apartment": "Apartament",

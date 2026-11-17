@@ -394,7 +394,9 @@
         "invalid": "Ju lutemi kontrolloni këtë vlerë.",
         "tooShort": "Kjo është shumë e shkurtër.",
         "tooLong": "Kjo është shumë e gjatë."
-      }
+      },
+      "call": "Telefono {{phone}}",
+      "callLabel": "Telefono zhvilluesin në {{phone}}"
     },
     "unitType": {
       "apartment": "Apartament",

@@ -18,6 +18,7 @@ import DevelopmentEntrance, { IDevelopmentEntrance } from '../../models/Developm
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import Property from '../../models/Property';
 import { encodeId } from '../../utils/idObfuscation';
+import { residenceCallNumber } from './callNumber';
 import { NotFoundError } from './developmentListingService';
 import { linkMaps } from './unitLinks';
 import { toObjectId } from './developmentRefs';
@@ -394,6 +395,7 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
     return ka - kb;
   });
 
+  const phone = residenceCallNumber(development);
   return {
     unit: toPublicUnit(unit, ctx, { detail: true }),
     /** Parking spots / storage rooms it comes with, and the units it is sold with. */
@@ -407,6 +409,7 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
       city: development.city,
       country: development.country,
       allowUnitInquiries: development.allowUnitInquiries !== false,
+      ...(phone ? { phone } : {}),
     },
     listings: sorted.slice(0, 10).map((l) => ({
       id: encodeId(String(l._id)),

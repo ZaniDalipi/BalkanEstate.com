@@ -254,6 +254,35 @@ describe('ApartmentDetailsDrawer + useUnitDrawer', () => {
     expect(screen.queryByRole('form')).not.toBeInTheDocument();
   });
 
+  describe('calling the developer', () => {
+    const withPhone = (allow: boolean): PublicUnitDetail => {
+      const d = detail({}, allow);
+      return { ...d, development: { ...d.development, phone: '+389 71 967 915' } };
+    };
+
+    it('offers a Call link next to the inquiry form when the residence has a number', async () => {
+      h.detail = withPhone(true);
+      mount('/en/developments/res?unit=u1');
+      const call = await screen.findByRole('link', { name: /Call the developer at \+389 71 967 915/ });
+      expect(call).toHaveAttribute('href', 'tel:+38971967915');
+      expect(screen.getByRole('button', { name: /Send inquiry/ })).toBeInTheDocument();
+    });
+
+    it('still offers the call when online inquiries are switched off', async () => {
+      h.detail = withPhone(false);
+      mount('/en/developments/res?unit=u1');
+      expect(await screen.findByRole('link', { name: /Call the developer/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Send inquiry/ })).not.toBeInTheDocument();
+    });
+
+    it('shows no Call link without a number', async () => {
+      h.detail = detail();
+      mount('/en/developments/res?unit=u1');
+      await screen.findByRole('button', { name: /Send inquiry/ });
+      expect(screen.queryByRole('link', { name: /Call the developer/ })).not.toBeInTheDocument();
+    });
+  });
+
   it('a unit with a primary listing offers the listing actions', async () => {
     h.detail = detail({ primaryListingId: 'p1', hasListing: true });
     mount('/en/developments/res?unit=u1');

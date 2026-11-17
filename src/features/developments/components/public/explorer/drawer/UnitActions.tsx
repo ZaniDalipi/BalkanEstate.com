@@ -4,6 +4,7 @@ import type { PublicUnit, PublicUnitDetail } from '../../../../types';
 import { isPursuable } from '../../../../utils/availability';
 import { ListingActions } from './ListingActions';
 import { UnitInquiryForm } from './UnitInquiryForm';
+import { CallDeveloperButton } from './CallDeveloperButton';
 
 interface UnitActionsProps {
   slug: string;
@@ -16,7 +17,8 @@ interface UnitActionsProps {
  * What a buyer can do about this unit, reusing the platform's own flows:
  *  - unit with a primary listing → that listing's inquiry, viewing, favourite,
  *    compare, share and "open full listing";
- *  - no listing → a unit inquiry to the developer (when the development allows it);
+ *  - no listing → a unit inquiry to the developer (when the development allows it)
+ *    and a Call button when the residence has a number (also without inquiries);
  *  - sold / rented / unavailable → no contact or viewing CTAs at all.
  */
 export const UnitActions: React.FC<UnitActionsProps> = ({ slug, unit, development, onModalChange }) => {
@@ -33,11 +35,13 @@ export const UnitActions: React.FC<UnitActionsProps> = ({ slug, unit, developmen
       </p>
     );
   }
-  if (development?.allowUnitInquiries === false) return null;
+  // Inquiries switched off: the developer can still be called.
+  if (development?.allowUnitInquiries === false) return <CallDeveloperButton phone={development.phone} />;
   return (
     <UnitInquiryForm
       slug={slug}
       unitId={unit.id}
+      phone={development?.phone}
       defaultMessage={t('explorer.inquiry.defaultMessage', {
         unit: unit.unitNumber,
         development: development?.name ?? '',

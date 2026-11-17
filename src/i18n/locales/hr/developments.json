@@ -394,7 +394,9 @@
         "invalid": "Provjerite ovu vrijednost.",
         "tooShort": "Ovo je prekratko.",
         "tooLong": "Ovo je predugo."
-      }
+      },
+      "call": "Nazovite {{phone}}",
+      "callLabel": "Nazovite investitora na {{phone}}"
     },
     "unitType": {
       "apartment": "Stan",

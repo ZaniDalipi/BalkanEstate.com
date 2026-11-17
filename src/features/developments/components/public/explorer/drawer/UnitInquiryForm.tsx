@@ -5,12 +5,15 @@ import { CheckCircle2, Send } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { sendUnitInquiry } from '../../../../api/developmentsApi';
 import type { UnitInquiryPayload } from '../../../../types';
+import { CallDeveloperButton } from './CallDeveloperButton';
 import { validateInquiry, type InquiryErrors, type InquiryField } from './validateInquiry';
 
 interface UnitInquiryFormProps {
   slug: string;
   unitId: string;
   defaultMessage: string;
+  /** The residence's number: a "Call" button under the form. */
+  phone?: string;
 }
 
 const ERROR_DEFAULTS = {
@@ -24,7 +27,7 @@ const input =
   'block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 aria-[invalid=true]:border-red-500';
 
 /** Inquiry to the developer about a unit that has no listing (validated client- and server-side). */
-export const UnitInquiryForm: React.FC<UnitInquiryFormProps> = ({ slug, unitId, defaultMessage }) => {
+export const UnitInquiryForm: React.FC<UnitInquiryFormProps> = ({ slug, unitId, defaultMessage, phone }) => {
   const { t } = useTranslation('developments');
   const { state } = useAppContext();
   const [values, setValues] = useState<UnitInquiryPayload>({
@@ -38,9 +41,12 @@ export const UnitInquiryForm: React.FC<UnitInquiryFormProps> = ({ slug, unitId, 
 
   if (mutation.isSuccess) {
     return (
-      <div role="status" className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-        {t('explorer.inquiry.success', 'Thank you — your inquiry was sent. The developer will get back to you soon.')}
+      <div className="space-y-3">
+        <div role="status" className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          {t('explorer.inquiry.success', 'Thank you — your inquiry was sent. The developer will get back to you soon.')}
+        </div>
+        <CallDeveloperButton phone={phone} />
       </div>
     );
   }
@@ -82,6 +88,7 @@ export const UnitInquiryForm: React.FC<UnitInquiryFormProps> = ({ slug, unitId, 
         <Send className="h-4 w-4" aria-hidden="true" />
         {mutation.isPending ? t('explorer.inquiry.sending', 'Sending…') : t('explorer.inquiry.submit', 'Send inquiry')}
       </button>
+      <CallDeveloperButton phone={phone} />
     </form>
   );
 };
