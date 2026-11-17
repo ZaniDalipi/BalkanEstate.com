@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { optimizeImageUrl } from '@/config/mediaConfig';
-import { findWalls, paintMask, type WallMask } from './planWalls';
+import { findWalls, paintMask, type WallMask } from './wallMask';
 
 /** The walls as two pictures: their sides and their tops. */
 export interface PlanWallImages {

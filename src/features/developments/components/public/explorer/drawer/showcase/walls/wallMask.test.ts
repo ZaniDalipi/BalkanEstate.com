@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { darkPixels, findWalls, openMask, openingRadius, paintMask } from './planWalls';
+import { darkPixels, findWalls, openMask, openingRadius, paintMask } from './wallMask';
 import { ORBIT_TILT, orbitBy, orbitByDrag } from './planOrbit';
 
 /** An RGBA picture filled white, with `paint` setting some pixels. */
