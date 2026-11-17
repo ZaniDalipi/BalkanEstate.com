@@ -473,7 +473,11 @@
       "loading": "Po ngarkohet fotoja e katit…",
       "floorFailed": "Fotoja e katit nuk mund të ngarkohej.",
       "retry": "Provo përsëri",
-      "photoSpots": "Ku janë bërë fotot"
+      "photoSpots": "Ku janë bërë fotot",
+      "turnLeft": "Rrotullo majtas",
+      "turnRight": "Rrotullo djathtas",
+      "dragHint": "Tërhiq për ta rrotulluar",
+      "modelLabel": "Modeli i planimetrisë. Tërhiq ose përdor shigjetat për ta rrotulluar."
     },
     "dive": {
       "skip": "Kapërce",
@@ -890,9 +894,6 @@
       "full": "Një njësi mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
       "addedTitle": "Fotot u shtuan",
       "added": "Foto të shtuara në galeri: {{n}}.",
-      "placeOnPlan": "Vendos në planimetri",
-      "placing": "Po ruhet…",
-      "placedCount": "{{placed}}/{{total}}",
       "spotsSavedTitle": "Fotot u vendosën",
       "spotsSaved": "Blerësit tani shohin ku është bërë secila foto në planimetri."
     },

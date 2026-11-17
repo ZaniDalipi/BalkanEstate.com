@@ -475,7 +475,11 @@
       "loading": "Se încarcă imaginea etajului…",
       "floorFailed": "Imaginea etajului nu a putut fi încărcată.",
       "retry": "Încearcă din nou",
-      "photoSpots": "Unde au fost făcute fotografiile"
+      "photoSpots": "Unde au fost făcute fotografiile",
+      "turnLeft": "Rotește la stânga",
+      "turnRight": "Rotește la dreapta",
+      "dragHint": "Trageți pentru a-l roti",
+      "modelLabel": "Macheta planului. Trageți sau folosiți săgețile pentru a o roti."
     },
     "dive": {
       "skip": "Omite",
@@ -897,9 +901,6 @@
       "full": "O unitate poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
       "addedTitle": "Fotografii adăugate",
       "added": "Fotografii adăugate în galerie: {{n}}.",
-      "placeOnPlan": "Plasează pe plan",
-      "placing": "Se salvează…",
-      "placedCount": "{{placed}}/{{total}}",
       "spotsSavedTitle": "Fotografii plasate",
       "spotsSaved": "Cumpărătorii văd acum unde a fost făcută fiecare fotografie pe plan."
     },

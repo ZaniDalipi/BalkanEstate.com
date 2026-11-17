@@ -449,7 +449,11 @@
       "loading": "Loading the floor picture…",
       "floorFailed": "The floor picture could not be loaded.",
       "retry": "Try again",
-      "photoSpots": "Where photos were taken"
+      "photoSpots": "Where photos were taken",
+      "turnLeft": "Turn left",
+      "turnRight": "Turn right",
+      "dragHint": "Drag to turn it round",
+      "modelLabel": "Floor plan model. Drag, or use the arrow keys, to turn it."
     },
     "dive": {
       "skip": "Skip",
@@ -890,9 +894,6 @@
       "full": "A unit can have at most {{max}} photos. {{remaining}} more can be added.",
       "addedTitle": "Photos added",
       "added": "Photos added to the gallery: {{n}}.",
-      "placeOnPlan": "Place on floor plan",
-      "placing": "Saving…",
-      "placedCount": "{{placed}}/{{total}}",
       "spotsSavedTitle": "Photos placed",
       "spotsSaved": "Buyers now see where each photo was taken on the floor plan."
     },

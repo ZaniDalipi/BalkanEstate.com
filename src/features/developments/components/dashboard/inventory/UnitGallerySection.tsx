@@ -131,10 +131,12 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
             {isUploadingGallery ? t('inventory.gallery.uploading', 'Uploading…') : t('inventory.gallery.add', 'Add photos')}
           </label>
           <input id={inputId} type="file" multiple accept={GALLERY_TYPES.join(',')} onChange={onPick} disabled={busy || remaining === 0} className="sr-only" />
-          {floorplanUrl && gallery.length > 0 && (
-            <UnitPhotoSpotsButton developmentId={developmentId} unitId={unitId} floorplanUrl={floorplanUrl} gallery={gallery} disabled={busy} onUnit={onUnit} onError={setError} />
-          )}
           {isUploadingGallery && <span role="status" className="text-sm text-slate-600">{t('inventory.gallery.uploadingStatus', 'Uploading photos…')}</span>}
+        </div>
+      )}
+      {canUpload && floorplanUrl && gallery.length > 0 && (
+        <div className="mt-3">
+          <UnitPhotoSpotsButton developmentId={developmentId} unitId={unitId} floorplanUrl={floorplanUrl} gallery={gallery} disabled={busy} onUnit={onUnit} onError={setError} />
         </div>
       )}
       {error && <p role="alert" className="mt-2 text-sm text-red-600">{error}</p>}

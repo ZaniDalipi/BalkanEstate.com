@@ -119,7 +119,7 @@ describe('UnitMediaSections', () => {
       unit: { ...UNIT, gallery: [UNIT.gallery![0], { ...UNIT.gallery![1], floorplanSpot: { x: 40, y: 60, angle: 180 } }] },
     });
     renderMedia('owner');
-    await userEvent.click(screen.getByRole('button', { name: /inventory\.gallery\.placeOnPlan/ }));
+    await userEvent.click(screen.getByRole('button', { name: /createListing\.photoSpots\.start/ }));
     await userEvent.click(await screen.findByRole('button', { name: 'stub-place' }));
     await waitFor(() =>
       expect(api.setUnitGallerySpots).toHaveBeenCalledWith('dev1', 'u1', [{ url: 'https://img.example/g2.jpg', spot: { x: 40, y: 60, angle: 180 } }])
@@ -129,9 +129,9 @@ describe('UnitMediaSections', () => {
   it('offers placing only when the unit has a floor plan', async () => {
     vi.mocked(api.deleteUnitFloorplan).mockResolvedValue({ unit: { ...UNIT, floorplan: undefined } });
     renderMedia('owner');
-    expect(screen.getByRole('button', { name: /inventory\.gallery\.placeOnPlan/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /createListing\.photoSpots\.start/ })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'inventory.floorplan.remove' }));
     await confirmLast('inventory.floorplan.remove');
-    await waitFor(() => expect(screen.queryByRole('button', { name: /inventory\.gallery\.placeOnPlan/ })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('button', { name: /createListing\.photoSpots\.start/ })).not.toBeInTheDocument());
   });
 });

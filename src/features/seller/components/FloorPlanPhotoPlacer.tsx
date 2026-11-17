@@ -73,16 +73,46 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floors, pho
     // A spot placed on another floor isn't drawn (or turned) on this one.
     const selectedSpot = spots[selected] && spotFloor(spots[selected]) === floor ? spots[selected] : undefined;
 
+    // Restore whatever lock was there before: the placer can open over a dialog that keeps the page locked.
     useEffect(() => {
+        const previous = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = ''; };
+        return () => { document.body.style.overflow = previous; };
     }, []);
 
+    // The placer is the top layer: Esc closes only it, and Tab stays in it. Caught in the window's
+    // capture phase so a dialog underneath (which listens on the document) neither closes nor
+    // pulls focus back.
+    const rootRef = useRef<HTMLDivElement>(null);
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
     useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [onClose]);
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                e.preventDefault();
+                onCloseRef.current();
+            } else if (e.key === 'Tab' && rootRef.current) {
+                e.stopPropagation();
+                const focusable = Array.from(rootRef.current.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input, [tabindex]:not([tabindex="-1"])'));
+                if (focusable.length === 0) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                const inside = rootRef.current.contains(document.activeElement);
+                if (!inside || (e.shiftKey && document.activeElement === first)) {
+                    e.preventDefault();
+                    (e.shiftKey ? last : first).focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+        window.addEventListener('keydown', onKey, true);
+        // Start keyboard users inside the placer (its close button).
+        rootRef.current?.querySelector<HTMLElement>('button')?.focus();
+        return () => window.removeEventListener('keydown', onKey, true);
+    }, []);
 
     // Keep the selected photo visible in its list — scrolling only the list,
     // never the page behind the editor.
@@ -237,6 +267,7 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floors, pho
 
     return createPortal(
         <div
+            ref={rootRef}
             className="fixed inset-0 z-[6000] h-[100dvh] bg-neutral-950 text-white flex flex-col overflow-hidden overscroll-none"
             style={{
                 paddingTop: 'env(safe-area-inset-top)',

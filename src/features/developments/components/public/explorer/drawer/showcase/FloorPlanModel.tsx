@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { imageSrcSet, optimizeImageUrl } from '@/config/mediaConfig';
 import { PLAN_POSES, riseFrom, type PlanPose, type ScreenBox } from './showcaseMotion';
 import { FRAME_DRIVEN } from '../../../motion/frameDriven';
+import type { Orbit } from './walls/planOrbit';
 
 interface FloorPlanModelProps {
   url: string;
@@ -18,6 +19,12 @@ interface FloorPlanModelProps {
   children?: React.ReactNode;
   /** Widest it grows, in CSS pixels (a wide floor picture can take more of the stage than a plan). */
   maxWidth?: number;
+  /** Tilted only: how far the buyer has turned and laid back the model (replaces the resting tilt). */
+  orbit?: Orbit;
+  /** The buyer is turning it: follow quickly instead of with the slow rise. */
+  orbitFast?: boolean;
+  /** Drawn on the board with the plan (the standing walls). */
+  overlay?: React.ReactNode;
 }
 
 /** Thickness of the board the plan is printed on, seen along its front edges when tilted. */
@@ -31,7 +38,7 @@ const SLAB_W = 'w-3';
  * stage. The board's size comes from CSS, so it is measured before the model
  * appears and the rise starts exactly over the apartment.
  */
-export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain', children, maxWidth = 760 }) => {
+export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt, tilted, origin, fill = 'contain', children, maxWidth = 760, orbit, orbitFast, overlay }) => {
   const reduced = useReducedMotion();
   const slot = useRef<HTMLDivElement>(null);
   const [from, setFrom] = useState<PlanPose | null>(null);
@@ -41,7 +48,13 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
     setFrom(riseFrom(origin, slot.current?.getBoundingClientRect() ?? null));
   }, [origin]);
 
-  const pose = PLAN_POSES[tilted ? 'tilted' : 'flat'];
+  const rest = PLAN_POSES[tilted ? 'tilted' : 'flat'];
+  const pose = tilted && orbit ? { ...rest, rotateX: orbit.tilt, rotateZ: rest.rotateZ + orbit.turn } : rest;
+  const transition = reduced
+    ? { duration: 0 }
+    : orbitFast
+      ? { type: 'spring' as const, stiffness: 320, damping: 34 }
+      : { type: 'spring' as const, stiffness: 38, damping: 12, mass: 1, opacity: { duration: 0.35 } };
   return (
     <div
       ref={slot}
@@ -56,7 +69,7 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
           style={{ transformStyle: 'preserve-3d' }}
           initial={reduced ? false : from}
           animate={pose}
-          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 38, damping: 12, mass: 1, opacity: { duration: 0.35 } }}
+          transition={transition}
           data-testid="floor-plan-model"
           data-pose={tilted ? 'tilted' : 'flat'}
         >
@@ -70,9 +83,12 @@ export const FloorPlanModel: React.FC<FloorPlanModelProps> = ({ url, ratio, alt,
                 draggable={false}
                 className={`absolute inset-0 h-full w-full select-none bg-white shadow-[0_40px_70px_-30px_rgba(70,50,30,0.45)] ${fill === 'cover' ? 'rounded-2xl object-cover' : 'rounded-[3px] object-contain p-[3%]'}`}
               />
-              {/* The board's front and left edges, folded back under the plan. */}
+              {/* The board's edges, folded back under the plan (all four: it can be turned all the way round). */}
               <div aria-hidden="true" className={`absolute inset-x-0 top-full ${SLAB} origin-top bg-[#ddd5c9]`} style={{ transform: 'rotateX(-90deg)' }} />
+              <div aria-hidden="true" className={`absolute inset-x-0 bottom-full ${SLAB} origin-bottom bg-[#d3cabd]`} style={{ transform: 'rotateX(90deg)' }} />
               <div aria-hidden="true" className={`absolute inset-y-0 right-full ${SLAB_W} origin-right bg-[#cbc2b4]`} style={{ transform: 'rotateY(-90deg)' }} />
+              <div aria-hidden="true" className={`absolute inset-y-0 left-full ${SLAB_W} origin-left bg-[#c4baab]`} style={{ transform: 'rotateY(90deg)' }} />
+              {overlay}
             </>
           )}
         </motion.div>

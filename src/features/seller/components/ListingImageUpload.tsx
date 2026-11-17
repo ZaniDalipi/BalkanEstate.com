@@ -2,6 +2,7 @@ import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FloorplanSpot } from '@/types';
 import FloorPlanPhotoPlacer from './FloorPlanPhotoPlacer';
+import { PhotoSpotsCallout } from '@/src/components/property/PhotoSpotsCallout';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { XMarkIcon } from '@/constants';
 import { ImageData, FloorPlanDraft, ALL_VALID_TAGS, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
@@ -166,22 +167,8 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                 </label>
 
                 {canPlacePhotos && (
-                    <div className="mt-3 p-3 rounded-xl border border-blue-200 bg-blue-50/60">
-                        <p className="text-sm font-semibold text-gray-700">
-                            {t('seller:createListing.photoSpots.cta', 'Show buyers where each photo was taken')}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                            {t('seller:createListing.photoSpots.ctaHint', 'Buyers see a camera on the floor plan for each photo, in sync as they browse.')}
-                        </p>
-                        <button
-                            type="button"
-                            onClick={() => setIsPlacingPhotos(true)}
-                            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
-                        >
-                            {placedCount > 0
-                                ? t('seller:createListing.photoSpots.edit', 'Edit photo spots ({{placed}}/{{total}})', { placed: placedCount, total: images.length })
-                                : t('seller:createListing.photoSpots.start', 'Place photos on floor plan')}
-                        </button>
+                    <div className="mt-3">
+                        <PhotoSpotsCallout placed={placedCount} total={images.length} onStart={() => setIsPlacingPhotos(true)} />
                     </div>
                 )}
                 {isPlacingPhotos && canPlacePhotos && (

@@ -475,7 +475,11 @@
       "loading": "Učitavanje slike sprata…",
       "floorFailed": "Slika sprata nije mogla da se učita.",
       "retry": "Pokušaj ponovo",
-      "photoSpots": "Gdje su fotografije snimljene"
+      "photoSpots": "Gdje su fotografije snimljene",
+      "turnLeft": "Okreni lijevo",
+      "turnRight": "Okreni desno",
+      "dragHint": "Povucite da ga okrenete",
+      "modelLabel": "Model osnove. Povucite ili koristite strelice da ga okrenete."
     },
     "dive": {
       "skip": "Preskoči",
@@ -897,9 +901,6 @@
       "full": "Jedinica može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
       "addedTitle": "Fotografije dodate",
       "added": "Fotografija dodato u galeriju: {{n}}.",
-      "placeOnPlan": "Postavi na osnovu",
-      "placing": "Čuvanje…",
-      "placedCount": "{{placed}}/{{total}}",
       "spotsSavedTitle": "Fotografije postavljene",
       "spotsSaved": "Kupci sada vide gdje je svaka fotografija snimljena na osnovi."
     },

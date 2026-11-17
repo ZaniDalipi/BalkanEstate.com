@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapPin } from 'lucide-react';
+import { PhotoSpotsCallout } from '@/src/components/property/PhotoSpotsCallout';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { useApiErrorText } from '../../../hooks/useApiErrorText';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
@@ -21,7 +21,7 @@ interface UnitPhotoSpotsButtonProps {
 }
 
 /**
- * "Place on floor plan": opens the same placer sellers use for listings, so
+ * "Show buyers where each photo was taken": the listing form's callout and placer, so
  * buyers see where each unit photo was taken. Saves immediately.
  */
 export const UnitPhotoSpotsButton: React.FC<UnitPhotoSpotsButtonProps> = ({ developmentId, unitId, floorplanUrl, gallery, disabled, onUnit, onError }) => {
@@ -50,18 +50,7 @@ export const UnitPhotoSpotsButton: React.FC<UnitPhotoSpotsButtonProps> = ({ deve
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        disabled={disabled || isPlacingGalleryPhotos}
-        className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 sm:min-h-[40px]"
-      >
-        <MapPin className="h-4 w-4" aria-hidden="true" />
-        {isPlacingGalleryPhotos ? t('inventory.gallery.placing', 'Saving…') : t('inventory.gallery.placeOnPlan', 'Place on floor plan')}
-        <span className="rounded-full bg-slate-100 px-2 text-xs tabular-nums text-slate-600">
-          {t('inventory.gallery.placedCount', '{{placed}}/{{total}}', { placed, total: gallery.length })}
-        </span>
-      </button>
+      <PhotoSpotsCallout placed={placed} total={gallery.length} onStart={() => setOpen(true)} disabled={disabled} busy={isPlacingGalleryPhotos} />
       {open && (
         <Suspense fallback={null}>
           <FloorPlanPhotoPlacer
