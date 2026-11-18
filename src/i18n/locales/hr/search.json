@@ -346,7 +346,8 @@
       "message": "Prijavite se prije crtanja kako biste mogli spremiti ovo područje i primati obavijesti o novim oglasima u njemu.",
       "login": "Prijava",
       "drawAnyway": "Crtaj bez spremanja"
-    }
+    },
+    "layersHint": "Stil karte, klimatski rizici i slojevi su ovdje"
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hasActiveLayers, type ActiveLayerFlags } from './hasActiveLayers';
+import { countActiveLayers, hasActiveLayers, type ActiveLayerFlags } from './hasActiveLayers';
 
 const off: ActiveLayerFlags = {
   selectedClimateRisk: 'none', showOnlyPromoted: false, show3DBuildings: false,
@@ -11,5 +11,12 @@ describe('hasActiveLayers', () => {
   it('is true for any overlay or layer', () => {
     expect(hasActiveLayers({ ...off, selectedClimateRisk: 'heat' })).toBe(true);
     expect(hasActiveLayers({ ...off, showCadastre: true })).toBe(true);
+  });
+});
+
+describe('countActiveLayers', () => {
+  it('counts each layer and the climate overlay once', () => {
+    expect(countActiveLayers(off)).toBe(0);
+    expect(countActiveLayers({ ...off, selectedClimateRisk: 'fire', show3DBuildings: true, showTerrain: true })).toBe(3);
   });
 });
