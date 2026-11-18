@@ -7,6 +7,7 @@ import { useEscapeLayer } from '@/src/features/developments/components/public/ex
 import { useSheetFocus } from '@/src/features/developments/components/shared/useSheetFocus';
 import { shouldDismissSheet } from '@/src/features/developments/utils/sheetDismiss';
 import SheetErrorFallback from './SheetErrorFallback';
+import XmarkIcon from '@/src/components/ui/XmarkIcon';
 
 interface BottomSheetProps {
   title: string;
@@ -75,9 +76,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ title, onClose, children }) =
               className="flex h-11 w-11 items-center justify-center rounded-full active:opacity-60"
             >
               <span aria-hidden="true" className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-neutral-900/[0.08] text-neutral-500">
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
+                <XmarkIcon className="h-3.5 w-3.5" strokeWidth={3} />
               </span>
             </button>
           </div>

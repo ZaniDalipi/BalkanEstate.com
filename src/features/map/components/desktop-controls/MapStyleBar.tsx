@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CrosshairsIcon, PencilIcon, XCircleIcon } from '@/constants';
+import { CrosshairsIcon, PencilIcon } from '@/constants';
+import XmarkIcon from '@/src/components/ui/XmarkIcon';
 import type { MapStyleType } from '../googleMapConstants';
 import { DESKTOP_MAP_STYLES, planStyleChange } from '../../utils/mapStyleOptions';
 
@@ -74,7 +75,7 @@ const MapStyleBar: React.FC<MapStyleBarProps> = ({
         aria-label={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
         aria-pressed={isDrawing}
       >
-        {isDrawing ? <XCircleIcon className="h-4 w-4" /> : <PencilIcon className="h-4 w-4" />}
+        {isDrawing ? <XmarkIcon className="h-3.5 w-3.5" strokeWidth={3} /> : <PencilIcon className="h-4 w-4" />}
         <span className="inline landscape:hidden">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
       </button>
     </div>

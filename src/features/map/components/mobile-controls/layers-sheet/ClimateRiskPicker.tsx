@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { tapHaptic } from '@/shared/utils/haptics';
 import type { ClimateRiskType } from '../../googleMapConstants';
+import XmarkIcon from '@/src/components/ui/XmarkIcon';
 import { CLIMATE_RISK_ICONS } from '../../layer-dock/ClimateRiskMenu';
 import { CLIMATE_RISKS, CLIMATE_RISK_FALLBACK, climateRiskLabelKey, isClimateRisk } from '../../../utils/climateRisk';
 
@@ -43,9 +44,7 @@ const ClimateRiskPicker: React.FC<ClimateRiskPickerProps> = ({ selected, onSelec
               }`}
             >
               {risk === 'none' ? (
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
+                <XmarkIcon />
               ) : (
                 <SoftIcon name={CLIMATE_RISK_ICONS[risk]} className="h-6 w-6" />
               )}

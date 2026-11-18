@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { SearchPlusIcon, XCircleIcon } from '@/constants';
+import { SearchPlusIcon } from '@/constants';
+import XmarkIcon from '@/src/components/ui/XmarkIcon';
 
 interface MobileDrawnAreaBarProps {
   isAuthenticated: boolean;
@@ -44,7 +45,7 @@ const MobileDrawnAreaBar: React.FC<MobileDrawnAreaBarProps> = ({ isAuthenticated
         aria-label={t('map.clearArea', 'Clear Area')}
         className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 rounded-[20px] px-2 text-red-600"
       >
-        <XCircleIcon className="h-5 w-5" />
+        <XmarkIcon className="h-[18px] w-[18px]" strokeWidth={2.75} />
         <span className="text-[10px] font-semibold leading-none">{t('map.clear', 'Clear')}</span>
       </motion.button>
     </motion.div>

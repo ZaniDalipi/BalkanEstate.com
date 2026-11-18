@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SearchPlusIcon, XCircleIcon } from '@/constants';
+import { SearchPlusIcon } from '@/constants';
+import XmarkIcon from '@/src/components/ui/XmarkIcon';
 
 export interface DrawnAreaActionsProps {
   isAuthenticated: boolean;
@@ -31,7 +32,7 @@ const DrawnAreaActions: React.FC<DrawnAreaActionsProps> = ({ isAuthenticated, is
         onClick={onClear}
         className="flex min-h-11 items-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-rose-600 px-4 text-xs font-semibold text-white shadow-md transition-shadow hover:shadow-lg"
       >
-        <XCircleIcon className="h-4 w-4" />
+        <XmarkIcon className="h-3.5 w-3.5" strokeWidth={3} />
         <span>{t('map.clearArea')}</span>
       </button>
     </div>

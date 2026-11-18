@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CrosshairsIcon, PencilIcon, XCircleIcon } from '@/constants';
+import { CrosshairsIcon, PencilIcon } from '@/constants';
 import GlassIconButton from './GlassIconButton';
+import XmarkIcon from '@/src/components/ui/XmarkIcon';
 
 interface MapButtonStackProps {
   isSheetOpen: boolean;
@@ -60,7 +61,7 @@ const MapButtonStack: React.FC<MapButtonStackProps> = ({
           aria-pressed={isDrawing}
           onClick={onDrawStart}
         >
-          {isDrawing ? <XCircleIcon className="h-5 w-5" /> : <PencilIcon className="h-5 w-5" />}
+          {isDrawing ? <XmarkIcon className="h-[18px] w-[18px]" strokeWidth={2.75} /> : <PencilIcon className="h-5 w-5" />}
         </GlassIconButton>
       </div>
     </div>
