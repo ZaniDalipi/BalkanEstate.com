@@ -457,6 +457,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         {/* Mobile-only: floating search bar overlay (tablet uses SearchHeader instead) */}
                         {isMobile && (
                             <div
+                                data-map-overlay
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
                                     paddingTop: 'var(--floating-search-top-pad)',

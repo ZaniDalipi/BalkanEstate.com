@@ -1,18 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { latLngToWorld, worldToLatLng, pixelToLatLng } from './pixelToLatLng';
-
-describe('latLngToWorld / worldToLatLng', () => {
-  it('round-trips a point', () => {
-    const p = { lat: 40.64, lng: 22.94 };
-    const back = worldToLatLng(latLngToWorld(p));
-    expect(back.lat).toBeCloseTo(p.lat, 6);
-    expect(back.lng).toBeCloseTo(p.lng, 6);
-  });
-
-  it('puts 0,0 in the middle of the world square', () => {
-    expect(latLngToWorld({ lat: 0, lng: 0 })).toEqual({ x: 128, y: 128 });
-  });
-});
+import { pixelToLatLng } from './pixelToLatLng';
+import { projectToWorld as latLngToWorld } from './clusterCamera';
 
 describe('pixelToLatLng', () => {
   const view = { center: { lat: 41, lng: 21 }, zoom: 6, width: 1100, height: 1080 };

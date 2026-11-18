@@ -41,6 +41,7 @@ const MapSearchDock: React.FC<MapSearchDockProps> = ({ shown, children, onReset 
             {shown && (
                 <motion.div
                     key="map-search-dock"
+                    data-map-overlay
                     role="search"
                     aria-label={t('search:listPanel.mapSearch', 'Search on the map')}
                     className="pointer-events-none absolute left-0 right-0 top-3 z-[1004] flex pl-4"

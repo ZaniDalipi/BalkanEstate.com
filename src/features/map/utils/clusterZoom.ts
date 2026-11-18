@@ -87,7 +87,7 @@ const setMarkerMap = (marker: AnyMarker, map: google.maps.Map | null) => {
   else (marker as any).map = map;
 };
 
-const viewportOf = (map: google.maps.Map): { width: number; height: number } => {
+export const viewportOf = (map: google.maps.Map): { width: number; height: number } => {
   const rect = map.getDiv()?.getBoundingClientRect();
   return {
     width: Math.max(1, Math.round(rect?.width || 0) || 800),
@@ -337,7 +337,7 @@ interface FlyOptions {
 }
 
 /** Runs the flight path frame by frame. Returns a cancel handle. */
-function flyCamera(
+export function flyCamera(
   map: google.maps.Map,
   to: CameraTarget,
   { onArrive }: FlyOptions = {},

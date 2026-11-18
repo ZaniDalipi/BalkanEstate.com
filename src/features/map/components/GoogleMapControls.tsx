@@ -144,7 +144,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
 
       {/* Desktop Controls */}
       {!isMobile && !hideControls && (
-        <div className="absolute bottom-24 landscape:bottom-6 right-4 landscape:right-2 z-[1000] flex-col items-end gap-2 landscape:gap-1.5 hidden md:flex">
+        <div data-map-overlay className="absolute bottom-24 landscape:bottom-6 right-4 landscape:right-2 z-[1000] flex-col items-end gap-2 landscape:gap-1.5 hidden md:flex">
           {/* Main control bar */}
           <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 landscape:p-1 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
             <button
@@ -398,7 +398,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
       {isMobile && !hideControls && (
         <>
           {/* Mobile layer menu FAB */}
-          <div className="absolute bottom-32 left-3 z-[1003]">
+          <div data-map-overlay className="absolute bottom-32 left-3 z-[1003]">
             {isLayerMenuOpen && (
               <div className="absolute bottom-full left-0 mb-3 animate-fade-in">
                 <div
@@ -553,7 +553,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
           {/* Mobile controls - top right: sits below the floating search bar.
               Each button pairs its icon with a short caption + aria-label so the
               action is self-explanatory on touch devices (no hover tooltips). */}
-          <div className="absolute right-2 z-[999]" style={{ top: 'calc(var(--floating-search-top-pad, 8px) + 60px)' }}>
+          <div data-map-overlay className="absolute right-2 z-[999]" style={{ top: 'calc(var(--floating-search-top-pad, 8px) + 60px)' }}>
             <div className="flex flex-col gap-1.5 items-end">
               <div
                 className="flex items-stretch gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"

@@ -86,6 +86,22 @@ describe('cameraForBounds', () => {
     expect(camera.center.lng).toBeCloseTo((bounds.east + bounds.west) / 2, 6);
   });
 
+  it('centres the bounds in the clear part of the map when toolbars cover one side', () => {
+    const padding = { top: 40, right: 40, bottom: 240, left: 40 };
+    const camera = cameraForBounds({ bounds, viewport: VIEWPORT, padding });
+    const scale = Math.pow(2, camera.zoom);
+    const c = projectToWorld(camera.center);
+    const ne = projectToWorld({ lat: bounds.north, lng: bounds.east });
+    const sw = projectToWorld({ lat: bounds.south, lng: bounds.west });
+    // Screen y of the bounds' edges, with the camera centre at the viewport middle.
+    const topPx = (ne.y - c.y) * scale + VIEWPORT.height / 2;
+    const bottomPx = (sw.y - c.y) * scale + VIEWPORT.height / 2;
+    expect(topPx).toBeGreaterThanOrEqual(padding.top - 0.001);
+    expect(bottomPx).toBeLessThanOrEqual(VIEWPORT.height - padding.bottom + 0.001);
+    // Centred between the two insets, not in the middle of the whole map.
+    expect((topPx + bottomPx) / 2).toBeCloseTo((padding.top + VIEWPORT.height - padding.bottom) / 2, 3);
+  });
+
   it('picks a zoom that leaves the whole cluster inside the padding', () => {
     const padding = 72;
     const { zoom } = cameraForBounds({ bounds, viewport: VIEWPORT, padding });

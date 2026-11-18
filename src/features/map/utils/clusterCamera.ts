@@ -83,12 +83,28 @@ export function boundsOfPositions(positions: Array<LatLngLiteral | null | undefi
   return bounds;
 }
 
+/** Pixels kept clear on each side of the viewport. */
+export interface Insets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+const toInsets = (padding: number | Insets): Insets =>
+  typeof padding === 'number'
+    ? { top: padding, right: padding, bottom: padding, left: padding }
+    : padding;
+
 export interface FitBoundsOptions {
   bounds: BoundsLiteral;
   /** Size of the map viewport in CSS pixels. */
   viewport: { width: number; height: number };
-  /** Breathing room kept around the cluster, in pixels. */
-  padding?: number;
+  /**
+   * Breathing room kept around the bounds, in pixels: one number for every
+   * side, or per side to keep clear of controls floating over the map.
+   */
+  padding?: number | Insets;
   minZoom?: number;
   maxZoom?: number;
 }
@@ -116,25 +132,27 @@ export function cameraForBounds({
   const spanX = Math.abs(northEast.x - southWest.x);
   const spanY = Math.abs(southWest.y - northEast.y);
 
+  const inset = toInsets(padding);
+
   // A padding bigger than the viewport would leave nothing to draw in; never
   // let the usable area collapse to zero.
-  const usableWidth = Math.max(1, viewport.width - padding * 2);
-  const usableHeight = Math.max(1, viewport.height - padding * 2);
+  const usableWidth = Math.max(1, viewport.width - inset.left - inset.right);
+  const usableHeight = Math.max(1, viewport.height - inset.top - inset.bottom);
 
   const zoomForX = spanX > 0 ? Math.log2(usableWidth / spanX) : Infinity;
   const zoomForY = spanY > 0 ? Math.log2(usableHeight / spanY) : Infinity;
   const requiredZoom = Math.min(zoomForX, zoomForY);
+  const zoom = clamp(Number.isFinite(requiredZoom) ? requiredZoom : maxZoom, minZoom, maxZoom);
 
+  // Uneven insets move the clear area off-centre; shift the camera the other
+  // way so the bounds land in the middle of what is actually visible.
+  const scale = Math.pow(2, zoom);
   const center = unprojectFromWorld({
-    x: (northEast.x + southWest.x) / 2,
-    y: (northEast.y + southWest.y) / 2,
+    x: (northEast.x + southWest.x) / 2 - (inset.left - inset.right) / 2 / scale,
+    y: (northEast.y + southWest.y) / 2 - (inset.top - inset.bottom) / 2 / scale,
   });
 
-  return {
-    center,
-    zoom: clamp(Number.isFinite(requiredZoom) ? requiredZoom : maxZoom, minZoom, maxZoom),
-    requiredZoom,
-  };
+  return { center, zoom, requiredZoom };
 }
 
 /**

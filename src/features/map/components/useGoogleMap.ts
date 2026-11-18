@@ -20,6 +20,10 @@ import { Property } from '@/types';
 import L from 'leaflet';
 import { isDrawnArea } from '../utils/drawTip';
 import { pixelToLatLng } from '../utils/pixelToLatLng';
+import { cameraForBounds } from '../utils/clusterCamera';
+import { flyCamera, viewportOf } from '../utils/clusterZoom';
+import { measureOverlayInsets } from '../utils/mapOverlayInsets';
+
 import { usePoiTiles } from '../poi/usePoiTiles';
 import { usePoiGoogleMarkers } from '../poi/usePoiGoogleMarkers';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
@@ -78,6 +82,9 @@ import { paths } from '@/src/app/router/paths';
 import { CLOSED_MARKER_COLOR, closedMarkerLabel, isClosedListing } from '@/src/shared/map/closedListing';
 import { appendMarkerEventTag, markerEventTag } from '../utils/markerEventTag';
 import { softIconHtml } from '@/src/shared/illustrations';
+
+/** A tiny drawn area still shows streets around it rather than a single roof. */
+const DRAWN_AREA_MAX_ZOOM = 17;
 
 // Inject CSS for marker entrance fly-in animation (Google Maps variant)
 if (typeof window !== 'undefined') {
@@ -1542,7 +1549,8 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }, 400);
   }, [flyToTarget, map, onFlyComplete]);
 
-  // Fit map to drawnBounds when they exist (for saved searches)
+  // Frame the drawn area (just drawn, or a saved search): fly to it, centred in
+  // the part of the map the search bar and toolbars don't cover.
   const skipRestoredDrawnFitRef = useRef(!!restoredView);
   useEffect(() => {
     if (!map) return;
@@ -1551,22 +1559,17 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     skipRestoredDrawnFitRef.current = false;
     if (!drawnBounds || skipFit) return;
 
-    // Only fit bounds if there's no flyToTarget (which handles positioning)
-    // and if drawnBounds changed
-    try {
-      const sw = drawnBounds.getSouthWest();
-      const ne = drawnBounds.getNorthEast();
-
-      const bounds = new google.maps.LatLngBounds(
-        { lat: sw.lat, lng: sw.lng },
-        { lat: ne.lat, lng: ne.lng }
-      );
-
-      // Fit the map to show the drawn bounds with some padding
-      map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
-    } catch (e) {
-      // Error removed
-    }
+    const mapDiv = map.getDiv();
+    if (!mapDiv) return;
+    const sw = drawnBounds.getSouthWest();
+    const ne = drawnBounds.getNorthEast();
+    const camera = cameraForBounds({
+      bounds: { north: ne.lat, south: sw.lat, east: ne.lng, west: sw.lng },
+      viewport: viewportOf(map),
+      padding: measureOverlayInsets(mapDiv),
+      maxZoom: DRAWN_AREA_MAX_ZOOM,
+    });
+    return flyCamera(map, camera);
   }, [map, drawnBounds]);
 
   // Back from a listing opened here: put it in focus again — its popup open,
