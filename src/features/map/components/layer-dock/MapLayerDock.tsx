@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import MacOSDock from '@/src/components/ui/mac-os-dock';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 import type { ClimateRiskType } from '../googleMapConstants';
 import ClimateRiskMenu from './ClimateRiskMenu';
 import { useLayerDockItems, type LayerId } from './useLayerDockItems';
@@ -27,9 +28,15 @@ export interface MapLayerDockProps {
   setIsLegendOpen: (open: boolean) => void;
 }
 
+/** Compact sizes: 44px touch targets, 32px on a sideways phone (CLAUDE.md). */
+const ICON_SIZE = 44;
+const ICON_SIZE_SHORT = 32;
+const MAX_SCALE = 1.45;
+
 /** Desktop map layer toggles, shown as a magnifying macOS-style dock. */
 const MapLayerDock: React.FC<MapLayerDockProps> = (p) => {
   const { t } = useTranslation('search');
+  const isShortLandscape = useShortLandscape();
   const { apps, openApps } = useLayerDockItems({
     promotedCount: p.promotedCount,
     active: {
@@ -70,6 +77,8 @@ const MapLayerDock: React.FC<MapLayerDockProps> = (p) => {
         apps={apps}
         openApps={openApps}
         toggleable
+        iconSize={isShortLandscape ? ICON_SIZE_SHORT : ICON_SIZE}
+        maxScale={MAX_SCALE}
         ariaLabel={t('map.layers', 'Layers')}
         onAppClick={(id) => toggles[id as LayerId]?.()}
       />

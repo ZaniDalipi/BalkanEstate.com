@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getDockConfig, getPositions, getTargetScales, isSettled, MIN_TOUCH_SIZE } from './dockMath';
+import { getDockConfig, getPositions, getTargetScales, isSettled, MIN_TOUCH_SIZE, resolveDockConfig } from './dockMath';
 
 const cfg = { baseIconSize: 64, maxScale: 1.8, effectWidth: 300 };
 
@@ -37,5 +37,18 @@ describe('isSettled', () => {
   it('is true only when every value is within tolerance', () => {
     expect(isSettled([1, 1.001], [1, 1], 0.002)).toBe(true);
     expect(isSettled([1, 1.1], [1, 1], 0.002)).toBe(false);
+  });
+});
+
+describe('resolveDockConfig', () => {
+  const base = { baseIconSize: 72, maxScale: 1.8, effectWidth: 300 };
+  it('applies a valid compact size and scale', () => {
+    const cfg = resolveDockConfig(base, { iconSize: 44, maxScale: 1.45 });
+    expect(cfg).toMatchObject({ baseIconSize: 44, maxScale: 1.45 });
+    expect(cfg.effectWidth).toBeLessThan(base.effectWidth);
+  });
+  it('ignores out-of-range values and keeps the viewport default', () => {
+    expect(resolveDockConfig(base, { iconSize: 10, maxScale: 9 })).toEqual(base);
+    expect(resolveDockConfig(base, { iconSize: NaN })).toEqual(base);
   });
 });

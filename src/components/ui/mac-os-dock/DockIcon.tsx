@@ -10,13 +10,13 @@ const DockIcon: React.FC<DockIconProps> = ({ name, icon }) => {
   const [failed, setFailed] = useState(false);
 
   if (typeof icon !== 'string') {
-    return <span className="flex h-full w-full items-center justify-center [&>*]:h-full [&>*]:w-full">{icon}</span>;
+    return <span className="flex h-full w-full items-center justify-center p-[20%] [&>*]:h-full [&>*]:w-full">{icon}</span>;
   }
   if (failed) {
     return (
       <span
         aria-hidden="true"
-        className="flex h-full w-full items-center justify-center rounded-[22%] bg-white/20 text-lg font-bold uppercase text-white"
+        className="flex h-full w-full items-center justify-center rounded-full bg-neutral-900/10 text-sm font-bold uppercase text-neutral-700"
       >
         {name.trim().charAt(0)}
       </span>

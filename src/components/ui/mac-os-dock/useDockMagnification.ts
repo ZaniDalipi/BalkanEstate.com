@@ -7,6 +7,7 @@ import {
   getTargetScales,
   isSettled,
   lerp,
+  resolveDockConfig,
   type DockConfig,
 } from './dockMath';
 
@@ -14,12 +15,17 @@ import {
  * Drives the dock's magnification. Scales and positions live in refs and are
  * written straight to the DOM each frame, so hovering never re-renders React.
  */
-export function useDockMagnification(count: number, iconSizeOverride: number | undefined, reduced: boolean) {
+export interface DockSizeOptions {
+  iconSize?: number;
+  maxScale?: number;
+}
+
+export function useDockMagnification(count: number, options: DockSizeOptions, reduced: boolean) {
   const [config, setConfig] = useState<DockConfig>(() =>
     typeof window === 'undefined' ? getDockConfig(0, 0) : getDockConfig(window.innerWidth, window.innerHeight),
   );
-  const size = iconSizeOverride ?? config.baseIconSize;
-  const cfg: DockConfig = { ...config, baseIconSize: size };
+  const cfg = resolveDockConfig(config, options);
+  const size = cfg.baseIconSize;
 
   const dockRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
@@ -73,12 +79,11 @@ export function useDockMagnification(count: number, iconSizeOverride: number | u
 
   // Reset to the resting layout whenever the item count or size changes.
   useLayoutEffect(() => {
-    const rest = getTargetScales(null, count, cfg);
+    const rest = Array.from({ length: count }, () => 1);
     scales.current = rest;
     positions.current = getPositions(rest, size);
     paint();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, size, cfg.maxScale, cfg.effectWidth, paint]);
+  }, [count, size, paint]);
 
   useEffect(
     () => () => {

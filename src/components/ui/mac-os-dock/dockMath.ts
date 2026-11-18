@@ -33,7 +33,7 @@ export function getDockConfig(width: number, height: number): DockConfig {
 }
 
 export const dockSpacing = (iconSize: number): number => Math.max(4, iconSize * 0.08);
-export const dockPadding = (iconSize: number): number => Math.max(8, iconSize * 0.12);
+export const dockPadding = (iconSize: number): number => Math.max(6, iconSize * 0.12);
 
 /** Scale of each icon when the pointer is at `mouseX` (null = pointer away). */
 export function getTargetScales(mouseX: number | null, count: number, cfg: DockConfig): number[] {
@@ -73,4 +73,29 @@ export const lerp = (from: number, to: number, factor: number): number => from +
 /** True while any value is still visibly short of its target. */
 export function isSettled(current: number[], target: number[], tolerance: number): boolean {
   return current.every((v, i) => Math.abs(v - target[i]) <= tolerance);
+}
+
+/** Smallest icon a caller may ask for: the 32px landscape touch minimum. */
+export const MIN_ICON_SIZE = 32;
+export const MAX_ICON_SIZE = 128;
+
+/**
+ * Applies the caller's size and magnification over the viewport config.
+ * Out-of-range values are ignored (the viewport default is kept), so a bad
+ * prop never produces an unusable dock.
+ */
+export function resolveDockConfig(
+  base: DockConfig,
+  overrides: { iconSize?: number; maxScale?: number },
+): DockConfig {
+  const { iconSize, maxScale } = overrides;
+  const sizeOk = iconSize !== undefined && Number.isFinite(iconSize) && iconSize >= MIN_ICON_SIZE && iconSize <= MAX_ICON_SIZE;
+  const scaleOk = maxScale !== undefined && Number.isFinite(maxScale) && maxScale >= MIN_SCALE && maxScale <= 3;
+  const size = sizeOk ? iconSize : base.baseIconSize;
+  return {
+    baseIconSize: size,
+    maxScale: scaleOk ? maxScale : base.maxScale,
+    // Keep the magnified neighbourhood proportional when the icons shrink.
+    effectWidth: sizeOk ? Math.min(base.effectWidth, size * 4.5) : base.effectWidth,
+  };
 }
