@@ -254,7 +254,8 @@
       "mapButton": "Mapa",
       "automatic": "Automatski",
       "satellite": "Satelit",
-      "streetView": "Ulični Prikaz"
+      "streetView": "Ulični Prikaz",
+      "subtitle": "Stil, klima i slojevi"
     },
     "climateRisks": {
       "title": "Klimatski Rizici",
@@ -346,8 +347,7 @@
       "message": "Prijavite se prije crtanja kako biste mogli sačuvati ovu oblast i dobijati obavještenja o novim oglasima u njoj.",
       "login": "Prijava",
       "drawAnyway": "Crtaj bez čuvanja"
-    },
-    "layersHint": "Stil mape, klimatski rizici i slojevi su ovdje"
+    }
   },
   "newsletter": {
     "title": "Budite Ažurirani sa Novim Nekretninama",

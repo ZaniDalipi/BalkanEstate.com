@@ -254,7 +254,8 @@
       "mapButton": "Harta",
       "automatic": "Automatike",
       "satellite": "Satelitor",
-      "streetView": "Pamje rruge"
+      "streetView": "Pamje rruge",
+      "subtitle": "Stili, klima dhe shtresat"
     },
     "climateRisks": {
       "title": "Rreziqet Klimatike",
@@ -346,8 +347,7 @@
       "message": "Hyni para se të vizatoni, që të mund ta ruani këtë zonë dhe të merrni njoftime për shpallje të reja në të.",
       "login": "Hyni",
       "drawAnyway": "Vizato pa ruajtur"
-    },
-    "layersHint": "Stili i hartës, rreziqet klimatike dhe shtresat janë këtu"
+    }
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",
