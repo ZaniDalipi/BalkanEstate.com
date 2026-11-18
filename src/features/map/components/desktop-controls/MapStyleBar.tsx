@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CrosshairsIcon, PencilIcon, XCircleIcon } from '@/constants';
 import type { MapStyleType } from '../googleMapConstants';
-import { DESKTOP_MAP_STYLES, planStyleChange } from './mapStyleOptions';
+import { DESKTOP_MAP_STYLES, planStyleChange } from '../../utils/mapStyleOptions';
 
 export interface MapStyleBarProps {
   handleRecenter: () => void;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatBadgeCount } from '@/shared/utils/badgeCount';
 import DockIcon from './DockIcon';
 import type { DockApp } from './types';
 
@@ -18,6 +19,7 @@ interface DockItemProps {
  */
 const DockItem: React.FC<DockItemProps> = ({ app, size, left, isOpen, toggleable, itemRef, onClick }) => {
   const dot = Math.max(4, size * 0.08);
+  const badge = formatBadgeCount(app.badge);
   return (
     <button
       ref={itemRef}
@@ -37,9 +39,9 @@ const DockItem: React.FC<DockItemProps> = ({ app, size, left, isOpen, toggleable
       >
         {app.name}
       </span>
-      {app.badge !== undefined && app.badge > 0 && (
+      {badge !== null && (
         <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white/80">
-          {app.badge > 99 ? '99+' : app.badge}
+          {badge}
         </span>
       )}
       {isOpen && (

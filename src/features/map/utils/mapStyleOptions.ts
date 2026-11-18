@@ -1,4 +1,4 @@
-import type { MapStyleType } from '../googleMapConstants';
+import type { MapStyleType } from '../components/googleMapConstants';
 
 /** The styles the desktop bar offers, in order. `hybrid` is set elsewhere. */
 export const DESKTOP_MAP_STYLES = ['clean', 'color', 'street', 'satellite'] as const;

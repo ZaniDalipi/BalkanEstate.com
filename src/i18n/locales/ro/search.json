@@ -251,7 +251,8 @@
       "wind": "Vânt",
       "air": "Aer",
       "heat": "Căldură",
-      "airQuality": "Calitatea aerului"
+      "airQuality": "Calitatea aerului",
+      "off": "Dezactivat"
     },
     "mapLegend": "Legenda hărții",
     "nightMode": "Mod noapte",
