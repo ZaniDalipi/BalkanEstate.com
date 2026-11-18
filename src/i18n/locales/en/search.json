@@ -280,7 +280,8 @@
       "wind": "Wind",
       "air": "Air",
       "heat": "Heat",
-      "airQuality": "Air Quality"
+      "airQuality": "Air Quality",
+      "off": "Off"
     },
     "dawn": "Dawn",
     "morning": "Morning",

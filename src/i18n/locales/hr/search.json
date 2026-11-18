@@ -264,7 +264,8 @@
       "wind": "Vjetar",
       "air": "Zrak",
       "heat": "Vrućina",
-      "airQuality": "Kvaliteta zraka"
+      "airQuality": "Kvaliteta zraka",
+      "off": "Isključeno"
     },
     "dawn": "Zora",
     "morning": "Jutro",

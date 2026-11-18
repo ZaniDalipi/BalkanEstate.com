@@ -264,7 +264,8 @@
       "wind": "Erë",
       "air": "Ajër",
       "heat": "Nxehtësi",
-      "airQuality": "Cilësia e Ajrit"
+      "airQuality": "Cilësia e Ajrit",
+      "off": "Joaktiv"
     },
     "dawn": "Agim",
     "morning": "Mëngjes",
