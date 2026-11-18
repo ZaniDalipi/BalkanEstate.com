@@ -241,7 +241,8 @@
       "mapButton": "Hartă",
       "automatic": "Automat",
       "satellite": "Satelit",
-      "streetView": "Vedere stradală"
+      "streetView": "Vedere stradală",
+      "subtitle": "Stil, climă și straturi"
     },
     "climateRisks": {
       "title": "Riscuri climatice",
@@ -346,8 +347,7 @@
       "message": "Conectați-vă înainte de a desena, ca să puteți salva această zonă și să primiți alerte pentru anunțuri noi din ea.",
       "login": "Conectare",
       "drawAnyway": "Desenează fără salvare"
-    },
-    "layersHint": "Stilul hărții, riscurile climatice și straturile sunt aici"
+    }
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",
