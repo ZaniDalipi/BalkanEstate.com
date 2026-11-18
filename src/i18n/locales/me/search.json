@@ -340,7 +340,14 @@
       "openHouse": "Otvoreno",
       "auction": "Aukcija",
       "today": "danas"
-    }
+    },
+    "drawLogin": {
+      "title": "Prijavite se da sačuvate oblast",
+      "message": "Prijavite se prije crtanja kako biste mogli sačuvati ovu oblast i dobijati obavještenja o novim oglasima u njoj.",
+      "login": "Prijava",
+      "drawAnyway": "Crtaj bez čuvanja"
+    },
+    "layersHint": "Stil mape, klimatski rizici i slojevi su ovdje"
   },
   "newsletter": {
     "title": "Budite Ažurirani sa Novim Nekretninama",

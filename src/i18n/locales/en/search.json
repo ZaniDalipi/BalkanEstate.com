@@ -356,7 +356,14 @@
       "openHouse": "Open",
       "auction": "Auction",
       "today": "today"
-    }
+    },
+    "drawLogin": {
+      "title": "Log in to save your area",
+      "message": "Log in before you draw, so you can save this area and get alerts for new listings in it.",
+      "login": "Log In",
+      "drawAnyway": "Draw Without Saving"
+    },
+    "layersHint": "Map style, climate risks and layers are here"
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

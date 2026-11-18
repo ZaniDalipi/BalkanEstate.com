@@ -340,7 +340,14 @@
       "openHouse": "Hapur",
       "auction": "Ankand",
       "today": "sot"
-    }
+    },
+    "drawLogin": {
+      "title": "Hyni për të ruajtur zonën tuaj",
+      "message": "Hyni para se të vizatoni, që të mund ta ruani këtë zonë dhe të merrni njoftime për shpallje të reja në të.",
+      "login": "Hyni",
+      "drawAnyway": "Vizato pa ruajtur"
+    },
+    "layersHint": "Stili i hartës, rreziqet klimatike dhe shtresat janë këtu"
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",
