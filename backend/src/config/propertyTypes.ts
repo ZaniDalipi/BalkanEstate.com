@@ -25,3 +25,15 @@ export const isPropertyType = (value: unknown): value is PropertyType =>
 
 /** Human-readable list for the message a rejected request gets back. */
 export const PROPERTY_TYPES_LABEL = PROPERTY_TYPES.join(', ');
+
+/**
+ * The types a search asks for. Search filters carry one type, `any`, or
+ * several joined by commas (`villa,apartment`); unknown words are dropped, and
+ * an empty result means "every type". Saved searches made before the picker
+ * allowed several types hold a single word, which reads the same way.
+ */
+export const parsePropertyTypeList = (value: unknown): PropertyType[] => {
+  const words = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
+  const types = words.map((word) => (typeof word === 'string' ? word.trim() : word)).filter(isPropertyType);
+  return [...new Set(types)];
+};

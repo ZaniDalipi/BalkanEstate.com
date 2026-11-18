@@ -3,6 +3,7 @@ import { BALKAN_COUNTRIES } from '../constants/countries';
 import { createPropertyMatcher, rankProperties } from '../src/shared/search';
 import { normalizeConstructionStatus } from '../src/shared/property/construction';
 import { listingHasAmenity } from './amenityMatch';
+import { parsePropertyTypes } from '../src/shared/search/propertyTypeSelection';
 import { bedsWithinRange } from './bedroomFilter';
 import { hasFeatureRequest } from './featureMatchRequest';
 import { matchesEventFilters, nextEventTime } from '@/src/features/listing-events/utils/listingEvents';
@@ -31,6 +32,8 @@ export const filterProperties = (properties: Property[], filters: Filters, optio
     // its words are all required (typing more narrows), spellings are folded
     // so "Becici" and "Bečići" are one word, and a typo is forgiven.
     const queryMatcher = createPropertyMatcher(filters.query ?? '');
+    // One type, or several picked together (`villa,apartment`); none = every type.
+    const wantedTypes = parsePropertyTypes(filters.propertyType);
     const now = new Date();
 
     return properties.filter(p => {
@@ -85,8 +88,8 @@ export const filterProperties = (properties: Property[], filters: Filters, optio
         const minSqftMatch = filters.minSqft ? p.sqft >= filters.minSqft : true;
         const maxSqftMatch = filters.maxSqft ? p.sqft <= filters.maxSqft : true;
         const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller.type === filters.sellerType : true;
-        const propertyTypeMatch = filters.propertyType !== 'any'
-            ? p.propertyType === filters.propertyType
+        const propertyTypeMatch = wantedTypes.length > 0
+            ? wantedTypes.some((type) => type === p.propertyType)
             : p.propertyType !== 'luxury-villa'; // luxury-villa is exclusive to the Luxury Villas tab
 
         // Advanced filters

@@ -31,6 +31,7 @@
     "allCountries": "Сите Држави",
     "anyCountry": "Која било земја",
     "propertyType": "Тип на Недвижност",
+    "propertyTypeHint": "Изберете еден или повеќе",
     "allTypes": "Сите Типови",
     "listingType": "Тип на Оглас",
     "buyOrRent": "Купи или Изнајми",

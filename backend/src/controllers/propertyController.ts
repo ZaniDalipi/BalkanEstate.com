@@ -65,6 +65,7 @@ import { buildZoneDynamics } from '../services/zoneDynamicsService';
 import { getSeasonalAirQuality, AirQualityUnavailableError } from '../services/airQualityService';
 import { getSurroundingsWithin, SurroundingsUnavailableError } from '../services/surroundings/surroundingsService';
 import { hasUsableLocation } from '../utils/coordinates';
+import { parsePropertyTypeList } from '../config/propertyTypes';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -226,8 +227,12 @@ export const getProperties = async (
       if (maxSqft) filter.sqft.$lte = Number(maxSqft);
     }
 
-    if (propertyType && propertyType !== 'any') {
-      filter.propertyType = propertyType;
+    // One type, or several joined by commas (`villa,apartment`).
+    const wantedTypes = parsePropertyTypeList(propertyType);
+    if (wantedTypes.length === 1) {
+      filter.propertyType = wantedTypes[0];
+    } else if (wantedTypes.length > 1) {
+      filter.propertyType = { $in: wantedTypes };
     }
 
     // Luxury villas are admin-curated: hide only the ones an admin has left
@@ -235,13 +240,16 @@ export const getProperties = async (
     // created before the approval field existed (status is null/absent) — stay
     // visible, so the tab is never silently emptied. (The admin approval queue
     // uses its own endpoint and sees every status.)
-    if (propertyType === 'luxury-villa') {
+    // Other types never carry an approval status, so the same condition keeps
+    // them when luxury villas are asked for alongside them.
+    if (wantedTypes.includes('luxury-villa')) {
       filter.villaApprovalStatus = { $nin: ['pending', 'rejected'] };
     }
 
     // Exclude specific property types (e.g. luxury-villa is exclusive to its own tab)
     if (req.query.excludePropertyType) {
-      filter.propertyType = { ...filter.propertyType, $ne: req.query.excludePropertyType };
+      const typeCondition = typeof filter.propertyType === 'string' ? { $eq: filter.propertyType } : filter.propertyType;
+      filter.propertyType = { ...typeCondition, $ne: req.query.excludePropertyType };
     }
 
     if (city) {

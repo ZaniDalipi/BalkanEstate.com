@@ -22,6 +22,7 @@ import Agent from '../models/Agent';
 import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendSavedSearchPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 import { sendPushToUser } from '../services/pushNotificationService';
+import { parsePropertyTypeList } from '../config/propertyTypes';
 
 // All tiers can receive saved-search and price alerts — free users included.
 // Subscription gate only controls how many searches a user can save, not whether they get notified.
@@ -102,7 +103,8 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   if (filters.country && filters.country !== 'all' && property.country !== filters.country) return false;
 
   // Property type
-  if (filters.propertyType && filters.propertyType !== 'any' && property.propertyType !== filters.propertyType) return false;
+  const wantedTypes = parsePropertyTypeList(filters.propertyType);
+  if (wantedTypes.length > 0 && !wantedTypes.some((type) => type === property.propertyType)) return false;
 
   // Year built
   if (filters.minYearBuilt && property.yearBuilt < filters.minYearBuilt) return false;

@@ -32,7 +32,7 @@ export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type { PropertyImageTag } from './src/shared/types/property.types';
-import type { PropertyImageTag, SaleStatusFilter, ListingAuction } from './src/shared/types/property.types';
+import type { PropertyImageTag, SaleStatusFilter, ListingAuction, PropertyTypeSelection } from './src/shared/types/property.types';
 export type { ListingAuction } from './src/shared/types/property.types';
 export type { SaleStatusFilter } from './src/shared/types/property.types';
 
@@ -556,7 +556,8 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+    /** `any`, one type, or several joined by commas (`villa,apartment`). */
+    propertyType: PropertyTypeSelection;
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;

@@ -47,6 +47,7 @@
     "allCountries": "All Countries",
     "anyCountry": "Any Country",
     "propertyType": "Property Type",
+    "propertyTypeHint": "Choose one or more",
     "allTypes": "All Types",
     "listingType": "Listing Type",
     "buyOrRent": "Buy or Rent",

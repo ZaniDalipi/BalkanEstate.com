@@ -305,6 +305,69 @@ html.is-webkit .thumb-glass {
   backdrop-filter: blur(8px) saturate(180%);
 }
 
+/* Liquid-glass choice tile (search filters: property type). The look of
+   .thumb-glass — frosted fill, a gradient rim drawn with a mask, light pooling
+   at the top — without `backdrop-filter`: the tiles sit on a plain white
+   sheet, where a blur shows nothing and a grid of them would only cost frames
+   in WebKit (see "WebKit compositing budget"). The element must be positioned
+   (set by the component). `--on` is the chosen state, in the brand blue of
+   .thumb-glass-tint. */
+.glass-chip {
+  isolation: isolate;
+  color: #334155;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.7));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 8px 18px -12px rgba(15, 23, 42, 0.35);
+  transition: transform 160ms ease, box-shadow 200ms ease, background 200ms ease, color 200ms ease;
+}
+.glass-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(203, 213, 225, 0.7) 45%, rgba(148, 163, 184, 0.45) 70%, rgba(255, 255, 255, 0.9));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.glass-chip::after {
+  content: '';
+  position: absolute;
+  inset: 1px 1px 45% 1px;
+  z-index: -1;
+  border-radius: inherit;
+  border-bottom-left-radius: 40% 30%;
+  border-bottom-right-radius: 40% 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+.glass-chip:active {
+  transform: scale(0.96);
+}
+.glass-chip--on {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(41, 151, 255, 0.96), rgba(2, 82, 205, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 30, 90, 0.25),
+    0 10px 22px -10px rgba(2, 82, 205, 0.75);
+}
+.glass-chip--on::before {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.15) 45%, rgba(0, 30, 90, 0.25) 70%, rgba(255, 255, 255, 0.5));
+}
+.glass-chip--on::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-chip { transition: none; }
+  .glass-chip:active { transform: none; }
+}
+
 /* Glass input field — light theme */
 .glass-input {
   background: rgba(255, 255, 255, 0.7);
@@ -2922,4 +2985,14 @@ html {
    own 44px action buttons below it are the touch targets. */
 [data-slot="team-lanyard-rail"] [data-links] a {
   min-height: 0;
+}
+
+/* Vertical scroll panels never scroll sideways. CSS turns a scroller's
+   `overflow-x: visible` into `auto`, so anything a little too wide inside a
+   list (a long translation, a row of chips) let a finger drag the whole panel
+   left and right into blank space. Panels that are meant to scroll sideways
+   say so with `overflow-x-auto` / `overflow-auto` and are left alone. */
+:is(.overflow-y-auto, .overflow-y-scroll, [class*=":overflow-y-auto"], [class*=":overflow-y-scroll"]):not([class*="overflow-x-auto"], [class*="overflow-x-scroll"], [class*="overflow-auto"], [class*="overflow-scroll"]) {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }

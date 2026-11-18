@@ -31,6 +31,7 @@
     "allCountries": "Sve Države",
     "anyCountry": "Bilo Koja Država",
     "propertyType": "Tip Nekretnine",
+    "propertyTypeHint": "Izaberite jedan ili više",
     "allTypes": "Svi Tipovi",
     "listingType": "Tip Oglasa",
     "buyOrRent": "Kupovina ili Iznajmljivanje",

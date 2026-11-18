@@ -30,6 +30,7 @@
     "country": "Țară",
     "allCountries": "Toate Țările",
     "propertyType": "Tip Proprietate",
+    "propertyTypeHint": "Alegeți unul sau mai multe",
     "allTypes": "Toate Tipurile",
     "listingType": "Tip Anunț",
     "buyOrRent": "Cumpără sau Închiriază",

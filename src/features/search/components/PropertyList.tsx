@@ -10,12 +10,12 @@ import AiSearch from './AiSearch';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import type { OutOfAreaKind } from '../outOfArea';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
+import PropertyTypePicker from './filters/PropertyTypePicker';
 import EventFilterChips from '@/src/features/listing-events/components/EventFilterChips';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
 import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
-import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
 import { useShortLandscape } from '@/src/hooks/useMediaQuery';
@@ -132,22 +132,17 @@ const FilterButtonGroup = <T extends string | number | null>({
   icon,
   options,
   selectedValue,
-  onChange,
-  wrap = false
+  onChange
 }: {
   label: string;
   icon?: FilterIcon;
   options: { value: T; label: string }[];
   selectedValue: T;
   onChange: (value: T) => void;
-  /** Long option lists wrap onto more lines instead of pushing the panel wider than the screen. */
-  wrap?: boolean;
 }) => (
   <div className="min-w-0">
     <FilterLabel icon={icon}>{label}</FilterLabel>
-    <div className={`flex items-center bg-neutral-100 p-1 border border-neutral-200 ${
-      wrap ? 'flex-wrap gap-1 rounded-2xl' : 'space-x-1 rounded-full'
-    }`}>
+    <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
       {options.map(({ value, label: optionLabel }) => (
         <FilterButton
           key={optionLabel}
@@ -422,20 +417,12 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 selectedValue={filters.sellerType}
                                 onChange={(value) => onFilterChange('sellerType', (value as SellerType) || 'any')}
                             />
-                            <FilterButtonGroup
-                                label={t('search:filters.propertyType')}
-                                icon="home"
-                                options={[
-                                    { value: 'any', label: t('search:propertyTypes.any') },
-                                    ...PROPERTY_TYPE_OPTIONS.map(option => ({
-                                        value: option.value,
-                                        label: t(`search:${option.labelKey}`, option.fallback),
-                                    })),
-                                ]}
-                                selectedValue={filters.propertyType}
-                                onChange={(value) => onFilterChange('propertyType', (value as Filters['propertyType']) || 'any')}
-                                wrap
-                            />
+                            <div className="sm:col-span-2">
+                                <PropertyTypePicker
+                                    value={filters.propertyType}
+                                    onChange={(value) => onFilterChange('propertyType', value)}
+                                />
+                            </div>
                         </div>
 
                         {/* Year Built */}

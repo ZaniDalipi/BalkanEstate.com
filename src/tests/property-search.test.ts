@@ -259,3 +259,27 @@ describe('sold / rented filter', () => {
     expect(ids({ ...initialFilters, saleStatus: 'all' })).toEqual(['on-market', 'sold', 'for-rent', 'rented']);
   });
 });
+
+describe('filterProperties — several property types', () => {
+  const listings = [
+    property({ id: 'apt', propertyType: 'apartment' }),
+    property({ id: 'villa', propertyType: 'villa' }),
+    property({ id: 'land', propertyType: 'land' }),
+    property({ id: 'lux', propertyType: 'luxury-villa' }),
+  ];
+  const ids = (propertyType: Filters['propertyType']) =>
+    filterProperties(listings, { ...initialFilters, propertyType }).map((p) => p.id);
+
+  it('keeps every listing of any chosen type', () => {
+    expect(ids('villa,land')).toEqual(['villa', 'land']);
+  });
+
+  it('still reads a single type, as old links and saved searches carry it', () => {
+    expect(ids('apartment')).toEqual(['apt']);
+  });
+
+  it('shows luxury villas only when they are chosen', () => {
+    expect(ids('any')).toEqual(['apt', 'villa', 'land']);
+    expect(ids('apartment,luxury-villa')).toEqual(['apt', 'lux']);
+  });
+});

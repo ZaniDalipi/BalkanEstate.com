@@ -20,7 +20,7 @@ import { applyQueryToFilters } from '../universal/queryToFilters';
 import { frameSearchTarget } from '../frameSearch';
 import { searchPlaces } from '../universal/places';
 import type { Suggestion } from '../universal/types';
-import { isPropertyTypeFilter } from '@/shared/types/property.types';
+import { readPropertyTypeSelection, singlePropertyType } from '@/shared/search/propertyTypeSelection';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { readMapView, rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
@@ -312,10 +312,10 @@ export function useSearchPage() {
             if (countryParam) {
                 newFilters.country = countryParam;
             }
-            // A propertyType arriving in the URL is untrusted input: keep it only
-            // when it names a type the app actually knows about.
-            if (isPropertyTypeFilter(propertyTypeParam)) {
-                newFilters.propertyType = propertyTypeParam;
+            // A propertyType arriving in the URL is untrusted input: keep only the
+            // types the app knows about (one, or several joined by commas).
+            if (propertyTypeParam) {
+                newFilters.propertyType = readPropertyTypeSelection(propertyTypeParam);
             }
 
             // Apply filters from URL
@@ -970,7 +970,7 @@ export function useSearchPage() {
         return generateSearchSEOTitle({
             country: filters.country && filters.country !== 'any' ? filters.country : undefined,
             city: filters.query || undefined,
-            propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
+            propertyType: singlePropertyType(filters.propertyType),
             query: filters.query || undefined,
         }, t);
     }, [filters.country, filters.query, filters.propertyType, t]);
@@ -979,7 +979,7 @@ export function useSearchPage() {
         return generateSearchSEODescription({
             country: filters.country && filters.country !== 'any' ? filters.country : undefined,
             city: filters.query || undefined,
-            propertyType: filters.propertyType && filters.propertyType !== 'any' ? filters.propertyType : undefined,
+            propertyType: singlePropertyType(filters.propertyType),
             query: filters.query || undefined,
             minPrice: filters.minPrice || undefined,
             maxPrice: filters.maxPrice || undefined,

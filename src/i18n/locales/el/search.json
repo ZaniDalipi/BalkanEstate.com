@@ -30,6 +30,7 @@
     "country": "Χώρα",
     "allCountries": "Όλες οι Χώρες",
     "propertyType": "Τύπος Ακινήτου",
+    "propertyTypeHint": "Επιλέξτε ένα ή περισσότερα",
     "allTypes": "Όλοι οι Τύποι",
     "listingType": "Τύπος Αγγελίας",
     "buyOrRent": "Αγορά ή Ενοικίαση",

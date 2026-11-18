@@ -51,7 +51,7 @@ export class SavedSearch {
     }
 
     if (this.filters.propertyType && this.filters.propertyType !== 'any') {
-      parts.push(this.filters.propertyType);
+      parts.push(String(this.filters.propertyType).split(',').join(', '));
     }
 
     if (this.filters.minPrice || this.filters.maxPrice) {
@@ -79,7 +79,9 @@ export class SavedSearch {
     if (this.filters.maxPrice && property.price > this.filters.maxPrice) return false;
     if (this.filters.beds && property.beds < this.filters.beds) return false;
     if (this.filters.baths && property.baths < this.filters.baths) return false;
-    if (this.filters.propertyType !== 'any' && property.propertyType !== this.filters.propertyType) return false;
+    // `any`, one type, or several joined by commas (`villa,apartment`).
+    const wantedTypes = this.filters.propertyType === 'any' ? [] : String(this.filters.propertyType).split(',');
+    if (wantedTypes.length > 0 && !wantedTypes.includes(String(property.propertyType))) return false;
     return true;
   }
 

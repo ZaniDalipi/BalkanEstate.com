@@ -14,7 +14,8 @@ export interface IFilters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: 'any' | 'agent' | 'private';
-  propertyType: 'any' | PropertyType;
+  /** `any`, one type, or several joined by commas (`villa,apartment`). */
+  propertyType: 'any' | PropertyType | `${PropertyType},${string}`;
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;

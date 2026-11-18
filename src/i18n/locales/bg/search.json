@@ -30,6 +30,7 @@
     "country": "Държава",
     "allCountries": "Всички държави",
     "propertyType": "Тип имот",
+    "propertyTypeHint": "Изберете един или повече",
     "allTypes": "Всички типове",
     "listingType": "Тип обява",
     "buyOrRent": "Покупка или наем",

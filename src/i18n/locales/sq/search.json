@@ -31,6 +31,7 @@
     "allCountries": "Të Gjitha Shtetet",
     "anyCountry": "Çdo shtet",
     "propertyType": "Lloji i Pronës",
+    "propertyTypeHint": "Zgjidhni një ose më shumë",
     "allTypes": "Të Gjitha Llojet",
     "listingType": "Lloji i Listimit",
     "buyOrRent": "Bli ose Me Qira",

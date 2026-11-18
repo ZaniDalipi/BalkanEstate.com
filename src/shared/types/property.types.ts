@@ -52,6 +52,14 @@ export const isPropertyType = (value: unknown): value is PropertyType =>
 
 export const isPropertyTypeFilter = (value: unknown): value is PropertyTypeFilter =>
   typeof value === 'string' && (PROPERTY_TYPE_FILTERS as readonly string[]).includes(value);
+
+/**
+ * What the search's property-type filter holds: `any`, one type, or several
+ * joined by commas (`villa,apartment`). Kept as one string so links, saved
+ * searches and the API, which all carried a single type before, read it
+ * unchanged. Build and read it with `src/shared/search/propertyTypeSelection.ts`.
+ */
+export type PropertyTypeSelection = PropertyTypeFilter | `${PropertyType},${string}`;
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
@@ -346,7 +354,7 @@ export interface Filters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: SellerType;
-  propertyType: PropertyTypeFilter;
+  propertyType: PropertyTypeSelection;
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;
