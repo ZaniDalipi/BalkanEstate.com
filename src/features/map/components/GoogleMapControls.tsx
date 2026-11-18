@@ -77,8 +77,9 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = (props) => {
 
   return (
     <>
-      {/* Climate Risk Legend. Moves below the search dock when there is one (`--map-dock-h`). */}
-      {selectedClimateRisk !== 'none' && (
+      {/* Desktop Climate Risk Legend (phones show their own in MobileMapControls).
+          Moves below the search dock when there is one (`--map-dock-h`). */}
+      {!isMobile && selectedClimateRisk !== 'none' && (
         <div className="absolute top-[calc(var(--map-dock-h,0px)+3.5rem)] left-4 z-[1000] transition-[top] duration-300 motion-reduce:transition-none">
           <ClimateRiskLegend riskType={selectedClimateRisk} />
         </div>
