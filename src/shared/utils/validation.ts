@@ -994,3 +994,21 @@ export function validateNotPastDate(value: string, today: Date = new Date()): Va
   }
   return { isValid: true };
 }
+
+/**
+ * Dock items (`components/ui/mac-os-dock`): every item needs a unique, non-empty
+ * id, a visible name and an icon. The dock drops the bad ones instead of
+ * failing, so a single bad entry never hides the rest.
+ */
+export function validateDockApp(app: { id?: unknown; name?: unknown; icon?: unknown }): ValidationResult {
+  if (typeof app.id !== 'string' || app.id.trim() === '') {
+    return { isValid: false, error: 'Dock item needs a non-empty id' };
+  }
+  if (typeof app.name !== 'string' || app.name.trim() === '') {
+    return { isValid: false, error: `Dock item "${app.id}" needs a name` };
+  }
+  if (app.icon === undefined || app.icon === null || app.icon === '') {
+    return { isValid: false, error: `Dock item "${app.id}" needs an icon` };
+  }
+  return { isValid: true };
+}

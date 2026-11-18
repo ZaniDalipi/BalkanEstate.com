@@ -17,14 +17,8 @@ import L from 'leaflet';
 import { type MapStyleType, type ClimateRiskType } from './googleMapConstants';
 import { Legend, ClimateRiskLegend } from './GoogleMapLegend';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
-
-const CLIMATE_RISK_ICONS: Record<Exclude<ClimateRiskType, 'none'>, SoftIconName> = {
-  flood: 'sea',
-  fire: 'flame',
-  wind: 'leafAutumn',
-  air: 'leaf',
-  heat: 'sun',
-};
+import MapLayerDock from './layer-dock/MapLayerDock';
+import { CLIMATE_RISK_ICONS } from './layer-dock/ClimateRiskMenu';
 
 const MAP_STYLE_ICONS: Record<MapStyleType, SoftIconName> = {
   clean: 'sparkles',
@@ -213,145 +207,28 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
             </button>
           </div>
 
-          {/* Layer toggles */}
-          <div className="relative">
-            {/* Climate dropdown - rendered outside overflow container */}
-            {isClimateMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 min-w-[160px] z-50">
-                {(['none', 'flood', 'fire', 'wind', 'air', 'heat'] as ClimateRiskType[]).map((risk) => (
-                  <button
-                    key={risk}
-                    onClick={() => { setSelectedClimateRisk(risk); setIsClimateMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                      selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
-                    }`}
-                  >
-                    {risk === 'none' ? `✕ ${t('search:map.climateRisks.none', 'None')}` : (
-                      <>
-                        <SoftIcon name={CLIMATE_RISK_ICONS[risk]} className="w-5 h-5 flex-shrink-0" />
-                        {risk === 'flood' ? t('search:map.climateRisks.flood', 'Flood') : risk === 'fire' ? t('search:map.climateRisks.fire', 'Fire') : risk === 'wind' ? t('search:map.climateRisks.wind', 'Wind') : risk === 'air' ? t('search:map.climateRisks.airQuality', 'Air Quality') : t('search:map.climateRisks.heat', 'Heat')}
-                      </>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 landscape:p-1 rounded-full shadow-xl shadow-black/10 overflow-x-auto scrollbar-hide">
-              {/* Climate Risks Button */}
-              <button
-                onClick={() => setIsClimateMenuOpen(!isClimateMenuOpen)}
-                className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-3 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all flex-shrink-0 ${
-                  isClimateMenuOpen || selectedClimateRisk !== 'none'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
-                }`}
-                aria-label={t('search:map.climateRisks.title', 'Climate Risks')}
-                aria-haspopup="menu"
-                aria-expanded={isClimateMenuOpen}
-              >
-                <SoftIcon name="thermometer" className="w-5 h-5" />
-                <span className="inline leading-none landscape:hidden">{t('search:map.climateRisks.title', 'Climate')}</span>
-              </button>
-
-            {/* Promoted/Premium Filter */}
-            <button
-              onClick={() => setShowOnlyPromoted(!showOnlyPromoted)}
-              className={`relative flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                showOnlyPromoted ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={showOnlyPromoted ? t('common:aria.showAllListings') : t('common:aria.showOnlyPremium')}
-              aria-pressed={showOnlyPromoted}
-            >
-              <SoftIcon name="crown" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">{t('search:map.promoted', 'Premium')}</span>
-              {promotedCount > 0 && !showOnlyPromoted && (
-                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold bg-amber-500 text-white rounded-full px-1">
-                  {promotedCount}
-                </span>
-              )}
-            </button>
-
-            <div className="w-px h-5 bg-gray-300/50" />
-
-            {/* 3D Buildings Toggle */}
-            <button
-              onClick={() => setShow3DBuildings(!show3DBuildings)}
-              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                show3DBuildings ? 'bg-slate-700 text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={t('common:aria.toggle3DBuildings')}
-              aria-pressed={show3DBuildings}
-            >
-              <SoftIcon name="cube" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">3D</span>
-            </button>
-
-            {/* Landmarks Toggle */}
-            <button
-              onClick={() => setShowLandmarks(!showLandmarks)}
-              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                showLandmarks ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={t('common:aria.togglePointsOfInterest')}
-              aria-pressed={showLandmarks}
-            >
-              <SoftIcon name="landmark" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">POI</span>
-            </button>
-
-            {/* Measurement Tool Toggle */}
-            <button
-              onClick={() => setShowMeasurement(!showMeasurement)}
-              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                showMeasurement ? 'bg-emerald-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={t('common:aria.toggleMeasurementTool')}
-              aria-pressed={showMeasurement}
-            >
-              <SoftIcon name="ruler" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">{t('search:map.measure', 'Measure')}</span>
-            </button>
-
-            {/* Terrain (slope) Tool Toggle */}
-            <button
-              onClick={() => setShowTerrain(!showTerrain)}
-              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                showTerrain ? 'bg-lime-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={t('search:terrain.toggleAria', 'Terrain and slope tool')}
-              aria-pressed={showTerrain}
-            >
-              <SoftIcon name="mountain" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">{t('search:terrain.toggle', 'Terrain')}</span>
-            </button>
-
-            {/* Cadastre Layer Toggle */}
-            <button
-              onClick={() => setShowCadastre(!showCadastre)}
-              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                showCadastre ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={t('common:aria.toggleCadastreParcels')}
-              aria-pressed={showCadastre}
-            >
-              <SoftIcon name="mapGrid" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">{t('search:map.cadastre', 'Cadastre')}</span>
-            </button>
-
-            {/* Legend Toggle */}
-            <button
-              onClick={() => setIsLegendOpen(!isLegendOpen)}
-              className={`flex flex-col items-center flex-shrink-0 whitespace-nowrap gap-0.5 px-2.5 py-1.5 text-xs landscape:px-2 landscape:py-1 font-semibold rounded-full transition-all ${
-                isLegendOpen ? 'bg-amber-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
-              }`}
-              aria-label={t('search:map.legend', 'Legend')}
-              aria-pressed={isLegendOpen}
-            >
-              <SoftIcon name="legend" className="w-5 h-5" />
-              <span className="inline leading-none landscape:hidden">{t('search:map.legend', 'Legend')}</span>
-            </button>
-            </div>
-          </div>
+          {/* Layer toggles: magnifying dock */}
+          <MapLayerDock
+            selectedClimateRisk={selectedClimateRisk}
+            setSelectedClimateRisk={setSelectedClimateRisk}
+            isClimateMenuOpen={isClimateMenuOpen}
+            setIsClimateMenuOpen={setIsClimateMenuOpen}
+            showOnlyPromoted={showOnlyPromoted}
+            setShowOnlyPromoted={setShowOnlyPromoted}
+            promotedCount={promotedCount}
+            show3DBuildings={show3DBuildings}
+            setShow3DBuildings={setShow3DBuildings}
+            showLandmarks={showLandmarks}
+            setShowLandmarks={setShowLandmarks}
+            showMeasurement={showMeasurement}
+            setShowMeasurement={setShowMeasurement}
+            showTerrain={showTerrain}
+            setShowTerrain={setShowTerrain}
+            showCadastre={showCadastre}
+            setShowCadastre={setShowCadastre}
+            isLegendOpen={isLegendOpen}
+            setIsLegendOpen={setIsLegendOpen}
+          />
 
           {/* Drawn bounds actions */}
           {drawnBounds && !isDrawing && (
