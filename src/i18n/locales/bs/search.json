@@ -340,6 +340,12 @@
       "openHouse": "Otvoreno",
       "auction": "Aukcija",
       "today": "danas"
+    },
+    "drawLogin": {
+      "title": "Prijavite se da sačuvate područje",
+      "message": "Prijavite se prije crtanja kako biste mogli sačuvati ovo područje i primati obavijesti o novim oglasima u njemu.",
+      "login": "Prijava",
+      "drawAnyway": "Crtaj bez čuvanja"
     }
   },
   "newsletter": {

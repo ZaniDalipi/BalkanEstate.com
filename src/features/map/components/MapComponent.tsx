@@ -21,6 +21,8 @@ import { useMapComponent, USE_GOOGLE_MAPS, TILE_LAYERS, type MapComponentProps }
 import MapPropertyMarkers from './MapPropertyMarkers';
 import MapFilterControls from './MapFilterControls';
 import DrawAreaTip from './DrawAreaTip';
+import DrawLoginGate from './draw-gate/DrawLoginGate';
+import { useDrawLoginGate } from './draw-gate/useDrawLoginGate';
 
 import i18n from '@/src/i18n';
 import { SoftIcon } from '@/src/shared/illustrations';
@@ -243,6 +245,8 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
   } = props;
 
   const hook = useMapComponent(props);
+  // Logged-out users are asked to log in before drawing (only they can save the area).
+  const drawGate = useDrawLoginGate({ isDrawing, isAuthenticated, onDrawStart });
 
   // Google reports ready itself (tiles + first pins). Leaflet fades its own
   // tiles in, and the timeout notice must be seen, so those are ready at once.
@@ -287,7 +291,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           drawnBounds={drawnBounds}
           onDrawComplete={onDrawComplete}
           isDrawing={isDrawing}
-          onDrawStart={onDrawStart}
+          onDrawStart={drawGate.requestDraw}
           flyToTarget={flyToTarget}
           onFlyComplete={onFlyComplete}
           onRecenter={onRecenter}
@@ -298,6 +302,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           hideControls={hideControls}
           onReady={onReady}
         />
+        <DrawLoginGate gate={drawGate} />
       </MapErrorBoundary>
     );
   }
@@ -379,6 +384,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
         </MapContainer>
 
         <DrawAreaTip isDrawing={isDrawing} onCancel={onDrawStart} />
+        <DrawLoginGate gate={drawGate} />
 
         <MapFilterControls
           isMobile={isMobile}
@@ -404,7 +410,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           handleMapOptionChange={hook.handleMapOptionChange}
           handleClimateRiskChange={hook.handleClimateRiskChange}
           isDrawing={isDrawing}
-          onDrawStart={onDrawStart}
+          onDrawStart={drawGate.requestDraw}
           drawnBounds={drawnBounds}
           onDrawComplete={onDrawComplete}
           isAuthenticated={isAuthenticated}
