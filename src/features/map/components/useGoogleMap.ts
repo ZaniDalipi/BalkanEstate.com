@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import L from 'leaflet';
 import { isDrawnArea } from '../utils/drawTip';
+import { pixelToLatLng } from '../utils/pixelToLatLng';
 import { usePoiTiles } from '../poi/usePoiTiles';
 import { usePoiGoogleMarkers } from '../poi/usePoiGoogleMarkers';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
@@ -407,32 +408,16 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       const x = clientX - rect.left;
       const y = clientY - rect.top;
 
-      // Convert pixel position to lat/lng
-      const bounds = map.getBounds();
-      const projection = map.getProjection();
-      if (!bounds || !projection) return null;
+      // Mercator, not a straight line between the edges: latitude is uneven on screen.
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      if (!center || zoom === undefined) return null;
 
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
-      const topRight = projection.fromLatLngToPoint(ne);
-      const bottomLeft = projection.fromLatLngToPoint(sw);
-      if (!topRight || !bottomLeft) return null;
-
-      const scale = Math.pow(2, map.getZoom() || 0);
-      const worldPoint = new google.maps.Point(
-        bottomLeft.x + (x / scale) * (topRight.x - bottomLeft.x) / rect.width * scale,
-        topRight.y + (y / scale) * (bottomLeft.y - topRight.y) / rect.height * scale
+      return pixelToLatLng(
+        { center: { lat: center.lat(), lng: center.lng() }, zoom, width: rect.width, height: rect.height },
+        x,
+        y
       );
-
-      // Simpler approach: use overlay projection
-      const latLng = map.getCenter();
-      if (!latLng) return null;
-
-      // Calculate based on bounds
-      const lng = sw.lng() + (x / rect.width) * (ne.lng() - sw.lng());
-      const lat = ne.lat() - (y / rect.height) * (ne.lat() - sw.lat());
-
-      return { lat, lng };
     };
 
     const handleMouseDown = (e: MouseEvent | TouchEvent) => {
