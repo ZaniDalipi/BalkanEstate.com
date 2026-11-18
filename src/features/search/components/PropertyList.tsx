@@ -132,17 +132,22 @@ const FilterButtonGroup = <T extends string | number | null>({
   icon,
   options,
   selectedValue,
-  onChange
+  onChange,
+  wrap = false
 }: {
   label: string;
   icon?: FilterIcon;
   options: { value: T; label: string }[];
   selectedValue: T;
   onChange: (value: T) => void;
+  /** Long option lists wrap onto more lines instead of pushing the panel wider than the screen. */
+  wrap?: boolean;
 }) => (
-  <div>
+  <div className="min-w-0">
     <FilterLabel icon={icon}>{label}</FilterLabel>
-    <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
+    <div className={`flex items-center bg-neutral-100 p-1 border border-neutral-200 ${
+      wrap ? 'flex-wrap gap-1 rounded-2xl' : 'space-x-1 rounded-full'
+    }`}>
       {options.map(({ value, label: optionLabel }) => (
         <FilterButton
           key={optionLabel}
@@ -429,6 +434,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 ]}
                                 selectedValue={filters.propertyType}
                                 onChange={(value) => onFilterChange('propertyType', (value as Filters['propertyType']) || 'any')}
+                                wrap
                             />
                         </div>
 
