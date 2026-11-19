@@ -16,7 +16,8 @@ export interface Terrain3DInfoProps {
   titleId: string;
   analysis: TerrainAnalysis;
   surface: PlotSurface;
-  exaggeration: Exaggeration;
+  /** How much heights are stretched; null on Google's photorealistic 3D map, which shows them as they are. */
+  exaggeration: Exaggeration | null;
   /** Whether buildings from the map stand round the plot. */
   buildings: boolean;
 }
@@ -38,10 +39,14 @@ const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, surfac
         </div>
       )}
       <p className={`mt-2 ${CAPTION}`}>
-        {exaggeration === 1
-          ? t('terrain.view3d.trueScale', 'Heights are shown true to scale.')
-          : t('terrain.view3d.exaggerated', 'Heights are stretched ×{{n}} so the shape of the land is easier to see.', { n: exaggeration })}
-        {analysis.buildSpot && (
+        {exaggeration === null && t('terrain.view3d.googleNote', '3D imagery from Google, at true scale.')}
+        {exaggeration === 1 && t('terrain.view3d.trueScale', 'Heights are shown true to scale.')}
+        {exaggeration !== null && exaggeration > 1
+          && t('terrain.view3d.exaggerated', 'Heights are stretched ×{{n}} so the shape of the land is easier to see.', { n: exaggeration })}
+        {exaggeration === null && analysis.buildSpot && (
+          <> {t('terrain.view3d.pinNote', 'The pin marks the best place to build.')}</>
+        )}
+        {exaggeration !== null && analysis.buildSpot && (
           <> {t('terrain.view3d.houseNote', 'The house marks the best place to build, at true size (about 12 × 9 m).')}</>
         )}
         {buildings && (

@@ -4,6 +4,8 @@
 import { useJsApiLoader } from '@react-google-maps/api';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
+/** Whether a Google Maps key is set, so Google's maps (and its 3D map) can be used. */
+export const HAS_GOOGLE_MAPS_KEY = Boolean(GOOGLE_MAPS_API_KEY);
 const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'marker')[] = ['places', 'geometry', 'marker'];
 
 export const useGoogleMapLoader = () => {
