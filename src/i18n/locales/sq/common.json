@@ -932,5 +932,14 @@
   "scroller": {
     "scrollLeft": "Lëviz majtas",
     "scrollRight": "Lëviz djathtas"
+  },
+  "inquiryErrors": {
+    "invalidName": "Ju lutemi shkruani emrin tuaj (2–100 karaktere).",
+    "invalidEmail": "Ju lutemi shkruani një adresë email të vlefshme.",
+    "invalidPhone": "Ky numër telefoni nuk është i vlefshëm. Kontrolloni prefiksin e shtetit dhe numrin, ose lëreni bosh.",
+    "phoneMismatch": "Ju lutemi përdorni të njëjtin numër telefoni si në kërkesat tuaja të mëparshme.",
+    "invalidMessage": "Ju lutemi shkruani një mesazh (deri në 2000 karaktere).",
+    "duplicate": "Këtë kërkesë e keni dërguar tashmë. Agjenti do t'ju përgjigjet me email.",
+    "tooMany": "Keni dërguar shumë kërkesa së fundmi. Ju lutemi provoni përsëri pas një ore."
   }
 }

@@ -9,6 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
 import { Property } from '@/types';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import InquiryHoneypot from './InquiryHoneypot';
+import { HONEYPOT_FIELD, readHoneypot } from '../utils/inquiryHoneypot';
+import { useInquiryFieldErrors } from '../hooks/useInquiryFieldErrors';
 import { XMarkIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { optimizeImageUrl } from '@/config/mediaConfig';
@@ -53,6 +56,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { phoneError, clearPhoneError, checkPhone, showSendError } = useInquiryFieldErrors(setError);
   const [mounted, setMounted] = useState(false);
 
   // Ensure we only render portal on client side
@@ -86,6 +90,8 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
       setError(t('property:inquiry.messageRequired', 'Message is required'));
       return;
     }
+    if (!checkPhone(formData.buyerPhone)) return;
+    const honeypot = readHoneypot(e.currentTarget as HTMLFormElement);
 
     if (sendingRef.current) return;
     sendingRef.current = true;
@@ -106,12 +112,13 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
         buyerName: formData.buyerName.trim(),
         buyerEmail: formData.buyerEmail.trim(),
         buyerPhone: formData.buyerPhone.trim() || undefined,
+        [HONEYPOT_FIELD]: honeypot,
         message: fullMessage,
       });
       draft.finish();
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('property:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
+      showSendError(err, t('property:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
     } finally {
       sendingRef.current = false;
       setIsSubmitting(false);
@@ -220,7 +227,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
 
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm">{error}</p>
+                  <p role="alert" className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
 
@@ -229,6 +236,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
               <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
               <form onSubmit={handleSubmit} className="space-y-4" onKeyDown={handleFormEnterKey}>
+                <InquiryHoneypot />
                 {/* Name */}
                 <div className="relative">
                   <input
@@ -270,8 +278,12 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                   </label>
                   <PhoneInput
                     value={formData.buyerPhone}
-                    onChange={(v) => setFormData(prev => ({ ...prev, buyerPhone: v }))}
+                    onChange={(v) => { setFormData(prev => ({ ...prev, buyerPhone: v })); clearPhoneError(); }}
+                    error={phoneError ?? undefined}
                   />
+                  {phoneError && (
+                    <p role="alert" className="mt-1 text-xs text-red-600">{phoneError}</p>
+                  )}
                 </div>
 
                 {/* Message */}
@@ -279,6 +291,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
                   <textarea
                     id="message"
                     name="message"
+                    maxLength={2000}
                     value={formData.message}
                     onChange={handleChange}
                     rows={4}

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { escapeHtml } from '../utils/escapeHtml';
 import { Resend } from 'resend';
 import User, { DEFAULT_EMAIL_PREFERENCES, IEmailPreferences } from '../models/User';
 import { CITY_MARKET_DIGEST_EMAIL_TYPE } from '../config/cityMarketDigest';
@@ -10,18 +11,6 @@ import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml
 // Security Utilities
 // =============================================================================
 
-/**
- * Escape HTML special characters to prevent XSS attacks
- */
-function escapeHtml(unsafe: string | undefined | null): string {
-  if (unsafe == null) return '';
-  return String(unsafe)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
 
 /**
  * Validate email address format

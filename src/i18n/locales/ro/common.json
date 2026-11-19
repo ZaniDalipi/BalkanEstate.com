@@ -932,5 +932,14 @@
   "scroller": {
     "scrollLeft": "Derulează la stânga",
     "scrollRight": "Derulează la dreapta"
+  },
+  "inquiryErrors": {
+    "invalidName": "Introduceți numele dvs. (2–100 de caractere).",
+    "invalidEmail": "Introduceți o adresă de email validă.",
+    "invalidPhone": "Acest număr de telefon nu este valid. Verificați prefixul țării și numărul sau lăsați câmpul gol.",
+    "phoneMismatch": "Folosiți același număr de telefon ca în solicitările anterioare.",
+    "invalidMessage": "Scrieți un mesaj (până la 2000 de caractere).",
+    "duplicate": "Ați trimis deja această solicitare. Agentul vă va răspunde prin email.",
+    "tooMany": "Ați trimis multe solicitări recent. Încercați din nou peste o oră."
   }
 }

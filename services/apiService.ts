@@ -593,6 +593,8 @@ export interface InquiryParams {
   buyerEmail: string;
   buyerPhone?: string;
   message: string;
+  /** Hidden honeypot field; always '' when a person sends the form. */
+  confirm_details?: string;
 }
 
 export interface PropertyInquiryParams extends InquiryParams {

@@ -9,6 +9,9 @@ import { sendAgentInquiry } from '@/services/apiService';
 import { XMarkIcon } from '@/constants';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import InquiryHoneypot from './InquiryHoneypot';
+import { HONEYPOT_FIELD, readHoneypot } from '../utils/inquiryHoneypot';
+import { useInquiryFieldErrors } from '../hooks/useInquiryFieldErrors';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
 import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
@@ -70,6 +73,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { phoneError, clearPhoneError, checkPhone, showSendError } = useInquiryFieldErrors(setError);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   // Lock background scroll when modal is open
@@ -141,6 +145,8 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
       setError(t('agents:inquiry.messageRequired', 'Message is required'));
       return;
     }
+    if (!checkPhone(formData.buyerPhone)) return;
+    const honeypot = readHoneypot(e.currentTarget as HTMLFormElement);
 
     if (sendingRef.current) return;
     sendingRef.current = true;
@@ -155,12 +161,13 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
         buyerName: formData.buyerName.trim(),
         buyerEmail: formData.buyerEmail.trim(),
         buyerPhone: formData.buyerPhone.trim() || undefined,
+        [HONEYPOT_FIELD]: honeypot,
         message: formData.message.trim(),
       });
       draft.finish();
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('agents:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
+      showSendError(err, t('agents:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
     } finally {
       sendingRef.current = false;
       setIsSubmitting(false);
@@ -314,7 +321,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
                   <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
-                  <p className="text-red-700 text-sm">{error}</p>
+                  <p role="alert" className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
 
@@ -323,6 +330,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
               <DraftRestoredNotice savedAt={draft.restoredAt} onDiscard={discardDraft} className="mb-4" />
 
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5" onKeyDown={handleFormEnterKey}>
+                <InquiryHoneypot />
 
                 {/* Name + Email — stacked on mobile, side-by-side on tablet+ */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -372,8 +380,12 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                   </label>
                   <PhoneInput
                     value={formData.buyerPhone}
-                    onChange={(v) => setFormData(prev => ({ ...prev, buyerPhone: v }))}
+                    onChange={(v) => { setFormData(prev => ({ ...prev, buyerPhone: v })); clearPhoneError(); }}
+                    error={phoneError ?? undefined}
                   />
+                  {phoneError && (
+                    <p role="alert" className="mt-1 text-xs text-red-600">{phoneError}</p>
+                  )}
                 </div>
 
                 {/* Message + counter */}
@@ -389,6 +401,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                   <textarea
                     id="ai-message"
                     name="message"
+                    maxLength={MAX_MESSAGE_LENGTH}
                     value={formData.message}
                     onChange={handleChange}
                     // 3 rows on mobile (saves vertical space), 4 on tablet+

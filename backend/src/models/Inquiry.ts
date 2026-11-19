@@ -12,6 +12,8 @@ export interface IInquiry extends Document {
   buyerEmail: string;
   buyerPhone?: string;
   buyerId?: mongoose.Types.ObjectId; // If the sender is a registered user
+  /** Keyed hash of the sender's IP, for spotting scripted senders (never the raw IP). */
+  senderIpHash?: string;
 
   // Recipient info (agent/seller) - optional for 'contact' type
   recipientId?: mongoose.Types.ObjectId;
@@ -86,6 +88,10 @@ const InquirySchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    senderIpHash: {
+      type: String,
+      select: false,
+    },
 
     // Recipient info (optional for 'contact' type inquiries)
     recipientId: {
@@ -159,7 +165,8 @@ const InquirySchema: Schema = new Schema(
 
 // Indexes for efficient queries
 InquirySchema.index({ recipientId: 1, status: 1 });
-InquirySchema.index({ buyerEmail: 1 });
+InquirySchema.index({ buyerEmail: 1, createdAt: -1 });
+InquirySchema.index({ senderIpHash: 1, createdAt: -1 }, { sparse: true });
 InquirySchema.index({ propertyId: 1 });
 InquirySchema.index({ developmentId: 1, createdAt: -1 });
 InquirySchema.index({ type: 1, status: 1 });

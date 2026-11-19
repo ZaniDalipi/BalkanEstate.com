@@ -952,5 +952,14 @@
   "scroller": {
     "scrollLeft": "Scroll left",
     "scrollRight": "Scroll right"
+  },
+  "inquiryErrors": {
+    "invalidName": "Please enter your name (2–100 characters).",
+    "invalidEmail": "Please enter a valid email address.",
+    "invalidPhone": "This phone number is not valid. Check the country code and number, or leave it empty.",
+    "phoneMismatch": "Please use the same phone number as in your earlier inquiries.",
+    "invalidMessage": "Please write a message (up to 2000 characters).",
+    "duplicate": "You already sent this inquiry. The agent will reply to you by email.",
+    "tooMany": "You have sent many inquiries recently. Please try again in an hour."
   }
 }

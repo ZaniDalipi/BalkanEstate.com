@@ -1,27 +1,34 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
+import { sendContactInquiry, uploadAdvertisingImage } from '../controllers/inquiryController';
 import {
   sendPropertyInquiry,
   sendAgentGeneralInquiry,
   sendAreaSearchInquiry,
-  sendContactInquiry,
-  uploadAdvertisingImage,
-} from '../controllers/inquiryController';
+} from '../controllers/buyerInquiryController';
 import { decryptPayload } from '../middleware/decryptPayload';
+import { optionalAuth } from '../middleware/auth';
+import { rateLimitStore } from '../middleware/redisRateLimitStore';
 
 const router = express.Router();
 
 const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 
-// Rate limit inquiries to prevent spam (10 inquiries per hour per IP)
+// First line of defence against spam: 15 inquiry requests per hour per IP,
+// counted in Redis when REDIS_URL is set so every server instance shares them.
+// The per-email / per-IP rules in services/inquiries/senderLimits.ts sit
+// behind this and also hold in development.
 const inquiryRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 30,
-  message: { message: 'Too many inquiries sent. Please try again later.' },
+  max: 15,
+  store: rateLimitStore('inquiries'),
+  passOnStoreError: true,
+  message: { message: 'Too many inquiries sent. Please try again later.', code: 'sender_limit' },
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => isDevelopment, // Skip rate limiting in development
+  validate: { xForwardedForHeader: false },
 });
 
 // Image upload for advertising creatives (public, image only, 5MB, no SVG).
@@ -41,17 +48,17 @@ const adImageUpload = multer({
   },
 });
 
-// All inquiry routes are public (no auth required)
-// but rate-limited to prevent abuse
+// All inquiry routes are public (no auth required) but rate-limited.
+// optionalAuth records a signed-in sender as the inquiry's buyerId.
 
 // Send inquiry about a specific property
-router.post('/property', inquiryRateLimiter, decryptPayload, sendPropertyInquiry);
+router.post('/property', inquiryRateLimiter, decryptPayload, optionalAuth, sendPropertyInquiry);
 
 // Send general inquiry to an agent
-router.post('/agent', inquiryRateLimiter, decryptPayload, sendAgentGeneralInquiry);
+router.post('/agent', inquiryRateLimiter, decryptPayload, optionalAuth, sendAgentGeneralInquiry);
 
 // Send area search inquiry (sent to multiple agents in an area)
-router.post('/area-search', inquiryRateLimiter, decryptPayload, sendAreaSearchInquiry);
+router.post('/area-search', inquiryRateLimiter, decryptPayload, optionalAuth, sendAreaSearchInquiry);
 
 // Send contact form inquiry to platform team
 router.post('/contact', inquiryRateLimiter, decryptPayload, sendContactInquiry);

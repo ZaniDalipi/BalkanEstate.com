@@ -932,5 +932,14 @@
   "scroller": {
     "scrollLeft": "Pomakni lijevo",
     "scrollRight": "Pomakni desno"
+  },
+  "inquiryErrors": {
+    "invalidName": "Unesite svoje ime (2–100 znakova).",
+    "invalidEmail": "Unesite valjanu adresu e-pošte.",
+    "invalidPhone": "Ovaj broj telefona nije valjan. Provjerite pozivni broj države i broj ili ostavite polje prazno.",
+    "phoneMismatch": "Koristite isti broj telefona kao u prethodnim upitima.",
+    "invalidMessage": "Napišite poruku (do 2000 znakova).",
+    "duplicate": "Ovaj upit ste već poslali. Agent će vam odgovoriti e-poštom.",
+    "tooMany": "Nedavno ste poslali mnogo upita. Pokušajte ponovno za sat vremena."
   }
 }
