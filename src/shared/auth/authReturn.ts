@@ -1,10 +1,10 @@
 /**
  * Where to return after signing in, and what the user was about to do.
  *
- * Signing in normally ends on the search page. A page that asks the user to
- * sign in for something (Follow on a residence) remembers itself here, and
- * sign-in comes back to it instead — also after Google/Apple, which leave the
- * site and return on /auth/callback. An "intent" (e.g. "follow this residence") lets the page
+ * Signing in comes back to the page the sign-in window was opened over (a
+ * listing, a photo, the home page), also after Google/Apple, which leave the
+ * site and return on /auth/callback. Only when there is no such page (the
+ * `/login` entry point) does it end on the search page. An "intent" (e.g. "follow this residence") lets the page
  * finish the action the user asked for once they are back and signed in.
  * Both expire after 30 minutes and only same-site paths are accepted.
  */
@@ -68,6 +68,26 @@ const take = <T>(key: string): T | null => {
 export function rememberReturnPath(path = `${window.location.pathname}${window.location.search}`): void {
   const safe = safeReturnPath(path);
   if (safe) store(RETURN_KEY, safe);
+}
+
+/**
+ * Remember the page the sign-in window opened over. On a sign-in page itself
+ * (`/login`) there is nothing to return to, so an older remembered page is
+ * dropped rather than reused.
+ */
+export function rememberSignInOrigin(path = `${window.location.pathname}${window.location.search}`): void {
+  if (safeReturnPath(path)) rememberReturnPath(path);
+  else forgetReturnPath();
+}
+
+/**
+ * Where to go once signed in: the remembered page, else the page the user is
+ * on, else `fallback`. `null` means stay put — the user is already there, so
+ * nothing on the page (an open photo, a half-filled form) is lost.
+ */
+export function signInDestination(remembered: string | null, current: string, fallback: string): string | null {
+  const target = remembered ?? safeReturnPath(current) ?? fallback;
+  return target === current ? null : target;
 }
 
 /** The page to go back to after signing in (read once). */

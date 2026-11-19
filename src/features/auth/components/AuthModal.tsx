@@ -9,6 +9,7 @@ import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 import { getAvailableOAuthProviders } from '@/services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { useRememberSignInOrigin } from '../hooks/useRememberSignInOrigin';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -227,6 +228,7 @@ const AuthPage: React.FC = () => {
     const { t: rawT } = useTranslation(['auth', 'common', 'modals']);
     const t = rawT as (key: string, defaultValue?: string, options?: Record<string, string>) => string;
     const { state, dispatch, login, signup, requestPasswordReset, loginWithSocial } = useAppContext();
+    useRememberSignInOrigin();
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);

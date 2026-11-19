@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect, useRef, useMemo } from 'react';
-import { takeReturnPath } from '@/src/shared/auth/authReturn';
+import { returnAfterSignIn } from '@/src/app/router/returnAfterSignIn';
 import { User, Property, SavedSearch, Conversation, AppState, AppAction, Filters, Message, AuthModalView, initialFilters, SearchPageState } from '../types';
 import {
   checkAuth as apiCheckAuth,
@@ -467,8 +467,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Check if there's a pending subscription and navigate to pricing page
       setTimeout(() => navigate(paths.pricing()), 500);
     } else {
-      // Back to the page that asked for sign-in (e.g. Follow on a residence), else search.
-      navigate(takeReturnPath() ?? paths.search(), { replace: true });
+      // Back to the page the sign-in window was opened over.
+      returnAfterSignIn();
     }
 
     return user;
@@ -518,8 +518,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Check if there's a pending subscription and navigate to pricing page
       setTimeout(() => navigate(paths.pricing()), 500);
     } else {
-      // Back to the page that asked for sign-up (e.g. Follow on a residence), else search.
-      navigate(takeReturnPath() ?? paths.search(), { replace: true });
+      // Back to the page the sign-up window was opened over.
+      returnAfterSignIn();
     }
 
     return user;
@@ -586,8 +586,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const userData = await apiGetMyData();
         dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
 
-        // Back to the page that asked for sign-in (e.g. Follow on a residence), else search.
-        navigate(takeReturnPath() ?? paths.search(), { replace: true });
+        // Back to the page the sign-in window was opened over.
+        returnAfterSignIn();
       } else {
         throw new Error('Failed to fetch user profile');
       }

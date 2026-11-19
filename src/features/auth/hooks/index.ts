@@ -7,3 +7,4 @@ export { useSignup } from './useSignup';
 export { useLogout } from './useLogout';
 export { usePasswordReset } from './usePasswordReset';
 export { usePhoneAuth } from './usePhoneAuth';
+export { useRememberSignInOrigin } from './useRememberSignInOrigin';
