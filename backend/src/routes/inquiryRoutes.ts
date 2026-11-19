@@ -10,6 +10,7 @@ import {
 import { decryptPayload } from '../middleware/decryptPayload';
 import { optionalAuth } from '../middleware/auth';
 import { rateLimitStore } from '../middleware/redisRateLimitStore';
+import { requireTurnstile } from '../middleware/requireTurnstile';
 
 const router = express.Router();
 
@@ -52,16 +53,16 @@ const adImageUpload = multer({
 // optionalAuth records a signed-in sender as the inquiry's buyerId.
 
 // Send inquiry about a specific property
-router.post('/property', inquiryRateLimiter, decryptPayload, optionalAuth, sendPropertyInquiry);
+router.post('/property', inquiryRateLimiter, requireTurnstile(), decryptPayload, optionalAuth, sendPropertyInquiry);
 
 // Send general inquiry to an agent
-router.post('/agent', inquiryRateLimiter, decryptPayload, optionalAuth, sendAgentGeneralInquiry);
+router.post('/agent', inquiryRateLimiter, requireTurnstile(), decryptPayload, optionalAuth, sendAgentGeneralInquiry);
 
 // Send area search inquiry (sent to multiple agents in an area)
-router.post('/area-search', inquiryRateLimiter, decryptPayload, optionalAuth, sendAreaSearchInquiry);
+router.post('/area-search', inquiryRateLimiter, requireTurnstile(), decryptPayload, optionalAuth, sendAreaSearchInquiry);
 
 // Send contact form inquiry to platform team
-router.post('/contact', inquiryRateLimiter, decryptPayload, sendContactInquiry);
+router.post('/contact', inquiryRateLimiter, requireTurnstile(), decryptPayload, sendContactInquiry);
 
 // Upload an advertising creative (attached to an advertising contact request)
 router.post('/advertising-image', inquiryRateLimiter, adImageUpload.single('image'), uploadAdvertisingImage);

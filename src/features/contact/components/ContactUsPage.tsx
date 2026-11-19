@@ -21,6 +21,7 @@ import { useAppContext } from '@/context/AppContext';
 import { formDraftKey } from '@/src/shared/utils/formDraftStorage';
 import DraftRestoredNotice from '@/src/shared/components/ui/DraftRestoredNotice';
 import FormLeaveGuard from '@/src/shared/components/forms/FormLeaveGuard';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 
 // Inline SVG icons to avoid importing full icon set
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -88,6 +89,7 @@ const ContactUsPage: React.FC = () => {
   );
 
   const [isAdImageUploading, setIsAdImageUploading] = useState(false);
+  const captcha = useTurnstile('contact');
 
   const handleAdImageSelect = useCallback(
     async (file: File) => {
@@ -119,7 +121,7 @@ const ContactUsPage: React.FC = () => {
       e.preventDefault();
       handleSubmit(async (data: ContactFormData) => {
         const isAd = data.subject === 'advertising';
-        await sendContactInquiry({
+        await captcha.send((headers) => sendContactInquiry({
           name: data.name,
           email: data.email,
           phone: data.phone || undefined,
@@ -128,10 +130,10 @@ const ContactUsPage: React.FC = () => {
           adPage: isAd ? data.adPage : undefined,
           adPlacement: isAd ? data.adPlacement : undefined,
           attachmentUrl: isAd ? data.adImageUrl : undefined,
-        });
+        }, headers));
       });
     },
-    [handleSubmit]
+    [handleSubmit, captcha.send]
   );
 
   const contactInfoItems = [
@@ -216,6 +218,7 @@ const ContactUsPage: React.FC = () => {
                       onAdImageSelect={handleAdImageSelect}
                       onAdImageClear={handleAdImageClear}
                       isAdImageUploading={isAdImageUploading}
+                      captcha={<TurnstileWidget {...captcha.widgetProps} />}
                     />
                   </>
                 )}

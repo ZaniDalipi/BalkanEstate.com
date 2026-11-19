@@ -137,11 +137,14 @@ export const getPublicViews = (
 export const sendUnitInquiry = (
   slug: string,
   unitId: string,
-  payload: UnitInquiryPayload
+  payload: UnitInquiryPayload,
+  /** Carries the captcha token (see src/shared/captcha). */
+  headers: Record<string, string> = {}
 ): Promise<{ message: string }> =>
   apiRequest(`${PUBLIC}/${encodeURIComponent(slug)}/units/${unitId}/inquiries`, {
     method: 'POST',
     body: payload,
+    headers,
   });
 
 // --- Dashboard: development lifecycle -------------------------------------

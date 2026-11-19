@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { resendVerificationEmail } from '@/services/apiService';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 import { LogoIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 
@@ -14,6 +15,7 @@ const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ e
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const captcha = useTurnstile('resend_verification');
   const [cooldown, setCooldown] = useState(0);
 
   const handleResendEmail = async () => {
@@ -24,7 +26,7 @@ const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ e
     setResendSuccess(false);
 
     try {
-      await resendVerificationEmail(email);
+      await captcha.send((headers) => resendVerificationEmail(email, headers));
       setResendSuccess(true);
       // Start 60 second cooldown
       setCooldown(60);
@@ -113,6 +115,7 @@ const EmailVerificationRequired: React.FC<EmailVerificationRequiredProps> = ({ e
         )}
 
         <div className="space-y-3">
+          <TurnstileWidget {...captcha.widgetProps} />
           <button
             onClick={handleResendEmail}
             disabled={isResending || cooldown > 0}

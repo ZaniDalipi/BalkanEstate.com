@@ -148,6 +148,7 @@ export const helmetConfig = helmet({
         'https://unpkg.com',
         'https://www.googletagmanager.com',
         'https://connect.facebook.net',
+        'https://challenges.cloudflare.com', // Turnstile captcha
       ],
       styleSrc: [
         "'self'",
@@ -194,6 +195,7 @@ export const helmetConfig = helmet({
         'https://www.googletagmanager.com',
         'https://connect.facebook.net',
         'https://*.sentry.io', // Error tracking
+        'https://challenges.cloudflare.com', // Turnstile captcha
         // Development URLs
         ...(isDevelopment ? [
           'http://localhost:5001',
@@ -203,6 +205,7 @@ export const helmetConfig = helmet({
       ],
       frameSrc: [
         "'self'",
+        'https://challenges.cloudflare.com', // Turnstile captcha
       ],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'", ...ALLOWED_PHOTO_HOSTS.map(host => `https://${host}`), 'blob:'],
@@ -321,6 +324,7 @@ export const getCorsConfig = () => {
       'Origin',
       'X-CSRF-Token',
       'X-Response-Key',
+      'X-Turnstile-Token',
     ],
     exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
     maxAge: 86400, // 24 hours

@@ -9,6 +9,8 @@ interface ImportMetaEnv {
    */
   readonly VITE_MEDIA_CDN_URL?: string;
   readonly VITE_GOOGLE_CLIENT_ID?: string;
+  /** Cloudflare Turnstile site key; empty hides the captcha widget. */
+  readonly VITE_TURNSTILE_SITE_KEY?: string;
   readonly VITE_GOOGLE_MAPS_KEY?: string;
   readonly VITE_GOOGLE_MAPS_MAP_ID?: string;
   readonly VITE_FACEBOOK_APP_ID?: string;

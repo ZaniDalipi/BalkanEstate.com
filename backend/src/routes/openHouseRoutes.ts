@@ -9,6 +9,7 @@ import {
   postOpenHouse,
   postRsvp,
 } from '../controllers/openHouseController';
+import { requireTurnstile } from '../middleware/requireTurnstile';
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.get('/mine', protect, getMyOpenHouses);
 router.get('/property/:propertyId', optionalAuth, getPropertyOpenHouses);
 router.post('/', protect, postOpenHouse);
 router.delete('/:id', protect, deleteOpenHouse);
-router.post('/:id/rsvp', rsvpRateLimiter, optionalAuth, postRsvp);
+router.post('/:id/rsvp', rsvpRateLimiter, requireTurnstile(), optionalAuth, postRsvp);
 router.delete('/:id/rsvp', rsvpRateLimiter, optionalAuth, deleteRsvp);
 
 export default router;

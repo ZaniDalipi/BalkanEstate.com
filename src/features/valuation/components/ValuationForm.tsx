@@ -10,6 +10,8 @@ import type { ValuationInput, PropertyType, PropertyCondition, ViewType, Furnish
 interface ValuationFormProps {
   onSubmit: (data: ValuationInput) => void;
   isLoading?: boolean;
+  /** Security check (and its message) shown above the submit button. */
+  captcha?: React.ReactNode;
 }
 
 // Property type icons
@@ -74,7 +76,7 @@ const RoomCounter: React.FC<{
   </div>
 );
 
-const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = false }) => {
+const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = false, captcha }) => {
   const { t, i18n } = useTranslation(['valuation', 'common']);
 
   // Form state
@@ -599,6 +601,8 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
           </motion.div>
         )}
       </AnimatePresence>
+
+      {captcha}
 
       {/* Submit Button */}
       <button

@@ -232,7 +232,7 @@ describe('ApartmentDetailsDrawer + useUnitDrawer', () => {
       fireEvent.submit(form);
     });
     await screen.findByRole('status');
-    expect(h.sendUnitInquiry).toHaveBeenCalledWith('res', 'u1', expect.objectContaining({ name: 'Ana', email: 'ana@example.com' }));
+    expect(h.sendUnitInquiry).toHaveBeenCalledWith('res', 'u1', expect.objectContaining({ name: 'Ana', email: 'ana@example.com' }), {}); // {}: no captcha token when no site key is set
   });
 
   it('shows the error state when the inquiry fails', async () => {

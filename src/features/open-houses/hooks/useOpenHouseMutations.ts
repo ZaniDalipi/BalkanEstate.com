@@ -24,7 +24,8 @@ export function useRsvp(propertyId: string, isSignedIn: boolean) {
   const qc = useQueryClient();
   const refresh = () => qc.invalidateQueries({ queryKey: openHouseKeys.property(propertyId) });
   const join = useMutation({
-    mutationFn: ({ openHouseId, input }: { openHouseId: string; input: RsvpInput }) => rsvpOpenHouse(openHouseId, input),
+    mutationFn: ({ openHouseId, input, headers }: { openHouseId: string; input: RsvpInput; headers?: Record<string, string> }) =>
+      rsvpOpenHouse(openHouseId, input, headers),
     onSuccess: (oh) => {
       if (!isSignedIn && oh.myRsvpId) rememberGuestRsvp(oh.id, oh.myRsvpId);
       return refresh();

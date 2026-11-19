@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { sendUnitInquiry } from '../../../../api/developmentsApi';
 import type { UnitInquiryPayload } from '../../../../types';
 import { validateInquiry, type InquiryErrors, type InquiryField } from './validateInquiry';
+import { TurnstileWidget, isCaptchaError, useTurnstile } from '@/src/shared/captcha';
 
 interface UnitInquiryFormProps {
   slug: string;
@@ -34,7 +35,10 @@ export const UnitInquiryForm: React.FC<UnitInquiryFormProps> = ({ slug, unitId, 
     message: defaultMessage,
   });
   const [errors, setErrors] = useState<InquiryErrors>({});
-  const mutation = useMutation({ mutationFn: (p: UnitInquiryPayload) => sendUnitInquiry(slug, unitId, p) });
+  const captcha = useTurnstile('unit_inquiry');
+  const mutation = useMutation({
+    mutationFn: (p: UnitInquiryPayload) => captcha.send((headers) => sendUnitInquiry(slug, unitId, p, headers)),
+  });
 
   if (mutation.isSuccess) {
     return (
@@ -73,9 +77,10 @@ export const UnitInquiryForm: React.FC<UnitInquiryFormProps> = ({ slug, unitId, 
       {field('email', t('explorer.inquiry.email', 'Email'), <input className={input} type="email" value={values.email} onChange={set('email')} autoComplete="email" maxLength={254} />)}
       {field('phone', t('explorer.inquiry.phone', 'Phone (optional)'), <input className={input} type="tel" value={values.phone} onChange={set('phone')} autoComplete="tel" maxLength={25} />)}
       {field('message', t('explorer.inquiry.message', 'Message'), <textarea className={`${input} min-h-[110px]`} value={values.message} onChange={set('message')} maxLength={2000} />)}
+      <TurnstileWidget {...captcha.widgetProps} />
       {mutation.isError && (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {t('explorer.inquiry.error', 'Your inquiry could not be sent. Please try again.')}
+          {isCaptchaError(mutation.error) ? mutation.error.message : t('explorer.inquiry.error', 'Your inquiry could not be sent. Please try again.')}
         </p>
       )}
       <button type="submit" disabled={mutation.isPending} className="inline-flex min-h-[48px] w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60">

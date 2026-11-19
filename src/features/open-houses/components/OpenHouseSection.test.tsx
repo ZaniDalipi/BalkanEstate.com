@@ -87,7 +87,8 @@ describe('OpenHouseSection', () => {
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ana@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Count me in' }));
 
-    await waitFor(() => expect(h.rsvp).toHaveBeenCalledWith('oh1', { name: 'Ana', email: 'ana@example.com', phone: undefined }));
+    // {}: no captcha token when no site key is set
+    await waitFor(() => expect(h.rsvp).toHaveBeenCalledWith('oh1', { name: 'Ana', email: 'ana@example.com', phone: undefined }, {}));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     // The guest's sign-up is remembered in this browser, so the page shows it.
     expect(await screen.findByText(/You're going/)).toBeInTheDocument();

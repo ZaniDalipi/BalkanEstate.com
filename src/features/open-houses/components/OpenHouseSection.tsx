@@ -8,6 +8,7 @@ import { openHouseErrorKey } from '../utils/openHouseErrorKey';
 import type { OpenHouse, RsvpInput } from '../types';
 import OpenHouseSlot from './OpenHouseSlot';
 import RsvpDialog from './RsvpDialog';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 
 interface OpenHouseSectionProps {
   property: { id: string; title?: string; address?: string; city?: string; country?: string };
@@ -28,10 +29,14 @@ const OpenHouseSection: React.FC<OpenHouseSectionProps> = ({ property, viewer, o
   const { data: openHouses } = useOpenHouses(property.id);
   const { join, leave } = useRsvp(property.id, viewer.isSignedIn);
   const [selected, setSelected] = useState<OpenHouse | null>(null);
+  const captcha = useTurnstile('open_house_rsvp');
+  const [captchaBlock, setCaptchaBlock] = useState<string | null>(null);
 
   if (!openHouses || openHouses.length === 0) return null;
 
   const errorMessage = (e: unknown): string => {
+    const captchaMessage = captcha.errorMessage(e);
+    if (captchaMessage) return captchaMessage;
     const { key, defaultValue } = openHouseErrorKey(e);
     return t(key, { defaultValue });
   };
@@ -66,7 +71,7 @@ const OpenHouseSection: React.FC<OpenHouseSectionProps> = ({ property, viewer, o
             key={oh.id}
             openHouse={oh}
             busy={(join.isPending && join.variables?.openHouseId === oh.id) || (leave.isPending && leave.variables?.openHouseId === oh.id)}
-            onRsvp={() => { join.reset(); setSelected(oh); }}
+            onRsvp={() => { join.reset(); setCaptchaBlock(null); setSelected(oh); }}
             onCancelRsvp={() => leave.mutate({ openHouseId: oh.id, rsvpId: oh.myRsvpId })}
             onAddToCalendar={() => addToCalendar(oh)}
             fallback={fallback}
@@ -82,8 +87,17 @@ const OpenHouseSection: React.FC<OpenHouseSectionProps> = ({ property, viewer, o
           whenLabel={label(selected)}
           defaults={{ name: viewer.name, email: viewer.email, phone: viewer.phone }}
           submitting={join.isPending}
-          serverError={join.isError ? errorMessage(join.error) : null}
-          onSubmit={(input) => join.mutate({ openHouseId: selected.id, input }, { onSuccess: () => setSelected(null) })}
+          serverError={captchaBlock ?? (join.isError ? errorMessage(join.error) : null)}
+          captcha={<TurnstileWidget {...captcha.widgetProps} />}
+          onSubmit={(input) => {
+            const blocked = captcha.blockReason();
+            setCaptchaBlock(blocked);
+            if (blocked) return;
+            join.mutate(
+              { openHouseId: selected.id, input, headers: captcha.headers },
+              { onSuccess: () => setSelected(null), onSettled: captcha.reset }
+            );
+          }}
           onClose={() => setSelected(null)}
         />
       )}

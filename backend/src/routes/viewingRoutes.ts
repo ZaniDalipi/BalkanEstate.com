@@ -2,6 +2,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { getViewingAvailability, scheduleViewing, getSellerViewings, updateViewingStatus } from '../controllers/viewingController';
 import { protect } from '../middleware/auth';
+import { requireTurnstile } from '../middleware/requireTurnstile';
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ const viewingRateLimiter = rateLimit({
 router.get('/availability/:propertyId', getViewingAvailability);
 
 // Schedule a viewing (public, rate limited)
-router.post('/', viewingRateLimiter, scheduleViewing);
+router.post('/', viewingRateLimiter, requireTurnstile(), scheduleViewing);
 
 // Get all viewings for the authenticated seller (private)
 router.get('/seller', protect, getSellerViewings);

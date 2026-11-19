@@ -8,6 +8,7 @@ import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import ConfirmationModal from '@/src/shared/components/ui/ConfirmationModal';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 
 interface ScheduleViewingModalProps {
     property: Property;
@@ -102,6 +103,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const captcha = useTurnstile('schedule_viewing');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     // Availability from backend (with property.visitAvailability as fallback)
@@ -267,8 +269,9 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
         setIsSubmitting(true);
 
         try {
-            await apiRequest('/viewings', {
+            await captcha.send((headers) => apiRequest('/viewings', {
                 method: 'POST',
+                headers,
                 body: {
                     propertyId: property.id,
                     date: selectedDate,
@@ -278,7 +281,7 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                     visitorPhone: phone.trim() || undefined,
                     visitorMessage: message.trim() || undefined,
                 },
-            });
+            }));
 
             setIsSubmitted(true);
         } catch (err: unknown) {
@@ -656,6 +659,12 @@ const ScheduleViewingModal: React.FC<ScheduleViewingModalProps> = ({ property, i
                 </div>
 
                 {/* Footer Actions */}
+                {/* Security check, mounted from the details step so it is ready by "Confirm" */}
+                {!isSubmitted && !loadingAvailability && step !== 'datetime' && (
+                    <div className="px-5">
+                        <TurnstileWidget {...captcha.widgetProps} />
+                    </div>
+                )}
                 {!isSubmitted && !loadingAvailability && (
                     <div className="px-5 py-4 border-t border-neutral-100 flex items-center justify-between bg-neutral-50/50">
                         {step !== 'datetime' ? (

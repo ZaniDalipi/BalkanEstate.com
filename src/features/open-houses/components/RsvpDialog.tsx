@@ -14,12 +14,14 @@ interface RsvpDialogProps {
   defaults: RsvpInput;
   submitting: boolean;
   serverError: string | null;
+  /** Security check (Turnstile) shown above the buttons. */
+  captcha?: React.ReactNode;
   onSubmit: (input: RsvpInput) => void;
   onClose: () => void;
 }
 
 /** Name, email and an optional phone to say you're coming to an open house. */
-const RsvpDialog: React.FC<RsvpDialogProps> = ({ open, whenLabel, defaults, submitting, serverError, onSubmit, onClose }) => {
+const RsvpDialog: React.FC<RsvpDialogProps> = ({ open, whenLabel, defaults, submitting, serverError, captcha, onSubmit, onClose }) => {
   const { t } = useTranslation('property');
   const reduceMotion = useReducedMotion();
   const titleId = useId();
@@ -77,6 +79,7 @@ const RsvpDialog: React.FC<RsvpDialogProps> = ({ open, whenLabel, defaults, subm
               <Field label={t('openHouse.name', { defaultValue: 'Your name' })} value={values.name} onChange={set('name')} error={errorText('name')} autoComplete="name" autoFocus />
               <Field label={t('openHouse.email', { defaultValue: 'Email' })} type="email" value={values.email} onChange={set('email')} error={errorText('email')} autoComplete="email" />
               <Field label={t('openHouse.phoneOptional', { defaultValue: 'Phone (optional)' })} type="tel" value={values.phone ?? ''} onChange={set('phone')} error={errorText('phone')} autoComplete="tel" />
+              {captcha}
               {serverError && <p role="alert" className="text-sm text-red-600">{serverError}</p>}
               <p className="text-xs text-neutral-500">
                 {t('openHouse.rsvpPrivacy', { defaultValue: 'Only the host sees your details. We email you a confirmation and a reminder.' })}

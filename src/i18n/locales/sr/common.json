@@ -941,5 +941,10 @@
     "invalidMessage": "Napišite poruku (do 2000 znakova).",
     "duplicate": "Ovaj upit ste već poslali. Agent će vam odgovoriti imejlom.",
     "tooMany": "Nedavno ste poslali mnogo upita. Pokušajte ponovo za sat vremena."
+  },
+  "captcha": {
+    "required": "Sačekajte trenutak da se bezbednosna provera završi, pa pošaljite ponovo.",
+    "failed": "Bezbednosna provera nije uspela. Pokušajte ponovo da pošaljete.",
+    "loadError": "Bezbednosna provera nije učitana. Dozvolite challenges.cloudflare.com (isključite blokatore sadržaja za ovaj sajt) i pokušajte ponovo."
   }
 }

@@ -26,10 +26,15 @@ interface ValuationStatsResponse {
 /**
  * Create a new property valuation
  */
-export const createValuation = async (input: ValuationInput): Promise<PropertyValuation> => {
+export const createValuation = async (
+  input: ValuationInput,
+  /** Carries the captcha token (see src/shared/captcha). */
+  headers: Record<string, string> = {}
+): Promise<PropertyValuation> => {
   const response = await apiRequest<ValuationResponse>('/valuations', {
     method: 'POST',
     body: input,
+    headers,
   });
 
   return response.data;

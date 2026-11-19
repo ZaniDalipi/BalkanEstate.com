@@ -23,6 +23,7 @@ import {
   requestAttachment,
 } from '../controllers/developmentSuggestionController';
 import { publicResidencePricing } from '../controllers/residenceBillingController';
+import { requireTurnstile } from '../middleware/requireTurnstile';
 
 const router = express.Router();
 
@@ -55,7 +56,7 @@ router.get('/:slug/scene', getPublishedScene);
 router.get('/:slug/views', listPublicViews);
 router.get('/:slug/developer', getPublicDeveloperProfile);
 router.get('/:slug/units/:unitId', getPublicUnit);
-router.post('/:slug/units/:unitId/inquiries', unitInquiryRateLimiter, sendUnitInquiry);
+router.post('/:slug/units/:unitId/inquiries', unitInquiryRateLimiter, requireTurnstile(), sendUnitInquiry);
 router.get('/:slug/units', listPublicUnits);
 
 // Follow / alerts (signed-in buyers)

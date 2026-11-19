@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { resendVerificationEmail } from '@/services/apiService';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 
 interface EmailVerificationBannerProps {
   email: string;
@@ -12,13 +13,14 @@ const EmailVerificationBanner: React.FC<EmailVerificationBannerProps> = ({ email
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const captcha = useTurnstile('resend_verification');
 
   const handleResend = async () => {
     setIsResending(true);
     setError(null);
 
     try {
-      await resendVerificationEmail(email);
+      await captcha.send((headers) => resendVerificationEmail(email, headers));
       setResendSuccess(true);
       // Reset success message after 5 seconds
       setTimeout(() => setResendSuccess(false), 5000);
@@ -65,8 +67,9 @@ const EmailVerificationBanner: React.FC<EmailVerificationBannerProps> = ({ email
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <TurnstileWidget {...captcha.widgetProps} />
             {error && (
-              <p className="text-xs text-red-600">{error}</p>
+              <p role="alert" className="text-xs text-red-600">{error}</p>
             )}
             <button
               onClick={handleResend}

@@ -22,6 +22,7 @@ import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
 import { HERO_IMAGES } from '@/config/mediaConfig';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import { TurnstileWidget, isCaptchaError, useTurnstile } from '@/src/shared/captcha';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name' | 'licensed';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -63,6 +64,7 @@ const AgentsPage: React.FC = () => {
     propertyDescription: ''
   });
   const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const captcha = useTurnstile('agent_request');
   const [contactSubmitSuccess, setContactSubmitSuccess] = useState(false);
   const contactSuccessTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -166,10 +168,11 @@ const AgentsPage: React.FC = () => {
     setIsSubmittingContact(true);
 
     try {
-      await apiRequest('/agent-requests', {
+      await captcha.send((headers) => apiRequest('/agent-requests', {
         method: 'POST',
         body: contactForm,
-      });
+        headers,
+      }));
 
       setContactSubmitSuccess(true);
       setContactForm({
@@ -190,7 +193,9 @@ const AgentsPage: React.FC = () => {
         payload: {
           type: 'error',
           title: t('common:error', 'Error'),
-          message: t('common:errors.genericError', 'An error occurred. Please try again later.'),
+          message: isCaptchaError(error) && error instanceof Error
+            ? error.message
+            : t('common:errors.genericError', 'An error occurred. Please try again later.'),
         },
       });
     } finally {
@@ -957,6 +962,8 @@ const AgentsPage: React.FC = () => {
                       placeholder={t('agents:contact.propertyDescriptionPlaceholder')}
                     />
                   </div>
+
+                  <TurnstileWidget {...captcha.widgetProps} />
 
                   <button
                     type="submit"

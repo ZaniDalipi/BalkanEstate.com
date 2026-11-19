@@ -22,6 +22,8 @@ interface ContactFormProps {
   onAdImageSelect?: (file: File) => void;
   onAdImageClear?: () => void;
   isAdImageUploading?: boolean;
+  /** Security check (Turnstile) shown above the submit button. */
+  captcha?: React.ReactNode;
 }
 
 const AD_PAGE_OPTIONS = [
@@ -67,6 +69,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
   onAdImageSelect,
   onAdImageClear,
   isAdImageUploading = false,
+  captcha,
 }) => {
   const { t } = useTranslation(['contact', 'common']);
   const isAdvertising = formData.subject === 'advertising';
@@ -291,6 +294,8 @@ const ContactForm: React.FC<ContactFormProps> = ({
           </span>
         </div>
       </div>
+
+      {captcha}
 
       {/* Submit Button */}
       <button

@@ -12,6 +12,7 @@ import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import InquiryHoneypot from './InquiryHoneypot';
 import { HONEYPOT_FIELD, readHoneypot } from '../utils/inquiryHoneypot';
 import { useInquiryFieldErrors } from '../hooks/useInquiryFieldErrors';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { handleFormEnterKey } from '@/src/shared/utils/formEnterKey';
 import SubmitShortcutHint from '@/src/shared/components/forms/SubmitShortcutHint';
@@ -74,6 +75,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { phoneError, clearPhoneError, checkPhone, showSendError } = useInquiryFieldErrors(setError);
+  const captcha = useTurnstile('agent_inquiry');
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   // Lock background scroll when modal is open
@@ -147,6 +149,11 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
     }
     if (!checkPhone(formData.buyerPhone)) return;
     const honeypot = readHoneypot(e.currentTarget as HTMLFormElement);
+    const captchaBlock = captcha.blockReason();
+    if (captchaBlock) {
+      setError(captchaBlock);
+      return;
+    }
 
     if (sendingRef.current) return;
     sendingRef.current = true;
@@ -163,12 +170,15 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
         buyerPhone: formData.buyerPhone.trim() || undefined,
         [HONEYPOT_FIELD]: honeypot,
         message: formData.message.trim(),
-      });
+      }, captcha.headers);
       draft.finish();
       setSuccess(true);
     } catch (err) {
-      showSendError(err, t('agents:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
+      const captchaMessage = captcha.errorMessage(err);
+      if (captchaMessage) setError(captchaMessage);
+      else showSendError(err, t('agents:inquiry.sendError', 'Failed to send inquiry. Please try again.'));
     } finally {
+      captcha.reset();
       sendingRef.current = false;
       setIsSubmitting(false);
     }
@@ -331,6 +341,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
 
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5" onKeyDown={handleFormEnterKey}>
                 <InquiryHoneypot />
+                <TurnstileWidget {...captcha.widgetProps} />
 
                 {/* Name + Email — stacked on mobile, side-by-side on tablet+ */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

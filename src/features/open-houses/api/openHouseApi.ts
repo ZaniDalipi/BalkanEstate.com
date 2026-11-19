@@ -19,8 +19,9 @@ export const cancelOpenHouse = async (id: string): Promise<void> => {
   await apiRequest(`/open-houses/${encodeURIComponent(id)}`, { method: 'DELETE', requiresAuth: true });
 };
 
-export const rsvpOpenHouse = async (id: string, input: RsvpInput): Promise<OpenHouse> =>
-  (await apiRequest<{ openHouse: OpenHouse }>(`/open-houses/${encodeURIComponent(id)}/rsvp`, { method: 'POST', body: input, requiresAuth: true })).openHouse;
+/** `headers` carries the captcha token (see src/shared/captcha). */
+export const rsvpOpenHouse = async (id: string, input: RsvpInput, headers: Record<string, string> = {}): Promise<OpenHouse> =>
+  (await apiRequest<{ openHouse: OpenHouse }>(`/open-houses/${encodeURIComponent(id)}/rsvp`, { method: 'POST', body: input, headers, requiresAuth: true })).openHouse;
 
 export const cancelRsvp = async (id: string, rsvpId?: string): Promise<OpenHouse> =>
   (await apiRequest<{ openHouse: OpenHouse }>(`/open-houses/${encodeURIComponent(id)}/rsvp`, { method: 'DELETE', body: { rsvpId }, requiresAuth: true })).openHouse;

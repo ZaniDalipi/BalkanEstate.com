@@ -13,6 +13,7 @@ import {
 import { SoftIcon } from '@/src/shared/illustrations';
 import Footer from '@/components/shared/Footer';
 import { useAppContext } from '@/context/AppContext';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 import { SEO } from '@/src/components/seo';
 import { Helmet } from 'react-helmet-async';
 
@@ -24,6 +25,8 @@ const ValuationPage: React.FC = () => {
   const [history, setHistory] = useState<PropertyValuation[]>([]);
 
   const { mutate: createValuation, isPending } = useCreateValuation();
+  const captcha = useTurnstile('valuation');
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
   // Server-backed history (signed-in users only) is merged with the local list.
   const { data: serverHistory } = useValuationHistory(25, isAuthenticated);
 
@@ -40,7 +43,11 @@ const ValuationPage: React.FC = () => {
   }, [serverHistory]);
 
   const handleSubmit = (data: ValuationInput) => {
-    createValuation(data, {
+    const blocked = captcha.blockReason();
+    setCaptchaError(blocked);
+    if (blocked) return;
+    createValuation({ input: data, headers: captcha.headers }, {
+      onSettled: captcha.reset,
       onSuccess: (result) => {
         // The API may not echo the newer room fields; keep what the user entered
         // so the report and saved history reflect the full room layout.
@@ -57,8 +64,10 @@ const ValuationPage: React.FC = () => {
         setHistory(saveValuation(enriched)); // auto-save every completed valuation
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      onError: () => {
-        // Surfaced by the form's own error state / QueryErrorBoundary.
+      onError: (err) => {
+        // A refused security check is explained here; other errors are surfaced
+        // by the form's own error state / QueryErrorBoundary.
+        setCaptchaError(captcha.errorMessage(err));
       },
     });
   };
@@ -203,7 +212,18 @@ const ValuationPage: React.FC = () => {
             {/* Decorative corner */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full" />
 
-            <ValuationForm onSubmit={handleSubmit} isLoading={isPending} />
+            <ValuationForm
+              onSubmit={handleSubmit}
+              isLoading={isPending}
+              captcha={
+                <>
+                  <TurnstileWidget {...captcha.widgetProps} />
+                  {captchaError && (
+                    <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{captchaError}</p>
+                  )}
+                </>
+              }
+            />
           </motion.div>
         )}
 

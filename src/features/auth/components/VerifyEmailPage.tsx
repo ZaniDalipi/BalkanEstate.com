@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { verifyEmail as verifyEmailApi, resendVerificationEmail } from '@/services/apiService';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 import { LogoIcon } from '@/constants';
 
 interface VerifyEmailPageProps {
@@ -17,6 +18,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
   const [resendEmail, setResendEmail] = useState('');
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const captcha = useTurnstile('resend_verification');
   const [isAutoLoggedIn, setIsAutoLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -77,7 +79,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
     setError(null);
 
     try {
-      const result = await resendVerificationEmail(resendEmail);
+      const result = await captcha.send((headers) => resendVerificationEmail(resendEmail, headers));
       setResendSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth:verifyEmail.resendFailed', 'Failed to resend verification email. Please try again.'));
@@ -215,6 +217,8 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
                 {t('auth:verifyEmail.emailLabel', 'Email Address')}
               </label>
             </div>
+
+            <TurnstileWidget {...captcha.widgetProps} />
 
             <button
               type="submit"

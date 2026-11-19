@@ -367,10 +367,10 @@ interface AppContextType {
     dispatch: Dispatch<AppAction>;
     checkAuthStatus: () => Promise<void>;
     login: (emailOrPhone: string, pass: string) => Promise<User>;
-    signup: (email: string, pass: string, options?: { name?: string; phone?: string; role?: 'buyer' | 'private_seller' | 'agent'; licenseNumber?: string; agencyInvitationCode?: string; }) => Promise<User>;
+    signup: (email: string, pass: string, options?: { name?: string; phone?: string; role?: 'buyer' | 'private_seller' | 'agent'; licenseNumber?: string; agencyInvitationCode?: string; headers?: Record<string, string>; }) => Promise<User>;
     logout: () => Promise<void>;
     logoutAllDevices: () => Promise<void>;
-    requestPasswordReset: (email: string) => Promise<void>;
+    requestPasswordReset: (email: string, headers?: Record<string, string>) => Promise<void>;
     resetPassword: (token: string, newPassword: string) => Promise<User>;
     loginWithSocial: (provider: 'google' | 'apple') => void;
     handleOAuthCallback: (token: string, refreshToken?: string) => void;
@@ -483,6 +483,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       role?: 'buyer' | 'private_seller' | 'agent';
       licenseNumber?: string;
       agencyInvitationCode?: string;
+      /** Carries the captcha token. */
+      headers?: Record<string, string>;
     }
   ) => {
     const user = await apiSignup(email, pass, options);
@@ -539,8 +541,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
   }, []);
 
-  const requestPasswordReset = useCallback(async (email: string) => {
-      await apiRequestPasswordReset(email);
+  const requestPasswordReset = useCallback(async (email: string, headers?: Record<string, string>) => {
+      await apiRequestPasswordReset(email, headers);
   }, []);
 
   const resetPassword = useCallback(async (token: string, newPassword: string) => {

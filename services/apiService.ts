@@ -343,10 +343,13 @@ export const signup = async (
     role?: 'buyer' | 'private_seller' | 'agent';
     licenseNumber?: string;
     agencyInvitationCode?: string;
+    /** Carries the captcha token (see src/shared/captcha). */
+    headers?: Record<string, string>;
   }
 ): Promise<User> => {
   const response = await secureAuthRequest<{ user: User; accessToken?: string; refreshToken?: string; token?: string }>('/auth/signup', {
     method: 'POST',
+    headers: options?.headers,
     body: {
       email,
       password,
@@ -421,9 +424,10 @@ export const getLoginHistory = async (): Promise<LoginHistoryEntry[]> => {
   return response.loginHistory;
 };
 
-export const requestPasswordReset = async (email: string): Promise<{ message: string; resetToken?: string }> => {
+export const requestPasswordReset = async (email: string, headers: Record<string, string> = {}): Promise<{ message: string; resetToken?: string }> => {
   return secureAuthRequest<{ message: string; resetToken?: string }>('/auth/forgot-password', {
     method: 'POST',
+    headers,
     body: { email },
     sensitiveFields: ['email'],
   });
@@ -578,9 +582,10 @@ export const verifyEmail = async (token: string): Promise<{ success: boolean; me
   return response;
 };
 
-export const resendVerificationEmail = async (email: string): Promise<{ success: boolean; message: string }> => {
+export const resendVerificationEmail = async (email: string, headers: Record<string, string> = {}): Promise<{ success: boolean; message: string }> => {
   const response = await apiRequest<{ success: boolean; message: string }>('/auth/resend-verification', {
     method: 'POST',
+    headers,
     body: { email },
   });
 
@@ -611,26 +616,32 @@ export interface AreaSearchInquiryParams extends InquiryParams {
   budget?: number;
 }
 
-export const sendPropertyInquiry = async (params: PropertyInquiryParams): Promise<{ message: string; recipient: string }> => {
+/** `headers` carries the captcha token (see src/shared/captcha). */
+export const sendPropertyInquiry = async (params: PropertyInquiryParams, headers: Record<string, string> = {}): Promise<{ message: string; recipient: string }> => {
   const response = await apiRequest<{ message: string; recipient: string }>('/inquiries/property', {
     method: 'POST',
     body: params,
+    headers,
   });
   return response;
 };
 
-export const sendAgentInquiry = async (params: AgentInquiryParams): Promise<{ message: string; recipient: string }> => {
+/** `headers` carries the captcha token (see src/shared/captcha). */
+export const sendAgentInquiry = async (params: AgentInquiryParams, headers: Record<string, string> = {}): Promise<{ message: string; recipient: string }> => {
   const response = await apiRequest<{ message: string; recipient: string }>('/inquiries/agent', {
     method: 'POST',
     body: params,
+    headers,
   });
   return response;
 };
 
-export const sendAreaSearchInquiry = async (params: AreaSearchInquiryParams): Promise<{ message: string; agentCount: number }> => {
+/** `headers` carries the captcha token (see src/shared/captcha). */
+export const sendAreaSearchInquiry = async (params: AreaSearchInquiryParams, headers: Record<string, string> = {}): Promise<{ message: string; agentCount: number }> => {
   const response = await apiRequest<{ message: string; agentCount: number }>('/inquiries/area-search', {
     method: 'POST',
     body: params,
+    headers,
   });
   return response;
 };
@@ -647,10 +658,11 @@ export interface ContactInquiryParams {
   attachmentUrl?: string;
 }
 
-export const sendContactInquiry = async (params: ContactInquiryParams): Promise<{ message: string; inquiryId: string }> => {
+export const sendContactInquiry = async (params: ContactInquiryParams, headers: Record<string, string> = {}): Promise<{ message: string; inquiryId: string }> => {
   const response = await apiRequest<{ message: string; inquiryId: string }>('/inquiries/contact', {
     method: 'POST',
     body: params,
+    headers,
   });
   return response;
 };

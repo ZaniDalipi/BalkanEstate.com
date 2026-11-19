@@ -10,7 +10,8 @@ export function useCreateValuation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: ValuationInput) => createValuation(input),
+    mutationFn: ({ input, headers }: { input: ValuationInput; headers?: Record<string, string> }) =>
+      createValuation(input, headers),
     onSuccess: () => {
       // Invalidate valuation history
       queryClient.invalidateQueries({ queryKey: valuationKeys.history() });

@@ -9,6 +9,7 @@ import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 import { getAvailableOAuthProviders } from '@/services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { TurnstileWidget, useTurnstile } from '@/src/shared/captcha';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -230,6 +231,8 @@ const AuthPage: React.FC = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // Signup and password-reset emails are protected; login is not.
+    const captcha = useTurnstile(state.authModalView === 'forgotPassword' ? 'password_reset' : 'signup');
     const [socialLoginProvider, setSocialLoginProvider] = useState<SocialProvider | null>(null);
     const [availableProviders, setAvailableProviders] = useState<{ google: boolean; apple: boolean }>({ google: false, apple: false });
 
@@ -457,7 +460,7 @@ const AuthPage: React.FC = () => {
                 const cleanNumber = phoneNumber.replace(/[\s\-()]/g, '');
                 const fullPhone = cleanNumber ? `${phoneCountryCode}${cleanNumber}` : '';
                 // All users register as buyers - they can upgrade to agent from profile settings
-                await signup(email, password, { role: 'buyer', phone: fullPhone });
+                await captcha.send((headers) => signup(email, password, { role: 'buyer', phone: fullPhone, headers }));
             }
             handleClose();
         } catch (err) {
@@ -480,7 +483,7 @@ const AuthPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            await requestPasswordReset(email);
+            await captcha.send((headers) => requestPasswordReset(email, headers));
             dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPasswordSuccess' });
         } catch(err) {
             setError(err instanceof Error ? err.message : t('auth:validation.genericError', 'An error occurred. Please try again.'));
@@ -729,6 +732,12 @@ const AuthPage: React.FC = () => {
                                 </div>
                             )}
 
+                            {state.authModalView === 'signup' && (
+                                <div className="landscape:col-span-2">
+                                    <TurnstileWidget {...captcha.widgetProps} />
+                                </div>
+                            )}
+
                             {/* Submit button with gradient */}
                             <button
                                 type="submit"
@@ -820,6 +829,7 @@ const AuthPage: React.FC = () => {
                                     show={!!touched.email && !!fieldErrors.email}
                                 />
                             </div>
+                            <TurnstileWidget {...captcha.widgetProps} />
                             <button
                                 type="submit"
                                 disabled={isLoading}

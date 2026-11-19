@@ -42,6 +42,7 @@ import { decryptPayload } from '../middleware/decryptPayload';
 import { getPublicKeyBase64 } from '../utils/payloadEncryption';
 import { upload } from '../utils/upload';
 import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
+import { requireTurnstile } from '../middleware/requireTurnstile';
 
 
 const router = express.Router();
@@ -98,7 +99,7 @@ router.get('/encryption-key', (_req, res) => {
  *       429:
  *         $ref: '#/components/responses/RateLimited'
  */
-router.post('/signup', signupRateLimiterIP, decryptPayload, signup);
+router.post('/signup', signupRateLimiterIP, requireTurnstile(), decryptPayload, signup);
 
 /**
  * @swagger
@@ -210,10 +211,10 @@ router.get('/login-history', protect, getLoginHistory);
 
 // Email verification routes (rate limited to prevent brute-force and email flooding)
 router.post('/verify-email', passwordResetRateLimiterIP, verifyEmail);
-router.post('/resend-verification', passwordResetRateLimiterIP, resendVerificationEmail);
+router.post('/resend-verification', passwordResetRateLimiterIP, requireTurnstile(), resendVerificationEmail);
 
 // Password reset routes with rate limiting
-router.post('/forgot-password', passwordResetRateLimiterIP, decryptPayload, requestPasswordReset);
+router.post('/forgot-password', passwordResetRateLimiterIP, requireTurnstile(), decryptPayload, requestPasswordReset);
 router.post('/reset-password', passwordResetRateLimiterIP, decryptPayload, resetPassword);
 router.post('/verify-password', protect, decryptPayload, verifyPassword);
 router.post('/change-password', protect, decryptPayload, changePassword);

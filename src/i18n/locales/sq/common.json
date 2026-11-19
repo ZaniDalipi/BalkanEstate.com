@@ -941,5 +941,10 @@
     "invalidMessage": "Ju lutemi shkruani një mesazh (deri në 2000 karaktere).",
     "duplicate": "Këtë kërkesë e keni dërguar tashmë. Agjenti do t'ju përgjigjet me email.",
     "tooMany": "Keni dërguar shumë kërkesa së fundmi. Ju lutemi provoni përsëri pas një ore."
+  },
+  "captcha": {
+    "required": "Ju lutemi prisni pak që të përfundojë kontrolli i sigurisë, pastaj dërgoni përsëri.",
+    "failed": "Kontrolli i sigurisë dështoi. Ju lutemi provoni ta dërgoni përsëri.",
+    "loadError": "Kontrolli i sigurisë nuk u ngarkua. Lejoni challenges.cloudflare.com (çaktivizoni bllokuesit e përmbajtjes për këtë faqe) dhe provoni përsëri."
   }
 }

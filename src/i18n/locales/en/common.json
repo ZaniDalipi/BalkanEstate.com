@@ -961,5 +961,10 @@
     "invalidMessage": "Please write a message (up to 2000 characters).",
     "duplicate": "You already sent this inquiry. The agent will reply to you by email.",
     "tooMany": "You have sent many inquiries recently. Please try again in an hour."
+  },
+  "captcha": {
+    "required": "Please wait a moment for the security check to finish, then send again.",
+    "failed": "The security check failed. Please try sending again.",
+    "loadError": "The security check could not load. Please allow challenges.cloudflare.com (turn off content blockers for this site) and try again."
   }
 }

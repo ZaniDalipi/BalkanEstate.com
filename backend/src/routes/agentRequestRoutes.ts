@@ -7,11 +7,12 @@ import {
   getAgentRequestStats,
 } from '../controllers/agentRequestController';
 import { protect } from '../middleware/auth';
+import { requireTurnstile } from '../middleware/requireTurnstile';
 
 const router = express.Router();
 
 // Public routes
-router.post('/', createAgentRequest);
+router.post('/', requireTurnstile(), createAgentRequest);
 
 // Protected routes (for agents to view their assigned requests)
 router.get('/agent/:agentId', protect, getAgentRequests);

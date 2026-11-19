@@ -941,5 +941,10 @@
     "invalidMessage": "Scrieți un mesaj (până la 2000 de caractere).",
     "duplicate": "Ați trimis deja această solicitare. Agentul vă va răspunde prin email.",
     "tooMany": "Ați trimis multe solicitări recent. Încercați din nou peste o oră."
+  },
+  "captcha": {
+    "required": "Așteptați un moment să se termine verificarea de securitate, apoi trimiteți din nou.",
+    "failed": "Verificarea de securitate a eșuat. Încercați să trimiteți din nou.",
+    "loadError": "Verificarea de securitate nu s-a putut încărca. Permiteți challenges.cloudflare.com (dezactivați blocantele de conținut pentru acest site) și încercați din nou."
   }
 }
