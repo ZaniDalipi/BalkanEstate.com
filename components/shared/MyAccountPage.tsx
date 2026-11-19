@@ -25,8 +25,8 @@ import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile
 import { submitLicense, getLicenseFormatHint } from '../../src/features/credentials/api/licenseApi';
 import Footer from './Footer';
 import PhoneInput from '../../src/shared/components/ui/PhoneInput';
-import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
+import ServiceAreaSearch from '../../src/features/agents/serviceAreas/ServiceAreaSearch';
 import { SEO } from '../../src/components/seo';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
@@ -2048,28 +2048,12 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             </div>
                         )}
 
-                        {/* Add Service Area */}
-                        <select
-                            defaultValue=""
-                            onChange={(e) => {
-                                if (e.target.value) {
-                                    handleAddServiceArea(e.target.value);
-                                    e.target.value = '';
-                                }
-                            }}
-                            className="w-full px-3 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 text-sm transition-all shadow-sm"
-                        >
-                            <option value="">{t('agent.addServiceArea')}</option>
-                            {BALKAN_LOCATIONS.map((location) => (
-                                <option
-                                    key={location.code}
-                                    value={location.name}
-                                    disabled={agentData.serviceAreas.includes(location.name)}
-                                >
-                                    {location.name}
-                                </option>
-                            ))}
-                        </select>
+                        {/* Add Service Area — searches every place the site search knows */}
+                        <ServiceAreaSearch
+                            areas={agentData.serviceAreas}
+                            onAdd={handleAddServiceArea}
+                            className="px-3 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white/60 text-sm transition-all shadow-sm"
+                        />
                         <p className="text-xs text-neutral-500 mt-1">{t('agent.serviceAreasHint')}</p>
                     </div>
                 </fieldset>

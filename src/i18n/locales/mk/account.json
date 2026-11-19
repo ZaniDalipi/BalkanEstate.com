@@ -149,7 +149,10 @@
     "formatHint": "Очекуван формат",
     "submitForReview": "Поднеси на преглед",
     "officeLocation": "Локација на канцеларијата",
-    "selectLocation": "Изберете локација"
+    "selectLocation": "Изберете локација",
+    "searchServiceArea": "Пребарајте држава, град или село...",
+    "addTypedServiceArea": "Додај \"{{area}}\"",
+    "serviceAreaAlreadyAdded": "Веќе е во вашите области на работа"
   },
   "security": {
     "title": "Безбедност и активност на најава",

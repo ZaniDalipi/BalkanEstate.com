@@ -149,7 +149,10 @@
     "formatHint": "Format așteptat",
     "submitForReview": "Trimite spre verificare",
     "officeLocation": "Locația biroului",
-    "selectLocation": "Selectați locația"
+    "selectLocation": "Selectați locația",
+    "searchServiceArea": "Căutați o țară, un oraș sau un sat...",
+    "addTypedServiceArea": "Adaugă \"{{area}}\"",
+    "serviceAreaAlreadyAdded": "Este deja în zonele dvs. de activitate"
   },
   "security": {
     "title": "Securitate și Activitate de Autentificare",

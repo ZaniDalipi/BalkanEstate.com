@@ -121,7 +121,10 @@
     "formatHint": "Очакван формат",
     "submitForReview": "Изпрати за преглед",
     "officeLocation": "Местоположение на офиса",
-    "selectLocation": "Изберете местоположение"
+    "selectLocation": "Изберете местоположение",
+    "searchServiceArea": "Търсете държава, град или село...",
+    "addTypedServiceArea": "Добави \"{{area}}\"",
+    "serviceAreaAlreadyAdded": "Вече е във вашите области на работа"
   },
   "security": {
     "title": "Сигурност и Активност при Влизане",

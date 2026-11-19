@@ -149,7 +149,10 @@
     "formatHint": "Expected format",
     "submitForReview": "Submit for Review",
     "officeLocation": "Office Location",
-    "selectLocation": "Select location"
+    "selectLocation": "Select location",
+    "searchServiceArea": "Search a country, city or village...",
+    "addTypedServiceArea": "Add \"{{area}}\"",
+    "serviceAreaAlreadyAdded": "Already in your service areas"
   },
   "security": {
     "title": "Security & Login Activity",

@@ -149,7 +149,10 @@
     "formatHint": "Formati i pritur",
     "submitForReview": "Dërgo për shqyrtim",
     "officeLocation": "Vendndodhja e zyrës",
-    "selectLocation": "Zgjidh vendndodhjen"
+    "selectLocation": "Zgjidh vendndodhjen",
+    "searchServiceArea": "Kërko një shtet, qytet ose fshat...",
+    "addTypedServiceArea": "Shto \"{{area}}\"",
+    "serviceAreaAlreadyAdded": "Tashmë në zonat tuaja të shërbimit"
   },
   "security": {
     "title": "Siguria dhe Aktiviteti i Hyrjes",

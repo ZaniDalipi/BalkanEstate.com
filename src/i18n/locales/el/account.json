@@ -149,7 +149,10 @@
     "formatHint": "Αναμενόμενη μορφή",
     "submitForReview": "Υποβολή για έλεγχο",
     "officeLocation": "Τοποθεσία γραφείου",
-    "selectLocation": "Επιλέξτε τοποθεσία"
+    "selectLocation": "Επιλέξτε τοποθεσία",
+    "searchServiceArea": "Αναζητήστε χώρα, πόλη ή χωριό...",
+    "addTypedServiceArea": "Προσθήκη \"{{area}}\"",
+    "serviceAreaAlreadyAdded": "Υπάρχει ήδη στις περιοχές εξυπηρέτησής σας"
   },
   "security": {
     "title": "Ασφάλεια & Δραστηριότητα Σύνδεσης",
