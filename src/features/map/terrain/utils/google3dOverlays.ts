@@ -1,12 +1,18 @@
 /**
  * What goes on Google's 3D map over the plot: the slope colours draped on
  * the ground, the plot's outline, a pin at the best place to build, and what
- * shows how steep it is — a level glass lid at the height of the plot's
- * highest ground (the taller the gap under it, the further the land falls),
- * pins with the heights of the highest and lowest ground, and a line down
- * the slope between them. The slope colours can be hidden to see the photo.
+ * shows how steep it is: contour lines of equal height (the closer, the
+ * steeper); a level glass lid at the height of the plot's highest ground,
+ * with coloured walls down to the ground under it — pale where the land is
+ * high, deep blue where it has fallen furthest; pins with the heights of the
+ * highest and lowest ground, and a line down the slope between them. The
+ * slope colours can be hidden to see the photo.
  */
 import type { TerrainAnalysis, TerrainPoint } from '../types';
+import { INDEX_EVERY } from './contours';
+import { contourLines } from './contourLines';
+import { fallCurtain } from './fallCurtain';
+import { heightSampler } from './heightSampler';
 import { MIN_FALL_M, pointsBetween, type SlopeFall } from './slopeFall';
 import { slopePatches } from './slopePatches';
 
@@ -24,6 +30,8 @@ export interface Google3DLabels {
 const SLOPE_ALPHA = 0.62;
 /** The lid floats this far above the highest ground, so the ground never pokes through it. */
 const LID_CLEARANCE_M = 0.5;
+/** How solid the walls under the lid are. */
+const CURTAIN_ALPHA = 0.72;
 /** Pins stand this high above their spot. */
 const PIN_M = 14;
 
@@ -68,17 +76,39 @@ export function addGoogle3DOverlays(
   });
   map.append(outline);
 
+  if (analysis.contourIntervalM) {
+    for (const line of contourLines(analysis.grid, polygon, analysis.contourIntervalM, INDEX_EVERY)) {
+      if (line.points.length < 2) continue;
+      map.append(new lib.Polyline3DElement({
+        path: line.points,
+        altitudeMode: 'CLAMP_TO_GROUND',
+        strokeColor: line.index ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.75)',
+        strokeWidth: line.index ? 3.5 : 2,
+        zIndex: 3,
+      }));
+    }
+  }
+
   if (fall && fall.dropM >= MIN_FALL_M) {
     const lid = fall.high.elevation + LID_CLEARANCE_M;
     map.append(new lib.Polygon3DElement({
       path: polygon.map((p) => ({ ...p, altitude: lid })),
       altitudeMode: 'ABSOLUTE',
-      extruded: true,
-      fillColor: 'rgba(224, 242, 254, 0.22)',
+      fillColor: 'rgba(240, 249, 255, 0.16)',
       strokeColor: 'rgba(255, 255, 255, 0.95)',
       strokeWidth: 2,
       zIndex: 4,
     }));
+    for (const piece of fallCurtain(polygon, lid, heightSampler(analysis.grid), CURTAIN_ALPHA)) {
+      map.append(new lib.Polygon3DElement({
+        path: piece.path.map((p) => ({ ...p, altitude: lid })),
+        altitudeMode: 'ABSOLUTE',
+        extruded: true,
+        fillColor: piece.color,
+        strokeWidth: 0,
+        zIndex: 4,
+      }));
+    }
     map.append(new lib.Polyline3DElement({
       path: pointsBetween(fall.high, fall.low, 24),
       altitudeMode: 'CLAMP_TO_GROUND',

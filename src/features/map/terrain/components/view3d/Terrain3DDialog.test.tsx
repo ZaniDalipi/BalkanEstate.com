@@ -150,6 +150,7 @@ describe('Terrain3DDialog on Google\'s 3D map', () => {
     // The land rises 0.2 m per 10 m cell: about 2 m over 90 m.
     expect(screen.getByText(/Falls 2 m over 90 m: 2% on average/)).toBeTruthy();
     expect(screen.getByText(/glass lid is level with the highest ground/)).toBeTruthy();
+    expect(screen.getByText('Gap under the level glass')).toBeTruthy();
     expect(model.options).toBeNull();
     expect(screen.getByText(/3D imagery from Google/)).toBeTruthy();
     expect(screen.getByText(/The pin marks the best place to build/)).toBeTruthy();

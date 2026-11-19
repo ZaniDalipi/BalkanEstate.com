@@ -11,6 +11,7 @@ import type { PlotSurface } from '../../hooks/usePlotModel';
 import type { Exaggeration } from '../../utils/terrain3dScene';
 import { MIN_FALL_M, type SlopeFall } from '../../utils/slopeFall';
 import { CAPTION, GLASS } from '../terrainStyles';
+import FallScale from './FallScale';
 import SlopeScale from './SlopeScale';
 
 export interface Terrain3DInfoProps {
@@ -50,10 +51,18 @@ const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, fall, 
           <SlopeScale />
         </div>
       )}
+      {exaggeration === null && fall && fall.dropM >= MIN_FALL_M && (
+        <div className="mt-2.5">
+          <FallScale dropM={fall.dropM} />
+        </div>
+      )}
       <p className={`mt-2 ${CAPTION}`}>
         {exaggeration === null && t('terrain.view3d.googleNote', '3D imagery from Google, at true scale.')}
         {exaggeration === null && fall && fall.dropM >= MIN_FALL_M && (
-          <> {t('terrain.view3d.lidNote', 'The glass lid is level with the highest ground: the gap under it is how far the land falls.')}</>
+          <> {t('terrain.view3d.lidNote', 'The glass lid is level with the highest ground; the walls under it turn darker blue where the land falls further.')}</>
+        )}
+        {exaggeration === null && analysis.contourIntervalM !== null && (
+          <> {t('terrain.view3d.contourNote', 'White lines join ground of equal height every {{n}} m: the closer they are, the steeper.', { n: analysis.contourIntervalM })}</>
         )}
         {exaggeration === 1 && t('terrain.view3d.trueScale', 'Heights are shown true to scale.')}
         {exaggeration !== null && exaggeration > 1
