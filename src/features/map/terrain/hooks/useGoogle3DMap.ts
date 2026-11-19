@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGoogleMapLoader } from '@/src/features/map/hooks/useGoogleMapLoader';
 import type { TerrainAnalysis, TerrainPoint } from '../types';
-import { addGoogle3DOverlays, type Google3DOverlays } from '../utils/google3dOverlays';
+import { addGoogle3DOverlays, type Google3DLabels, type Google3DOverlays } from '../utils/google3dOverlays';
 import { startCamera, TILTED_FROM_DEG, type GoogleCamera } from '../utils/googleCamera';
+import type { SlopeFall } from '../utils/slopeFall';
 import { openingBearing } from '../utils/terrain3dScene';
 import { useGoogleCameraButtons } from './useGoogleCameraButtons';
 import type { PlotModelStatus, PlotSurface } from './usePlotModel';
@@ -11,7 +12,9 @@ export interface Google3DOptions {
   analysis: TerrainAnalysis;
   polygon: TerrainPoint[];
   surface: PlotSurface;
-  markerLabel: string;
+  /** The plot's highest and lowest ground, marked on the map. */
+  fall: SlopeFall | null;
+  labels: Google3DLabels;
   reduceMotion: boolean;
 }
 
@@ -21,7 +24,8 @@ const SHOW_ANYWAY_MS = 12000;
 /**
  * Google's photorealistic 3D map of the plot in `container` — the same 3D
  * imagery as Google Maps, streamed sharper as the camera comes closer — with
- * the slope colours, the outline and the best-spot pin on it. 'failed' when
+ * the slope colours, the outline, the best-spot pin and the marks that
+ * show how steep it is (see google3dOverlays) on it. 'failed' when
  * the Maps script or its 3D library can't load, so the dialog can fall back
  * to the home-made model.
  */
@@ -69,7 +73,7 @@ export function useGoogle3DMap(container: React.RefObject<HTMLDivElement>, o: Go
       element.addEventListener('gmp-tiltchange', () => setTilted((element?.tilt ?? 0) > TILTED_FROM_DEG));
       element.addEventListener('pointerdown', stopOrbit);
       element.addEventListener('wheel', stopOrbit, { passive: true });
-      overlays.current = addGoogle3DOverlays(element, lib, analysis, polygon, latest.current.markerLabel);
+      overlays.current = addGoogle3DOverlays(element, lib, analysis, polygon, latest.current.fall, latest.current.labels);
       overlays.current.setSlopeVisible(latest.current.surface === 'slope');
       host.replaceChildren(element);
       map.current = element;

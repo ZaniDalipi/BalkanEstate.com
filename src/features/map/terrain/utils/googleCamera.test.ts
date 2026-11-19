@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { analyzeTerrain } from './analyzeTerrain';
-import { clampRange, MAX_RANGE, MIN_RANGE, normalHeading, plotCenter, startCamera } from './googleCamera';
+import { clampRange, GOOGLE_TILT, MAX_RANGE, MIN_RANGE, normalHeading, plotCenter, startCamera } from './googleCamera';
 import { makeGrid, wholeGrid } from './testGrid';
 
 const analysisOf = (size: number) => {
@@ -12,14 +12,15 @@ const analysisOf = (size: number) => {
 };
 
 describe('googleCamera', () => {
-  it('opens over the middle of the plot, at its height, tilted and looking the given way', () => {
+  it('opens over the middle of the plot, at its height, low and side-on to the slope', () => {
     const { analysis, polygon, grid } = analysisOf(10);
     const cam = startCamera(analysis, polygon, -30, 1.5);
     expect(cam.center.lat).toBeCloseTo((grid.north + grid.south) / 2, 9);
     expect(cam.center.lng).toBeCloseTo((grid.east + grid.west) / 2, 9);
     expect(cam.center.altitude).toBeCloseTo((analysis.stats.minElevation + analysis.stats.maxElevation) / 2, 6);
-    expect(cam.heading).toBe(330);
-    expect(cam.tilt).toBeGreaterThan(30);
+    // Uphill is −30°: the camera looks across the slope, at 60°.
+    expect(cam.heading).toBe(60);
+    expect(cam.tilt).toBe(GOOGLE_TILT);
   });
 
   it('stands further back for a bigger plot, within the limits', () => {

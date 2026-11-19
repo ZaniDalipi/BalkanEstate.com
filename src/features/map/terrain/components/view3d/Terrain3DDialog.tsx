@@ -9,7 +9,7 @@
  * heights, the house at the best place to build — to turn, tilt and fly around. Heights can be stretched so even
  * gentle land shows its shape; the info card says by how much.
  */
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -19,6 +19,7 @@ import { useEscapeLayer } from '@/src/features/developments/components/public/ex
 import type { PlotSurface } from '../../hooks/usePlotModel';
 import { useSurroundings } from '../../hooks/useSurroundings';
 import type { TerrainAnalysis, TerrainPoint } from '../../types';
+import { slopeFall } from '../../utils/slopeFall';
 import { defaultExaggeration, type Exaggeration } from '../../utils/terrain3dScene';
 import { GLASS } from '../terrainStyles';
 import GoogleTerrainScene from './GoogleTerrainScene';
@@ -40,6 +41,7 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
   const [surface, setSurface] = useState<PlotSurface>('slope');
   const [showBuildings, setShowBuildings] = useState(true);
   const [google, setGoogle] = useState(HAS_GOOGLE_MAPS_KEY);
+  const fall = useMemo(() => slopeFall(analysis), [analysis]);
   const { ground, buildings } = useSurroundings(analysis, !google);
   const buildingsShown = showBuildings && Boolean(buildings?.length);
   useEscapeLayer(ref, onClose);
@@ -60,6 +62,7 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
           <GoogleTerrainScene
             analysis={analysis}
             polygon={polygon}
+            fall={fall}
             surface={surface}
             onSurface={setSurface}
             reduceMotion={reduceMotion}
@@ -82,7 +85,7 @@ const Terrain3DDialog: React.FC<Terrain3DDialogProps> = ({ analysis, polygon, on
           />
         )}
         <div className="absolute left-[calc(0.75rem+var(--t3d-safe-left))] top-[calc(0.75rem+var(--t3d-safe-top))] sm:left-4 sm:top-4">
-          <Terrain3DInfo titleId={titleId} analysis={analysis} surface={surface} exaggeration={google ? null : exaggeration} buildings={!google && buildingsShown} />
+          <Terrain3DInfo titleId={titleId} analysis={analysis} fall={fall} surface={surface} exaggeration={google ? null : exaggeration} buildings={!google && buildingsShown} />
         </div>
         <button
           type="button"
