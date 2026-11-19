@@ -765,8 +765,6 @@
       "back": "Natrag na kartu nagiba",
       "height": "Visina",
       "trueScale": "Visine su prikazane u stvarnom mjerilu.",
-      "googleNote": "3D snimke od Googlea, u stvarnom mjerilu.",
-      "pinNote": "Oznaka pokazuje najbolje mjesto za gradnju.",
       "exaggerated": "Visine su povećane ×{{n}} kako bi se oblik zemljišta lakše vidio.",
       "hint": "Povucite za pomicanje · desni klik i povlačenje ili dva prsta za okretanje i naginjanje · pomičite kotačić ili raširite prste za zumiranje.",
       "camera": "Kamera",

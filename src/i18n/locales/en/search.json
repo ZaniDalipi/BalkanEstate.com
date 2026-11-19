@@ -775,8 +775,6 @@
       "back": "Back to the slope map",
       "height": "Height",
       "trueScale": "Heights are shown true to scale.",
-      "googleNote": "3D imagery from Google, at true scale.",
-      "pinNote": "The pin marks the best place to build.",
       "exaggerated": "Heights are stretched ×{{n}} so the shape of the land is easier to see.",
       "hint": "Drag to move · right-drag or two fingers to turn and tilt · scroll or pinch to zoom.",
       "camera": "Camera",

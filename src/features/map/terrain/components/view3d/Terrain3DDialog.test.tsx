@@ -31,22 +31,6 @@ vi.mock('../../hooks/usePlotModel', () => ({
   },
 }));
 
-/** Google's 3D map: whether a key is set, and a stand-in for its hook (no Maps script in jsdom). */
-const google = vi.hoisted(() => ({
-  hasKey: false,
-  status: 'ready' as 'loading' | 'ready' | 'failed',
-  options: null as null | { surface: string; markerLabel: string },
-}));
-vi.mock('@/src/features/map/hooks/useGoogleMapLoader', () => ({
-  get HAS_GOOGLE_MAPS_KEY() { return google.hasKey; },
-}));
-vi.mock('../../hooks/useGoogle3DMap', () => ({
-  useGoogle3DMap: (_host: unknown, options: { surface: string; markerLabel: string }) => {
-    google.options = options;
-    return { status: google.status, camera: model.camera };
-  },
-}));
-
 import Terrain3DDialog from './Terrain3DDialog';
 import { analyzeTerrain } from '../../utils/analyzeTerrain';
 import { makeGrid, wholeGrid } from '../../utils/testGrid';
@@ -61,7 +45,6 @@ const analysis = result.value;
 beforeEach(() => {
   Object.assign(model, { status: 'ready', satelliteReady: true, options: null });
   around.buildings = null;
-  Object.assign(google, { hasKey: false, status: 'ready', options: null });
   Object.values(model.camera).forEach((v) => { if (typeof v === 'function') (v as ReturnType<typeof vi.fn>).mockClear(); });
 });
 afterEach(() => cleanup());
@@ -139,31 +122,5 @@ describe('Terrain3DDialog', () => {
     expect(screen.getByRole('alert').textContent).toContain("can't show 3D");
     fireEvent.click(screen.getByRole('button', { name: 'Back to the slope map' }));
     expect(onClose).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('Terrain3DDialog on Google\'s 3D map', () => {
-  it('shows the plot on Google\'s photorealistic 3D map, with the slope colours and the pin', () => {
-    google.hasKey = true;
-    open();
-    expect(google.options).toMatchObject({ surface: 'slope', markerLabel: 'Best spot' });
-    expect(model.options).toBeNull();
-    expect(screen.getByText(/3D imagery from Google/)).toBeTruthy();
-    expect(screen.getByText(/The pin marks the best place to build/)).toBeTruthy();
-    // Google's heights can't be stretched, and it has its own buildings.
-    expect(screen.queryByRole('button', { name: '2×' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Buildings' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Satellite' }));
-    expect(google.options?.surface).toBe('satellite');
-    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
-    expect(model.camera.zoomIn).toHaveBeenCalledTimes(1);
-  });
-
-  it('falls back to the home-made model when Google\'s 3D map cannot load', () => {
-    google.hasKey = true;
-    google.status = 'failed';
-    open();
-    expect(model.options).toMatchObject({ surface: 'slope', exaggeration: 5 });
-    expect(screen.getByText(/stretched ×5/)).toBeTruthy();
   });
 });

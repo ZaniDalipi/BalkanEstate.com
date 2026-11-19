@@ -12,9 +12,9 @@ export interface Surroundings {
   buildings: Building[] | null;
 }
 
-/** The land and buildings round a plot, for the home-made 3D model; nothing is fetched while `enabled` is false. */
-export function useSurroundings(analysis: TerrainAnalysis, enabled = true): Surroundings {
-  const bounds = useMemo(() => (enabled ? surroundingsBounds(analysis.grid) : null), [analysis.grid, enabled]);
+/** The land and buildings round a plot, for the 3D view. */
+export function useSurroundings(analysis: TerrainAnalysis): Surroundings {
+  const bounds = useMemo(() => surroundingsBounds(analysis.grid), [analysis.grid]);
   const heights = useElevationGrid(bounds);
   const ground = heights.data ? heights.data.grid : heights.isError ? analysis.grid : null;
   const area = useMemo(() => (ground ? buildingsArea(analysis.grid, ground) : null), [ground, analysis.grid]);

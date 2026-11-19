@@ -17,8 +17,7 @@ export interface Scene3DControlsProps {
   /** Whether buildings are shown; null when there are none to show. */
   buildings: boolean | null;
   onBuildings: (on: boolean) => void;
-  /** How tall the land stands; null where it can't be stretched (Google's 3D map). */
-  exaggeration: Exaggeration | null;
+  exaggeration: Exaggeration;
   onExaggeration: (value: Exaggeration) => void;
   camera: Camera3D;
 }
@@ -43,14 +42,12 @@ const Scene3DControls: React.FC<Scene3DControlsProps> = ({ surface, onSurface, s
           />
         )}
         {buildings !== null && <BuildingsToggle on={buildings} onChange={onBuildings} />}
-        {exaggeration !== null && (
-          <SegmentedControl<Exaggeration>
-            label={t('terrain.view3d.height', 'Height')}
-            options={EXAGGERATIONS.map((n) => ({ value: n, text: `${n}×` }))}
-            value={exaggeration}
-            onChange={onExaggeration}
-          />
-        )}
+        <SegmentedControl<Exaggeration>
+          label={t('terrain.view3d.height', 'Height')}
+          options={EXAGGERATIONS.map((n) => ({ value: n, text: `${n}×` }))}
+          value={exaggeration}
+          onChange={onExaggeration}
+        />
         <Camera3DControls camera={camera} />
       </div>
     </div>
