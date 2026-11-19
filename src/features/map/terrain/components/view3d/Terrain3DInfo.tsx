@@ -9,19 +9,24 @@ import { formatMeasureArea } from '../../../hooks/useMeasurement';
 import type { TerrainAnalysis } from '../../types';
 import type { PlotSurface } from '../../hooks/usePlotModel';
 import type { Exaggeration } from '../../utils/terrain3dScene';
+import { MIN_FALL_M, type SlopeFall } from '../../utils/slopeFall';
 import { CAPTION, GLASS } from '../terrainStyles';
+import FallScale from './FallScale';
 import SlopeScale from './SlopeScale';
 
 export interface Terrain3DInfoProps {
   titleId: string;
   analysis: TerrainAnalysis;
+  /** How far the plot falls, said in words. */
+  fall: SlopeFall | null;
   surface: PlotSurface;
-  exaggeration: Exaggeration;
+  /** How much heights are stretched; null on Google's photorealistic 3D map, which shows them as they are. */
+  exaggeration: Exaggeration | null;
   /** Whether buildings from the map stand round the plot. */
   buildings: boolean;
 }
 
-const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, surface, exaggeration, buildings }) => {
+const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, fall, surface, exaggeration, buildings }) => {
   const { t } = useTranslation('search');
   const { stats } = analysis;
   return (
@@ -32,16 +37,40 @@ const Terrain3DInfo: React.FC<Terrain3DInfoProps> = ({ titleId, analysis, surfac
       <p className="text-xs tabular-nums text-gray-600">
         {formatMeasureArea(stats.areaM2)} · {Math.round(stats.minElevation)}–{Math.round(stats.maxElevation)} m
       </p>
+      {fall && fall.dropM >= MIN_FALL_M && (
+        <p className="mt-1.5 text-[13px] font-semibold leading-snug text-gray-900">
+          {t('terrain.view3d.fall', 'Falls {{drop}} m over {{run}} m: {{pct}}% on average.', {
+            drop: Math.round(fall.dropM),
+            run: Math.round(fall.runM),
+            pct: Math.round(fall.gradePct),
+          })}
+        </p>
+      )}
       {surface === 'slope' && (
         <div className="mt-2.5">
           <SlopeScale />
         </div>
       )}
+      {exaggeration === null && fall && fall.dropM >= MIN_FALL_M && (
+        <div className="mt-2.5">
+          <FallScale dropM={fall.dropM} />
+        </div>
+      )}
       <p className={`mt-2 ${CAPTION}`}>
-        {exaggeration === 1
-          ? t('terrain.view3d.trueScale', 'Heights are shown true to scale.')
-          : t('terrain.view3d.exaggerated', 'Heights are stretched ×{{n}} so the shape of the land is easier to see.', { n: exaggeration })}
-        {analysis.buildSpot && (
+        {exaggeration === null && t('terrain.view3d.googleNote', '3D imagery from Google, at true scale.')}
+        {exaggeration === null && fall && fall.dropM >= MIN_FALL_M && (
+          <> {t('terrain.view3d.lidNote', 'The glass lid is level with the highest ground; the walls under it turn darker blue where the land falls further.')}</>
+        )}
+        {exaggeration === null && analysis.contourIntervalM !== null && (
+          <> {t('terrain.view3d.contourNote', 'White lines join ground of equal height every {{n}} m: the closer they are, the steeper.', { n: analysis.contourIntervalM })}</>
+        )}
+        {exaggeration === 1 && t('terrain.view3d.trueScale', 'Heights are shown true to scale.')}
+        {exaggeration !== null && exaggeration > 1
+          && t('terrain.view3d.exaggerated', 'Heights are stretched ×{{n}} so the shape of the land is easier to see.', { n: exaggeration })}
+        {exaggeration === null && analysis.buildSpot && (
+          <> {t('terrain.view3d.pinNote', 'The pin marks the best place to build.')}</>
+        )}
+        {exaggeration !== null && analysis.buildSpot && (
           <> {t('terrain.view3d.houseNote', 'The house marks the best place to build, at true size (about 12 × 9 m).')}</>
         )}
         {buildings && (
