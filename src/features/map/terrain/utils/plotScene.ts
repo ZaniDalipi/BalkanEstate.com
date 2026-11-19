@@ -133,7 +133,7 @@ export function createPlotScene(
   const labelAnchor = house ? new THREE.Vector3() : null;
   const target = new THREE.Vector3();
 
-  const buildings = createBuildingsLayer(terrain, ground, exaggeration);
+  const buildings = createBuildingsLayer(terrain, ground, exaggeration, anisotropy);
   scene.add(buildings.mesh);
 
   const setStretch = (stretch: number) => {
