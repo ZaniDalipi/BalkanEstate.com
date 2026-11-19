@@ -119,7 +119,9 @@
     "selectCountry": "Изберете държава...",
     "enterLicenseNumber": "Въведете номера на лиценза",
     "formatHint": "Очакван формат",
-    "submitForReview": "Изпрати за преглед"
+    "submitForReview": "Изпрати за преглед",
+    "officeLocation": "Местоположение на офиса",
+    "selectLocation": "Изберете местоположение"
   },
   "security": {
     "title": "Сигурност и Активност при Влизане",

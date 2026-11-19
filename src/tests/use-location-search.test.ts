@@ -82,6 +82,34 @@ describe('useLocationSearch', () => {
     expect(result.current.isSearching).toBe(false);
   });
 
+  it('finds a city from the app\'s own list, as the site-wide search does', async () => {
+    // No country or city: the profile's office picker searches everywhere.
+    const { result } = renderHook(() => useLocationSearch({}));
+
+    await search(result, 'athens');
+
+    expect(result.current.suggestions[0]).toMatchObject({ title: 'Athens', source: 'local' });
+    expect(result.current.suggestions[0].subtitle).toContain('Greece');
+    const resolved = await result.current.resolveSuggestion(result.current.suggestions[0]);
+    expect(resolved?.lat).toBeCloseTo(37.98, 1);
+  });
+
+  it('labels a Google prediction with its own city and country when none was chosen', async () => {
+    isPlacesAvailable.mockReturnValue(true);
+    fetchPlacePredictions.mockResolvedValue([
+      { placeId: 'p1', title: 'Syntagma Square', subtitle: 'Athens, Greece' },
+    ]);
+
+    const { result } = renderHook(() => useLocationSearch({ country: '', city: '' }));
+    await search(result, 'syntagma');
+
+    expect(fetchPlacePredictions).toHaveBeenCalledWith('syntagma', expect.objectContaining({ countryCode: undefined }));
+    expect(result.current.suggestions.find((s) => s.source === 'google')).toMatchObject({
+      title: 'Syntagma Square',
+      subtitle: 'Athens, Greece',
+    });
+  });
+
   it('does not search below the minimum query length', async () => {
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
 

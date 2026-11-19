@@ -147,7 +147,9 @@
     "selectCountry": "Изберете земја...",
     "enterLicenseNumber": "Внесете го бројот на лиценцата",
     "formatHint": "Очекуван формат",
-    "submitForReview": "Поднеси на преглед"
+    "submitForReview": "Поднеси на преглед",
+    "officeLocation": "Локација на канцеларијата",
+    "selectLocation": "Изберете локација"
   },
   "security": {
     "title": "Безбедност и активност на најава",

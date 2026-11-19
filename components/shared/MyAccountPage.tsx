@@ -41,6 +41,9 @@ import NotificationSettingsSection from '../../src/features/notifications/compon
 import { usePendingImportCount } from '../../src/features/listing-sources/hooks/useImportReview';
 import { SoftIcon, NavPicture, type SoftIconName } from '@/src/shared/illustrations';
 
+/** Where the location map opens before an agent has set a pin. */
+const BALKAN_CENTRE = { lat: 42.0, lng: 21.0 };
+
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
   'English', 'Serbian', 'Croatian', 'Slovenian', 'Bosnian', 'Macedonian',
@@ -1257,6 +1260,9 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
         }));
     };
 
+    const hasAgentPin = Number.isFinite(agentData.lat) && Number.isFinite(agentData.lng)
+        && !(agentData.lat === 0 && agentData.lng === 0);
+
     const handleLocationChange = (lat: number, lng: number) => {
         setAgentData(prev => ({
             ...prev,
@@ -1999,18 +2005,18 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                     </div>
 
                     {/* Main Location with Map Picker */}
+                    {/* No country or city is passed: an agent's office can be anywhere
+                        the app covers, so the search offers every place the site-wide
+                        search box knows. A 0,0 pin is "never set", not a location. */}
                     <MapLocationPicker
-                        lat={agentData.lat ?? 42.0}
-                        lng={agentData.lng ?? 21.0}
-                        address={agentData.streetAddress || agentData.city || 'Select location'}
-                        country={agentData.country || 'Serbia'}
-                        city={agentData.city || ''}
-                        cityLat={agentData.lat ?? 42.0}
-                        cityLng={agentData.lng ?? 21.0}
+                        lat={hasAgentPin ? agentData.lat : BALKAN_CENTRE.lat}
+                        lng={hasAgentPin ? agentData.lng : BALKAN_CENTRE.lng}
+                        address={agentData.streetAddress || agentData.city || t('agent.selectLocation', 'Select location')}
+                        title={t('agent.officeLocation', 'Office Location')}
                         onLocationChange={handleLocationChange}
                         onAddressChange={handleAddressChange}
-                        zoom={10}
-                        autoDetectLocation={!agentData.lat && !agentData.lng}
+                        zoom={hasAgentPin ? 14 : 6}
+                        autoDetectLocation={!hasAgentPin}
                     />
 
                     {/* Service Areas */}

@@ -147,7 +147,9 @@
     "selectCountry": "Zgjidhni shtetin...",
     "enterLicenseNumber": "Vendosni numrin e licencës",
     "formatHint": "Formati i pritur",
-    "submitForReview": "Dërgo për shqyrtim"
+    "submitForReview": "Dërgo për shqyrtim",
+    "officeLocation": "Vendndodhja e zyrës",
+    "selectLocation": "Zgjidh vendndodhjen"
   },
   "security": {
     "title": "Siguria dhe Aktiviteti i Hyrjes",

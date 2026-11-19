@@ -18,13 +18,16 @@ import {
   isPlacesAvailable,
   resolvePlaceDetails,
 } from '@/shared/places';
+import { cityPlaceSuggestions } from '../utils/cityPlaceSuggestions';
 
 /**
  * Location search for the listing map picker.
  *
  * Three sources, best-first, merged and de-duplicated:
- *   1. the curated Balkan locality gazetteer — instant, offline, and the only
- *      source guaranteed to know the villages this app lists in;
+ *   1. the app's own places — the cities of `BALKAN_LOCATIONS` and the curated
+ *      locality gazetteer, the same index the site-wide search box uses —
+ *      instant, offline, and the only source guaranteed to know the villages
+ *      this app lists in;
  *   2. Google Places autocomplete — broad coverage, biased to the chosen city;
  *   3. the Nominatim proxy — the fallback when no Places key is configured.
  *
@@ -173,9 +176,18 @@ export const useLocationSearch = ({
       // Every suggestion is written against the city the seller picked, so a
       // village 45km down the coast still reads "Himarë, Vlorë, Albania" —
       // the address agrees with the city the listing is filed under.
-      const context = { city, country };
+      // An empty name is no city at all: it must not blank out the place's
+      // own city or country in the label.
+      const context = { city: city || undefined, country: country || undefined };
 
-      const results: LocationSuggestion[] = localMatches.map((match) => ({
+      // A city outranks a village of the same name, as in the search box.
+      const cityMatches: LocationSuggestion[] = cityPlaceSuggestions(trimmedQuery, {
+        country,
+        near: centre,
+        limit: 3,
+      }).map((place) => ({ ...place, source: 'local' }));
+
+      const results: LocationSuggestion[] = [...cityMatches, ...localMatches.map((match) => ({
         id: `local:${match.country}:${match.city}:${match.name}`,
         title: canonicalPlaceName(match.name),
         subtitle: formatPlace(match, { context }).secondary,
@@ -183,7 +195,7 @@ export const useLocationSearch = ({
         lat: match.lat,
         lng: match.lng,
         distanceKm: match.distanceKm,
-      }));
+      }))];
 
       if (isPlacesAvailable()) {
         if (!sessionTokenRef.current) sessionTokenRef.current = createSessionToken();
@@ -197,7 +209,18 @@ export const useLocationSearch = ({
 
         for (const prediction of predictions) {
           // Restricted at the request by ISO code, so nothing to re-check.
-          const label = formatPlaceLabel({ name: prediction.title }, { context });
+          // Google's own "<city>, <country>" line names the place when the
+          // caller has no city of its own to file it under; a caller that
+          // does still gets every label written against that city.
+          const [placeCity, ...rest] = prediction.subtitle.split(',').map((part) => part.trim());
+          const label = formatPlaceLabel(
+            {
+              name: prediction.title,
+              city: placeCity || undefined,
+              country: rest.length > 0 ? rest[rest.length - 1] : undefined,
+            },
+            { context }
+          );
           results.push({
             id: `google:${prediction.placeId}`,
             title: label.primary,

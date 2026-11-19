@@ -147,7 +147,9 @@
     "selectCountry": "Select country...",
     "enterLicenseNumber": "Enter your license number",
     "formatHint": "Expected format",
-    "submitForReview": "Submit for Review"
+    "submitForReview": "Submit for Review",
+    "officeLocation": "Office Location",
+    "selectLocation": "Select location"
   },
   "security": {
     "title": "Security & Login Activity",

@@ -147,7 +147,9 @@
     "selectCountry": "Επιλέξτε χώρα...",
     "enterLicenseNumber": "Εισαγάγετε τον αριθμό άδειας",
     "formatHint": "Αναμενόμενη μορφή",
-    "submitForReview": "Υποβολή για έλεγχο"
+    "submitForReview": "Υποβολή για έλεγχο",
+    "officeLocation": "Τοποθεσία γραφείου",
+    "selectLocation": "Επιλέξτε τοποθεσία"
   },
   "security": {
     "title": "Ασφάλεια & Δραστηριότητα Σύνδεσης",

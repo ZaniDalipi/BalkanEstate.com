@@ -147,7 +147,9 @@
     "selectCountry": "Izaberite državu...",
     "enterLicenseNumber": "Unesite broj licence",
     "formatHint": "Očekivani format",
-    "submitForReview": "Pošalji na pregled"
+    "submitForReview": "Pošalji na pregled",
+    "officeLocation": "Lokacija kancelarije",
+    "selectLocation": "Izaberite lokaciju"
   },
   "security": {
     "title": "Sigurnost i Aktivnost Prijave",

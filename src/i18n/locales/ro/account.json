@@ -147,7 +147,9 @@
     "selectCountry": "Selectează țara...",
     "enterLicenseNumber": "Introdu numărul licenței",
     "formatHint": "Format așteptat",
-    "submitForReview": "Trimite spre verificare"
+    "submitForReview": "Trimite spre verificare",
+    "officeLocation": "Locația biroului",
+    "selectLocation": "Selectați locația"
   },
   "security": {
     "title": "Securitate și Activitate de Autentificare",
