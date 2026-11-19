@@ -1481,73 +1481,21 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     };
   }, [map, selectedProperty]);
 
-  // Handle flyTo target - smooth cinematic animation
+  // Fly to a searched place. One continuous flight that sets centre and zoom
+  // together on every frame, so it always lands exactly on the place. (The old
+  // panTo-then-setZoom timers cut a still-animating pan short on wide screens,
+  // leaving the map stopped part-way there.)
+  const onFlyCompleteRef = useRef(onFlyComplete);
+  onFlyCompleteRef.current = onFlyComplete;
   useEffect(() => {
     if (!map || !flyToTarget) return;
-
-    const targetLat = flyToTarget.center[0];
-    const targetLng = flyToTarget.center[1];
-    const targetZoom = flyToTarget.zoom;
-    const currentZoom = map.getZoom() || 10;
-    const currentCenter = map.getCenter();
-
-    // Calculate distance to target (rough approximation)
-    const distance = currentCenter
-      ? Math.sqrt(
-          Math.pow(currentCenter.lat() - targetLat, 2) +
-          Math.pow(currentCenter.lng() - targetLng, 2)
-        )
-      : 1;
-
-    // For short distances, just do a simple smooth pan
-    if (distance < 0.1 && Math.abs(currentZoom - targetZoom) < 3) {
-      map.panTo({ lat: targetLat, lng: targetLng });
-      setTimeout(() => {
-        if (map) map.setZoom(targetZoom);
-        onFlyComplete();
-      }, 500);
-      return;
-    }
-
-    // Cinematic fly animation for longer distances:
-    // 1. Zoom out to show context
-    // 2. Pan to target
-    // 3. Zoom in to target level
-
-    // Calculate intermediate zoom (zoomed out view)
-    const intermediateZoom = Math.max(8, Math.min(currentZoom, targetZoom) - 4);
-
-    // Step 1: Zoom out
-    map.setZoom(intermediateZoom);
-
-    // Step 2: After zoom out, pan to target location
-    setTimeout(() => {
-      if (!map) return;
-      map.panTo({ lat: targetLat, lng: targetLng });
-
-      // Step 3: After pan, zoom in to target
-      setTimeout(() => {
-        if (!map) return;
-
-        // Gradually zoom in for smooth effect
-        const zoomSteps = 3;
-        const zoomDiff = targetZoom - intermediateZoom;
-        const stepDelay = 200;
-
-        for (let i = 1; i <= zoomSteps; i++) {
-          setTimeout(() => {
-            if (map) {
-              const stepZoom = intermediateZoom + (zoomDiff * (i / zoomSteps));
-              map.setZoom(Math.round(stepZoom));
-            }
-          }, stepDelay * i);
-        }
-
-        // Complete after all animations
-        setTimeout(onFlyComplete, stepDelay * zoomSteps + 200);
-      }, 600);
-    }, 400);
-  }, [flyToTarget, map, onFlyComplete]);
+    const [lat, lng] = flyToTarget.center;
+    return flyCamera(
+      map,
+      { center: { lat, lng }, zoom: flyToTarget.zoom },
+      { onArrive: () => onFlyCompleteRef.current() },
+    );
+  }, [flyToTarget, map]);
 
   // Frame the drawn area (just drawn, or a saved search): fly to it, centred in
   // the part of the map the search bar and toolbars don't cover.
