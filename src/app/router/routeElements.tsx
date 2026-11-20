@@ -27,6 +27,9 @@ import { lazyWithRetry } from './lazyWithRetry';
 import { localizePath } from './navigation';
 import { paths } from './paths';
 import { useOpenSidebar } from './layoutContext';
+import { readLastPage } from './lastPage';
+import { RememberLastPage } from './RememberLastPage';
+import { signedInLandingPage } from '@/src/shared/auth/authReturn';
 
 const PropertyDetailsPage = lazyWithRetry(routeImporters.propertyDetails);
 const AgencyDetailPage = lazyWithRetry(routeImporters.agencyDetail);
@@ -77,7 +80,12 @@ export const LanguageGate: React.FC = () => {
   if (!supported) {
     return <Navigate replace to={`/${detectPreferredLanguage()}${pathname}${search}${hash}`} state={state} />;
   }
-  return <Outlet />;
+  return (
+    <>
+      <RememberLastPage />
+      <Outlet />
+    </>
+  );
 };
 
 const PageLoader: React.FC = () => <RouteLoader />;
@@ -254,6 +262,19 @@ export const SignedInRoute: React.FC<{ children: React.ReactNode }> = ({ childre
   const { state } = useAppContext();
   if (!state.isAuthenticated) {
     return <Redirect to={paths.search()} keepQuery={false} />;
+  }
+  return <>{children}</>;
+};
+
+/**
+ * Sign-in pages (`/login`, `/register`): for signed-out visitors only. A
+ * signed-in user (the session is restored before any route renders) is sent
+ * back to the last page they had open, else home — never shown the form again.
+ */
+export const SignedOutRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { state } = useAppContext();
+  if (state.isAuthenticated) {
+    return <Redirect to={signedInLandingPage(readLastPage(), paths.home())} keepQuery={false} />;
   }
   return <>{children}</>;
 };

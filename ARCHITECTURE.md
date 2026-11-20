@@ -98,6 +98,15 @@ src/app/router/
   rewritten with `replaceQueryString()`, which does not re-render the tree.
 - `navHistory.ts` sits underneath the router on `window.history`: back/forward
   direction and per-entry scroll restoration.
+- **Guards** (`routeElements.tsx`): `SignedInRoute` and `AdminRoute` keep
+  signed-out users out; `SignedOutRoute` wraps `/login` and `/register`, so a
+  signed-in user who opens them is sent to the last page they had open
+  (`lastPage.ts`, per tab), else home. The session is restored before any route
+  renders, so guards can trust `isAuthenticated`.
+- **Signing in returns to where the user was.** The sign-in window remembers the
+  page it opened over (`authReturn.ts`), and `returnAfterSignIn()` goes back
+  there after email, sign-up and Google/Apple sign-in, or stays put when the
+  user is already on it.
 
 To add a page: a builder in `paths.ts`, a lazy import and a route in
 `routes.tsx`. If the sidebar lists it, add it to `VIEW_ORDER` in

@@ -4,7 +4,7 @@
  * Signing in comes back to the page the sign-in window was opened over (a
  * listing, a photo, the home page), also after Google/Apple, which leave the
  * site and return on /auth/callback. Only when there is no such page (the
- * `/login` entry point) does it end on the search page. An "intent" (e.g. "follow this residence") lets the page
+ * `/login` entry point) does it end on the last page the user had open, or home. An "intent" (e.g. "follow this residence") lets the page
  * finish the action the user asked for once they are back and signed in.
  * Both expire after 30 minutes and only same-site paths are accepted.
  */
@@ -88,6 +88,15 @@ export function rememberSignInOrigin(path = `${window.location.pathname}${window
 export function signInDestination(remembered: string | null, current: string, fallback: string): string | null {
   const target = remembered ?? safeReturnPath(current) ?? fallback;
   return target === current ? null : target;
+}
+
+/**
+ * Where a signed-in user belongs when they reach a sign-in page (`/login`
+ * typed by hand, an old link): the last page they had open, else `fallback`.
+ * The stored value is checked again, since storage can be edited.
+ */
+export function signedInLandingPage(lastPage: unknown, fallback: string): string {
+  return safeReturnPath(lastPage) ?? fallback;
 }
 
 /** The page to go back to after signing in (read once). */

@@ -312,10 +312,9 @@ const AuthPage: React.FC = () => {
     // page; closing it there moves the URL on to that page.
     const { pathname } = useLocation();
 
-    const handleClose = () => {
-        if (/\/(login|register)\/?$/.test(pathname)) {
-            navigate(paths.search(), { replace: true });
-        }
+    // Closes the window and clears the form. Leaves the URL alone: after a
+    // successful sign-in, the sign-in flow has already sent the user on.
+    const closeModal = () => {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
         // Reset form state
         setEmail('');
@@ -324,6 +323,14 @@ const AuthPage: React.FC = () => {
         setPhoneNumber('');
         setPhoneCountryCode(ALL_PHONE_COUNTRY_CODES[0].code);
         setHasUnsavedChanges(false);
+    };
+
+    // The user dismissed the window without signing in.
+    const handleClose = () => {
+        if (/\/(login|register)\/?$/.test(pathname)) {
+            navigate(paths.search(), { replace: true });
+        }
+        closeModal();
     };
 
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -461,7 +468,7 @@ const AuthPage: React.FC = () => {
                 // All users register as buyers - they can upgrade to agent from profile settings
                 await signup(email, password, { role: 'buyer', phone: fullPhone });
             }
-            handleClose();
+            closeModal();
         } catch (err) {
             setError(err instanceof Error ? err.message : t('auth:validation.genericError', 'An error occurred. Please try again.'));
         } finally {

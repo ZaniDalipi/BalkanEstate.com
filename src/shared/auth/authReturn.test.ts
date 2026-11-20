@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
-  AUTH_RETURN_TTL_MS, readFresh, rememberReturnPath, rememberSignInOrigin, safeReturnPath, signInDestination, takeReturnPath,
+  AUTH_RETURN_TTL_MS, readFresh, rememberReturnPath, rememberSignInOrigin, safeReturnPath, signedInLandingPage, signInDestination, takeReturnPath,
 } from './authReturn';
 
 describe('safeReturnPath', () => {
@@ -84,5 +84,17 @@ describe('rememberSignInOrigin', () => {
     rememberReturnPath('/en/developments/old');
     rememberSignInOrigin('/en/login');
     expect(takeReturnPath()).toBeNull();
+  });
+});
+
+describe('signedInLandingPage', () => {
+  it('returns the last page the user had open', () => {
+    expect(signedInLandingPage('/en/property/abc', '/')).toBe('/en/property/abc');
+  });
+
+  it('goes home when there is no last page, or it is not a same-site page', () => {
+    expect(signedInLandingPage(null, '/')).toBe('/');
+    expect(signedInLandingPage('https://evil.test/', '/')).toBe('/');
+    expect(signedInLandingPage('/en/login', '/')).toBe('/');
   });
 });

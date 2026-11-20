@@ -487,10 +487,19 @@ export const setPasswordForSocialUser = async (newPassword: string): Promise<{ m
   });
 };
 
+/**
+ * The sign-in providers the server has switched on. Anything but an explicit
+ * `true` counts as off, so an unexpected reply hides a button instead of
+ * breaking the sign-in window.
+ */
+export const readOAuthProviders = (response: unknown): { google: boolean; apple: boolean } => {
+  const providers = (response as { providers?: Record<string, unknown> } | null)?.providers;
+  return { google: providers?.google === true, apple: providers?.apple === true };
+};
+
 export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; apple: boolean }> => {
   try {
-    const response = await apiRequest<{ providers: { google: boolean; apple: boolean } }>('/auth/oauth/providers');
-    return response.providers;
+    return readOAuthProviders(await apiRequest<unknown>('/auth/oauth/providers'));
   } catch (_error) {
     // Return all false if endpoint fails
     return { google: false, apple: false };

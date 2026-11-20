@@ -32,6 +32,7 @@ import {
   PropertyRoute,
   Redirect,
   SignedInRoute,
+  SignedOutRoute,
 } from './routeElements';
 
 const HomePage = lazyWithRetry(() => import('@/src/features/home/components/HomePage'));
@@ -187,8 +188,8 @@ const pageRoutes: AppRoute[] = [
   ...aliases(['refund', 'refund-policy'], { view: 'refund' }, <RefundPolicyPage />),
 
   // Auth and payment callbacks
-  page('login', { view: 'search' }, <AuthModalRoute view="login" />),
-  page('register', { view: 'search' }, <AuthModalRoute view="signup" />),
+  page('login', { view: 'search' }, <SignedOutRoute><AuthModalRoute view="login" /></SignedOutRoute>),
+  page('register', { view: 'search' }, <SignedOutRoute><AuthModalRoute view="signup" /></SignedOutRoute>),
   // The OAuth token is read off this URL by AppShell before anything renders.
   page('auth/callback', { view: 'search' }, guarded(<WithSidebar page={SearchPage} />)),
   page('reset-password', { view: 'reset-password' }, <ResetPasswordPage />),
