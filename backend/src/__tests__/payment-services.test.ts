@@ -1,10 +1,15 @@
 /**
  * Payment Services Unit Tests
  *
- * Tests for payment provider factory
- * All countries use 'web' as payment provider (pending new provider integration)
- * Run: npm test -- --testPathPattern=payment-services
+ * Tests for payment provider factory.
+ * Every country is served by Paysera (services/paymentProviderFactory.ts:
+ * COUNTRY_PROVIDER_MAP, and Paysera is also the fallback). These tests used to
+ * expect 'web', from before the factory was moved to Paysera.
+ * Run: npx jest -i src/__tests__/payment-services.test.ts
  */
+
+// Pure functions only: no database needed.
+process.env.SKIP_TEST_DB = 'true';
 
 import { paymentProviderFactory, COUNTRY_PROVIDER_MAP } from '../services/paymentProviderFactory';
 
@@ -18,24 +23,24 @@ describe('PaymentProviderFactory', () => {
 
     const allCountries = ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'];
 
-    test.each(allCountries)('returns web for country %s', (countryCode) => {
+    test.each(allCountries)('returns paysera for country %s', (countryCode) => {
       const provider = paymentProviderFactory.getProviderForCountry(countryCode);
-      expect(provider).toBe('web');
+      expect(provider).toBe('paysera');
     });
 
-    test('returns web for unknown country (default)', () => {
+    test('returns paysera for unknown country (default)', () => {
       const provider = paymentProviderFactory.getProviderForCountry('XX');
-      expect(provider).toBe('web');
+      expect(provider).toBe('paysera');
     });
 
     test('handles lowercase country codes', () => {
-      expect(paymentProviderFactory.getProviderForCountry('rs')).toBe('web');
-      expect(paymentProviderFactory.getProviderForCountry('gr')).toBe('web');
+      expect(paymentProviderFactory.getProviderForCountry('rs')).toBe('paysera');
+      expect(paymentProviderFactory.getProviderForCountry('gr')).toBe('paysera');
     });
 
     test('handles empty string', () => {
       const provider = paymentProviderFactory.getProviderForCountry('');
-      expect(provider).toBe('web');
+      expect(provider).toBe('paysera');
     });
   });
 
@@ -45,7 +50,7 @@ describe('PaymentProviderFactory', () => {
       const info = paymentProviderFactory.getCountryMapping('RS');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Serbia');
-      expect(info?.provider).toBe('web');
+      expect(info?.provider).toBe('paysera');
       expect(info?.currency).toBe('EUR');
       expect(info?.isEU).toBe(false);
     });
@@ -54,7 +59,7 @@ describe('PaymentProviderFactory', () => {
       const info = paymentProviderFactory.getCountryMapping('GR');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Greece');
-      expect(info?.provider).toBe('web');
+      expect(info?.provider).toBe('paysera');
       expect(info?.isEU).toBe(true);
     });
 

@@ -1,30 +1,59 @@
 /**
- * TEST: Renewal & Listing Growth
+ * TEST: Renewal & the monthly listing allowance
  *
- * Scenario:
- * 1. User subscribes on Day 1 → gets 30 listings
- * 2. Creates 20 listings
- * 3. Subscription expires after 1 day (Day 2)
- * 4. User renews on Day 2
- * 5. Expected: Max allowed should increase to 60 (or stay at 30 if still month 1?)
+ * Scenario (from the original bug report): a user on a 30-listings-a-month
+ * plan creates 20 listings, then renews. What can they create next?
+ *
+ * This suite used to test a cumulative model: allowed = months since the
+ * cycle started × allowance, through `getMaxAllowedListings` and
+ * `subscription.subscriptionCycleStartDate`. Both are gone. The model is now
+ * a monthly counter (services/listingLimitService.ts): the allowance is per
+ * calendar month and does not add up, the counter starts again at 0 each new
+ * month or when the plan is renewed (renewal sets `listingsCreatedThisMonth`
+ * to 0, as `resetMonthlyCounter` does), and listings already published stay
+ * up. These tests pin that model with the same scenario.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import User from '../models/User';
 import Product from '../models/Product';
 import listingLimitService from '../services/listingLimitService';
+import { createMockUser } from './setup';
 
-describe('CRITICAL BUG TEST: Renewal Not Adding More Listings', () => {
-  let testUser: any;
-  let agencyProduct: any;
+const PLAN = 'agency_monthly_test';
+const ALLOWANCE = 30;
 
+let seq = 0;
+
+const startOfLastMonth = (): Date => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+};
+
+/** A user on the 30-a-month plan who has created `created` listings since `monthResetDate`. */
+const planUser = (created: number, monthResetDate: Date) =>
+  User.create(
+    createMockUser({
+      email: `renewal-${Date.now()}-${++seq}@example.com`,
+      role: 'agent',
+      subscriptionPlan: PLAN,
+      subscription: {
+        tier: 'agency_agent',
+        status: 'active',
+        listingsLimit: ALLOWANCE,
+        listingsCreatedThisMonth: created,
+        monthResetDate,
+      },
+    })
+  );
+
+describe('Renewal and the monthly listing allowance', () => {
   beforeEach(async () => {
-    // Create product
-    agencyProduct = await Product.create({
-      productId: 'agency_monthly_test',
+    await Product.create({
+      productId: PLAN,
       name: 'Agency Monthly',
       tier: 'agency',
-      listingsLimit: 30,
+      listingsLimit: ALLOWANCE,
       billingPeriod: 'monthly',
       price: 99,
       currency: 'EUR',
@@ -35,150 +64,51 @@ describe('CRITICAL BUG TEST: Renewal Not Adding More Listings', () => {
       displayOrder: 1,
       highlighted: false,
     });
-
-    // Create user
-    testUser = await User.create({
-      email: 'test-renewal@example.com',
-      password: 'hashed_password',
-      name: 'Test Renewal User',
-      role: 'agent',
-      subscription: {
-        tier: 'agency_agent',
-        status: 'active',
-        subscriptionCycleStartDate: new Date('2024-01-01'),
-        subscriptionCycleEndDate: new Date('2024-01-02'), // Expires after 1 day!
-        activeListingsCount: 0,
-      },
-      subscriptionPlan: 'agency_monthly_test',
-    });
   });
 
-  afterEach(async () => {
-    await User.deleteMany({});
-    await Product.deleteMany({});
+  it('reads the monthly allowance from the plan', async () => {
+    await expect(listingLimitService.getMonthlyAllowance(PLAN)).resolves.toBe(ALLOWANCE);
+    await expect(listingLimitService.getMonthlyAllowance('no_such_plan')).rejects.toThrow('Product not found');
   });
 
-  it('BUG: User renews on Day 2 but still sees 30 listings max, not 60', async () => {
-    const user = testUser;
+  it('day 1: after creating 20 of 30, 10 are left and more can be created', async () => {
+    const user = await planUser(20, new Date());
 
-    // Day 1: User creates 20 listings
-    const monthlyAllowance = await listingLimitService.getMonthlyAllowance(user.subscriptionPlan);
-    let maxAllowedDay1 = listingLimitService.getMaxAllowedListings(
-      user.subscription.subscriptionCycleStartDate,
-      monthlyAllowance
-    );
-
-    console.log('DAY 1:');
-    console.log(`  Monthly allowance: ${monthlyAllowance}`);
-    console.log(`  Max allowed: ${maxAllowedDay1}`);
-    console.log(`  Cycle start: ${user.subscription.subscriptionCycleStartDate}`);
-    console.log(`  Cycle end: ${user.subscription.subscriptionCycleEndDate}`);
-
-    expect(maxAllowedDay1).toBe(30); // Month 1: 30 max
-    user.subscription.activeListingsCount = 20;
-    await user.save();
-
-    // ===================================================================
-    // DAY 2: SUBSCRIPTION EXPIRES AND USER RENEWS
-    // ===================================================================
-    // Simulate renewal - subscription gets extended
-    const renewalDate = new Date('2024-01-02');
-    const newExpirationDate = new Date(renewalDate);
-    newExpirationDate.setMonth(newExpirationDate.getMonth() + 1); // Add 1 month
-
-    console.log('\nDAY 2 - RENEWAL:');
-    console.log(`  Renewal date: ${renewalDate}`);
-    console.log(`  New expiration: ${newExpirationDate}`);
-
-    // THE BUG: We need to check - does subscriptionCycleEndDate get updated?
-    // If it doesn't, then months elapsed is still calculated from Day 1
-    // Which means: (Day2 - Day1) / 30 = 1/30 = 0, + 1 = Month 1 still!
-
-    // Update subscription (this is what should happen on renewal)
-    user.subscription.subscriptionCycleEndDate = newExpirationDate;
-    await user.save();
-
-    const updatedUser = await User.findById(user._id);
-    const maxAllowedDay2 = listingLimitService.getMaxAllowedListings(
-      updatedUser!.subscription.subscriptionCycleStartDate,
-      monthlyAllowance
-    );
-
-    console.log('\nAFTER RENEWAL:');
-    console.log(`  Days since cycle start: ${(renewalDate.getTime() - updatedUser!.subscription.subscriptionCycleStartDate!.getTime()) / (24 * 60 * 60 * 1000)}`);
-    console.log(`  Max allowed: ${maxAllowedDay2}`);
-    console.log(`  ❌ BUG: Still 30, should be 60!`);
-
-    // The problem: We're only 1 day into the cycle
-    // So: Math.floor(1 / 30) + 1 = 0 + 1 = Month 1 still
-    // User is confused because they renewed but max didn't increase
-    expect(maxAllowedDay2).toBe(30); // Still month 1 because only 1 day has passed!
+    const usage = await listingLimitService.getMonthlyUsage(String(user._id));
+    expect(usage).toMatchObject({ monthlyAllowance: ALLOWANCE, created: 20, remaining: 10 });
+    await expect(listingLimitService.canCreateListing(String(user._id))).resolves.toBe(true);
   });
 
-  it('CORRECT: User renews on Day 31 (1 month later) and sees 60 listings max', async () => {
-    const user = testUser;
+  it('with all 30 used this month, no more can be created', async () => {
+    const user = await planUser(ALLOWANCE, new Date());
 
-    // Day 1: User creates 20 listings
-    const monthlyAllowance = 30;
-    let maxAllowedDay1 = listingLimitService.getMaxAllowedListings(
-      user.subscription.subscriptionCycleStartDate,
-      monthlyAllowance
-    );
-
-    console.log('\nDAY 1:');
-    console.log(`  Max allowed: ${maxAllowedDay1}`);
-    expect(maxAllowedDay1).toBe(30);
-
-    user.subscription.activeListingsCount = 20;
-    await user.save();
-
-    // ===================================================================
-    // DAY 31: 1 MONTH LATER - USER RENEWS
-    // ===================================================================
-    const renewalDate = new Date('2024-02-01'); // Day 31 (1 month later)
-
-    console.log('\nDAY 31 (1 MONTH LATER):');
-    console.log(`  Renewal date: ${renewalDate}`);
-    console.log(`  Days since start: ${(renewalDate.getTime() - user.subscription.subscriptionCycleStartDate!.getTime()) / (24 * 60 * 60 * 1000)}`);
-
-    const maxAllowedDay31 = listingLimitService.getMaxAllowedListings(
-      user.subscription.subscriptionCycleStartDate,
-      monthlyAllowance
-    );
-
-    console.log(`  Max allowed: ${maxAllowedDay31}`);
-    console.log(`  ✓ CORRECT: Now 60!`);
-
-    expect(maxAllowedDay31).toBe(60); // Month 2: 60 max
+    const usage = await listingLimitService.getMonthlyUsage(String(user._id));
+    expect(usage.remaining).toBe(0);
+    await expect(listingLimitService.canCreateListing(String(user._id))).resolves.toBe(false);
   });
 
-  it('DIAGNOSIS: Calculate months correctly', () => {
-    const cycleStart = new Date('2024-01-01');
-    const monthlyAllowance = 30;
+  it('renewing resets the counter, so the full 30 are available again the same day', async () => {
+    const user = await planUser(ALLOWANCE, new Date());
 
-    // Test at different days
-    const testDates = [
-      { day: 1, date: new Date('2024-01-01') },
-      { day: 2, date: new Date('2024-01-02') },
-      { day: 30, date: new Date('2024-01-30') },
-      { day: 31, date: new Date('2024-01-31') },
-      { day: 32, date: new Date('2024-02-02') },
-      { day: 60, date: new Date('2024-02-29') },
-      { day: 61, date: new Date('2024-03-01') },
-    ];
+    // What renewal does to the counter.
+    await listingLimitService.resetMonthlyCounter(String(user._id));
 
-    console.log('\nMONTHS ELAPSED CALCULATION:');
-    console.log('Day | Date       | Days Since | Months | Max Allowed');
-    console.log('----+------------+------------+--------+-------------');
+    const usage = await listingLimitService.getMonthlyUsage(String(user._id));
+    expect(usage).toMatchObject({ monthlyAllowance: ALLOWANCE, created: 0, remaining: ALLOWANCE });
+    await expect(listingLimitService.canCreateListing(String(user._id))).resolves.toBe(true);
+  });
 
-    testDates.forEach(({ day, date }) => {
-      const daysSince = Math.floor((date.getTime() - cycleStart.getTime()) / (24 * 60 * 60 * 1000));
-      const monthsElapsed = Math.floor(daysSince / 30) + 1;
-      const maxAllowed = Math.min(monthsElapsed * monthlyAllowance, 12 * monthlyAllowance);
+  it('a new calendar month starts fresh without any reset job, and does not stack to 60', async () => {
+    const user = await planUser(ALLOWANCE, startOfLastMonth());
 
-      console.log(
-        `${String(day).padEnd(3)} | ${date.toISOString().split('T')[0]} | ${String(daysSince).padEnd(10)} | ${String(monthsElapsed).padEnd(6)} | ${maxAllowed}`
-      );
-    });
+    const usage = await listingLimitService.getMonthlyUsage(String(user._id));
+    expect(usage).toMatchObject({ monthlyAllowance: ALLOWANCE, created: 0, remaining: ALLOWANCE });
+    await expect(listingLimitService.canCreateListing(String(user._id))).resolves.toBe(true);
+  });
+
+  it('isMonthBoundaryPassed: same month no, last month yes, never reset yes', () => {
+    expect(listingLimitService.isMonthBoundaryPassed(new Date())).toBe(false);
+    expect(listingLimitService.isMonthBoundaryPassed(startOfLastMonth())).toBe(true);
+    expect(listingLimitService.isMonthBoundaryPassed(undefined)).toBe(true);
   });
 });

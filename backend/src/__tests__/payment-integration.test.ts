@@ -1,53 +1,32 @@
 /**
  * Payment Integration Tests
  *
- * End-to-end tests for payment flows
- * Run: npm test -- --testPathPattern=payment-integration
+ * The payment routes end to end through express: routing, authentication,
+ * validation and subscription status.
+ * Run: npx jest -i src/__tests__/payment-integration.test.ts
+ *
+ * Only the payment router is mounted, on the shared test database
+ * (setup.ts). Importing the whole server would connect to a real database,
+ * start the cron jobs and open a port. Users are signed in with a token
+ * the auth middleware accepts, as in the other route suites; login itself
+ * is covered by auth.test.ts. Every country is served by Paysera
+ * (services/paymentProviderFactory.ts).
  */
 
+import express from 'express';
 import request from 'supertest';
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import app from '../server';
 import User from '../models/User';
-import Product from '../models/Product';
-import Subscription from '../models/Subscription';
-import {
-  TEST_USERS,
-  TEST_PRODUCTS,
-  TEST_PAYMENT_REQUESTS,
-  createMockUser,
-} from './fixtures/payment-fixtures';
+import { TEST_USERS, TEST_PAYMENT_REQUESTS } from './fixtures/payment-fixtures';
+import { tokenFor } from './developments/helpers/explorerHarness';
 
-let mongoServer: MongoMemoryServer;
-let authToken: string;
-let testUserId: string;
+const app = express();
+app.use(express.json());
+/* eslint-disable @typescript-eslint/no-var-requires */
+app.use('/api/payments', require('../routes/paymentRoutes').default);
+/* eslint-enable @typescript-eslint/no-var-requires */
 
-// ============================================================
-// SETUP & TEARDOWN
-// ============================================================
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  await mongoose.connect(mongoServer.getUri());
-
-  // Seed products
-  await Product.insertMany(Object.values(TEST_PRODUCTS));
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
-
-beforeEach(async () => {
-  // Clear users and subscriptions before each test
-  await User.deleteMany({});
-  await Subscription.deleteMany({});
-});
-
-// Helper to create and authenticate a user
-async function createAuthenticatedUser(userData: any) {
+// Helper to create and sign in a user
+async function createAuthenticatedUser(userData: Record<string, unknown>) {
   const user = await User.create({
     ...userData,
     password: 'TestPassword123!',
@@ -55,13 +34,9 @@ async function createAuthenticatedUser(userData: any) {
     isEmailVerified: true,
   });
 
-  const loginRes = await request(app)
-    .post('/api/auth/login')
-    .send({ email: userData.email, password: 'TestPassword123!' });
-
   return {
     user,
-    token: loginRes.body.token,
+    token: tokenFor(user._id),
   };
 }
 
@@ -96,24 +71,24 @@ describe('Public Payment Endpoints', () => {
 
   describe('GET /api/payments/providers/:countryCode', () => {
 
-    it('returns web for Greece (EU)', async () => {
+    it('returns paysera for Greece (EU)', async () => {
       const res = await request(app)
         .get('/api/payments/providers/GR')
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.provider).toBe('web');
+      expect(res.body.provider).toBe('paysera');
       expect(res.body.countryName).toBe('Greece');
       expect(res.body.isEU).toBe(true);
     });
 
-    it('returns web for Serbia (non-EU)', async () => {
+    it('returns paysera for Serbia (non-EU)', async () => {
       const res = await request(app)
         .get('/api/payments/providers/RS')
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.provider).toBe('web');
+      expect(res.body.provider).toBe('paysera');
       expect(res.body.countryName).toBe('Serbia');
       expect(res.body.isEU).toBe(false);
     });
@@ -123,7 +98,7 @@ describe('Public Payment Endpoints', () => {
         .get('/api/payments/providers/rs')
         .expect(200);
 
-      expect(res.body.provider).toBe('web');
+      expect(res.body.provider).toBe('paysera');
     });
   });
 });
@@ -176,7 +151,7 @@ describe('Authenticated Payment Endpoints', () => {
     });
 
     it('returns subscription details for subscribed user', async () => {
-      const { user, token } = await createAuthenticatedUser(TEST_USERS.subscribedUser);
+      const { token } = await createAuthenticatedUser(TEST_USERS.subscribedUser);
 
       const res = await request(app)
         .get('/api/payments/subscription-status')

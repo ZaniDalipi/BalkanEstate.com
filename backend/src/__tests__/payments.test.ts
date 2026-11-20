@@ -1,86 +1,36 @@
 /**
  * Payment System Tests
  *
- * Test cases for payment integration
- * Run with: npm test -- --testPathPattern=payments
+ * Provider routing, authentication and validation of the payment routes.
+ * Run with: npx jest -i src/__tests__/payments.test.ts
+ *
+ * Only the payment router is mounted, on the shared test database
+ * (setup.ts). Importing the whole server would connect to a real database,
+ * start the cron jobs and open a port. Every country is served by Paysera
+ * (services/paymentProviderFactory.ts).
  */
 
+import express from 'express';
 import request from 'supertest';
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import app from '../server';
 import User from '../models/User';
-import Product from '../models/Product';
+import { createMockUser } from './setup';
+import { tokenFor } from './developments/helpers/explorerHarness';
 
-// Test configuration
-let mongoServer: MongoMemoryServer;
-let authToken: string;
-let testUser: any;
+const app = express();
+app.use(express.json());
+/* eslint-disable @typescript-eslint/no-var-requires */
+app.use('/api/payments', require('../routes/paymentRoutes').default);
+/* eslint-enable @typescript-eslint/no-var-requires */
 
-// Test data
-const TEST_USER = {
-  email: 'test@balkanestateai.com',
-  password: 'TestPassword123!',
-  name: 'Test User',
-  country: 'RS', // Serbia
+let seq = 0;
+
+/** A signed-in user from Serbia; returns a bearer token. */
+const signedInToken = async (): Promise<string> => {
+  const user = await User.create(
+    createMockUser({ email: `payments-${Date.now()}-${++seq}@example.com`, country: 'RS' })
+  );
+  return tokenFor(user._id);
 };
-
-const TEST_USER_EU = {
-  email: 'testeu@balkanestateai.com',
-  password: 'TestPassword123!',
-  name: 'Test EU User',
-  country: 'GR', // Greece
-};
-
-const TEST_PRODUCTS = [
-  {
-    productId: 'pro_monthly',
-    name: 'Pro Monthly',
-    description: 'Professional monthly subscription',
-    price: 25,
-    currency: 'EUR',
-    billingPeriod: 'monthly',
-    isActive: true,
-  },
-  {
-    productId: 'pro_yearly',
-    name: 'Pro Yearly',
-    description: 'Professional yearly subscription',
-    price: 200,
-    currency: 'EUR',
-    billingPeriod: 'yearly',
-    isActive: true,
-  },
-];
-
-// ============================================================
-// TEST SETUP
-// ============================================================
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-
-  await mongoose.connect(mongoUri);
-
-  // Create test products
-  await Product.insertMany(TEST_PRODUCTS);
-
-  // Create test user and get auth token
-  const registerRes = await request(app)
-    .post('/api/auth/register')
-    .send(TEST_USER);
-
-  if (registerRes.status === 201) {
-    authToken = registerRes.body.token;
-    testUser = registerRes.body.user;
-  }
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
 
 // ============================================================
 // COUNTRY ROUTING TESTS
@@ -98,42 +48,44 @@ describe('Payment Provider Routing', () => {
     expect(res.body.countries.length).toBeGreaterThan(0);
   });
 
-  test('GET /api/payments/providers/RS - Serbia routes to web', async () => {
+  test('GET /api/payments/providers/RS - Serbia routes to paysera', async () => {
     const res = await request(app)
       .get('/api/payments/providers/RS')
       .expect(200);
 
     expect(res.body.success).toBe(true);
-    expect(res.body.provider).toBe('web');
+    expect(res.body.provider).toBe('paysera');
     expect(res.body.countryCode).toBe('RS');
     expect(res.body.countryName).toBe('Serbia');
   });
 
-  test('GET /api/payments/providers/GR - Greece routes to web', async () => {
+  test('GET /api/payments/providers/GR - Greece routes to paysera', async () => {
     const res = await request(app)
       .get('/api/payments/providers/GR')
       .expect(200);
 
     expect(res.body.success).toBe(true);
-    expect(res.body.provider).toBe('web');
+    expect(res.body.provider).toBe('paysera');
     expect(res.body.countryCode).toBe('GR');
   });
 
   const allCountries = ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'];
 
-  test.each(allCountries)('GET /api/payments/providers/%s routes to web', async (country) => {
+  test.each(allCountries)('GET /api/payments/providers/%s routes to paysera', async (country) => {
     const res = await request(app)
       .get(`/api/payments/providers/${country}`)
       .expect(200);
 
-    expect(res.body.provider).toBe('web');
+    expect(res.body.provider).toBe('paysera');
   });
 
   test('Country codes are case-insensitive', async () => {
     const resLower = await request(app).get('/api/payments/providers/rs');
     const resUpper = await request(app).get('/api/payments/providers/RS');
 
+    expect(resLower.status).toBe(200);
     expect(resLower.body.provider).toBe(resUpper.body.provider);
+    expect(resLower.body.countryCode).toBe('RS');
   });
 });
 
@@ -144,7 +96,7 @@ describe('Payment Provider Routing', () => {
 describe('Payment Creation', () => {
 
   test('POST /api/payments/create-payment - requires authentication', async () => {
-    const res = await request(app)
+    await request(app)
       .post('/api/payments/create-payment')
       .send({
         planName: 'Pro Monthly',
@@ -156,11 +108,11 @@ describe('Payment Creation', () => {
   });
 
   test('POST /api/payments/create-payment - validates required fields', async () => {
-    if (!authToken) return;
+    const token = await signedInToken();
 
     const res = await request(app)
       .post('/api/payments/create-payment')
-      .set('Authorization', `Bearer ${authToken}`)
+      .set('Authorization', `Bearer ${token}`)
       .send({})
       .expect(400);
 
@@ -175,24 +127,24 @@ describe('Payment Creation', () => {
 describe('Subscription Management', () => {
 
   test('GET /api/payments/subscription-status - requires auth', async () => {
-    const res = await request(app)
+    await request(app)
       .get('/api/payments/subscription-status')
       .expect(401);
   });
 
   test('GET /api/payments/subscription-status - returns status for authenticated user', async () => {
-    if (!authToken) return;
+    const token = await signedInToken();
 
     const res = await request(app)
       .get('/api/payments/subscription-status')
-      .set('Authorization', `Bearer ${authToken}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
     expect(res.body.isSubscribed).toBeDefined();
   });
 
   test('POST /api/payments/cancel-subscription - requires auth', async () => {
-    const res = await request(app)
+    await request(app)
       .post('/api/payments/cancel-subscription')
       .expect(401);
   });
@@ -204,25 +156,34 @@ describe('Subscription Management', () => {
 
 describe('Error Handling', () => {
 
-  test('Invalid country code returns default provider', async () => {
+  test('Unknown country code returns the default provider', async () => {
     const res = await request(app)
-      .get('/api/payments/providers/INVALID')
+      .get('/api/payments/providers/ZZ')
       .expect(200);
 
-    expect(res.body.provider).toBe('web');
+    expect(res.body.provider).toBe('paysera');
+    expect(res.body.countryName).toBe('Unknown');
+  });
+
+  test('Malformed country code is rejected by validation', async () => {
+    const res = await request(app)
+      .get('/api/payments/providers/INVALID')
+      .expect(400);
+
+    expect(res.body.message).toBe('Validation failed');
   });
 
   test('Empty country code handled gracefully', async () => {
-    const res = await request(app)
+    await request(app)
       .get('/api/payments/providers/')
       .expect(404); // Route not matched
   });
 
-  test('Special characters in country code handled', async () => {
+  test('Special characters in country code are rejected', async () => {
     const res = await request(app)
       .get('/api/payments/providers/<script>')
-      .expect(200);
+      .expect(400);
 
-    expect(res.body.provider).toBe('web');
+    expect(res.body.provider).toBeUndefined();
   });
 });
