@@ -13,6 +13,7 @@ import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analy
 import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
 import { validatePaymentRedirectUrl } from '../../src/utils/security';
 import { tokenService } from '../../src/shared/api/tokenService';
+import { freeCouponErrorText, freeCouponRefusal } from '@/src/features/payments/utils/freeCouponError';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -564,6 +565,11 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
+          const refusal = freeCouponRefusal(errorData);
+          if (refusal) {
+            const { key, options } = freeCouponErrorText(refusal);
+            throw new Error(t(key, options));
+          }
           throw new Error(errorData?.message || t('payment:errors.freeSubscriptionFailed'));
         }
 
@@ -802,7 +808,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           <div className="max-w-md mx-auto text-center py-4 sm:py-6">
             <SoftIcon name="warning" className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4" />
             <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">{t('payment:ui.paymentWindow.activationFailed', 'Activation Failed')}</h2>
-            <p className="text-sm text-neutral-600 mb-2 px-2">{errorMessage}</p>
+            <p role="alert" className="text-sm text-neutral-600 mb-2 px-2">{errorMessage}</p>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-5 text-left">
               <p className="text-xs sm:text-sm text-amber-800 font-semibold mb-1">{t('payment:ui.paymentWindow.whatYouCanDo', 'What you can do:')}</p>
               <ul className="text-xs sm:text-sm text-amber-700 space-y-1 list-disc list-inside">

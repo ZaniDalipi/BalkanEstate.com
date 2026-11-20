@@ -62,7 +62,17 @@
     "freeSubscriptionFailed": "Aplicarea abonamentului gratuit a eșuat",
     "verificationTimeout": "Verificarea plății a expirat. Dacă ai finalizat plata, abonamentul va fi activat în curând. Verifică emailul pentru confirmare.",
     "invalidCodeFormat": "Format de cod invalid. Folosește doar litere, cifre, cratime și liniuțe de subliniere.",
-    "invalidPlanPrice": "Preț de plan invalid"
+    "invalidPlanPrice": "Preț de plan invalid",
+    "freeCoupon": {
+      "PLAN_REQUIRED": "Alege mai întâi un plan.",
+      "CODE_REQUIRED": "Introdu un cod de reducere.",
+      "PLAN_NOT_FOUND": "Acest plan nu este disponibil. Contactează echipa noastră și te vom ajuta.",
+      "PLAN_NOT_ELIGIBLE": "Un cod nu poate activa acest articol aici. Contactează echipa noastră și te vom ajuta.",
+      "ALREADY_SUBSCRIBED": "Ai deja un abonament activ pentru acest plan.",
+      "CODE_INVALID": "Acest cod nu poate fi folosit pentru acest plan. Poate a expirat, a fost deja folosit sau este pentru alt plan.",
+      "CODE_NOT_FREE": "Acest cod reduce prețul, dar nu face planul gratuit. Mai ai de plătit €{{remaining}} — contactează echipa noastră pentru a plăti restul.",
+      "CODE_USED_UP": "Acest cod a fost deja folosit."
+    }
   },
   "checkout": {
     "secureCheckout": "Finalizare securizată",

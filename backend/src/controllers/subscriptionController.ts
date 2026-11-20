@@ -710,9 +710,10 @@ export const verifySubscription = async (req: Request, res: Response): Promise<v
  */
 export const activateTestProSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Only allow in development mode
-    if (process.env.NODE_ENV === 'production') {
-      res.status(403).json({ message: 'This endpoint is only available in development mode' });
+    // Off unless a developer turns it on for a local box. NODE_ENV alone was not
+    // enough: any server not named exactly "production" (staging) handed out Pro.
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_TEST_ENDPOINTS !== 'true') {
+      res.status(404).json({ message: 'Not found' });
       return;
     }
 

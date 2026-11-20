@@ -6,13 +6,13 @@ import {
   getSubscriptionStatus,
   cancelSubscription,
   applyFreeSubscription,
-  reactivateSubscription,
   getCustomerPortal,
   getAvailablePaymentMethods,
 } from '../controllers/paymentController';
 import { handlePayseraWebhook, verifyPayseraPayment } from '../controllers/payseraWebhookController';
 import { protect } from '../middleware/auth';
 import { decryptPayload } from '../middleware/decryptPayload';
+import { requirePaymentsEnabled } from '../middleware/requirePaymentsEnabled';
 import {
   validateCreatePayment,
   validateCountryCode,
@@ -30,7 +30,7 @@ const router = express.Router();
  * POST /api/payments/create-payment
  * Body: { planName, planInterval, amount, productId, countryCode, language, preferredProvider? }
  */
-router.post('/create-payment', protect, decryptPayload, validateCreatePayment, createUnifiedPayment);
+router.post('/create-payment', protect, decryptPayload, validateCreatePayment, requirePaymentsEnabled, createUnifiedPayment);
 
 /**
  * Get payment provider info for a specific country
@@ -57,8 +57,8 @@ router.get('/methods/:countryCode', validateCountryCode, getAvailablePaymentMeth
 /** Apply free subscription with 100% off coupon */
 router.post('/apply-free-subscription', protect, decryptPayload, validateFreeSubscription, applyFreeSubscription);
 
-/** Reactivate an expired subscription (no payment required) */
-router.post('/reactivate-subscription', protect, reactivateSubscription);
+// POST /reactivate-subscription was removed: it gave any past subscriber a new
+// period without paying. Renewals go through the team (or checkout, once on).
 
 /** Get subscription status */
 router.get('/subscription-status', protect, getSubscriptionStatus);
@@ -74,7 +74,7 @@ router.get('/customer-portal', protect, getCustomerPortal);
 // ============================================================
 
 /** Paysera payment callback (signature-verified, no auth) */
-router.post('/paysera/webhook', handlePayseraWebhook);
+router.post('/paysera/webhook', requirePaymentsEnabled, handlePayseraWebhook);
 
 /** Verify Paysera payment by order ID */
 router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);

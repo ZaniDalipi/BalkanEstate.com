@@ -55,7 +55,17 @@
     "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
     "invalidPlanPrice": "Invalid plan price",
     "freeSubscriptionFailed": "Failed to apply free subscription",
-    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation."
+    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
+    "freeCoupon": {
+      "PLAN_REQUIRED": "Choose a plan first.",
+      "CODE_REQUIRED": "Enter a discount code.",
+      "PLAN_NOT_FOUND": "This plan is not available. Contact our team and we will help you.",
+      "PLAN_NOT_ELIGIBLE": "A code can't activate this item here. Contact our team and we will help you.",
+      "ALREADY_SUBSCRIBED": "You already have an active subscription for this plan.",
+      "CODE_INVALID": "This code can't be used for this plan. It may have expired, already been used, or be meant for a different plan.",
+      "CODE_NOT_FREE": "This code lowers the price but doesn't make the plan free. €{{remaining}} is left to pay — contact our team to pay the rest.",
+      "CODE_USED_UP": "This code has already been used."
+    }
   },
   "checkout": {
     "secureCheckout": "Secure Checkout",

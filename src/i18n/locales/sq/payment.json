@@ -55,7 +55,17 @@
     "freeSubscriptionFailed": "Aplikimi i abonimit falas dështoi",
     "verificationTimeout": "Verifikimi i pagesës zgjati shumë. Nëse e përfunduat pagesën, abonimi do të aktivizohet së shpejti. Kontrolloni email-in për konfirmim.",
     "invalidCodeFormat": "Format i pavlefshëm i kodit. Përdorni vetëm shkronja, numra, viza dhe nënvizime.",
-    "invalidPlanPrice": "Çmim i pavlefshëm i planit"
+    "invalidPlanPrice": "Çmim i pavlefshëm i planit",
+    "freeCoupon": {
+      "PLAN_REQUIRED": "Zgjidhni fillimisht një plan.",
+      "CODE_REQUIRED": "Shkruani një kod zbritjeje.",
+      "PLAN_NOT_FOUND": "Ky plan nuk është i disponueshëm. Kontaktoni ekipin tonë dhe do t'ju ndihmojmë.",
+      "PLAN_NOT_ELIGIBLE": "Një kod nuk mund ta aktivizojë këtë artikull këtu. Kontaktoni ekipin tonë dhe do t'ju ndihmojmë.",
+      "ALREADY_SUBSCRIBED": "Ju keni tashmë një abonim aktiv për këtë plan.",
+      "CODE_INVALID": "Ky kod nuk mund të përdoret për këtë plan. Mund të ketë skaduar, të jetë përdorur tashmë ose të jetë për një plan tjetër.",
+      "CODE_NOT_FREE": "Ky kod e ul çmimin, por nuk e bën planin falas. Mbeten €{{remaining}} për t'u paguar — kontaktoni ekipin tonë për të paguar pjesën tjetër.",
+      "CODE_USED_UP": "Ky kod është përdorur tashmë."
+    }
   },
   "checkout": {
     "secureCheckout": "Pagesë e Sigurt",

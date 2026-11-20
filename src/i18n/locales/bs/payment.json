@@ -55,7 +55,17 @@
     "freeSubscriptionFailed": "Primjena besplatne pretplate nije uspjela",
     "verificationTimeout": "Provjera plaćanja je istekla. Ako ste završili plaćanje, pretplata će uskoro biti aktivirana. Provjerite e-mail za potvrdu.",
     "invalidCodeFormat": "Neispravan format koda. Koristite samo slova, brojeve, crtice i donje crte.",
-    "invalidPlanPrice": "Neispravna cijena plana"
+    "invalidPlanPrice": "Neispravna cijena plana",
+    "freeCoupon": {
+      "PLAN_REQUIRED": "Prvo odaberite plan.",
+      "CODE_REQUIRED": "Unesite kod za popust.",
+      "PLAN_NOT_FOUND": "Ovaj plan nije dostupan. Kontaktirajte naš tim i pomoći ćemo vam.",
+      "PLAN_NOT_ELIGIBLE": "Kod ovdje ne može aktivirati ovu stavku. Kontaktirajte naš tim i pomoći ćemo vam.",
+      "ALREADY_SUBSCRIBED": "Već imate aktivnu pretplatu na ovaj plan.",
+      "CODE_INVALID": "Ovaj kod se ne može koristiti za ovaj plan. Možda je istekao, već je iskorišten ili je namijenjen drugom planu.",
+      "CODE_NOT_FREE": "Ovaj kod smanjuje cijenu, ali plan ne čini besplatnim. Preostalo je za platiti €{{remaining}} — kontaktirajte naš tim da platite ostatak.",
+      "CODE_USED_UP": "Ovaj kod je već iskorišten."
+    }
   },
   "checkout": {
     "secureCheckout": "Sigurno plaćanje",

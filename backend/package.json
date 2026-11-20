@@ -21,6 +21,8 @@
     "backfill:areas:resync": "ts-node src/scripts/backfillPropertyAreas.ts --resync",
     "backfill:areas:resync:apply": "ts-node src/scripts/backfillPropertyAreas.ts --resync --apply",
     "seed:villa-destinations": "ts-node src/scripts/seedVillaDestinations.ts",
+    "products:unknown": "ts-node src/scripts/listUnknownProducts.ts",
+    "products:unknown:apply": "ts-node src/scripts/listUnknownProducts.ts --apply",
     "seed:destination-images": "ts-node src/scripts/seedDestinationImages.ts",
     "seed:destination-images:dry": "ts-node src/scripts/seedDestinationImages.ts --dry-run",
     "media:migrate": "ts-node --transpile-only src/scripts/migrateCloudinaryToR2.ts",

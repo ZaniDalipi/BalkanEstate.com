@@ -11,6 +11,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
 import { paymentLogger } from '../utils/logger';
+import { redeemFreeSubscription } from '../services/subscriptions/freeSubscriptionService';
 
 // Stripe is not used - Paddle and PaySera are the active payment providers
 // Keeping Stripe initialization for legacy webhook handling only
@@ -734,262 +735,52 @@ export const verifySession = async (req: Request, res: Response): Promise<void> 
 };
 
 /**
- * @desc    Apply free subscription with 100% off coupon
- * @route   POST /api/payment/apply-free-subscription
+ * @desc    Apply a free subscription with a 100%-off code
+ * @route   POST /api/payments/apply-free-subscription
  * @access  Private
+ *
+ * Only an existing, coupon-grantable plan can be activated, and the code must
+ * be valid for this person and plan and cover the whole price.
+ * Logic: services/subscriptions/freeSubscriptionService.ts
  */
 export const applyFreeSubscription = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { planName, planInterval, productId, discountCode } = req.body;
     const userId = (req as any).user?._id;
-
-    // Free subscription request received
-
     if (!userId) {
-      console.error('❌ User not authenticated');
       res.status(401).json({ message: 'User not authenticated' });
       return;
     }
 
-    const user = await User.findById(userId);
-    if (!user) {
-      console.error('❌ User not found:', userId);
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    // User found
-
-    // Check if user already has a truly active subscription (not expired)
-    // The expiration worker runs every 6 hours, so status may still be 'active'
-    // even though expirationDate has passed — check both fields
-    const now = new Date();
-    const existingActiveSub = await Subscription.findOne({
-      userId,
-      status: { $in: ['active', 'grace'] },
-      expirationDate: { $gt: now },
-    });
-    if (existingActiveSub) {
-      // If the user is trying to subscribe to the exact same product, block it (prevent stacking)
-      if (existingActiveSub.productId === productId) {
-        res.status(400).json({ message: 'You already have an active subscription for this plan' });
-        return;
-      }
-      // Otherwise, allow the upgrade/switch — the old subscription will be
-      // canceled automatically inside processSubscriptionPayment
-    }
-
-    // Verify discount code is valid and provides 100% off
-    if (!discountCode) {
-      res.status(400).json({ message: 'Discount code is required for free subscriptions' });
-      return;
-    }
-
-    const discount = await DiscountCode.findOne({
-      code: discountCode.toUpperCase(),
-      isActive: true,
-    });
-
-    if (!discount) {
-      res.status(400).json({ message: 'Invalid or inactive discount code' });
-      return;
-    }
-
-    // Check if discount is expired
-    if (discount.validUntil && new Date(discount.validUntil) < new Date()) {
-      res.status(400).json({ message: 'Discount code has expired' });
-      return;
-    }
-
-    // Check usage limit
-    if (discount.usageLimit && discount.usedCount >= discount.usageLimit) {
-      res.status(400).json({ message: 'Discount code has reached maximum usage limit' });
-      return;
-    }
-
-    // Find or create product (need to check price for fixed discounts)
-    let product = await Product.findOne({ productId });
-
-    if (!product) {
-      // Create a default product
-      product = await Product.create({
-        productId: productId || 'default',
-        name: planName || 'Subscription',
-        description: `${planName} subscription`,
-        price: 0, // Free with 100% off
-        currency: 'EUR',
-        billingPeriod: planInterval === 'year' ? 'yearly' : 'monthly',
-        isActive: true,
-      });
-    }
-
-    // Verify this is a free discount (100% off or fixed amount >= price)
-    const isFreeDiscount =
-      (discount.discountType === 'percentage' && discount.discountValue === 100) ||
-      (discount.discountType === 'fixed' && discount.discountValue >= product.price);
-
-    if (!isFreeDiscount) {
-      res.status(400).json({
-        message: 'This discount code does not provide a free subscription. Only 100% off or fixed discounts equal to the price are accepted.'
+    const result = await redeemFreeSubscription(String(userId), req.body ?? {});
+    if (result.ok === false) {
+      res.status(result.status).json({
+        success: false,
+        code: result.code,
+        message: result.message,
+        ...(result.remaining !== undefined ? { remaining: result.remaining } : {}),
       });
       return;
     }
 
-    console.log('💾 Creating free subscription in database...');
-
-    // Process the subscription payment with 0 amount
-    const result = await processSubscriptionPayment({
-      userId,
-      productId: productId || 'default',
-      store: 'web',
-      amount: 0,
-      currency: 'EUR',
-    });
-
-    console.log('✅ Subscription created with ID:', result.subscription._id);
-    console.log('Subscription status:', result.subscription.status);
-    console.log('Expires at:', result.subscription.expirationDate);
-
-    // Increment discount code usage
-    discount.usedCount = (discount.usedCount || 0) + 1;
-    await discount.save();
-
-    // Free subscription activated successfully
-
+    const grant = result.value;
+    paymentLogger.info(`Free subscription ${grant.productId} activated for user ${userId} with code ${grant.code}`);
     res.status(200).json({
       success: true,
       message: 'Free subscription activated successfully',
-      subscriptionId: result.subscription._id.toString(),
+      subscriptionId: grant.subscriptionId,
       subscription: {
-        id: result.subscription._id,
-        plan: productId,
-        productName: product.name,
+        id: grant.subscriptionId,
+        plan: grant.productId,
+        productName: grant.productName,
         source: 'web',
-        couponCode: discountCode,
-        expiresAt: result.subscription.expirationDate,
-        status: result.subscription.status,
+        couponCode: grant.code,
+        expiresAt: grant.expiresAt,
+        status: grant.status,
       },
     });
   } catch (error: any) {
-    console.error('❌ Error applying free subscription:', error);
-    console.error('Stack trace:', error.stack);
+    paymentLogger.error('Error applying free subscription:', error);
     res.status(500).json({ message: 'Error applying free subscription' });
-  }
-};
-
-/**
- * Reactivate an expired subscription without requiring new payment
- * POST /api/payments/reactivate-subscription
- * Body: { productId }
- * For re-enabling subscriptions that have already been purchased/expired
- */
-export const reactivateSubscription = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.body;
-    const userId = (req as any).user?._id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-
-    if (!productId) {
-      res.status(400).json({ message: 'Product ID is required' });
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    // Find the most recent subscription for this product (regardless of status)
-    const lastSubscription = await Subscription.findOne({ userId, productId })
-      .sort({ createdAt: -1 });
-
-    if (!lastSubscription) {
-      res.status(404).json({ message: 'No previous subscription found for this product' });
-      return;
-    }
-
-    // Calculate new expiration date based on billing period
-    const product = await Product.findOne({ productId });
-    const newExpirationDate = new Date();
-
-    if (product?.billingPeriod === 'yearly') {
-      newExpirationDate.setFullYear(newExpirationDate.getFullYear() + 1);
-    } else {
-      // Default to monthly
-      newExpirationDate.setMonth(newExpirationDate.getMonth() + 1);
-    }
-
-    // Reactivate the subscription
-    lastSubscription.status = 'active';
-    lastSubscription.expirationDate = newExpirationDate;
-    lastSubscription.renewalDate = newExpirationDate;
-    lastSubscription.autoRenewing = false;
-    lastSubscription.canceledAt = undefined;
-    lastSubscription.cancellationReason = undefined;
-    lastSubscription.willCancelAt = undefined;
-    await lastSubscription.save();
-
-    // Update user's subscription status
-    user.isSubscribed = true;
-    user.subscriptionStatus = 'active';
-    user.subscriptionExpiresAt = newExpirationDate;
-    user.subscriptionPlan = productId;
-    if (product) {
-      user.subscriptionProductName = product.name;
-    }
-
-    // Sync embedded subscription object
-    if (!user.subscription) {
-      user.subscription = {} as any;
-    }
-    user.subscription.status = 'active';
-    user.subscription.expiresAt = newExpirationDate;
-
-    // Set listingsLimit from product if available
-    if (product?.listingsLimit) {
-      user.subscription.listingsLimit = product.listingsLimit;
-      user.activeListingsLimit = product.listingsLimit;
-    }
-
-    user.markModified('subscription');
-    await user.save();
-
-    // Log reactivation event
-    await SubscriptionEvent.create({
-      subscriptionId: lastSubscription._id,
-      userId,
-      eventType: 'subscription_reactivated',
-      store: 'web',
-      previousStatus: 'expired',
-      newStatus: 'active',
-      metadata: {
-        reactivatedAt: new Date(),
-        expiresAt: newExpirationDate,
-        productId,
-      },
-    });
-
-    paymentLogger.info(`Subscription reactivated for user ${userId}, product ${productId}`);
-
-    res.status(200).json({
-      success: true,
-      message: 'Subscription reactivated successfully',
-      subscription: {
-        id: lastSubscription._id,
-        status: 'active',
-        plan: productId,
-        expiresAt: newExpirationDate,
-        productName: product?.name || productId,
-      },
-    });
-  } catch (error: any) {
-    paymentLogger.error('Error reactivating subscription:', error);
-    res.status(500).json({ message: 'Error reactivating subscription' });
   }
 };
 

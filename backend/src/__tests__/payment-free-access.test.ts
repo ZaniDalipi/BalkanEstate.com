@@ -36,6 +36,51 @@ describe('no free subscriptions', () => {
     expect(after?.isSubscribed).toBeFalsy();
   });
 
+  it('POST /payments/reactivate-subscription is gone (it renewed past plans without payment)', async () => {
+    const user = await makeUser();
+    const expiredAt = new Date(Date.now() - 86_400_000);
+    const past = await Subscription.create({
+      userId: user._id,
+      store: 'web',
+      productId: 'pro_monthly',
+      startDate: new Date(Date.now() - 31 * 86_400_000),
+      expirationDate: expiredAt,
+      status: 'expired',
+      price: 25,
+    });
+    const res = await request(app)
+      .post('/api/payments/reactivate-subscription')
+      .set(auth(tokenFor(user._id)))
+      .send({ productId: 'pro_monthly' });
+    expect(res.status).toBe(404);
+    const after = await Subscription.findById(past._id);
+    expect(after?.status).toBe('expired');
+    expect(after?.expirationDate.getTime()).toBe(expiredAt.getTime());
+    expect((await User.findById(user._id))?.isSubscribed).toBeFalsy();
+  });
+
+  it('POST /subscriptions/activate-test-pro is off unless ENABLE_TEST_ENDPOINTS=true', async () => {
+    delete process.env.ENABLE_TEST_ENDPOINTS;
+    const user = await makeUser();
+    const res = await request(app)
+      .post('/api/subscriptions/activate-test-pro')
+      .set(auth(tokenFor(user._id)))
+      .send({ plan: 'pro_yearly', durationMonths: 12 });
+    expect(res.status).toBe(404);
+    expect((await User.findById(user._id))?.isSubscribed).toBeFalsy();
+  });
+
+  it('POST /payments/create-payment answers 503 PAYMENT_NOT_CONFIGURED while online payment is off', async () => {
+    delete process.env.PAYMENTS_ENABLED;
+    const user = await makeUser();
+    const res = await request(app)
+      .post('/api/payments/create-payment')
+      .set(auth(tokenFor(user._id)))
+      .send({ planName: 'pro_monthly', planInterval: 'month', amount: 25, productId: 'pro_monthly', countryCode: 'RS' });
+    expect(res.status).toBe(503);
+    expect(res.body.code).toBe('PAYMENT_NOT_CONFIGURED');
+  });
+
   it('POST /subscriptions with store "web" does not activate anything', async () => {
     await Product.create({
       productId: 'pro_monthly',

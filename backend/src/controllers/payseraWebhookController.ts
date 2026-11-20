@@ -145,23 +145,15 @@ async function handleSuccessfulPayment(
       return;
     }
 
-    // Find or create product
-    let product = productId ? await Product.findOne({ productId }) : null;
+    // Only a product in the catalogue can be granted. The payment is never
+    // turned into a new product priced at whatever was paid.
+    const product = productId ? await Product.findOne({ productId }) : null;
 
     if (!product) {
-      // Create a default product based on amount
-      const amountInEur = callbackData.payamount / 100;
-      const isYearly = amountInEur > 50; // Simple heuristic
-
-      product = await Product.create({
-        productId: productId || `paysera_${callbackData.orderid}`,
-        name: metadata?.planName || 'PaySera Subscription',
-        description: 'Subscription via PaySera',
-        price: amountInEur,
-        currency: callbackData.paycurrency || 'EUR',
-        billingPeriod: isYearly ? 'yearly' : 'monthly',
-        isActive: true,
-      });
+      paymentLogger.error(
+        `❌ PaySera webhook: order ${callbackData.orderid} (user ${userId}) paid ${callbackData.payamount} ${callbackData.paycurrency} for unknown product "${productId ?? ''}" — nothing granted, needs manual review`
+      );
+      return;
     }
 
     // Process the subscription payment
