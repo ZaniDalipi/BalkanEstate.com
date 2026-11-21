@@ -205,5 +205,54 @@
       "bank": "Bank",
       "salesBalkanestateaiCom": "sales@balkanestateai.com"
     }
+  },
+  "planRequest": {
+    "title": "Pay by arrangement with our team",
+    "description": "Request {{plan}} and we will send you the amount, a payment reference and how to pay. Your plan starts as soon as we confirm the payment.",
+    "button": "Request this plan",
+    "sending": "Sending your request…",
+    "orEmail": "Prefer email? Write to",
+    "sentTitle": "Request sent",
+    "existingTitle": "You already requested this plan",
+    "emailed": "We also emailed you these details.",
+    "plan": "Plan",
+    "amount": "Amount",
+    "reference": "Reference",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyLabel": "Copy {{label}}",
+    "copyFailed": "Copying didn't work. Select the text to copy it.",
+    "bankTitle": "Pay by bank transfer",
+    "accountHolder": "Account holder",
+    "iban": "IBAN",
+    "bic": "BIC/SWIFT",
+    "bank": "Bank",
+    "putReference": "Put the reference {{reference}} in the payment description so we can match your payment.",
+    "teamWillContact": "Our team will contact you within one business day with how to pay.",
+    "startsOnConfirm": "Your plan starts as soon as we confirm the payment.",
+    "questions": "Questions? Write to {{email}} and mention {{reference}}.",
+    "myRequests": "My plan requests",
+    "requestedOn": "Requested {{date}}",
+    "paidOn": "Paid {{date}}",
+    "showHowToPay": "How to pay",
+    "hideHowToPay": "Hide payment details",
+    "loadFailed": "Your plan requests could not be loaded.",
+    "retry": "Try again",
+    "status": {
+      "requested": "Waiting for payment",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "mismatch": "Needs review"
+    },
+    "errors": {
+      "PLAN_REQUIRED": "Choose a plan first.",
+      "PLAN_NOT_FOUND": "This plan is not available. Contact our team and we will help you.",
+      "PLAN_NOT_ELIGIBLE": "This item can't be requested here. Contact our team and we will help you.",
+      "CODE_INVALID": "This code can't be used for this plan. It may have expired, already been used, or be meant for a different plan.",
+      "CODE_COVERS_PRICE": "This code makes the plan free. Use it in the coupon box above to activate the plan right away.",
+      "CODE_USED_UP": "This code has already been used.",
+      "USER_NOT_FOUND": "Your account was not found. Please sign in again.",
+      "generic": "We could not send your request. Please try again, or email our team."
+    }
   }
 }

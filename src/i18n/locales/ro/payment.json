@@ -148,10 +148,10 @@
     "helpText": "Dacă fereastra de plată nu s-a deschis, verifică blocarea ferestrelor pop-up"
   },
   "comingSoon": {
-    "selfServicePayment": "Self-service payment",
-    "launchingSoon": "Online payment gateway launching soon",
-    "integrationInProgress": "Payment integration in progress",
-    "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
+    "selfServicePayment": "Plățile directe nu sunt încă disponibile",
+    "launchingSoon": "În prezent căutăm un furnizor de plăți cu care să colaborăm. Momentan nu acceptăm plăți directe.",
+    "integrationInProgress": "Căutăm un partener pentru plăți",
+    "contactSalesDescription": "Vrei să te abonezi? Contactează-ne și aranjăm totul pentru tine:",
     "responseTime": "De obicei răspundem în 24 de ore"
   },
   "taxNotice": {
@@ -198,6 +198,55 @@
       "continueToDashboard": "Continuă la panou",
       "card": "Card",
       "bank": "Bancă"
+    }
+  },
+  "planRequest": {
+    "title": "Plătește prin înțelegere cu echipa noastră",
+    "description": "Solicită {{plan}} și îți trimitem suma, o referință de plată și cum să plătești. Planul tău începe imediat ce confirmăm plata.",
+    "button": "Solicită acest plan",
+    "sending": "Se trimite solicitarea ta…",
+    "orEmail": "Preferi emailul? Scrie-ne la",
+    "sentTitle": "Solicitare trimisă",
+    "existingTitle": "Ai solicitat deja acest plan",
+    "emailed": "Ți-am trimis aceste detalii și pe email.",
+    "plan": "Plan",
+    "amount": "Sumă",
+    "reference": "Referință",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "copyLabel": "Copiază {{label}}",
+    "copyFailed": "Copierea nu a funcționat. Selectează textul ca să-l copiezi.",
+    "bankTitle": "Plătește prin transfer bancar",
+    "accountHolder": "Titularul contului",
+    "iban": "IBAN",
+    "bic": "BIC/SWIFT",
+    "bank": "Banca",
+    "putReference": "Scrie referința {{reference}} în descrierea plății, ca să putem identifica plata ta.",
+    "teamWillContact": "Echipa noastră te va contacta în cel mult o zi lucrătoare cu detaliile de plată.",
+    "startsOnConfirm": "Planul tău începe imediat ce confirmăm plata.",
+    "questions": "Întrebări? Scrie-ne la {{email}} și menționează {{reference}}.",
+    "myRequests": "Solicitările mele de planuri",
+    "requestedOn": "Solicitat pe {{date}}",
+    "paidOn": "Plătit pe {{date}}",
+    "showHowToPay": "Cum plătești",
+    "hideHowToPay": "Ascunde detaliile de plată",
+    "loadFailed": "Solicitările tale de planuri nu au putut fi încărcate.",
+    "retry": "Încearcă din nou",
+    "status": {
+      "requested": "În așteptarea plății",
+      "paid": "Plătit",
+      "cancelled": "Anulat",
+      "mismatch": "Necesită verificare"
+    },
+    "errors": {
+      "PLAN_REQUIRED": "Alege mai întâi un plan.",
+      "PLAN_NOT_FOUND": "Acest plan nu este disponibil. Contactează echipa noastră și te vom ajuta.",
+      "PLAN_NOT_ELIGIBLE": "Acest articol nu poate fi solicitat aici. Contactează echipa noastră și te vom ajuta.",
+      "CODE_INVALID": "Acest cod nu poate fi folosit pentru acest plan. Poate a expirat, a fost deja folosit sau este pentru alt plan.",
+      "CODE_COVERS_PRICE": "Acest cod face planul gratuit. Folosește-l în câmpul pentru cupon de mai sus ca să activezi planul imediat.",
+      "CODE_USED_UP": "Acest cod a fost deja folosit.",
+      "USER_NOT_FOUND": "Contul tău nu a fost găsit. Te rugăm să te autentifici din nou.",
+      "generic": "Nu am putut trimite solicitarea ta. Încearcă din nou sau scrie-i echipei noastre."
     }
   }
 }

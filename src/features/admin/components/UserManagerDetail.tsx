@@ -7,12 +7,12 @@ import {
 } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { User, UserEditForm } from './useUserManager';
-import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { approveLicense, rejectLicense } from '../api/adminApi';
 import { useUpdateUserListingCounter, useUpdateUserListingLimit } from '../hooks/useAdminData';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { RoleSelect } from './roles/RoleSelect';
+import UserSubscriptionPanel from './paymentOrders/UserSubscriptionPanel';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -381,7 +381,7 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
               </div>
 
               {/* Subscription Management */}
-              <SubscriptionEditPanel editingUser={editingUser} />
+              <UserSubscriptionPanel user={editingUser} />
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-xs text-yellow-800">
@@ -705,197 +705,6 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
         {errMonthly && <p className="text-xs text-red-600 font-medium mt-1">{errMonthly}</p>}
         {savedMonthly && <p className="text-xs text-green-600 font-medium mt-1">{t('admin:ui.userManagerDetail.counterUpdatedSuccessfully', '✓ Counter updated successfully')}</p>}
       </div>
-    </div>
-  );
-}
-
-// ─── Subscription edit panel for the edit modal ───────────────────────────────
-function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
-  const { t } = useTranslation('admin');
-  const [isSubscribed, setIsSubscribed] = useState(editingUser.isSubscribed);
-  const [plan, setPlan] = useState(editingUser.subscriptionPlan || '');
-  const [startDate, setStartDate] = useState(
-    editingUser.subscriptionStartedAt ? new Date(editingUser.subscriptionStartedAt).toISOString().split('T')[0] : ''
-  );
-  const [expiresDate, setExpiresDate] = useState(
-    editingUser.subscriptionExpiresAt ? new Date(editingUser.subscriptionExpiresAt).toISOString().split('T')[0] : ''
-  );
-  const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
-
-  const handleActivate = async () => {
-    if (!plan || !expiresDate) {
-      setResult({ type: 'error', msg: 'Plan and expiration date are required' });
-      return;
-    }
-    setSaving(true);
-    setResult(null);
-    try {
-      await apiRequest(`/admin/subscriptions/manage/${editingUser._id}`, {
-        method: 'PATCH',
-        body: {
-          isSubscribed: true,
-          subscriptionPlan: plan,
-          subscriptionStartedAt: startDate || new Date().toISOString(),
-          subscriptionExpiresAt: new Date(expiresDate + 'T23:59:59.999Z').toISOString(),
-          reason: 'Admin manual activation',
-        },
-        requiresAuth: true,
-      });
-      setIsSubscribed(true);
-      setResult({ type: 'success', msg: 'Subscription activated successfully' });
-    } catch (e: any) {
-      setResult({ type: 'error', msg: e.message || 'Error activating subscription' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDeactivate = async () => {
-    setSaving(true);
-    setResult(null);
-    try {
-      await apiRequest(`/admin/subscriptions/manage/${editingUser._id}`, {
-        method: 'PATCH',
-        body: {
-          isSubscribed: false,
-          reason: 'Admin manual deactivation',
-        },
-        requiresAuth: true,
-      });
-      setIsSubscribed(false);
-      setResult({ type: 'success', msg: 'Subscription deactivated successfully' });
-    } catch (e: any) {
-      setResult({ type: 'error', msg: e.message || 'Error deactivating subscription' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdateDates = async () => {
-    if (!expiresDate) {
-      setResult({ type: 'error', msg: 'Expiration date is required' });
-      return;
-    }
-    setSaving(true);
-    setResult(null);
-    try {
-      await apiRequest(`/admin/subscriptions/manage/${editingUser._id}`, {
-        method: 'PATCH',
-        body: {
-          ...(plan && { subscriptionPlan: plan }),
-          ...(startDate && { subscriptionStartedAt: startDate }),
-          subscriptionExpiresAt: new Date(expiresDate + 'T23:59:59.999Z').toISOString(),
-          reason: 'Admin date update',
-        },
-        requiresAuth: true,
-      });
-      setResult({ type: 'success', msg: 'Subscription updated successfully' });
-    } catch (e: any) {
-      setResult({ type: 'error', msg: e.message || 'Error updating subscription' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="border border-gray-200 rounded-lg p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-gray-700">{t('userDetail.subscriptionSection')}</h4>
-        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${isSubscribed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-          {isSubscribed ? t('admin:ui.userManagerDetail.active2', 'Active') : t('admin:ui.userManagerDetail.inactive', 'Inactive')}
-        </span>
-      </div>
-
-      {/* Plan selector */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin:ui.userManagerDetail.plan', 'Plan')}</label>
-        <select
-          value={plan}
-          onChange={(e) => setPlan(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-        >
-          <option value="">{t('admin:ui.userManagerDetail.selectPlan', '— Select Plan —')}</option>
-          <option value="seller_pro_monthly">{t('admin:ui.userManagerDetail.sellerProMonthly', 'Seller Pro Monthly')}</option>
-          <option value="seller_pro_yearly">{t('admin:ui.userManagerDetail.sellerProYearly', 'Seller Pro Yearly')}</option>
-          <option value="seller_enterprise_yearly">{t('admin:ui.userManagerDetail.sellerEnterpriseYearly', 'Seller Enterprise Yearly')}</option>
-          <option value="buyer_monthly">{t('admin:ui.userManagerDetail.buyerMonthly', 'Buyer Monthly')}</option>
-          <option value="buyer_yearly">{t('admin:ui.userManagerDetail.buyerYearly', 'Buyer Yearly')}</option>
-          <option value="pro_monthly">{t('admin:ui.userManagerDetail.proMonthly', 'Pro Monthly')}</option>
-          <option value="pro_yearly">{t('admin:ui.userManagerDetail.proYearly', 'Pro Yearly')}</option>
-          <option value="agency_yearly">{t('admin:ui.userManagerDetail.agencyYearly', 'Agency Yearly')}</option>
-        </select>
-      </div>
-
-      {/* Date pickers */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin:ui.userManagerDetail.startDate', 'Start Date')}</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin:ui.userManagerDetail.expirationDate', 'Expiration Date')}</label>
-          <input
-            type="date"
-            value={expiresDate}
-            onChange={(e) => setExpiresDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Current info */}
-      {editingUser.subscriptionSource && (
-        <p className="text-xs text-gray-400">
-          {t('admin:ui.userManagerDetail.source2', 'Source:')} <span className="capitalize">{editingUser.subscriptionSource}</span>
-          {editingUser.subscriptionProductName && <> &middot; {editingUser.subscriptionProductName}</>}
-        </p>
-      )}
-
-      {/* Action buttons */}
-      <div className="flex gap-2 pt-1">
-        {isSubscribed ? (
-          <>
-            <button
-              type="button"
-              onClick={handleUpdateDates}
-              disabled={saving}
-              className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 font-medium"
-            >
-              {saving ? 'Saving...' : t('admin:ui.userManagerDetail.updateDates', 'Update Dates')}
-            </button>
-            <button
-              type="button"
-              onClick={handleDeactivate}
-              disabled={saving}
-              className="flex-1 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-40 font-medium"
-            >
-              {saving ? 'Saving...' : t('admin:ui.userManagerDetail.deactivate', 'Deactivate')}
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            onClick={handleActivate}
-            disabled={saving || !plan || !expiresDate}
-            className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-40 font-medium"
-          >
-            {saving ? 'Activating...' : t('admin:ui.userManagerDetail.activateSubscription', 'Activate Subscription')}
-          </button>
-        )}
-      </div>
-
-      {/* Feedback */}
-      {result && (
-        <p className={`text-xs mt-1 ${result.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
-          {result.msg}
-        </p>
-      )}
     </div>
   );
 }

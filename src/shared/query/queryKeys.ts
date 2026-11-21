@@ -456,3 +456,17 @@ export const listingEventKeys = {
   all: ['listingEvents'] as const,
   feed: (country: string, limit: number, weekEnd: string) => [...listingEventKeys.all, 'feed', country, limit, weekEnd] as const,
 };
+
+// ============================================================================
+// Payment orders (plans paid by arrangement with the team)
+// Used by: payments RequestPlanPanel / MyPlanRequests, admin PaymentOrdersManager
+// ============================================================================
+
+export const paymentOrderKeys = {
+  all: ['paymentOrders'] as const,
+  mine: () => [...paymentOrderKeys.all, 'mine'] as const,
+  admin: () => [...paymentOrderKeys.all, 'admin'] as const,
+  adminList: (filters: { status?: string; q?: string; page?: number }) =>
+    [...paymentOrderKeys.admin(), 'list', filters] as const,
+  adminPlans: () => [...paymentOrderKeys.admin(), 'plans'] as const,
+};

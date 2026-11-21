@@ -187,6 +187,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       label: t('admin:sidebar.marketing', 'Marketing'),
       items: [
         {
+          id: 'paymentOrders',
+          label: t('admin:sidebar.paymentOrders', 'Payment orders'),
+          icon: <CurrencyEuroIcon className="w-5 h-5" />
+        },
+        {
           id: 'pricing',
           label: t('admin:sidebar.pricing', 'Pricing & Plans'),
           icon: <CurrencyEuroIcon className="w-5 h-5" />

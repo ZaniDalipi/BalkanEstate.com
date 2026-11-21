@@ -14,6 +14,7 @@ import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
 import { validatePaymentRedirectUrl } from '../../src/utils/security';
 import { tokenService } from '../../src/shared/api/tokenService';
 import { freeCouponErrorText, freeCouponRefusal } from '@/src/features/payments/utils/freeCouponError';
+import RequestPlanPanel from '@/src/features/payments/components/RequestPlanPanel';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -1136,20 +1137,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   </div>
                 </div>
 
-                {/* Contact sales */}
-                <div className="rounded-lg sm:rounded-xl border border-neutral-200 bg-white p-3 sm:p-4">
-                  <p className="text-xs sm:text-sm text-neutral-600 mb-2.5">
-                    {t('payment:comingSoon.contactSalesDescription')}
-                  </p>
-                  <a
-                    href="mailto:sales@balkanestateai.com?subject=Subscription%20Request%20-%20BalkanEstate"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-lg hover:from-primary-dark hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
-                  >
-                    <SoftIcon name="envelope" className="w-5 h-5" />
-                    {t('payment:ui.paymentWindow.salesBalkanestateaiCom', 'sales@balkanestateai.com')}
-                  </a>
-                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-2">{t('payment:comingSoon.responseTime')}</p>
-                </div>
+                {/* Request the plan and pay by arrangement with the team */}
+                <RequestPlanPanel
+                  productId={productId}
+                  planName={planName}
+                  discountCode={appliedDiscountCode && finalPrice > 0 ? appliedDiscountCode : undefined}
+                />
               </>
             )}
 

@@ -148,10 +148,10 @@
     "helpText": "Ako se prozor za plaćanje nije otvorio, provjerite blokator skočnih prozora"
   },
   "comingSoon": {
-    "selfServicePayment": "Self-service payment",
-    "launchingSoon": "Online payment gateway launching soon",
-    "integrationInProgress": "Payment integration in progress",
-    "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
+    "selfServicePayment": "Izravna plaćanja još nisu dostupna",
+    "launchingSoon": "Trenutačno tražimo pružatelja usluga plaćanja s kojim ćemo surađivati. Izravna plaćanja trenutačno nisu moguća.",
+    "integrationInProgress": "Tražimo partnera za plaćanja",
+    "contactSalesDescription": "Želite se pretplatiti? Javite nam se i sve ćemo dogovoriti za vas:",
     "responseTime": "Obično odgovaramo u roku od 24 sata"
   },
   "taxNotice": {
@@ -198,6 +198,55 @@
       "continueToDashboard": "Nastavi na nadzornu ploču",
       "card": "Kartica",
       "bank": "Banka"
+    }
+  },
+  "planRequest": {
+    "title": "Platite prema dogovoru s našim timom",
+    "description": "Zatražite {{plan}} i poslat ćemo vam iznos, referencu za plaćanje i upute kako platiti. Vaš plan počinje čim potvrdimo uplatu.",
+    "button": "Zatraži ovaj plan",
+    "sending": "Šaljemo vaš zahtjev…",
+    "orEmail": "Radije e-poštom? Pišite na",
+    "sentTitle": "Zahtjev je poslan",
+    "existingTitle": "Već ste zatražili ovaj plan",
+    "emailed": "Ove smo vam podatke poslali i e-poštom.",
+    "plan": "Plan",
+    "amount": "Iznos",
+    "reference": "Referenca",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "copyLabel": "Kopiraj {{label}}",
+    "copyFailed": "Kopiranje nije uspjelo. Označite tekst kako biste ga kopirali.",
+    "bankTitle": "Platite bankovnom uplatom",
+    "accountHolder": "Vlasnik računa",
+    "iban": "IBAN",
+    "bic": "BIC/SWIFT",
+    "bank": "Banka",
+    "putReference": "Upišite referencu {{reference}} u opis plaćanja kako bismo prepoznali vašu uplatu.",
+    "teamWillContact": "Naš tim javit će vam se u roku od jednog radnog dana s uputama za plaćanje.",
+    "startsOnConfirm": "Vaš plan počinje čim potvrdimo uplatu.",
+    "questions": "Pitanja? Pišite na {{email}} i navedite {{reference}}.",
+    "myRequests": "Moji zahtjevi za planove",
+    "requestedOn": "Zatraženo {{date}}",
+    "paidOn": "Plaćeno {{date}}",
+    "showHowToPay": "Kako platiti",
+    "hideHowToPay": "Sakrij podatke za plaćanje",
+    "loadFailed": "Vaše zahtjeve za planove nije bilo moguće učitati.",
+    "retry": "Pokušajte ponovno",
+    "status": {
+      "requested": "Čeka uplatu",
+      "paid": "Plaćeno",
+      "cancelled": "Otkazano",
+      "mismatch": "Potrebna provjera"
+    },
+    "errors": {
+      "PLAN_REQUIRED": "Najprije odaberite plan.",
+      "PLAN_NOT_FOUND": "Ovaj plan nije dostupan. Obratite se našem timu i pomoći ćemo vam.",
+      "PLAN_NOT_ELIGIBLE": "Ovu stavku nije moguće zatražiti ovdje. Obratite se našem timu i pomoći ćemo vam.",
+      "CODE_INVALID": "Ovaj kod ne može se upotrijebiti za ovaj plan. Možda je istekao, već je iskorišten ili je namijenjen drugom planu.",
+      "CODE_COVERS_PRICE": "Ovaj kod čini plan besplatnim. Upišite ga u polje za kupon iznad kako biste odmah aktivirali plan.",
+      "CODE_USED_UP": "Ovaj kod je već iskorišten.",
+      "USER_NOT_FOUND": "Vaš račun nije pronađen. Prijavite se ponovno.",
+      "generic": "Nismo uspjeli poslati vaš zahtjev. Pokušajte ponovno ili pišite našem timu."
     }
   }
 }

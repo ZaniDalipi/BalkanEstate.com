@@ -11,6 +11,7 @@ import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featu
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { tokenService } from '../../src/shared/api/tokenService';
+import MyPlanRequests from '@/src/features/payments/components/MyPlanRequests';
 
 interface SubscriptionManagementProps {
   userId: string;
@@ -1156,6 +1157,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </a>
           </div>
         </div>
+        <div className="mt-6">
+          <MyPlanRequests />
+        </div>
       </div>
     );
   }
@@ -1175,6 +1179,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           {t('management.refresh', 'Refresh')}
         </button>
       </div>
+
+      {/* Plans requested and waiting for payment (or recently paid) */}
+      <MyPlanRequests />
 
       {/* Current Subscription Card */}
       <div className="rounded-2xl p-6 text-white shadow-xl relative overflow-hidden" style={{ background: subscriptionDetails.currentPlan.color }}>

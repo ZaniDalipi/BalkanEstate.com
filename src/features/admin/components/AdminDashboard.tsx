@@ -7,6 +7,7 @@ import { paths } from '@/src/app/router/paths';
 import AdminLayout from './AdminLayout';
 import type { AdminView } from './AdminLayout';
 import DiscountCodeManager from './DiscountCodeManager';
+import PaymentOrdersManager from './paymentOrders/PaymentOrdersManager';
 import PromotionCouponManager from './PromotionCouponManager';
 import PromotionPlansManager from './PromotionPlansManager';
 import UserManager from './UserManager';
@@ -64,6 +65,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'villa-destinations': 'villaDestinations',
   'city-showcase': 'cityShowcase',
   'city-photos': 'cityPhotos',
+  'payment-orders': 'paymentOrders',
 };
 
 // Map AdminView to URL sections
@@ -93,6 +95,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'villaDestinations': 'villa-destinations',
   'cityShowcase': 'city-showcase',
   'cityPhotos': 'city-photos',
+  'paymentOrders': 'payment-orders',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -218,6 +221,8 @@ const AdminDashboard: React.FC = () => {
         return <PricingManager />;
       case 'promotionPlans':
         return <PromotionPlansManager />;
+      case 'paymentOrders':
+        return <PaymentOrdersManager />;
       case 'discounts':
         return <DiscountCodeManager />;
       case 'promotionCoupons':

@@ -148,10 +148,10 @@
     "helpText": "Nëse dritarja e pagesës nuk u hap, kontrolloni bllokuesin e dritareve"
   },
   "comingSoon": {
-    "selfServicePayment": "Self-service payment",
-    "launchingSoon": "Online payment gateway launching soon",
-    "integrationInProgress": "Payment integration in progress",
-    "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
+    "selfServicePayment": "Pagesat e drejtpërdrejta nuk janë ende të disponueshme",
+    "launchingSoon": "Po punojmë për të gjetur një ofrues pagesash si partner. Për momentin nuk pranohen pagesa të drejtpërdrejta.",
+    "integrationInProgress": "Po kërkojmë një partner për pagesat",
+    "contactSalesDescription": "Dëshironi të abonoheni? Na kontaktoni dhe do ta rregullojmë manualisht për ju:",
     "responseTime": "Zakonisht përgjigjemi brenda 24 orëve"
   },
   "taxNotice": {
@@ -198,6 +198,55 @@
       "continueToDashboard": "Vazhdo te paneli",
       "card": "Kartë",
       "bank": "Bankë"
+    }
+  },
+  "planRequest": {
+    "title": "Paguani me marrëveshje me ekipin tonë",
+    "description": "Kërkoni {{plan}} dhe do t'ju dërgojmë shumën, një referencë pagese dhe mënyrën si të paguani. Plani juaj fillon sapo të konfirmojmë pagesën.",
+    "button": "Kërko këtë plan",
+    "sending": "Po dërgohet kërkesa juaj…",
+    "orEmail": "Preferoni email? Na shkruani te",
+    "sentTitle": "Kërkesa u dërgua",
+    "existingTitle": "Ju e keni kërkuar tashmë këtë plan",
+    "emailed": "Ju dërguam edhe me email këto të dhëna.",
+    "plan": "Plani",
+    "amount": "Shuma",
+    "reference": "Referenca",
+    "copy": "Kopjo",
+    "copied": "U kopjua",
+    "copyLabel": "Kopjo {{label}}",
+    "copyFailed": "Kopjimi nuk funksionoi. Përzgjidhni tekstin për ta kopjuar.",
+    "bankTitle": "Paguani me transfertë bankare",
+    "accountHolder": "Mbajtësi i llogarisë",
+    "iban": "IBAN",
+    "bic": "BIC/SWIFT",
+    "bank": "Banka",
+    "putReference": "Vendosni referencën {{reference}} në përshkrimin e pagesës që ta identifikojmë pagesën tuaj.",
+    "teamWillContact": "Ekipi ynë do t'ju kontaktojë brenda një dite pune me mënyrën si të paguani.",
+    "startsOnConfirm": "Plani juaj fillon sapo të konfirmojmë pagesën.",
+    "questions": "Pyetje? Shkruani te {{email}} dhe përmendni {{reference}}.",
+    "myRequests": "Kërkesat e mia për plane",
+    "requestedOn": "Kërkuar më {{date}}",
+    "paidOn": "Paguar më {{date}}",
+    "showHowToPay": "Si të paguani",
+    "hideHowToPay": "Fshih të dhënat e pagesës",
+    "loadFailed": "Kërkesat tuaja për plane nuk u ngarkuan.",
+    "retry": "Provo përsëri",
+    "status": {
+      "requested": "Në pritje të pagesës",
+      "paid": "Paguar",
+      "cancelled": "Anuluar",
+      "mismatch": "Kërkon shqyrtim"
+    },
+    "errors": {
+      "PLAN_REQUIRED": "Zgjidhni fillimisht një plan.",
+      "PLAN_NOT_FOUND": "Ky plan nuk është i disponueshëm. Kontaktoni ekipin tonë dhe do t'ju ndihmojmë.",
+      "PLAN_NOT_ELIGIBLE": "Ky artikull nuk mund të kërkohet këtu. Kontaktoni ekipin tonë dhe do t'ju ndihmojmë.",
+      "CODE_INVALID": "Ky kod nuk mund të përdoret për këtë plan. Mund të ketë skaduar, të jetë përdorur tashmë ose të jetë për një plan tjetër.",
+      "CODE_COVERS_PRICE": "Ky kod e bën planin falas. Përdoreni te kutia e kuponit më lart për ta aktivizuar planin menjëherë.",
+      "CODE_USED_UP": "Ky kod është përdorur tashmë.",
+      "USER_NOT_FOUND": "Llogaria juaj nuk u gjet. Ju lutemi hyni përsëri.",
+      "generic": "Nuk mundëm ta dërgojmë kërkesën tuaj. Provoni përsëri ose shkruajini ekipit tonë me email."
     }
   }
 }
