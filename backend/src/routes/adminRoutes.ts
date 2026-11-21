@@ -6,6 +6,14 @@ import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 import { adminLogger } from '../utils/logger';
 import {
+  adminListOrders,
+  adminListPlans,
+  adminMarkPaid,
+  adminCancelOrder,
+  adminRecordPayment,
+  adminFreeGrant,
+} from '../controllers/paymentOrderController';
+import {
   getAdminStats,
   getAllUsers,
   updateUserAdmin,
@@ -70,7 +78,6 @@ import {
   getAllPayments,
   getPaymentById,
   getPaymentStats,
-  activateUserSubscription,
   cancelSubscription,
   deactivateUserSubscription,
   adjustListingLimit,
@@ -80,7 +87,6 @@ import {
   getAgencySubscriptionHistory,
   manageUserSubscription,
   getCarryoverStats,
-  triggerSubscriptionRenewal,
   updateCarryoverFields,
   getProductConfig,
   getAllProducts,
@@ -222,12 +228,21 @@ router.delete('/inquiries/:id', logAdminAction('DELETE_INQUIRY'), deleteInquiry)
 // ===== Subscription & Payment Management =====
 router.get('/subscriptions', logAdminAction('VIEW_SUBSCRIPTIONS'), getAllSubscriptions);
 router.get('/subscriptions/:id', logAdminAction('VIEW_SUBSCRIPTION'), getSubscriptionById);
-router.post('/subscriptions/activate', logAdminAction('ACTIVATE_SUBSCRIPTION'), activateUserSubscription);
 router.post('/subscriptions/:id/cancel', logAdminAction('CANCEL_SUBSCRIPTION'), cancelSubscription);
 router.post('/subscriptions/:id/deactivate', logAdminAction('DEACTIVATE_SUBSCRIPTION'), deactivateUserSubscription);
 router.patch('/subscriptions/listing-limit/:userId', logAdminAction('ADJUST_LISTING_LIMIT'), adjustListingLimit);
 router.patch('/users/:userId/listing-counter', logAdminAction('UPDATE_LISTING_COUNTER'), updateUserListingCounter);
 router.patch('/subscriptions/manage/:userId', logAdminAction('MANAGE_USER_SUBSCRIPTION'), manageUserSubscription);
+
+// Payment orders: plans paid by arrangement with the team. Granting a plan goes
+// through these (record payment / free grant); the old free-text "activate" and
+// "trigger renewal" actions are gone.
+router.get('/payment-orders', logAdminAction('VIEW_PAYMENT_ORDERS'), adminListOrders);
+router.get('/payment-orders/plans', logAdminAction('VIEW_ORDERABLE_PLANS'), adminListPlans);
+router.post('/payment-orders/record-payment', logAdminAction('RECORD_PAYMENT'), adminRecordPayment);
+router.post('/payment-orders/free-grant', logAdminAction('FREE_GRANT'), adminFreeGrant);
+router.post('/payment-orders/:reference/mark-paid', logAdminAction('MARK_ORDER_PAID'), adminMarkPaid);
+router.post('/payment-orders/:reference/cancel', logAdminAction('CANCEL_ORDER'), adminCancelOrder);
 router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
 router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);
 router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);
@@ -236,7 +251,6 @@ router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);
 router.get('/subscriptions/products', logAdminAction('VIEW_PRODUCTS'), getAllProducts);
 router.get('/subscriptions/product-config/:productId', logAdminAction('VIEW_PRODUCT_CONFIG'), getProductConfig);
 router.get('/subscriptions/carryover/:userId', logAdminAction('VIEW_CARRYOVER_STATS'), getCarryoverStats);
-router.post('/subscriptions/trigger-renewal/:userId', logAdminAction('TRIGGER_RENEWAL'), triggerSubscriptionRenewal);
 router.patch('/subscriptions/carryover/:userId', logAdminAction('UPDATE_CARRYOVER_FIELDS'), updateCarryoverFields);
 
 // ===== Test Email Endpoints =====

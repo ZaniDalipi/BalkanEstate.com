@@ -8,10 +8,9 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { payseraService } from '../services/payseraService';
-import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
+import { grantPaidPeriod } from '../services/subscriptions/grantPaidPeriod';
 import User from '../models/User';
 import Product from '../models/Product';
-import Subscription from '../models/Subscription';
 import DiscountCode from '../models/DiscountCode';
 import { paymentLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
@@ -124,18 +123,6 @@ async function handleSuccessfulPayment(
       return;
     }
 
-    // Idempotency check: skip if this order was already processed.
-    // The Subscription model has a unique index on (store, transactionId),
-    // but checking upfront avoids side effects like duplicate product creation.
-    const existingSub = await Subscription.findOne({
-      store: 'web',
-      transactionId: callbackData.orderid,
-    });
-    if (existingSub) {
-      paymentLogger.info(`⏭️ PaySera webhook: order ${callbackData.orderid} already processed (subscription ${existingSub._id}), skipping`);
-      return;
-    }
-
     paymentLogger.info(`✅ Processing successful PaySera payment for user ${userId}`);
 
     // Find user
@@ -156,17 +143,21 @@ async function handleSuccessfulPayment(
       return;
     }
 
-    // Process the subscription payment
-    const result = await processSubscriptionPayment({
+    // Granted once per order: a repeated callback for the same order finds
+    // the payment already recorded and changes nothing.
+    const result = await grantPaidPeriod({
       userId,
       productId: product.productId,
-      store: 'web', // PaySera is a web payment
       amount: callbackData.payamount / 100, // Convert from cents
       currency: callbackData.paycurrency || 'EUR',
-      transactionId: callbackData.orderid,
-      purchaseToken: callbackData.requestid,
+      reference: callbackData.orderid,
+      method: 'paysera',
       ...(metadata?.discountCode ? { discountCode: metadata.discountCode, originalAmount: product.price } : {}),
     });
+    if (result.alreadyGranted) {
+      paymentLogger.info(`⏭️ PaySera webhook: order ${callbackData.orderid} already processed, skipping`);
+      return;
+    }
 
     if (metadata?.discountCode) {
       await redeemDiscountCodeForPayment(metadata.discountCode, userId, callbackData.orderid);
@@ -174,7 +165,7 @@ async function handleSuccessfulPayment(
 
     paymentLogger.info(`✅ PaySera subscription activated for user ${user._id}`);
     paymentLogger.info(`   Subscription ID: ${result.subscription._id}`);
-    paymentLogger.info(`   Expires: ${result.subscription.expirationDate}`);
+    paymentLogger.info(`   Expires: ${result.expirationDate}`);
   } catch (error: any) {
     paymentLogger.error('❌ Error processing PaySera payment:', error);
     throw error;

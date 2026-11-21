@@ -35,6 +35,15 @@ export type AdminAlertEvent =
       to: string;
       /** The admin who made the change. */
       byName: string;
+    }
+  | {
+      kind: 'plan_requested';
+      reference: string;
+      name: string;
+      email: string;
+      productName: string;
+      amountCents: number;
+      currency: string;
     };
 
 export interface AdminAlert {
@@ -125,6 +134,28 @@ export function buildAdminAlert(event: AdminAlertEvent, siteUrl: string): AdminA
       message: `${name}: ${roleName(event.from)} → ${roleName(event.to)} (by ${oneLine(event.byName)})`,
       actionUrl,
       html: render(heading, rows, `${base}${actionUrl}`, 'Open users'),
+      text: textOf(heading, rows, `${base}${actionUrl}`),
+    };
+  }
+
+  if (event.kind === 'plan_requested') {
+    const name = oneLine(event.name) || 'Unnamed user';
+    const email = oneLine(event.email);
+    const amount = `${event.currency === 'EUR' ? '€' : `${oneLine(event.currency, 3)} `}${(event.amountCents / 100).toFixed(2)}`;
+    const rows: Array<[string, string]> = [
+      ['Reference', oneLine(event.reference, 20)],
+      ['Plan', oneLine(event.productName)],
+      ['Amount', amount],
+      ['Customer', `${name} (${email})`],
+    ];
+    const actionUrl = '/admin/payment-orders';
+    const heading = 'New plan request';
+    return {
+      subject: `Plan request ${oneLine(event.reference, 20)}: ${oneLine(event.productName)} for ${amount}`,
+      title: heading,
+      message: `${name} · ${oneLine(event.productName)} · ${amount} · ${oneLine(event.reference, 20)}`,
+      actionUrl,
+      html: render(heading, rows, `${base}${actionUrl}`, 'Open payment orders'),
       text: textOf(heading, rows, `${base}${actionUrl}`),
     };
   }

@@ -17,7 +17,7 @@ import { adminLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
-import { PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
+import { FREE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { createNotificationWithPush } from '../services/engagementService';
 
 /**
@@ -313,129 +313,6 @@ export const getPaymentStats = async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting payment stats:', error);
     res.status(500).json({ message: 'Error getting payment stats' });
-  }
-};
-
-/**
- * @desc    Manually activate a user's subscription (admin override)
- * @route   POST /api/admin/subscriptions/activate
- * @access  Admin
- */
-export const activateUserSubscription = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { userId, planName, durationDays, reason } = req.body;
-
-    if (!userId || !planName || !durationDays) {
-      res.status(400).json({ message: 'userId, planName, and durationDays are required' });
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays));
-
-    // Update user
-    const normalizedPlan = planName.toLowerCase().replace(/\s+/g, '_');
-    user.isSubscribed = true;
-    user.subscriptionStatus = 'active';
-    user.subscriptionPlan = normalizedPlan;
-    user.subscriptionProductName = planName;
-    user.subscriptionSource = 'web';
-    user.subscriptionExpiresAt = expiresAt;
-    user.subscriptionStartedAt = new Date();
-
-    // Sync embedded subscription object
-    const isEnterprise = normalizedPlan.includes('enterprise') || normalizedPlan === 'agency_yearly';
-    const isPro = normalizedPlan.includes('pro_') || normalizedPlan.includes('seller_pro_');
-    const isYearly = normalizedPlan.includes('yearly');
-
-    if (!user.subscription) {
-      user.subscription = {} as any;
-    }
-    user.subscription.status = 'active';
-    user.subscription.expiresAt = expiresAt;
-    user.subscription.startDate = new Date();
-
-    if (isEnterprise) {
-      user.subscription.tier = 'agency_owner';
-      user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
-    } else if (isPro) {
-      user.subscription.tier = 'pro';
-      user.subscription.listingsLimit = isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
-    }
-    user.markModified('subscription');
-
-    // Sync activeListingsLimit
-    if (user.subscription.listingsLimit) {
-      user.activeListingsLimit = user.subscription.listingsLimit;
-    }
-
-    // Sync activeRole and primaryRole
-    const currentRole = user.role;
-    if (currentRole && currentRole !== 'buyer') {
-      if (user.activeRole !== currentRole) user.activeRole = currentRole as any;
-      if (user.primaryRole !== currentRole) user.primaryRole = currentRole as any;
-    }
-
-    await user.save();
-
-    // Create subscription record
-    const subscription = await Subscription.create({
-      userId,
-      store: 'web',
-      productId: planName.toLowerCase().replace(/\s+/g, '_'),
-      startDate: new Date(),
-      expirationDate: expiresAt,
-      renewalDate: expiresAt,
-      status: 'active',
-      autoRenewing: false,
-      price: 0,
-      currency: 'EUR',
-      purchaseToken: `admin_${userId}_${Date.now()}`,
-      transactionId: `admin_txn_${userId}_${Date.now()}`,
-    });
-
-    // Update user with subscription ID
-    user.activeSubscriptionId = subscription._id as mongoose.Types.ObjectId;
-    await user.save();
-
-    // Create event for audit trail
-    await SubscriptionEvent.create({
-      subscriptionId: subscription._id,
-      userId,
-      eventType: 'subscription_purchased',
-      store: 'web',
-      metadata: {
-        activatedByAdmin: true,
-        adminUserId: (req as any).user?._id,
-        reason,
-      },
-    });
-
-    adminLogger.info(`[Admin] Subscription activated for user ${user._id} - Plan: ${planName}, Duration: ${durationDays} days`);
-
-    // Invalidate caches so subscription change reflects immediately
-    invalidateCache('/api/agents');
-    invalidateCache('/api/properties');
-
-    res.json({
-      success: true,
-      message: `Subscription activated for ${user.email}`,
-      subscription: {
-        planName,
-        expiresAt,
-        userId: user._id,
-        email: user.email,
-      },
-    });
-  } catch (error: any) {
-    adminLogger.error('[Admin] Error activating subscription:', error);
-    res.status(500).json({ message: 'Error activating subscription' });
   }
 };
 
@@ -1021,7 +898,7 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
     const userId = getObjectIdParam(req, res, 'userId');
     if (!userId) return;
 
-    const { isSubscribed, subscriptionPlan, subscriptionStartedAt, subscriptionExpiresAt, reason } = req.body;
+    const { isSubscribed, reason } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -1084,145 +961,12 @@ export const manageUserSubscription = async (req: Request, res: Response): Promi
     }
 
     // Activate or update subscription
-    const expiresAt = subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : undefined;
-    const startedAt = subscriptionStartedAt ? new Date(subscriptionStartedAt) : new Date();
-
-    if (isSubscribed === true) {
-      if (!subscriptionPlan || !expiresAt) {
-        res.status(400).json({ message: 'subscriptionPlan and subscriptionExpiresAt are required for activation' });
-        return;
-      }
-
-      user.isSubscribed = true;
-      user.subscriptionStatus = 'active';
-      user.subscriptionPlan = subscriptionPlan;
-      user.subscriptionProductName = subscriptionPlan.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-      user.subscriptionSource = 'web';
-      user.subscriptionExpiresAt = expiresAt;
-      user.subscriptionStartedAt = startedAt;
-
-      // Sync embedded subscription object
-      const isEnterprise = subscriptionPlan.includes('enterprise') || subscriptionPlan === 'agency_yearly';
-      const isPro = subscriptionPlan.includes('pro_') || subscriptionPlan.includes('seller_pro_');
-      const isYearly = subscriptionPlan.includes('yearly');
-
-      if (!user.subscription) {
-        user.subscription = {} as any;
-      }
-      user.subscription.status = 'active';
-      user.subscription.expiresAt = expiresAt;
-      user.subscription.startDate = startedAt;
-
-      if (isEnterprise) {
-        user.subscription.tier = 'agency_owner';
-        user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
-      } else if (isPro) {
-        user.subscription.tier = 'pro';
-        user.subscription.listingsLimit = isYearly ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
-      }
-      user.markModified('subscription');
-
-      // Sync activeListingsLimit
-      if (user.subscription.listingsLimit) {
-        user.activeListingsLimit = user.subscription.listingsLimit;
-      }
-
-      // Sync activeRole and primaryRole to match the user's actual role
-      const currentRole = user.role;
-      if (currentRole && currentRole !== 'buyer') {
-        if (user.activeRole !== currentRole) user.activeRole = currentRole as any;
-        if (user.primaryRole !== currentRole) user.primaryRole = currentRole as any;
-      }
-
-      // Create or update Subscription document
-      let subscription = user.activeSubscriptionId
-        ? await Subscription.findById(user.activeSubscriptionId)
-        : null;
-
-      if (subscription) {
-        subscription.productId = subscriptionPlan;
-        subscription.status = 'active';
-        subscription.expirationDate = expiresAt;
-        subscription.renewalDate = expiresAt;
-        subscription.startDate = startedAt;
-        subscription.autoRenewing = false;
-        subscription.lastUpdated = new Date();
-        await subscription.save();
-      } else {
-        subscription = await Subscription.create({
-          userId,
-          store: 'web',
-          productId: subscriptionPlan,
-          startDate: startedAt,
-          expirationDate: expiresAt,
-          renewalDate: expiresAt,
-          status: 'active',
-          autoRenewing: false,
-          price: 0,
-          currency: 'EUR',
-          purchaseToken: `admin_${userId}_${Date.now()}`,
-          transactionId: `admin_txn_${userId}_${Date.now()}`,
-        });
-        user.activeSubscriptionId = subscription._id as mongoose.Types.ObjectId;
-      }
-
-      await user.save();
-
-      await SubscriptionEvent.create({
-        subscriptionId: subscription._id,
-        userId,
-        eventType: 'subscription_purchased',
-        store: 'web',
-        metadata: {
-          activatedByAdmin: true,
-          adminUserId: (req as any).user?._id,
-          reason: reason || 'Admin activation via User Manager',
-          plan: subscriptionPlan,
-          expiresAt,
-          startedAt,
-        },
-      });
-
-      invalidateCache('/api/agents');
-      invalidateCache('/api/properties');
-
-      res.json({
-        success: true,
-        message: `Subscription activated for ${user.email} — ${subscriptionPlan} until ${expiresAt.toLocaleDateString()}`,
-      });
-      return;
-    }
-
-    // Update dates only (isSubscribed not explicitly set)
-    if (subscriptionPlan) {
-      user.subscriptionPlan = subscriptionPlan;
-      user.subscriptionProductName = subscriptionPlan.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-    }
-    if (expiresAt) user.subscriptionExpiresAt = expiresAt;
-    if (subscriptionStartedAt) user.subscriptionStartedAt = startedAt;
-    await user.save();
-
-    // Also update the Subscription document if it exists
-    if (user.activeSubscriptionId) {
-      const sub = await Subscription.findById(user.activeSubscriptionId);
-      if (sub) {
-        if (subscriptionPlan) sub.productId = subscriptionPlan;
-        if (expiresAt) {
-          sub.expirationDate = expiresAt;
-          sub.renewalDate = expiresAt;
-        }
-        if (subscriptionStartedAt) sub.startDate = startedAt;
-        sub.lastUpdated = new Date();
-        await sub.save();
-      }
-    }
-
-    invalidateCache('/api/agents');
-    invalidateCache('/api/properties');
-
-    res.json({
-      success: true,
-      message: `Subscription updated for ${user.email}`,
+    // Giving a plan or changing its dates goes through payment orders (Record
+    // payment / Free grant), so every period has a payment record and a reason.
+    res.status(400).json({
+      success: false,
+      code: 'USE_RECORD_PAYMENT',
+      message: 'Use Record payment or Free grant to give a plan. Plans are no longer edited in place.',
     });
   } catch (error: any) {
     adminLogger.error('[Admin] Error managing user subscription:', error);
@@ -1272,87 +1016,6 @@ export const getCarryoverStats = async (req: Request, res: Response): Promise<vo
   } catch (error: any) {
     adminLogger.error('[Admin] Error getting carryover stats:', error);
     res.status(500).json({ message: 'Error getting carryover stats' });
-  }
-};
-
-/**
- * @desc    Manually trigger subscription renewal (for testing carryover)
- * @route   POST /api/admin/subscriptions/trigger-renewal/:userId
- * @access  Admin
- */
-export const triggerSubscriptionRenewal = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const userId = getObjectIdParam(req, res, 'userId');
-    if (!userId) return;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    if (!user.subscription) {
-      res.status(400).json({ message: 'User has no subscription' });
-      return;
-    }
-
-    const subscription = await Subscription.findOne({
-      userId,
-      status: { $in: ['active', 'grace', 'pending_cancellation'] },
-    });
-
-    if (!subscription) {
-      res.status(404).json({ message: 'No active subscription found' });
-      return;
-    }
-
-    const product = await Product.findOne({ productId: subscription.productId });
-    if (!product) {
-      res.status(404).json({ message: `Product not found: ${subscription.productId}` });
-      return;
-    }
-
-    // Calculate new expiration date
-    const newExpirationDate = new Date();
-    if (product.billingPeriod === 'yearly') {
-      newExpirationDate.setFullYear(newExpirationDate.getFullYear() + 1);
-    } else {
-      newExpirationDate.setMonth(newExpirationDate.getMonth() + 1);
-    }
-
-    // Update subscription
-    subscription.expirationDate = newExpirationDate;
-    subscription.renewalDate = newExpirationDate;
-    subscription.status = 'active';
-    subscription.autoRenewing = true;
-    subscription.lastUpdated = new Date();
-    await subscription.save();
-
-    // Reset monthly counter on renewal
-    user.subscription.listingsCreatedThisMonth = 0;
-    user.subscription.monthResetDate = new Date();
-
-    user.markModified('subscription');
-    await user.save();
-
-    // Fetch updated user
-    const updatedUser = await User.findById(userId).lean();
-
-    res.json({
-      success: true,
-      message: 'Subscription renewal triggered successfully',
-      subscription: {
-        expirationDate: subscription.expirationDate,
-        status: subscription.status,
-      },
-      monthlyListing: {
-        listingsCreatedThisMonth: updatedUser?.subscription?.listingsCreatedThisMonth ?? 0,
-        monthResetDate: updatedUser?.subscription?.monthResetDate ?? null,
-      },
-    });
-  } catch (error: any) {
-    adminLogger.error('[Admin] Error triggering renewal:', error);
-    res.status(500).json({ message: 'Error triggering renewal', error: error.message });
   }
 };
 
@@ -1655,7 +1318,6 @@ export default {
   getAllPayments,
   getPaymentById,
   getPaymentStats,
-  activateUserSubscription,
   cancelSubscription,
   deactivateUserSubscription,
   adjustListingLimit,
@@ -1666,7 +1328,6 @@ export default {
   manageUserSubscription,
   getCarryoverStats,
   updateUserListingCounter,
-  triggerSubscriptionRenewal,
   updateCarryoverFields,
   getProductConfig,
   getAllProducts,

@@ -402,12 +402,17 @@ export const mutationRateLimiter = rateLimit({
 });
 
 /**
- * Very strict rate limiter for payment endpoints
- * In development mode, skip rate limiting entirely to avoid blocking during testing
+ * Very strict rate limiter for payment endpoints: 30 an hour in production,
+ * no limit anywhere else.
+ *
+ * It used to say `max: isProduction ? 30 : 0`, meaning "0 = unlimited". Since
+ * express-rate-limit v7 a limit of 0 blocks every request, so on any server
+ * that was neither production nor development (staging, tests) every payment
+ * and subscription request was answered 429.
  */
 export const paymentRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 30 : 0, // 0 = unlimited in development
+  max: 30,
   message: {
     error: 'Too many payment attempts',
     message: 'Too many payment attempts. Please try again later.',
@@ -415,7 +420,7 @@ export const paymentRateLimiter = rateLimit({
   },
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
-  skip: () => isDevelopment, // Skip rate limiting entirely in development
+  skip: () => !isProduction,
 });
 
 /**

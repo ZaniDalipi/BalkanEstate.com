@@ -3,7 +3,7 @@
  * plan only for a real, coupon-grantable product, only when the code is valid
  * for this person and plan, and only once per use.
  *
- * Granting itself (processSubscriptionPayment) runs in a Mongo transaction,
+ * Granting itself (grantPaidPeriod) runs in a Mongo transaction,
  * which the standalone test database can't do, so it is mocked here; these
  * tests cover everything the route decides before and after it.
  */
@@ -13,15 +13,15 @@ import mongoose from 'mongoose';
 import DiscountCode from '../models/DiscountCode';
 import Product from '../models/Product';
 import Subscription from '../models/Subscription';
-import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
+import { grantPaidPeriod } from '../services/subscriptions/grantPaidPeriod';
 import { makeUser, tokenFor } from './developments/helpers/explorerHarness';
 
-jest.mock('../services/subscriptionPaymentService', () => ({
-  ...jest.requireActual('../services/subscriptionPaymentService'),
-  processSubscriptionPayment: jest.fn(),
+jest.mock('../services/subscriptions/grantPaidPeriod', () => ({
+  ...jest.requireActual('../services/subscriptions/grantPaidPeriod'),
+  grantPaidPeriod: jest.fn(),
 }));
 
-const grant = processSubscriptionPayment as jest.MockedFunction<typeof processSubscriptionPayment>;
+const grant = grantPaidPeriod as jest.MockedFunction<typeof grantPaidPeriod>;
 
 const app = express();
 app.use(express.json());
@@ -61,15 +61,17 @@ const redeem = (userId: unknown, body: Record<string, unknown>) =>
 
 beforeEach(() => {
   grant.mockReset();
-  grant.mockImplementation(async () => ({
-    success: true,
-    message: 'ok',
-    subscription: {
-      _id: new mongoose.Types.ObjectId(),
-      expirationDate: new Date(Date.now() + 30 * 86_400_000),
-      status: 'active',
-    },
-  }));
+  grant.mockImplementation(async () => {
+    const expirationDate = new Date(Date.now() + 30 * 86_400_000);
+    return {
+      subscription: { _id: new mongoose.Types.ObjectId(), expirationDate, status: 'active' },
+      paymentRecord: { _id: new mongoose.Types.ObjectId() },
+      alreadyGranted: false,
+      isNew: true,
+      expirationDate,
+      creditedDays: 0,
+    } as unknown as Awaited<ReturnType<typeof grantPaidPeriod>>;
+  });
 });
 
 describe('unknown or ineligible plans', () => {
@@ -181,7 +183,7 @@ describe('redeeming', () => {
     expect(res.body.subscriptionId).toEqual(expect.any(String));
     expect(res.body.subscription.plan).toBe('pro_monthly');
     expect(grant).toHaveBeenCalledWith(
-      expect.objectContaining({ productId: 'pro_monthly', amount: 0, store: 'web', discountCode: 'FREEPRO', originalAmount: 25 })
+      expect.objectContaining({ productId: 'pro_monthly', amount: 0, method: 'coupon', discountCode: 'FREEPRO', originalAmount: 25 })
     );
     const code = await DiscountCode.findOne({ code: 'FREEPRO' });
     expect(code?.usedCount).toBe(1);

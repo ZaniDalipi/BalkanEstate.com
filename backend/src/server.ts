@@ -89,6 +89,7 @@ import savedSearchRoutes from './routes/savedSearchRoutes';
 import conversationRoutes from './routes/conversationRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import subscriptionRoutes from './routes/subscriptionRoutes';
+import paymentOrderRoutes from './routes/paymentOrderRoutes';
 import webhookRoutes from './routes/webhookRoutes';
 import productRoutes from './routes/productRoutes';
 import bankExportRoutes from './routes/bankExportRoutes';
@@ -351,6 +352,7 @@ app.use('/api/auth', sensitiveRateLimiter, authRoutes);
 // Payment routes with payment-specific rate limiting
 app.use('/api/payments', paymentRateLimiter, paymentRoutes);
 app.use('/api/subscriptions', paymentRateLimiter, subscriptionRoutes);
+app.use('/api/payment-orders', paymentOrderRoutes); // Plans paid by arrangement with the team
 app.use('/api/webhooks', webhookRoutes); // Webhooks from payment provider - no rate limit needed
 
 // Standard API routes

@@ -1,6 +1,7 @@
 process.env.SKIP_TEST_DB = 'true';
 
-import { isCouponGrantablePlan, remainingAfterDiscount } from '../utils/couponPlanRules';
+import { isGrantablePlan } from '../utils/grantablePlans';
+import { remainingAfterDiscount } from '../utils/planPricing';
 
 const plan = (overrides: Record<string, unknown> = {}) => ({
   productId: 'pro_monthly',
@@ -12,14 +13,14 @@ const plan = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-describe('isCouponGrantablePlan', () => {
+describe('isGrantablePlan', () => {
   it.each([
     ['Pro monthly', plan()],
     ['Pro yearly', plan({ productId: 'pro_yearly', billingPeriod: 'yearly', price: 200 })],
     ['Buyer monthly', plan({ productId: 'buyer_monthly', tier: 'buyer', price: 3 })],
     ['Enterprise', plan({ productId: 'agency_yearly', tier: 'agency', billingPeriod: 'yearly', price: 1000 })],
   ])('accepts a paid recurring plan: %s', (_label, product) => {
-    expect(isCouponGrantablePlan(product)).toBe(true);
+    expect(isGrantablePlan(product)).toBe(true);
   });
 
   it.each([
@@ -32,7 +33,7 @@ describe('isCouponGrantablePlan', () => {
     ['a one-off product', plan({ type: 'consumable' })],
     ['an inactive plan', plan({ isActive: false })],
   ])('refuses %s', (_label, product) => {
-    expect(isCouponGrantablePlan(product)).toBe(false);
+    expect(isGrantablePlan(product)).toBe(false);
   });
 });
 

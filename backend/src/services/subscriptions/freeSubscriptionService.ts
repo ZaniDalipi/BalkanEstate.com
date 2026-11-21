@@ -6,12 +6,13 @@
  * checked with DiscountCode.isValid, the same rules as everywhere else
  * (dates, usage limit, one use per person, the plans the code is for).
  */
-import mongoose from 'mongoose';
 import DiscountCode from '../../models/DiscountCode';
-import Product from '../../models/Product';
 import Subscription from '../../models/Subscription';
-import { processSubscriptionPayment } from '../subscriptionPaymentService';
-import { isCouponGrantablePlan, remainingAfterDiscount } from '../../utils/couponPlanRules';
+import { grantPaidPeriod } from './grantPaidPeriod';
+import { newOrderReference } from '../../utils/orderReference';
+import { claimCodeUse, releaseCodeUse } from '../payments/discountCodeUse';
+import { findOrderablePlan } from '../payments/paymentOrderService';
+import { remainingAfterDiscount } from '../../utils/planPricing';
 
 export type FreeSubscriptionErrorCode =
   | 'PLAN_REQUIRED'
@@ -49,18 +50,19 @@ export async function redeemFreeSubscription(
   userId: string,
   input: { productId?: unknown; discountCode?: unknown }
 ): Promise<FreeSubscriptionResult> {
-  const productId = asText(input.productId);
   const codeText = asText(input.discountCode).toUpperCase();
-  if (!productId) return fail(400, 'PLAN_REQUIRED', 'Choose a plan first.');
+  if (!asText(input.productId)) return fail(400, 'PLAN_REQUIRED', 'Choose a plan first.');
   if (!codeText) return fail(400, 'CODE_REQUIRED', 'Enter a discount code.');
 
-  const product = await Product.findOne({ productId, isActive: true });
-  if (!product) {
-    return fail(404, 'PLAN_NOT_FOUND', 'This plan is not available. Contact our team and we will help you.');
+  const plan = await findOrderablePlan(input.productId);
+  if (plan.ok === false) {
+    const message = plan.code === 'PLAN_NOT_ELIGIBLE'
+      ? 'A code cannot activate this item here. Contact our team and we will help you.'
+      : plan.message;
+    return fail(plan.status, plan.code as FreeSubscriptionErrorCode, message);
   }
-  if (!isCouponGrantablePlan(product)) {
-    return fail(400, 'PLAN_NOT_ELIGIBLE', 'A code cannot activate this item here. Contact our team and we will help you.');
-  }
+  const product = plan.value;
+  const productId = product.productId;
 
   const sameActivePlan = await Subscription.findOne({
     userId,
@@ -88,21 +90,16 @@ export async function redeemFreeSubscription(
     );
   }
 
-  // Claim one use for this person, only while uses are left and they haven't used it.
-  const actor = new mongoose.Types.ObjectId(userId);
-  const claimed = await DiscountCode.findOneAndUpdate(
-    { _id: code._id, isActive: true, usedBy: { $ne: actor }, $expr: { $lt: ['$usedCount', '$usageLimit'] } },
-    { $inc: { usedCount: 1 }, $push: { usedBy: actor } }
-  );
-  if (!claimed) return fail(409, 'CODE_USED_UP', 'This code has already been used.');
+  if (!(await claimCodeUse(code._id, userId))) return fail(409, 'CODE_USED_UP', 'This code has already been used.');
 
   try {
-    const result = await processSubscriptionPayment({
+    const result = await grantPaidPeriod({
       userId,
       productId,
-      store: 'web',
       amount: 0,
       currency: product.currency || 'EUR',
+      reference: newOrderReference('CP'),
+      method: 'coupon',
       discountCode: code.code,
       originalAmount: product.price,
     });
@@ -110,7 +107,7 @@ export async function redeemFreeSubscription(
       ok: true,
       value: {
         subscriptionId: String(result.subscription._id),
-        expiresAt: result.subscription.expirationDate,
+        expiresAt: result.expirationDate,
         status: result.subscription.status,
         productId,
         productName: product.name,
@@ -119,7 +116,7 @@ export async function redeemFreeSubscription(
     };
   } catch (error) {
     // Nothing was granted: give the use back.
-    await DiscountCode.updateOne({ _id: code._id }, { $inc: { usedCount: -1 }, $pull: { usedBy: actor } });
+    await releaseCodeUse(code, userId);
     throw error;
   }
 }
