@@ -95,7 +95,7 @@
   },
   "empty": {
     "title": "Nuk u gjetën biznese",
-    "description": "Bëhuni i pari që liston biznesin tuaj në këtë kategori dhe arrini mijëra klientë të mundshëm në të gjithë Ballkanin."
+    "description": "Bëhuni i pari që liston biznesin tuaj në këtë kategori dhe arrini klientë të mundshëm në të gjithë Ballkanin."
   },
   "pagination": {
     "previous": "E mëparshme",
@@ -252,7 +252,7 @@
   },
   "form": {
     "title": "Listoni Biznesin Tuaj",
-    "subtitle": "Arrini mijëra klientë të mundshëm në të gjithë Ballkanin",
+    "subtitle": "Arrini klientë të mundshëm në të gjithë Ballkanin",
     "sections": {
       "type": "Lloji i Listimit",
       "basicInfo": "Informacione Bazë",

@@ -113,7 +113,7 @@
   },
   "cta": {
     "sellerTitle": "Ready to Sell Your Property?",
-    "sellerSubtitle": "List your property and reach thousands of potential buyers across the Balkans. Get started in minutes.",
+    "sellerSubtitle": "List your property and reach buyers across the Balkans. Get started in minutes.",
     "sellerButton": "List Your Property",
     "agentTitle": "Are You a Real Estate Agent?",
     "agentSubtitle": "Join our network of verified agents. Get leads, manage listings, and grow your business.",
@@ -184,7 +184,7 @@
   },
   "testimonials": {
     "title": "What Our Users Say",
-    "subtitle": "Trusted by thousands of buyers, sellers, and agents across the Balkans",
+    "subtitle": "What buyers, sellers, and agents across the Balkans say about us",
     "emptyState": "Testimonials will appear here as users share their experiences."
   },
   "newsletter": {

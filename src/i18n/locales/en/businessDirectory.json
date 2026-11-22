@@ -95,7 +95,7 @@
   },
   "empty": {
     "title": "No businesses found",
-    "description": "Be the first to list your business in this category and reach thousands of potential customers across the Balkans."
+    "description": "Be the first to list your business in this category and reach potential customers across the Balkans."
   },
   "pagination": {
     "previous": "Previous",
@@ -252,7 +252,7 @@
   },
   "form": {
     "title": "List Your Business",
-    "subtitle": "Reach thousands of potential customers across the Balkans",
+    "subtitle": "Reach potential customers across the Balkans",
     "sections": {
       "type": "Listing Type",
       "basicInfo": "Basic Information",
