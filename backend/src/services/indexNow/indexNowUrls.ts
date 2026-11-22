@@ -15,9 +15,23 @@ export interface ChangedListing {
   city?: string | null;
 }
 
+/** A page path (`/agents/x`) in every language: /{lang}/agents/x. */
+export const pageUrls = (path: string, baseUrl: string): string[] =>
+  SUPPORTED_LANG_CODES.map((lang) => `${baseUrl}/${lang}${path}`);
+
 /** /{lang}/property/{id} in every language. */
 export const listingUrls = (encodedId: string, baseUrl: string): string[] =>
-  SUPPORTED_LANG_CODES.map((lang) => `${baseUrl}/${lang}/property/${encodeURIComponent(encodedId)}`);
+  pageUrls(`/property/${encodeURIComponent(encodedId)}`, baseUrl);
+
+/** An agency's page; its slug is `country/name`, each segment encoded (as in the sitemap). */
+export const agencyPagePath = (slug: string): string =>
+  `/agencies/${slug.split('/').filter(Boolean).map(encodeURIComponent).join('/')}`;
+
+/** An agent's page, by the public agent id the app links to. */
+export const agentPagePath = (agentId: string): string => `/agents/${encodeURIComponent(agentId)}`;
+
+/** A residence (development) page, by its slug. */
+export const developmentPagePath = (slug: string): string => `/developments/${encodeURIComponent(slug)}`;
 
 /** The country and city market pages (English) a listing appears on, if it is in one of our countries. */
 export const marketUrlsFor = (listing: Omit<ChangedListing, 'encodedId'>, baseUrl: string): string[] => {

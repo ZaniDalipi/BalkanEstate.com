@@ -1558,9 +1558,14 @@ per m² (`GET /api/market-prices`, `services/marketPages/marketPriceTable.ts`).
   price or yield figures (the market pages carry live prices), no superlatives.
 - **IndexNow.** Creating, editing, selling, renting, renewing or deleting a
   listing announces its URLs in every language plus its country and city pages
-  (`indexNowOnSuccess` on the listing routes → `services/indexNow/`). Batched per
-  minute, production only (`INDEXNOW_ENABLED=false` turns it off), never affects
-  the request. The key is public by design and served at `/{key}.txt` from
+  (`indexNowOnSuccess` on the listing routes → `services/indexNow/`). Agency
+  pages (edit, create, logo, cover, team), agent pages (profile, reviews,
+  leaving an agency) and residence pages (every dashboard write except a
+  preview, a scene draft or a checkout; never-published residences skipped)
+  are announced the same way (`indexNowAgency`, `indexNowAgent`,
+  `indexNowDevelopmentParam` → `indexNowPages.ts`). Batched per minute and
+  flushed on shutdown, production only (`INDEXNOW_ENABLED=false` turns it
+  off), never affects the request. The key is public by design and served at `/{key}.txt` from
   `public/`; `config/indexNow.ts` holds the same key and a test checks they match.
 - **Brand names.** The organisation's JSON-LD lists "BalkanEstate",
   "BalkanEstate AI" and "Balkan Estate AI" as alternate names of BalkanEstateAI.

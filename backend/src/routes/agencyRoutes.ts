@@ -27,6 +27,7 @@ import {
   recomputeAgencyScores,
 } from '../controllers/agencyController';
 import { protect, optionalAuth } from '../middleware/auth';
+import { indexNowAgency } from '../middleware/indexNowOnSuccess';
 
 const router = express.Router();
 
@@ -51,10 +52,10 @@ router.get('/', getAgencies);
 router.get('/featured/rotation', getFeaturedAgencies);
 
 // Protected routes
-router.post('/', protect, createAgency);
-router.put('/:id', protect, updateAgency);
-router.post('/:id/agents', protect, addAgentToAgency);
-router.delete('/:id/agents/:agentId', protect, removeAgentFromAgency);
+router.post('/', protect, indexNowAgency(), createAgency);
+router.put('/:id', protect, indexNowAgency(), updateAgency);
+router.post('/:id/agents', protect, indexNowAgency(), addAgentToAgency);
+router.delete('/:id/agents/:agentId', protect, indexNowAgency(), removeAgentFromAgency);
 router.post('/join-by-code', protect, joinAgencyByInvitationCode);
 router.post('/find-by-code', protect, findAgencyByInvitationCode);
 router.post('/leave', protect, leaveAgency);
@@ -65,8 +66,8 @@ router.post('/:id/admins', protect, addAgencyAdmin);
 router.delete('/:id/admins/:userId', protect, removeAgencyAdmin);
 
 // Image upload routes
-router.post('/:id/upload-logo', protect, upload.single('logo'), uploadAgencyLogo);
-router.post('/:id/upload-cover', protect, upload.single('cover'), uploadAgencyCover);
+router.post('/:id/upload-logo', protect, upload.single('logo'), indexNowAgency(), uploadAgencyLogo);
+router.post('/:id/upload-cover', protect, upload.single('cover'), indexNowAgency(), uploadAgencyCover);
 
 // Coupon management routes (new monetization system)
 router.post('/:id/coupons/generate', protect, generateAgentCoupons); // Generate agent coupons (owner only)

@@ -8,7 +8,7 @@ import { INDEXNOW_ENDPOINT, INDEXNOW_KEY, isIndexNowEnabled } from '../../config
 import { encodeId, resolveId } from '../../utils/idObfuscation';
 import { createLogger } from '../../utils/logger';
 import { createIndexNowQueue, type IndexNowQueue } from './indexNowQueue';
-import { listingUrls, urlsForChangedListing } from './indexNowUrls';
+import { listingUrls, pageUrls, urlsForChangedListing } from './indexNowUrls';
 
 const logger = createLogger('IndexNow');
 
@@ -72,6 +72,12 @@ export async function notifyListingChanged(id: string, options: { deleted?: bool
     logger.warn('Could not queue a changed listing:', error instanceof Error ? error.message : error);
   }
 }
+
+/** Queue these page paths, in every language. Pages other than listings use this. */
+export const queuePagePaths = (paths: readonly string[]): void => {
+  if (!isIndexNowEnabled()) return;
+  queue.add(paths.flatMap((path) => pageUrls(path, SITE_URL)));
+};
 
 /** Submit anything still queued (graceful shutdown). */
 export const flushIndexNow = (): Promise<void> => queue.flush();

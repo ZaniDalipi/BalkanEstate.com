@@ -62,6 +62,7 @@ import {
 import { attachListing } from '../controllers/developmentSuggestionController';
 import { deleteBuilderImage, linkBuilderBusinessHandler, uploadBuilderImage } from '../controllers/developmentBuilderController';
 import { deleteGalleryPhoto, reorderGalleryPhotos, uploadGalleryPhotos } from '../controllers/developmentGalleryController';
+import { indexNowDevelopmentParam } from '../middleware/indexNowOnSuccess';
 
 const router = express.Router();
 
@@ -112,6 +113,10 @@ const uploadMany = multer({
  */
 
 // Collection level
+// Every public-page change (details, photos, units, prices, scenes, publish,
+// delete) is announced to IndexNow once it succeeds.
+router.param('developmentId', indexNowDevelopmentParam);
+
 router.post('/', protect, create);
 router.get('/', protect, listMine);
 

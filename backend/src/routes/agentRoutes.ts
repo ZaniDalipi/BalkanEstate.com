@@ -13,6 +13,7 @@ import {
 } from '../controllers/agentController';
 import { protect } from '../middleware/auth';
 import { decryptPayload } from '../middleware/decryptPayload';
+import { indexNowAgent } from '../middleware/indexNowOnSuccess';
 
 const router = express.Router();
 
@@ -24,10 +25,10 @@ router.get('/:id', getAgent);
 router.get('/:id/market-insights', getAgentMarketInsights);
 
 // Protected routes
-router.put('/profile', protect, decryptPayload, updateAgentProfile);
-router.post('/:id/reviews', protect, addReview);
+router.put('/profile', protect, decryptPayload, indexNowAgent(), updateAgentProfile);
+router.post('/:id/reviews', protect, indexNowAgent(), addReview);
 router.post('/:id/testimonials', protect, addTestimonial); // Deprecated - use /reviews instead
-router.post('/leave-agency', protect, leaveAgency);
+router.post('/leave-agency', protect, indexNowAgent(), leaveAgency);
 router.post('/admin/recompute-scores', protect, recomputeAgentScores);
 
 export default router;
