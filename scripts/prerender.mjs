@@ -81,6 +81,11 @@ if (!hasShellMarkers(template) || !template.includes('<div id="root">')) {
 
 // ─── Shared content ──────────────────────────────────────────────────────────
 
+// Cloudflare's Email Obfuscation rewrites any address it finds in served HTML
+// into a link to /cdn-cgi/l/email-protection, which crawlers follow and get a
+// 4xx for. <!--email_off--> tells Cloudflare to leave the address as it is.
+const mailto = (address) =>
+  `<!--email_off--><a href="mailto:${escapeHtml(address)}">${escapeHtml(address)}</a><!--/email_off-->`;
 const link = (lang, path, text) => `<a href="${escapeHtml(pageUrl(lang, path))}">${escapeHtml(text)}</a>`;
 const list = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
 
@@ -348,7 +353,7 @@ const PAGES = [
       <h2>What we check</h2>
       <p>We do not inspect properties or verify each listing's details; the person who publishes a listing is responsible for it. Every listing page has a link to report it.</p>
       <h2>Contact</h2>
-      <p>${link(lang, '/contact', 'Contact form')} · <a href="mailto:info@balkanestateai.com">info@balkanestateai.com</a> · <a href="mailto:support@balkanestateai.com">support@balkanestateai.com</a></p>`,
+      <p>${link(lang, '/contact', 'Contact form')} · ${mailto('info@balkanestateai.com')} · ${mailto('support@balkanestateai.com')}</p>`,
   },
   {
     path: '/contact',
@@ -361,7 +366,7 @@ const PAGES = [
     body: () => `
       <h1>Contact us</h1>
       <p>Use the contact form for support, to report a listing, or about advertising and agency plans.</p>
-      <p>Email: <a href="mailto:contact@balkanestateai.com">contact@balkanestateai.com</a> · Support: <a href="mailto:support@balkanestateai.com">support@balkanestateai.com</a></p>`,
+      <p>Email: ${mailto('contact@balkanestateai.com')} · Support: ${mailto('support@balkanestateai.com')}</p>`,
   },
   {
     path: '/privacy',
@@ -373,7 +378,7 @@ const PAGES = [
     body: () => `
       <h1>Privacy Policy</h1>
       <p>How we collect, use, share and protect personal data, the legal bases we rely on, how long we keep data, and your rights. It also explains our use of cookies, analytics and advertising, including Google AdSense, and how to opt out of personalised ads.</p>
-      <p>Privacy requests: <a href="mailto:privacy@balkanestateai.com">privacy@balkanestateai.com</a></p>`,
+      <p>Privacy requests: ${mailto('privacy@balkanestateai.com')}</p>`,
   },
   {
     path: '/terms',
