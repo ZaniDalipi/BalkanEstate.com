@@ -42,6 +42,7 @@ const countrySection = (deal) => {
 
 const TOOLS = `## Search and tools
 
+- [Property prices in the Balkans](${url('/property-prices')}): median asking price, price per m² and monthly rent by country and city, with the method; CSV at ${SITE_URL}/property-prices.csv
 - [Property for sale by country](${url('/property-for-sale')}): every country with its listings and biggest cities
 - [Property for rent by country](${url('/property-for-rent')}): the same for rentals
 - [Map search, for sale](${url('/search')}): filter by country, city, price, size and rooms, or describe the home in plain language
@@ -123,7 +124,7 @@ ${COUNTRY_LIST}. Each country has a page for property for sale, a page for prope
 
 ### Where do the prices on ${SITE_NAME} come from?
 
-From the live listings: each country and city page shows the median asking price, the typical range (10th to 90th percentile) and the median price per m² of the listings on the site at that moment. They are asking prices, not completed sales or valuations.
+From the live listings: the price table (${url('/property-prices')}) and each country and city page show the median asking price, the typical range (10th to 90th percentile) and the median price per m² of the listings on the site at that moment. They are asking prices, not completed sales or valuations.
 
 ### Where do the listings come from?
 

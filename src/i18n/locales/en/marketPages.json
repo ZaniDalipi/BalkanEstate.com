@@ -78,5 +78,28 @@
   },
   "loading": "Loading listings…",
   "typesOther": "Other",
-  "breadcrumbHome": "Home"
+  "breadcrumbHome": "Home",
+  "prices": {
+    "heading": "Property prices in the Balkans",
+    "seoTitle": "Property Prices in the Balkans – Price per m² by Country and City",
+    "intro": "Median asking prices and rents of the live listings on BalkanEstateAI, by country and city, as of {{date}}.",
+    "metaTail": "Price per m², median asking price and median monthly rent for ten countries, with the method and a CSV download.",
+    "wholeCountry": "Whole country",
+    "place": "Place",
+    "listings": "Listings",
+    "medianPrice": "Median price",
+    "perSqm": "Price per m²",
+    "medianRent": "Median rent / month",
+    "rentPerSqm": "Rent per m²",
+    "notEnough": "“–” means fewer than {{min}} listings with a price",
+    "methodTitle": "How the figures are calculated",
+    "method1": "Asking prices of the listings live on BalkanEstateAI on the date above — not completed sales, valuations or official statistics.",
+    "method2": "Each figure is a median: half of the listings ask more, half ask less.",
+    "method3": "Price per m² uses listings that state an area of at least 15 m². Weekly rents are converted to monthly; nightly stays are left out.",
+    "method4": "A figure is shown only when at least {{min}} listings back it.",
+    "citeTitle": "Using these figures",
+    "cite": "You are welcome to quote them. Please cite “BalkanEstateAI, Property prices in the Balkans, {{date}}” with a link to this page.",
+    "download": "Download the table (CSV)",
+    "crumb": "Property prices"
+  }
 }

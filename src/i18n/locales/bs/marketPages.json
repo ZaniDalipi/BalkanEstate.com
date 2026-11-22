@@ -78,5 +78,28 @@
   },
   "loading": "Učitavanje oglasa…",
   "typesOther": "Ostalo",
-  "breadcrumbHome": "Početna"
+  "breadcrumbHome": "Početna",
+  "prices": {
+    "heading": "Cijene nekretnina na Balkanu",
+    "seoTitle": "Cijene nekretnina na Balkanu – cijena kvadrata po zemljama i gradovima",
+    "intro": "Medijalne tražene cijene i kirije aktivnih oglasa na BalkanEstateAI, po zemljama i gradovima, na dan {{date}}.",
+    "metaTail": "Cijena po m², medijalna tražena cijena i medijalna mjesečna kirija za deset zemalja, s metodom i CSV preuzimanjem.",
+    "wholeCountry": "Cijela zemlja",
+    "place": "Mjesto",
+    "listings": "Oglasi",
+    "medianPrice": "Medijalna cijena",
+    "perSqm": "Cijena po m²",
+    "medianRent": "Medijalna kirija / mjesec",
+    "rentPerSqm": "Kirija po m²",
+    "notEnough": "„–” znači manje od {{min}} oglasa s cijenom",
+    "methodTitle": "Kako se računaju podaci",
+    "method1": "Tražene cijene oglasa aktivnih na BalkanEstateAI na navedeni dan — ne završene prodaje, procjene ili zvanična statistika.",
+    "method2": "Svaki podatak je medijana: polovina oglasa traži više, polovina manje.",
+    "method3": "Cijena po m² koristi oglase s navedenom površinom od najmanje 15 m². Sedmične kirije pretvaraju se u mjesečne; noćenja nisu uključena.",
+    "method4": "Podatak se prikazuje samo kada ga podržava najmanje {{min}} oglasa.",
+    "citeTitle": "Korištenje ovih podataka",
+    "cite": "Slobodno ih citirajte. Navedite „BalkanEstateAI, Cijene nekretnina na Balkanu, {{date}}” uz link na ovu stranicu.",
+    "download": "Preuzmite tabelu (CSV)",
+    "crumb": "Cijene nekretnina"
+  }
 }

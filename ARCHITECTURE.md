@@ -1516,6 +1516,30 @@ visitor sees.
 - **Sitemap.** `/sitemap-listings.xml` lists the indexable market pages in every
   language with hreflang alternates (capped so the file stays under 50,000 URLs).
 
+### Property prices page — a source to cite
+
+`/:lang/property-prices` is the table journalists, analysts and answer engines
+can quote: for every country and each city with at least 10 live listings,
+the median asking price, median price per m², median monthly rent and rent
+per m² (`GET /api/market-prices`, `services/marketPages/marketPriceTable.ts`).
+
+- **Only defensible figures.** A median is shown from `PRICE_TABLE_MIN_SAMPLE`
+  (10) listings; below that the cell reads "–". Rows use the market pages'
+  merged city pages, so every city links to a page that exists.
+- **Read once an hour.** One pass over all live listings, kept in a promise
+  cache for an hour (a failure is retried after a minute); the HTTP cache keeps
+  the JSON for an hour too.
+- **Method and citation on the page**, plus a CSV
+  (`/property-prices.csv`, proxied by a Pages Function from
+  `/api/market-prices/csv`; cells that start with `=`, `+`, `-` or `@` are
+  quoted so a spreadsheet does not run them).
+- **schema.org `Dataset`** JSON-LD (creator, date, coverage, variables, the CSV
+  as `DataDownload`), for Google Dataset Search and answer engines. Crawlers get
+  the table as HTML (`functions/_market-prices.ts`). The page is `noindex` while
+  no place has a figure.
+- Linked from the footer ("Property prices", "Property by country"), the
+  crawler navigation, `llms.txt` and the sitemap.
+
 ## Search engines and AI crawlers — what they read
 
 - **Rendered HTML for every crawler.** `CRAWLER_USER_AGENTS` (`functions/_og-utils.ts`)

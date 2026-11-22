@@ -43,6 +43,8 @@ export const paths = {
 
   /** "Property for sale / for rent in …" landing pages: every country, one country, one city. */
   market: (deal: MarketDeal, countrySlug?: string, citySlug?: string) => marketPath(deal, countrySlug, citySlug),
+  /** Median asking prices and rents by country and city. */
+  prices: () => '/property-prices',
 
   property: (idOrSlug: string) => `/property/${seg(idOrSlug)}`,
   createListing: () => '/create-listing',

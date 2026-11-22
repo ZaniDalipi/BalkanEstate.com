@@ -23,7 +23,9 @@
     "howItWorks": "Πώς Λειτουργεί",
     "blog": "Ιστολόγιο",
     "contactUs": "Επικοινωνία",
-    "valuation": "Εκτίμηση ακινήτου"
+    "valuation": "Εκτίμηση ακινήτου",
+    "propertyByCountry": "Ακίνητα ανά χώρα",
+    "propertyPrices": "Τιμές ακινήτων"
   },
   "countries": {
     "AL": "Αλβανία",

@@ -93,6 +93,7 @@ function siteNav(lang) {
   return `<nav aria-label="${escapeHtml(NAV_LABEL[lang] || NAV_LABEL.en)}">${list([
     link(lang, '/property-for-sale', 'Property for sale by country'),
     link(lang, '/property-for-rent', 'Property for rent by country'),
+    link(lang, '/property-prices', 'Property prices by country and city'),
     link(lang, '/search', 'Map search: property for sale'),
     link(lang, '/rentals', 'Map search: property for rent'),
     link(lang, '/explore-cities', 'City pages'),

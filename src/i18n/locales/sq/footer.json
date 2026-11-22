@@ -26,7 +26,9 @@
     "contactUs": "Na kontaktoni",
     "advertise": "Reklamoni me ne",
     "buyingGuides": "Udhëzues blerjeje",
-    "mortgageCalculator": "Kalkulator kredie"
+    "mortgageCalculator": "Kalkulator kredie",
+    "propertyByCountry": "Prona sipas vendit",
+    "propertyPrices": "Çmimet e pronave"
   },
   "countries": {
     "AL": "Shqipëri",

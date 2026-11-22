@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { marketPageKeys } from '@/src/shared/query/queryKeys';
-import { fetchMarketHub, fetchMarketPage } from '../api/marketPagesApi';
+import { fetchMarketHub, fetchMarketPage, fetchPriceTable } from '../api/marketPagesApi';
 import { shouldRetry } from '../utils/marketApiResult';
 import type { MarketDeal } from '../types';
 
@@ -22,6 +22,16 @@ export function useMarketPage(deal: MarketDeal, country: string, city?: string) 
     queryKey: marketPageKeys.page(deal, country, city),
     queryFn: () => fetchMarketPage(deal, country, city),
     staleTime: STALE_MS,
+    retry: shouldRetry,
+  });
+}
+
+/** The price table: recomputed hourly on the server, so it is fresh for a long while here. */
+export function usePriceTable() {
+  return useQuery({
+    queryKey: marketPageKeys.prices(),
+    queryFn: fetchPriceTable,
+    staleTime: 30 * 60 * 1000,
     retry: shouldRetry,
   });
 }

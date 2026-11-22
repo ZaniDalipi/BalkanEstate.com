@@ -78,5 +78,28 @@
   },
   "loading": "Po ngarkohen njoftimet…",
   "typesOther": "Tjetër",
-  "breadcrumbHome": "Kryefaqja"
+  "breadcrumbHome": "Kryefaqja",
+  "prices": {
+    "heading": "Çmimet e pronave në Ballkan",
+    "seoTitle": "Çmimet e pronave në Ballkan – çmimi për m² sipas vendit dhe qytetit",
+    "intro": "Çmimet dhe qiratë mediane të kërkuara të njoftimeve aktive në BalkanEstateAI, sipas vendit dhe qytetit, më {{date}}.",
+    "metaTail": "Çmimi për m², çmimi median i kërkuar dhe qiraja mujore mediane për dhjetë vende, me metodën dhe shkarkim CSV.",
+    "wholeCountry": "I gjithë vendi",
+    "place": "Vendndodhja",
+    "listings": "Njoftime",
+    "medianPrice": "Çmimi median",
+    "perSqm": "Çmimi për m²",
+    "medianRent": "Qiraja mediane / muaj",
+    "rentPerSqm": "Qiraja për m²",
+    "notEnough": "“–” do të thotë më pak se {{min}} njoftime me çmim",
+    "methodTitle": "Si llogariten shifrat",
+    "method1": "Çmimet e kërkuara të njoftimeve aktive në BalkanEstateAI në datën e mësipërme — jo shitje të përfunduara, vlerësime apo statistika zyrtare.",
+    "method2": "Çdo shifër është mediana: gjysma e njoftimeve kërkojnë më shumë, gjysma më pak.",
+    "method3": "Çmimi për m² përdor njoftimet që japin një sipërfaqe prej të paktën 15 m². Qiratë javore kthehen në mujore; qëndrimet për netë nuk përfshihen.",
+    "method4": "Një shifër shfaqet vetëm kur e mbështesin të paktën {{min}} njoftime.",
+    "citeTitle": "Përdorimi i këtyre shifrave",
+    "cite": "Mund t'i citoni lirisht. Ju lutemi shënoni “BalkanEstateAI, Çmimet e pronave në Ballkan, {{date}}” me një lidhje te kjo faqe.",
+    "download": "Shkarko tabelën (CSV)",
+    "crumb": "Çmimet e pronave"
+  }
 }

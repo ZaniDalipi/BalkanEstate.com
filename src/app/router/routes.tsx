@@ -65,6 +65,7 @@ const RefundPolicyPage = lazy(() => import('@/src/features/legal/components/Refu
 const ContactUsPage = lazy(() => import('@/src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('@/src/features/guides/components/BuyingGuidesPage'));
 const MarketPage = lazy(() => import('@/src/features/market-pages/components/MarketPage'));
+const PriceTablePage = lazy(() => import('@/src/features/market-pages/components/prices/PriceTablePage'));
 const NotFoundPage = lazy(() => import('@/src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const AboutPage = lazy(() => import('@/src/features/legal/components/AboutPage'));
 const BlogPage = lazy(() => import('@/src/features/blog/components/BlogPage'));
@@ -127,6 +128,7 @@ const pageRoutes: AppRoute[] = [
     const handle: RouteHandle = { view: 'market', pageParams: ['country', 'city'] };
     return [segment, `${segment}/:country`, `${segment}/:country/:city`].map((path) => page(path, handle, <MarketPage deal={deal} />));
   }),
+  page('property-prices', { view: 'market' }, <PriceTablePage />),
 
   // People and businesses
   page('agents', { view: 'agents' }, guarded(<AgentsPage />)),

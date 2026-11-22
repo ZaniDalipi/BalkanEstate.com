@@ -88,3 +88,32 @@ export type MarketPageResult =
   | { status: 'found'; page: MarketPageData }
   | { status: 'unknown-country' }
   | { status: 'unknown-city'; country: MarketCountryRef };
+
+/** One place and deal in the price table; medians are null below `PriceTable.minSample` listings. */
+export interface PriceFigures {
+  listingCount: number;
+  pricedCount: number;
+  /** Median asking price (sale) or monthly rent (rent). */
+  priceMedian: number | null;
+  pricePerSqmMedian: number | null;
+  pricePerSqmCount: number;
+}
+
+export interface PriceTableRow {
+  slug: string;
+  name: string;
+  sale: PriceFigures;
+  rent: PriceFigures;
+}
+
+export interface PriceTableCountry extends PriceTableRow {
+  code: string;
+  cities: PriceTableRow[];
+}
+
+/** GET /api/market-prices — median asking prices and rents by country and city. */
+export interface PriceTable {
+  generatedAt: string;
+  minSample: number;
+  countries: PriceTableCountry[];
+}

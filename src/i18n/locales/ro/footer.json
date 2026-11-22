@@ -26,7 +26,9 @@
     "contactUs": "Contact",
     "advertise": "Faceți reclamă la noi",
     "buyingGuides": "Ghiduri de cumpărare",
-    "mortgageCalculator": "Calculator credit ipotecar"
+    "mortgageCalculator": "Calculator credit ipotecar",
+    "propertyByCountry": "Proprietăți pe țări",
+    "propertyPrices": "Prețurile proprietăților"
   },
   "countries": {
     "AL": "Albania",

@@ -30,6 +30,8 @@ import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 const FOOTER_LINK_FALLBACKS: Record<string, string> = {
     'links.buyingGuides': 'Buying Guides',
     'links.mortgageCalculator': 'Mortgage Calculator',
+    'links.propertyByCountry': 'Property by country',
+    'links.propertyPrices': 'Property prices',
 };
 
 interface FooterProps {
@@ -62,8 +64,11 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
     const guideSlugFor = (countryName: string) =>
         COUNTRY_GUIDES.find((g) => g.country === countryName)?.slug;
 
-    const buyerLinks = [
+    // Entries with `to` link to a page that is not a sidebar view.
+    const buyerLinks: Array<{ icon: typeof SearchIcon; labelKey: string; view?: AppView; to?: string }> = [
         { icon: SearchIcon, labelKey: 'links.searchProperties', view: 'search' },
+        { icon: SearchIcon, labelKey: 'links.propertyByCountry', to: paths.market('sale') },
+        { icon: ChartBarIcon, labelKey: 'links.propertyPrices', to: paths.prices() },
         { icon: SparklesIcon, labelKey: 'links.exploreCities', view: 'explore-cities' },
         { icon: BuildingLibraryIcon, labelKey: 'links.buyingGuides', view: 'guides' },
         { icon: ChartBarIcon, labelKey: 'links.mortgageCalculator', view: 'mortgage-calculator' },
@@ -178,10 +183,10 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             {t('footer:sections.forBuyers', 'For Buyers')}
                         </h3>
                         <ul className="space-y-2 sm:space-y-2.5">
-                            {buyerLinks.map(({ icon: Icon, labelKey, view }) => (
+                            {buyerLinks.map(({ icon: Icon, labelKey, view, to }) => (
                                 <li key={labelKey}>
                                     <AppLink
-                                        to={viewPath(view as AppView)}
+                                        to={to ?? viewPath(view ?? 'home')}
                                         className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
                                     >
                                         <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/70 group-hover:text-primary transition-colors flex-shrink-0" />

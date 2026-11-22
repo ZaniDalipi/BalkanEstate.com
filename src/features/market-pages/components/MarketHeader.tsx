@@ -10,17 +10,17 @@ export interface MarketCrumb {
 }
 
 interface MarketHeaderProps {
-  deal: MarketDeal;
   heading: string;
   intro: string;
   crumbs: MarketCrumb[];
-  /** The same place for the other deal (sale ↔ rent). */
-  dealPaths: Record<MarketDeal, string>;
+  /** The deal on show and the same place for each deal (sale ↔ rent); no switch without them. */
+  deal?: MarketDeal;
+  dealPaths?: Record<MarketDeal, string>;
 }
 
 const DEALS: MarketDeal[] = ['sale', 'rent'];
 
-/** Breadcrumb trail, the page heading and intro, and the for sale / for rent switch. */
+/** Breadcrumb trail, the page heading and intro, and (on market pages) the for sale / for rent switch. */
 const MarketHeader: React.FC<MarketHeaderProps> = ({ deal, heading, intro, crumbs, dealPaths }) => {
   const { t } = useMarketText();
   return (
@@ -45,6 +45,7 @@ const MarketHeader: React.FC<MarketHeaderProps> = ({ deal, heading, intro, crumb
           <h1 className="text-2xl font-bold text-neutral-900 sm:text-4xl landscape:text-2xl">{heading}</h1>
           <p className="mt-3 text-neutral-700">{intro}</p>
         </div>
+        {deal && dealPaths && (
         <nav aria-label={t('marketPages:switch.label', { defaultValue: 'Sale or rent' })} className="shrink-0">
           <ul className="inline-flex rounded-full bg-neutral-100 p-1">
             {DEALS.map((d) => (
@@ -62,6 +63,7 @@ const MarketHeader: React.FC<MarketHeaderProps> = ({ deal, heading, intro, crumb
             ))}
           </ul>
         </nav>
+        )}
       </div>
     </header>
   );

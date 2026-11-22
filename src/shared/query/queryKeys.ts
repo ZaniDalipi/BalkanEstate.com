@@ -467,4 +467,5 @@ export const marketPageKeys = {
   hub: (deal: 'sale' | 'rent') => [...marketPageKeys.all, deal, 'hub'] as const,
   page: (deal: 'sale' | 'rent', country: string, city?: string) =>
     [...marketPageKeys.all, deal, country, city ?? null] as const,
+  prices: () => [...marketPageKeys.all, 'prices'] as const,
 };

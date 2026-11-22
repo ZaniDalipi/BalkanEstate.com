@@ -294,6 +294,7 @@ export function siteLinks(lang: string): string {
   return `<nav aria-label="${SITE_NAME}"><ul>
       <li>${link(lang, '/property-for-sale', 'Property for sale')}</li>
       <li>${link(lang, '/property-for-rent', 'Property for rent')}</li>
+      <li>${link(lang, '/property-prices', 'Property prices')}</li>
       <li>${link(lang, '/search', 'Map search')}</li>
       <li>${link(lang, '/guides', 'Buying guides')}</li>
       <li>${link(lang, '/agents', 'Real estate agents')}</li>

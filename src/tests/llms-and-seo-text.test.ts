@@ -19,8 +19,14 @@ describe('llms.txt', () => {
   it('links only to pages crawlers can read: language-prefixed, no query strings', () => {
     for (const url of [...siteUrls(short), ...siteUrls(full)]) {
       expect(url).not.toContain('?');
-      expect(url === 'https://balkanestateai.com' || url.endsWith('.txt') || /^https:\/\/balkanestateai\.com\/en(\/|$)/.test(url)).toBe(true);
+      // Pages under /en, the site root, and the llms / CSV files at the root.
+      expect(url === 'https://balkanestateai.com' || /\/[\w-]+\.(txt|csv)$/.test(url) || /^https:\/\/balkanestateai\.com\/en(\/|$)/.test(url)).toBe(true);
     }
+  });
+
+  it('points to the price table and its CSV', () => {
+    expect(short).toContain('(https://balkanestateai.com/en/property-prices)');
+    expect(short).toContain('https://balkanestateai.com/property-prices.csv');
   });
 
   it('has a sale page, a rent page and a guide for every country', () => {

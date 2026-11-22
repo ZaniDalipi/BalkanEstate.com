@@ -74,6 +74,8 @@ router.get('/sitemap.xml', async (_req: Request, res: Response) => {
       Promise.all(MARKET_DEALS.map(async (deal) => indexableMarketPaths(deal, await loadMarketTree(deal))))
         // Overviews and countries before cities, so a cut never drops a whole country.
         .then((perDeal) => perDeal.flat().sort((a, b) => a.split('/').length - b.split('/').length).slice(0, MAX_MARKET_PATHS))
+        // The price table is worth indexing as soon as any country page is.
+        .then((paths) => (paths.length > 0 ? ['/property-prices', ...paths].slice(0, MAX_MARKET_PATHS) : paths))
         .catch((error) => {
           apiLogger.error('Sitemap: market pages left out:', error);
           return [] as string[];

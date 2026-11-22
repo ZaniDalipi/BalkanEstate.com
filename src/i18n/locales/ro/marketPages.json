@@ -78,5 +78,28 @@
   },
   "loading": "Se încarcă anunțurile…",
   "typesOther": "Altele",
-  "breadcrumbHome": "Acasă"
+  "breadcrumbHome": "Acasă",
+  "prices": {
+    "heading": "Prețurile proprietăților în Balcani",
+    "seoTitle": "Prețurile proprietăților în Balcani – prețul pe m² pe țări și orașe",
+    "intro": "Prețurile și chiriile mediane cerute în anunțurile active de pe BalkanEstateAI, pe țări și orașe, la {{date}}.",
+    "metaTail": "Prețul pe m², prețul median cerut și chiria lunară mediană pentru zece țări, cu metoda de calcul și descărcare CSV.",
+    "wholeCountry": "Toată țara",
+    "place": "Localitate",
+    "listings": "Anunțuri",
+    "medianPrice": "Preț median",
+    "perSqm": "Preț pe m²",
+    "medianRent": "Chirie mediană / lună",
+    "rentPerSqm": "Chirie pe m²",
+    "notEnough": "„–” înseamnă mai puțin de {{min}} anunțuri cu preț",
+    "methodTitle": "Cum se calculează cifrele",
+    "method1": "Prețurile cerute în anunțurile active pe BalkanEstateAI la data de mai sus — nu vânzări încheiate, evaluări sau statistici oficiale.",
+    "method2": "Fiecare cifră este o mediană: jumătate dintre anunțuri cer mai mult, jumătate mai puțin.",
+    "method3": "Prețul pe m² folosește anunțurile care declară o suprafață de cel puțin 15 m². Chiriile săptămânale sunt transformate în lunare; închirierile pe noapte sunt excluse.",
+    "method4": "O cifră este afișată doar când o susțin cel puțin {{min}} anunțuri.",
+    "citeTitle": "Folosirea acestor cifre",
+    "cite": "Le puteți cita liber. Vă rugăm să menționați „BalkanEstateAI, Prețurile proprietăților în Balcani, {{date}}”, cu un link către această pagină.",
+    "download": "Descarcă tabelul (CSV)",
+    "crumb": "Prețurile proprietăților"
+  }
 }

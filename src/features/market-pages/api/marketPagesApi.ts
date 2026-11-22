@@ -1,6 +1,6 @@
 import { apiRequest } from '@/src/shared/api';
-import type { MarketDeal, MarketHub, MarketPageResult } from '../types';
-import { isMarketHub, isMarketPageData, notFoundResult } from '../utils/marketApiResult';
+import type { MarketDeal, MarketHub, MarketPageResult, PriceTable } from '../types';
+import { isMarketHub, isMarketPageData, isPriceTable, notFoundResult } from '../utils/marketApiResult';
 
 /** GET /market-pages/:deal — every country with its biggest cities. */
 export async function fetchMarketHub(deal: MarketDeal): Promise<MarketHub> {
@@ -24,4 +24,11 @@ export async function fetchMarketPage(deal: MarketDeal, country: string, city?: 
     if (notFound) return notFound;
     throw error;
   }
+}
+
+/** GET /market-prices — median asking prices and rents by country and city. */
+export async function fetchPriceTable(): Promise<PriceTable> {
+  const table = await apiRequest<unknown>('/market-prices');
+  if (!isPriceTable(table)) throw new Error('Unexpected response for the price table');
+  return table;
 }

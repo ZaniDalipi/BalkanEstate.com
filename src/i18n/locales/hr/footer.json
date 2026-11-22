@@ -26,7 +26,9 @@
     "contactUs": "Kontakt",
     "advertise": "Oglašavajte se kod nas",
     "buyingGuides": "Vodiči za kupnju",
-    "mortgageCalculator": "Kalkulator kredita"
+    "mortgageCalculator": "Kalkulator kredita",
+    "propertyByCountry": "Nekretnine po državama",
+    "propertyPrices": "Cijene nekretnina"
   },
   "countries": {
     "AL": "Albanija",

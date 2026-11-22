@@ -26,7 +26,9 @@
     "contactUs": "Контакт",
     "advertise": "Рекламирайте при нас",
     "buyingGuides": "Ръководства за купувачи",
-    "mortgageCalculator": "Ипотечен калкулатор"
+    "mortgageCalculator": "Ипотечен калкулатор",
+    "propertyByCountry": "Имоти по държави",
+    "propertyPrices": "Цени на имотите"
   },
   "countries": {
     "AL": "Албания",

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AppLink } from '@/src/app/router/AppLink';
 import { paths } from '@/src/app/router/paths';
 import { GUIDES_LAST_UPDATED, type CountryGuide } from '../data/countryGuides';
+import { marketCountrySlug } from '@/src/features/market-pages/utils/marketRoutes';
 
 interface CountryGuideArticleProps {
   guide: CountryGuide;
@@ -100,7 +101,9 @@ const CountryGuideArticle: React.FC<CountryGuideArticleProps> = ({ guide, headin
           ))}
         </ul>
         <AppLink
-          to={paths.search({ country: guide.searchCountry })}
+          // The country's own page (prices, cities, newest listings, and a link on
+          // to the map) rather than a filtered search URL crawlers cannot read.
+          to={paths.market('sale', marketCountrySlug(guide.country) ?? guide.slug)}
           className="mt-4 inline-block px-5 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 text-sm"
         >
           {t('common:guides.browseProperties', 'Browse {{country}} Properties', { country: guide.country })}

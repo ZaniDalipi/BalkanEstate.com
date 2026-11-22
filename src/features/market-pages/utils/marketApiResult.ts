@@ -3,7 +3,7 @@
  * app: a page with the fields the screen reads, or the 404 answer that says
  * which place is unknown. Anything else is an error the page offers to retry.
  */
-import type { MarketCountryRef, MarketHub, MarketPageData, MarketPageResult } from '../types';
+import type { MarketCountryRef, MarketHub, MarketPageData, MarketPageResult, PriceTable } from '../types';
 
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
@@ -26,6 +26,19 @@ export const isMarketPageData = (value: unknown): value is MarketPageData =>
 export const isMarketHub = (value: unknown): value is MarketHub =>
   isObject(value) && (value.deal === 'sale' || value.deal === 'rent') && Array.isArray(value.countries)
   && value.countries.every((c: unknown) => isCountryRef(c) && isObject(c) && Array.isArray(c.cities));
+
+const isFigures = (value: unknown): boolean =>
+  isObject(value) && typeof value.listingCount === 'number'
+  && (value.priceMedian === null || typeof value.priceMedian === 'number')
+  && (value.pricePerSqmMedian === null || typeof value.pricePerSqmMedian === 'number');
+
+const isPriceRow = (value: unknown): boolean =>
+  isObject(value) && typeof value.slug === 'string' && typeof value.name === 'string' && isFigures(value.sale) && isFigures(value.rent);
+
+export const isPriceTable = (value: unknown): value is PriceTable =>
+  isObject(value) && typeof value.generatedAt === 'string' && typeof value.minSample === 'number'
+  && Array.isArray(value.countries)
+  && value.countries.every((c: unknown) => isPriceRow(c) && isObject(c) && Array.isArray(c.cities) && c.cities.every(isPriceRow));
 
 /**
  * The page result for an API error, when it is a 404 the screen can explain

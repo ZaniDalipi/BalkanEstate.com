@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { apiLogger } from '../utils/logger';
 import { parseMarketParams } from '../services/marketPages/marketPlaces';
 import { getMarketHub, getMarketPage } from '../services/marketPages/marketPageService';
+import { getPriceTable } from '../services/marketPages/marketPriceService';
+import { priceTableCsv } from '../services/marketPages/marketPriceTable';
 
 /**
  * GET /api/market-pages/:deal — every country with its biggest cities.
@@ -47,5 +49,33 @@ export const getMarketPageController = async (req: Request, res: Response): Prom
   } catch (error) {
     apiLogger.error('Market page failed:', error);
     res.status(500).json({ message: 'Could not load this page. Please try again.' });
+  }
+};
+
+/**
+ * GET /api/market-prices — median asking prices and rents by country and city.
+ */
+export const getPriceTableController = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await getPriceTable());
+  } catch (error) {
+    apiLogger.error('Price table failed:', error);
+    res.status(500).json({ message: 'Could not load the price table. Please try again.' });
+  }
+};
+
+/**
+ * GET /api/market-prices/csv — the same table as a CSV download.
+ */
+export const getPriceTableCsvController = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const table = await getPriceTable();
+    res.set('Content-Type', 'text/csv; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.set('Content-Disposition', `attachment; filename="balkan-property-prices-${table.generatedAt.slice(0, 10)}.csv"`);
+    res.send(priceTableCsv(table));
+  } catch (error) {
+    apiLogger.error('Price table CSV failed:', error);
+    res.status(500).type('text/plain').send('Could not build the price table. Please try again.');
   }
 };
