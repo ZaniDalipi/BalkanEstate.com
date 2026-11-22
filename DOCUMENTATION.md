@@ -387,7 +387,7 @@ Located in `src/i18n/index.ts`:
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="..." />
-<meta property="og:image" content="/og-image.png" />
+<meta property="og:image" content="/og-image.jpg" />
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
