@@ -1,0 +1,58 @@
+{
+  "home": {
+    "title": "Nekretnine na prodaju i za najam na Balkanu",
+    "description": "Nekretnine na prodaju i za najam u Albaniji, na Kosovu, u Sjevernoj Makedoniji, Crnoj Gori, Srbiji, BiH, Hrvatskoj, Bugarskoj, Rumunjskoj i Grčkoj, s kartama i cijenama."
+  },
+  "search": {
+    "title": "Nekretnine na prodaju na Balkanu – pretraga na karti",
+    "description": "Pretražite stanove, kuće, vile i zemljišta na prodaju na interaktivnoj karti. Filtrirajte po zemlji, gradu, cijeni, površini i sobama te se javite prodavatelju."
+  },
+  "rentals": {
+    "title": "Nekretnine za najam na Balkanu",
+    "description": "Pronađite stanove i kuće za najam na Balkanu na interaktivnoj karti. Filtrirajte po gradu, mjesečnoj najamnini, površini i sobama te zatražite razgledavanje."
+  },
+  "exploreCities": {
+    "title": "Stranice gradova – cijene i četvrti na Balkanu",
+    "description": "Usporedite gradove na Balkanu: povijest traženih cijena, četvrti, gospodarske pokazatelje i oglase koji su trenutačno dostupni u svakom gradu."
+  },
+  "mortgageCalculator": {
+    "title": "Kalkulator stambenog kredita",
+    "description": "Izračunajte mjesečnu ratu i ukupne kamate stambenog kredita za nekretninu na Balkanu te usporedite trošak najma i kupnje kroz godine."
+  },
+  "valuation": {
+    "title": "Procjena cijene nekretnine",
+    "description": "Dobijte besplatnu automatsku procjenu vrijednosti nekretnine na Balkanu prema sličnim oglasima i lokaciji. Polazna procjena, a ne stručna procjena vrijednosti."
+  },
+  "agents": {
+    "title": "Agenti za nekretnine na Balkanu",
+    "description": "Pronađite agente za nekretnine u Albaniji, na Kosovu, u Crnoj Gori, Srbiji, Sjevernoj Makedoniji, Hrvatskoj i cijeloj regiji, s njihovim oglasima, područjima i kontaktima."
+  },
+  "agencies": {
+    "title": "Agencije za nekretnine na Balkanu",
+    "description": "Pregledajte agencije za nekretnine u deset balkanskih zemalja, s njihovim agentima, aktualnim oglasima, uredima i načinom kako ih kontaktirati."
+  },
+  "blog": {
+    "title": "Blog – kupnja i najam nekretnina na Balkanu",
+    "description": "Članci o kupnji, najmu i posjedovanju nekretnina na Balkanu: vijesti s tržišta, cijene, porezi, pravni koraci i savjeti za kupce iz inozemstva."
+  },
+  "howItWorks": {
+    "title": "Kako funkcionira BalkanEstateAI",
+    "description": "Kako funkcioniraju pretraga, objava oglasa i kontakt s prodavateljima na BalkanEstateAI za kupce, najmoprimce, privatne prodavatelje, agente i agencije te što uključuje svaki plan."
+  },
+  "contact": {
+    "title": "Kontaktirajte BalkanEstateAI",
+    "description": "Kontaktirajte tim BalkanEstateAI za pomoć s računom ili oglasom, za prijavu oglasa ili za pitanja o oglašavanju i planovima za agente i agencije."
+  },
+  "privacy": {
+    "title": "Pravila privatnosti",
+    "description": "Kako BalkanEstateAI prikuplja, koristi i štiti osobne podatke, koje kolačiće, analitiku i oglašavanje koristi, koliko dugo čuva podatke i kako ostvariti svoja prava."
+  },
+  "terms": {
+    "title": "Uvjeti korištenja",
+    "description": "Uvjeti koji vrijede za korištenje BalkanEstateAI: računi, objava oglasa za nekretnine, plaćeni planovi za agente i agencije, dopuštena uporaba i odgovornost."
+  },
+  "cookies": {
+    "title": "Pravila o kolačićima",
+    "description": "Koje kolačiće koristi BalkanEstateAI – nužne, za postavke, analitičke i oglašivačke – čemu svaki služi i kako u bilo kojem trenutku promijeniti svoj odabir."
+  }
+}

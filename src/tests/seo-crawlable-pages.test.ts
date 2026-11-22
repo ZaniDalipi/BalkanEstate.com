@@ -63,7 +63,20 @@ describe('server-rendered listing page', () => {
     expect(sold.head).toContain('content="noindex, follow"');
   });
 
-  it('escapes seller-written text', () => {
+  it('words the title and description in the page language, so the ten language URLs are not duplicates', () => {
+    const titleOf = (head: string) => head.match(/<title>([^<]*)<\/title>/)?.[1];
+    const descriptionOf = (head: string) => head.match(/<meta name="description" content="([^"]*)"/)?.[1];
+    const en = buildPropertyPage(listing, listing.id, 'en');
+    const sq = buildPropertyPage(listing, listing.id, 'sq');
+    const sr = buildPropertyPage(listing, listing.id, 'sr');
+    expect(titleOf(en.head)).toBe('Sea-view apartment – Budva, Montenegro | BalkanEstateAI');
+    expect(titleOf(sq.head)).toBe('Sea-view apartment – Në shitje · Budva, Mal i Zi | BalkanEstateAI');
+    expect(descriptionOf(sq.head)).toMatch(/^Apartament – Në shitje – Budva, Mal i Zi\. /);
+    expect(descriptionOf(sr.head)).toMatch(/^Стан – На продају – Budva, Црна Гора\. /);
+    expect(new Set([titleOf(en.head), titleOf(sq.head), titleOf(sr.head)]).size).toBe(3);
+  });
+
+    it('escapes seller-written text', () => {
     const page = buildPropertyPage({ ...listing, description: '<script>alert(1)</script> nice' }, listing.id);
     expect(page.body).not.toContain('<script>alert(1)</script>');
   });

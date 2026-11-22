@@ -1471,6 +1471,76 @@ how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
     limits, gives passes and adds agency free residences.
   - See *Residence Pass* in `docs/RESIDENCE_EXPLORER.md`.
 
+## Market Landing Pages — "property for sale in {country | city}"
+
+Search engines and AI answer engines (ChatGPT, Claude, Gemini, Perplexity,
+Copilot) rank pages that answer "property for sale in Tirana". A filtered map
+URL (`/search?country=Albania`) cannot be that page: Cloudflare Pages ignores
+the query string, so crawlers got the empty app shell. These pages are real
+URLs with real content, in all ten languages:
+
+```
+/:lang/property-for-sale                  every country, busiest first, with its biggest cities
+/:lang/property-for-sale/:country         e.g. /en/property-for-sale/albania
+/:lang/property-for-sale/:country/:city   e.g. /sq/property-for-sale/albania/tirana
+/:lang/property-for-rent/…                the same for rentals (nightly stays excluded)
+```
+
+**One response, two renderers.** `GET /api/market-pages/:deal[/:country[/:city]]`
+(`backend/src/services/marketPages/`) returns the page: live listing count,
+asking-price median, typical range (10th–90th percentile), median price per m²,
+property-type mix, up to 24 listing cards (our own listings first), and the
+cities to link to. The React page (`src/features/market-pages/`) and the
+crawler HTML (`functions/_market-pages.ts`, for every crawler in
+`CRAWLER_USER_AGENTS`) render that same response with the same text builders
+(`utils/marketPageText.ts`, `utils/marketJsonLd.ts`), so a crawler reads what a
+visitor sees.
+
+- **Cities** come from the listings: spellings of one city merge into one page
+  (`Tiranë`, `tirana` → `/tirana`, via the importer's `canonicalCity`), and
+  values that are not place names ("Load more", addresses) never become a page.
+- **Indexing threshold.** A page is `noindex` and left out of the sitemap until
+  it has `MIN_INDEXABLE_LISTINGS` (5) of our own listings — not imported, with a
+  description, the same rule as the listings sitemap (`utils/indexableListing.ts`).
+  Below that it still works for visitors.
+- **Prices are asking prices** of live listings, labelled as such, shown only
+  from `MIN_PRICE_SAMPLE` (3) priced listings; "price on request" and areas
+  under 15 m² are left out.
+- **No dead ends.** A city with no listings is a 404 that offers its country's
+  page; an unknown country or malformed URL offers the overview; a failed load
+  offers "Try again" and the map search. Mixed-case URLs redirect to lower case.
+- **Words.** `marketPages` namespace in all ten locales. Serbian, Croatian,
+  Bosnian, Montenegrin, Bulgarian, Macedonian, Albanian and Greek use the dash
+  form ("Nekretnine na prodaju – Tirana, Albanija") because place names after
+  "in" would need case endings the app cannot inflect.
+- **Sitemap.** `/sitemap-listings.xml` lists the indexable market pages in every
+  language with hreflang alternates (capped so the file stays under 50,000 URLs).
+
+## Search engines and AI crawlers — what they read
+
+- **Rendered HTML for every crawler.** `CRAWLER_USER_AGENTS` (`functions/_og-utils.ts`)
+  covers search engines and AI crawlers (OAI-SearchBot, ChatGPT-User, GPTBot,
+  Claude-SearchBot, ClaudeBot, Claude-User, PerplexityBot, Perplexity-User, Meta,
+  Mistral, DuckAssistBot, Amazonbot, CCBot …). None of them run JavaScript.
+  Gemini reads Google's index; Copilot reads Bing's.
+- **A distinct title and description per language.** Prerendered pages take
+  theirs from `src/i18n/locales/{lang}/seoPages.json`; listing pages word the
+  text around the seller's title in the page language ("Apartament – Në
+  shitje – Budva, Mal i Zi"). Ten language URLs with one English title were
+  reported by Bing as duplicates. `llms-and-seo-text.test.ts` guards it.
+- **`/llms.txt` and `/llms-full.txt`** are generated at build time
+  (`scripts/lib/llms-text.mjs`) from the buying guides and the page list:
+  language-prefixed links only, country facts with their official sources, no
+  price or yield figures (the market pages carry live prices), no superlatives.
+- **IndexNow.** Creating, editing, selling, renting, renewing or deleting a
+  listing announces its URLs in every language plus its country and city pages
+  (`indexNowOnSuccess` on the listing routes → `services/indexNow/`). Batched per
+  minute, production only (`INDEXNOW_ENABLED=false` turns it off), never affects
+  the request. The key is public by design and served at `/{key}.txt` from
+  `public/`; `config/indexNow.ts` holds the same key and a test checks they match.
+- **Brand names.** The organisation's JSON-LD lists "BalkanEstate",
+  "BalkanEstate AI" and "Balkan Estate AI" as alternate names of BalkanEstateAI.
+
 ## Internationalisation (i18n)
 
 **Library**: `react-i18next`

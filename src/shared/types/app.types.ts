@@ -41,6 +41,7 @@ export type AppView =
   | 'guides'
   | 'about'
   | 'blog'
+  | 'market'
   | 'not-found';
 
 export type AuthModalView =

@@ -36,6 +36,7 @@ import villas from './villas.json';
 import legal from './legal.json';
 import contact from './contact.json';
 import developments from './developments.json';
+import marketPages from './marketPages.json';
 
 export default {
   common, nav, property, auth, search, messages, footer, newsletter,
@@ -45,4 +46,5 @@ export default {
   businessDirectory, listingFeeds, blog,
   villas, legal, contact,
   developments,
+  marketPages,
 };

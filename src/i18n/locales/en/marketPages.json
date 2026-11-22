@@ -1,0 +1,82 @@
+{
+  "heading": {
+    "sale": "Property for sale in {{place}}",
+    "rent": "Property for rent in {{place}}"
+  },
+  "seoTitle": {
+    "sale": "Property for Sale in {{place}} – Prices and Listings",
+    "rent": "Property for Rent in {{place}} – Rents and Listings"
+  },
+  "theBalkans": "the Balkans",
+  "intro": {
+    "hub": {
+      "sale": "Homes, land and commercial property for sale in ten countries, by country and city. Figures are asking prices of the live listings on BalkanEstateAI.",
+      "rent": "Homes and commercial property for rent in ten countries, by country and city. Figures are asking rents of the live listings on BalkanEstateAI."
+    },
+    "place": {
+      "sale": "Apartments, houses, villas and land for sale in {{place}}, with photos, floor plans and the seller's contact.",
+      "rent": "Apartments and houses for rent in {{place}}, with photos, the monthly rent and the owner's or agent's contact."
+    }
+  },
+  "stats": {
+    "title": "At a glance",
+    "listings": "Live listings",
+    "median": {
+      "sale": "Median asking price",
+      "rent": "Median monthly rent"
+    },
+    "range": {
+      "sale": "Typical price range",
+      "rent": "Typical rent range"
+    },
+    "perSqm": {
+      "sale": "Median price per m²",
+      "rent": "Median rent per m²"
+    },
+    "none": "Not enough priced listings yet",
+    "note": "Asking prices of live listings on {{date}}, not sale prices or valuations.",
+    "types": "Property types"
+  },
+  "listings": {
+    "title": "Latest listings",
+    "viewAll": {
+      "sale": "See every property for sale in {{place}} on the map",
+      "rent": "See every property for rent in {{place}} on the map"
+    }
+  },
+  "empty": {
+    "title": "No listings here yet",
+    "body": "New property is listed every day. Search the map, or look at the places below."
+  },
+  "cities": {
+    "country": "Cities in {{country}}",
+    "other": "Other cities in {{country}}"
+  },
+  "countries": {
+    "title": "Countries",
+    "count": "Listings: {{count}}"
+  },
+  "guide": {
+    "link": "How to buy property in {{country}} – buyer's guide (English)"
+  },
+  "switch": {
+    "sale": "For sale",
+    "rent": "For rent",
+    "label": "Sale or rent"
+  },
+  "notFound": {
+    "title": "No listings in this city right now",
+    "page": "This page does not exist",
+    "body": "We have no live listings in this city at the moment. Here are the listings across the rest of the country.",
+    "country": "Property in {{country}}"
+  },
+  "error": {
+    "title": "This page could not be loaded",
+    "body": "Check your connection and try again, or search the map instead.",
+    "retry": "Try again",
+    "search": "Search the map"
+  },
+  "loading": "Loading listings…",
+  "typesOther": "Other",
+  "breadcrumbHome": "Home"
+}

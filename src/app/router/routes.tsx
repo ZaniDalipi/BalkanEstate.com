@@ -17,6 +17,7 @@ import React, { lazy } from 'react';
 import { createBrowserRouter, useParams, type RouteObject } from 'react-router-dom';
 import { QueryErrorBoundary } from '@/src/app/components/QueryErrorBoundary';
 import type { RouteHandle } from './useRouteView';
+import { MARKET_SEGMENT } from '@/src/features/market-pages/utils/marketRoutes';
 import { useOpenSidebar } from './layoutContext';
 import { lazyWithRetry } from './lazyWithRetry';
 import { paths, type BusinessDirectoryTab } from './paths';
@@ -63,6 +64,7 @@ const CookiePolicyPage = lazy(() => import('@/src/features/legal/components/Cook
 const RefundPolicyPage = lazy(() => import('@/src/features/legal/components/RefundPolicyPage'));
 const ContactUsPage = lazy(() => import('@/src/features/contact/components/ContactUsPage'));
 const BuyingGuidesPage = lazy(() => import('@/src/features/guides/components/BuyingGuidesPage'));
+const MarketPage = lazy(() => import('@/src/features/market-pages/components/MarketPage'));
 const NotFoundPage = lazy(() => import('@/src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const AboutPage = lazy(() => import('@/src/features/legal/components/AboutPage'));
 const BlogPage = lazy(() => import('@/src/features/blog/components/BlogPage'));
@@ -119,6 +121,12 @@ const pageRoutes: AppRoute[] = [
   page('property/:propertyId', { view: 'search', detail: 'property', pageParams: ['propertyId'] }, <PropertyRoute />),
   page('explore-cities', { view: 'explore-cities' }, <CityRecommendations />),
   page('explore-cities/:city/:country', { view: 'city-dashboard', pageParams: ['city', 'country'] }, <CityDashboard />),
+  // "Property for sale / for rent in {country | city}" landing pages
+  ...(['sale', 'rent'] as const).flatMap((deal) => {
+    const segment = MARKET_SEGMENT[deal];
+    const handle: RouteHandle = { view: 'market', pageParams: ['country', 'city'] };
+    return [segment, `${segment}/:country`, `${segment}/:country/:city`].map((path) => page(path, handle, <MarketPage deal={deal} />));
+  }),
 
   // People and businesses
   page('agents', { view: 'agents' }, guarded(<AgentsPage />)),

@@ -1,0 +1,58 @@
+{
+  "home": {
+    "title": "Property for Sale and Rent in the Balkans",
+    "description": "Homes for sale and rent in Albania, Kosovo, North Macedonia, Montenegro, Serbia, Bosnia, Croatia, Bulgaria, Romania and Greece, with maps, prices and buying guides."
+  },
+  "search": {
+    "title": "Property for Sale in the Balkans – Map Search",
+    "description": "Search apartments, houses, villas and land for sale on an interactive map. Filter by country, city, price, size and rooms, and contact the seller or agent directly."
+  },
+  "rentals": {
+    "title": "Property for Rent in the Balkans",
+    "description": "Find apartments and houses for rent across the Balkans on an interactive map. Filter by city, monthly rent, size and rooms, and send a viewing request to the owner."
+  },
+  "exploreCities": {
+    "title": "City Pages – Prices and Neighbourhoods Across the Balkans",
+    "description": "Compare cities across the Balkans: asking-price history, districts, economic indicators and the listings currently available in each city."
+  },
+  "mortgageCalculator": {
+    "title": "Mortgage Calculator",
+    "description": "Estimate the monthly mortgage repayment and total interest for a property in the Balkans, and compare the cost of renting with buying over the years."
+  },
+  "valuation": {
+    "title": "Property Price Estimate",
+    "description": "Get a free automated indication of a property's value in the Balkans from comparable listings and its location. An estimate to start from, not a valuation."
+  },
+  "agents": {
+    "title": "Real Estate Agents in the Balkans",
+    "description": "Find real estate agents in Albania, Kosovo, Montenegro, Serbia, North Macedonia, Croatia and the rest of the region, with their listings, areas and contacts."
+  },
+  "agencies": {
+    "title": "Real Estate Agencies in the Balkans",
+    "description": "Browse real estate agencies across ten Balkan countries, with their agents, current listings, office locations and how to contact them."
+  },
+  "blog": {
+    "title": "Blog – Buying and Renting Property in the Balkans",
+    "description": "Articles on buying, renting and owning property in the Balkans: market news, prices, taxes, the legal steps and tips for buyers from abroad."
+  },
+  "howItWorks": {
+    "title": "How BalkanEstateAI Works",
+    "description": "How searching, listing and contacting sellers works on BalkanEstateAI for buyers, renters, private sellers, agents and agencies, and what each plan includes."
+  },
+  "contact": {
+    "title": "Contact BalkanEstateAI",
+    "description": "Contact the BalkanEstateAI team for help with your account or a listing, to report a listing, or to ask about advertising and plans for agents and agencies."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "How BalkanEstateAI collects, uses and protects personal data, which cookies, analytics and advertising it uses, how long data is kept and how to use your rights."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "description": "The terms that apply to using BalkanEstateAI: accounts, publishing property listings, paid plans for agents and agencies, acceptable use and liability."
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "description": "Which cookies BalkanEstateAI uses – necessary, preference, analytics and advertising cookies – what each one is for, and how to change your choice at any time."
+  }
+}

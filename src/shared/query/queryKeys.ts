@@ -456,3 +456,15 @@ export const listingEventKeys = {
   all: ['listingEvents'] as const,
   feed: (country: string, limit: number, weekEnd: string) => [...listingEventKeys.all, 'feed', country, limit, weekEnd] as const,
 };
+
+// ============================================================================
+// Market Landing Pages Query Keys
+// Used by: /property-for-sale and /property-for-rent pages (features/market-pages)
+// ============================================================================
+
+export const marketPageKeys = {
+  all: ['marketPages'] as const,
+  hub: (deal: 'sale' | 'rent') => [...marketPageKeys.all, deal, 'hub'] as const,
+  page: (deal: 'sale' | 'rent', country: string, city?: string) =>
+    [...marketPageKeys.all, deal, country, city ?? null] as const,
+};

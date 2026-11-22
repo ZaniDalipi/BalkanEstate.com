@@ -1,0 +1,82 @@
+{
+  "heading": {
+    "sale": "Prodaja nekretnina – {{place}}",
+    "rent": "Nekretnine za iznajmljivanje – {{place}}"
+  },
+  "seoTitle": {
+    "sale": "Prodaja nekretnina – {{place}}: cijene i oglasi",
+    "rent": "Nekretnine za iznajmljivanje – {{place}}: kirije i oglasi"
+  },
+  "theBalkans": "Balkan",
+  "intro": {
+    "hub": {
+      "sale": "Stanovi, kuće, zemljišta i poslovni prostori na prodaju u deset zemalja, po zemlji i gradu. Podaci su tražene cijene aktivnih oglasa na BalkanEstateAI.",
+      "rent": "Stanovi, kuće i poslovni prostori za iznajmljivanje u deset zemalja, po zemlji i gradu. Podaci su tražene kirije aktivnih oglasa na BalkanEstateAI."
+    },
+    "place": {
+      "sale": "Stanovi, kuće, vile i zemljišta na prodaju – {{place}}, sa fotografijama, tlocrtima i kontaktom prodavca.",
+      "rent": "Stanovi i kuće za iznajmljivanje – {{place}}, sa fotografijama, mjesečnom kirijom i kontaktom vlasnika ili agenta."
+    }
+  },
+  "stats": {
+    "title": "Ukratko",
+    "listings": "Aktivni oglasi",
+    "median": {
+      "sale": "Medijalna tražena cijena",
+      "rent": "Medijalna mjesečna kirija"
+    },
+    "range": {
+      "sale": "Uobičajen raspon cijena",
+      "rent": "Uobičajen raspon kirija"
+    },
+    "perSqm": {
+      "sale": "Medijalna cijena po m²",
+      "rent": "Medijalna kirija po m²"
+    },
+    "none": "Još nema dovoljno oglasa sa cijenom",
+    "note": "Tražene cijene aktivnih oglasa na dan {{date}}, a ne prodajne cijene ili procjene.",
+    "types": "Vrste nekretnina"
+  },
+  "listings": {
+    "title": "Najnoviji oglasi",
+    "viewAll": {
+      "sale": "Sve nekretnine na prodaju – {{place}} – na mapi",
+      "rent": "Sve nekretnine za iznajmljivanje – {{place}} – na mapi"
+    }
+  },
+  "empty": {
+    "title": "Ovdje još nema oglasa",
+    "body": "Nove nekretnine se objavljuju svaki dan. Pretražite mapu ili pogledajte mjesta ispod."
+  },
+  "cities": {
+    "country": "Gradovi – {{country}}",
+    "other": "Drugi gradovi – {{country}}"
+  },
+  "countries": {
+    "title": "Zemlje",
+    "count": "Oglasi: {{count}}"
+  },
+  "guide": {
+    "link": "Kako kupiti nekretninu – {{country}}: vodič za kupce (na engleskom)"
+  },
+  "switch": {
+    "sale": "Na prodaju",
+    "rent": "Za iznajmljivanje",
+    "label": "Prodaja ili iznajmljivanje"
+  },
+  "notFound": {
+    "title": "Trenutno nema oglasa u ovom gradu",
+    "page": "Ova stranica ne postoji",
+    "body": "Trenutno nemamo aktivnih oglasa u ovom gradu. Pogledajte oglase u ostatku zemlje.",
+    "country": "Nekretnine – {{country}}"
+  },
+  "error": {
+    "title": "Ova stranica se nije mogla učitati",
+    "body": "Provjerite vezu i pokušajte ponovo ili pretražite mapu.",
+    "retry": "Pokušaj ponovo",
+    "search": "Pretraži mapu"
+  },
+  "loading": "Učitavanje oglasa…",
+  "typesOther": "Ostalo",
+  "breadcrumbHome": "Početna"
+}

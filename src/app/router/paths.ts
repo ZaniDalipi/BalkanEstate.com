@@ -11,6 +11,8 @@
  */
 
 import type { AppView, AdminSection, AgencyDashboardSection, HowItWorksTab } from '@/types';
+import { marketPath } from '@/src/features/market-pages/utils/marketRoutes';
+import type { MarketDeal } from '@/src/features/market-pages/types';
 
 export type QueryInit = Record<string, string | number | boolean | null | undefined>;
 
@@ -38,6 +40,9 @@ export const paths = {
 
   exploreCities: (query?: QueryInit) => withQuery('/explore-cities', query),
   cityDashboard: (city: string, country: string) => `/explore-cities/${seg(city)}/${seg(country)}`,
+
+  /** "Property for sale / for rent in …" landing pages: every country, one country, one city. */
+  market: (deal: MarketDeal, countrySlug?: string, citySlug?: string) => marketPath(deal, countrySlug, citySlug),
 
   property: (idOrSlug: string) => `/property/${seg(idOrSlug)}`,
   createListing: () => '/create-listing',

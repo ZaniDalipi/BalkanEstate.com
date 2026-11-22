@@ -45,6 +45,23 @@ import {
   HREFLANG,
 } from './lib/page-shell.mjs';
 import { COUNTRY_GUIDES, GUIDES_LAST_UPDATED } from '../src/features/guides/data/countryGuides.js';
+import { buildLlmsTxt, buildLlmsFullTxt } from './lib/llms-text.mjs';
+import { marketCountrySlug } from '../src/features/market-pages/utils/marketCountries.js';
+
+/**
+ * Each page's title and description in every language
+ * (src/i18n/locales/{lang}/seoPages.json). Ten language URLs of one page with
+ * the same English title and description are what search engines report as
+ * duplicates; these give each language its own. English is the fallback.
+ */
+const SEO_TEXT = Object.fromEntries(LANGUAGES.map((lang) => {
+  try {
+    return [lang, JSON.parse(readFileSync(new URL(`../src/i18n/locales/${lang}/seoPages.json`, import.meta.url), 'utf-8'))];
+  } catch {
+    return [lang, {}];
+  }
+}));
+const seoText = (lang, key) => SEO_TEXT[lang]?.[key] ?? SEO_TEXT[DEFAULT_LANG]?.[key];
 
 const DIST_DIR = process.argv[2] || 'dist';
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
@@ -74,8 +91,10 @@ const NAV_LABEL = {
 
 function siteNav(lang) {
   return `<nav aria-label="${escapeHtml(NAV_LABEL[lang] || NAV_LABEL.en)}">${list([
-    link(lang, '/search', 'Property for sale'),
-    link(lang, '/rentals', 'Property for rent'),
+    link(lang, '/property-for-sale', 'Property for sale by country'),
+    link(lang, '/property-for-rent', 'Property for rent by country'),
+    link(lang, '/search', 'Map search: property for sale'),
+    link(lang, '/rentals', 'Map search: property for rent'),
     link(lang, '/explore-cities', 'City pages'),
     link(lang, '/guides', 'Buying guides'),
     link(lang, '/mortgage-calculator', 'Mortgage calculator'),
@@ -93,6 +112,15 @@ function siteNav(lang) {
 
 function guideLinks(lang) {
   return list(COUNTRY_GUIDES.map((g) => link(lang, `/guides/${g.slug}`, `Buying property in ${g.country}`)));
+}
+
+/** Market page slug of a guide's country (the guides' "Bosnia" search value predates these pages). */
+const marketSlugOf = (guide) => marketCountrySlug(guide.country) ?? guide.slug;
+
+function countryLinks(lang, deal = 'sale') {
+  const segment = deal === 'rent' ? '/property-for-rent' : '/property-for-sale';
+  const words = deal === 'rent' ? 'Property for rent in' : 'Property for sale in';
+  return list(COUNTRY_GUIDES.map((g) => link(lang, `${segment}/${marketSlugOf(g)}`, `${words} ${g.country}`)));
 }
 
 const FEATURES = [
@@ -132,10 +160,11 @@ function webPage(lang, path, name, description, type = 'WebPage', extra = {}) {
 // exists, but the canonical is the English one and there are no hreflang
 // alternates, so ten identical copies do not compete with each other).
 
-/** @type {Array<{ path: string, title: string, description: string, body: (lang: string) => string, type?: string, englishOnly?: boolean, priority?: string, changefreq?: string, jsonLd?: (lang: string) => object[] }>} */
+/** @type {Array<{ path: string, seoKey?: string, title: string, description: string, body: (lang: string) => string, type?: string, englishOnly?: boolean, priority?: string, changefreq?: string, jsonLd?: (lang: string) => object[] }>} */
 const PAGES = [
   {
     path: '/',
+    seoKey: 'home',
     title: 'Property for Sale and Rent in the Balkans',
     description: `Search property for sale and rent in ${COUNTRY_LIST}, with maps, floor plans, virtual tours, calculators and country buying guides.`,
     priority: '1.0',
@@ -144,10 +173,13 @@ const PAGES = [
       <h1>Property for sale and rent in the Balkans</h1>
       <p>${SITE_NAME} is a property marketplace for ${COUNTRY_LIST}. Owners, agents and agencies publish homes for sale and rent; buyers and renters search, compare and contact them directly.</p>
       <h2>What you can do</h2>${list(FEATURES.map(escapeHtml))}
+      <h2>Property for sale by country</h2>${countryLinks(lang, 'sale')}
+      <h2>Property for rent by country</h2>${countryLinks(lang, 'rent')}
       <h2>Country buying guides</h2>${guideLinks(lang)}`,
   },
   {
     path: '/search',
+    seoKey: 'search',
     title: 'Property for Sale in the Balkans — Map Search',
     description: `Search apartments, houses, villas and land for sale in ${COUNTRY_LIST} on an interactive map.`,
     type: 'CollectionPage',
@@ -156,21 +188,25 @@ const PAGES = [
     body: (lang) => `
       <h1>Property for sale in the Balkans</h1>
       <p>Search listings for sale on an interactive map. Filter by country, city, price, size, number of rooms and property type, or describe what you want in plain language. Each listing links to the seller or agent.</p>
+      <h2>Property for sale by country</h2>${countryLinks(lang, 'sale')}
       <p>New to buying in the region? Start with a country guide:</p>${guideLinks(lang)}`,
   },
   {
     path: '/rentals',
+    seoKey: 'rentals',
     title: 'Property for Rent in the Balkans',
     description: 'Search apartments and houses for rent across the Balkans on an interactive map, and contact owners and agents directly.',
     type: 'CollectionPage',
     priority: '0.8',
     changefreq: 'daily',
-    body: () => `
+    body: (lang) => `
       <h1>Property for rent in the Balkans</h1>
-      <p>Search apartments and houses for rent on an interactive map. Filter by city, monthly rent, size and rooms, and send a viewing request from the listing.</p>`,
+      <p>Search apartments and houses for rent on an interactive map. Filter by city, monthly rent, size and rooms, and send a viewing request from the listing.</p>
+      <h2>Property for rent by country</h2>${countryLinks(lang, 'rent')}`,
   },
   {
     path: '/explore-cities',
+    seoKey: 'exploreCities',
     title: 'City Pages — Prices and Neighbourhoods Across the Balkans',
     description: 'City pages with price history, districts and economic indicators for cities across the Balkans.',
     priority: '0.7',
@@ -214,7 +250,7 @@ const PAGES = [
         <h2>Buying process, step by step</h2><ol>${g.legalProcess.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
         <h2>Check before you buy</h2>${list(g.cautions.map(escapeHtml))}
         <h2>Cities</h2>${list(g.topCities.map((c) => link(lang, `/explore-cities/${encodeURIComponent(c)}/${encodeURIComponent(g.searchCountry)}`, c)))}
-        <p>${link(lang, `/search?country=${encodeURIComponent(g.searchCountry)}`, `Property for sale in ${g.country}`)}</p>
+        <p>${link(lang, `/property-for-sale/${marketSlugOf(g)}`, `Property for sale in ${g.country}`)} · ${link(lang, `/property-for-rent/${marketSlugOf(g)}`, `Property for rent in ${g.country}`)}</p>
         <h2>Official sources</h2>${list(g.sources.map((s) => (s.url ? `<a href="${escapeHtml(s.url)}" rel="noopener">${escapeHtml(s.name)}</a>` : escapeHtml(s.name))))}
         <p>General information, not legal or tax advice. Rules and rates change and can depend on your nationality and the municipality; confirm them with a licensed local lawyer or notary and the official registry.</p>
       </article>
@@ -235,6 +271,7 @@ const PAGES = [
   })),
   {
     path: '/mortgage-calculator',
+    seoKey: 'mortgageCalculator',
     title: 'Mortgage Calculator',
     description: 'Estimate monthly mortgage repayments for a property purchase, and compare renting with buying.',
     priority: '0.6',
@@ -246,6 +283,7 @@ const PAGES = [
   },
   {
     path: '/valuation',
+    seoKey: 'valuation',
     title: 'Property Price Estimate',
     description: 'Get an automated indication of a property\'s value from comparable listings and its location. Not a professional valuation.',
     priority: '0.6',
@@ -256,6 +294,7 @@ const PAGES = [
   },
   {
     path: '/agents',
+    seoKey: 'agents',
     title: 'Real Estate Agents in the Balkans',
     description: 'Find real estate agents working in Albania, Montenegro, Serbia, North Macedonia, Croatia and the rest of the region, with their listings and contact details.',
     type: 'CollectionPage',
@@ -265,6 +304,7 @@ const PAGES = [
   },
   {
     path: '/agencies',
+    seoKey: 'agencies',
     title: 'Real Estate Agencies in the Balkans',
     description: 'Browse real estate agencies across the Balkans, with their agents, listings and contact details.',
     type: 'CollectionPage',
@@ -274,6 +314,7 @@ const PAGES = [
   },
   {
     path: '/blog',
+    seoKey: 'blog',
     title: 'Blog — Property in the Balkans',
     description: 'Articles about buying, renting and owning property in the Balkans.',
     type: 'CollectionPage',
@@ -283,6 +324,7 @@ const PAGES = [
   },
   {
     path: '/how-it-works',
+    seoKey: 'howItWorks',
     title: 'How BalkanEstateAI Works',
     description: 'How searching, listing and contacting sellers works on BalkanEstateAI, for buyers, sellers, agents and agencies.',
     priority: '0.5',
@@ -299,7 +341,7 @@ const PAGES = [
     changefreq: 'monthly',
     body: (lang) => `
       <h1>About BalkanEstateAI</h1>
-      <p>${SITE_NAME} is an online property marketplace for ${COUNTRY_LIST}. It is operated by BalkanEstate AI DOOEL.</p>
+      <p>${SITE_NAME} (also written BalkanEstate AI, or BalkanEstate) is an online property marketplace for ${COUNTRY_LIST}. It is operated by BalkanEstate AI DOOEL.</p>
       <h2>Where listings come from</h2>
       <p>Listings are created by property owners, agents and agencies with an account. Some listings are imported from agency feeds or other websites and show their original source.</p>
       <h2>What we check</h2>
@@ -309,6 +351,7 @@ const PAGES = [
   },
   {
     path: '/contact',
+    seoKey: 'contact',
     title: 'Contact BalkanEstateAI',
     description: 'Contact BalkanEstateAI support, report a listing, or ask about advertising and agency plans.',
     type: 'ContactPage',
@@ -321,6 +364,7 @@ const PAGES = [
   },
   {
     path: '/privacy',
+    seoKey: 'privacy',
     title: 'Privacy Policy',
     description: 'How BalkanEstateAI collects, uses and protects personal data, including cookies, analytics and advertising.',
     priority: '0.3',
@@ -332,6 +376,7 @@ const PAGES = [
   },
   {
     path: '/terms',
+    seoKey: 'terms',
     title: 'Terms of Service',
     description: 'The terms that apply to using BalkanEstateAI, publishing listings and paid plans.',
     priority: '0.3',
@@ -340,6 +385,7 @@ const PAGES = [
   },
   {
     path: '/cookies',
+    seoKey: 'cookies',
     title: 'Cookie Policy',
     description: 'Which cookies BalkanEstateAI uses, what they are for, and how to change your choices.',
     priority: '0.3',
@@ -368,20 +414,27 @@ function write(file, html) {
   writeFileSync(file, html, 'utf-8');
 }
 
+/** Title and description in the page's language when it has them, else the English ones above. */
+function textFor(page, lang) {
+  const text = page.seoKey && !page.englishOnly ? seoText(lang, page.seoKey) : undefined;
+  return { title: text?.title ?? page.title, description: text?.description ?? page.description };
+}
+
 function renderFor(page, lang) {
   const canonicalLang = page.englishOnly ? DEFAULT_LANG : lang;
-  const title = `${page.title} | ${SITE_NAME}`;
+  const text = textFor(page, lang);
+  const title = `${text.title} | ${SITE_NAME}`;
   const head = buildHead({
     lang,
     path: page.path,
     title,
-    description: page.description,
+    description: text.description,
     robots: ROBOTS_INDEX,
     canonicalLang,
     alternates: !page.englishOnly,
     ogType: page.type === 'Article' ? 'article' : 'website',
     jsonLd: [
-      webPage(canonicalLang, page.path, page.title, page.description, page.type === 'Article' ? 'WebPage' : (page.type || 'WebPage'), {
+      webPage(canonicalLang, page.path, text.title, text.description, page.type === 'Article' ? 'WebPage' : (page.type || 'WebPage'), {
         dateModified: BUILD_DATE,
       }),
       ...(page.jsonLd ? page.jsonLd(lang) : []),
@@ -454,5 +507,11 @@ ${urls.join('\n')}
 `,
   'utf-8',
 );
+
+// ─── llms.txt (summary for language models) ─────────────────────────────────
+// Generated from the guides and the page list, replacing the hand-written
+// copies that linked to query-string URLs crawlers cannot read.
+writeFileSync(join(DIST_DIR, 'llms.txt'), buildLlmsTxt(), 'utf-8');
+writeFileSync(join(DIST_DIR, 'llms-full.txt'), buildLlmsFullTxt(), 'utf-8');
 
 console.log(`✅ Prerendered ${written} files for ${PAGES.length} pages × ${LANGUAGES.length} languages; sitemap.xml has ${urls.length} URLs`);

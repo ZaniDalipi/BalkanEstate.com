@@ -26,6 +26,7 @@ import { mutationRateLimiter } from '../middleware/security';
 import { validatePropertyId } from '../middleware/propertyValidation';
 import { withUploadErrors } from '../middleware/uploadErrors';
 import { MAX_PROPERTY_IMAGES, MAX_PROPERTY_IMAGE_SIZE_BYTES } from '../config/uploadLimits';
+import { indexNowOnSuccess } from '../middleware/indexNowOnSuccess';
 
 const router = express.Router();
 
@@ -195,9 +196,9 @@ router.get('/:id', getProperty);
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.post('/', protect, mutationRateLimiter, createProperty);
-router.put('/:id', protect, mutationRateLimiter, updateProperty);
-router.delete('/:id', protect, mutationRateLimiter, deleteProperty);
+router.post('/', protect, mutationRateLimiter, indexNowOnSuccess(), createProperty);
+router.put('/:id', protect, mutationRateLimiter, indexNowOnSuccess(), updateProperty);
+router.delete('/:id', protect, mutationRateLimiter, indexNowOnSuccess({ deleted: true }), deleteProperty);
 router.get('/my/listings', protect, getMyListings);
 // Upload images - can be used with or without propertyId
 const propertyImagesUpload = withUploadErrors(upload.array('images', MAX_PROPERTY_IMAGES), {
@@ -207,11 +208,11 @@ const propertyImagesUpload = withUploadErrors(upload.array('images', MAX_PROPERT
 });
 router.post('/upload-images', protect, mutationRateLimiter, propertyImagesUpload, uploadImages);
 router.post('/:propertyId/upload-images', protect, mutationRateLimiter, propertyImagesUpload, uploadImages);
-router.patch('/:id/mark-sold', protect, mutationRateLimiter, markAsSold);
-router.patch('/:id/mark-rented', protect, mutationRateLimiter, markAsRented);
-router.patch('/:id/mark-available', protect, mutationRateLimiter, markAsAvailable);
+router.patch('/:id/mark-sold', protect, mutationRateLimiter, indexNowOnSuccess(), markAsSold);
+router.patch('/:id/mark-rented', protect, mutationRateLimiter, indexNowOnSuccess(), markAsRented);
+router.patch('/:id/mark-available', protect, mutationRateLimiter, indexNowOnSuccess(), markAsAvailable);
 router.patch('/:id/reassign-role', protect, mutationRateLimiter, reassignPropertyRole);
-router.patch('/:id/renew', protect, mutationRateLimiter, renewProperty);
+router.patch('/:id/renew', protect, mutationRateLimiter, indexNowOnSuccess(), renewProperty);
 router.post('/:id/rental-history', protect, mutationRateLimiter, addRentalHistoryEntry);
 router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, deleteRentalHistoryEntry);
 router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);

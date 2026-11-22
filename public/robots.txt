@@ -11,6 +11,13 @@
 #
 # Google's ad crawlers (Mediapartners-Google, AdsBot-Google) are not blocked:
 # AdSense must be able to read any page that can show ads.
+#
+# AI search and assistant crawlers (OAI-SearchBot, ChatGPT-User, GPTBot,
+# Claude-SearchBot, ClaudeBot, PerplexityBot, Google-Extended for Gemini,
+# Applebot-Extended, Meta, Mistral, DuckAssistBot, CCBot …) are welcome: they
+# follow the `*` group below, so they may read every public page. Pages are
+# served to them fully rendered (functions/_og-utils.ts → CRAWLER_USER_AGENTS).
+# A summary for language models is at /llms.txt.
 
 User-agent: *
 Disallow: /account

@@ -108,6 +108,7 @@ import gameRewardRoutes from './routes/gameRewardRoutes';
 import agencyFeaturedSubscriptionRoutes from './routes/agencyFeaturedSubscriptionRoutes';
 import adminRoutes from './routes/adminRoutes';
 import cityMarketDataRoutes from './routes/cityMarketDataRoutes';
+import marketPageRoutes from './routes/marketPageRoutes';
 import licenseRoutes from './routes/licenseRoutes';
 import credentialRoutes from './routes/credentialRoutes';
 import sitemapRoutes from './routes/sitemapRoutes';
@@ -386,6 +387,7 @@ app.use('/api/sales-history', salesHistoryRoutes);
 app.use('/api/discount-codes', discountCodeRoutes);
 app.use('/api/game-rewards', gameRewardRoutes);
 app.use('/api/cities', cityMarketDataRoutes); // City market data and recommendations
+app.use('/api/market-pages', marketPageRoutes); // Country/city landing pages (property for sale / rent in …)
 app.use('/api/admin', sensitiveRateLimiter, adminRoutes); // Admin panel routes (VPN + admin role required)
 app.use('/api/license', licenseRoutes); // Agent license verification
 app.use('/api/credentials', credentialRoutes); // Agent credentials management

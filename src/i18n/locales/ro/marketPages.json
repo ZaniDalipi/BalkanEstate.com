@@ -1,0 +1,82 @@
+{
+  "heading": {
+    "sale": "Proprietăți de vânzare în {{place}}",
+    "rent": "Proprietăți de închiriat în {{place}}"
+  },
+  "seoTitle": {
+    "sale": "Proprietăți de vânzare în {{place}} – prețuri și anunțuri",
+    "rent": "Proprietăți de închiriat în {{place}} – chirii și anunțuri"
+  },
+  "theBalkans": "Balcani",
+  "intro": {
+    "hub": {
+      "sale": "Locuințe, terenuri și spații comerciale de vânzare în zece țări, pe țări și orașe. Cifrele sunt prețurile cerute în anunțurile active de pe BalkanEstateAI.",
+      "rent": "Locuințe și spații comerciale de închiriat în zece țări, pe țări și orașe. Cifrele sunt chiriile cerute în anunțurile active de pe BalkanEstateAI."
+    },
+    "place": {
+      "sale": "Apartamente, case, vile și terenuri de vânzare în {{place}}, cu fotografii, planuri și datele de contact ale vânzătorului.",
+      "rent": "Apartamente și case de închiriat în {{place}}, cu fotografii, chiria lunară și datele de contact ale proprietarului sau agentului."
+    }
+  },
+  "stats": {
+    "title": "Pe scurt",
+    "listings": "Anunțuri active",
+    "median": {
+      "sale": "Prețul median cerut",
+      "rent": "Chiria lunară mediană"
+    },
+    "range": {
+      "sale": "Interval obișnuit de prețuri",
+      "rent": "Interval obișnuit de chirii"
+    },
+    "perSqm": {
+      "sale": "Prețul median pe m²",
+      "rent": "Chiria mediană pe m²"
+    },
+    "none": "Încă nu sunt destule anunțuri cu preț",
+    "note": "Prețuri cerute în anunțurile active la {{date}}, nu prețuri de vânzare sau evaluări.",
+    "types": "Tipuri de proprietăți"
+  },
+  "listings": {
+    "title": "Cele mai noi anunțuri",
+    "viewAll": {
+      "sale": "Vezi toate proprietățile de vânzare în {{place}} pe hartă",
+      "rent": "Vezi toate proprietățile de închiriat în {{place}} pe hartă"
+    }
+  },
+  "empty": {
+    "title": "Încă nu sunt anunțuri aici",
+    "body": "În fiecare zi apar proprietăți noi. Caută pe hartă sau vezi locurile de mai jos."
+  },
+  "cities": {
+    "country": "Orașe din {{country}}",
+    "other": "Alte orașe din {{country}}"
+  },
+  "countries": {
+    "title": "Țări",
+    "count": "Anunțuri: {{count}}"
+  },
+  "guide": {
+    "link": "Cum cumperi o proprietate în {{country}} – ghid pentru cumpărători (în engleză)"
+  },
+  "switch": {
+    "sale": "De vânzare",
+    "rent": "De închiriat",
+    "label": "Vânzare sau închiriere"
+  },
+  "notFound": {
+    "title": "Momentan nu sunt anunțuri în acest oraș",
+    "page": "Această pagină nu există",
+    "body": "Momentan nu avem anunțuri active în acest oraș. Iată anunțurile din restul țării.",
+    "country": "Proprietăți în {{country}}"
+  },
+  "error": {
+    "title": "Pagina nu a putut fi încărcată",
+    "body": "Verifică conexiunea și încearcă din nou sau caută pe hartă.",
+    "retry": "Încearcă din nou",
+    "search": "Caută pe hartă"
+  },
+  "loading": "Se încarcă anunțurile…",
+  "typesOther": "Altele",
+  "breadcrumbHome": "Acasă"
+}

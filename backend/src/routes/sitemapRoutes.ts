@@ -4,6 +4,11 @@ import Agency from '../models/Agency';
 import Article from '../models/Article';
 import { encodeId } from '../utils/idObfuscation';
 import { apiLogger } from '../utils/logger';
+import { xmlEscape } from '../utils/xml';
+import { INDEXABLE_LISTING_FILTER } from '../utils/indexableListing';
+import { MARKET_DEALS } from '../services/marketPages/marketPlaces';
+import { loadMarketTree } from '../services/marketPages/marketPageService';
+import { indexableMarketPaths, marketSitemapEntries } from '../services/marketPages/marketSitemap';
 
 const router = express.Router();
 
@@ -11,14 +16,6 @@ const BASE_URL = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
 /** Pages are served under a language prefix; English is the default. */
 const LANG = 'en';
-
-const xmlEscape = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
 
 const day = (date?: Date | string | null): string =>
   (date ? new Date(date) : new Date()).toISOString().split('T')[0];
@@ -33,8 +30,10 @@ const urlEntry = (path: string, lastmod: string, changefreq: string, priority: s
 `;
 
 /**
- * Sitemap of the database-backed pages: listings, agency profiles and blog
- * articles. The static pages (home, guides, legal, tools) are in the
+ * Sitemap of the database-backed pages: listings, agency profiles, blog
+ * articles, and the "property for sale / for rent in {country | city}" pages
+ * that have enough of our own listings to be indexed (in every language, with
+ * hreflang alternates). The static pages (home, guides, legal, tools) are in the
  * frontend's own /sitemap.xml, generated at build time; this one is served on
  * the site's host as /sitemap-listings.xml by a Cloudflare Pages Function.
  *
@@ -46,17 +45,20 @@ const urlEntry = (path: string, lastmod: string, changefreq: string, priority: s
  *    nothing a search result should point to.
  * Listing URLs use the encoded id, exactly as the site links to them.
  */
+/**
+ * A sitemap holds at most 50,000 URLs: 43,000 listings + 2,000 agencies +
+ * 2,000 articles + 300 market pages × 10 languages = 50,000.
+ */
+const MAX_LISTINGS = 43_000;
+const MAX_MARKET_PATHS = 300;
+
 router.get('/sitemap.xml', async (_req: Request, res: Response) => {
   try {
-    const [properties, agencies, articles] = await Promise.all([
-      Property.find({
-        status: 'active',
-        $or: [{ source: { $exists: false } }, { source: null }, { source: '' }],
-        description: { $exists: true, $ne: '' },
-      })
+    const [properties, agencies, articles, marketPaths] = await Promise.all([
+      Property.find(INDEXABLE_LISTING_FILTER)
         .select('_id updatedAt')
         .sort({ updatedAt: -1 })
-        .limit(45000)
+        .limit(MAX_LISTINGS)
         .lean(),
       Agency.find({ slug: { $exists: true, $ne: '' } })
         .select('slug updatedAt')
@@ -68,11 +70,21 @@ router.get('/sitemap.xml', async (_req: Request, res: Response) => {
         .sort({ publishedAt: -1 })
         .limit(2000)
         .lean(),
+      // A failure here must not take the listings out of the sitemap.
+      Promise.all(MARKET_DEALS.map(async (deal) => indexableMarketPaths(deal, await loadMarketTree(deal))))
+        // Overviews and countries before cities, so a cut never drops a whole country.
+        .then((perDeal) => perDeal.flat().sort((a, b) => a.split('/').length - b.split('/').length).slice(0, MAX_MARKET_PATHS))
+        .catch((error) => {
+          apiLogger.error('Sitemap: market pages left out:', error);
+          return [] as string[];
+        }),
     ]);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 `;
+
+    xml += marketSitemapEntries(marketPaths, BASE_URL, day());
 
     for (const property of properties) {
       xml += urlEntry(`/property/${encodeId(String(property._id))}`, day(property.updatedAt), 'weekly', '0.8');

@@ -203,6 +203,7 @@ if (process.env.REDIS_URL) {
 
 const cacheConfig: Record<string, number> = {
   '/api/cities': 15 * 60 * 1000,
+  '/api/market-pages': 10 * 60 * 1000,
   '/api/agencies': 5 * 60 * 1000,
   '/api/agents': 5 * 60 * 1000,
   '/api/properties': 10 * 1000,

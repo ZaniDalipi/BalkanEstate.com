@@ -266,7 +266,7 @@ const MainLayout: React.FC = () => {
   const isMainTabView = !isAgentDetail && !isAgencyDetail && !isBusinessDetail && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
-    'account', 'blog', 'guides', 'about',
+    'account', 'blog', 'guides', 'about', 'market',
   ].includes(view);
 
   // Map the current view to an ad-banner "page" so advertisers can target placements.
@@ -345,6 +345,7 @@ const MainLayout: React.FC = () => {
       'mortgage-calculator': 'nav:pageTitles.mortgageCalculator',
       blog: 'nav:pageTitles.blog',
       guides: 'nav:pageTitles.guides',
+      market: 'nav:pageTitles.market',
     };
     const key = titleKeys[view];
     return key ? t(key) : t('nav:pageTitles.default');

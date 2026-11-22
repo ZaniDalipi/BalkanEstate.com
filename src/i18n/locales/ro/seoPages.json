@@ -1,0 +1,58 @@
+{
+  "home": {
+    "title": "Proprietăți de vânzare și de închiriat în Balcani",
+    "description": "Locuințe de vânzare și de închiriat în Albania, Kosovo, Macedonia de Nord, Muntenegru, Serbia, Bosnia, Croația, Bulgaria, România și Grecia, cu hărți, prețuri și ghiduri."
+  },
+  "search": {
+    "title": "Proprietăți de vânzare în Balcani – căutare pe hartă",
+    "description": "Caută apartamente, case, vile și terenuri de vânzare pe o hartă interactivă. Filtrează după țară, oraș, preț, suprafață și camere și contactează vânzătorul direct."
+  },
+  "rentals": {
+    "title": "Proprietăți de închiriat în Balcani",
+    "description": "Găsește apartamente și case de închiriat în Balcani pe o hartă interactivă. Filtrează după oraș, chirie lunară, suprafață și camere și cere o vizionare proprietarului."
+  },
+  "exploreCities": {
+    "title": "Paginile orașelor – prețuri și cartiere în Balcani",
+    "description": "Compară orașele din Balcani: istoricul prețurilor cerute, cartierele, indicatorii economici și anunțurile disponibile acum în fiecare oraș."
+  },
+  "mortgageCalculator": {
+    "title": "Calculator de credit ipotecar",
+    "description": "Estimează rata lunară și dobânda totală a unui credit ipotecar pentru o proprietate în Balcani și compară costul chiriei cu cel al cumpărării de-a lungul anilor."
+  },
+  "valuation": {
+    "title": "Estimarea prețului unei proprietăți",
+    "description": "Primește gratuit o indicație automată a valorii unei proprietăți din Balcani pe baza anunțurilor similare și a locației. Un punct de pornire, nu o evaluare."
+  },
+  "agents": {
+    "title": "Agenți imobiliari în Balcani",
+    "description": "Găsește agenți imobiliari în Albania, Kosovo, Muntenegru, Serbia, Macedonia de Nord, Croația și în toată regiunea, cu anunțurile, zonele și datele lor de contact."
+  },
+  "agencies": {
+    "title": "Agenții imobiliare în Balcani",
+    "description": "Răsfoiește agențiile imobiliare din zece țări balcanice, cu agenții lor, anunțurile actuale, birourile și modul în care le poți contacta."
+  },
+  "blog": {
+    "title": "Blog – cumpărarea și închirierea de proprietăți în Balcani",
+    "description": "Articole despre cumpărarea, închirierea și deținerea de proprietăți în Balcani: știri de piață, prețuri, taxe, pașii legali și sfaturi pentru cumpărătorii din străinătate."
+  },
+  "howItWorks": {
+    "title": "Cum funcționează BalkanEstateAI",
+    "description": "Cum funcționează căutarea, publicarea anunțurilor și contactul cu vânzătorii pe BalkanEstateAI pentru cumpărători, chiriași, vânzători privați, agenți și agenții și ce include fiecare plan."
+  },
+  "contact": {
+    "title": "Contactează BalkanEstateAI",
+    "description": "Contactează echipa BalkanEstateAI pentru ajutor cu contul sau un anunț, pentru a raporta un anunț sau pentru întrebări despre publicitate și planuri pentru agenți și agenții."
+  },
+  "privacy": {
+    "title": "Politica de confidențialitate",
+    "description": "Cum colectează, folosește și protejează BalkanEstateAI datele personale, ce cookie-uri, analize și publicitate folosește, cât timp păstrează datele și cum îți exerciți drepturile."
+  },
+  "terms": {
+    "title": "Termeni și condiții",
+    "description": "Termenii care se aplică utilizării BalkanEstateAI: conturi, publicarea anunțurilor imobiliare, planuri plătite pentru agenți și agenții, utilizarea permisă și răspunderea."
+  },
+  "cookies": {
+    "title": "Politica privind cookie-urile",
+    "description": "Ce cookie-uri folosește BalkanEstateAI – necesare, de preferințe, de analiză și de publicitate – la ce servește fiecare și cum îți poți schimba alegerea oricând."
+  }
+}

@@ -33,6 +33,7 @@ import ArchivedListing from '../models/ArchivedListing';
 import { notifyAdmins } from '../services/adminNotificationService';
 import { archiveDeletedListing, archiveThumbnailPublicId as archiveThumbnailPublicIdOf } from '../services/listingArchiveService';
 import { sanitizeProperty } from '../utils/responseSanitizer';
+import { PROPERTY_LIST_PROJECTION, PROPERTY_LIST_SELLER_FIELDS, attachAgencyLogos } from '../services/propertyListing/propertyListQuery';
 import {
   emitPropertyCreated,
   emitPropertyUpdated,
@@ -399,18 +400,6 @@ export const getProperties = async (
 
     const skip = useCursor ? 0 : (pageNum - 1) * limitNum;
 
-    // List-view projection: exclude heavy fields not needed in listings
-    const LIST_PROJECTION = {
-      description: 0,
-      rentalHistory: 0,
-      priceIntervals: 0,
-      tenantRequirements: 0,
-      visitAvailability: 0,
-      specialFeatures: 0,
-      materials: 0,
-      'images.publicId': 0,
-    };
-
     // Optional open house / auction filters (all off unless asked for).
     const eventSearch = parseEventSearch(req.query as Record<string, unknown>, new Date());
     const eventConditions = [...eventSearch.conditions];
@@ -431,8 +420,8 @@ export const getProperties = async (
     const fetchLimit = Math.min(limitNum + 20, limitNum * 2); // Fetch slightly extra for promotion sort, capped
     const [rawProperties, total] = await Promise.all([
       Property.find(filter)
-        .select(LIST_PROJECTION)
-        .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName agencyId agentId')
+        .select(PROPERTY_LIST_PROJECTION)
+        .populate('sellerId', PROPERTY_LIST_SELLER_FIELDS)
         .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
         .sort(sort)
         .skip(skip)
@@ -465,27 +454,7 @@ export const getProperties = async (
     properties = properties.slice(0, limitNum);
 
     // Enrich properties with agency logos for agent sellers (already plain objects from .lean())
-    const agencyIds = properties
-      .map(p => (p.sellerId as any)?.agencyId)
-      .filter(Boolean);
-
-    if (agencyIds.length > 0) {
-      const agencies = await Agency.find(
-        { _id: { $in: agencyIds } },
-        { _id: 1, logo: 1 }
-      ).lean();
-
-      const agencyLogoMap = new Map(
-        agencies.map(a => [String(a._id), a.logo])
-      );
-
-      for (const prop of properties) {
-        const seller = prop.sellerId as any;
-        if (seller?.agencyId) {
-          seller.agencyLogo = agencyLogoMap.get(String(seller.agencyId));
-        }
-      }
-    }
+    await attachAgencyLogos(properties);
 
     const enrichedProperties = properties;
 

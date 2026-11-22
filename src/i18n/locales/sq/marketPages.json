@@ -1,0 +1,82 @@
+{
+  "heading": {
+    "sale": "Prona në shitje – {{place}}",
+    "rent": "Prona me qira – {{place}}"
+  },
+  "seoTitle": {
+    "sale": "Prona në shitje – {{place}}: çmime dhe njoftime",
+    "rent": "Prona me qira – {{place}}: qira dhe njoftime"
+  },
+  "theBalkans": "Ballkan",
+  "intro": {
+    "hub": {
+      "sale": "Shtëpi, toka dhe prona komerciale në shitje në dhjetë vende, sipas vendit dhe qytetit. Shifrat janë çmimet e kërkuara të njoftimeve aktive në BalkanEstateAI.",
+      "rent": "Shtëpi dhe prona komerciale me qira në dhjetë vende, sipas vendit dhe qytetit. Shifrat janë qiratë e kërkuara të njoftimeve aktive në BalkanEstateAI."
+    },
+    "place": {
+      "sale": "Apartamente, shtëpi, vila dhe toka në shitje – {{place}}, me foto, planimetri dhe kontaktin e shitësit.",
+      "rent": "Apartamente dhe shtëpi me qira – {{place}}, me foto, qiranë mujore dhe kontaktin e pronarit ose të agjentit."
+    }
+  },
+  "stats": {
+    "title": "Në një vështrim",
+    "listings": "Njoftime aktive",
+    "median": {
+      "sale": "Çmimi median i kërkuar",
+      "rent": "Qiraja mujore mediane"
+    },
+    "range": {
+      "sale": "Gama e zakonshme e çmimeve",
+      "rent": "Gama e zakonshme e qirave"
+    },
+    "perSqm": {
+      "sale": "Çmimi median për m²",
+      "rent": "Qiraja mediane për m²"
+    },
+    "none": "Ende nuk ka mjaftueshëm njoftime me çmim",
+    "note": "Çmime të kërkuara të njoftimeve aktive më {{date}}, jo çmime shitjeje apo vlerësime.",
+    "types": "Llojet e pronave"
+  },
+  "listings": {
+    "title": "Njoftimet më të fundit",
+    "viewAll": {
+      "sale": "Të gjitha pronat në shitje – {{place}} – në hartë",
+      "rent": "Të gjitha pronat me qira – {{place}} – në hartë"
+    }
+  },
+  "empty": {
+    "title": "Ende nuk ka njoftime këtu",
+    "body": "Çdo ditë shtohen prona të reja. Kërkoni në hartë ose shikoni vendet më poshtë."
+  },
+  "cities": {
+    "country": "Qytetet – {{country}}",
+    "other": "Qytete të tjera – {{country}}"
+  },
+  "countries": {
+    "title": "Vendet",
+    "count": "Njoftime: {{count}}"
+  },
+  "guide": {
+    "link": "Si të blini pronë – {{country}}: udhëzues për blerësit (në anglisht)"
+  },
+  "switch": {
+    "sale": "Në shitje",
+    "rent": "Me qira",
+    "label": "Shitje apo qira"
+  },
+  "notFound": {
+    "title": "Tani nuk ka njoftime në këtë qytet",
+    "page": "Kjo faqe nuk ekziston",
+    "body": "Për momentin nuk kemi njoftime aktive në këtë qytet. Shikoni njoftimet në pjesën tjetër të vendit.",
+    "country": "Prona – {{country}}"
+  },
+  "error": {
+    "title": "Kjo faqe nuk u ngarkua",
+    "body": "Kontrolloni lidhjen dhe provoni përsëri, ose kërkoni në hartë.",
+    "retry": "Provo përsëri",
+    "search": "Kërko në hartë"
+  },
+  "loading": "Po ngarkohen njoftimet…",
+  "typesOther": "Tjetër",
+  "breadcrumbHome": "Kryefaqja"
+}

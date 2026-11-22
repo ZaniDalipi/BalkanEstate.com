@@ -28,12 +28,16 @@
  */
 
 import { optimizeImageUrl, MEDIA_CDN_URL } from '../config/mediaConfig';
+import { marketCountrySlug, marketPath } from '../src/features/market-pages/utils/marketRoutes';
+import { countryLabel, typeLabel } from '../src/features/market-pages/utils/marketPageText';
+import { marketTranslator } from './_market-i18n';
 import { isCloudinaryPhotoUrl } from '../config/legacyCloudinary';
 import { parseMediaUrl, mediaFileUrl, MEDIA_MASTER_FILE } from '../backend/src/config/mediaVariants';
 import {
   SITE_URL,
   SITE_NAME,
   DEFAULT_IMAGE,
+  DEFAULT_LANG,
   ROBOTS_INDEX,
   ROBOTS_NOINDEX,
   buildHead,
@@ -58,13 +62,31 @@ export const CRAWLER_USER_AGENTS = [
   'YandexBot',
   'Applebot',
   'Baiduspider',
-  // AI search
+  // AI search and assistants. These crawlers do not run JavaScript, so
+  // without the rendered page they read only the empty app shell. Gemini and
+  // Google's AI Overviews read Google's index (Googlebot, above); Copilot
+  // reads Bing's (bingbot). DeepSeek publishes no crawler of its own; it and
+  // most other models learn from Common Crawl (CCBot).
   'OAI-SearchBot',
   'GPTBot',
   'ChatGPT-User',
   'ClaudeBot',
+  'Claude-SearchBot',
   'Claude-User',
   'PerplexityBot',
+  'Perplexity-User',
+  'meta-externalagent',
+  'Meta-ExternalFetcher',
+  'Meta-WebIndexer',
+  'MistralAI-User',
+  'DuckAssistBot',
+  'YouBot',
+  'Amazonbot',
+  'Google-CloudVertexBot',
+  'cohere-ai',
+  'CCBot',
+  'PetalBot',
+  'SeznamBot',
   // Link previews
   'facebookexternalhit',
   'Facebot',
@@ -270,8 +292,9 @@ export function breadcrumb(lang: string, items: Array<{ name: string; path?: str
 /** Site-wide navigation for the bottom of every server-rendered page. */
 export function siteLinks(lang: string): string {
   return `<nav aria-label="${SITE_NAME}"><ul>
-      <li>${link(lang, '/search', 'Property for sale')}</li>
-      <li>${link(lang, '/rentals', 'Property for rent')}</li>
+      <li>${link(lang, '/property-for-sale', 'Property for sale')}</li>
+      <li>${link(lang, '/property-for-rent', 'Property for rent')}</li>
+      <li>${link(lang, '/search', 'Map search')}</li>
       <li>${link(lang, '/guides', 'Buying guides')}</li>
       <li>${link(lang, '/agents', 'Real estate agents')}</li>
       <li>${link(lang, '/agencies', 'Agencies')}</li>
@@ -363,7 +386,7 @@ export function resolveOgImage(...candidates: Array<string | undefined>): OgImag
 }
 
 /** A photo URL for an <img> in the crawler content (not the share card). */
-function contentImage(url: string | undefined, width = 800): string | null {
+export function contentImage(url: string | undefined, width = 800): string | null {
   if (!url) return null;
   if (url.startsWith('/')) return `${SITE_URL}${url}`;
   return optimizeImageUrl(url, { width }) || null;
@@ -427,6 +450,24 @@ function capitalize(text: string | undefined): string {
   return text.charAt(0).toUpperCase() + text.slice(1).replace(/[-_]/g, ' ');
 }
 
+/**
+ * The words around a listing's own text, in the page's language: "Apartment –
+ * For sale – Tirana, Shqipëri". The seller's title and description read the
+ * same in every language, so without this the ten language URLs of a listing
+ * had ten identical titles and descriptions — which search engines report as
+ * duplicates. Null for English, which keeps its own phrasing below.
+ */
+function localizedListingWords(property: PropertyData, lang: string): { deal: string; place: string; intro: string } | null {
+  if (lang === DEFAULT_LANG) return null;
+  const t = marketTranslator(lang);
+  const countrySlug = marketCountrySlug(property.country);
+  const country = countrySlug && property.country ? countryLabel(t, { slug: countrySlug, name: property.country }) : property.country;
+  const place = [property.city, country].filter(Boolean).join(', ');
+  const deal = t(`marketPages:switch.${property.listingType === 'rent' ? 'rent' : 'sale'}`);
+  const type = typeLabel(t, property.propertyType || 'other');
+  return { deal, place, intro: `${type} – ${deal}${place ? ` – ${place}` : ''}.` };
+}
+
 /** Title, description, head and content for one listing. */
 export function buildPropertyPage(property: PropertyData, slug: string, lang = 'en'): RenderedPage {
   const id = property.id || slug;
@@ -438,7 +479,10 @@ export function buildPropertyPage(property: PropertyData, slug: string, lang = '
 
   const heading = property.title?.trim()
     || `${beds ? `${beds}-bedroom ` : ''}${typeLabel} ${action}${location ? ` in ${location}` : ''}`;
-  const title = `${heading}${property.title && location ? ` – ${location}` : ''} | ${SITE_NAME}`;
+  const localized = localizedListingWords(property, lang);
+  const title = localized
+    ? `${heading} – ${localized.deal}${localized.place ? ` · ${localized.place}` : ''} | ${SITE_NAME}`
+    : `${heading}${property.title && location ? ` – ${location}` : ''} | ${SITE_NAME}`;
   const price = formatPrice(property.price, property.listingType, property.isNegotiable);
 
   const facts: Array<[string, string]> = [
@@ -456,7 +500,7 @@ export function buildPropertyPage(property: PropertyData, slug: string, lang = '
   const summary = facts.filter(([k]) => k !== 'Type' && k !== 'Location').map(([, v]) => v).join(' · ');
   const descText = plainText(property.description);
   const description = truncate(
-    [`${typeLabel} ${action}${location ? ` in ${location}` : ''}.`, summary, descText].filter(Boolean).join(' '),
+    [localized ? localized.intro : `${typeLabel} ${action}${location ? ` in ${location}` : ''}.`, summary, descText].filter(Boolean).join(' '),
     300,
   );
 
@@ -479,7 +523,15 @@ export function buildPropertyPage(property: PropertyData, slug: string, lang = '
   const features = (property.specialFeatures ?? []).filter((f) => typeof f === 'string' && f.trim()).slice(0, 20);
 
   const crumbs = breadcrumb(lang, [
-    ...(property.country ? [{ name: property.country, path: `/search?country=${encodeURIComponent(property.country)}` }] : []),
+    // The country's own page when it is one of ours; the map search otherwise.
+    ...(property.country
+      ? [{
+        name: property.country,
+        path: marketCountrySlug(property.country)
+          ? marketPath(property.listingType === 'rent' ? 'rent' : 'sale', marketCountrySlug(property.country))
+          : `/search?country=${encodeURIComponent(property.country)}`,
+      }]
+      : []),
     ...(property.city && property.country
       ? [{ name: property.city, path: `/explore-cities/${encodeURIComponent(property.city)}/${encodeURIComponent(property.country)}` }]
       : []),

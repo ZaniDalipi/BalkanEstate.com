@@ -1,0 +1,58 @@
+{
+  "home": {
+    "title": "Prona në shitje dhe me qira në Ballkan",
+    "description": "Shtëpi në shitje dhe me qira në Shqipëri, Kosovë, Maqedoni të Veriut, Mal të Zi, Serbi, Bosnjë, Kroaci, Bullgari, Rumani dhe Greqi, me harta, çmime dhe udhëzues blerjeje."
+  },
+  "search": {
+    "title": "Prona në shitje në Ballkan – kërkim në hartë",
+    "description": "Kërkoni apartamente, shtëpi, vila dhe toka në shitje në një hartë interaktive. Filtroni sipas vendit, qytetit, çmimit, sipërfaqes dhe dhomave, dhe kontaktoni shitësin."
+  },
+  "rentals": {
+    "title": "Prona me qira në Ballkan",
+    "description": "Gjeni apartamente dhe shtëpi me qira në Ballkan në një hartë interaktive. Filtroni sipas qytetit, qirasë mujore, sipërfaqes dhe dhomave, dhe kërkoni një vizitë te pronari."
+  },
+  "exploreCities": {
+    "title": "Faqet e qyteteve – çmime dhe lagje në Ballkan",
+    "description": "Krahasoni qytetet e Ballkanit: historikun e çmimeve të kërkuara, lagjet, treguesit ekonomikë dhe njoftimet që janë aktualisht në çdo qytet."
+  },
+  "mortgageCalculator": {
+    "title": "Kalkulatori i kredisë hipotekore",
+    "description": "Llogaritni këstin mujor dhe interesin total të kredisë për një pronë në Ballkan, dhe krahasoni koston e qirasë me blerjen ndër vite."
+  },
+  "valuation": {
+    "title": "Vlerësim i çmimit të pronës",
+    "description": "Merrni falas një tregues automatik të vlerës së një prone në Ballkan nga njoftimet e ngjashme dhe vendndodhja. Një vlerësim fillestar, jo vlerësim profesional."
+  },
+  "agents": {
+    "title": "Agjentë imobiliarë në Ballkan",
+    "description": "Gjeni agjentë imobiliarë në Shqipëri, Kosovë, Mal të Zi, Serbi, Maqedoni të Veriut, Kroaci dhe në gjithë rajonin, me njoftimet, zonat dhe kontaktet e tyre."
+  },
+  "agencies": {
+    "title": "Agjenci imobiliare në Ballkan",
+    "description": "Shfletoni agjencitë imobiliare në dhjetë vende të Ballkanit, me agjentët, njoftimet aktuale, zyrat dhe mënyrën si t'i kontaktoni."
+  },
+  "blog": {
+    "title": "Blogu – blerja dhe qiraja e pronave në Ballkan",
+    "description": "Artikuj për blerjen, qiranë dhe zotërimin e pronave në Ballkan: lajme tregu, çmime, taksa, hapat ligjorë dhe këshilla për blerësit nga jashtë."
+  },
+  "howItWorks": {
+    "title": "Si funksionon BalkanEstateAI",
+    "description": "Si funksionon kërkimi, publikimi i njoftimeve dhe kontakti me shitësit në BalkanEstateAI për blerës, qiramarrës, shitës privatë, agjentë dhe agjenci, dhe çfarë përfshin çdo plan."
+  },
+  "contact": {
+    "title": "Kontaktoni BalkanEstateAI",
+    "description": "Kontaktoni ekipin e BalkanEstateAI për ndihmë me llogarinë ose një njoftim, për të raportuar një njoftim, ose për reklamat dhe planet për agjentë dhe agjenci."
+  },
+  "privacy": {
+    "title": "Politika e privatësisë",
+    "description": "Si i mbledh, i përdor dhe i mbron BalkanEstateAI të dhënat personale, cilat cookies, analitika dhe reklama përdor, sa kohë ruhen të dhënat dhe si t'i ushtroni të drejtat."
+  },
+  "terms": {
+    "title": "Kushtet e shërbimit",
+    "description": "Kushtet për përdorimin e BalkanEstateAI: llogaritë, publikimi i njoftimeve të pronave, planet me pagesë për agjentë dhe agjenci, përdorimi i lejuar dhe përgjegjësia."
+  },
+  "cookies": {
+    "title": "Politika e cookies",
+    "description": "Cilat cookies përdor BalkanEstateAI – të nevojshme, preferencash, analitike dhe reklamash – për çfarë shërben secila dhe si ta ndryshoni zgjedhjen në çdo kohë."
+  }
+}
