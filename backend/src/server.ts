@@ -22,6 +22,7 @@ import { setupChatSocket } from './sockets/chatSocket';
 import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
 import { serverLogger } from './utils/logger';
+import { flushIndexNow } from './services/indexNow/indexNowService';
 
 // Import and initialize Sentry for error monitoring (must be early)
 import { initSentry, setupSentry, attachSentryErrorHandler } from './lib/sentry';
@@ -545,5 +546,17 @@ httpServer.listen(PORT, () => {
   // Start subscription cron jobs
   startCronJobs();
 });
+
+// On a deploy or restart, send IndexNow the listing changes still waiting for
+// their one-minute batch before the process exits; otherwise they are lost.
+let shuttingDown = false;
+const shutdown = (signal: NodeJS.Signals): void => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  serverLogger.info(`${signal} received, shutting down`);
+  void flushIndexNow().finally(() => process.exit(0));
+};
+process.once('SIGTERM', shutdown);
+process.once('SIGINT', shutdown);
 
 export default app;
