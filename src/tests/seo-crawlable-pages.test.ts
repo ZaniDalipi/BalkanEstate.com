@@ -82,6 +82,16 @@ describe('server-rendered listing page', () => {
   });
 });
 
+describe('second host', () => {
+  it('keeps the pages.dev copies of the site out of search engines', () => {
+    const headers = fs.readFileSync(path.resolve(__dirname, '../../public/_headers'), 'utf-8');
+    expect(headers).toMatch(/^https:\/\/balkanestateai\.pages\.dev\/\*\n {2}X-Robots-Tag: noindex$/m);
+    expect(headers).toMatch(/^https:\/\/:subdomain\.balkanestateai\.pages\.dev\/\*\n {2}X-Robots-Tag: noindex$/m);
+    // The real domain must never be noindexed by a header.
+    expect(headers).not.toMatch(/balkanestateai\.com[^\n]*\n {2}X-Robots-Tag/);
+  });
+});
+
 describe('crawler detection', () => {
   it('serves rendered pages to Google, including the AdSense crawler', () => {
     expect(isCrawler('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')).toBe(true);

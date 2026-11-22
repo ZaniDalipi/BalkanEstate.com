@@ -1,4 +1,17 @@
 # Cloudflare Pages custom headers
+
+# The site also answers at balkanestateai.pages.dev (and preview/commit
+# subdomains of it): a full copy of every page on a second host. Search
+# engines must only index balkanestateai.com, so the pages.dev hosts say
+# noindex. (Cloudflare adds this to preview deployments itself, but not to
+# the production pages.dev address.) Pages also declare the
+# balkanestateai.com canonical; this is the second line of defence.
+https://balkanestateai.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:subdomain.balkanestateai.pages.dev/*
+  X-Robots-Tag: noindex
+
 # Security headers for all pages
 
 /*
