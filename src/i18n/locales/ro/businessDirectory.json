@@ -95,7 +95,7 @@
   },
   "empty": {
     "title": "Nu au fost găsite afaceri",
-    "description": "Fii primul care își listează afacerea în această categorie și ajunge la mii de clienți potențiali din întreaga regiune a Balcanilor."
+    "description": "Fii primul care își listează afacerea în această categorie și ajunge la clienți potențiali din întreaga regiune a Balcanilor."
   },
   "pagination": {
     "previous": "Anterioară",
@@ -254,7 +254,7 @@
   },
   "form": {
     "title": "Adaugă afacerea ta",
-    "subtitle": "Ajungeți la mii de clienți potențiali din întreaga regiune a Balcanilor",
+    "subtitle": "Ajungeți la clienți potențiali din întreaga regiune a Balcanilor",
     "sections": {
       "type": "Tip anunț",
       "basicInfo": "Informații de bază",

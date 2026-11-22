@@ -733,7 +733,7 @@
   },
   "sellers": {
     "title": "Prodajte Svoju Nekretninu",
-    "subtitle": "Oglasite svoju nekretninu i dosegnite tisuće potencijalnih kupaca širom regije",
+    "subtitle": "Oglasite svoju nekretninu i dosegnite potencijalne kupce diljem regije",
     "freePlan": {
       "title": "Besplatni Plan",
       "price": "€0",
@@ -836,7 +836,7 @@
   },
   "cta": {
     "title": "Spremni Započeti?",
-    "subtitle": "Pridružite se tisućama korisnika koji već pronalaze i oglašavaju nekretnine na Balkan Estate-u",
+    "subtitle": "Pridružite se kupcima, prodavačima i agentima koji pronalaze i oglašavaju nekretnine na Balkan Estate-u",
     "browseProperties": "Pregledajte Nekretnine",
     "listProperty": "Oglasite Svoju Nekretninu"
   },

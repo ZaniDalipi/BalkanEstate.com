@@ -256,7 +256,7 @@ const Onboarding: React.FC = () => {
                   {t('nav:onboarding.wantToSell', 'I want to sell')}
                 </h3>
                 <p className="text-sm text-neutral-500 mb-5 leading-relaxed">
-                  {t('nav:onboarding.sellDescription', 'List your property, reach thousands of potential buyers, and use our smart tools.')}
+                  {t('nav:onboarding.sellDescription', 'List your property, reach buyers across the Balkans, and use our smart tools.')}
                 </p>
 
                 <div
@@ -323,7 +323,7 @@ const Onboarding: React.FC = () => {
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}
           >
-            {t('seller:ui.onboarding.n11Countries50CitiesAi', '11 countries • 50+ cities • AI-powered search • Thousands of properties')}
+            {t('seller:ui.onboarding.n11Countries50CitiesAi', '11 countries • 50+ cities • AI-powered search • Listings in 10 languages')}
           </p>
         </div>
       </div>

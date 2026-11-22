@@ -11,7 +11,10 @@
     "typewriterWord3": "Idealan Stan",
     "typewriterWord4": "Novi Početak",
     "titleEnd": "na Balkanu",
-    "subtitle": "Otkrijte tisuće nekretnina u 11 zemalja. AI pretraživanje, verificirani agenti i oglasi na 10 jezika.",
+    "subtitle": "Otkrijte nekretnine u 11 zemalja. AI pretraživanje, verificirani agenti i oglasi na 10 jezika.",
+    "subtitleCount_one": "Otkrijte {{count}} nekretninu u 11 zemalja. AI pretraživanje, verificirani agenti i oglasi na 10 jezika.",
+    "subtitleCount_few": "Otkrijte {{count}} nekretnine u 11 zemalja. AI pretraživanje, verificirani agenti i oglasi na 10 jezika.",
+    "subtitleCount_other": "Otkrijte {{count}} nekretnina u 11 zemalja. AI pretraživanje, verificirani agenti i oglasi na 10 jezika.",
     "searchPlaceholder": "Pretražite po gradu, četvrti ili adresi...",
     "searchButton": "Pretraži",
     "popularSearches": "Popularno:",
@@ -111,7 +114,7 @@
   },
   "cta": {
     "sellerTitle": "Spremni Prodati Svoju Nekretninu?",
-    "sellerSubtitle": "Oglasite nekretninu i dođite do tisuća potencijalnih kupaca na Balkanu.",
+    "sellerSubtitle": "Oglasite nekretninu i dođite do kupaca diljem Balkana.",
     "sellerButton": "Oglasi Nekretninu",
     "agentTitle": "Jeste Li Agent za Nekretnine?",
     "agentSubtitle": "Pridružite se našoj mreži verificiranih agenata. Dobijte kontakte i rastite.",
@@ -182,7 +185,7 @@
   },
   "testimonials": {
     "title": "Što Kažu Naši Korisnici",
-    "subtitle": "Povjerenje tisuća kupaca, prodavača i agenata na Balkanu",
+    "subtitle": "Što o nama kažu kupci, prodavači i agenti diljem Balkana",
     "emptyState": "Iskustva će se pojaviti ovdje kada korisnici podijele svoje dojmove."
   },
   "newsletter": {

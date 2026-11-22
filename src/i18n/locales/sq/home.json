@@ -11,7 +11,9 @@
     "typewriterWord3": "Apartamentin Ideal",
     "typewriterWord4": "fillimet e Reja",
     "titleEnd": "në Ballkan",
-    "subtitle": "Zbuloni mijëra prona në 11 vende. Kërkim i mundësuar nga AI, agjentë të verifikuar dhe lista në 10 gjuhë.",
+    "subtitle": "Zbuloni prona në 11 vende. Kërkim i mundësuar nga AI, agjentë të verifikuar dhe lista në 10 gjuhë.",
+    "subtitleCount_one": "Zbuloni {{count}} pronë në 11 vende. Kërkim i mundësuar nga AI, agjentë të verifikuar dhe lista në 10 gjuhë.",
+    "subtitleCount_other": "Zbuloni {{count}} prona në 11 vende. Kërkim i mundësuar nga AI, agjentë të verifikuar dhe lista në 10 gjuhë.",
     "searchPlaceholder": "Kërko sipas qytetit, lagjes ose adresës...",
     "searchButton": "Kërko",
     "popularSearches": "Vende popullore:",
@@ -111,7 +113,7 @@
   },
   "cta": {
     "sellerTitle": "Gati të Shisni Pronën Tuaj?",
-    "sellerSubtitle": "Listoni pronën tuaj dhe arrini mijëra blerës potencialë në Ballkan.",
+    "sellerSubtitle": "Listoni pronën tuaj dhe arrini blerës në të gjithë Ballkanin.",
     "sellerButton": "Listo Pronën Tënde",
     "agentTitle": "Jeni Agjent i Pasurive?",
     "agentSubtitle": "Bashkohuni me rrjetin tonë të agjentëve. Merrni kontakte dhe rritni biznesin.",
@@ -182,7 +184,7 @@
   },
   "testimonials": {
     "title": "Çfarë Thonë Përdoruesit Tanë",
-    "subtitle": "I besuar nga mijëra blerës, shitës dhe agjentë në Ballkan",
+    "subtitle": "Çfarë thonë për ne blerësit, shitësit dhe agjentët në Ballkan",
     "emptyState": "Dëshmitë do të shfaqen këtu kur përdoruesit ndajnë përvojat e tyre."
   },
   "newsletter": {

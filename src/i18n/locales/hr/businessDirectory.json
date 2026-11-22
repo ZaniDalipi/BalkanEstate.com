@@ -95,7 +95,7 @@
   },
   "empty": {
     "title": "Nisu pronađene tvrtke",
-    "description": "Budite prvi koji će dodati svoju tvrtku u ovu kategoriju i doseći tisuće potencijalnih klijenata diljem Balkana."
+    "description": "Budite prvi koji će dodati svoju tvrtku u ovu kategoriju i doseći potencijalne klijente diljem Balkana."
   },
   "pagination": {
     "previous": "Prethodna",
@@ -254,7 +254,7 @@
   },
   "form": {
     "title": "Dodajte svoju tvrtku",
-    "subtitle": "Dosegnite tisuće potencijalnih klijenata diljem Balkana",
+    "subtitle": "Dosegnite potencijalne klijente diljem Balkana",
     "sections": {
       "type": "Vrsta oglasa",
       "basicInfo": "Osnovne informacije",

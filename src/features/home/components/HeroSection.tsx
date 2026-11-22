@@ -281,7 +281,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           className="mt-4 sm:mt-5 landscape:mt-2 text-center text-sm sm:text-base md:text-lg landscape:text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed px-2 hero-fade-up"
           style={{ animationDelay: '0.08s' }}
         >
-          {t('home:hero.subtitle')}
+          {stats && stats.properties > 0
+            ? t('home:hero.subtitleCount', {
+                count: stats.properties,
+                defaultValue: 'Discover {{count}} properties across 11 countries. AI-powered search, verified agents, and listings in 10 languages.',
+              })
+            : t('home:hero.subtitle', {
+                defaultValue: 'Discover properties across 11 countries. AI-powered search, verified agents, and listings in 10 languages.',
+              })}
         </p>
 
         {/* Search Bar — liquid glass */}
