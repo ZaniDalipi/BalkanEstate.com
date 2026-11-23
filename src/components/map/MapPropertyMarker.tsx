@@ -12,6 +12,7 @@ import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
+import { formatMarkerPrice as formatShortPrice } from '@/shared/map/formatMarkerPrice';
 import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
@@ -290,23 +291,9 @@ const PROPERTY_TYPE_COLORS = Object.fromEntries(
  * Adds rental period suffix for rental properties
  */
 const formatMarkerPrice = (property: Property): string => {
-  if (property.isNegotiable) {
-    return 'Negotiable';
-  }
-  const price = property.price;
-  let formatted: string;
-  if (price >= 1000000) {
-    const millions = price / 1000000;
-    // Use integer if it's a whole number, otherwise 1 decimal
-    if (millions >= 10) {
-      formatted = `€${Math.round(millions)}M`;
-    } else {
-      formatted = `€${millions.toFixed(1).replace('.0', '')}M`;
-    }
-  } else if (price >= 1000) {
-    formatted = `€${Math.round(price / 1000)}K`;
-  } else {
-    formatted = `€${price}`;
+  let formatted = formatShortPrice(property);
+  if (formatted === 'Negotiable') {
+    return formatted;
   }
 
   // Add rental period suffix

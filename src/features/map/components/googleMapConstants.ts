@@ -86,31 +86,8 @@ export const latLngToWebMercator = (lat: number, lng: number): { x: number; y: n
   return { x, y };
 };
 
-/**
- * Format price for marker display (short format)
- */
-export const formatMarkerPrice = (
-  priceOrProperty: number | { price?: number; isNegotiable?: boolean }
-): string => {
-  // Accept either a raw price or a property; negotiable / zero-price
-  // listings have no fixed price and must never render as €0.
-  const isNegotiable = typeof priceOrProperty === 'object' && !!priceOrProperty.isNegotiable;
-  const price = typeof priceOrProperty === 'number' ? priceOrProperty : (priceOrProperty.price ?? 0);
-  if (isNegotiable || !price || price <= 0) {
-    return 'Negotiable';
-  }
-  if (price >= 1000000) {
-    const millions = price / 1000000;
-    if (millions >= 10) {
-      return `€${Math.round(millions)}M`;
-    }
-    return `€${millions.toFixed(1).replace('.0', '')}M`;
-  }
-  if (price >= 1000) {
-    return `€${Math.round(price / 1000)}K`;
-  }
-  return `€${price}`;
-};
+/** Short price for a marker pill; see `@/shared/map/formatMarkerPrice`. */
+export { formatMarkerPrice } from '@/shared/map/formatMarkerPrice';
 
 /**
  * The colour behind the map before its tiles arrive. The loading veil
