@@ -64,7 +64,8 @@ export const BudgetAssistant: React.FC<BudgetAssistantProps> = ({ units, city, c
             </motion.div>
           )}
           {!open && teaser.visible && (
-            <motion.div key="teaser" {...pop}>
+            // Phones: the bubble would cover most of the small picture; the button and the stats card's "From" price remain.
+            <motion.div key="teaser" className="hidden sm:block" {...pop}>
               <BudgetTeaser
                 pick={featured}
                 reference={reference}

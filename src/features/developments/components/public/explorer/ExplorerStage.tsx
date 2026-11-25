@@ -45,7 +45,8 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         full ? 'explorer-stage-full fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
-      <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
+      {/* On phones a column: the docked top bar above the picture, then the picture itself. */}
+      <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative flex flex-col sm:static sm:block'}>
         {view && (
           // Views of one building orbit into each other; a new building fades in, so drilling in after the glide reads as one move.
           <OrbitView viewKey={`${targetKey}:${view.viewKey}`} move={orbit.move}>
@@ -76,6 +77,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           activeFilters={p.activeFilters}
           fullscreen={full}
           onToggleFullscreen={fs.toggle}
+          docked={!full}
         />
 
         <div className={cn('absolute bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)] left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-[calc(var(--stage-safe-right,0px)+0.75rem)] lg:translate-x-0', HIDE_WHEN_IMMERSED)}>

@@ -1,10 +1,9 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Images } from 'lucide-react';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
-
-const ImageViewerModal = lazy(() => import('@/src/features/property-details/components/ImageViewerModal'));
+import { ResidencePhotoViewer } from './ResidencePhotoViewer';
 
 interface ResidencePhotosButtonProps {
   /** Cover first, then the gallery (see residencePhotos). */
@@ -48,11 +47,7 @@ export const ResidencePhotosButton: React.FC<ResidencePhotosButtonProps> = ({ ph
         <Images className="h-4 w-4" aria-hidden="true" />
         {label}
       </button>
-      {open && (
-        <Suspense fallback={null}>
-          <ImageViewerModal images={photos.map((url) => ({ url, tag: 'other' }))} startIndex={0} onClose={() => setOpen(false)} />
-        </Suspense>
-      )}
+      {open && <ResidencePhotoViewer photos={photos} start={0} onClose={() => setOpen(false)} />}
     </>
   );
 };

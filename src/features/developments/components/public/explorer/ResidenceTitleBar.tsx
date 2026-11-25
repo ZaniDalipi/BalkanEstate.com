@@ -5,6 +5,7 @@ import type { Development, UnitsSummary } from '../../../types';
 import { ShareResidenceButton } from '../share/ShareResidenceButton';
 import { residencePhotos } from '../../../utils/residencePhotos';
 import { ResidencePhotosButton } from '../gallery/ResidencePhotosButton';
+import { ResidencePhotoStrip } from '../gallery/ResidencePhotoStrip';
 import { BuilderByline } from '../builder/BuilderByline';
 
 interface ResidenceTitleBarProps {
@@ -18,6 +19,7 @@ interface ResidenceTitleBarProps {
 /** Compact name / location / availability strip above the full-bleed explorer. */
 export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ development, summary, onViewUnits, onViewBuilder }) => {
   const { t } = useTranslation('developments');
+  const photos = residencePhotos(development);
   return (
     <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-3 px-4 pb-4 pt-2">
       <div className="min-w-0 max-w-full">
@@ -27,6 +29,10 @@ export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ developmen
           <span className="min-w-0 break-words">{[development.address, development.city, development.country].filter(Boolean).join(', ')}</span>
         </p>
         {onViewBuilder && <BuilderByline builder={development.builder} onOpen={onViewBuilder} />}
+      </div>
+      {/* Phones: the photos as a row to swipe; from tablet up, the "Photos (N)" button beside the actions. */}
+      <div className="w-full sm:hidden">
+        <ResidencePhotoStrip photos={photos} />
       </div>
       <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto">
         {summary && (
@@ -41,12 +47,14 @@ export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ developmen
         <button
           type="button"
           onClick={onViewUnits}
-          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 min-[400px]:w-auto text-sm font-semibold text-white hover:bg-primary/90"
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-white hover:bg-primary/90 sm:flex-none"
         >
           {t('hero.viewUnits', 'View available units')}
           <ArrowDown className="h-4 w-4" aria-hidden="true" />
         </button>
-        <ResidencePhotosButton photos={residencePhotos(development)} variant="outline" />
+        <div className="hidden sm:block">
+          <ResidencePhotosButton photos={photos} variant="outline" />
+        </div>
         <ShareResidenceButton
           slug={development.slug}
           name={development.name}

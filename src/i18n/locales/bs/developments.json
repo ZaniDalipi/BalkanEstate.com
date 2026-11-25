@@ -493,7 +493,8 @@
       "whole": "Cijela zgrada",
       "hasPlan": "Ima tlocrt"
     },
-    "viewsFailed": "Slika se nije mogla učitati."
+    "viewsFailed": "Slika se nije mogla učitati.",
+    "phoneHint": "Dodirnite zgradu da je istražite · raširite prste za zumiranje"
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",
@@ -1600,7 +1601,8 @@
     "moveLater": "Pomjeri fotografiju {{n}} nazad",
     "remove": "Ukloni fotografiju {{n}}",
     "removeMessage": "Fotografija se uklanja sa stranice rezidencije.",
-    "showAll": "Fotografije ({{n}})"
+    "showAll": "Fotografije ({{n}})",
+    "open": "Otvori fotografiju {{n}} od {{total}}"
   },
   "immersive": {
     "headline": "Pronađite svoj dom u {{name}}",
