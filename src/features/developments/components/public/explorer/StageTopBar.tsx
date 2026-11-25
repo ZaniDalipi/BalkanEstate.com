@@ -53,7 +53,7 @@ export const StageTopBar: React.FC<StageTopBarProps> = (p) => {
       <div className="min-w-0 flex-1">
         {/* Docked on a phone at the top level, the residence name is already the page title: say what to do instead. */}
         {p.docked && p.crumbs.length <= 1 && (
-          <p className="text-[13px] leading-snug text-white/80 sm:hidden">{t('explorer.phoneHint', 'Tap a building to explore · pinch to zoom')}</p>
+          <p className="text-[13px] leading-snug text-white/80 sm:hidden">{t('explorer.phoneHint', 'Swipe to look around · tap a building to explore')}</p>
         )}
         {p.crumbs.length > 0 && (
           <div className={cn(p.docked && p.crumbs.length <= 1 && 'hidden sm:block')}>

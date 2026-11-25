@@ -102,7 +102,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
       <div
         ref={pz.containerRef}
         className="absolute"
-        style={{ ...frame, touchAction: pz.isZoomed ? 'none' : 'pan-y' }}
+        // Unzoomed, one finger scrolls the page either way (sideways in the phone panorama); two fingers zoom here.
+        style={{ ...frame, touchAction: pz.isZoomed ? 'none' : 'pan-x pan-y' }}
         {...pz.handlers}
         onClick={() => !pz.consumeDrag() && dismiss()}
       >

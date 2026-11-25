@@ -467,7 +467,7 @@
       "hasPlan": "Has a floor plan"
     },
     "viewsFailed": "The picture could not be loaded.",
-    "phoneHint": "Tap a building to explore · pinch to zoom"
+    "phoneHint": "Swipe to look around · tap a building to explore"
   },
   "feature": {
     "big_terrace": "With big terrace",
