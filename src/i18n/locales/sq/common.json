@@ -906,6 +906,7 @@
     },
     "groups": {
       "property": "Te një njoftim",
+      "residence": "Në një rezidencë",
       "search": "Në kërkim",
       "global": "Kudo",
       "current": "Në këtë faqe"
@@ -918,6 +919,10 @@
       "photoZoomTouch": "Në ekran të plotë, prekni dy herë një foto për ta zmadhuar dhe rrëshqitni poshtë për ta mbyllur.",
       "photoZoomPointer": "Në ekran të plotë, klikoni dy herë një foto ose shtypni + dhe − për zmadhim. Esc e mbyll.",
       "photoDraw": "Në ekran të plotë, përdorni stilolapsin për të vizatuar mbi një foto dhe dërgojeni te shitësi me pyetjen tuaj.",
+      "explorerHover": "Kalo miun mbi një ndërtesë ose apartament në foto për të parë çfarë është e lirë dhe çmimet. Kliko për të hyrë brenda.",
+      "explorerTap": "Prek një ndërtesë ose apartament në foto për të parë çfarë është e lirë dhe çmimet, pastaj prek butonin në kartën e saj për të hyrë brenda.",
+      "explorerSwipe": "Rrëshqit foton anash për të parë përreth dhe afroje me dy gishta.",
+      "explorerAvailability": "Aktivizo „Shfaq disponueshmërinë” për të ngjyrosur çdo apartament në foto sipas asaj nëse është i lirë, i rezervuar apo i shitur.",
       "drawArea": "Përdorni lapsin në hartë për të vizatuar zonën tuaj dhe për të parë vetëm njoftimet brenda saj.",
       "cardSwipe": "Rrëshqitni foton e një njoftimi majtas ose djathtas për të parë më shumë foto pa e hapur.",
       "saveSearch": "Ruani kërkimin dhe ne do t'ju njoftojmë kur të dalin njoftime të reja që përputhen.",

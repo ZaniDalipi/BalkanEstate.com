@@ -63,6 +63,7 @@ export const ExplorerStageControls: React.FC<ExplorerStageControlsProps> = (p) =
           onToggle={p.onToggleAvailability}
           showAvailability={p.showAvailability}
           onToggleShowAvailability={p.onToggleShowAvailability}
+          layout={full ? 'inline' : 'grid'}
         />
       </div>
     </>

@@ -493,7 +493,8 @@
       "whole": "Toată clădirea",
       "hasPlan": "Are plan de etaj"
     },
-    "viewsFailed": "Imaginea nu a putut fi încărcată."
+    "viewsFailed": "Imaginea nu a putut fi încărcată.",
+    "phoneHint": "Glisați pentru a privi în jur · atingeți o clădire pentru a o explora"
   },
   "feature": {
     "big_terrace": "Cu terasă mare",
@@ -1600,7 +1601,8 @@
     "moveLater": "Mută fotografia {{n}} mai târziu",
     "remove": "Elimină fotografia {{n}}",
     "removeMessage": "Fotografia este eliminată de pe pagina ansamblului.",
-    "showAll": "Fotografii ({{n}})"
+    "showAll": "Fotografii ({{n}})",
+    "open": "Deschide fotografia {{n}} din {{total}}"
   },
   "immersive": {
     "headline": "Găsiți-vă casa în {{name}}",

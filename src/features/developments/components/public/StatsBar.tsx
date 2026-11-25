@@ -15,18 +15,19 @@ const Tile: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactN
   value,
   accent,
 }) => (
-  <div className="flex items-center gap-3 px-4 py-3">
+  <div className="flex min-w-0 items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4">
     <span
       className={
         accent
-          ? 'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-sm'
-          : 'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary'
+          ? 'hidden h-9 w-9 shrink-0 items-center min-[360px]:flex justify-center rounded-xl sm:h-11 sm:w-11 bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-sm'
+          : 'hidden h-9 w-9 shrink-0 items-center min-[360px]:flex justify-center rounded-xl sm:h-11 sm:w-11 bg-primary/10 text-primary'
       }
     >
       {icon}
     </span>
     <div className="min-w-0">
-      <div className="truncate text-xl font-extrabold leading-tight tracking-tight text-slate-900">{value}</div>
+      {/* Wraps instead of cutting off: a price must never show as "72.00…". */}
+      <div className="break-words text-lg font-extrabold leading-tight tracking-tight text-slate-900 sm:text-xl">{value}</div>
       <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</div>
     </div>
   </div>
@@ -42,7 +43,8 @@ export const StatsBar: React.FC<StatsBarProps> = ({ summary, buildings }) => {
     summary?.priceMin != null
       ? summary.priceMin === summary.priceMax
         ? formatPrice(summary.priceMin, summary.currency)
-        : `${formatPrice(summary.priceMin, summary.currency)}+`
+        : // A word joiner keeps the "+" on the price's line when the tile wraps.
+          `${formatPrice(summary.priceMin, summary.currency)}\u2060+`
       : summary && summary.total > 0
         ? t('unit.priceOnRequest', 'Price on request')
         : '—';

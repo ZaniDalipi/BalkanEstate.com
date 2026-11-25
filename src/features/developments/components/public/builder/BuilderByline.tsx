@@ -13,12 +13,12 @@ export const BuilderByline: React.FC<{ builder?: DevelopmentBuilder; onOpen: () 
     <button
       type="button"
       onClick={onOpen}
-      className="mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 text-sm shadow-sm hover:border-primary/40 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="mt-2 inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 text-sm shadow-sm hover:border-primary/40 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       <BuilderLogo name={builder.name} url={builder.logo?.url} size={34} className="rounded-full" />
-      <span className="text-slate-500">{isAgencyCompany(builder) ? t('builderPublic.companyBy', 'By') : t('builderPublic.builtBy', 'Built by')}</span>
-      <span className="font-semibold text-slate-900">{builder.name}</span>
-      <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden="true" />
+      <span className="shrink-0 text-slate-500">{isAgencyCompany(builder) ? t('builderPublic.companyBy', 'By') : t('builderPublic.builtBy', 'Built by')}</span>
+      <span className="min-w-0 truncate font-semibold text-slate-900">{builder.name}</span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
     </button>
   );
 };

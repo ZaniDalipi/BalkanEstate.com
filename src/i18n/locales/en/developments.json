@@ -466,7 +466,8 @@
       "whole": "Whole building",
       "hasPlan": "Has a floor plan"
     },
-    "viewsFailed": "The picture could not be loaded."
+    "viewsFailed": "The picture could not be loaded.",
+    "phoneHint": "Swipe to look around · tap a building to explore"
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -1588,7 +1589,8 @@
     "moveLater": "Move photo {{n}} later",
     "remove": "Remove photo {{n}}",
     "removeMessage": "The photo is removed from the residence page.",
-    "showAll": "Photos ({{n}})"
+    "showAll": "Photos ({{n}})",
+    "open": "Open photo {{n}} of {{total}}"
   },
   "immersive": {
     "headline": "Find your home in {{name}}",

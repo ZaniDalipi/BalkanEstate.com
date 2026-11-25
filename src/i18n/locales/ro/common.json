@@ -906,6 +906,7 @@
     },
     "groups": {
       "property": "Într-un anunț",
+      "residence": "Într-un complex",
       "search": "În căutare",
       "global": "Peste tot",
       "current": "Pe această pagină"
@@ -918,6 +919,10 @@
       "photoZoomTouch": "Pe tot ecranul, atingeți de două ori o fotografie pentru a o mări și glisați în jos pentru a o închide.",
       "photoZoomPointer": "Pe tot ecranul, faceți dublu clic pe o fotografie sau apăsați + și − pentru zoom. Esc o închide.",
       "photoDraw": "Pe tot ecranul, desenați cu creionul pe o fotografie și trimiteți-o vânzătorului împreună cu întrebarea dvs.",
+      "explorerHover": "Treceți cu mouse-ul peste o clădire sau un apartament din imagine pentru a vedea ce este liber și prețurile. Faceți clic pentru a intra.",
+      "explorerTap": "Atingeți o clădire sau un apartament din imagine pentru a vedea ce este liber și prețurile, apoi atingeți butonul de pe cardul său pentru a intra.",
+      "explorerSwipe": "Glisați imaginea lateral pentru a privi în jur și depărtați degetele pentru a mări.",
+      "explorerAvailability": "Activați „Arată disponibilitatea” pentru a colora fiecare apartament din imagine după cum este liber, rezervat sau vândut.",
       "drawArea": "Folosiți creionul de pe hartă pentru a desena propria zonă și a vedea doar anunțurile din ea.",
       "cardSwipe": "Glisați fotografia unui anunț la stânga sau la dreapta pentru a vedea mai multe fotografii fără a-l deschide.",
       "saveSearch": "Salvați căutarea și vă anunțăm când apar anunțuri noi potrivite.",

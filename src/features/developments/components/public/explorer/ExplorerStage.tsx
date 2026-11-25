@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/src/lib/utils';
 import { ExplorerCanvas } from './ExplorerCanvas';
+import { PhonePanorama } from './PhonePanorama';
+import { PHONE_CANVAS_WIDTH } from './canvasSize';
 import { ViewSwitcher } from './ViewSwitcher';
 import { FiltersOverlay } from './FiltersOverlay';
 import { StageTopBar } from './StageTopBar';
@@ -18,7 +20,8 @@ export type { ExplorerStageProps };
 /**
  * Full-bleed explorer layout (East Gate B2): the rendering edge to edge with
  * the breadcrumb, building chips, legend, camera arrows and zoom laid over it.
- * On phones the chips and legend flow below the image so they don't bury it.
+ * On phones the chips and legend flow below the image so they don't bury it, and
+ * the image is drawn tall and swiped sideways (PhonePanorama).
  * ←/→ switch camera views; the full-screen toggle portals the stage to <body>.
  * While the buyer dives into an apartment the controls fade away (`group/stage`).
  */
@@ -45,26 +48,30 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         full ? 'explorer-stage-full fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
-      <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
+      {/* On phones a column: the docked top bar above the picture, then the picture itself. */}
+      <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative flex flex-col sm:static sm:block'}>
         {view && (
-          // Views of one building orbit into each other; a new building fades in, so drilling in after the glide reads as one move.
-          <OrbitView viewKey={`${targetKey}:${view.viewKey}`} move={orbit.move}>
-            <ExplorerCanvas
-              view={view}
-              unitsById={p.unitsById}
-              matchedIds={p.matchedIds}
-              buildingsById={p.buildingsById}
-              entrancesById={p.entrancesById}
-              buildingFacts={p.buildingFacts}
-              mode={mode}
-              onActivate={p.onActivate}
-              fullscreen={full}
-              focus={p.focus}
-              onFocusArrive={p.onFocusArrive}
-              openUnitId={p.openUnitId}
-              litUnitIds={preview.litUnitIds}
-            />
-          </OrbitView>
+          <PhonePanorama pictureKey={`${targetKey}:${view.viewKey}`} enabled={!full}>
+            {/* Views of one building orbit into each other; a new building fades in, so drilling in after the glide reads as one move. */}
+            <OrbitView viewKey={`${targetKey}:${view.viewKey}`} move={orbit.move}>
+              <ExplorerCanvas
+                view={view}
+                unitsById={p.unitsById}
+                matchedIds={p.matchedIds}
+                buildingsById={p.buildingsById}
+                entrancesById={p.entrancesById}
+                buildingFacts={p.buildingFacts}
+                mode={mode}
+                onActivate={p.onActivate}
+                fullscreen={full}
+                focus={p.focus}
+                onFocusArrive={p.onFocusArrive}
+                openUnitId={p.openUnitId}
+                litUnitIds={preview.litUnitIds}
+                className={full ? undefined : PHONE_CANVAS_WIDTH}
+              />
+            </OrbitView>
+          </PhonePanorama>
         )}
 
         <StageTopBar
@@ -76,6 +83,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           activeFilters={p.activeFilters}
           fullscreen={full}
           onToggleFullscreen={fs.toggle}
+          docked={!full}
         />
 
         <div className={cn('absolute bottom-[calc(var(--stage-safe-bottom,0px)+0.75rem)] left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-[calc(var(--stage-safe-right,0px)+0.75rem)] lg:translate-x-0', HIDE_WHEN_IMMERSED)}>

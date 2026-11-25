@@ -490,7 +490,8 @@
       "whole": "E gjithë ndërtesa",
       "hasPlan": "Ka plan kati"
     },
-    "viewsFailed": "Fotografia nuk mund të ngarkohej."
+    "viewsFailed": "Fotografia nuk mund të ngarkohej.",
+    "phoneHint": "Rrëshqit për të parë përreth · prek një ndërtesë për ta eksploruar"
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -1588,7 +1589,8 @@
     "moveLater": "Zhvendos foton {{n}} më pas",
     "remove": "Hiq foton {{n}}",
     "removeMessage": "Fotoja hiqet nga faqja e rezidencës.",
-    "showAll": "Fotot ({{n}})"
+    "showAll": "Fotot ({{n}})",
+    "open": "Hap foton {{n}} nga {{total}}"
   },
   "immersive": {
     "headline": "Gjeni shtëpinë tuaj në {{name}}",
