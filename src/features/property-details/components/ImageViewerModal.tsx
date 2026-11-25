@@ -18,6 +18,8 @@ interface ImageViewerModalProps {
     startIndex: number;
     onClose: () => void;
     propertyId?: string;
+    /** Called when the user moves to another photo (e.g. to put it in the URL). */
+    onIndexChange?: (index: number) => void;
 }
 
 type Point = { x: number; y: number };
@@ -31,7 +33,7 @@ const DOUBLE_TAP_MS = 300;
 const COLORS = ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#A855F7', '#FFFFFF', '#111827'];
 const WIDTHS = [3, 7, 14];
 
-const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex, onClose, propertyId }) => {
+const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex, onClose, propertyId, onIndexChange }) => {
     const { t } = useTranslation(['property']);
     const { state, dispatch } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(startIndex);
@@ -347,6 +349,15 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     }, []);
 
     // ── Effects ──────────────────────────────────────────────────────────────
+    const onIndexChangeRef = useRef(onIndexChange);
+    onIndexChangeRef.current = onIndexChange;
+    const reportedIndexRef = useRef(startIndex);
+    useEffect(() => {
+        if (reportedIndexRef.current === currentIndex) return;
+        reportedIndexRef.current = currentIndex;
+        onIndexChangeRef.current?.(currentIndex);
+    }, [currentIndex]);
+
     useEffect(() => {
         setImageError(false); setImageLoaded(false);
         resetZoom(); setStrokes([]); setAnnotateMode(false);

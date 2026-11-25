@@ -12,6 +12,8 @@ import { SoftIcon } from '@/src/shared/illustrations';
 import { formatPrice } from '@/utils/currency';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
+import { usePhotoViewerUrl } from '../hooks/usePhotoViewerUrl';
+import { resolveViewerImages } from '../utils/photoParam';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
 import { getFloorPlans } from '@/shared/utils/floorplans';
 import PropertySectionNav from './PropertySectionNav';
@@ -135,7 +137,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for modals
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
 
   // State for contact
@@ -303,6 +304,26 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   }, [activeCategory, allImages, categorizedImages]);
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
+
+  // Full-screen viewer: the open photo is in the URL (`?photo=N`), so every
+  // photo has its own link and Back closes the viewer.
+  const photoViewer = usePhotoViewerUrl(allImages.length);
+  const viewer = useMemo(
+    () => (photoViewer.photoIndex === null ? null : resolveViewerImages(allImages, imagesForCurrentCategory, photoViewer.photoIndex)),
+    // `images` is one of the two arrays passed in, so paging keeps its identity.
+    [photoViewer.photoIndex, allImages, imagesForCurrentCategory],
+  );
+  const openViewer = useCallback(() => {
+    const index = allImages.findIndex(img => img.url === currentImageUrl);
+    photoViewer.open(Math.max(index, 0));
+  }, [allImages, currentImageUrl, photoViewer]);
+  const handleViewerIndexChange = useCallback((index: number) => {
+    if (!viewer) return;
+    const url = viewer.images[index]?.url;
+    photoViewer.show(Math.max(allImages.findIndex(img => img.url === url), 0));
+    // The gallery follows the viewer, so closing it lands on the same photo.
+    if (viewer.images === imagesForCurrentCategory) setCurrentImageIndex(index);
+  }, [viewer, allImages, imagesForCurrentCategory, photoViewer]);
 
   // Floor plan ↔ gallery sync: the viewer opens on the photo showing in the
   // gallery, and the gallery follows whichever photo is picked in the viewer.
@@ -708,11 +729,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           onClose={() => setIsEditorOpen(false)}
         />
       )}
-      {isViewerOpen && (
+      {viewer && (
         <ImageViewerModal
-          images={imagesForCurrentCategory}
-          startIndex={currentImageIndex}
-          onClose={() => setIsViewerOpen(false)}
+          images={viewer.images}
+          startIndex={viewer.start}
+          onClose={photoViewer.close}
+          onIndexChange={handleViewerIndexChange}
           propertyId={property.id}
         />
       )}
@@ -1055,7 +1077,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         <PropertyGallery
           property={property}
           onOpenEditor={(url) => setIsEditorOpen(true)}
-          onOpenViewer={() => setIsViewerOpen(true)}
+          onOpenViewer={openViewer}
           onNavigateTo3DTour={handleNavigateTo3DTour}
           onOpenFloorPlan={getFloorPlans(property).length > 0 ? openFloorPlan : undefined}
           onView3DMap={
