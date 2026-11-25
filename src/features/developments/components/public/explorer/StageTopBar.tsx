@@ -30,10 +30,11 @@ export const StageTopBar: React.FC<StageTopBarProps> = (p) => {
   const { t } = useTranslation('developments');
   return (
     <div className={`pointer-events-none absolute left-[calc(var(--stage-safe-left,0px)+0.75rem)] right-[calc(var(--stage-safe-right,0px)+0.75rem)] top-[calc(var(--stage-safe-top,0px)+0.75rem)] z-10 flex items-start justify-between gap-2 ${RAISED_WHILE_POPUP_OPEN} ${HIDE_WHEN_IMMERSED}`}>
-      <div className="pointer-events-auto">
+      {/* Only the chip itself takes taps; the free space beside it still reaches the picture. */}
+      <div className="min-w-0 flex-1">
         {p.crumbs.length > 0 && <ExplorerBreadcrumb crumbs={p.crumbs} onSelect={p.onCrumb} />}
       </div>
-      <div className="pointer-events-auto relative flex gap-2">
+      <div className="pointer-events-auto relative flex shrink-0 gap-2">
         {p.actions}
         <button type="button" className={EXPLORER_PILL} onClick={p.onToggleFilters} aria-expanded={p.filtersOpen}>
           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />

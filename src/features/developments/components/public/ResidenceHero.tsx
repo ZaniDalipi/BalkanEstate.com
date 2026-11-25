@@ -55,7 +55,7 @@ export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onVie
       <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
       <ResidencePhotosButton photos={residencePhotos(development)} variant="glass" className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6" />
 
-      <div className="relative flex min-h-[460px] flex-col justify-end gap-4 px-6 pb-20 pt-16 sm:aspect-[16/10] sm:max-h-[80vh] sm:px-10 sm:pb-24 lg:aspect-[2/1]">
+      <div className="relative flex min-h-[460px] flex-col justify-end gap-4 px-5 pb-20 pt-16 sm:aspect-[16/10] sm:max-h-[80vh] sm:px-10 sm:pb-24 lg:aspect-[2/1]">
         <div className="flex flex-wrap gap-2">
           <Chip>{t(`category.${category}`)}</Chip>
           <Chip>
@@ -70,13 +70,13 @@ export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onVie
           )}
         </div>
 
-        <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-6xl">
+        <h1 className="max-w-3xl text-balance break-words text-3xl font-extrabold leading-[1.05] min-[400px]:text-4xl tracking-tight text-white drop-shadow-sm sm:text-6xl">
           {name}
         </h1>
 
-        <p className="flex items-center gap-1.5 text-sm text-white/90 sm:text-base">
-          <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
-          {[address, city, country].filter(Boolean).join(', ')}
+        <p className="flex items-start gap-1.5 text-sm text-white/90 sm:text-base">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="min-w-0 break-words">{[address, city, country].filter(Boolean).join(', ')}</span>
         </p>
 
         <div className="mt-1 flex flex-wrap items-center gap-3">
