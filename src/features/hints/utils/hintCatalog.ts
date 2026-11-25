@@ -6,7 +6,7 @@
  */
 
 /** Where a tip applies. `global` tips are true on every page. */
-export type HintPage = 'property' | 'search' | 'global';
+export type HintPage = 'property' | 'residence' | 'search' | 'global';
 
 /**
  * Which devices the tip is true for. `touch` is a phone or tablet,
@@ -43,6 +43,11 @@ export const HINTS: readonly HintDef[] = [
   hint('photoZoomTouch', 'property', 'touch', 'In full screen, double-tap a photo to zoom in, and swipe down to close it.'),
   hint('photoZoomPointer', 'property', 'pointer', 'In full screen, double-click a photo or press + and − to zoom. Esc closes it.'),
   hint('photoDraw', 'property', 'any', 'In full screen, use the pen to draw on a photo and send it to the seller with your question.'),
+  // A residence: its interactive picture
+  hint('explorerHover', 'residence', 'pointer', 'Hover over a building or apartment in the picture to see what is free and the prices. Click it to go inside.'),
+  hint('explorerTap', 'residence', 'touch', 'Tap a building or apartment in the picture to see what is free and the prices, then tap the button on its card to go inside.'),
+  hint('explorerSwipe', 'residence', 'touch', 'Swipe the picture sideways to look around, and pinch it to zoom in.'),
+  hint('explorerAvailability', 'residence', 'any', 'Turn on “Show availability” to colour every apartment in the picture by whether it is free, reserved or sold.'),
   // Search
   hint('drawArea', 'search', 'any', 'Use the pencil on the map to draw your own area and see only the listings inside it.'),
   hint('cardSwipe', 'search', 'touch', "Swipe a listing's photo left or right to see more photos without opening it."),

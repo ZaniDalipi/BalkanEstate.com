@@ -4,6 +4,7 @@ import type { HintPage } from './hintCatalog';
 /** Which tips belong to the page on screen. */
 export function hintPageFor(view: string, detail?: DetailKind): HintPage {
   if (detail === 'property') return 'property';
+  if (detail === 'residence') return 'residence';
   if (!detail && view === 'search') return 'search';
   return 'global';
 }

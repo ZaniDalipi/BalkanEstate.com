@@ -1,12 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HintGroup } from '../utils/hintGroups';
+import type { HintPage } from '../utils/hintCatalog';
 
 /** One group of tips in the Tips panel. */
 const HintGroupList: React.FC<{ group: HintGroup }> = ({ group }) => {
   const { t } = useTranslation('common');
-  const titles = {
+  const titles: Record<HintPage, string> = {
     property: t('hints.groups.property', 'On a listing'),
+    residence: t('hints.groups.residence', 'On a residence'),
     search: t('hints.groups.search', 'In search'),
     global: t('hints.groups.global', 'Everywhere'),
   };

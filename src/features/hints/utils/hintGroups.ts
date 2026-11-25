@@ -8,7 +8,7 @@ export interface HintGroup {
   hints: HintDef[];
 }
 
-const ORDER: HintPage[] = ['property', 'search', 'global'];
+const ORDER: HintPage[] = ['property', 'residence', 'search', 'global'];
 
 /** Every tip for this device, grouped by page, the page on screen first. */
 export function groupHints(page: HintPage, device: DeviceTraits, catalog: readonly HintDef[] = HINTS): HintGroup[] {

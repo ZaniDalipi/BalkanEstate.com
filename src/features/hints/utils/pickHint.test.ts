@@ -66,15 +66,31 @@ describe('hintPageFor', () => {
     expect(hintPageFor('search')).toBe('search');
     expect(hintPageFor('agents', 'agent')).toBe('global');
     expect(hintPageFor('home')).toBe('global');
+    expect(hintPageFor('developments', 'residence')).toBe('residence');
   });
 });
 
 describe('groupHints', () => {
   it('puts the page on screen first and drops empty groups', () => {
     const groups = groupHints('search', laptop);
-    expect(groups.map((g) => g.page)).toEqual(['search', 'property', 'global']);
+    expect(groups.map((g) => g.page)).toEqual(['search', 'property', 'residence', 'global']);
     expect(groups[0].current).toBe(true);
     expect(groups.flatMap((g) => g.hints).some((h) => h.device === 'touch')).toBe(false);
+  });
+});
+
+describe('residence tips', () => {
+  const onResidence = { ...base, page: 'residence' as const };
+  it('tells a mouse user to hover over the picture, and a touch user to tap and swipe it', () => {
+    expect(pickHint({ ...onResidence, device: laptop })?.id).toBe('explorerHover');
+    expect(pickHint(onResidence)?.id).toBe('explorerTap');
+    expect(hintsFor('residence', phone).map((h) => h.id)).toEqual(expect.arrayContaining(['explorerSwipe', 'explorerAvailability']));
+    expect(hintsFor('residence', phone).map((h) => h.id)).not.toContain('explorerHover');
+    expect(hintsFor('residence', laptop).map((h) => h.id)).not.toContain('explorerSwipe');
+  });
+  it('lists them first in the Tips panel on a residence', () => {
+    const groups = groupHints('residence', laptop);
+    expect(groups[0]).toMatchObject({ page: 'residence', current: true });
   });
 });
 

@@ -902,6 +902,7 @@
     },
     "groups": {
       "property": "Na oglasu",
+      "residence": "U rezidenciji",
       "search": "U pretrazi",
       "global": "Svugdje",
       "current": "Na ovoj stranici"
@@ -914,6 +915,10 @@
       "photoZoomTouch": "Preko cijelog ekrana dvaput dodirnite fotografiju da je uvećate, a prevucite nadolje da je zatvorite.",
       "photoZoomPointer": "Preko cijelog ekrana dvaput kliknite fotografiju ili pritisnite + i − za uvećanje. Esc zatvara.",
       "photoDraw": "Preko cijelog ekrana olovkom crtajte po fotografiji i pošaljite je prodavcu uz svoje pitanje.",
+      "explorerHover": "Pređite mišem preko zgrade ili stana na slici da vidite šta je slobodno i cijene. Kliknite da uđete.",
+      "explorerTap": "Dodirnite zgradu ili stan na slici da vidite šta je slobodno i cijene, pa dodirnite dugme na kartici da uđete.",
+      "explorerSwipe": "Prevucite sliku u stranu da razgledate i raširite prste da je uvećate.",
+      "explorerAvailability": "Uključite „Prikaži dostupnost” da se svaki stan na slici oboji prema tome da li je slobodan, rezervisan ili prodan.",
       "drawArea": "Olovkom na mapi nacrtajte svoje područje i vidite samo oglase unutar njega.",
       "cardSwipe": "Prevucite fotografiju oglasa lijevo ili desno da vidite još fotografija bez otvaranja.",
       "saveSearch": "Sačuvajte pretragu i javit ćemo vam kad se pojave novi odgovarajući oglasi.",
