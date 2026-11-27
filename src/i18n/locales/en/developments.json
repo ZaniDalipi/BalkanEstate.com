@@ -730,6 +730,29 @@
       "nothing": "The chosen view has no regions to copy.",
       "create": "Copy regions",
       "done": "Regions copied: {{made}}. Move and resize them where needed."
+    },
+    "autoFloors": {
+      "title": "Add floors automatically",
+      "hint": "Places one region per floor of this building, linked to its floor, laid out like a building you have already drawn (the same side first). Floors already on this view are left alone. Undo removes them all at once.",
+      "loading": "Looking up the floors of this building…",
+      "loadFailed": "Could not load the floors of this building. Check your connection and open this panel again.",
+      "noFloors": "This building has no floors yet. Add its floors in the structure first, then come back here.",
+      "empty": "No view has floor regions yet. Draw the floors of one building and link each to its floor; every other building can then reuse that layout here. Until then, use Repeat on other floors.",
+      "found": "Floors found on this building: {{count}} ({{first}} – {{last}}).",
+      "source": "Follow the layout of",
+      "option": "{{building}} · {{view}} ({{n}} floors)",
+      "optionSameSide": "{{building}} · {{view}} ({{n}} floors) · same side",
+      "otherSide": "No other view of the side \"{{side}}\" has floors yet, so the closest picture is used. Check the result.",
+      "withUnits": "Also add the apartment outlines (link them afterwards)",
+      "create": "Add floors",
+      "done": "Added {{floors}} floors and {{units}} apartment outlines. Check the edges, then link the apartments.",
+      "estimated": "{{count}} floors are not in the chosen view and were placed by its floor spacing. Check them first.",
+      "skippedThere": "{{count}} floors already had a region here and were left as they are.",
+      "skippedOutside": "{{count}} floors would fall outside the picture and were not added. Make the layout smaller to fit them.",
+      "outside": "The floors would leave the picture. Make them smaller or move them back.",
+      "tooMany": "This view would have more than {{max}} regions.",
+      "allThere": "Every floor of this building already has a region on this view. Delete one to place it again.",
+      "noTemplate": "The chosen view has no floor regions to follow. Pick another one."
     }
   },
   "inventory": {

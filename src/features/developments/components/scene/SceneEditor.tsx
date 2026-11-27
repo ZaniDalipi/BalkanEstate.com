@@ -9,6 +9,7 @@ import { RegionList } from './editor/RegionList';
 import { RegionInspector } from './editor/RegionInspector';
 import { RepeatRegion } from './editor/RepeatRegion';
 import { CopyFromView } from './editor/CopyFromView';
+import { AutoFloors } from './editor/AutoFloors';
 import { SceneStatusBar } from './editor/SceneStatusBar';
 import { useSceneSync } from './editor/useSceneSync';
 import { useLinkOptions } from './editor/useLinkOptions';
@@ -141,6 +142,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
               <p className="text-xs text-slate-500">{t('scene.selectHint', 'Select a region to edit its link.')}</p>
             )}
           </div>
+          {!preview && scene.targetType === 'building' && <AutoFloors developmentId={developmentId} scene={scene} editor={editor} />}
           {!preview && <CopyFromView developmentId={developmentId} scene={scene} editor={editor} />}
         </aside>
       </div>

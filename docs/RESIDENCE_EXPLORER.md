@@ -699,6 +699,29 @@ being edited:
   perspectives, so the copy is a head start to move and resize, not exact.
   Geometry: `utils/regionTransfer.ts`; action `ADD_MANY`; panel `CopyFromView.tsx`.
 
+**Add floors automatically** (building views only, above *Copy from another
+view*) places one region per floor of the building, already linked to its floor,
+laid out like a view the owner drew before:
+
+- The floors come from the building's structure ("Floors found: 8 (Ground – Floor 7)").
+  None yet → the panel says to add them in the structure first.
+- *Follow the layout of*: any building view with regions linked to its own
+  building's floors. The same side comes first (same direction; two custom views
+  only when they share a name), then other buildings before this building's other
+  sides, then the most floors. A template from another side shows a warning.
+- Floors are matched by level. A level the template does not have is placed at
+  the template's floor spacing (from its lowest to its highest floor) and counted
+  as "placed by spacing, check first". Floors that would leave the picture are
+  left out and counted; floors that already have a region on this view are left
+  as they are.
+- *Also add the apartment outlines* (on by default) copies each floor's unit
+  regions along with it, unlinked: units belong to one building, so they are
+  linked afterwards. *Mirror*, *Size* and *Right / Down* fit the template first,
+  so the spacing follows the fit.
+- One Undo step (`ADD_MANY`). It uses no image recognition: the picture itself is
+  not analysed. Logic: `utils/floorTemplate.ts`; hook `useAutoFloors.ts`; panel
+  `AutoFloors.tsx`.
+
 ## 7b-6. The phone apartment sheet
 
 On phones the apartment details are a bottom sheet that follows the finger, like

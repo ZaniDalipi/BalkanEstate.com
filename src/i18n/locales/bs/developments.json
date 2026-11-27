@@ -737,6 +737,29 @@
       "nothing": "Odabrani prikaz nema zona za kopiranje.",
       "create": "Kopiraj zone",
       "done": "Kopirano zona: {{made}}. Pomjerite ih i prilagodite veličinu gdje treba."
+    },
+    "autoFloors": {
+      "title": "Automatski dodaj spratove",
+      "hint": "Postavlja po jednu regiju za svaki sprat ove zgrade, povezanu s njenim spratom, raspoređenu kao zgrada koju ste već nacrtali (prvo ista strana). Spratovi koji su već na ovom prikazu ostaju kakvi jesu. Poništi ih sve uklanja odjednom.",
+      "loading": "Tražim spratove ove zgrade…",
+      "loadFailed": "Spratovi ove zgrade nisu učitani. Provjerite vezu i ponovo otvorite ovaj panel.",
+      "noFloors": "Ova zgrada još nema spratova. Prvo dodajte njene spratove u strukturi, zatim se vratite ovdje.",
+      "empty": "Nijedan prikaz još nema regije spratova. Nacrtajte spratove jedne zgrade i svaki povežite s njegovim spratom; svaka druga zgrada tada ovdje može ponovo koristiti taj raspored. Do tada koristite Ponovi na drugim spratovima.",
+      "found": "Pronađeni spratovi ove zgrade: {{count}} ({{first}} – {{last}}).",
+      "source": "Prati raspored prikaza",
+      "option": "{{building}} · {{view}} ({{n}} spratova)",
+      "optionSameSide": "{{building}} · {{view}} ({{n}} spratova) · ista strana",
+      "otherSide": "Nijedan drugi prikaz strane \"{{side}}\" još nema spratove, pa se koristi najbliža slika. Provjerite rezultat.",
+      "withUnits": "Dodaj i obrise stanova (povežite ih poslije)",
+      "create": "Dodaj spratove",
+      "done": "Dodano spratova: {{floors}}, obrisa stanova: {{units}}. Provjerite rubove, zatim povežite stanove.",
+      "estimated": "Spratova kojih nema na odabranom prikazu: {{count}}; postavljeni su prema razmaku spratova. Prvo njih provjerite.",
+      "skippedThere": "Spratova koji su ovdje već imali regiju: {{count}}; ostali su kakvi jesu.",
+      "skippedOutside": "Spratova koji bi izašli iz slike: {{count}}; nisu dodani. Smanjite raspored da stanu.",
+      "outside": "Spratovi bi izašli iz slike. Smanjite ih ili ih vratite nazad.",
+      "tooMany": "Ovaj prikaz bi imao više od {{max}} regija.",
+      "allThere": "Svaki sprat ove zgrade već ima regiju na ovom prikazu. Izbrišite jednu da je ponovo postavite.",
+      "noTemplate": "Odabrani prikaz nema regije spratova koje bi se pratile. Odaberite drugi."
     }
   },
   "inventory": {

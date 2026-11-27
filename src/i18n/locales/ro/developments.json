@@ -737,6 +737,29 @@
       "nothing": "Vederea aleasă nu are zone de copiat.",
       "create": "Copiază zonele",
       "done": "Zone copiate: {{made}}. Mutați-le și redimensionați-le unde e nevoie."
+    },
+    "autoFloors": {
+      "title": "Adaugă etajele automat",
+      "hint": "Plasează câte o zonă pentru fiecare etaj al acestei clădiri, legată de etajul ei, așezată ca o clădire pe care ați desenat-o deja (mai întâi aceeași latură). Etajele deja prezente în această vedere rămân neschimbate. Anulare le elimină pe toate odată.",
+      "loading": "Se caută etajele acestei clădiri…",
+      "loadFailed": "Etajele acestei clădiri nu s-au încărcat. Verificați conexiunea și deschideți din nou acest panou.",
+      "noFloors": "Această clădire nu are încă etaje. Adăugați mai întâi etajele în structură, apoi reveniți aici.",
+      "empty": "Nicio vedere nu are încă zone de etaj. Desenați etajele unei clădiri și legați-o pe fiecare de etajul ei; orice altă clădire poate apoi refolosi aici acea așezare. Până atunci, folosiți Repetă pe alte etaje.",
+      "found": "Etaje găsite în această clădire: {{count}} ({{first}} – {{last}}).",
+      "source": "Urmează așezarea din",
+      "option": "{{building}} · {{view}} ({{n}} etaje)",
+      "optionSameSide": "{{building}} · {{view}} ({{n}} etaje) · aceeași latură",
+      "otherSide": "Nicio altă vedere a laturii „{{side}}” nu are încă etaje, așa că se folosește imaginea cea mai apropiată. Verificați rezultatul.",
+      "withUnits": "Adaugă și contururile apartamentelor (legați-le după aceea)",
+      "create": "Adaugă etajele",
+      "done": "Etaje adăugate: {{floors}}, contururi de apartamente: {{units}}. Verificați marginile, apoi legați apartamentele.",
+      "estimated": "Etaje care lipsesc din vederea aleasă: {{count}}; au fost plasate după distanța dintre etaje. Verificați-le mai întâi.",
+      "skippedThere": "Etaje care aveau deja o zonă aici: {{count}}; au rămas neschimbate.",
+      "skippedOutside": "Etaje care ar ieși din imagine: {{count}}; nu au fost adăugate. Micșorați așezarea ca să încapă.",
+      "outside": "Etajele ar ieși din imagine. Micșorați-le sau mutați-le înapoi.",
+      "tooMany": "Această vedere ar avea mai mult de {{max}} zone.",
+      "allThere": "Fiecare etaj al acestei clădiri are deja o zonă în această vedere. Ștergeți una pentru a o plasa din nou.",
+      "noTemplate": "Vederea aleasă nu are zone de etaj de urmat. Alegeți alta."
     }
   },
   "inventory": {

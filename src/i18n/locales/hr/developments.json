@@ -737,6 +737,29 @@
       "nothing": "Odabrani prikaz nema zona za kopiranje.",
       "create": "Kopiraj zone",
       "done": "Kopirano zona: {{made}}. Pomaknite ih i prilagodite veličinu gdje treba."
+    },
+    "autoFloors": {
+      "title": "Automatski dodaj katove",
+      "hint": "Postavlja po jednu regiju za svaki kat ove zgrade, povezanu s njezinim katom, raspoređenu kao zgrada koju ste već nacrtali (najprije ista strana). Katovi koji su već na ovom prikazu ostaju kakvi jesu. Poništi ih sve uklanja odjednom.",
+      "loading": "Tražim katove ove zgrade…",
+      "loadFailed": "Katovi ove zgrade nisu učitani. Provjerite vezu i ponovno otvorite ovu ploču.",
+      "noFloors": "Ova zgrada još nema katova. Najprije dodajte njezine katove u strukturi, zatim se vratite ovamo.",
+      "empty": "Nijedan prikaz još nema regije katova. Nacrtajte katove jedne zgrade i svaki povežite s njegovim katom; svaka druga zgrada tada ovdje može ponovno koristiti taj raspored. Do tada koristite Ponovi na drugim katovima.",
+      "found": "Pronađeni katovi ove zgrade: {{count}} ({{first}} – {{last}}).",
+      "source": "Prati raspored prikaza",
+      "option": "{{building}} · {{view}} ({{n}} katova)",
+      "optionSameSide": "{{building}} · {{view}} ({{n}} katova) · ista strana",
+      "otherSide": "Nijedan drugi prikaz strane \"{{side}}\" još nema katove, pa se koristi najbliža slika. Provjerite rezultat.",
+      "withUnits": "Dodaj i obrise stanova (povežite ih poslije)",
+      "create": "Dodaj katove",
+      "done": "Dodano katova: {{floors}}, obrisa stanova: {{units}}. Provjerite rubove, zatim povežite stanove.",
+      "estimated": "Katova kojih nema na odabranom prikazu: {{count}}; postavljeni su prema razmaku katova. Najprije njih provjerite.",
+      "skippedThere": "Katova koji su ovdje već imali regiju: {{count}}; ostali su kakvi jesu.",
+      "skippedOutside": "Katova koji bi izašli iz slike: {{count}}; nisu dodani. Smanjite raspored da stanu.",
+      "outside": "Katovi bi izašli iz slike. Smanjite ih ili ih vratite natrag.",
+      "tooMany": "Ovaj bi prikaz imao više od {{max}} regija.",
+      "allThere": "Svaki kat ove zgrade već ima regiju na ovom prikazu. Izbrišite jednu da je ponovno postavite.",
+      "noTemplate": "Odabrani prikaz nema regije katova koje bi se pratile. Odaberite drugi."
     }
   },
   "inventory": {
