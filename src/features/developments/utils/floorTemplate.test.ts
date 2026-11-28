@@ -1,25 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import type { Hotspot, Scene } from '../types';
-import { buildFloorRegions, floorTemplates, isSameSide, type AutoFloorsInput, type FloorLevel } from './floorTemplate';
+import { drawnLevels, type FloorLevel, type LevelContext, type UnitRef } from './floorLevels';
+import { fillFloors, floorTemplates, isSameSide, type FillInput } from './floorTemplate';
 
-const rect = (id: string, y0: number, y1: number, linkType: Hotspot['linkType'], linkId: string, x0 = 0.2, x1 = 0.8): Hotspot =>
-  ({ id, shape: 'rect', points: [[x0, y0], [x1, y1]], linkType, linkId, z: 0 });
+const rect = (id: string, y0: number, y1: number, linkType: Hotspot['linkType'], linkId: string): Hotspot =>
+  ({ id, shape: 'rect', points: [[0.2, y0], [0.8, y1]], linkType, linkId, z: 0 });
 const view = (id: string, targetId: string, dir: Scene['viewDirection'], hotspots: Hotspot[], viewName?: string): Scene =>
   ({ id, developmentId: 'd', targetType: 'building', targetId, viewKey: id, viewName, viewDirection: dir, sortOrder: 0, imageUrl: '', imageWidth: 1, imageHeight: 1, draft: { hotspots, version: 1 }, version: 1 }) as Scene;
-const floor = (id: string, buildingId: string, level: number): FloorLevel => ({ id, buildingId, level, label: `L${level}` });
 
-// Building A (template): ground + two floors, each band 0.1 high, 0.15 apart.
-const aFloors = [floor('a0', 'A', 0), floor('a1', 'A', 1), floor('a2', 'A', 2)];
-const aRight = view('aR', 'A', 'right', [
-  rect('g', 0.75, 0.85, 'floor', 'a0'),
-  rect('f1', 0.6, 0.7, 'floor', 'a1'),
-  rect('f2', 0.45, 0.55, 'floor', 'a2'),
-  rect('apt', 0.62, 0.68, 'unit', 'u-a1', 0.25, 0.4),
-]);
-const noAdjust = { mirror: false, sizePct: 100, moveXPct: 0, moveYPct: 0 };
+// Building A: ground + floors 1–5; apartments x01/x02 on floors 1–4 (floor 5 has none yet).
+const floors: FloorLevel[] = [0, 1, 2, 3, 4, 5].map((l) => ({ id: `f${l}`, buildingId: 'A', level: l, label: l === 0 ? 'Ground' : `Floor ${l}` }));
+const units: UnitRef[] = [1, 2, 3, 4].flatMap((l) => [1, 2].map((p) => ({ id: `u${l}0${p}`, unitNumber: `A-${l}0${p}`, floorId: `f${l}` })));
+units.push({ id: 'g1', unitNumber: 'A-001', floorId: 'f0' });
+const ctx: LevelContext = { floors, units };
+// Drawn on this view: the ground floor shop and both apartments of floor 1 (0.1 high).
+const drawn = [rect('shop', 0.85, 0.98, 'unit', 'g1'), rect('a', 0.7, 0.8, 'unit', 'u101'), rect('b', 0.7, 0.8, 'unit', 'u102')];
 const ids = () => { let n = 0; return () => `n${++n}`; };
-const input = (over: Partial<AutoFloorsInput>): AutoFloorsInput =>
-  ({ template: aRight, floors: [...aFloors, floor('c0', 'C', 0), floor('c1', 'C', 1)], buildingId: 'C', existing: [], withUnits: false, adjust: noAdjust, nextId: ids(), ...over });
+const input = (over: Partial<FillInput> = {}): FillInput => {
+  const groups = drawnLevels(drawn, 'A', ctx);
+  return { groups, floors, drawn: new Set(groups.map((g) => g.level)), stepPct: 15, units, nextId: ids(), ...over };
+};
 
 describe('isSameSide', () => {
   it('matches the direction, and custom views by name', () => {
@@ -31,68 +31,61 @@ describe('isSameSide', () => {
 });
 
 describe('floorTemplates', () => {
-  it('offers views with floor regions, same side first, another building before this one', () => {
-    const floors = [...aFloors, floor('c0', 'C', 0)];
+  it('offers other buildings\' views with linked regions, the same side first', () => {
+    const cFloors: FloorLevel[] = [{ id: 'c1', buildingId: 'C', level: 1, label: 'C1' }];
+    const all: LevelContext = { floors: [...floors, ...cFloors], units };
     const current = view('cR', 'C', 'right', []);
-    const aFront = view('aF', 'A', 'front', [rect('x', 0.1, 0.2, 'floor', 'a0'), rect('y', 0.3, 0.4, 'floor', 'a1')]);
-    const cFront = view('cF', 'C', 'front', [rect('z', 0.1, 0.2, 'floor', 'c0')]);
-    const unitsOnly = view('aB', 'A', 'back', [rect('u', 0.1, 0.2, 'unit', 'u1')]);
-    const list = floorTemplates([current, cFront, aFront, unitsOnly, aRight], current, floors);
-    expect(list.map((t) => [t.scene.id, t.floors, t.sameSide])).toEqual([['aR', 3, true], ['aF', 2, false], ['cF', 1, false]]);
-  });
-
-  it('ignores floor links to another building', () => {
-    const odd = view('odd', 'A', 'right', [rect('x', 0.1, 0.2, 'floor', 'c0')]);
-    expect(floorTemplates([odd], view('cR', 'C', 'right', []), [floor('c0', 'C', 0)])).toEqual([]);
+    const aFront = view('aF', 'A', 'front', drawn);
+    const aRight = view('aR', 'A', 'right', [rect('a', 0.7, 0.8, 'unit', 'u101')]);
+    const empty = view('aB', 'A', 'back', [rect('x', 0.1, 0.2, 'unit', '')]);
+    const ownOther = view('cF', 'C', 'front', [rect('y', 0.1, 0.2, 'floor', 'c1')]);
+    expect(floorTemplates([current, aFront, empty, ownOther, aRight], current, all).map((t) => [t.scene.id, t.levels, t.sameSide]))
+      .toEqual([['aR', 1, true], ['aF', 2, false]]);
   });
 });
 
-describe('buildFloorRegions', () => {
-  it('links one region to each floor of the building at the template\'s place', () => {
-    const r = buildFloorRegions(input({}));
-    expect(r.ok).toBe(true);
-    if (r.ok === false) return;
-    expect(r.hotspots.map((h) => [h.id, h.linkType, h.linkId])).toEqual([['n1', 'floor', 'c0'], ['n2', 'floor', 'c1']]);
-    expect(r.hotspots[1].points).toEqual([[0.2, 0.6], [0.8, 0.7]]);
-    expect(r).toMatchObject({ floors: 2, estimated: 0, alreadyThere: 0, outside: 0 });
+describe('fillFloors', () => {
+  it('copies the top drawn floor up the building, linking each copy to the apartment with the same number', () => {
+    const r = fillFloors(input());
+    expect(r.added).toEqual(['Floor 2', 'Floor 3', 'Floor 4', 'Floor 5']);
+    const floor2 = r.hotspots.slice(0, 2);
+    expect(floor2.map((h) => h.linkId)).toEqual(['u201', 'u202']);
+    expect(floor2[0].points[0][1]).toBeCloseTo(0.55);
+    // Floor 5 has no apartments yet: its copies are left to link.
+    expect(r).toMatchObject({ linked: 6, toLink: 2, outside: [] });
   });
 
-  it('places levels the template lacks at its floor spacing, and leaves out what would leave the picture', () => {
-    const floors = [...aFloors, ...[0, 1, 2, 3, 4, 5, 6].map((l) => floor(`c${l}`, 'C', l))];
-    const r = buildFloorRegions(input({ floors }));
-    if (r.ok === false) throw new Error('expected ok');
-    // Level 3 sits one step (0.15) above level 2; level 5 touches the top edge, level 6 would be above it.
-    const l3 = r.hotspots.find((h) => h.linkId === 'c3') as Hotspot;
-    expect(l3.points[0][1]).toBeCloseTo(0.3);
-    expect(l3.points[1][1]).toBeCloseTo(0.4);
-    expect(r).toMatchObject({ floors: 6, estimated: 3, outside: 1 });
+  it('leaves out floors that would leave the picture, and never touches drawn floors', () => {
+    const r = fillFloors(input({ stepPct: 20 }));
+    expect(r.added).toEqual(['Floor 2', 'Floor 3', 'Floor 4']);
+    expect(r.outside).toEqual(['Floor 5']);
+    expect(r.hotspots.every((h) => !['a', 'b', 'shop'].includes(h.id))).toBe(true);
   });
 
-  it('brings the apartment outlines of each floor along, unlinked', () => {
-    const r = buildFloorRegions(input({ withUnits: true }));
-    if (r.ok === false) throw new Error('expected ok');
-    const apts = r.hotspots.filter((h) => h.linkType === 'unit');
-    expect(apts).toHaveLength(1);
-    expect(apts[0]).toMatchObject({ linkId: '', points: [[0.25, 0.62], [0.4, 0.68]] });
-    expect(r.units).toBe(1);
+  it('links floor regions to their floor and clears other links', () => {
+    const groups = [{ level: 1, regions: [rect('fl', 0.7, 0.8, 'floor', 'f1'), rect('ls', 0.7, 0.8, 'listing', 'L1')] }];
+    const r = fillFloors(input({ groups, drawn: new Set([0, 1]) }));
+    expect(r.hotspots.slice(0, 2).map((h) => [h.linkType, h.linkId])).toEqual([['floor', 'f2'], ['listing', '']]);
   });
 
-  it('leaves floors that already have a region on the view as they are', () => {
-    const r = buildFloorRegions(input({ existing: [rect('mine', 0.7, 0.9, 'floor', 'c0')] }));
-    if (r.ok === false) throw new Error('expected ok');
-    expect(r.hotspots.map((h) => h.linkId)).toEqual(['c1']);
-    expect(r.alreadyThere).toBe(1);
+  it('skips basements unless a basement level was drawn', () => {
+    const withBasement = [...floors, { id: 'b1', buildingId: 'A', level: -1, label: 'Basement' }];
+    expect(fillFloors(input({ floors: withBasement })).added).not.toContain('Basement');
   });
 
-  it('applies the fit (move) before placing the floors', () => {
-    const r = buildFloorRegions(input({ adjust: { ...noAdjust, moveYPct: 10 } }));
-    if (r.ok === false) throw new Error('expected ok');
-    expect(r.hotspots[0].points[0][1]).toBeCloseTo(0.85);
+  it('adds nothing when every floor is drawn or nothing is drawn', () => {
+    expect(fillFloors(input({ drawn: new Set([0, 1, 2, 3, 4, 5]) })).hotspots).toEqual([]);
+    expect(fillFloors(input({ groups: [] })).added).toEqual([]);
   });
+});
 
-  it('names the reason it cannot place anything', () => {
-    expect(buildFloorRegions(input({ buildingId: 'Z' }))).toEqual({ ok: false, problem: 'noFloors' });
-    expect(buildFloorRegions(input({ template: view('e', 'A', 'right', []) }))).toEqual({ ok: false, problem: 'noTemplate' });
-    expect(buildFloorRegions(input({ adjust: { ...noAdjust, moveYPct: 50 } }))).toEqual({ ok: false, problem: 'outside' });
+describe('fillFloors — whole floors', () => {
+  it('outlines each added floor under its apartments, linked to the floor, and never guesses the ground floor', () => {
+    const upper = drawnLevels([rect('a', 0.7, 0.8, 'unit', 'u101'), rect('b', 0.7, 0.8, 'unit', 'u102')], 'A', ctx);
+    const r = fillFloors(input({ groups: upper, drawn: new Set([1]), floorOutline: true }));
+    expect(r.added).not.toContain('Ground');
+    const outline = r.hotspots[0];
+    expect(outline).toMatchObject({ shape: 'rect', linkType: 'floor', linkId: 'f2', z: -1 });
+    expect(outline.points).toEqual([[0.2, expect.closeTo(0.55)], [0.8, expect.closeTo(0.65)]]);
   });
 });

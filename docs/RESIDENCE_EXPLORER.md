@@ -700,27 +700,38 @@ being edited:
   Geometry: `utils/regionTransfer.ts`; action `ADD_MANY`; panel `CopyFromView.tsx`.
 
 **Add floors automatically** (building views only, above *Copy from another
-view*) places one region per floor of the building, already linked to its floor,
-laid out like a view the owner drew before:
+view*, open by default): draw and link one floor, press Add, and the rest of the
+building is filled in.
 
-- The floors come from the building's structure ("Floors found: 8 (Ground – Floor 7)").
-  None yet → the panel says to add them in the structure first.
-- *Follow the layout of*: any building view with regions linked to its own
-  building's floors. The same side comes first (same direction; two custom views
-  only when they share a name), then other buildings before this building's other
-  sides, then the most floors. A template from another side shows a warning.
-- Floors are matched by level. A level the template does not have is placed at
-  the template's floor spacing (from its lowest to its highest floor) and counted
-  as "placed by spacing, check first". Floors that would leave the picture are
-  left out and counted; floors that already have a region on this view are left
-  as they are.
-- *Also add the apartment outlines* (on by default) copies each floor's unit
-  regions along with it, unlinked: units belong to one building, so they are
-  linked afterwards. *Mirror*, *Size* and *Right / Down* fit the template first,
-  so the spacing follows the fit.
-- One Undo step (`ADD_MANY`). It uses no image recognition: the picture itself is
-  not analysed. Logic: `utils/floorTemplate.ts`; hook `useAutoFloors.ts`; panel
-  `AutoFloors.tsx`.
+1. Draw the apartments of one floor (e.g. Floor 1) and link each to its apartment.
+   The panel reads each region's floor from its link (an apartment's floor, or a
+   floor link) and lists what is drawn ("Floor 1 (3)"). Until something linked is
+   drawn it shows these steps and counts the unlinked regions.
+2. *Floor height* (% of the picture height) is measured from the drawing: the
+   distance between the two highest drawn floors (a tall ground floor below them
+   does not count), else the drawn floor's height plus a little for the slab.
+3. The button says what it will do ("Add 6 floors (Floor 2 – Floor 7)"). Every
+   floor without regions on this view gets the outlines of the nearest drawn
+   floor, moved by the floor height, as one Undo step (`ADD_MANY`).
+
+- **Apartments are linked automatically** to the apartment with the same
+  number ending on the new floor (A-102 → A-202; C-102 in another building).
+  Only a single clear match counts; the others are left as *Missing link*.
+- *Also outline each whole floor* (on by default) adds one rectangle per new
+  floor around its apartments, linked to the floor and placed under them, so the
+  apartments stay clickable.
+- The ground floor and basements are never guessed from the floors above;
+  floors that would leave the picture are left out and named. Floors already
+  drawn on this view are never touched.
+- *Start from another building's view* (shown when one exists): the same side
+  first (same direction; custom views when they share a name), with *Mirror*,
+  *Size* and *Right / Down* to fit it. Levels the template does not have come
+  from its nearest level by the floor height and are flagged to check first.
+- The picture itself is not analysed (no image recognition). Logic:
+  `utils/floorLevels.ts` (levels, floor height, number matching) and
+  `utils/floorTemplate.ts` (templates, filling); hook `useAutoFloors.ts`;
+  panel `AutoFloors.tsx` with `AutoFloorsHowTo`, `AutoFloorsTemplate` and
+  `AutoFloorsOutcome`.
 
 ## 7b-6. The phone apartment sheet
 

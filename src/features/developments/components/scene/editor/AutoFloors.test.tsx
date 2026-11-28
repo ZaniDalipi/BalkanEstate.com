@@ -5,82 +5,81 @@ import { AutoFloors } from './AutoFloors';
 import type { PolygonEditor } from '../../../hooks/usePolygonEditor';
 import type { DevelopmentFloor, Hotspot, Scene } from '../../../types';
 
-const band = (id: string, y0: number, linkId: string): Hotspot => ({ id, shape: 'rect', points: [[0.2, y0], [0.8, y0 + 0.1]], linkType: 'floor', linkId, z: 0 });
+const rect = (id: string, y0: number, linkId: string): Hotspot => ({ id, shape: 'rect', points: [[0.2, y0], [0.8, y0 + 0.1]], linkType: 'unit', linkId, z: 0 });
 const view = (id: string, targetId: string, direction: Scene['viewDirection'], hotspots: Hotspot[]): Scene =>
   ({ id, developmentId: 'd1', targetType: 'building', targetId, viewKey: id, viewDirection: direction, sortOrder: 0, imageUrl: `https://m.test/${id}.webp`, imageWidth: 100, imageHeight: 100, draft: { hotspots, version: 1 }, version: 1 }) as Scene;
 const floor = (id: string, buildingId: string, level: number) => ({ id, buildingId, level, label: `F${level}` }) as DevelopmentFloor;
+const unit = (id: string, unitNumber: string, floorId: string) => ({ id, unitNumber, floorId });
 
 let scenes: Scene[] = [];
-let structure: { floors: DevelopmentFloor[]; buildings: { id: string; name: string }[]; isLoading: boolean; error: unknown } = { floors: [], buildings: [], isLoading: false, error: null };
+let structure = { floors: [] as DevelopmentFloor[], buildings: [] as { id: string; name: string }[], isLoading: false, error: null as unknown };
+let ownUnits: ReturnType<typeof unit>[] = [];
 vi.mock('../../../hooks/useScenes', () => ({ useScenes: () => ({ scenes }) }));
-vi.mock('../../../hooks/useDevelopment', () => ({ useDevelopmentStructure: () => structure }));
+vi.mock('../../../hooks/useDevelopment', () => ({
+  useDevelopmentStructure: () => structure,
+  useDevelopmentUnits: (id: string | undefined) => ({ units: id ? ownUnits : [], total: ownUnits.length, isLoading: false }),
+}));
 
-const aRight = view('aR', 'A', 'right', [band('g', 0.7, 'a0'), band('f1', 0.55, 'a1')]);
-const cRight = view('cR', 'C', 'right', []);
-const allFloors = [floor('a0', 'A', 0), floor('a1', 'A', 1), floor('c0', 'C', 0), floor('c1', 'C', 1), floor('c2', 'C', 2)];
+const aFloors = [floor('f0', 'A', 0), floor('f1', 'A', 1), floor('f2', 'A', 2), floor('f3', 'A', 3)];
+const aUnits = [unit('u101', 'A-101', 'f1'), unit('u102', 'A-102', 'f1'), unit('u201', 'A-201', 'f2'), unit('u202', 'A-202', 'f2'), unit('u301', 'A-301', 'f3'), unit('u302', 'A-302', 'f3')];
+const aFront = view('aF', 'A', 'front', []);
 
-const open = (existing: Hotspot[] = []) => {
+const open = (hotspots: Hotspot[]) => {
   let n = 0;
   const dispatch = vi.fn();
-  const editor = { dispatch, nextId: () => `n${++n}`, state: { hotspots: existing } } as unknown as PolygonEditor;
-  render(<AutoFloors developmentId="d1" scene={cRight} editor={editor} />);
-  fireEvent.click(screen.getByText('editor.autoFloors.title'));
+  const editor = { dispatch, nextId: () => `n${++n}`, state: { hotspots } } as unknown as PolygonEditor;
+  render(<AutoFloors developmentId="d1" scene={aFront} editor={editor} />);
   return dispatch;
 };
-const add = () => fireEvent.click(screen.getByRole('button', { name: 'editor.autoFloors.create' }));
+const setup = () => { scenes = [aFront]; structure = { floors: aFloors, buildings: [], isLoading: false, error: null }; ownUnits = aUnits; };
 
 describe('AutoFloors', () => {
-  it('tells the owner to add floors first when the building has none', () => {
-    scenes = [aRight, cRight];
-    structure = { floors: allFloors.filter((f) => f.buildingId === 'A'), buildings: [], isLoading: false, error: null };
-    open();
-    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.noFloors');
-    expect(screen.queryByRole('button', { name: 'editor.autoFloors.create' })).toBeNull();
+  it('explains the three steps while nothing linked is drawn, and counts the unlinked regions', () => {
+    setup();
+    open([rect('x', 0.5, '')]);
+    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.how1');
+    expect(screen.getByText('editor.autoFloors.unlinked')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /editor.autoFloors.create/ })).toBeNull();
   });
 
-  it('explains how to make a template when no view has floor regions', () => {
-    scenes = [cRight];
-    structure = { floors: allFloors, buildings: [], isLoading: false, error: null };
-    open();
-    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.empty');
-  });
-
-  it('shows an error when the floors cannot be loaded', () => {
-    structure = { floors: [], buildings: [], isLoading: false, error: new Error('offline') };
-    open();
-    expect(screen.getByRole('alert')).toHaveTextContent('editor.autoFloors.loadFailed');
-  });
-
-  it('adds one linked region per floor from the same side of another building in one step', () => {
-    scenes = [aRight, cRight];
-    structure = { floors: allFloors, buildings: [{ id: 'A', name: 'A1' }], isLoading: false, error: null };
-    const dispatch = open();
-    expect(screen.getByText('editor.autoFloors.found')).toBeInTheDocument();
-    expect(screen.getByLabelText('editor.autoFloors.source').querySelector('option')).toHaveTextContent('editor.autoFloors.optionSameSide');
-    add();
+  it('fills the floors above the drawn one in one step, linked by apartment number', () => {
+    setup();
+    const dispatch = open([rect('a', 0.7, 'u101'), rect('b', 0.7, 'u102')]);
+    expect(screen.getByText(/editor.autoFloors.drawnHere/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'editor.autoFloors.create' }));
     expect(dispatch).toHaveBeenCalledTimes(1);
     const added = dispatch.mock.calls[0][0].hotspots as Hotspot[];
-    expect(added.map((h) => h.linkId)).toEqual(['c0', 'c1', 'c2']);
+    // Each new floor: its whole-floor outline (on by default), then the apartments with the same numbers.
+    expect(added.map((h) => h.linkId)).toEqual(['f2', 'u201', 'u202', 'f3', 'u301', 'u302']);
     expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.done');
-    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.estimated');
+    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.linked');
   });
 
-  it('warns when the layout comes from another side', () => {
-    scenes = [view('aF', 'A', 'front', aRight.draft.hotspots), cRight];
-    structure = { floors: allFloors, buildings: [], isLoading: false, error: null };
-    open();
-    expect(screen.getByText('editor.autoFloors.otherSide')).toBeInTheDocument();
-  });
-
-  it('refuses when every floor is already on the view, and shows field errors without adding', () => {
-    scenes = [aRight, cRight];
-    structure = { floors: allFloors, buildings: [], isLoading: false, error: null };
-    const dispatch = open([band('x', 0.7, 'c0'), band('y', 0.55, 'c1'), band('z', 0.4, 'c2')]);
-    add();
-    expect(screen.getByRole('alert')).toHaveTextContent('editor.autoFloors.allThere');
-    fireEvent.change(screen.getByLabelText('editor.copyFrom.size'), { target: { value: '5' } });
-    add();
-    expect(screen.getByRole('alert')).toHaveTextContent('editor.copyFrom.sizeInvalid');
+  it('shows the reason next to the floor height and adds nothing when it is wrong', () => {
+    setup();
+    const dispatch = open([rect('a', 0.7, 'u101')]);
+    fireEvent.change(screen.getByLabelText('editor.autoFloors.step'), { target: { value: 'tall' } });
+    fireEvent.click(screen.getByRole('button', { name: /editor.autoFloors.create/ }));
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('editor.autoFloors.stepInvalid');
+    expect(screen.getByLabelText('editor.autoFloors.step')).toHaveAttribute('aria-describedby', alert.id);
     expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('says when every floor is already drawn and disables Add', () => {
+    setup();
+    open([rect('g', 0.85, 'u101'), rect('a', 0.7, 'u101'), rect('b', 0.55, 'u201'), rect('c', 0.4, 'u301')].map((h, i) => (i === 0 ? { ...h, linkType: 'floor' as const, linkId: 'f0' } : h)));
+    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.allDrawn');
+    expect(screen.getByRole('button', { name: 'editor.autoFloors.createNone' })).toBeDisabled();
+  });
+
+  it('tells the owner to add floors first when the building has none, and reports a failed load', () => {
+    setup();
+    structure = { ...structure, floors: [] };
+    open([]);
+    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.noFloors');
+    structure = { ...structure, error: new Error('offline') };
+    open([]);
+    expect(screen.getByRole('alert')).toHaveTextContent('editor.autoFloors.loadFailed');
   });
 });

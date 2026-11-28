@@ -1,15 +1,14 @@
 /**
- * "Add floors automatically": one region per floor of a building, laid out like
- * a building the owner has already drawn (the same side of it first). The
- * template's floor regions are matched to this building's floors by level;
- * levels the template does not have are placed at its floor spacing. Pure
- * functions on the normalised 0–1 picture coordinates.
+ * "Add floors automatically": the floors of a building that have no regions on
+ * a view get the outlines of a drawn level — this view's own top floor, or the
+ * same side of a building drawn before — moved up or down by the floor height.
+ * Each copy is linked to the apartment with the same number ending on its floor
+ * (A-102 → A-202), floor regions to their floor. Pure functions.
  */
-import type { DevelopmentFloor, Hotspot, Scene } from '../types';
+import type { Hotspot, Scene } from '../types';
 import { polygonBounds, type Point } from './polygonGeometry';
-import { transferHotspots, type TransferOptions } from './regionTransfer';
+import { drawnLevels, matchingUnit, type FloorLevel, type LevelContext, type LevelGroup } from './floorLevels';
 
-export type FloorLevel = Pick<DevelopmentFloor, 'id' | 'buildingId' | 'level' | 'label'>;
 type SceneSide = Pick<Scene, 'viewDirection' | 'viewName'>;
 
 /** Same camera side; two custom views count as the same side only when they share a name. */
@@ -19,122 +18,91 @@ export function isSameSide(a: SceneSide, b: SceneSide): boolean {
   return (a.viewName ?? '').trim().toLowerCase() === (b.viewName ?? '').trim().toLowerCase();
 }
 
-interface Band { hotspot: Hotspot; level: number; top: number; bottom: number }
-
-const boundsOf = (h: Hotspot) => polygonBounds(h.points as Point[]);
-
-/** A view's regions that link to a floor of the view's own building, lowest level first, one per level. */
-function bandsOf(hotspots: Hotspot[], buildingId: string, floors: FloorLevel[]): Band[] {
-  const levelOf = new Map(floors.filter((f) => f.buildingId === buildingId).map((f) => [f.id, f.level]));
-  const byLevel = new Map<number, Band>();
-  for (const h of hotspots) {
-    const level = h.linkType === 'floor' ? levelOf.get(h.linkId) : undefined;
-    if (level === undefined || byLevel.has(level)) continue;
-    const b = boundsOf(h);
-    byLevel.set(level, { hotspot: h, level, top: b.minY, bottom: b.maxY });
-  }
-  return [...byLevel.values()].sort((a, b) => a.level - b.level);
-}
-
-export interface FloorTemplate { scene: Scene; floors: number; sameSide: boolean; sameBuilding: boolean }
+export interface FloorTemplate { scene: Scene; levels: number; sameSide: boolean }
 
 /**
- * Building views that can serve as a template for `current`: they have at least
- * one floor region. Same side first, then other buildings before this one's other
- * sides (another building's same side is the closest match), then the most floors.
+ * Views of other buildings that can serve as a template: they have regions
+ * linked to apartments or floors of their building. Same side first, then the
+ * most levels drawn.
  */
-export function floorTemplates(scenes: Scene[], current: Scene, floors: FloorLevel[]): FloorTemplate[] {
+export function floorTemplates(scenes: Scene[], current: Scene, ctx: LevelContext): FloorTemplate[] {
   return scenes
-    .filter((s) => s.id !== current.id && s.targetType === 'building')
-    .map((s) => ({
-      scene: s,
-      floors: bandsOf(s.draft?.hotspots ?? [], s.targetId, floors).length,
-      sameSide: isSameSide(s, current),
-      sameBuilding: s.targetId === current.targetId,
-    }))
-    .filter((t) => t.floors > 0)
-    .sort((a, b) => Number(b.sameSide) - Number(a.sameSide) || Number(a.sameBuilding) - Number(b.sameBuilding) || b.floors - a.floors);
+    .filter((s) => s.targetType === 'building' && s.targetId !== current.targetId)
+    .map((s) => ({ scene: s, levels: drawnLevels(s.draft?.hotspots ?? [], s.targetId, ctx).length, sameSide: isSameSide(s, current) }))
+    .filter((t) => t.levels > 0)
+    .sort((a, b) => Number(b.sameSide) - Number(a.sameSide) || b.levels - a.levels);
 }
 
-/** Vertical distance between neighbouring levels in the template (one band's height when it has one floor). */
-function floorStep(bands: Band[]): number {
-  const first = bands[0];
-  const last = bands[bands.length - 1];
-  const mid = (b: Band) => (b.top + b.bottom) / 2;
-  if (bands.length > 1 && last.level > first.level) {
-    const step = (mid(first) - mid(last)) / (last.level - first.level);
-    if (step > 0) return step;
-  }
-  return first.bottom - first.top;
-}
-
-/** The band an apartment outline belongs to: the one holding its middle, else the nearest. */
-function bandOfUnit(h: Hotspot, bands: Band[]): Band {
-  const b = boundsOf(h);
-  const y = (b.minY + b.maxY) / 2;
-  const inside = bands.find((band) => y >= band.top && y <= band.bottom);
-  if (inside) return inside;
-  return bands.reduce((best, band) => (Math.abs((band.top + band.bottom) / 2 - y) < Math.abs((best.top + best.bottom) / 2 - y) ? band : best));
-}
-
-export interface AutoFloorsInput {
-  template: Scene;
-  /** Every floor of the development (the template's and this building's). */
+export interface FillInput {
+  /** Drawn levels to copy from (this view's, or a fitted template's). */
+  groups: LevelGroup[];
+  /** The floors of the building being drawn. */
   floors: FloorLevel[];
-  /** The building being drawn. */
-  buildingId: string;
-  /** Regions already on the view: floors linked there are left as they are. */
-  existing: Hotspot[];
-  /** Also copy the template's apartment outlines, unlinked. */
-  withUnits: boolean;
-  adjust: TransferOptions;
+  /** Levels that already have regions on this view; they are left as they are. */
+  drawn: Set<number>;
+  /** Floor height, % of the picture height. */
+  stepPct: number;
+  /** Also outline each whole added floor, linked to the floor (under its apartments). */
+  floorOutline?: boolean;
+  /** Every apartment known (for the source numbers and this building's floors). */
+  units: LevelContext['units'];
   nextId: () => string;
 }
 
-export type AutoFloorsResult =
-  | { ok: true; hotspots: Hotspot[]; floors: number; units: number; estimated: number; alreadyThere: number; outside: number }
-  | { ok: false; problem: 'noFloors' | 'noTemplate' | 'outside' };
+export interface FillResult {
+  hotspots: Hotspot[];
+  /** Floors that got regions, lowest first (labels). */
+  added: string[];
+  /** Of those, how many came from another level by the floor height (not drawn at that level). */
+  estimated: number;
+  /** Apartment copies linked to an apartment, and those left to link. */
+  linked: number;
+  toLink: number;
+  /** Floors left out because their copies would leave the picture. */
+  outside: string[];
+}
 
 const EPS = 1e-9;
-const insidePicture = (pts: Point[]) => pts.every(([x, y]) => x >= -EPS && x <= 1 + EPS && y >= -EPS && y <= 1 + EPS);
+const inside = (pts: Point[]) => pts.every(([x, y]) => x >= -EPS && x <= 1 + EPS && y >= -EPS && y <= 1 + EPS);
+/** The nearest drawn level; on a tie the one below (it is usually the better-drawn). */
+const nearest = (groups: LevelGroup[], level: number) =>
+  groups.reduce((best, g) => (Math.abs(g.level - level) < Math.abs(best.level - level) ? g : best));
 
-export function buildFloorRegions(input: AutoFloorsInput): AutoFloorsResult {
-  const targetFloors = input.floors.filter((f) => f.buildingId === input.buildingId).sort((a, b) => a.level - b.level);
-  if (targetFloors.length === 0) return { ok: false, problem: 'noFloors' };
-  const source = input.template.draft?.hotspots ?? [];
-  const rawBands = bandsOf(source, input.template.targetId, input.floors);
-  if (rawBands.length === 0) return { ok: false, problem: 'noTemplate' };
+export function fillFloors(input: FillInput): FillResult {
+  const result: FillResult = { hotspots: [], added: [], estimated: 0, linked: 0, toLink: 0, outside: [] };
+  if (input.groups.length === 0) return result;
+  const numberOf = new Map(input.units.map((u) => [u.id, u.unitNumber]));
+  const step = input.stepPct / 100;
+  const sorted = [...input.floors].sort((a, b) => a.level - b.level);
 
-  // Fit the template (mirror, size, move) first, so the floor spacing follows it.
-  const used = [...rawBands.map((b) => b.hotspot), ...(input.withUnits ? source.filter((h) => h.linkType === 'unit') : [])];
-  const fitted = transferHotspots(used, input.adjust, true, used.map((h) => h.id));
-  if (fitted.ok === false) return { ok: false, problem: 'outside' };
-  const byId = new Map(fitted.hotspots.map((h) => [h.id, h]));
-  const bands = bandsOf(rawBands.map((b) => byId.get(b.hotspot.id) as Hotspot), input.template.targetId, input.floors);
-  const units = fitted.hotspots.filter((h) => h.linkType === 'unit');
-  const unitsOf = new Map<Band, Hotspot[]>(bands.map((b) => [b, []]));
-  for (const u of units) unitsOf.get(bandOfUnit(u, bands))?.push(u);
-
-  const step = floorStep(bands);
-  const linked = new Set(input.existing.filter((h) => h.linkType === 'floor').map((h) => h.linkId));
-  const out: Hotspot[] = [];
-  let floors = 0, unitCount = 0, estimated = 0, alreadyThere = 0, outside = 0;
-  for (const floor of targetFloors) {
-    if (linked.has(floor.id)) { alreadyThere += 1; continue; }
-    const band = bands.reduce((best, b) => (Math.abs(b.level - floor.level) < Math.abs(best.level - floor.level) ? b : best));
-    const dy = -(floor.level - band.level) * step;
-    const move = (h: Hotspot): Point[] => (h.points as Point[]).map(([x, y]) => [x, y + dy]);
-    const points = move(band.hotspot);
-    if (!insidePicture(points)) { outside += 1; continue; }
-    out.push({ ...band.hotspot, id: input.nextId(), points, linkType: 'floor', linkId: floor.id, label: undefined });
-    floors += 1;
-    if (band.level !== floor.level) estimated += 1;
-    for (const u of unitsOf.get(band) ?? []) {
-      const pts = move(u);
-      if (!insidePicture(pts)) continue;
-      out.push({ ...u, id: input.nextId(), points: pts, linkId: '', label: undefined });
-      unitCount += 1;
+  // The ground floor (shops, lobby) and basements are never guessed from the floors above.
+  const lowest = Math.min(...input.groups.map((g) => g.level));
+  for (const floor of sorted) {
+    if (input.drawn.has(floor.level)) continue;
+    if (floor.level <= 0 && floor.level < lowest) continue;
+    const group = nearest(input.groups, floor.level);
+    const dy = -(floor.level - group.level) * step;
+    const moved = group.regions.map((h) => ({ h, points: (h.points as Point[]).map(([x, y]) => [x, y + dy] as Point) }));
+    if (moved.some((m) => !inside(m.points))) { result.outside.push(floor.label); continue; }
+    const onFloor = input.units.filter((u) => u.floorId === floor.id);
+    if (input.floorOutline && !group.regions.some((h) => h.linkType === 'floor')) {
+      const b = polygonBounds(moved.flatMap((m) => m.points));
+      const z = Math.min(...group.regions.map((h) => h.z)) - 1;
+      result.hotspots.push({ id: input.nextId(), shape: 'rect', points: [[b.minX, b.minY], [b.maxX, b.maxY]], linkType: 'floor', linkId: floor.id, z });
     }
+    for (const { h, points } of moved) {
+      let linkId = '';
+      if (h.linkType === 'floor') linkId = floor.id;
+      else if (h.linkType === 'unit') {
+        const own = numberOf.get(h.linkId);
+        linkId = (own && matchingUnit(own, onFloor)?.id) || '';
+        if (linkId) result.linked += 1;
+        else result.toLink += 1;
+      }
+      result.hotspots.push({ ...h, id: input.nextId(), points, linkId, label: undefined });
+    }
+    result.added.push(floor.label);
+    if (group.level !== floor.level) result.estimated += 1;
   }
-  return { ok: true, hotspots: out, floors, units: unitCount, estimated, alreadyThere, outside };
+  return result;
 }
