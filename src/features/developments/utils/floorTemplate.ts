@@ -1,12 +1,14 @@
 /**
  * "Add floors automatically": the floors of a building that have no regions on
- * a view get the outlines of a drawn level — this view's own top floor, or the
- * same side of a building drawn before — moved up or down by the floor height.
+ * a view get the outlines of a drawn level — this view's own floors, or the
+ * same side of a building drawn before — moved along each apartment column's
+ * own perspective (see floorPerspective).
  * Each copy is linked to the apartment with the same number ending on its floor
  * (A-102 → A-202), floor regions to their floor. Pure functions.
  */
 import type { Hotspot, Scene } from '../types';
-import { polygonBounds, type Point } from './polygonGeometry';
+import { toPolygon, type Point } from './polygonGeometry';
+import { columnMotions, floorHull, moveByFloors, type FloorMotion, type PlacementQuality } from './floorPerspective';
 import { drawnLevels, matchingUnit, type FloorLevel, type LevelContext, type LevelGroup } from './floorLevels';
 
 type SceneSide = Pick<Scene, 'viewDirection' | 'viewName'>;
@@ -40,8 +42,8 @@ export interface FillInput {
   floors: FloorLevel[];
   /** Levels that already have regions on this view; they are left as they are. */
   drawn: Set<number>;
-  /** Floor height, % of the picture height. */
-  stepPct: number;
+  /** Correction of the measured floor spacing, 100 = as measured. */
+  spacingPct: number;
   /** Also outline each whole added floor, linked to the floor (under its apartments). */
   floorOutline?: boolean;
   /** Every apartment known (for the source numbers and this building's floors). */
@@ -53,13 +55,18 @@ export interface FillResult {
   hotspots: Hotspot[];
   /** Floors that got regions, lowest first (labels). */
   added: string[];
-  /** Of those, how many came from another level by the floor height (not drawn at that level). */
+  /** Of those, how many came from another level of a template (not drawn at that level). */
   estimated: number;
   /** Apartment copies linked to an apartment, and those left to link. */
   linked: number;
   toLink: number;
-  /** Floors left out because their copies would leave the picture. */
+  /** Floors left out entirely because all their copies would leave the picture. */
   outside: string[];
+  /** Floors added with some regions left out (they would leave the picture), and how many regions. */
+  partial: string[];
+  left: number;
+  /** How the positions were found: measured per column from two floors, partly, or estimated from one. */
+  quality: PlacementQuality;
 }
 
 const EPS = 1e-9;
@@ -68,27 +75,33 @@ const inside = (pts: Point[]) => pts.every(([x, y]) => x >= -EPS && x <= 1 + EPS
 const nearest = (groups: LevelGroup[], level: number) =>
   groups.reduce((best, g) => (Math.abs(g.level - level) < Math.abs(best.level - level) ? g : best));
 
+/** The levels a fill can copy from: drawn floors above the ground floor (it is shaped differently). */
+export const copyableLevels = (groups: LevelGroup[]) => groups.filter((g) => g.level >= 1);
+
 export function fillFloors(input: FillInput): FillResult {
-  const result: FillResult = { hotspots: [], added: [], estimated: 0, linked: 0, toLink: 0, outside: [] };
-  if (input.groups.length === 0) return result;
   const numberOf = new Map(input.units.map((u) => [u.id, u.unitNumber]));
-  const step = input.stepPct / 100;
+  const sources = copyableLevels(input.groups);
+  const { motions, quality } = columnMotions(sources, numberOf);
+  const result: FillResult = { hotspots: [], added: [], estimated: 0, linked: 0, toLink: 0, outside: [], partial: [], left: 0, quality };
+  if (sources.length === 0) return result;
+  const spacing = input.spacingPct / 100;
   const sorted = [...input.floors].sort((a, b) => a.level - b.level);
 
-  // The ground floor (shops, lobby) and basements are never guessed from the floors above.
-  const lowest = Math.min(...input.groups.map((g) => g.level));
   for (const floor of sorted) {
-    if (input.drawn.has(floor.level)) continue;
-    if (floor.level <= 0 && floor.level < lowest) continue;
-    const group = nearest(input.groups, floor.level);
-    const dy = -(floor.level - group.level) * step;
-    const moved = group.regions.map((h) => ({ h, points: (h.points as Point[]).map(([x, y]) => [x, y + dy] as Point) }));
-    if (moved.some((m) => !inside(m.points))) { result.outside.push(floor.label); continue; }
+    // Drawn floors are never touched; the ground floor and basements are never guessed.
+    if (input.drawn.has(floor.level) || floor.level <= 0) continue;
+    const group = nearest(sources, floor.level);
+    const moved = group.regions
+      .map((h) => ({ h, points: moveByFloors(h.points as Point[], motions.get(h.id) as FloorMotion, floor.level - group.level, spacing) }))
+      .filter((m) => inside(m.points));
+    const dropped = group.regions.length - moved.length;
+    if (moved.length === 0) { result.outside.push(floor.label); continue; }
+    if (dropped > 0) { result.partial.push(floor.label); result.left += dropped; }
     const onFloor = input.units.filter((u) => u.floorId === floor.id);
-    if (input.floorOutline && !group.regions.some((h) => h.linkType === 'floor')) {
-      const b = polygonBounds(moved.flatMap((m) => m.points));
-      const z = Math.min(...group.regions.map((h) => h.z)) - 1;
-      result.hotspots.push({ id: input.nextId(), shape: 'rect', points: [[b.minX, b.minY], [b.maxX, b.maxY]], linkType: 'floor', linkId: floor.id, z });
+    if (input.floorOutline && !moved.some((m) => m.h.linkType === 'floor')) {
+      const hull = floorHull(moved.flatMap((m) => toPolygon(m.h.shape, m.points)));
+      const z = Math.min(...moved.map((m) => m.h.z)) - 1;
+      if (hull.length >= 3) result.hotspots.push({ id: input.nextId(), shape: 'polygon', points: hull, linkType: 'floor', linkId: floor.id, z });
     }
     for (const { h, points } of moved) {
       let linkId = '';

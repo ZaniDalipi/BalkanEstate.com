@@ -4,7 +4,9 @@ import { Wand2 } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import type { Scene } from '../../../types';
 import type { PolygonEditor } from '../../../hooks/usePolygonEditor';
-import { MAX_REPEAT_STEP_PCT, MIN_REPEAT_STEP_PCT } from '../../../utils/regionRepeat';
+import type { Hotspot } from '../../../types';
+import { MAX_SPACING_PCT, MIN_SPACING_PCT } from '../../../utils/floorLevels';
+import { AutoFloorsQuality } from './AutoFloorsQuality';
 import { AutoFloorsHowTo } from './AutoFloorsHowTo';
 import { AutoFloorsTemplate } from './AutoFloorsTemplate';
 import { AutoFloorsOutcome } from './AutoFloorsOutcome';
@@ -14,18 +16,19 @@ const inputCls =
   'min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary aria-[invalid=true]:border-red-400 sm:min-h-[36px]';
 
 /**
- * "Add floors automatically" (building views): draw and link one floor, press
- * Add, and every other floor of the building gets the same outlines at the floor
- * height, linked to the apartment with the same number. Another building's view
- * can be the starting point instead. The button says what it will add.
+ * "Add floors automatically" (building views): draw and link one or two floors,
+ * press Add, and every other floor gets the same outlines along each apartment
+ * column's perspective, linked to the apartment with the same number. Another
+ * building's view can be the starting point instead. The button says what it
+ * will add; the new regions then go to the review (`onPlaced`).
  */
-export const AutoFloors: React.FC<{ developmentId: string; scene: Scene; editor: PolygonEditor }> = ({ developmentId, scene, editor }) => {
+export const AutoFloors: React.FC<{ developmentId: string; scene: Scene; editor: PolygonEditor; onPlaced: (added: Hotspot[]) => void }> = ({ developmentId, scene, editor, onPlaced }) => {
   const { t } = useTranslation('developments');
   const id = useId();
-  const a = useAutoFloors(developmentId, scene, editor);
+  const a = useAutoFloors(developmentId, scene, editor, onPlaced);
   const label = (level: number) => a.floors.find((f) => f.level === level)?.label ?? String(level);
   const plan = a.plan;
-  const showHowTo = a.source === 'here' && a.here.length === 0;
+  const showHowTo = a.source === 'here' && !a.canCopy;
 
   const body = () => {
     if (a.loading) return <p role="status" className="text-xs text-slate-600">{t('editor.autoFloors.loading', 'Looking up the floors of this building…')}</p>;
@@ -56,13 +59,14 @@ export const AutoFloors: React.FC<{ developmentId: string; scene: Scene; editor:
         {showHowTo ? <AutoFloorsHowTo unlinked={a.unlinkedCount} /> : (
           <>
             {a.source === 'template' && <AutoFloorsTemplate a={a} scene={scene} />}
+            {plan && <AutoFloorsQuality quality={plan.quality} />}
             <div>
-              <label htmlFor={`${id}-step`} className="mb-1 block text-xs font-medium text-slate-600">{t('editor.autoFloors.step', 'Floor height (% of the picture height)')}</label>
-              <input id={`${id}-step`} inputMode="decimal" value={a.step.value} onChange={(e) => a.step.set(e.target.value)} aria-invalid={a.step.invalid} aria-describedby={`${id}-step-help`} className={inputCls} />
-              {a.step.invalid ? (
-                <p id={`${id}-step-help`} role="alert" className="mt-1 text-xs text-red-700">{t('editor.autoFloors.stepInvalid', { min: MIN_REPEAT_STEP_PCT, max: MAX_REPEAT_STEP_PCT, defaultValue: 'Enter a floor height from {{min}} to {{max}} %.' })}</p>
+              <label htmlFor={`${id}-spacing`} className="mb-1 block text-xs font-medium text-slate-600">{t('editor.autoFloors.spacing', 'Spacing between floors (%)')}</label>
+              <input id={`${id}-spacing`} inputMode="decimal" value={a.spacing.value} onChange={(e) => a.spacing.set(e.target.value)} aria-invalid={a.spacing.invalid} aria-describedby={`${id}-spacing-help`} className={inputCls} />
+              {a.spacing.invalid ? (
+                <p id={`${id}-spacing-help`} role="alert" className="mt-1 text-xs text-red-700">{t('editor.autoFloors.spacingInvalid', { min: MIN_SPACING_PCT, max: MAX_SPACING_PCT, defaultValue: 'Enter a spacing from {{min}} to {{max}} %.' })}</p>
               ) : (
-                <p id={`${id}-step-help`} className="mt-1 text-[11px] leading-relaxed text-slate-500">{t('editor.autoFloors.stepHelp', 'Measured from your drawing. If the new floors land too high or too low, press Undo, change this and add again.')}</p>
+                <p id={`${id}-spacing-help`} className="mt-1 text-[11px] leading-relaxed text-slate-500">{t('editor.autoFloors.spacingHelp', '100 = as measured from your drawing. Lower it if the new floors climb too fast, raise it if they stay too low; press Undo first.')}</p>
               )}
             </div>
             <label className="flex min-h-[44px] items-center gap-2 text-sm text-slate-800 sm:min-h-[32px]">
@@ -72,7 +76,7 @@ export const AutoFloors: React.FC<{ developmentId: string; scene: Scene; editor:
             <AutoFloorsOutcome outcome={a.outcome} />
             {plan && plan.added.length === 0 && !a.outcome && (
               <p role="status" className="text-xs text-slate-600">
-                {plan.outside.length > 0 ? t('editor.autoFloors.willNotFit', 'The floors would leave the picture. Lower the floor height or make the layout smaller.') : t('editor.autoFloors.allDrawn', 'Every floor of this building already has regions on this view.')}
+                {plan.outside.length > 0 ? t('editor.autoFloors.willNotFit', 'The floors would leave the picture. Lower the spacing or make the layout smaller.') : t('editor.autoFloors.allDrawn', 'Every floor of this building already has regions on this view.')}
               </p>
             )}
             <Button size="sm" className="min-h-[44px] w-full sm:min-h-0" onClick={a.apply} disabled={!!plan && plan.added.length === 0}>
@@ -93,7 +97,7 @@ export const AutoFloors: React.FC<{ developmentId: string; scene: Scene; editor:
         {t('editor.autoFloors.title', 'Add floors automatically')}
       </summary>
       <div className="mt-2 space-y-2">
-        <p className="text-xs leading-relaxed text-slate-500">{t('editor.autoFloors.intro', 'Draw and link one floor; this fills in the rest of the building.')}</p>
+        <p className="text-xs leading-relaxed text-slate-500">{t('editor.autoFloors.intro', 'Draw and link one or two floors; this fills in the rest of the building. You then check every new region.')}</p>
         {body()}
       </div>
     </details>

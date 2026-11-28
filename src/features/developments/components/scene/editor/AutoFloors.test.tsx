@@ -24,25 +24,27 @@ const aFloors = [floor('f0', 'A', 0), floor('f1', 'A', 1), floor('f2', 'A', 2), 
 const aUnits = [unit('u101', 'A-101', 'f1'), unit('u102', 'A-102', 'f1'), unit('u201', 'A-201', 'f2'), unit('u202', 'A-202', 'f2'), unit('u301', 'A-301', 'f3'), unit('u302', 'A-302', 'f3')];
 const aFront = view('aF', 'A', 'front', []);
 
+let onPlaced = vi.fn();
 const open = (hotspots: Hotspot[]) => {
   let n = 0;
   const dispatch = vi.fn();
+  onPlaced = vi.fn();
   const editor = { dispatch, nextId: () => `n${++n}`, state: { hotspots } } as unknown as PolygonEditor;
-  render(<AutoFloors developmentId="d1" scene={aFront} editor={editor} />);
+  render(<AutoFloors developmentId="d1" scene={aFront} editor={editor} onPlaced={onPlaced} />);
   return dispatch;
 };
 const setup = () => { scenes = [aFront]; structure = { floors: aFloors, buildings: [], isLoading: false, error: null }; ownUnits = aUnits; };
 
 describe('AutoFloors', () => {
-  it('explains the three steps while nothing linked is drawn, and counts the unlinked regions', () => {
+  it('explains the steps until a linked floor above the ground is drawn, and counts the unlinked regions', () => {
     setup();
-    open([rect('x', 0.5, '')]);
+    open([rect('x', 0.5, ''), { ...rect('g', 0.85, ''), linkType: 'floor', linkId: 'f0' }]);
     expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.how1');
     expect(screen.getByText('editor.autoFloors.unlinked')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /editor.autoFloors.create/ })).toBeNull();
   });
 
-  it('fills the floors above the drawn one in one step, linked by apartment number', () => {
+  it('fills the floors above the drawn one in one step, linked by apartment number, and hands them to the review', () => {
     setup();
     const dispatch = open([rect('a', 0.7, 'u101'), rect('b', 0.7, 'u102')]);
     expect(screen.getByText(/editor.autoFloors.drawnHere/)).toBeInTheDocument();
@@ -51,18 +53,21 @@ describe('AutoFloors', () => {
     const added = dispatch.mock.calls[0][0].hotspots as Hotspot[];
     // Each new floor: its whole-floor outline (on by default), then the apartments with the same numbers.
     expect(added.map((h) => h.linkId)).toEqual(['f2', 'u201', 'u202', 'f3', 'u301', 'u302']);
+    expect(onPlaced).toHaveBeenCalledWith(added);
+    expect(screen.getByText('editor.autoFloors.qualityEstimated')).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.done');
+    expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.checkNow');
     expect(screen.getByRole('status')).toHaveTextContent('editor.autoFloors.linked');
   });
 
-  it('shows the reason next to the floor height and adds nothing when it is wrong', () => {
+  it('shows the reason next to the spacing and adds nothing when it is wrong', () => {
     setup();
     const dispatch = open([rect('a', 0.7, 'u101')]);
-    fireEvent.change(screen.getByLabelText('editor.autoFloors.step'), { target: { value: 'tall' } });
+    fireEvent.change(screen.getByLabelText('editor.autoFloors.spacing'), { target: { value: '20' } });
     fireEvent.click(screen.getByRole('button', { name: /editor.autoFloors.create/ }));
     const alert = screen.getByRole('alert');
-    expect(alert).toHaveTextContent('editor.autoFloors.stepInvalid');
-    expect(screen.getByLabelText('editor.autoFloors.step')).toHaveAttribute('aria-describedby', alert.id);
+    expect(alert).toHaveTextContent('editor.autoFloors.spacingInvalid');
+    expect(screen.getByLabelText('editor.autoFloors.spacing')).toHaveAttribute('aria-describedby', alert.id);
     expect(dispatch).not.toHaveBeenCalled();
   });
 

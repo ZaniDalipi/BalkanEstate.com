@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CircleDot, Globe2, Save, EyeOff } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
@@ -6,18 +6,24 @@ import { cn } from '@/src/lib/utils';
 import type { Hotspot, Scene } from '../../../types';
 import type { SceneSync } from './useSceneSync';
 import { SyncNoticeBanner } from './SyncNoticeBanner';
+import { ReviewPublishConfirm } from './ReviewPublishConfirm';
 
 interface SceneStatusBarProps {
   scene: Scene;
   sync: SceneSync;
   issueCount: number;
+  /** Automatically placed regions still to check: publishing them asks first. */
+  unchecked?: number;
+  onReview?: () => void;
 }
 
 const same = (a: Hotspot[] = [], b: Hotspot[] = []) => JSON.stringify(a) === JSON.stringify(b);
 
 /** Draft/published state, save/publish/unpublish actions and their outcome. */
-export const SceneStatusBar: React.FC<SceneStatusBarProps> = ({ scene, sync, issueCount }) => {
+export const SceneStatusBar: React.FC<SceneStatusBarProps> = ({ scene, sync, issueCount, unchecked = 0, onReview }) => {
   const { t, i18n } = useTranslation('developments');
+  const [confirming, setConfirming] = useState(false);
+  const askPublish = () => (unchecked > 0 ? setConfirming(true) : sync.publish());
   const published = scene.published;
   const pendingChanges = sync.dirty || !published || !same(scene.draft?.hotspots, published.hotspots);
   const publishedAt = published?.publishedAt
@@ -67,7 +73,7 @@ export const SceneStatusBar: React.FC<SceneStatusBarProps> = ({ scene, sync, iss
           <Button
             size="sm"
             className="min-h-[44px] sm:min-h-0"
-            onClick={sync.publish}
+            onClick={askPublish}
             disabled={busy || !pendingChanges}
             aria-describedby={issueCount > 0 ? 'scene-publish-blocked' : undefined}
           >
@@ -81,6 +87,14 @@ export const SceneStatusBar: React.FC<SceneStatusBarProps> = ({ scene, sync, iss
         {issueCount > 0 &&
           t('editor.status.issueCount', '{{count}} region(s) need attention before publishing.', { count: issueCount })}
       </p>
+      {confirming && unchecked > 0 && (
+        <ReviewPublishConfirm
+          count={unchecked}
+          onCheck={() => { setConfirming(false); onReview?.(); }}
+          onPublish={() => { setConfirming(false); void sync.publish(); }}
+          onCancel={() => setConfirming(false)}
+        />
+      )}
       <SyncNoticeBanner sync={sync} />
     </div>
   );

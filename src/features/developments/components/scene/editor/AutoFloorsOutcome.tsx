@@ -8,12 +8,12 @@ export const AutoFloorsOutcome: React.FC<{ outcome: Outcome | null }> = ({ outco
   const { t } = useTranslation('developments');
   if (!outcome) return null;
   if (outcome.kind === 'error') {
-    if (outcome.reason === 'step') return null; // shown next to the field
+    if (outcome.reason === 'spacing') return null; // shown next to the field
     const text =
       outcome.reason === 'tooMany'
         ? t('editor.autoFloors.tooMany', { max: MAX_HOTSPOTS_PER_SCENE, defaultValue: 'This view would have more than {{max}} regions.' })
         : outcome.reason === 'outside'
-          ? t('editor.autoFloors.willNotFit', 'The floors would leave the picture. Lower the floor height or make the layout smaller.')
+          ? t('editor.autoFloors.willNotFit', 'The floors would leave the picture. Lower the spacing or make the layout smaller.')
           : t('editor.autoFloors.allDrawn', 'Every floor of this building already has regions on this view.');
     return <p role="alert" className="text-xs text-red-700">{text}</p>;
   }
@@ -26,12 +26,15 @@ export const AutoFloorsOutcome: React.FC<{ outcome: Outcome | null }> = ({ outco
       {r.linked > 0 && <p className="text-emerald-800">{t('editor.autoFloors.linked', { count: r.linked, defaultValue: '{{count}} copies were linked to the apartment with the same number.' })}</p>}
       {r.toLink > 0 && <p className="text-amber-700">{t('editor.autoFloors.toLink', { count: r.toLink, defaultValue: '{{count}} copies have no matching apartment and are marked Missing link. Select each to link it.' })}</p>}
       {outcome.source === 'template' && r.estimated > 0 && (
-        <p className="text-amber-700">{t('editor.autoFloors.estimated', { count: r.estimated, defaultValue: '{{count}} floors are not drawn in the chosen view and were placed by the floor height. Check them first.' })}</p>
+        <p className="text-amber-700">{t('editor.autoFloors.estimated', { count: r.estimated, defaultValue: '{{count}} floors are not drawn in the chosen view and were placed along the measured perspective. Check them first.' })}</p>
+      )}
+      {r.partial.length > 0 && (
+        <p className="text-amber-700">{t('editor.autoFloors.partial', { count: r.left, floors: r.partial.join(', '), defaultValue: '{{count}} regions on {{floors}} would leave the picture and were not added. Draw them by hand.' })}</p>
       )}
       {r.outside.length > 0 && (
         <p className="text-amber-700">{t('editor.autoFloors.skippedOutside', { floors: r.outside.join(', '), defaultValue: 'Not added, they would leave the picture: {{floors}}.' })}</p>
       )}
-      <p className="text-slate-600">{t('editor.autoFloors.undoHint', 'Not right? Press Undo (it removes them all at once), change the floor height and add again.')}</p>
+      <p className="font-medium text-amber-800">{t('editor.autoFloors.checkNow', 'Now check every new region: drag it onto the building and fix its corners. Undo removes them all at once.')}</p>
     </div>
   );
 };

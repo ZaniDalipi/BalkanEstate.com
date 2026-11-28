@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Hotspot } from '../types';
-import { drawnLevels, matchingUnit, parseStepPct, suggestStepPct, unitPosition, type LevelContext } from './floorLevels';
+import { drawnLevels, matchingUnit, parseSpacingPct, unitPosition, type LevelContext } from './floorLevels';
 
 const rect = (id: string, y0: number, y1: number, linkType: Hotspot['linkType'], linkId: string): Hotspot =>
   ({ id, shape: 'rect', points: [[0.2, y0], [0.8, y1]], linkType, linkId, z: 0 });
@@ -16,16 +16,6 @@ describe('drawnLevels', () => {
   });
 });
 
-describe('suggestStepPct', () => {
-  it('measures between the two highest levels, so a tall ground floor does not count', () => {
-    const groups = drawnLevels([rect('g', 0.7, 0.95, 'unit', 'u001'), rect('a', 0.5, 0.6, 'unit', 'u102'), rect('b', 0.38, 0.48, 'floor', 'f2')], 'A', ctx);
-    expect(suggestStepPct(groups)).toBe(12);
-  });
-  it('uses the level\'s own height plus the slab when only one is drawn', () => {
-    expect(suggestStepPct(drawnLevels([rect('a', 0.5, 0.58, 'unit', 'u102')], 'A', ctx))).toBe(10);
-  });
-});
-
 describe('apartment numbers', () => {
   it('reads the place within the floor from the end of the number', () => {
     expect([unitPosition('A-102'), unitPosition('C-305'), unitPosition('12'), unitPosition('PH')]).toEqual([2, 5, 12, null]);
@@ -38,11 +28,11 @@ describe('apartment numbers', () => {
   });
 });
 
-describe('parseStepPct', () => {
-  it('accepts a comma and refuses values outside the limits', () => {
-    expect(parseStepPct('9,5')).toEqual({ ok: true, value: 9.5 });
-    expect(parseStepPct('')).toEqual({ ok: false });
-    expect(parseStepPct('0.1')).toEqual({ ok: false });
-    expect(parseStepPct('high')).toEqual({ ok: false });
+describe('parseSpacingPct', () => {
+  it('accepts a comma and refuses values outside 50–200 %', () => {
+    expect(parseSpacingPct('92,5')).toEqual({ ok: true, value: 92.5 });
+    expect(parseSpacingPct('')).toEqual({ ok: false });
+    expect(parseSpacingPct('40')).toEqual({ ok: false });
+    expect(parseSpacingPct('wide')).toEqual({ ok: false });
   });
 });

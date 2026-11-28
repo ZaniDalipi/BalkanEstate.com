@@ -700,38 +700,54 @@ being edited:
   Geometry: `utils/regionTransfer.ts`; action `ADD_MANY`; panel `CopyFromView.tsx`.
 
 **Add floors automatically** (building views only, above *Copy from another
-view*, open by default): draw and link one floor, press Add, and the rest of the
-building is filled in.
+view*, open by default): draw and link one or two floors, press Add, and the
+rest of the building is filled in. Every new region is then checked by the owner.
 
-1. Draw the apartments of one floor (e.g. Floor 1) and link each to its apartment.
-   The panel reads each region's floor from its link (an apartment's floor, or a
-   floor link) and lists what is drawn ("Floor 1 (3)"). Until something linked is
-   drawn it shows these steps and counts the unlinked regions.
-2. *Floor height* (% of the picture height) is measured from the drawing: the
-   distance between the two highest drawn floors (a tall ground floor below them
-   does not count), else the drawn floor's height plus a little for the slab.
-3. The button says what it will do ("Add 6 floors (Floor 2 – Floor 7)"). Every
-   floor without regions on this view gets the outlines of the nearest drawn
-   floor, moved by the floor height, as one Undo step (`ADD_MANY`).
+1. Draw the apartments of Floor 1 and link each to its apartment. On a photo
+   taken at an angle also draw Floor 2. The panel reads each region's floor from
+   its link (an apartment's floor, or a floor link) and lists what is drawn
+   ("Floor 1 (3), Floor 2 (3)"). Until a linked floor above the ground is drawn it
+   shows these steps and counts the unlinked regions.
+2. **Perspective per apartment column** (`utils/floorPerspective.ts`). Each region
+   on a drawn floor is paired with the same column on another drawn floor (same
+   apartment number ending, else the region overlapping it most horizontally).
+   The pair gives that column's own step up, sideways drift and shrink per floor;
+   above the pair every step shrinks by the same factor, as floors further from
+   the camera look smaller and closer together. Columns without a pair use the
+   paired ones' step scaled by their own height; with one floor drawn every
+   region climbs by its own height × 1.25. The ground floor is never measured
+   (shops and lobbies are taller). The panel says which it is: *measured* (green),
+   *partly measured* or *estimated* (amber, asking for a second floor).
+3. *Spacing between floors (%)*, 100 = as measured (50–200), corrects all steps.
+4. The button says what it will do ("Add 5 floors (Floor 3 – Floor 7)"); one Undo
+   step (`ADD_MANY`).
 
-- **Apartments are linked automatically** to the apartment with the same
-  number ending on the new floor (A-102 → A-202; C-102 in another building).
-  Only a single clear match counts; the others are left as *Missing link*.
-- *Also outline each whole floor* (on by default) adds one rectangle per new
-  floor around its apartments, linked to the floor and placed under them, so the
-  apartments stay clickable.
-- The ground floor and basements are never guessed from the floors above;
-  floors that would leave the picture are left out and named. Floors already
-  drawn on this view are never touched.
-- *Start from another building's view* (shown when one exists): the same side
-  first (same direction; custom views when they share a name), with *Mirror*,
-  *Size* and *Right / Down* to fit it. Levels the template does not have come
-  from its nearest level by the floor height and are flagged to check first.
-- The picture itself is not analysed (no image recognition). Logic:
-  `utils/floorLevels.ts` (levels, floor height, number matching) and
-  `utils/floorTemplate.ts` (templates, filling); hook `useAutoFloors.ts`;
-  panel `AutoFloors.tsx` with `AutoFloorsHowTo`, `AutoFloorsTemplate` and
-  `AutoFloorsOutcome`.
+- **Apartments are linked automatically** to the apartment with the same number
+  ending on the new floor (A-102 → A-202; C-102 in another building). Only a
+  single clear match counts; the others are left as *Missing link*.
+- *Also outline each whole floor* (on by default): one polygon per new floor, the
+  convex hull of its apartments (a band around an angled corner, not a box),
+  linked to the floor and placed under them so the apartments stay clickable.
+- A region that would leave the picture is left out; the rest of its floor is
+  still added, and the panel names the floor and how many regions to draw by
+  hand. A floor is left out only when none of it fits. The ground floor and
+  basements are never guessed; floors already drawn are never touched.
+- *Start from another building's view* (when one exists): the same side first,
+  with *Mirror*, *Size* and *Right / Down* to fit it.
+
+**Checking the new regions** (`useFloorReview`, `utils/floorReview.ts`). Right
+after Add a dialog (*Check every new floor*, Esc or *Later* closes it) explains
+that positions on an angled photo are a first guess and asks the owner to drag
+each region onto its balcony or windows, fix its corners and check its apartment.
+A checklist at the top of the sidebar then shows *N new regions to check* with a
+progress bar, *Start checking / Next to check* (selects the next one), *Looks
+right* for the selected one and *I have checked them all*. A region counts as
+checked once it is moved or reshaped or marked; Undo or delete removes it from
+the list. While any are unchecked, *Publish* first asks: *Check them first*,
+*Publish anyway* or *Cancel* (`ReviewPublishConfirm`). The picture itself is not
+analysed (no image recognition). Panel: `AutoFloors.tsx` with `AutoFloorsHowTo`,
+`AutoFloorsQuality`, `AutoFloorsTemplate`, `AutoFloorsOutcome`; sidebar
+`EditorSidebar.tsx`; review `FloorReviewDialog.tsx`, `FloorReviewPanel.tsx`.
 
 ## 7b-6. The phone apartment sheet
 

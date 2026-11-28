@@ -5,11 +5,9 @@ import type { Hotspot, HotspotLinkType, Scene, SceneTargetType } from '../../typ
 import { usePolygonEditor } from '../../hooks/usePolygonEditor';
 import { EditorCanvas } from './editor/EditorCanvas';
 import { EditorToolbar } from './editor/EditorToolbar';
-import { RegionList } from './editor/RegionList';
-import { RegionInspector } from './editor/RegionInspector';
-import { RepeatRegion } from './editor/RepeatRegion';
-import { CopyFromView } from './editor/CopyFromView';
-import { AutoFloors } from './editor/AutoFloors';
+import { EditorSidebar } from './editor/EditorSidebar';
+import { FloorReviewDialog } from './editor/FloorReviewDialog';
+import { useFloorReview } from './editor/useFloorReview';
 import { SceneStatusBar } from './editor/SceneStatusBar';
 import { useSceneSync } from './editor/useSceneSync';
 import { useLinkOptions } from './editor/useLinkOptions';
@@ -44,6 +42,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
   const rootRef = useRef<HTMLDivElement>(null);
   const editor = usePolygonEditor(scene.draft?.hotspots ?? []);
   const sync = useSceneSync(developmentId, scene, editor);
+  const review = useFloorReview(editor);
   const { options, availabilityOf, labelOf, unitPicker } = useLinkOptions(developmentId, scene);
   const [showLabels, setShowLabels] = useState(true);
   const [preview, setPreview] = useState(false);
@@ -65,7 +64,6 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
     [availabilityOf]
   );
   const { state } = editor;
-  const selected = state.hotspots.find((h) => h.id === state.selectedId) ?? null;
   const issueCount = Object.keys(editor.issues).length;
 
   return (
@@ -76,7 +74,8 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
       aria-label={full.expanded ? t('editor.toolbar.fullscreen', 'Full-screen editor') : undefined}
     >
       <RouterLeaveGuard dirty={sync.dirty} />
-      <SceneStatusBar scene={scene} sync={sync} issueCount={issueCount} />
+      <SceneStatusBar scene={scene} sync={sync} issueCount={issueCount} unchecked={review.pending.length} onReview={review.next} />
+      <FloorReviewDialog review={review} />
 
       <div className={cn('grid gap-4', full.expanded ? 'lg:grid-cols-[minmax(0,1fr)_340px]' : '2xl:grid-cols-[minmax(0,1fr)_320px]')}>
         <div className="min-w-0 space-y-2">
@@ -116,35 +115,17 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
           </p>
         </div>
 
-        <aside className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4" aria-label={t('scene.regions', 'Regions')}>
-          <h3 className="text-sm font-semibold text-slate-900">
-            {t('scene.regions', 'Regions')} ({state.hotspots.length})
-          </h3>
-          <RegionList editor={editor} issues={sync.issues} labelOf={labelOf} />
-          <div className="border-t border-slate-200 pt-3">
-            {selected && !preview ? (
-              <div className="space-y-3">
-                <RegionInspector
-                  key={selected.id}
-                  developmentId={developmentId}
-                  editor={editor}
-                  hotspot={selected}
-                  linkOptions={options}
-                  unitPicker={unitPicker}
-                  targetLabel={labelOf({ ...selected, label: '' })}
-                  issues={sync.issues[selected.id] ?? []}
-                  buildingId={scene.targetType === 'building' ? scene.targetId : undefined}
-                />
-                {/* Outside the keyed inspector: creating copies selects the first one, and the panel must keep its result. */}
-                <RepeatRegion editor={editor} hotspot={selected} />
-              </div>
-            ) : (
-              <p className="text-xs text-slate-500">{t('scene.selectHint', 'Select a region to edit its link.')}</p>
-            )}
-          </div>
-          {!preview && scene.targetType === 'building' && <AutoFloors developmentId={developmentId} scene={scene} editor={editor} />}
-          {!preview && <CopyFromView developmentId={developmentId} scene={scene} editor={editor} />}
-        </aside>
+        <EditorSidebar
+          developmentId={developmentId}
+          scene={scene}
+          editor={editor}
+          sync={sync}
+          review={review}
+          preview={preview}
+          options={options}
+          unitPicker={unitPicker}
+          labelOf={labelOf}
+        />
       </div>
     </div>
   );
